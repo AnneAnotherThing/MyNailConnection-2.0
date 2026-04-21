@@ -1351,7 +1351,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       <div>
         <label style="font-size:11px;color:var(--muted);font-weight:500;display:block;margin-bottom:4px;letter-spacing:0.8px;">TYPICAL HOURS</label>
         <div style="font-size:12px;color:var(--muted);line-height:1.5;margin-bottom:10px;padding:10px 12px;background:var(--cream);border-radius:10px;">
-          These are your <em>general</em> hours — not a guarantee! They help clients know when you're usually around. You can always update them later in your profile.
+          These are your <em>general</em> hours — not your availability status. They help clients know when you're usually around. Use the <strong>Available Now</strong> and <strong>This Week</strong> toggles on your dashboard to actually show as open. You can update both later from your profile.
         </div>
         <div id="reg-hours-grid" style="display:grid;gap:6px;"></div>
         <input type="hidden" id="reg-hours"/>
@@ -1644,8 +1644,8 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
   <!-- Radius slider -->
   <div style="padding:10px 20px 12px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border);background:white;flex-shrink:0;">
     <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--rose);fill:none;stroke-width:2;flex-shrink:0;"><circle cx="12" cy="10" r="3"/><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
-    <input type="range" min="1" max="50" value="15" id="map-radius-slider" style="flex:1;accent-color:var(--rose);" oninput="updateMapRadius(this.value)"/>
-    <div id="map-rad-label" style="font-size:13px;font-weight:500;color:var(--rose);min-width:54px;text-align:right;">15 mi</div>
+    <input type="range" min="1" max="51" value="15" id="map-radius-slider" style="flex:1;accent-color:var(--rose);" oninput="updateMapRadius(this.value)" title="Drag to the right end for Anywhere"/>
+    <div id="map-rad-label" style="font-size:13px;font-weight:500;color:var(--rose);min-width:74px;text-align:right;">15 mi</div>
   </div>
 
   <!-- Location status -->
@@ -2832,7 +2832,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       <!-- Hours -->
       <div style="margin-bottom:14px;">
         <div style="font-size:10px;color:var(--muted);font-weight:600;letter-spacing:0.8px;margin-bottom:4px;">TYPICAL HOURS</div>
-        <div style="font-size:11px;color:var(--muted);font-style:italic;margin-bottom:8px;">General hours only — not a guarantee. Shown on profile with a disclaimer.</div>
+        <div style="font-size:11px;color:var(--muted);font-style:italic;margin-bottom:8px;">General hours only — separate from your <em>Available Now</em> / <em>This Week</em> toggles. Shown on profile with a "hours may vary" note so clients know to reach out anytime.</div>
         <div style="display:grid;gap:6px;" id="reg-hours-grid-te"></div>
       </div>
 
@@ -4051,25 +4051,61 @@ function isInspoSaved(url) {
 // (those show up as 'orphaned' rows in the user_inspo migration diagnostic).
 async function toggleInspoPhoto(url, techName, techEmail) {
   if (!currentUserEmail) { showToast('Sign in to save inspo'); show('auth'); return; }
-  if (isInspoSaved(url)) {
-    await fetch(`${SUPABASE_URL}/rest/v1/user_inspo?user_email=eq.${encodeURIComponent(currentUserEmail)}&photo_url=eq.${encodeURIComponent(url)}`, {
-      method: 'DELETE', headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${window._mncAccessToken || SUPABASE_ANON_KEY}` }
-    }).catch(()=>{});
+  // OPTIMISTIC UPDATE: mutate the local cache BEFORE firing the network
+  // request, so any caller that re-reads state synchronously after this
+  // function starts (e.g., the inspo-feed heart button's refresh() call
+  // on line ~7957, which doesn't await) sees the new state immediately.
+  //
+  // Previously the cache update sat AFTER `await fetch(...)`, which
+  // caused the "first tap saves but heart stays empty; second tap
+  // unsaves but heart turns red" bug — callers were reading stale cache
+  // because the await yielded the event loop before the cache mutation
+  // landed.
+  //
+  // If the network request fails we revert the optimistic change so the
+  // UI stays in sync with the DB.
+  const wasSaved = isInspoSaved(url);
+  if (wasSaved) {
+    // Remove from cache + bump counts down (fires DOM updates via bump helpers)
     if (_inspoPhotos) _inspoPhotos = _inspoPhotos.filter(p => p.photo_url !== url);
     bumpPhotoHeartCount(url, -1);
     if (techEmail) bumpTechHeartCount(techEmail, -1);
     showToast('Removed from inspo');
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/user_inspo?user_email=eq.${encodeURIComponent(currentUserEmail)}&photo_url=eq.${encodeURIComponent(url)}`, {
+        method: 'DELETE',
+        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${window._mncAccessToken || SUPABASE_ANON_KEY}` }
+      });
+      if (!res.ok) throw new Error('delete failed: ' + res.status);
+    } catch(e) {
+      // Revert: the row is still in the DB, so put it back in cache
+      if (_inspoPhotos) _inspoPhotos.push({ photo_url: url, tech_name: techName, tech_email: techEmail || null });
+      else _inspoPhotos = [{ photo_url: url, tech_name: techName, tech_email: techEmail || null }];
+      bumpPhotoHeartCount(url, +1);
+      if (techEmail) bumpTechHeartCount(techEmail, +1);
+      showToast('Could not remove — please try again');
+    }
   } else {
-    await fetch(`${SUPABASE_URL}/rest/v1/user_inspo`, {
-      method: 'POST',
-      headers: { 'Content-Type':'application/json','apikey': SUPABASE_ANON_KEY,'Authorization': `Bearer ${window._mncAccessToken || SUPABASE_ANON_KEY}`,'Prefer':'return=minimal' },
-      body: JSON.stringify({ user_email: currentUserEmail, photo_url: url, tech_name: techName || '', tech_email: techEmail || null })
-    }).catch(()=>{});
+    // Add to cache + bump counts up
     if (_inspoPhotos) _inspoPhotos.push({ photo_url: url, tech_name: techName, tech_email: techEmail || null });
     else _inspoPhotos = [{ photo_url: url, tech_name: techName, tech_email: techEmail || null }];
     bumpPhotoHeartCount(url, +1);
     if (techEmail) bumpTechHeartCount(techEmail, +1);
     showToast('Saved to inspo!');
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/user_inspo`, {
+        method: 'POST',
+        headers: { 'Content-Type':'application/json','apikey': SUPABASE_ANON_KEY,'Authorization': `Bearer ${window._mncAccessToken || SUPABASE_ANON_KEY}`,'Prefer':'return=minimal' },
+        body: JSON.stringify({ user_email: currentUserEmail, photo_url: url, tech_name: techName || '', tech_email: techEmail || null })
+      });
+      if (!res.ok) throw new Error('insert failed: ' + res.status);
+    } catch(e) {
+      // Revert: the insert didn't land, so remove from cache
+      if (_inspoPhotos) _inspoPhotos = _inspoPhotos.filter(p => p.photo_url !== url);
+      bumpPhotoHeartCount(url, -1);
+      if (techEmail) bumpTechHeartCount(techEmail, -1);
+      showToast('Could not save — please try again');
+    }
   }
   // Refresh the popularity row on the current tech profile (if open) so
   // ♥ N updates immediately when a user hearts a photo. No-op if a
@@ -5490,6 +5526,12 @@ function renderTechDetailAvail(tech) {
   var newEl  = document.getElementById('td-badge-new');
   var noneEl = document.getElementById('td-avail-none');
 
+  // Hours-available and availability are intentionally decoupled:
+  // `hours_available` is informational ("when Laura MIGHT be around")
+  // while the three booleans below are the actual availability signal
+  // (Anne 2026-04-21). Clients can always reach out; the toggles control
+  // whether a tech is publicly surfacing as Available Now / This Week /
+  // Accepting New.
   var hasAny = tech.is_available || tech.is_same_day || tech.accepting_new_clients;
   if (nowEl)  nowEl.style.display  = tech.is_available ? 'flex' : 'none';
   if (weekEl) weekEl.style.display = tech.is_same_day  ? 'flex' : 'none';
@@ -5866,9 +5908,18 @@ let _radiusCircle = null;
 // Rose-gold custom pin icon
 function _makePinIcon(initials, highlighted) {
   const bg = highlighted ? '#C4786A' : '#D4908A';
+  // Font stack reason: on mobile (observed 2026-04-21) pins rendered
+  // but the initials were invisible, because 'DM Sans' sometimes hadn't
+  // loaded yet when the Leaflet divIcon was injected AND the browser
+  // doesn't always fall through to sans-serif fallback reliably inside
+  // injected Leaflet HTML. Front-loading -apple-system + segoe-ui means
+  // the initials always render immediately; DM Sans upgrades once the
+  // webfont is ready. Also added explicit line-height + text-align as
+  // belt-and-suspenders and bumped font-size from 11 → 12 for
+  // readability at retina densities.
   return L.divIcon({
     className: '',
-    html: `<div style="width:36px;height:36px;border-radius:50%;background:${bg};border:2.5px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.25);display:flex;align-items:center;justify-content:center;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;color:white;cursor:pointer;">${initials}</div>`,
+    html: `<div style="width:36px;height:36px;border-radius:50%;background:${bg};border:2.5px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.25);display:flex;align-items:center;justify-content:center;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','DM Sans',sans-serif;font-size:12px;line-height:1;font-weight:700;color:white;cursor:pointer;text-align:center;">${initials}</div>`,
     iconSize: [36, 36],
     iconAnchor: [18, 18],
     popupAnchor: [0, -20]
@@ -5887,8 +5938,20 @@ function _initLeafletMap() {
 }
 
 function updateMapRadius(val) {
-  mapRadius = parseInt(val);
-  document.getElementById('map-rad-label').textContent = val + ' mi';
+  // Slider max is 51: values 1-50 are miles, 51 is the sentinel for
+  // "Anywhere" (countrywide). Infinity as the radius value disables the
+  // distance filter in _refreshMapPins/renderLocTechCards and hides the
+  // radius circle on the map. Added 2026-04-21 per Anne — the previous
+  // 1-50 cap meant techs in other states never showed up even with
+  // location off.
+  var v = parseInt(val);
+  if (v >= 51) {
+    mapRadius = Infinity;
+    document.getElementById('map-rad-label').textContent = 'Anywhere';
+  } else {
+    mapRadius = v;
+    document.getElementById('map-rad-label').textContent = v + ' mi';
+  }
   if (userLat) {
     _refreshMapPins();
     renderLocTechCards();
@@ -5898,7 +5961,10 @@ function updateMapRadius(val) {
 
 function _updateRadiusCircle() {
   if (!_leafletMap || !userLat) return;
-  if (_radiusCircle) _leafletMap.removeLayer(_radiusCircle);
+  if (_radiusCircle) { _leafletMap.removeLayer(_radiusCircle); _radiusCircle = null; }
+  // Anywhere: skip the circle entirely. A 3000-mi radius circle would
+  // blow past the viewport bounds and look silly.
+  if (!isFinite(mapRadius)) return;
   _radiusCircle = L.circle([userLat, userLng], {
     radius: mapRadius * 1609.34,
     color: '#C4786A',
@@ -5926,7 +5992,9 @@ function requestLocation() {
       statusBar.style.background = '#EAF3EC';
       statusBar.style.borderColor = '#A0C8A8';
       statusMsg.style.color = '#2E6B44';
-      statusMsg.textContent = `Location found — showing techs within ${mapRadius} mi`;
+      statusMsg.textContent = isFinite(mapRadius)
+        ? `Location found — showing techs within ${mapRadius} mi`
+        : `Location found — showing techs anywhere`;
 
       // Drop user marker
       if (_userMarker) _leafletMap.removeLayer(_userMarker);
@@ -6505,6 +6573,26 @@ async function techBulkDropFiles(fileList) {
   const files = Array.from(fileList).filter(f => f.type.startsWith('image/'));
   if (!files.length) { showToast('No image files found'); return; }
 
+  // Paywall gate. Without this, Anne added a 6th photo via the bulk drop
+  // zone on 2026-04-21 and never saw the upgrade modal — because only
+  // techEditAddPhotos (the single-file picker) was checking the tier,
+  // while this bulk handler was unconditionally accepting. Match the
+  // gate behaviour here: refresh the tier, block entirely if at limit,
+  // OR trim the batch to fit and surface the upgrade modal for the
+  // remainder so the tech can buy more slots in one tap.
+  await loadTechTier(currentUserEmail);
+  if (!canUploadPhoto()) {
+    showUpgradeModal();
+    return;
+  }
+  const remaining = photosRemaining();
+  let trimmedCount = 0;
+  if (isFinite(remaining) && files.length > remaining) {
+    trimmedCount = files.length - remaining;
+    files.length = remaining; // truncate in place
+    showToast('Only ' + remaining + ' free slot' + (remaining === 1 ? '' : 's') + ' left — upload the rest after upgrading');
+  }
+
   const editKey = currentEditTech.name || '__new__';
   if (!techEdits[editKey]) techEdits[editKey] = {};
   const edit = techEdits[editKey];
@@ -6581,6 +6669,13 @@ async function techBulkDropFiles(fileList) {
   count.textContent = '';
   showToast(`${uploadedCount} photo${uploadedCount !== 1 ? 's' : ''} added — tap Save Changes!`);
   setTimeout(() => { wrap.style.display = 'none'; bar.style.background = 'var(--rose)'; bar.style.width = '0%'; }, 5000);
+
+  // If the batch was trimmed because it exceeded remaining slots, prompt
+  // for an upgrade now (after the success toast so messages don't stomp
+  // on each other).
+  if (trimmedCount > 0) {
+    setTimeout(function() { showUpgradeModal(); }, 900);
+  }
 }
 
 const PHOTO_TAG_TAXONOMY = {
@@ -7416,6 +7511,16 @@ async function saveTechEdit() {
   // Reload fresh from Supabase so admin list stays in sync
   await loadTechsFromSupabase();
   renderTechAdminList();
+  // Refresh the tech-home Dashboard panels too, so edits made through
+  // the tech-edit modal (new photos via "Manage", bio changes,
+  // availability toggles) reflect back on the Dashboard immediately.
+  // Without this, adding a 6th photo via the edit modal showed on the
+  // client-facing profile but not on the tech's own Dashboard portfolio
+  // preview until they navigated away and back. The two helpers are
+  // DOM-gated — they no-op silently if the tech-home elements aren't
+  // on screen, so calling unconditionally here is safe.
+  try { if (typeof loadTechHomeStats === 'function') loadTechHomeStats(); } catch(_){}
+  try { if (typeof loadTechHomePortfolio === 'function') loadTechHomePortfolio(); } catch(_){}
   closeTechEdit();
   return; // local state update below is now handled by loadTechsFromSupabase
   // Add to ALL_TECHS + ALL_USERS if new, otherwise update existing
