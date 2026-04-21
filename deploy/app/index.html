@@ -2431,25 +2431,27 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
 <!-- TUTORIAL OVERLAY (shared for client, tech, admin)                    -->
 <!-- ══════════════════════════════════════════════════════════════════════ -->
 <div id="tutorial-overlay" style="display:none;position:fixed;inset:0;z-index:10000;background:rgba(20,10,15,0.82);backdrop-filter:blur(6px);align-items:center;justify-content:center;">
-  <div style="position:relative;width:100%;max-width:400px;margin:0 auto;padding:0 20px;">
+  <div style="position:relative;width:100%;max-width:460px;margin:0 auto;padding:0 20px;">
 
-    <!-- Card -->
-    <div id="tutorial-card" style="background:white;border-radius:28px;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,0.35);">
+    <!-- Card — made roomier 2026-04-21: wider max-width, more breathing
+         room, softer cream-to-white vertical gradient so it doesn't
+         feel like a sterile white box. -->
+    <div id="tutorial-card" style="background:linear-gradient(180deg,#FDFAF7 0%,#FFFFFF 52%);border-radius:32px;overflow:hidden;box-shadow:0 30px 80px rgba(40,20,16,0.38),inset 0 1px 0 rgba(255,255,255,0.9);">
       <!-- Gradient top bar -->
       <div id="tutorial-top-bar" style="height:6px;background:linear-gradient(90deg,var(--rose-dark),var(--rose),var(--gold));"></div>
 
       <!-- Slide content -->
-      <div id="tutorial-slide" style="padding:28px 24px 20px;min-height:260px;max-height:60vh;overflow-y:auto;display:flex;flex-direction:column;align-items:center;text-align:center;">
+      <div id="tutorial-slide" style="padding:38px 32px 22px;min-height:320px;max-height:68vh;overflow-y:auto;display:flex;flex-direction:column;align-items:center;text-align:center;">
         <!-- filled by JS -->
       </div>
 
       <!-- Progress dots -->
-      <div id="tutorial-dots" style="display:flex;justify-content:center;gap:6px;padding-bottom:8px;"></div>
+      <div id="tutorial-dots" style="display:flex;justify-content:center;gap:7px;padding:4px 0 10px;"></div>
 
       <!-- Navigation -->
-      <div style="display:flex;gap:10px;padding:12px 20px 24px;">
-        <button id="tutorial-skip" onclick="closeTutorial()" style="flex:1;padding:11px;border-radius:100px;border:1.5px solid var(--border);background:white;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;">Skip</button>
-        <button id="tutorial-next" onclick="tutorialNext()" style="flex:2;padding:11px;border-radius:100px;border:none;background:linear-gradient(135deg,var(--rose-dark),var(--rose));color:white;font-size:14px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;">Next →</button>
+      <div style="display:flex;gap:12px;padding:14px 28px 28px;">
+        <button id="tutorial-skip" onclick="closeTutorial()" style="flex:1;padding:13px;border-radius:100px;border:1.5px solid var(--border);background:white;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;">Skip</button>
+        <button id="tutorial-next" onclick="tutorialNext()" style="flex:2;padding:13px;border-radius:100px;border:none;background:linear-gradient(135deg,var(--rose-dark),var(--rose));color:white;font-size:14.5px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;letter-spacing:0.2px;box-shadow:0 4px 14px rgba(196,120,106,0.35);">Next &rarr;</button>
       </div>
     </div>
 
@@ -3131,19 +3133,19 @@ const TUTORIALS = {
 
   tech: [
     {
-      icon: '<svg viewBox="0 0 24 24" style="width:52px;height:52px;stroke:var(--rose);fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>',
-      title: 'Welcome to My Nail Connection!',
-      body: 'Your profile is your storefront — and clients in your area are already searching. Your first 5 photo slots are completely free, always. Here\'s how to get seen from day one.'
+      icon: '<svg viewBox="0 0 24 24" style="width:60px;height:60px;stroke:var(--rose);fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>',
+      title: 'You\u2019re in \u2014 welcome.',
+      body: '<p style="margin:0 0 14px;">Taking your craft online is a big move, and we\u2019re so glad you made it with us. Nail techs are artists, and here you get to be seen like one.</p><p style="margin:0;">Clients in your area are already browsing. The next two screens walk you through the three things that matter most \u2014 your portfolio, your profile, and your availability. Takes about a minute.</p>'
     },
     {
-      icon: '<svg viewBox="0 0 24 24" style="width:52px;height:52px;stroke:var(--rose);fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>',
-      title: 'Your Photos Get You Found',
-      body: 'Clients scroll a feed of real nail photos — yours included. Tap <b>Add Photo</b> from your dashboard and upload your best work. <b>Tag every single photo</b> with Shape, Material, and Style or it won\'t show up in filtered searches.<br><br>A client searching for "Almond + Gel + Chrome" only sees your photo if all three tags match. The more you tag, the more you get discovered. More photos = more time in the feed = more clients.'
+      icon: '<svg viewBox="0 0 24 24" style="width:60px;height:60px;stroke:var(--rose);fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>',
+      title: 'Your photos do the talking.',
+      body: '<p style="margin:0 0 14px;">Clients scroll a feed of real nail work \u2014 the better you look, the more they stop. From your Dashboard, tap <b>Manage</b> to upload. Your first <b>five photos are free, always.</b></p><p style="margin:0;">One quiet magic trick: tag every photo with its <b>Shape</b>, <b>Type</b>, and <b>Style</b>. A client searching for <em>almond + gel + chrome</em> only finds you if all three match. More photos and more tags = more time in the feed = more bookings in your chair.</p>'
     },
     {
-      icon: '<svg viewBox="0 0 24 24" style="width:52px;height:52px;stroke:var(--rose);fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
-      title: 'Stay Visible Between Appointments',
-      body: 'Fill out your full profile — address, bio, and a profile photo go a long way. Add your <b>Vagaro, StyleSeat, or Square</b> booking link and a Book Now button appears automatically on your profile.<br><br>Toggle <b>Available Right Now</b> or <b>Open This Week</b> any time you have openings — clients searching for same-day appointments will see you first. Use <b>New Post</b> to share availability windows, promos, or fresh sets. You\'re all set — go upload those first photos!'
+      icon: '<svg viewBox="0 0 24 24" style="width:60px;height:60px;stroke:var(--rose);fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
+      title: 'Show up. The rest follows.',
+      body: '<p style="margin:0 0 14px;">A filled-out profile makes clients feel like they already know you. Add your <b>bio</b>, <b>address</b>, and a <b>profile photo</b>. If you book through Vagaro, StyleSeat, or Square, drop in your link \u2014 a <b>Book Now</b> button appears automatically.</p><p style="margin:0 0 14px;">Flip <b>Available Now</b> or <b>Open This Week</b> whenever you\u2019ve got openings \u2014 clients looking for same-day see you first. Drop a <b>post</b> for promos or fresh sets you\u2019re proud of.</p><p style="margin:0;font-style:italic;color:var(--rose-dark);">That\u2019s it \u2014 go get found.</p>'
     }
   ],
 
@@ -3206,16 +3208,19 @@ function _renderTutorialSlide() {
   const total = _tutorialSlides.length;
   const isLast = _tutorialIndex === total - 1;
 
-  // Slide content
+  // Slide content — sized up 2026-04-21 for roomier feel:
+  //   icon circle 80 → 92px, title 20 → 24px Playfair, body 14 → 15px
+  //   with a touch more line-height. Bit of vertical breathing room
+  //   between icon/title/body.
   const iconHtml = slide.img
-    ? `<div style="width:100%;height:160px;border-radius:16px;overflow:hidden;margin-bottom:18px;flex-shrink:0;display:flex;gap:4px;">
+    ? `<div style="width:100%;height:160px;border-radius:16px;overflow:hidden;margin-bottom:22px;flex-shrink:0;display:flex;gap:4px;">
         ${slide.img.map(u => `<div style="flex:1;background:url('${u}') center/cover no-repeat;border-radius:12px;"></div>`).join('')}
        </div>`
-    : `<div style="width:80px;height:80px;border-radius:50%;background:var(--rose-light);display:flex;align-items:center;justify-content:center;margin-bottom:18px;flex-shrink:0;">${slide.icon}</div>`;
+    : `<div style="width:92px;height:92px;border-radius:50%;background:var(--rose-light);display:flex;align-items:center;justify-content:center;margin-bottom:22px;flex-shrink:0;box-shadow:inset 0 0 0 1px rgba(196,120,106,0.15);">${slide.icon}</div>`;
   document.getElementById('tutorial-slide').innerHTML = `
     ${iconHtml}
-    <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--charcoal);margin-bottom:12px;line-height:1.3;">${slide.title}</div>
-    <div style="font-size:14px;color:var(--muted);line-height:1.6;">${slide.body}</div>
+    <div style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:var(--charcoal);margin-bottom:14px;line-height:1.25;letter-spacing:-0.2px;">${slide.title}</div>
+    <div style="font-size:15px;color:#5A4A44;line-height:1.7;max-width:360px;">${slide.body}</div>
   `;
 
   // Progress dots
@@ -3234,8 +3239,25 @@ function _renderTutorialSlide() {
 // App is self-explanatory enough; tutorial still reachable via "How to Use
 // This App" on the profile screen and "How to Use Admin Console" in
 // Settings → Help. To re-enable, restore the body of this function.
+// Show the tutorial the first time a TECH signs in. Clients and admins
+// are self-explanatory enough that the tutorial just gets in their way
+// (per Anne 2026-04-21). Tech-only because techs have a lot to do right
+// out of the gate — fill bio, upload portfolio, tag photos, set hours
+// and booking link — and we want to warmly nudge them to it.
+//
+// The mnc_tutorial_seen_tech localStorage flag is set by closeTutorial()
+// so it fires exactly once per browser. Techs can always re-open via
+// "Replay tutorial" on their profile.
 function maybeShowTutorial(role) {
-  return;
+  if (role !== 'tech') return;
+  try {
+    const seen = localStorage.getItem(_TUTORIAL_KEY + role);
+    if (seen) return;
+  } catch(e) { /* storage blocked — show tutorial anyway */ }
+  // Small delay so the home screen can render behind the overlay
+  // before the tutorial fades in. Without this, tall tutorial cards
+  // feel like they "ghost in" before the page is ready.
+  setTimeout(function() { showTutorial(role); }, 350);
 }
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
