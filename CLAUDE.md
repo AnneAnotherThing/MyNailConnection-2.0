@@ -63,6 +63,23 @@ If Anne edits a source file directly (in her own editor), `deploy/` will
 drift until someone runs the script — that's a known limitation of the
 copy-based approach. For now, Claude treats sync as a post-edit habit.
 
+### sync.sh auto-bumps the service worker cache
+
+When any HTML source (`index.html`, `marketing.html`, `reset-password.html`,
+`tech-guide.html`) or `manifest.json` is newer than `sw.js`, the sync
+script increments `CACHE_NAME` in `sw.js` (`mnc-vN` → `mnc-v(N+1)`) and
+then copies the updated `sw.js` into both deploy bundles.
+
+This exists because on 2026-04-21 Anne pushed a build to GitHub Pages
+and returning visitors kept seeing old code — the PWA service worker
+had `index.html` cached under the old name and never re-fetched. Manual
+"unregister + clear site data" from DevTools is the only client-side
+workaround, which we can't reasonably ask end-users to do. Bumping
+`CACHE_NAME` triggers the SW's `activate` handler to delete old caches.
+
+The bump only fires when a source HTML actually changed, so repeated
+idempotent syncs (no edits) don't churn the version number.
+
 ## When editing
 
 - "Forgot password?" link, splash, sign-in, tech dashboard, Contact
