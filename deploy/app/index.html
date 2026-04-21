@@ -1815,12 +1815,12 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
           <circle cx="0" cy="0" r="0.8" fill="#8A5C2A"/>
         </g>
       </svg>
-      <div><div class="logo-mark">My Nail Connection</div><div class="logo-sub">Your Business</div></div>
+      <div><div class="logo-mark">My Nail Connection</div><div class="logo-sub">Dashboard</div></div>
     </div>
     <div style="display:flex;align-items:center;gap:8px;">
-      <button onclick="showClientHome()" title="Preview client view" style="width:32px;height:32px;border-radius:50%;border:1px solid rgba(255,240,230,0.4);background:rgba(255,255,255,0.12);cursor:pointer;display:flex;align-items:center;justify-content:center;">
-        <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:#FAF0EB;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-      </button>
+      <!-- "Preview client view" eyeball removed 2026-04-21 — the bottom
+           nav's Home button already goes to the client view, which made
+           the eyeball a redundant duplicate. -->
       <!-- Avatar now opens the tech-edit modal directly (identity/bio/booking
            link live there). Previously this routed to profile-screen, but
            tech-home has absorbed the profile tabs, so going "in" means
@@ -1967,12 +1967,22 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
 <!-- MY PHOTOS — Tech self-tagging dashboard -->
 <div class="screen" id="my-photos">
   <div class="header">
-    <button class="back-btn" onclick="backSmart()">←</button>
+    <button class="back-btn" onclick="backFromMyPhotos()">←</button>
     <div style="flex:1;text-align:center;">
       <div class="logo-mark" style="font-size:18px;">My Photos</div>
       <div class="logo-sub">Tag your work so clients can find it</div>
     </div>
     <div style="width:32px;"></div>
+  </div>
+
+  <!-- Sticky save bar: Anne asked for an obvious Save button so users
+       don't have to trust the invisible 700ms auto-save. Status text on
+       the left tells you whether you have unsaved work, and the button
+       on the right forces an immediate save. Auto-save still runs in
+       the background as a safety net. Added 2026-04-21. -->
+  <div id="myph-save-bar" style="position:sticky;top:0;background:white;padding:10px 16px;border-bottom:1px solid var(--border);z-index:5;display:flex;align-items:center;justify-content:space-between;gap:12px;">
+    <span id="myph-save-status" style="font-size:12px;color:var(--muted);">All changes saved</span>
+    <button id="myph-save-btn" type="button" onclick="saveMyPhotosNow()" style="padding:7px 18px;border-radius:100px;border:none;background:var(--rose);color:white;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:opacity 0.2s,background 0.2s;">Save</button>
   </div>
 
   <div class="scroll-content" style="padding:20px 16px 100px;">
@@ -2941,7 +2951,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
           onclick="document.getElementById('te-bulk-files').click()"
           style="border:2px dashed var(--rose);border-radius:14px;padding:18px 14px;text-align:center;cursor:pointer;background:var(--cream);margin-bottom:10px;transition:background 0.15s;">
           <div style="font-size:22px;margin-bottom:6px;">📁</div>
-          <div style="font-size:13px;font-weight:600;color:var(--rose-dark);">Drop a folder or files here</div>
+          <div style="font-size:13px;font-weight:600;color:var(--rose-dark);">Drop files here</div>
           <div style="font-size:11px;color:var(--muted);margin-top:3px;">Or tap to select multiple photos at once</div>
           <input type="file" id="te-bulk-files" accept="image/*" multiple style="display:none;" onchange="techBulkDropFiles(this.files)"/>
         </div>
@@ -6685,7 +6695,80 @@ function togglePhotoTag(idx, tag) {
 // ── MY PHOTOS — tech self-tagging dashboard ────────────────────────────────
 // Scoped to the signed-in tech's own photos. Untagged photos get the full
 // tag-chip UI up top; tagged photos collapse into a disclosure below.
-let _myPhotosState = { photos: [], techId: null, techName: null, saveTimer: null };
+let _myPhotosState = { photos: [], techId: null, techName: null, saveTimer: null, dirty: false };
+
+// ── Save-status UI for my-photos ────────────────────────────────────────
+// Called whenever the user makes an edit OR a save completes. Keeps the
+// sticky Save bar (status text + button) in sync with the save state so
+// users aren't guessing whether their changes are persisted.
+//
+// Stages:
+//   'dirty'  → user has unsaved edits
+//   'saving' → a save is in flight
+//   'saved'  → most recent save succeeded (shows "Saved ✓" then fades)
+//   (undef)  → read dirty flag and reflect it
+function updateMyPhotosSaveStatus(stage) {
+  var statusEl = document.getElementById('myph-save-status');
+  var btnEl    = document.getElementById('myph-save-btn');
+  if (!statusEl || !btnEl) return;
+  if (stage === 'saving') {
+    statusEl.textContent = 'Saving…';
+    statusEl.style.color = 'var(--muted)';
+    btnEl.disabled = true;
+    btnEl.style.opacity = '0.5';
+    return;
+  }
+  if (stage === 'saved') {
+    _myPhotosState.dirty = false;
+    statusEl.textContent = '✓ Saved';
+    statusEl.style.color = 'var(--green, #4A7A5A)';
+    btnEl.disabled = false;
+    btnEl.style.opacity = '0.5';
+    btnEl.style.background = 'var(--border)';
+    // Fade back to "All changes saved" after 1.8s unless user edits again
+    setTimeout(function() {
+      if (!_myPhotosState.dirty) updateMyPhotosSaveStatus();
+    }, 1800);
+    return;
+  }
+  // Default: read dirty flag
+  if (_myPhotosState.dirty) {
+    statusEl.textContent = 'Unsaved changes';
+    statusEl.style.color = 'var(--rose-dark)';
+    btnEl.disabled = false;
+    btnEl.style.opacity = '1';
+    btnEl.style.background = 'var(--rose)';
+  } else {
+    statusEl.textContent = 'All changes saved';
+    statusEl.style.color = 'var(--muted)';
+    btnEl.disabled = true;
+    btnEl.style.opacity = '0.5';
+    btnEl.style.background = 'var(--border)';
+  }
+}
+
+// Mark state dirty and refresh the save bar. Call this wherever we
+// currently do `setTimeout(saveMyPhotos, 700)` — i.e., whenever the
+// user's action mutates _myPhotosState.photos.
+function markMyPhotosDirty() {
+  _myPhotosState.dirty = true;
+  updateMyPhotosSaveStatus();
+}
+
+// Explicit save — bound to the Save button click. Updates the status UI
+// around the save + shows a short confirmation toast so the user sees
+// positive feedback even when network is instant.
+async function saveMyPhotosNow() {
+  if (!_myPhotosState.dirty) return;
+  updateMyPhotosSaveStatus('saving');
+  try {
+    await saveMyPhotos();
+    updateMyPhotosSaveStatus('saved');
+    showToast('Photos saved ✓');
+  } catch(e) {
+    updateMyPhotosSaveStatus();  // revert to "Unsaved changes"
+  }
+}
 
 async function openMyPhotos() {
   if (!currentUserEmail) { showToast('Please sign in first'); return; }
@@ -6848,6 +6931,7 @@ function toggleMyPhotoTag(idx, tag, chipEl) {
   // skip the in-place style; chip will still show correct state next render.)
   if (chipEl) styleTagChip(chipEl, willBeOn);
   // Debounce save — write 700ms after last tap
+  markMyPhotosDirty();
   clearTimeout(_myPhotosState.saveTimer);
   _myPhotosState.saveTimer = setTimeout(saveMyPhotos, 700);
 }
@@ -6863,6 +6947,7 @@ async function reopenForTagEdit(idx) {
   p.tags = [];
   renderMyPhotos();
   showToast('Tags cleared — retag below');
+  markMyPhotosDirty();
   clearTimeout(_myPhotosState.saveTimer);
   _myPhotosState.saveTimer = setTimeout(saveMyPhotos, 700);
 }
@@ -6877,6 +6962,12 @@ function toggleMyPhotosTagged() {
 
 async function saveMyPhotos() {
   if (!_myPhotosState.techId) return;
+  // Clear any pending debounce timer so we don't double-fire (this function
+  // can be called directly by backFromMyPhotos to flush-then-navigate).
+  if (_myPhotosState.saveTimer) {
+    clearTimeout(_myPhotosState.saveTimer);
+    _myPhotosState.saveTimer = null;
+  }
   try {
     const res = await fetch(
       `${SUPABASE_URL}/rest/v1/techs?id=eq.${_myPhotosState.techId}`,
@@ -6893,10 +6984,34 @@ async function saveMyPhotos() {
     );
     if (!res.ok) {
       showToast('Save failed — please try again');
+      return;
     }
+    // Success path: flip the sticky save bar to "Saved ✓" so background
+    // auto-saves (not just explicit button clicks) also update the UI.
+    // saveMyPhotosNow wraps this too, but harmless if called twice.
+    try { updateMyPhotosSaveStatus('saved'); } catch(_) {}
   } catch(e) {
     showToast('Save failed — please try again');
   }
+}
+
+// Back-button handler for the my-photos screen.
+//
+// Why this exists: saveMyPhotos() is debounced 700ms after the last edit
+// (drag/drop/tag change) so we don't PATCH on every tiny mutation. But if
+// the user taps Back inside that 700ms window, the debounced save hasn't
+// fired yet AND the dashboard's loadTechHomePortfolio() reads the DB
+// before the save lands. Result: user returns to dashboard, sees stale
+// photos, thinks their edits were lost. This handler forces the pending
+// save to flush synchronously before navigating, so the subsequent
+// dashboard fetch always sees fresh data.
+async function backFromMyPhotos() {
+  // If there's a pending debounced save, flush it NOW (synchronously
+  // await) before we let the screen transition start.
+  if (_myPhotosState.saveTimer) {
+    try { await saveMyPhotos(); } catch(_) {}
+  }
+  backSmart();
 }
 
 async function removeTePhoto(idx) {
