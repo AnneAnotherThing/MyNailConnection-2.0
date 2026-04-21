@@ -833,6 +833,81 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
   animation: dotPulse 1.6s ease-in-out infinite;
 }
 
+/* ── Popularity chips ──────────────────────────────
+   Social-proof badges shown on tech profiles and (soon) browse cards.
+   Three variants — ⭐ favorites, ♥ heart-total, 🌸 "New on MNC" fallback
+   — all share the same pill base. Threshold-gated in JS so we never
+   render "⭐ 0"; fallback to New-on-MNC for first-30-days techs. */
+.popularity-row {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+.pop-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: 0.2px;
+}
+.pop-chip .pop-icon { font-size: 11px; }
+.pop-fav   { background: rgba(218,165,32,0.15); color: #8B6814; }
+.pop-heart { background: rgba(232,55,106,0.12); color: #B82555; }
+.pop-new   { background: rgba(156,175,136,0.18); color: #4F6B5C; }
+@keyframes popChipIn {
+  0%   { opacity: 0; transform: translateY(3px) scale(0.92); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+.popularity-row .pop-chip { animation: popChipIn 0.35s cubic-bezier(0.22,1,0.36,1) both; }
+
+/* ── Browse-grid chip row — lives inside each .tech-card-body. Default
+   hidden so cards that have nothing above threshold don't show an empty
+   margin row. Hydrator flips to inline-flex when there's at least one
+   chip to render. */
+.tech-card-pop {
+  display: none;
+  gap: 5px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+.tech-card-pop .pop-chip {
+  /* Slightly tighter than the profile-header chips — card density is higher */
+  padding: 2px 7px;
+  font-size: 10.5px;
+}
+
+/* ── Per-photo ♥ count badge — small pill overlaid on a gallery tile
+   when the photo has been hearted ≥1 time. Positioned bottom-left so it
+   doesn't collide with the heart save button (top-right). Hidden by
+   default; hydrator sets display:inline-flex when count > 0. */
+.photo-heart-count {
+  display: none;
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  align-items: center;
+  gap: 3px;
+  padding: 3px 7px 3px 6px;
+  border-radius: 999px;
+  background: rgba(20,10,15,0.55);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  color: white;
+  font-size: 10.5px;
+  font-weight: 600;
+  line-height: 1;
+  pointer-events: none;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+}
+.photo-heart-count svg { width: 10px; height: 10px; }
+
 /* ── Magnolia bloom animation ─────────────────── */
 @keyframes petalUnfurl {
   0%   { transform: rotate(var(--start-r)) scaleY(0.08) scaleX(0.3); opacity:0; }
@@ -1447,15 +1522,13 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
          without refetching; choice persists in localStorage. -->
     <div id="home-feed-section" style="padding:10px 20px 28px;">
       <!-- Test-data banner — visible over the feed during soft launch so
-           Leslie and any other testers know the posts on screen are dev
-           seed data, not real tech activity. Admin can wipe via Admin →
-           Settings → Clear test data. Remove (or hide via JS) once the
+           testers know the posts on screen are dev seed data, not real
+           tech activity. Auto-hides after admin runs Clear test data
+           (flag stored in localStorage). Remove entirely once the
            launch feed is live with real posts. -->
-      <div id="home-feed-test-banner" style="display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;padding:11px 14px;background:linear-gradient(135deg,var(--gold-light) 0%,#F5E4C8 100%);border:1px solid #D4B080;border-radius:12px;box-shadow:0 1px 4px rgba(160,120,64,0.15);">
-        <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:#7A5020;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;margin-top:1px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-        <div style="flex:1;font-size:12px;color:#7A5020;line-height:1.5;">
-          <b style="font-weight:700;letter-spacing:0.2px;">Heads up — these are test posts.</b> You're seeing dev seed data while we shake things out. Admins can clear it any time from <em>Admin → Settings → Clear test data</em>.
-        </div>
+      <div id="home-feed-test-banner" style="display:inline-flex;align-items:center;gap:6px;margin-bottom:10px;padding:4px 9px;background:var(--gold-light);border:1px solid #D4B080;border-radius:999px;font-size:10.5px;color:#7A5020;line-height:1.2;">
+        <svg viewBox="0 0 24 24" style="width:11px;height:11px;stroke:#7A5020;fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <span><b style="font-weight:700;">Test posts</b> — admin can clear in Settings</span>
       </div>
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;gap:10px;flex-wrap:wrap;">
         <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;">Recent from techs near you</div>
@@ -1617,7 +1690,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
   <div class="header">
     <button class="back-btn" onclick="backFromTechDetail()">←</button>
     <div style="text-align:center;"><div class="logo-mark" style="font-size:17px;color:#FAF0EB;font-weight:700;" id="td-header-name">Tech Profile</div></div>
-    <button id="td-fav-btn" onclick="toggleFavTech()" style="width:36px;height:36px;border-radius:50%;border:none;background:none;cursor:pointer;font-size:22px;display:flex;align-items:center;justify-content:center;" title="Save to favorites"><svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:var(--muted);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></button>
+    <button id="td-fav-btn" onclick="toggleFavTech()" style="width:44px;height:44px;border-radius:50%;border:none;background:rgba(255,255,255,0.08);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform 0.15s ease, background 0.2s ease;" title="Save to favorites"><svg viewBox="0 0 24 24" style="width:26px;height:26px;stroke:#F5E2DA;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></button>
   </div>
   <div class="scroll-content" style="padding-bottom:120px;">
 
@@ -1635,6 +1708,9 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
     <!-- Name + joined + location + street address -->
     <div style="padding:18px 20px 0;">
       <div style="font-family:'Playfair Display',serif;font-size:26px;font-weight:600;" id="td-name">Tech Name</div>
+      <!-- Popularity chips — populated by renderTechPopularity(). Hidden
+           when the tech has no count above threshold AND isn't brand-new. -->
+      <div id="td-popularity" class="popularity-row" style="display:none;"></div>
       <div style="font-size:13px;color:var(--muted);margin-top:3px;" id="td-joined"></div>
       <div style="font-size:13px;color:var(--muted);margin-top:2px;display:none;align-items:center;gap:4px;" id="td-location">
         <svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:var(--muted);fill:none;stroke-width:2;flex-shrink:0;"><circle cx="12" cy="10" r="3"/><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
@@ -3873,15 +3949,13 @@ async function toggleFavTech() {
   if (_favTechs === null) await loadFavTechsCache();
   const already = _favTechs && _favTechs.some(f => f.tech_email === techEmail);
   if (already) {
-    // Remove
     await fetch(`${SUPABASE_URL}/rest/v1/user_favorites?user_email=eq.${encodeURIComponent(email)}&tech_email=eq.${encodeURIComponent(techEmail)}`, {
       method: 'DELETE', headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${window._mncAccessToken || SUPABASE_ANON_KEY}` }
     }).catch(()=>{});
     if (_favTechs) _favTechs = _favTechs.filter(f => f.tech_email !== techEmail);
-    if (btn) btn.innerHTML = '<svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:var(--muted);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
+    bumpTechFavCount(techEmail, -1);
     showToast('Removed from favorites');
   } else {
-    // Add
     await fetch(`${SUPABASE_URL}/rest/v1/user_favorites`, {
       method: 'POST',
       headers: { 'Content-Type':'application/json','apikey': SUPABASE_ANON_KEY,'Authorization': `Bearer ${window._mncAccessToken || SUPABASE_ANON_KEY}`,'Prefer':'return=minimal' },
@@ -3889,9 +3963,15 @@ async function toggleFavTech() {
     }).catch(()=>{});
     if (_favTechs) _favTechs.push({ tech_email: techEmail, tech_name: currentTech.name, tech_image: currentTech.imageUrl || '' });
     else _favTechs = [{ tech_email: techEmail, tech_name: currentTech.name, tech_image: currentTech.imageUrl || '' }];
-    if (btn) { btn.innerHTML = '<svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:var(--gold);fill:var(--gold);stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>'; btn.style.color = 'var(--gold)'; }
+    bumpTechFavCount(techEmail, +1);
     showToast('Saved to favorites!');
   }
+  // Refresh star button (consolidated SVG logic in updateFavBtn) AND the
+  // popularity chip row so the user sees ⭐ N update immediately. The
+  // cache bump above means renderTechPopularity uses the new count
+  // without a second RPC roundtrip.
+  updateFavBtn();
+  renderTechPopularity(currentTech);
 }
 
 // Update fav button state when opening a tech
@@ -3902,8 +3982,10 @@ async function updateFavBtn() {
   if (!_favTechs) await loadFavTechsCache();
   const techEmail = currentTech.email || currentTech.name;
   const isFav = _favTechs && _favTechs.some(f => f.tech_email === techEmail);
-  btn.innerHTML = isFav ? '<svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:var(--gold);fill:var(--gold);stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>' : '<svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:var(--muted);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
-  btn.style.color = isFav ? 'var(--gold)' : '';
+  btn.innerHTML = isFav
+    ? '<svg viewBox="0 0 24 24" style="width:26px;height:26px;stroke:var(--gold);fill:var(--gold);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>'
+    : '<svg viewBox="0 0 24 24" style="width:26px;height:26px;stroke:#F5E2DA;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
+  btn.style.background = isFav ? 'rgba(218,165,32,0.15)' : 'rgba(255,255,255,0.08)';
 }
 
 async function loadFavTechsCache() {
@@ -3950,23 +4032,42 @@ function isInspoSaved(url) {
   return _inspoPhotos ? _inspoPhotos.some(p => p.photo_url === url) : false;
 }
 
-async function toggleInspoPhoto(url, techName) {
+// Save or un-save a nail photo to the signed-in user's inspo board.
+// techEmail is the authoritative link to the tech (unique-enforced in
+// public.techs) — it's what heart-count-per-tech aggregate queries
+// group on. techName is a denormalized display cache for the inspo
+// grid's "Tech: Sarah" labels. Callers should pass both; saves missing
+// techEmail still work but will be excluded from per-tech aggregates
+// (those show up as 'orphaned' rows in the user_inspo migration diagnostic).
+async function toggleInspoPhoto(url, techName, techEmail) {
   if (!currentUserEmail) { showToast('Sign in to save inspo'); show('auth'); return; }
   if (isInspoSaved(url)) {
     await fetch(`${SUPABASE_URL}/rest/v1/user_inspo?user_email=eq.${encodeURIComponent(currentUserEmail)}&photo_url=eq.${encodeURIComponent(url)}`, {
       method: 'DELETE', headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${window._mncAccessToken || SUPABASE_ANON_KEY}` }
     }).catch(()=>{});
     if (_inspoPhotos) _inspoPhotos = _inspoPhotos.filter(p => p.photo_url !== url);
+    bumpPhotoHeartCount(url, -1);
+    if (techEmail) bumpTechHeartCount(techEmail, -1);
     showToast('Removed from inspo');
   } else {
     await fetch(`${SUPABASE_URL}/rest/v1/user_inspo`, {
       method: 'POST',
       headers: { 'Content-Type':'application/json','apikey': SUPABASE_ANON_KEY,'Authorization': `Bearer ${window._mncAccessToken || SUPABASE_ANON_KEY}`,'Prefer':'return=minimal' },
-      body: JSON.stringify({ user_email: currentUserEmail, photo_url: url, tech_name: techName || '' })
+      body: JSON.stringify({ user_email: currentUserEmail, photo_url: url, tech_name: techName || '', tech_email: techEmail || null })
     }).catch(()=>{});
-    if (_inspoPhotos) _inspoPhotos.push({ photo_url: url, tech_name: techName });
-    else _inspoPhotos = [{ photo_url: url, tech_name: techName }];
+    if (_inspoPhotos) _inspoPhotos.push({ photo_url: url, tech_name: techName, tech_email: techEmail || null });
+    else _inspoPhotos = [{ photo_url: url, tech_name: techName, tech_email: techEmail || null }];
+    bumpPhotoHeartCount(url, +1);
+    if (techEmail) bumpTechHeartCount(techEmail, +1);
     showToast('Saved to inspo!');
+  }
+  // Refresh the popularity row on the current tech profile (if open) so
+  // ♥ N updates immediately when a user hearts a photo. No-op if a
+  // different screen is showing — renderTechPopularity bails cleanly
+  // when td-popularity isn't visible.
+  if (typeof currentTech !== 'undefined' && currentTech && currentTech.email
+      && techEmail && String(currentTech.email).toLowerCase() === String(techEmail).toLowerCase()) {
+    try { renderTechPopularity(currentTech); } catch(_){}
   }
 }
 
@@ -4021,7 +4122,7 @@ async function loadInspoPhotos() {
     (function(photo, btn, cellEl) {
       btn.onclick = function(e) {
         e.stopPropagation();
-        toggleInspoPhoto(photo.photo_url, photo.tech_name || '');
+        toggleInspoPhoto(photo.photo_url, photo.tech_name || '', photo.tech_email || null);
         // Animate out then reload
         cellEl.style.transition = 'opacity 0.2s';
         cellEl.style.opacity = '0';
@@ -4030,6 +4131,379 @@ async function loadInspoPhotos() {
     })(p, heart, cell);
     cell.appendChild(heart);
     grid.appendChild(cell);
+  });
+}
+
+// ── Popularity ──────────────────────────────────────────────────────────
+// Session-scoped caches + helpers powering the ⭐ fav / ♥ heart chips on
+// tech profiles (and soon browse cards + per-photo hearts). Each cache
+// is keyed by lowercased email or raw URL. Counts rarely change during
+// a browse session, and the UI calls these many times per render, so we
+// cache aggressively and bump the cache locally whenever the user taps
+// a star / heart (no full refetch needed).
+//
+// Threshold gating: never render "⭐ 0" on a new tech. Below the
+// threshold, we show the "🌸 New on MNC" decay badge for techs in their
+// first 30 days; after 30 days with nothing to show, the row just hides.
+const _techFavCountCache   = new Map(); // tech_email -> count
+const _techHeartCountCache = new Map(); // tech_email -> count
+const _photoHeartCountCache = new Map(); // photo_url -> count
+const _techJoinedCache     = new Map(); // tech_email -> joined date (string) or null
+
+const POPULARITY_THRESHOLD = 3;   // below this, chip is hidden
+const NEW_ON_MNC_DAYS      = 30;  // decay window for the New badge
+
+// Low-level RPC caller — POST to /rest/v1/rpc/<fn>, return parsed JSON
+// or null on any failure. Callers default to 0 / empty on null so the
+// UI never breaks if the network hiccups.
+async function callPopRpc(fnName, payload) {
+  try {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${fnName}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${window._mncAccessToken || SUPABASE_ANON_KEY}`
+      },
+      body: JSON.stringify(payload || {})
+    });
+    if (!r.ok) return null;
+    return await r.json();
+  } catch(e) {
+    try { console.warn('[pop] ' + fnName + ' failed:', e); } catch(_){}
+    return null;
+  }
+}
+
+// ── Single-tech / single-photo getters (cached) ────────────────────────
+
+async function getTechFavCount(techEmail) {
+  const key = String(techEmail || '').trim().toLowerCase();
+  if (!key) return 0;
+  if (_techFavCountCache.has(key)) return _techFavCountCache.get(key);
+  const result = await callPopRpc('tech_fav_count', { p_tech_email: key });
+  const count = Number(result) || 0;
+  _techFavCountCache.set(key, count);
+  return count;
+}
+
+async function getTechHeartCount(techEmail) {
+  const key = String(techEmail || '').trim().toLowerCase();
+  if (!key) return 0;
+  if (_techHeartCountCache.has(key)) return _techHeartCountCache.get(key);
+  const result = await callPopRpc('tech_heart_count', { p_tech_email: key });
+  const count = Number(result) || 0;
+  _techHeartCountCache.set(key, count);
+  return count;
+}
+
+async function getPhotoHeartCount(photoUrl) {
+  if (!photoUrl) return 0;
+  if (_photoHeartCountCache.has(photoUrl)) return _photoHeartCountCache.get(photoUrl);
+  const result = await callPopRpc('photo_heart_count', { p_photo_url: photoUrl });
+  const count = Number(result) || 0;
+  _photoHeartCountCache.set(photoUrl, count);
+  return count;
+}
+
+// ── Batch getters (for browse grids / inspo feed) ──────────────────────
+// Return a Map keyed by id -> count. Callers that render N cards should
+// call these ONCE with the full list instead of looping singles.
+
+async function batchTechFavCounts(emails) {
+  const keys = (emails || []).map(e => String(e || '').trim().toLowerCase()).filter(Boolean);
+  if (keys.length === 0) return new Map();
+  const needed = keys.filter(k => !_techFavCountCache.has(k));
+  if (needed.length > 0) {
+    const rows = await callPopRpc('tech_fav_counts', { p_tech_emails: needed });
+    // Seed cache with 0 for every requested email (so next call doesn't
+    // re-fetch unknowns), then fill in actual counts from the response.
+    needed.forEach(k => _techFavCountCache.set(k, 0));
+    if (Array.isArray(rows)) {
+      rows.forEach(row => {
+        if (row && row.tech_email) {
+          _techFavCountCache.set(String(row.tech_email).trim().toLowerCase(), Number(row.cnt) || 0);
+        }
+      });
+    }
+  }
+  const out = new Map();
+  keys.forEach(k => out.set(k, _techFavCountCache.get(k) || 0));
+  return out;
+}
+
+async function batchTechHeartCounts(emails) {
+  const keys = (emails || []).map(e => String(e || '').trim().toLowerCase()).filter(Boolean);
+  if (keys.length === 0) return new Map();
+  const needed = keys.filter(k => !_techHeartCountCache.has(k));
+  if (needed.length > 0) {
+    const rows = await callPopRpc('tech_heart_counts', { p_tech_emails: needed });
+    needed.forEach(k => _techHeartCountCache.set(k, 0));
+    if (Array.isArray(rows)) {
+      rows.forEach(row => {
+        if (row && row.tech_email) {
+          _techHeartCountCache.set(String(row.tech_email).trim().toLowerCase(), Number(row.cnt) || 0);
+        }
+      });
+    }
+  }
+  const out = new Map();
+  keys.forEach(k => out.set(k, _techHeartCountCache.get(k) || 0));
+  return out;
+}
+
+async function batchPhotoHeartCounts(urls) {
+  const keys = (urls || []).filter(Boolean);
+  if (keys.length === 0) return new Map();
+  const needed = keys.filter(u => !_photoHeartCountCache.has(u));
+  if (needed.length > 0) {
+    const rows = await callPopRpc('photo_heart_counts', { p_photo_urls: needed });
+    needed.forEach(u => _photoHeartCountCache.set(u, 0));
+    if (Array.isArray(rows)) {
+      rows.forEach(row => {
+        if (row && row.photo_url) {
+          _photoHeartCountCache.set(row.photo_url, Number(row.cnt) || 0);
+        }
+      });
+    }
+  }
+  const out = new Map();
+  keys.forEach(u => out.set(u, _photoHeartCountCache.get(u) || 0));
+  return out;
+}
+
+// ── Cache bumpers — called by toggleFavTech / toggleInspoPhoto ─────────
+// Keeps counts in sync with the user's own local toggles so they see
+// their action reflected instantly (no full refetch required).
+
+function bumpTechFavCount(techEmail, delta) {
+  const key = String(techEmail || '').trim().toLowerCase();
+  if (!key) return;
+  const current = _techFavCountCache.get(key) || 0;
+  _techFavCountCache.set(key, Math.max(0, current + delta));
+  // Live-update any visible grid chip for this tech so users returning
+  // from the detail screen see the fresh count without a re-render.
+  try { refreshGridChipDOM(key); } catch(_) {}
+}
+function bumpTechHeartCount(techEmail, delta) {
+  const key = String(techEmail || '').trim().toLowerCase();
+  if (!key) return;
+  const current = _techHeartCountCache.get(key) || 0;
+  _techHeartCountCache.set(key, Math.max(0, current + delta));
+  try { refreshGridChipDOM(key); } catch(_) {}
+}
+
+// Re-paint the chip row for a single tech in any visible browse grid.
+// Reads authoritative values from the caches (which have already been
+// bumped by toggleFavTech / toggleInspoPhoto by the time this fires).
+function refreshGridChipDOM(techEmail) {
+  const key = String(techEmail || '').trim().toLowerCase();
+  if (!key) return;
+  const slots = document.querySelectorAll('.tech-card-pop[data-tech-email="' + key.replace(/(["\\])/g, '\\$1') + '"]');
+  if (!slots.length) return;
+  const fc = _techFavCountCache.get(key) || 0;
+  const hc = _techHeartCountCache.get(key) || 0;
+  const html = popularityRowHTML(fc, hc, null, /*includeNew*/ false);
+  slots.forEach(el => {
+    if (html) {
+      el.innerHTML = html;
+      el.style.display = 'inline-flex';
+    } else {
+      el.innerHTML = '';
+      el.style.display = 'none';
+    }
+  });
+}
+function bumpPhotoHeartCount(photoUrl, delta) {
+  if (!photoUrl) return;
+  const current = _photoHeartCountCache.get(photoUrl) || 0;
+  const next = Math.max(0, current + delta);
+  _photoHeartCountCache.set(photoUrl, next);
+  // Live-update any visible badge on this photo (tech-detail gallery).
+  // Safe to call when no badge is mounted — refreshPhotoHeartBadgeDOM
+  // noops if it can't find matching DOM.
+  try { refreshPhotoHeartBadgeDOM(photoUrl, next); } catch(_) {}
+}
+
+// ── Tech joined-date fetch (for "New on MNC" decay) ────────────────────
+// users.joined is the date stamp set at signup. techs objects don't
+// carry it, so we pull it on demand (cached) when rendering popularity.
+async function getTechJoinedDate(techEmail) {
+  const key = String(techEmail || '').trim().toLowerCase();
+  if (!key) return null;
+  if (_techJoinedCache.has(key)) return _techJoinedCache.get(key);
+  try {
+    const r = await fetch(
+      `${SUPABASE_URL}/rest/v1/users?email=eq.${encodeURIComponent(key)}&select=joined`,
+      { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${window._mncAccessToken || SUPABASE_ANON_KEY}` } }
+    );
+    if (r.ok) {
+      const d = await r.json();
+      const joined = (d && d[0] && d[0].joined) || null;
+      _techJoinedCache.set(key, joined);
+      return joined;
+    }
+  } catch(e) {}
+  _techJoinedCache.set(key, null);
+  return null;
+}
+
+// ── Decay badge helper ─────────────────────────────────────────────────
+// Returns true if the tech joined within the last NEW_ON_MNC_DAYS days.
+function isTechNewOnMnc(joinedDate) {
+  if (!joinedDate) return false;
+  try {
+    const joined = new Date(joinedDate);
+    if (isNaN(joined.getTime())) return false;
+    const daysSince = (Date.now() - joined.getTime()) / (1000 * 60 * 60 * 24);
+    return daysSince >= 0 && daysSince <= NEW_ON_MNC_DAYS;
+  } catch(e) { return false; }
+}
+
+// ── Render helpers — HTML strings for chip rows ────────────────────────
+
+// Build the HTML for a single ⭐ / ♥ / 🌸 chip row. Returns empty string
+// when nothing's above threshold AND the tech isn't new (caller hides
+// the container).
+//
+// includeNew (default true): whether to fall back to the "🌸 New on MNC"
+// chip when counts are below threshold. Set false for the browse grid —
+// when every tech is new (e.g., first weeks after launch) the badge
+// would spray 🌸 across every card and lose its signal value. The
+// profile header keeps includeNew=true because on a single tech's page
+// it's useful social context.
+function popularityRowHTML(favCount, heartCount, joinedDate, includeNew) {
+  const fc = Number(favCount) || 0;
+  const hc = Number(heartCount) || 0;
+  if (includeNew === undefined) includeNew = true;
+  var chips = [];
+  if (fc >= POPULARITY_THRESHOLD) {
+    chips.push('<span class="pop-chip pop-fav"><span class="pop-icon">⭐</span>' + fc + '</span>');
+  }
+  if (hc >= POPULARITY_THRESHOLD) {
+    chips.push('<span class="pop-chip pop-heart"><span class="pop-icon">♥</span>' + hc + '</span>');
+  }
+  if (chips.length === 0 && includeNew && isTechNewOnMnc(joinedDate)) {
+    chips.push('<span class="pop-chip pop-new"><span class="pop-icon">🌸</span>New on MNC</span>');
+  }
+  return chips.join('');
+}
+
+// Populate the #td-popularity row on the tech-detail screen. Safe to
+// call synchronously — async-fetches happen inside and update the DOM
+// when ready. Hides the container when there's nothing to show.
+async function renderTechPopularity(tech) {
+  const row = document.getElementById('td-popularity');
+  if (!row) return;
+  row.innerHTML = '';
+  row.style.display = 'none';
+  if (!tech || !tech.email) return;
+  try {
+    const [favCount, heartCount, joined] = await Promise.all([
+      getTechFavCount(tech.email),
+      getTechHeartCount(tech.email),
+      getTechJoinedDate(tech.email)
+    ]);
+    const html = popularityRowHTML(favCount, heartCount, joined);
+    if (html) {
+      row.innerHTML = html;
+      row.style.display = 'inline-flex';
+    }
+  } catch(e) { /* non-fatal — just leave the row hidden */ }
+}
+
+// ── Browse-grid hydrator ───────────────────────────────────────────────
+// After renderTechCards has painted the grid (empty chip slots in every
+// card), this walks every [data-tech-email] chip slot, batches a single
+// RPC pair for all visible techs, and drops the chips into each slot.
+// Non-blocking — if this fails or is slow, cards still look fine.
+//
+// Skips the 🌸 New-on-MNC chip in the grid (see popularityRowHTML
+// includeNew param) so we don't spray it across every card during the
+// first 30 days post-launch when all techs are newish.
+async function hydrateGridPopularityChips(rootEl) {
+  try {
+    const root = rootEl || document;
+    const slots = root.querySelectorAll('.tech-card-pop[data-tech-email]');
+    if (!slots.length) return;
+    const emails = [];
+    const seen = new Set();
+    slots.forEach(el => {
+      const k = String(el.dataset.techEmail || '').trim().toLowerCase();
+      if (k && !seen.has(k)) { seen.add(k); emails.push(k); }
+    });
+    if (!emails.length) return;
+    // One round-trip for favs, one for hearts — batched across all cards.
+    const [favMap, heartMap] = await Promise.all([
+      batchTechFavCounts(emails),
+      batchTechHeartCounts(emails)
+    ]);
+    slots.forEach(el => {
+      const k = String(el.dataset.techEmail || '').trim().toLowerCase();
+      if (!k) return;
+      const fc = favMap.get(k) || 0;
+      const hc = heartMap.get(k) || 0;
+      const html = popularityRowHTML(fc, hc, null, /*includeNew*/ false);
+      if (html) {
+        el.innerHTML = html;
+        el.style.display = 'inline-flex';
+      } else {
+        el.innerHTML = '';
+        el.style.display = 'none';
+      }
+    });
+  } catch(e) { /* non-fatal */ }
+}
+
+// ── Tech-detail gallery hydrator ───────────────────────────────────────
+// Batch-fetches per-photo heart counts for all photos currently in the
+// tech-detail gallery, then paints a small ♥N badge on each tile whose
+// count > 0. Also registers a data-photo-url attribute on the tile's
+// badge element so bumpPhotoHeartCount can find it and live-update.
+async function hydrateGalleryHeartCounts(photos) {
+  try {
+    const urls = (photos || [])
+      .map(p => (p && (p.url || p)) || '')
+      .filter(u => typeof u === 'string' && u.length > 0);
+    if (!urls.length) return;
+    const countMap = await batchPhotoHeartCounts(urls);
+    urls.forEach(u => {
+      const count = countMap.get(u) || 0;
+      refreshPhotoHeartBadgeDOM(u, count);
+    });
+  } catch(e) { /* non-fatal */ }
+}
+
+// Update any visible .photo-heart-count element for a given photo URL.
+// Called both on initial hydrate AND from bumpPhotoHeartCount so live
+// toggles update the badge without a refetch. Reads from the cache when
+// called without an explicit count.
+function refreshPhotoHeartBadgeDOM(photoUrl, count) {
+  if (!photoUrl) return;
+  const n = (count === undefined)
+    ? (_photoHeartCountCache.get(photoUrl) || 0)
+    : (Number(count) || 0);
+  const escUrl = (typeof CSS !== 'undefined' && CSS.escape)
+    ? CSS.escape(photoUrl)
+    : photoUrl.replace(/(["\\])/g, '\\$1');
+  let badges;
+  try {
+    badges = document.querySelectorAll('.photo-heart-count[data-photo-url="' + escUrl + '"]');
+  } catch(e) {
+    // Fallback for environments without CSS.escape or unusual URLs
+    badges = [];
+    document.querySelectorAll('.photo-heart-count').forEach(b => {
+      if (b.getAttribute('data-photo-url') === photoUrl) badges.push(b);
+    });
+  }
+  badges.forEach(badge => {
+    if (n > 0) {
+      badge.innerHTML = '<svg viewBox="0 0 24 24" style="fill:white;stroke:white;stroke-width:1.5;"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg><span>' + n + '</span>';
+      badge.style.display = 'inline-flex';
+    } else {
+      badge.innerHTML = '';
+      badge.style.display = 'none';
+    }
   });
 }
 
@@ -5089,6 +5563,13 @@ function renderTechCards(query, filteredList) {
       ? `<span class="badge" style="background:#E8F5EE;color:#1A7A4A;font-size:10px;">Book Online</span>`
       : '';
 
+    // Popularity chip slot — empty on first paint, hydrated async by
+    // hydrateGridPopularityChips() using a single batched RPC pair.
+    // data-tech-email carries the key so the hydrator doesn't need to
+    // re-parse the onclick JSON. tech.email can be absent for older
+    // records; fall back to name so at least the hydrator skip is clean.
+    const popKey = (t.email || '').toString().trim().toLowerCase();
+
     return `<div class="tech-card" onclick="openTechDetail(${JSON.stringify(t).replace(/"/g,'&quot;')})">
       <div class="tech-card-photos">${photoSlots}</div>
       <div class="tech-card-body">
@@ -5097,12 +5578,17 @@ function renderTechCards(query, filteredList) {
           <div style="font-weight:600;font-size:14px;color:var(--charcoal);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(t.name)}</div>
           <div style="display:flex;align-items:center;gap:5px;margin-top:3px;flex-wrap:wrap;">
             ${availBadge}${newClientBadge}${bookingBadge}
-            <span style="font-size:11px;color:var(--muted);">${esc(t.joined || '')}</span>
+            <span style="font-size:11px;color:var(--muted);">${esc(formatJoinedBadge(t.joined))}</span>
           </div>
+          <div class="tech-card-pop" data-tech-email="${popKey}"></div>
         </div>
       </div>
     </div>`;
   }).join('');
+
+  // Fire-and-forget hydration — chips drop into each card as the batch
+  // RPC returns. Non-blocking so the grid paints instantly.
+  hydrateGridPopularityChips(container);
 }
 
 
@@ -5207,7 +5693,7 @@ function openTechDetail(tech) {
   document.getElementById('td-initials').style.color = tech.color;
   document.getElementById('td-hero').style.background = tech.bg;
   document.getElementById('td-bio').textContent = tech.bio || '';
-  document.getElementById('td-joined').textContent = tech.joined ? '' + tech.joined : '';
+  document.getElementById('td-joined').textContent = formatJoinedBadge(tech.joined);
 
   // ── Profile photo in hero
   const hero = document.getElementById('td-hero');
@@ -5273,6 +5759,7 @@ function openTechDetail(tech) {
     galleryCount.textContent = photos.length + ' photo' + (photos.length > 1 ? 's' : '');
     galleryEmpty.style.display = 'none';
     var techNameForInspo = tech.name || '';
+    var techEmailForInspo = tech.email || '';
     photos.forEach(function(p, idx) {
       var photoUrl = p.url || p;
       var div = document.createElement('div');
@@ -5293,14 +5780,14 @@ function openTechDetail(tech) {
       var heart = document.createElement('button');
       heart.type = 'button';
       heart.setAttribute('aria-label', 'Save as inspo');
-      heart.style.cssText = 'position:absolute;top:8px;right:8px;width:32px;height:32px;border-radius:50%;border:none;background:rgba(20,10,15,0.45);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;transition:transform 0.15s ease, background 0.2s ease;';
-      var heartEmpty  = '<svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:white;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>';
-      var heartFilled = '<svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:#E8376A;fill:#E8376A;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>';
+      heart.style.cssText = 'position:absolute;top:8px;right:8px;width:40px;height:40px;border-radius:50%;border:none;background:rgba(20,10,15,0.55);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;box-shadow:0 2px 8px rgba(0,0,0,0.25);transition:transform 0.15s ease, background 0.2s ease;';
+      var heartEmpty  = '<svg viewBox="0 0 24 24" style="width:22px;height:22px;stroke:white;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>';
+      var heartFilled = '<svg viewBox="0 0 24 24" style="width:22px;height:22px;stroke:#E8376A;fill:#E8376A;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>';
       function refreshHeart() { heart.innerHTML = isInspoSaved(photoUrl) ? heartFilled : heartEmpty; }
       refreshHeart();
       heart.onclick = function(e) {
         e.stopPropagation();
-        toggleInspoPhoto(photoUrl, techNameForInspo);
+        toggleInspoPhoto(photoUrl, techNameForInspo, techEmailForInspo);
         // Tiny pop-out animation when tapped
         heart.style.transform = 'scale(1.25)';
         setTimeout(function() { heart.style.transform = ''; }, 180);
@@ -5309,8 +5796,18 @@ function openTechDetail(tech) {
       };
       div.appendChild(heart);
 
+      // ♥ N count badge (bottom-left) — populated async by
+      // hydrateGalleryHeartCounts after the loop. Stays display:none
+      // when count is 0 so we don't clutter photos nobody has saved.
+      var countBadge = document.createElement('div');
+      countBadge.className = 'photo-heart-count';
+      countBadge.setAttribute('data-photo-url', photoUrl);
+      div.appendChild(countBadge);
+
       galleryEl.appendChild(div);
     });
+    // Fire-and-forget — paints badges once the batch RPC returns.
+    hydrateGalleryHeartCounts(photos);
   } else {
     galleryCount.textContent = '';
     galleryEmpty.style.display = 'block';
@@ -5321,6 +5818,10 @@ function openTechDetail(tech) {
   loadBulletinBoard(techBoardId);
   renderTechContactFooter(tech);
   updateFavBtn();
+  // Popularity chips (⭐ / ♥ / 🌸 New-on-MNC) — fire-and-forget; the
+  // function hides the row when there's nothing above threshold, so the
+  // profile still renders cleanly for brand-new techs with no data.
+  renderTechPopularity(tech);
   show('tech-detail');
 }
 
@@ -5484,7 +5985,7 @@ function _refreshMapPins() {
             📅 Book Now
           </a>` : ''}
           <button onclick="_mapPinTap(${JSON.stringify({id:t.id,name:t.name}).replace(/"/g,'&quot;')})"
-            style="width:100%;padding:6px;border-radius:100px;border:none;background:${t.booking_link ? 'rgba(0,0,0,0.07)' : 'var(--rose)'};color:${t.booking_link ? 'var(--charcoal)' : 'white'};font-size:11px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;">
+            style="width:100%;padding:6px;border-radius:100px;border:none;background:${t.booking_link ? 'rgba(0,0,0,0.07)' : 'var(--rose)'};color:${t.booking_link ? 'var(--charcoal)' : 'white'};font-size:11px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;text-align:center;white-space:nowrap;box-sizing:border-box;">
             View Profile
           </button>
         </div>
@@ -7160,11 +7661,30 @@ function requestHomeGeolocation() {
   } catch(_) {}
 }
 
+// Hide the "test posts" banner if the admin has cleared test data (flag
+// lives in localStorage, so it persists across reloads on that device).
+// Call this on every home-feed entry so the banner disappears the first
+// time the home screen mounts after a cleanup.
+//
+// Per-device: if Leslie tests from her own phone after Anne cleared, she
+// still sees the banner until she reloads or the banner is removed from
+// static markup for launch. Good enough for soft-launch; a global flag
+// in app_settings would be the proper fix if this sticks around.
+function updateTestBannerVisibility() {
+  try {
+    var banner = document.getElementById('home-feed-test-banner');
+    if (!banner) return;
+    var hidden = localStorage.getItem('mnc_hide_test_banner') === '1';
+    banner.style.display = hidden ? 'none' : 'inline-flex';
+  } catch(_) {}
+}
+
 async function loadHomeFeed() {
   // Ask for geolocation the first time a client lands on home. If they
   // grant it, the feed re-renders with the real distance filter applied.
   requestHomeGeolocation();
 
+  updateTestBannerVisibility();
   updateFeedRadiusChips();
   var list = document.getElementById('home-feed-list');
   if (!list) return;
@@ -7649,7 +8169,7 @@ function renderStyleGrid() {
       heart.title = 'Save to inspo';
       (function(photo, btn) {
         function refresh() { btn.innerHTML = isInspoSaved(photo.url) ? heartFilled : heartEmpty; }
-        btn.onclick = function(e) { e.stopPropagation(); toggleInspoPhoto(photo.url, photo.tech.name); refresh(); };
+        btn.onclick = function(e) { e.stopPropagation(); toggleInspoPhoto(photo.url, photo.tech.name, photo.tech.email); refresh(); };
         refresh();
       })(p, heart);
       div.appendChild(heart);
@@ -7786,7 +8306,7 @@ function renderLocTechCards() {
       style="flex-shrink:0;width:180px;background:white;border-radius:16px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.08);cursor:pointer;">
       <div style="height:72px;background:${t.bg||'linear-gradient(135deg,#F7EDEF,#E8D0D8)'};display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;">
         ${avatar}
-        <div style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,0.35);border-radius:100px;padding:2px 7px;font-size:10px;color:white;">${esc(t.joined||'')}</div>
+        <div style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,0.35);border-radius:100px;padding:2px 7px;font-size:10px;color:white;">${esc(formatJoinedBadge(t.joined))}</div>
       </div>
       <div style="padding:10px 10px 4px;">
         <div style="font-size:13px;font-weight:600;color:var(--charcoal);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(t.name)}</div>
@@ -8169,74 +8689,89 @@ async function resendConfirmation(email) {
 // auth user created, profile row never, user stuck in a broken state).
 async function saveSignupProfile(reg) {
   const isTech = reg.role === 'tech';
-  const nowDate = new Date().toISOString().split('T')[0];
+  // Call the SECURITY DEFINER RPC in sql/signup-profile-rpc-migration.sql
+  // instead of POSTing directly to /rest/v1/users and /rest/v1/techs.
+  //
+  // Why an RPC: RLS on public.users / public.techs requires the caller
+  // to be authenticated with a JWT email matching the inserted row.
+  // With Confirm-email ON in Supabase (kept ON deliberately as an
+  // anti-abuse layer — prevents sybil tech accounts), signup returns no
+  // session, so the client has no JWT to satisfy RLS at the moment of
+  // insert. A direct anon POST 401s and the auth.users row is orphaned.
+  //
+  // The RPC sidesteps this by running as SECURITY DEFINER but enforces
+  // its own access check: the email MUST have a fresh row in auth.users
+  // (created in the last 5 minutes). That's the signup fingerprint —
+  // without it the RPC refuses. So the RPC can only be used to seed
+  // profiles that genuinely just went through /auth/v1/signup.
+  //
+  // Works equally well for both Confirm-email branches: if we DO have a
+  // JWT (Confirm-email OFF), we send it on Authorization anyway — the
+  // RPC still enforces the replay-window check, so no extra trust is
+  // placed in the client beyond what the RPC itself verifies.
+  const token = (typeof window !== 'undefined' && window._mncAccessToken)
+    ? window._mncAccessToken
+    : SUPABASE_ANON_KEY;
   const hdrs = {
     'Content-Type': 'application/json',
     'apikey': SUPABASE_ANON_KEY,
-    'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
-    'Prefer': 'return=minimal'
+    'Authorization': 'Bearer ' + token,
+    'Prefer': 'return=representation'
   };
 
-  // Helper: POST one row, parse PostgREST error body on failure so the
-  // caller can distinguish phone vs email collisions by inspecting
-  // body.code + body.details / body.message.
-  async function doInsert(table, payload) {
-    try {
-      const res = await fetch(SUPABASE_URL + '/rest/v1/' + table, {
-        method: 'POST', headers: hdrs, body: JSON.stringify(payload)
-      });
-      if (res.ok) return { ok: true };
-      let body = null;
-      try { body = await res.json(); } catch(_){}
-      try { console.warn('[signup] ' + table + ' insert failed:', res.status, body); } catch(_){}
-      return { ok: false, status: res.status, body: body || {} };
-    } catch(e) {
-      try { console.warn('[signup] ' + table + ' insert threw:', e); } catch(_){}
-      return { ok: false, status: 0, body: { message: (e && e.message) || 'network' } };
+  // Build the RPC payload. Keys map 1:1 to the function's p_ parameters
+  // with the p_ prefix stripped. PostgREST accepts this shape for named
+  // SQL function arguments.
+  const rpcPayload = {
+    p_email:                 reg.email,
+    p_name:                  ((reg.first || '') + ' ' + (reg.last || '')).trim(),
+    p_role:                  isTech ? 'tech' : 'client',
+    p_phone:                 reg.phone || null,
+    p_address:               reg.address || null,
+    p_city:                  reg.city || null,
+    p_state:                 reg.state || null,
+    p_zip:                   reg.zip || null,
+    p_bio:                   reg.bio || null,
+    p_shop_name:             isTech ? (reg.shop || null) : null,
+    p_hours_available:       isTech ? (reg.hours || null) : null,
+    p_tags:                  isTech ? (reg.tags || null) : null,
+    p_image_url:             reg.photoUrl || null,
+    p_liability_version:     reg.liability_version || null,
+    p_liability_accepted_at: reg.liability_accepted_at || null
+  };
+
+  try {
+    const res = await fetch(SUPABASE_URL + '/rest/v1/rpc/create_signup_profile', {
+      method: 'POST',
+      headers: hdrs,
+      body: JSON.stringify(rpcPayload)
+    });
+    let body = null;
+    try { body = await res.json(); } catch(_){}
+    if (!res.ok) {
+      // Transport-level failure (5xx, auth misconfig, missing RPC, etc).
+      // A 404 here specifically means the RPC isn't deployed — common
+      // cause is forgetting to run sql/signup-profile-rpc-migration.sql.
+      var hint = (res.status === 404) ? ' — RPC not deployed? run sql/signup-profile-rpc-migration.sql' : '';
+      try { console.warn('[signup] rpc http error: status=' + res.status + hint, body); } catch(_){}
+      return { ok: false, status: res.status, body: body || { code: 'http_' + res.status } };
     }
+    // RPC returns its own shaped result — success or structured error.
+    // {ok: true} → proceed. {ok: false, code, message, details} → caller
+    // inspects code. completeSignup.handleProfileError checks body.code
+    // === '23505' to route unique-collision into the "Welcome back!"
+    // modal, so we surface that code shape unchanged.
+    if (body && body.ok === true) return { ok: true };
+    // Inline the code + message into the warn text so it's readable
+    // without clicking to expand the Object in devtools.
+    var code = (body && body.code) || 'unknown';
+    var msg  = (body && body.message) || '';
+    try { console.warn('[signup] rpc refused: code=' + code + (msg ? ', msg=' + msg : ''), body); } catch(_){}
+    return { ok: false, status: 200, body: body || {} };
+  } catch(e) {
+    try { console.warn('[signup] rpc threw:', e); } catch(_){}
+    return { ok: false, status: 0, body: { message: (e && e.message) || 'network' } };
   }
-
-  // 1) ALWAYS write public.users — identity + role + contact + liability acknowledgment.
-  const userProfile = {
-    name: (reg.first || '') + ' ' + (reg.last || ''),
-    email: reg.email,
-    role: isTech ? 'tech' : 'client',
-    joined: nowDate,
-    phone: reg.phone || '',
-    address: reg.address || '',
-    city: reg.city || '',
-    state: reg.state || '',
-    zip: reg.zip || '',
-    bio: reg.bio || '',
-    image_url: reg.photoUrl || '',
-    liability_version: reg.liability_version || null,
-    liability_accepted_at: reg.liability_accepted_at || null
-  };
-  const userRes = await doInsert('users', userProfile);
-  if (!userRes.ok) return userRes;
-
-  // 2) For techs ONLY, also write public.techs — the portfolio layer.
-  if (isTech) {
-    const techProfile = {
-      name: (reg.first || '') + ' ' + (reg.last || ''),
-      email: reg.email,
-      phone: reg.phone || '',
-      address: reg.address || '',
-      city: reg.city || '',
-      state: reg.state || '',
-      zip: reg.zip || '',
-      bio: reg.bio || '',
-      shop_name: reg.shop || '',
-      hours_available: reg.hours || '',
-      tags: reg.tags || [],
-      image_url: reg.photoUrl || '',
-      liability_version: reg.liability_version || null,
-      liability_accepted_at: reg.liability_accepted_at || null
-    };
-    const techRes = await doInsert('techs', techProfile);
-    if (!techRes.ok) return techRes;
-  }
-  return { ok: true };
 }
 
 async function completeSignup() {
@@ -8279,8 +8814,20 @@ async function completeSignup() {
       var detail = ((body.details || '') + ' ' + (body.message || '')).toLowerCase();
       var collision = detail.indexOf('phone') >= 0 ? 'phone' : 'email';
       showExistingAccountPrompt({ email: regData.email, phone: regData.phone, collision: collision });
+    } else if (body.code === 'no_recent_auth') {
+      // The RPC's replay-window check refused because the auth.users row
+      // for this email wasn't created in the last 5 minutes. Usually
+      // means the user took too long filling out the form OR the Supabase
+      // signup call was deduped against an existing row (already
+      // registered email). Nudge them through the existing-account flow.
+      showExistingAccountPrompt({ email: regData.email, phone: regData.phone, collision: 'email' });
     } else {
-      showSignupError("We had trouble saving your profile. Please try again, or reach out if this keeps happening.");
+      // Append the RPC code to the toast so testing + bug reports can
+      // point to the specific failure mode without opening DevTools.
+      // Leave stable copy out front so real end-users still get a
+      // human-readable message.
+      var codeSuffix = body.code ? ' (' + body.code + ')' : '';
+      showSignupError("We had trouble saving your profile. Please try again, or reach out if this keeps happening." + codeSuffix);
     }
   }
 
@@ -8322,11 +8869,28 @@ async function completeSignup() {
       // If a unique-constraint (phone or email) trips on public.users/public.techs,
       // surface it as "Welcome back!" — the auth user is created but orphaned
       // (unconfirmed), which is better than silently pretending signup worked.
+      //
+      // KNOWN LIMITATION: with Confirm-email ON, there is no JWT yet, so
+      // saveSignupProfile will fall back to the anon key and fail the
+      // authenticated-role RLS check on public.users. Fix path is either
+      // disable email confirmation in Supabase, or wrap profile inserts in a
+      // SECURITY DEFINER RPC. This branch logs a clear signup_needs_rpc
+      // warning so the failure mode is obvious in the console.
       const profRes1 = await saveSignupProfile(regData);
-      if (profRes1 && !profRes1.ok) { handleProfileError(profRes1); return; }
+      if (profRes1 && !profRes1.ok) {
+        try { console.warn('[signup_needs_rpc] Confirm-email ON + RLS blocks anon insert.', profRes1); } catch(_){}
+        handleProfileError(profRes1);
+        return;
+      }
       showConfirmationPending(regData.email);
       return;
     }
+    // Stash the just-minted JWT in the canonical global used by every
+    // other RLS-gated request (saveTechEdit, loadFavTechs, popularity
+    // RPCs, etc). saveSignupProfile reads window._mncAccessToken for its
+    // Authorization header; without this line, it would fall back to the
+    // anon key and 401 on the public.users insert.
+    window._mncAccessToken = signupRes.access_token;
     _authToken = signupRes.access_token;
   } catch(e) {
     showSignupError('Something went wrong creating your account. Please try again in a moment.');
@@ -8400,6 +8964,33 @@ function fmtDate(d) {
   const [y,m,day] = d.split('-');
   const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   return months[parseInt(m,10)-1] + ' ' + parseInt(day,10) + ', ' + y;
+}
+
+// Render-time formatter for the "Since XX date" badge shown on tech cards
+// (browse grid), the tech-detail profile header, and the map-view location
+// card. Accepts whatever is in t.joined and returns a display-ready string:
+//
+//   ""               → ""               (nothing to show)
+//   "Since Apr 26"   → "Since Apr 26"   (legacy/pre-formatted — pass through)
+//   "2026-04-21"     → "Since Apr 26"   (ISO from new-tech save path)
+//   "2026-04-21T…"   → "Since Apr 26"   (full ISO timestamp)
+//   "asdfghjkl"      → "asdfghjkl"      (unparseable — don't lie, show raw)
+//
+// Keeps the DB column clean (raw ISO is ideal for sorting, filtering, and
+// the New-on-MNC decay check in popularity/users.joined). The pretty form
+// only exists at render time.
+function formatJoinedBadge(raw) {
+  if (!raw) return '';
+  var s = String(raw).trim();
+  if (!s) return '';
+  // Already formatted — pass through untouched (legacy seed data)
+  if (/^Since\s/i.test(s)) return s;
+  // Try to parse as a date. Accept ISO dates and full timestamps.
+  var d = new Date(s);
+  if (isNaN(d.getTime())) return s;
+  var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var yy = String(d.getFullYear()).slice(-2);
+  return 'Since ' + months[d.getMonth()] + ' ' + yy;
 }
 
 function renderUsers() {
@@ -8476,13 +9067,20 @@ async function initProfileScreen() {
   const nameEl = document.getElementById('profile-display-name');
   if (nameEl) nameEl.textContent = name || email;
 
-  // Set avatar
-  const wrap = document.getElementById('profile-photo-wrap');
-  const initEl = document.getElementById('profile-initials');
-  if (currentUserPhoto && wrap) {
-    wrap.innerHTML = `<img src="${currentUserPhoto}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;"/>`;
-  } else if (initEl) {
-    initEl.textContent = name ? name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase() : '?';
+  // Set avatar — delegate to updateAvatar() which now branches on role
+  // (techs: photo-or-initials; clients/admins: photo-or-MNC-coin).
+  updateAvatar();
+  // Clients don't need a profile photo (their profile isn't visible to
+  // anyone) — kill the tap-to-upload handler so the coin isn't a
+  // misleading affordance. Techs + admins retain it.
+  if (window._mncCurrentRole !== 'tech') {
+    var wrap_ = document.getElementById('profile-photo-wrap');
+    var tapWrap = wrap_ ? wrap_.parentElement : null;
+    if (tapWrap) {
+      tapWrap.onclick = null;
+      tapWrap.style.cursor = 'default';
+      tapWrap.removeAttribute('title');
+    }
   }
 
   // Fetch role + location from Supabase
@@ -9227,13 +9825,64 @@ function initGooglePlaces() {
 function addrAutocomplete(input, listId, cityId, stateId, zipId) {
   // If Google Places is ready, use it
   if (_googlePlacesReady && window.google && window.google.maps && window.google.maps.places) {
-    if (input._googleAC) return; // already initialized
     const stateEl = document.getElementById(stateId);
-    const ac = new google.maps.places.Autocomplete(input, {
+    const currentState = stateEl ? stateEl.value.trim().toUpperCase() : '';
+
+    // Hook state dropdown once so picking a different state nukes the
+    // existing Autocomplete + clears the address field — the next
+    // keystroke will re-init with the correct state bounds. Without
+    // this, Google Places was using the user's geolocation as the bias
+    // and returning (e.g.) Arizona streets when IL was selected.
+    if (stateEl && !stateEl._mncAddrReInitHooked) {
+      stateEl._mncAddrReInitHooked = true;
+      stateEl.addEventListener('change', () => {
+        if (input._googleAC) {
+          try { google.maps.event.clearInstanceListeners(input._googleAC); } catch(_) {}
+          input._googleAC = null;
+          input._mncBoundState = null;
+        }
+        input.value = '';
+        const cityEl = document.getElementById(cityId);
+        const zipEl  = document.getElementById(zipId);
+        if (cityEl) cityEl.value = '';
+        if (zipEl)  zipEl.value  = '';
+      });
+    }
+
+    if (input._googleAC) return; // already initialized for this state
+
+    // Try synchronous state bounds first (hardcoded, no API dep). If
+    // available we can pass them to Autocomplete at construction time so
+    // strictBounds applies to the FIRST keystroke — which fixes the
+    // race where users typing fast see unfiltered results before the
+    // async geocoder resolved. Fall back to async geocoder for state
+    // codes we don't have in the table (shouldn't hit for 50-state app).
+    const syncBounds = currentState ? stateBoundsSync(currentState) : null;
+    const acOpts = {
       types: ['address'],
-      componentRestrictions: { country: 'us' },
-    });
+      componentRestrictions: { country: 'us' }
+    };
+    if (syncBounds) {
+      acOpts.bounds = syncBounds;
+      acOpts.strictBounds = true;
+    }
+    const ac = new google.maps.places.Autocomplete(input, acOpts);
     input._googleAC = ac;
+    input._mncBoundState = currentState;
+
+    // If we had no sync bounds for this state, try the async geocoder as
+    // a fallback. Bounds get applied via setBounds + setOptions when it
+    // resolves — will filter subsequent keystrokes, but the first few
+    // predictions before the response lands won't be filtered.
+    if (currentState && !syncBounds) {
+      geocodeStateBounds(currentState).then(bounds => {
+        if (bounds && input._googleAC === ac) {
+          ac.setBounds(bounds);
+          try { ac.setOptions({ strictBounds: true }); } catch(_) {}
+        }
+      });
+    }
+
     ac.addListener('place_changed', () => {
       const place = ac.getPlace();
       if (!place.address_components) return;
@@ -9266,9 +9915,15 @@ function addrAutocomplete(input, listId, cityId, stateId, zipId) {
     try {
       const stateEl = document.getElementById(stateId);
       const stateVal = stateEl ? stateEl.value.trim() : '';
+      // Nominatim's &state= matches against the full state name in its
+      // address index ("Illinois"), not the USPS 2-letter code ("IL").
+      // Our state dropdowns store the 2-letter value, so expand first.
+      // stateFull passes unknowns through unchanged, so if stateVal
+      // happens to already be a full name (legacy data) it still works.
+      const stateFullName = stateFull(stateVal);
       let url;
       if (stateVal) {
-        url = `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&countrycodes=us&limit=6&street=${encodeURIComponent(q)}&state=${encodeURIComponent(stateVal)}`;
+        url = `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&countrycodes=us&limit=6&street=${encodeURIComponent(q)}&state=${encodeURIComponent(stateFullName)}`;
       } else {
         url = `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&countrycodes=us&limit=6&q=${encodeURIComponent(q + ', USA')}`;
       }
@@ -9339,6 +9994,138 @@ function stateAbbr(full) {
     'District of Columbia':'DC'
   };
   return map[full] || full.slice(0,2).toUpperCase();
+}
+
+// Inverse of stateAbbr: 2-letter USPS code → full state name. Needed for
+// Nominatim's &state= query param, which matches against the full name
+// in its address index ("Illinois"), not the 2-letter code ("IL"). Our
+// signup / tech-edit / user-edit state dropdowns store the 2-letter
+// value, so we expand before hitting Nominatim. Unknown abbreviations
+// pass through unchanged — Nominatim will just return broader results.
+function stateFull(abbr) {
+  const map = {
+    'AL':'Alabama','AK':'Alaska','AZ':'Arizona','AR':'Arkansas','CA':'California',
+    'CO':'Colorado','CT':'Connecticut','DE':'Delaware','FL':'Florida','GA':'Georgia',
+    'HI':'Hawaii','ID':'Idaho','IL':'Illinois','IN':'Indiana','IA':'Iowa','KS':'Kansas',
+    'KY':'Kentucky','LA':'Louisiana','ME':'Maine','MD':'Maryland','MA':'Massachusetts',
+    'MI':'Michigan','MN':'Minnesota','MS':'Mississippi','MO':'Missouri','MT':'Montana',
+    'NE':'Nebraska','NV':'Nevada','NH':'New Hampshire','NJ':'New Jersey','NM':'New Mexico',
+    'NY':'New York','NC':'North Carolina','ND':'North Dakota','OH':'Ohio','OK':'Oklahoma',
+    'OR':'Oregon','PA':'Pennsylvania','RI':'Rhode Island','SC':'South Carolina',
+    'SD':'South Dakota','TN':'Tennessee','TX':'Texas','UT':'Utah','VT':'Vermont',
+    'VA':'Virginia','WA':'Washington','WV':'West Virginia','WI':'Wisconsin','WY':'Wyoming',
+    'DC':'District of Columbia'
+  };
+  if (!abbr) return '';
+  const key = String(abbr).trim().toUpperCase();
+  return map[key] || abbr;
+}
+
+// ── US state bounding boxes [south, west, north, east] ─────────────────
+// Used by addrAutocomplete to constrain Google Places results to the
+// selected state. Hardcoded (rather than geocoded) so we don't depend on
+// the Geocoding API being enabled in the Google Cloud project — it's a
+// separate billable product from Places, and if it isn't enabled our
+// geocoder call fails silently and results fall back to geo-biased.
+// Bounds are a touch generous on every side so edge-of-state addresses
+// (e.g. border towns) don't get excluded by strictBounds. Alaska and
+// Hawaii boxes cover mainland + main island chain only.
+const STATE_BOUNDS_DATA = {
+  'AL': [30.14, -88.47, 35.01, -84.89],
+  'AK': [54.40, -170.00, 71.50, -129.97],
+  'AZ': [31.33, -114.82, 37.00, -109.04],
+  'AR': [33.00, -94.62, 36.50, -89.64],
+  'CA': [32.53, -124.41, 42.01, -114.13],
+  'CO': [36.99, -109.06, 41.00, -102.04],
+  'CT': [40.98, -73.73, 42.05, -71.78],
+  'DE': [38.45, -75.79, 39.84, -75.05],
+  'DC': [38.79, -77.12, 38.99, -76.91],
+  'FL': [24.52, -87.64, 31.00, -79.97],
+  'GA': [30.36, -85.61, 35.00, -80.84],
+  'HI': [18.91, -160.25, 22.24, -154.81],
+  'ID': [41.99, -117.24, 49.00, -111.04],
+  'IL': [36.97, -91.51, 42.51, -87.02],
+  'IN': [37.77, -88.10, 41.76, -84.78],
+  'IA': [40.37, -96.64, 43.50, -90.14],
+  'KS': [36.99, -102.05, 40.00, -94.59],
+  'KY': [36.50, -89.57, 39.15, -81.96],
+  'LA': [28.93, -94.04, 33.02, -88.82],
+  'ME': [43.06, -71.08, 47.46, -66.95],
+  'MD': [37.89, -79.49, 39.72, -75.05],
+  'MA': [41.24, -73.51, 42.89, -69.93],
+  'MI': [41.70, -90.42, 48.31, -82.41],
+  'MN': [43.50, -97.24, 49.38, -89.49],
+  'MS': [30.17, -91.66, 34.99, -88.10],
+  'MO': [35.99, -95.77, 40.61, -89.10],
+  'MT': [44.36, -116.05, 49.00, -104.04],
+  'NE': [39.99, -104.05, 43.00, -95.31],
+  'NV': [35.00, -120.01, 42.00, -114.04],
+  'NH': [42.70, -72.56, 45.31, -70.61],
+  'NJ': [38.92, -75.56, 41.36, -73.89],
+  'NM': [31.33, -109.05, 37.00, -103.00],
+  'NY': [40.50, -79.76, 45.02, -71.86],
+  'NC': [33.84, -84.32, 36.59, -75.46],
+  'ND': [45.94, -104.05, 49.00, -96.55],
+  'OH': [38.40, -84.82, 41.98, -80.52],
+  'OK': [33.62, -103.00, 37.00, -94.43],
+  'OR': [42.00, -124.57, 46.29, -116.46],
+  'PA': [39.72, -80.52, 42.27, -74.69],
+  'RI': [41.15, -71.86, 42.02, -71.12],
+  'SC': [32.03, -83.35, 35.22, -78.54],
+  'SD': [42.48, -104.06, 45.94, -96.44],
+  'TN': [34.98, -90.31, 36.68, -81.65],
+  'TX': [25.84, -106.65, 36.50, -93.51],
+  'UT': [36.99, -114.05, 42.00, -109.04],
+  'VT': [42.73, -73.43, 45.02, -71.46],
+  'VA': [36.54, -83.68, 39.47, -75.24],
+  'WA': [45.54, -124.85, 49.00, -116.92],
+  'WV': [37.20, -82.64, 40.64, -77.72],
+  'WI': [42.49, -92.89, 47.08, -86.76],
+  'WY': [40.99, -111.06, 45.01, -104.05]
+};
+
+// Return a google.maps.LatLngBounds for a state code, or null. Uses the
+// hardcoded STATE_BOUNDS_DATA table — synchronous, no API dependency.
+// This is what addrAutocomplete calls at init time so strictBounds can
+// be applied to the FIRST keystroke, not after an async roundtrip.
+function stateBoundsSync(abbr) {
+  if (!abbr) return null;
+  const key = String(abbr).trim().toUpperCase();
+  const b = STATE_BOUNDS_DATA[key];
+  if (!b || !window.google || !window.google.maps || !window.google.maps.LatLngBounds) return null;
+  try {
+    return new google.maps.LatLngBounds(
+      new google.maps.LatLng(b[0], b[1]), // SW corner
+      new google.maps.LatLng(b[2], b[3])  // NE corner
+    );
+  } catch(_) { return null; }
+}
+
+// Geocoder-based fallback for any state code not in STATE_BOUNDS_DATA
+// (shouldn't happen — we cover all 50 + DC — but kept as a safety net
+// in case a future dropdown adds territories like PR or GU). Requires
+// the Geocoding API to be enabled in Google Cloud.
+function geocodeStateBounds(abbr) {
+  if (!abbr) return Promise.resolve(null);
+  const key = String(abbr).trim().toUpperCase();
+  geocodeStateBounds._cache = geocodeStateBounds._cache || {};
+  if (geocodeStateBounds._cache[key]) return Promise.resolve(geocodeStateBounds._cache[key]);
+  if (!window.google || !window.google.maps || !window.google.maps.Geocoder) {
+    return Promise.resolve(null);
+  }
+  return new Promise(resolve => {
+    try {
+      const geocoder = new google.maps.Geocoder();
+      geocoder.geocode({ address: stateFull(key) + ', USA' }, (results, status) => {
+        if (status === 'OK' && results && results[0] && results[0].geometry && results[0].geometry.viewport) {
+          geocodeStateBounds._cache[key] = results[0].geometry.viewport;
+          resolve(results[0].geometry.viewport);
+        } else {
+          resolve(null);
+        }
+      });
+    } catch(_) { resolve(null); }
+  });
 }
 
 
@@ -9480,7 +10267,8 @@ async function clearTestData() {
 
   var confirmText = prompt(
     'This deletes ALL bulletin posts, saved favorites, saved inspo, and\n' +
-    'admin inbox messages.\n\n' +
+    'admin inbox messages (including any @mnc-seed.test popularity seed\n' +
+    'rows from sql/popularity-test-seed.sql).\n\n' +
     'Techs and user accounts are preserved.\n\n' +
     'Type  CLEAR  to confirm:'
   );
@@ -9495,7 +10283,14 @@ async function clearTestData() {
   // Supabase REST refuses unconditional deletes (safety). The idiomatic
   // "match everything" filter is id=not.is.null — matches every row where
   // id is set, which is all of them.
+  //
+  // Seed-data endpoints (first two) run before the full wipes — redundant
+  // when the full wipe succeeds, but self-documenting AND it means the
+  // seed is still cleaned even if RLS ever blocks the full wipes. The
+  // full wipe then catches anything else (real interactions, etc).
   const endpoints = [
+    { label: 'favorites (seed)',  url: SUPABASE_URL + '/rest/v1/user_favorites?user_email=like.*%40mnc-seed.test' },
+    { label: 'inspo (seed)',      url: SUPABASE_URL + '/rest/v1/user_inspo?user_email=like.*%40mnc-seed.test' },
     { label: 'bulletin posts',    url: SUPABASE_URL + '/rest/v1/board_posts?id=not.is.null' },
     { label: 'favorites',         url: SUPABASE_URL + '/rest/v1/user_favorites?id=not.is.null' },
     { label: 'inspo',             url: SUPABASE_URL + '/rest/v1/user_inspo?id=not.is.null' },
@@ -9509,6 +10304,13 @@ async function clearTestData() {
     const failed = results.filter(r => !r.ok);
     if (failed.length === 0) {
       showToast('Test data cleared ✓', 3500);
+      // Hide the "test posts" banner on the home feed now that the data
+      // it's warning about is gone. Flag persists in localStorage so the
+      // banner stays hidden on subsequent reloads on this device. If the
+      // admin re-seeds and wants the banner back, clear the flag from
+      // DevTools: localStorage.removeItem('mnc_hide_test_banner').
+      try { localStorage.setItem('mnc_hide_test_banner', '1'); } catch(_) {}
+      try { updateTestBannerVisibility(); } catch(_) {}
     } else {
       var failMsg = failed.map(f => f.label + ' (' + f.status + ')').join(', ');
       showToast('Cleared with errors: ' + failMsg, 6000);
@@ -9518,6 +10320,43 @@ async function clearTestData() {
     try { loadAdminStats(); } catch(_){}
   } catch (e) {
     showToast('Clear failed: ' + (e.message || 'network error'), 5000);
+  }
+}
+
+// ── Surgical seed-only cleanup ────────────────────────────────────────────
+// Deletes ONLY rows with user_email ending in @mnc-seed.test (the sentinel
+// domain used by sql/popularity-test-seed.sql). Leaves every real user's
+// favorites and inspo untouched — unlike clearTestData(), this is safe to
+// run mid-beta when real testers are already using the app.
+//
+// No UI yet — callable from the DevTools console when needed. If this
+// becomes a frequent operation, wire it to a Settings button.
+async function clearSeedTestData() {
+  if (!isCurrentUserAdmin()) { showToast('Admin only'); return; }
+  const hdrs = {
+    apikey: SUPABASE_ANON_KEY,
+    Authorization: 'Bearer ' + (window._mncAccessToken || SUPABASE_ANON_KEY),
+    Prefer: 'return=minimal'
+  };
+  const endpoints = [
+    { label: 'favorites (seed)', url: SUPABASE_URL + '/rest/v1/user_favorites?user_email=like.*%40mnc-seed.test' },
+    { label: 'inspo (seed)',     url: SUPABASE_URL + '/rest/v1/user_inspo?user_email=like.*%40mnc-seed.test' }
+  ];
+  try {
+    const results = await Promise.all(
+      endpoints.map(e => fetch(e.url, { method: 'DELETE', headers: hdrs })
+                           .then(r => ({ label: e.label, ok: r.ok, status: r.status })))
+    );
+    const failed = results.filter(r => !r.ok);
+    if (failed.length === 0) {
+      showToast('Seed test data cleared ✓', 3500);
+    } else {
+      showToast('Seed clear had errors: ' + failed.map(f => f.label + ' (' + f.status + ')').join(', '), 6000);
+    }
+    // Pop caches so stale seeded counts don't linger on screen
+    try { _techFavCountCache.clear(); _techHeartCountCache.clear(); _photoHeartCountCache.clear(); } catch(_){}
+  } catch (e) {
+    showToast('Seed clear failed: ' + (e.message || 'network error'), 5000);
   }
 }
 
@@ -9602,6 +10441,14 @@ function constrainToDevice(el) {
     inner.style.width = '100%';
     inner.style.maxWidth = '100%';
     inner.style.boxSizing = 'border-box';
+    // Cap the inner's max-height to the device frame (minus a small
+    // strip so users can still see a sliver of dim backdrop above).
+    // Many modals ship with inline max-height:88vh which is 88% of the
+    // *viewport* — on desktop where the viewport is taller than the
+    // 812px phone frame, that lets the inner bleed past the top of the
+    // device with its sticky header getting clipped by our overflow
+    // hidden. Writing maxHeight via JS overrides the inline attribute.
+    inner.style.maxHeight = Math.max(0, dr.height - 12) + 'px';
   }
 }
 
@@ -10074,13 +10921,30 @@ async function submitContactAnne() {
   }, 1800);
 }
 
+// MNC "coin" avatar for non-tech users (clients + admins who haven't set
+// a photo). Per product direction on 2026-04-21: clients don't need a
+// profile photo because their profile isn't visible to anyone else —
+// uploading one was pure signup friction with no payoff. Instead of
+// falling back to initials, render a small branded coin so every screen
+// still has a consistent identity element in the avatar slot.
+function mncCoinHTML() {
+  return '<div style="width:100%;height:100%;border-radius:50%;background:linear-gradient(135deg,#F5E2DA 0%,#E8C4BA 55%,#C4786A 100%);display:flex;align-items:center;justify-content:center;box-shadow:inset 0 -1px 3px rgba(139,90,82,0.22), inset 0 1px 2px rgba(255,255,255,0.45);overflow:hidden;"><img src="mncLogo-transparent.png" alt="MNC" style="width:72%;height:72%;object-fit:contain;display:block;filter:drop-shadow(0 1px 1px rgba(139,90,82,0.18));" draggable="false"/></div>';
+}
+
 function updateAvatar() {
   var initials = (currentUserName.first ? currentUserName.first[0] : '') +
                  (currentUserName.last ? currentUserName.last[0] : '') || '?';
+  // Techs have real photos shown publicly — keep the photo/initials path.
+  // Everyone else (clients, admins without a photo) gets the MNC coin.
+  var isTech = (window._mncCurrentRole === 'tech');
+  var coin = mncCoinHTML();
+
   // Update all nav avatars
   document.querySelectorAll('.avatar').forEach(function(el) {
     if (currentUserPhoto) {
       el.innerHTML = '<img src="' + currentUserPhoto + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;"/>';
+    } else if (!isTech) {
+      el.innerHTML = coin;
     } else {
       el.textContent = initials;
     }
@@ -10091,11 +10955,13 @@ function updateAvatar() {
   if (wrap) {
     if (currentUserPhoto) {
       wrap.innerHTML = '<img src="' + currentUserPhoto + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;"/>';
+    } else if (!isTech) {
+      wrap.innerHTML = coin;
     } else {
       if (initEl) initEl.textContent = initials;
     }
   }
-  // Update tech dash avatar
+  // Update tech dash avatar — techs keep photo/initials (they have photos).
   var techAv = document.getElementById('tech-dash-avatar');
   if (techAv) {
     if (currentUserPhoto) {
