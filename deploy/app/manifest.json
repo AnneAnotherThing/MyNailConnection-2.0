@@ -1,0 +1,77 @@
+{
+  "name": "My Nail Connection",
+  "short_name": "Nail Connection",
+  "description": "Find, book, and connect with nail techs near you.",
+  "start_url": "/?utm_source=pwa&utm_medium=home-screen",
+  "scope": "/",
+  "id": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FAF5F7",
+  "theme_color": "#C4786A",
+  "lang": "en-US",
+  "dir": "ltr",
+  "categories": [
+    "beauty",
+    "lifestyle",
+    "social"
+  ],
+  "icons": [
+    {
+      "src": "images/mncLogo-192.webp",
+      "sizes": "192x192",
+      "type": "image/webp",
+      "purpose": "any"
+    },
+    {
+      "src": "images/mncLogo-512.webp",
+      "sizes": "512x512",
+      "type": "image/webp",
+      "purpose": "any"
+    },
+    {
+      "src": "images/mncLogo-maskable.webp",
+      "sizes": "512x512",
+      "type": "image/webp",
+      "purpose": "maskable"
+    },
+    {
+      "src": "images/mncLogo-1024.webp",
+      "sizes": "1024x1024",
+      "type": "image/webp",
+      "purpose": "any"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "app-screens/home.png",
+      "sizes": "1284x2778",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Home feed of nail inspiration"
+    },
+    {
+      "src": "app-screens/browse-style.png",
+      "sizes": "1284x2778",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Browse nail styles by shape and category"
+    },
+    {
+      "src": "app-screens/get-inspo.png",
+      "sizes": "1284x2778",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Get inspired — save your favorites"
+    },
+    {
+      "src": "app-screens/map.png",
+      "sizes": "1284x2778",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Map of nail techs near you"
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false
+}

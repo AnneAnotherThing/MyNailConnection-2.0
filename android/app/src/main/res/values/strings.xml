@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">My Nail Connection</string>
+    <string name="title_activity_main">My Nail Connection</string>
+    <string name="package_name">com.mynailconnection.app</string>
+    <string name="custom_url_scheme">com.mynailconnection.app</string>
+</resources>
