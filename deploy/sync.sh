@@ -33,6 +33,40 @@ copy_if_exists() {
   if [ -f "$src" ]; then cp -f "$src" "$dst"; fi
 }
 
+# ── Auto-bump service worker cache version ──────────────────────────────
+# Problem this solves: on 2026-04-21 Anne pushed a fresh build to GitHub
+# Pages and testers (including her) kept seeing the OLD code — the PWA
+# service worker had index.html cached under mnc-vN and never re-fetched.
+# Manual fix was "DevTools → Application → Unregister + Clear storage",
+# which isn't something we can ask end-users to do.
+#
+# Fix: every time an HTML source file (index.html, marketing.html, etc.)
+# is newer than sw.js, we bump the CACHE_NAME ('mnc-vN' → 'mnc-v(N+1)').
+# The service worker's activate handler already deletes any cache whose
+# name ≠ CACHE_NAME, so bumping is all that's required to force-refresh.
+#
+# We only bump when a source HTML is newer so repeated idempotent sync
+# runs (no actual edit) don't churn version numbers. After bumping we
+# `touch sw.js` so it's newer than the sources and subsequent syncs
+# stay no-op until the user edits HTML again.
+if [ -f sw.js ]; then
+  needs_bump=0
+  for f in index.html marketing.html reset-password.html tech-guide.html manifest.json; do
+    if [ -f "$f" ] && [ "$f" -nt sw.js ]; then needs_bump=1; break; fi
+  done
+  if [ "$needs_bump" = "1" ]; then
+    current=$(grep -oE "'mnc-v[0-9]+'" sw.js | head -1 | tr -d "'" | sed 's/mnc-v//')
+    if [ -n "$current" ]; then
+      next=$((current + 1))
+      # Portable in-place edit: write to temp then mv. Avoids the macOS
+      # vs GNU sed -i argument mismatch.
+      sed "s/'mnc-v${current}'/'mnc-v${next}'/" sw.js > sw.js.tmp && mv sw.js.tmp sw.js
+      touch sw.js
+      echo "  bumped sw.js cache: mnc-v${current} → mnc-v${next}"
+    fi
+  fi
+fi
+
 # ── App bundle ──────────────────────────────────────────────────────────
 copy_if_exists index.html              "$APP/index.html"
 copy_if_exists reset-password.html     "$APP/reset-password.html"
