@@ -56,8 +56,8 @@ Paste all 3 URLs into `index.html` in the `STRIPE_CONFIG` object:
 ```javascript
 const STRIPE_CONFIG = {
   link_1_photo:   'https://buy.stripe.com/YOUR_REAL_LINK',
-  link_5_photos:  'https://buy.stripe.com/YOUR_REAL_LINK',
-  link_unlimited: 'https://buy.stripe.com/YOUR_REAL_LINK',
+  link_10_photos: 'https://buy.stripe.com/YOUR_REAL_LINK',
+  link_glow_up:   'https://buy.stripe.com/YOUR_REAL_LINK',
   free_limit: 5
 };
 ```

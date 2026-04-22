@@ -334,17 +334,45 @@
     <label class="task" for="t7">
       <span class="checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
       <span class="task-body">
-        <div class="title">Create Stripe products &amp; paste payment links</div>
-        <div class="desc">In Stripe Dashboard → Products, create 3 products: (1) "1 Photo Credit" — $1 one-time, (2) "5 Photo Credits" — $4 one-time, (3) "Glow Up" — $9/mo recurring. Add <code>credits</code> metadata (1, 5) on each one-time Price. Create a Payment Link for each and paste the URLs into <code>STRIPE_CONFIG</code> in <code>index.html</code>. Register webhook events <code>checkout.session.completed</code>, <code>customer.subscription.updated</code>, <code>customer.subscription.deleted</code>.</div>
+        <div class="title">Register Stripe webhook endpoint <span class="prio-pill prio-crit">Critical</span></div>
+        <div class="desc"><strong>Partial progress 2026-04-22:</strong> ✓ Products created in live mode ($1 single / $5-for-10 / $9-mo Glow Up with credit metadata). ✓ Payment Links generated. ✓ URLs pasted into <code>STRIPE_CONFIG</code> at <code>index.html:3343</code> with renamed keys (<code>link_10_photos</code>, <code>link_glow_up</code>). ✓ Upgrade modal copy updated to match ($5 / 10 photos). ✓ Webhook fallback maps updated to match the new pricing. <br><br><strong>Still outstanding:</strong> In Stripe Dashboard → Developers → Webhooks, add endpoint pointing at <code>https://ktiztunuifzbzwzyqrrq.supabase.co/functions/v1/stripe-webhook</code> and subscribe to <code>checkout.session.completed</code>, <code>customer.subscription.updated</code>, <code>customer.subscription.deleted</code>. Copy the live-mode signing secret (<code>whsec_...</code>) and paste it into Supabase → Edge Functions → stripe-webhook → Secrets as <code>STRIPE_WEBHOOK_SECRET</code>. Without this, Stripe events won't reach the webhook and credit-granting won't happen.</div>
       </span>
     </label>
 
-    <input type="checkbox" id="t_seo_routing"/>
-    <label class="task" for="t_seo_routing">
+    <input type="checkbox" id="t_weekly_slots_schema"/>
+    <label class="task" for="t_weekly_slots_schema">
       <span class="checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
       <span class="task-body">
-        <div class="title">Decide + wire <code>/</code> routing: marketing page vs. app shell</div>
-        <div class="desc">Right now <code>index.html</code> is the PWA app and <code>marketing.html</code> is the landing page. All SEO metadata (canonical, OG URL, sitemap, JSON-LD) points <code>https://mynailconnection.com/</code> at the marketing page — meaning organic traffic should land there, and the app should live at <code>/app</code> or <code>/login</code>. Configure this at the host level (Netlify <code>_redirects</code>, Vercel <code>rewrites</code>, Cloudflare Pages routing rules, or nginx <code>try_files</code>) so <code>/</code> serves <code>marketing.html</code> and the app gets its own path. Alternate path: keep the app at <code>/</code> and edit every canonical/OG URL across <code>marketing.html</code>, <code>sitemap.xml</code>, <code>robots.txt</code>, and the JSON-LD block to point at <code>/marketing.html</code> explicitly — but this is worse for SEO because root-domain ranking accrues to the wrong page.</div>
+        <div class="title">Weekly-slot schema for Glow Up subscribers <span class="prio-pill prio-crit">Critical</span></div>
+        <div class="desc">Add <code>weekly_upload_count integer default 0</code> + <code>weekly_reset_at timestamptz</code> to <code>public.techs</code> (or a separate <code>weekly_uploads</code> audit table if we want per-week history). This is the keystone for the pivot — blocks the upload flow rewrite and the webhook semantic change. Design question still open: columns-on-techs (faster to ship, no audit trail) vs separate table (cleaner audit, trivial reset logic). Sunday midnight reset in tech's local timezone or UTC — decide at schema time.</div>
+      </span>
+    </label>
+
+    <input type="checkbox" id="t_upload_flow_rewrite"/>
+    <label class="task" for="t_upload_flow_rewrite">
+      <span class="checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
+      <span class="task-body">
+        <div class="title">Upload flow rewrite — pre-check messaging + credit enforcement <span class="prio-pill prio-crit">Critical</span></div>
+        <div class="desc">Before the picker opens, pre-check state and show exactly one of: "You have X free slots remaining" / "Next photo: $1. (You've added Y paid photos.)" / "Next 10 photos: $5 bundle — save $5" (auto-offer after 4 single purchases) / "You have X of 5 weekly slots remaining. Resets Sunday." (subscribers only) / "Weekly limit reached. New slots Sunday at midnight." (subscribers only). Per-file credit enforcement so bulk uploads can't bypass. Credits are pure top-up — weekly cap only applies to subscription slots, not credit purchases (model 1, locked 2026-04-22).</div>
+      </span>
+    </label>
+
+    <input type="checkbox" id="t_webhook_weekly_slots"/>
+    <label class="task" for="t_webhook_weekly_slots">
+      <span class="checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
+      <span class="title-spacer" style="display:none"></span>
+      <span class="task-body">
+        <div class="title">Webhook semantic change: sub grants 5 weekly slots, not unlimited <span class="prio-pill prio-crit">Critical</span></div>
+        <div class="desc">Rewrite <code>customer.subscription.updated</code> / <code>created</code> handlers in the Supabase <code>stripe-webhook</code> edge function so activating Glow Up grants 5 weekly slots via the new schema instead of flipping an unconstrained <code>subscription_active</code> flag. <code>customer.subscription.deleted</code> should stop refilling weekly slots on Sunday (pause-on-cancel already handles the photo-visibility side). Also add server-side guard against bulk-upload bypass — even if the client is lying about credits, the webhook / upload RPC enforces the count.</div>
+      </span>
+    </label>
+
+    <input type="checkbox" id="t_marketing_rhythm_copy"/>
+    <label class="task" for="t_marketing_rhythm_copy">
+      <span class="checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
+      <span class="task-body">
+        <div class="title">Marketing + tutorial copy refresh — lean into weekly rhythm <span class="prio-pill prio-high">High</span></div>
+        <div class="desc">Full copy pass across <code>marketing.html</code>, <code>tech-guide.html</code>, the upgrade modal, and the pricing card to match the locked pricing ladder ($1 / $5-for-10 / $9-mo Glow Up) and the rhythm positioning. Kill any "unlimited" or "most photos per dollar" language — Glow Up sells on <em>"5 new every Sunday, no thinking required"</em> not volume (at $0.50/photo credits vs $0.42/photo sub, the sub doesn't win on math). Soften tutorial card 06 per the pivot note. Anne flagged this as an area where "everything can get THAT much better" once the new model is clear.</div>
       </span>
     </label>
 
@@ -769,6 +797,17 @@
 
 <section class="sec-done">
     <h2>✅ Completed <span class="pill">Items with <span class="needs-confirm">Confirm</span> need your eyeball</span></h2>
+
+    <!-- ░░░░░░░░░░░░░░  2026-04-22 SESSION  ░░░░░░░░░░░░░░ -->
+
+    <input type="checkbox" id="t_seo_routing" checked/>
+    <label class="task" for="t_seo_routing">
+      <span class="checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
+      <span class="task-body">
+        <div class="title">Marketing + app split across two hosts <span class="prio-pill prio-high">High</span></div>
+        <div class="desc">Resolved 2026-04-22 by Anne. Marketing site (<code>marketing.html</code>, renamed to <code>index.html</code> at the marketing deploy root) now serves <code>https://mynailconnection.com/</code>. The PWA app (<code>index.html</code>) lives at <code>https://app.mynailconnection.com/</code>. SEO metadata (canonical, OG URL, sitemap, JSON-LD) all already pointed at the apex domain → marketing, so this lands cleanly. Heads-up: <code>reset-password.html</code> sits alongside the app at <code>app.mynailconnection.com/reset-password.html</code> — make sure Supabase Auth → URL Configuration → Site URL points there before any password-reset testing.</div>
+      </span>
+    </label>
 
     <!-- ░░░░░░░░░░░░░░  2026-04-19 SESSION  ░░░░░░░░░░░░░░ -->
 

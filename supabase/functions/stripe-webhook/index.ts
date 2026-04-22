@@ -34,7 +34,7 @@ const supabase = createClient(
 // pricing in the Stripe Dashboard.
 //
 // Preferred setup: add a `credits` metadata field on each Price in Stripe
-// (e.g. { credits: "1" }, { credits: "5" }). That's the most explicit signal
+// (e.g. { credits: "1" }, { credits: "10" }). That's the most explicit signal
 // and survives any product renaming.
 function creditsForLineItem(item: Stripe.LineItem): number {
   const qty = item.quantity || 1;
@@ -48,22 +48,26 @@ function creditsForLineItem(item: Stripe.LineItem): number {
   const productMeta = product?.metadata?.credits;
   if (productMeta) return (parseInt(productMeta, 10) || 0) * qty;
 
-  // 3. Fall back to name matching. Accept both "Credit" and "Slot" variants
-  //    because earlier docs used different names than earlier code.
+  // 3. Fall back to name matching. Keeps old "Slot" variants + pre-pivot
+  //    "5 Photo Credits" so historical events still resolve correctly if
+  //    ever replayed; current active products are "1 Photo Credit" and
+  //    "10 Photo Credits" per the 2026-04-22 pricing pivot.
   const name = (item.description || '').trim();
   const byName: Record<string, number> = {
-    '1 Photo Credit':  1,
-    '1 Photo Slot':    1,
-    '5 Photo Credits': 5,
-    '5 Photo Slots':   5,
+    '1 Photo Credit':   1,
+    '1 Photo Slot':     1,
+    '10 Photo Credits': 10,
+    '5 Photo Credits':  5,   // legacy — kept for replay of pre-pivot events
+    '5 Photo Slots':    5,   // legacy
   };
   if (byName[name]) return byName[name] * qty;
 
-  // 4. Last-resort price inference: $1 → 1 credit, $4 → 5 credits.
-  //    Matches the published pricing; fine as long as nothing changes.
+  // 4. Last-resort price inference aligned to current live pricing:
+  //    $1 → 1 credit, $5 → 10 credits. Legacy $4 → 5 retained for replay.
   const cents = item.amount_total || 0;
   if (cents === 100) return 1 * qty;
-  if (cents === 400) return 5 * qty;
+  if (cents === 500) return 10 * qty;
+  if (cents === 400) return 5 * qty; // legacy pre-pivot bundle
 
   console.warn(`creditsForLineItem: no match for "${name}" ($${cents / 100})`);
   return 0;

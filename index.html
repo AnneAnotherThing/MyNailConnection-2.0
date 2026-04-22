@@ -1394,7 +1394,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
 <!-- CHANGE PASSWORD (first login) -->
 <div class="screen" id="change-password-screen">
   <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;background:linear-gradient(160deg,#F7EDEF 0%,#FAF7F4 50%,#F5EDE0 100%);">
-    <div style="margin-bottom:16px;display:flex;justify-content:center;"><img src="#" class="mnc-logo" style="width:64px;height:64px;object-fit:contain;filter:drop-shadow(0 4px 14px rgba(139,94,107,0.4));"/></div>
+    <div style="margin-bottom:16px;display:flex;justify-content:center;"><img src="mncLogo-transparent.png" class="mnc-logo" style="width:64px;height:64px;object-fit:contain;filter:drop-shadow(0 4px 14px rgba(139,94,107,0.4));" alt="My Nail Connection"/></div>
     <div style="font-family:'Playfair Display',serif;font-size:24px;font-weight:600;color:var(--rose-dark);margin-bottom:6px;text-align:center;">Welcome</div>
     <div style="font-size:13px;color:var(--muted);margin-bottom:24px;text-align:center;line-height:1.6;">For your security, please set a new password<br>before continuing.</div>
     <div style="background:white;border-radius:20px;padding:22px;width:100%;box-shadow:0 4px 24px rgba(139,94,107,0.12);">
@@ -3102,12 +3102,14 @@ function _stripeLaunch(link, label) {
 }
 
 function purchasePhotos(qty) {
-  const link = qty === 1 ? STRIPE_CONFIG.link_1_photo : STRIPE_CONFIG.link_5_photos;
+  const link = qty === 1 ? STRIPE_CONFIG.link_1_photo : STRIPE_CONFIG.link_10_photos;
   _stripeLaunch(link, 'Complete payment in browser, then return here to upload');
 }
 
 function purchaseUnlimited() {
-  _stripeLaunch(STRIPE_CONFIG.link_unlimited, 'Complete payment in browser, then return here');
+  // Kept name for backward-compat call sites; actually launches Glow Up subscription
+  // (5 new photo slots/week, Sunday reset) under the 2026-04-22 pricing pivot.
+  _stripeLaunch(STRIPE_CONFIG.link_glow_up, 'Complete payment in browser, then return here');
 }
 
 // Stripe Payment Links open in a new tab. When the tech comes back, we want
@@ -3209,7 +3211,7 @@ const TUTORIALS = {
     {
       icon: '<svg viewBox="0 0 24 24" style="width:60px;height:60px;stroke:var(--rose);fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>',
       title: 'Your photos do the talking.',
-      body: '<p style="margin:0 0 14px;">Clients scroll a feed of real nail work \u2014 the better you look, the more they stop. From your Dashboard, tap <b>Manage</b> to upload. Your first <b>five photos are free, always.</b></p><p style="margin:0;">One quiet magic trick: tag every photo with its <b>Shape</b>, <b>Type</b>, and <b>Style</b>. A client searching for <em>almond + gel + chrome</em> only finds you if all three match. More photos and more tags = more time in the feed = more bookings in your chair.</p>'
+      body: '<p style="margin:0 0 14px;">Clients scroll a feed of real nail work \u2014 the better you look, the more they stop. From your Dashboard, tap <b>Manage</b> to upload. Your first <b>five photos are free, always.</b></p><p style="margin:0;">One quiet magic trick: tag every photo with its <b>Shape</b>, <b>Type</b>, and <b>Style</b>. Each tag is another path a client can take to find your work \u2014 whether they filter by <em>almond</em>, <em>gel</em>, <em>chrome</em>, or all three at once. More photos + more tags = more ways you surface in the feed = more bookings in your chair.</p>'
     },
     {
       icon: '<svg viewBox="0 0 24 24" style="width:60px;height:60px;stroke:var(--rose);fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
@@ -3341,16 +3343,16 @@ const ANNE_USER_ID = 'a2f3d32e-1121-43f1-8649-be5c5e460443';
 // 2. Create Payment Links for each, paste URLs below
 // 3. Add ?client_reference_id={email} to each link so webhook knows which tech
 const STRIPE_CONFIG = {
-  // Payment link for 1 photo credit ($1) — Test Mode
-  link_1_photo:   'https://buy.stripe.com/test_5kQbJ3gmD5WXbbF5l65kk00',
-  // Payment link for 5 photo credits ($4) — Test Mode
-  link_5_photos:  'https://buy.stripe.com/test_5kQ14pgmD4ST5RlcNy5kk01',
-  // Payment link for $9/month unlimited subscription — Test Mode
-  link_unlimited: 'https://buy.stripe.com/test_6oUbJ33zR4STa7B00M5kk02',
+  // Payment link for 1 photo credit ($1) — Live
+  link_1_photo:   'https://buy.stripe.com/28E4gycjubtr2KA2xtgEg00',
+  // Payment link for 10 photo credits ($5 bundle) — Live
+  link_10_photos: 'https://buy.stripe.com/cNi8wOfvG7db4SI3BxgEg01',
+  // Payment link for Glow Up subscription ($9/mo = 5 new slots/week, Sunday reset) — Live
+  link_glow_up:   'https://buy.stripe.com/eVqeVc1EQeFD4SIgojgEg02',
   // Plan names (for display)
   plan_free: 'Starter',
   plan_credits: 'Spotlight',
-  plan_unlimited: 'Glow Up',
+  plan_glow_up: 'Glow Up',
   // Free tier photo limit — first 5 are free and permanent (can't be swapped)
   free_limit: 5
 };
@@ -3786,13 +3788,24 @@ function validatePassword(pw) {
 }
 
 async function checkFirstLogin(email) {
-  // Returns true if user needs to change password (last_password_change is null)
+  // Returns true if the signed-in user needs to force-change their password
+  // (i.e., they're a temp-password recipient with last_password_change still null).
+  //
+  // IMPORTANT: use the user's JWT, not the anon key. RLS on public.users is
+  // `for select to authenticated using (lower(email) = current_email())` — so
+  // anon reads return empty, which would silently fall through to the techs
+  // table and give us a wrong answer (techs has a permissive public-read
+  // policy, so the null-stamp for temp-pw onboarding reads through and fires
+  // the force-change screen on legitimate fresh signups). Bug caught
+  // 2026-04-21 after fresh tech signups were tripping the force-change.
   if (!sbClient) return false;
+  var authToken = window._mncAccessToken || SUPABASE_ANON_KEY;
+  var authHdrs = { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + authToken };
   try {
-    // Check both tables
+    // Check users table first (authoritative — RPC stamps here on every signup)
     var userRes = await fetch(
       SUPABASE_URL + '/rest/v1/users?email=eq.' + encodeURIComponent(email) + '&select=last_password_change',
-      { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY } }
+      { headers: authHdrs }
     );
     if (userRes.ok) {
       var userData = await userRes.json();
@@ -3800,9 +3813,11 @@ async function checkFirstLogin(email) {
         return userData[0].last_password_change === null;
       }
     }
+    // No users row — fall through to techs. Legit case: user signed up as
+    // a tech via an older code path that only inserted into public.techs.
     var techRes = await fetch(
       SUPABASE_URL + '/rest/v1/techs?email=eq.' + encodeURIComponent(email) + '&select=last_password_change',
-      { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY } }
+      { headers: authHdrs }
     );
     if (techRes.ok) {
       var techData = await techRes.json();
@@ -12790,13 +12805,13 @@ function parseTimeStr(timeStr, refDate) {
         <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--muted);fill:none;stroke-width:2.5;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg>
       </div>
 
-      <!-- 5 photos/$4 -->
-      <div onclick="purchasePhotos(5)" style="border:2px solid var(--rose);border-radius:18px;padding:16px;cursor:pointer;display:flex;align-items:center;gap:14px;background:var(--rose-light);position:relative;transition:all 0.15s;">
+      <!-- 10 photos/$5 bundle -->
+      <div onclick="purchasePhotos(10)" style="border:2px solid var(--rose);border-radius:18px;padding:16px;cursor:pointer;display:flex;align-items:center;gap:14px;background:var(--rose-light);position:relative;transition:all 0.15s;">
         <div style="position:absolute;top:-10px;right:16px;background:var(--rose);color:white;font-size:10px;font-weight:700;padding:3px 10px;border-radius:100px;letter-spacing:0.5px;">BEST VALUE</div>
-        <div style="width:44px;height:44px;border-radius:14px;background:white;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--rose);">$4</div>
+        <div style="width:44px;height:44px;border-radius:14px;background:white;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--rose);">$5</div>
         <div style="flex:1;">
-          <div style="font-size:15px;font-weight:600;color:var(--charcoal);">Spotlight Pack <span style="font-size:11px;font-weight:500;color:var(--rose);">— 5 photos</span></div>
-          <div style="font-size:12px;color:var(--rose);">One-time · Save $1 · Show up 5x more often</div>
+          <div style="font-size:15px;font-weight:600;color:var(--charcoal);">Spotlight Pack <span style="font-size:11px;font-weight:500;color:var(--rose);">— 10 photos</span></div>
+          <div style="font-size:12px;color:var(--rose);">One-time · Save $5 · Show up 10x more often</div>
         </div>
         <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--rose);fill:none;stroke-width:2.5;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg>
       </div>

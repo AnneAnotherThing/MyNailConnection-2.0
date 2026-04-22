@@ -10,12 +10,11 @@ Coffee first. Then:
 ## TRACK A — Stripe setup (~45 min)
 
 - [ ] **Text Leslie first:** "Running Stripe 2FA today — if you get a code text, ignore it, they're going to my phone"
-- [ ] Open Stripe Dashboard → Products → create the 3 products
-      (1 photo / $1, 5 photos / $4, Glow Up / $9/mo recurring)
-- [ ] Payment Links → create one for each product
-- [ ] Add `?client_reference_id={email}` to each link (so webhook knows who paid)
-- [ ] Paste the 3 URLs into `STRIPE_CONFIG` in `index.html`
-      (lines ~2600 — `link_1_photo`, `link_5_photos`, `link_unlimited`)
+- [x] ~~Open Stripe Dashboard → Products → create the 3 products~~
+      (1 photo / $1, 10 photos / $5, Glow Up / $9/mo recurring) — done 2026-04-22
+- [x] ~~Payment Links → create one for each product~~ — done 2026-04-22
+- [x] ~~Paste the 3 URLs into `STRIPE_CONFIG` in `index.html`~~
+      (line 3343 — `link_1_photo`, `link_10_photos`, `link_glow_up`) — done 2026-04-22
 - [ ] Redeploy both folders from `deploy/` to Netlify
 - [ ] Do a test purchase on your own account ($1) → confirm webhook flipped
       the `subscription_tier` field in Supabase
