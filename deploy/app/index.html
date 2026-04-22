@@ -148,19 +148,39 @@ body{font-family:'DM Sans',sans-serif;background:#ddd4cc;display:flex;justify-co
   box-shadow:0 1px 3px rgba(44,36,32,0.04);
   transition:all 0.18s ease;
   position:relative;
-  /* Grid spanning: text-only posts span both columns (full width);
-     photo posts span one column (half width). See #home-feed-list rule. */
-  grid-column: 1 / -1;
 }
+
+/* Editorial photo-card layout (2026-04-22): each photo post is a full-width
+   row split into [photo | info]. Odd-indexed photo cards put the photo on
+   the LEFT, even ones flip it to the RIGHT — gives the feed a zebra rhythm
+   like a magazine spread. Text-only cards keep the normal avatar|body flex.
+   Avatar hidden in photo cards because the photo IS the visual anchor. */
 .feed-card.has-photo {
-  grid-column: span 1;
-  flex-direction: column;    /* narrower card → stack meta on top, photo below */
-  gap: 6px;
-  padding: 8px 10px 10px;
+  flex-direction: row-reverse;  /* default: DOM-order body+img → visual img|body (photo LEFT) */
+  gap: 12px;
+  padding: 10px 12px;
+  align-items: stretch;
+}
+.feed-card.has-photo.photo-flip {
+  flex-direction: row;  /* visual body|img (photo RIGHT) */
+}
+.feed-card.has-photo .feed-card-avatar {
+  display: none;
 }
 .feed-card.has-photo .board-post-img {
-  max-height: 180px;
-  margin-top: 4px;
+  flex: 0 0 44%;
+  max-height: 170px;
+  margin: 0;
+  object-fit: cover;
+  align-self: stretch;
+  border-radius: 10px;
+}
+.feed-card.has-photo .feed-card-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 .feed-card:hover{
   border-color:var(--rose-mid);
@@ -1577,7 +1597,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       </div>
     </div>
     <div style="font-family:'Playfair Display',serif;font-style:italic;font-size:11px;color:var(--muted);opacity:0.7;margin-bottom:10px;letter-spacing:0.2px;">the last 100 posts · freshest on top 🌸</div>
-    <div id="home-feed-list" style="display:grid;grid-template-columns:1fr 1fr;grid-auto-flow:row dense;gap:10px;max-height:calc(100vh - 220px);overflow-y:auto;padding-right:4px;-webkit-overflow-scrolling:touch;scrollbar-width:thin;"></div>
+    <div id="home-feed-list" style="display:flex;flex-direction:column;gap:10px;max-height:calc(100vh - 220px);overflow-y:auto;padding-right:4px;-webkit-overflow-scrolling:touch;scrollbar-width:thin;"></div>
   </div>
   <div class="bottom-nav">
     <div class="nav-item" onclick="show('home')"><span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg></span><span class="nav-label">Home</span></div>
@@ -8362,12 +8382,22 @@ function renderHomeFeedFromCache() {
   // auto-scroll wraps at the halfway point, the content at scrollTop=0
   // is byte-identical to the content at scrollTop=halfHeight, so the
   // user never sees the jump. Feels like an endless feed.
+  // Reset photo-alternation counter so both passes assign the same
+  // L/R pattern — otherwise the halfway wrap-point would visibly flip
+  // cards from left to right and break the seamless illusion.
+  _feedPhotoIndex = 0;
   for (var pass = 0; pass < 2; pass++) {
+    _feedPhotoIndex = 0; // reset per pass so both passes are identical
     pairs.forEach(function(pair) {
       list.appendChild(buildFeedCard(pair[0], pair[1]));
     });
   }
 }
+
+// Counter for zebra-striping photo cards L/R. Reset at the start of
+// each render pass above. 1st photo → photo-left (default). 2nd photo
+// → photo-right (.photo-flip). 3rd → photo-left. Etc.
+var _feedPhotoIndex = 0;
 
 function buildFeedCard(post, tech) {
   var card = document.createElement('div');
@@ -8375,9 +8405,13 @@ function buildFeedCard(post, tech) {
   // Apply the per-type accent class so the left border + pill match.
   var typeCls = (BOARD_TYPES[post.type] && BOARD_TYPES[post.type].cls) || 'board-type-announcement';
   card.classList.add(typeCls);
-  // has-photo class drives the 2-col grid layout: photo posts sit at half
-  // width side-by-side, text-only posts span the full row. See CSS.
-  if (post.image_url) card.classList.add('has-photo');
+  // Photo cards get the editorial [photo | info] split layout.
+  // Every other photo card flips L/R for a zebra rhythm.
+  if (post.image_url) {
+    card.classList.add('has-photo');
+    _feedPhotoIndex++;
+    if (_feedPhotoIndex % 2 === 0) card.classList.add('photo-flip');
+  }
   card.onclick = function() { openTechDetail(tech); };
 
   // Avatar
@@ -8429,10 +8463,12 @@ function buildFeedCard(post, tech) {
   text.textContent = post.body || '';
   body.appendChild(text);
 
-  // Photo — if the post has an attached image (auto-created from portfolio
-  // upload under the 2026-04-22 pivot, or manually attached to a text post),
-  // render it inline in the feed card. Uses the existing .board-post-img
-  // styling (rounded, max-height capped). Click opens the gallery viewer.
+  card.appendChild(body);
+
+  // Photo — appended as a SIBLING of body (not inside it) so the card's
+  // outer flex layout can put the photo opposite the info column. Order
+  // on screen is controlled by flex-direction via .has-photo (default =
+  // photo-left via row-reverse) and .photo-flip (photo-right via row).
   if (post.image_url) {
     var imgEl = document.createElement('img');
     imgEl.className = 'board-post-img';
@@ -8443,10 +8479,9 @@ function buildFeedCard(post, tech) {
       ev.stopPropagation(); // don't also trigger the card's openTechDetail
       if (typeof openGalleryPhoto === 'function') openGalleryPhoto(post.image_url);
     };
-    body.appendChild(imgEl);
+    card.appendChild(imgEl);
   }
 
-  card.appendChild(body);
   return card;
 }
 
