@@ -127,7 +127,7 @@
       "offers": [
         { "@type": "Offer", "name": "Starter", "price": "0", "priceCurrency": "USD", "description": "Free forever — 5 portfolio photos, full public profile, availability toggles, posts, call & text contact." },
         { "@type": "Offer", "name": "Spotlight", "price": "1.00", "priceCurrency": "USD", "description": "$1 per photo, or a 5-pack for $4. No monthly commitment." },
-        { "@type": "Offer", "name": "Glow Up", "price": "9.00", "priceCurrency": "USD", "description": "$9/month — your all-time portfolio. Every set you've ever done, preserved and searchable. Unlimited photos, maximum feed exposure. Cancel anytime." }
+        { "@type": "Offer", "name": "Glow Up", "price": "9.00", "priceCurrency": "USD", "description": "$9/month — your all-time portfolio. Every set you've ever done, preserved and searchable as long as you're a member. Maximum feed exposure. Cancel anytime." }
       ]
     },
     {
@@ -1737,6 +1737,15 @@
 
     </div>
 
+    <!-- Archive / show-and-tell promise — your photos don't go anywhere -->
+    <div style="margin-top:48px;padding:40px 32px;background:linear-gradient(160deg, #FFFBF9 0%, #FDF2EC 100%);border-radius:22px;border:1px solid rgba(196,120,106,0.18);box-shadow:0 2px 20px rgba(80,40,30,0.04);text-align:center;max-width:780px;margin-left:auto;margin-right:auto;">
+      <div style="display:inline-flex;align-items:center;justify-content:center;width:52px;height:52px;border-radius:14px;background:rgba(196,120,106,0.1);margin-bottom:18px;">
+        <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#C4786A" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M3 16l5-4 4 3 4-5 5 6"/></svg>
+      </div>
+      <h3 style="font-family:'Fraunces',serif;font-size:28px;font-weight:500;color:var(--text);margin:0 0 14px;line-height:1.25;">Your work stays put. <em style="color:var(--rose);font-style:italic;">For as long as you're with us.</em></h3>
+      <p style="font-size:16px;line-height:1.65;color:var(--muted);max-width:580px;margin:0 auto;">This isn't a social feed — nothing autodeletes, nothing scrolls into the void. Every set you post is yours. It's your <strong style="color:var(--text);">portfolio</strong>, your <strong style="color:var(--text);">archive</strong>, your <strong style="color:var(--text);">show-and-tell</strong> — a client five years from now can still scroll back and see that ombre you did last spring, as long as you're still a member. Start with 5 free slots. Unlock Glow Up when you're ready to put every set you've done on display.</p>
+    </div>
+
     <!-- Pricing nudge + collapsible inline pricing -->
     <div id="pricing" style="margin-top:56px;padding-top:40px;border-top:1px solid var(--border);">
       <div style="text-align:center;">
@@ -1786,7 +1795,7 @@
               <ul class="price-features">
                 <li><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#C4786A" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> Everything in Spotlight</li>
                 <li><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#C4786A" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> Your all-time portfolio</li>
-                <li><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#C4786A" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> Unlimited photos, forever searchable</li>
+                <li><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#C4786A" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> Every set you've done, searchable</li>
                 <li><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#C4786A" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> Maximum feed exposure</li>
                 <li><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#C4786A" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> Cancel anytime</li>
               </ul>

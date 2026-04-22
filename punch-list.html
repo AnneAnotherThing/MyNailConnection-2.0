@@ -335,7 +335,7 @@
       <span class="checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
       <span class="task-body">
         <div class="title">Create Stripe products &amp; paste payment links</div>
-        <div class="desc">In Stripe Dashboard → Products, create 3 products: (1) "1 Photo Credit" — $1 one-time, (2) "5 Photo Credits" — $4 one-time, (3) "Glow Up Unlimited" — $9/mo recurring. Then create a Payment Link for each and paste the URLs into <code>STRIPE_CONFIG</code> in <code>index.html</code> (replace the <code>YOUR_…</code> placeholders). The webhook CREDIT_MAP keys must match these product names exactly.</div>
+        <div class="desc">In Stripe Dashboard → Products, create 3 products: (1) "1 Photo Credit" — $1 one-time, (2) "5 Photo Credits" — $4 one-time, (3) "Glow Up" — $9/mo recurring. Add <code>credits</code> metadata (1, 5) on each one-time Price. Create a Payment Link for each and paste the URLs into <code>STRIPE_CONFIG</code> in <code>index.html</code>. Register webhook events <code>checkout.session.completed</code>, <code>customer.subscription.updated</code>, <code>customer.subscription.deleted</code>.</div>
       </span>
     </label>
 
@@ -1002,7 +1002,7 @@
       <span class="checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
       <span class="task-body">
         <div class="title">Stripe billing wired up with placeholder links <span class="prio-pill prio-high">High</span><span class="needs-confirm">Confirm</span></div>
-        <div class="desc">Pricing: 5 free photos (permanent, can't be removed), $1/photo, $4 for 5, $9/mo unlimited. Upgrade modal updated. Webhook now handles subscription renewals via <code>invoice.payment_succeeded</code>. First 5 photos locked from deletion. CREDIT_MAP aligned to "1 Photo Credit" / "5 Photo Credits". Only missing piece: real Stripe payment links (currently placeholder URLs). <strong>Confirm by:</strong> upload 6 photos as a test tech — the 6th should trigger the upgrade modal with correct pricing.</div>
+        <div class="desc">Pricing: 5 free photos (permanent, can't be removed), $1/photo, $4 for 5, $9/mo Glow Up (all-time portfolio). Upgrade modal updated. Webhook handles renewals via <code>customer.subscription.updated</code> and pauses photos beyond free limit on cancellation (via <code>pause_photos_beyond_free_limit</code> RPC). First 5 photos locked from deletion. CREDIT_MAP aligned to "1 Photo Credit" / "5 Photo Credits" + price-metadata fallback. Only missing piece: real Stripe payment links (currently placeholder URLs). <strong>Confirm by:</strong> upload 6 photos as a test tech — the 6th should trigger the upgrade modal with correct pricing.</div>
       </span>
     </label>
 

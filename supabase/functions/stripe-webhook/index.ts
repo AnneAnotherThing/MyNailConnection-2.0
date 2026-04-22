@@ -1,5 +1,5 @@
 // Supabase Edge Function: stripe-webhook
-// Handles Stripe payment events and updates tech tiers in Supabase
+// Handles Stripe payment events and updates tech tiers in Supabase.
 //
 // Deploy:
 //   supabase functions deploy stripe-webhook
@@ -8,9 +8,14 @@
 //   supabase secrets set STRIPE_WEBHOOK_SECRET="whsec_..."
 //   supabase secrets set STRIPE_SECRET_KEY="sk_live_..."
 //
-// In Stripe Dashboard → Webhooks, add endpoint:
-//   https://<your-project>.supabase.co/functions/v1/stripe-webhook
-//   Listen for: checkout.session.completed, customer.subscription.deleted, invoice.payment_succeeded
+// Register THREE events in Stripe Dashboard → Developers → Webhooks:
+//   - checkout.session.completed       (credit packs + first subscription payment)
+//   - customer.subscription.updated    (monthly renewals, plan changes, card updates)
+//   - customer.subscription.deleted    (cancellations)
+//
+// DO NOT register invoice.payment_succeeded — customer.subscription.updated
+// covers renewals and is cleaner. The tech-facing monthly receipt email is
+// controlled separately under Stripe → Settings → Emails.
 
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
@@ -24,19 +29,45 @@ const supabase = createClient(
   Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 );
 
-// Photo credit amounts by Stripe product name
-// These MUST match the product names in your Stripe Dashboard exactly.
-// Stripe Dashboard → Products → click each → the "Name" field is what shows up
-// as item.description in the webhook line items.
+// Resolve credits for a Checkout Session line item. Tries several strategies
+// in order, so we don't silently no-op if Anne ever renames products or tweaks
+// pricing in the Stripe Dashboard.
 //
-// Pricing:
-//   • 1 photo  = $1  (one-time)
-//   • 5 photos = $4  (one-time, best value)
-//   • Unlimited = $9/mo (subscription, handled separately below)
-const CREDIT_MAP: Record<string, number> = {
-  '1 Photo Credit':    1,
-  '5 Photo Credits':   5,
-};
+// Preferred setup: add a `credits` metadata field on each Price in Stripe
+// (e.g. { credits: "1" }, { credits: "5" }). That's the most explicit signal
+// and survives any product renaming.
+function creditsForLineItem(item: Stripe.LineItem): number {
+  const qty = item.quantity || 1;
+
+  // 1. Price metadata — most explicit
+  const priceMeta = (item.price as Stripe.Price | null)?.metadata?.credits;
+  if (priceMeta) return (parseInt(priceMeta, 10) || 0) * qty;
+
+  // 2. Product metadata — requires listLineItems to expand the product
+  const product = (item.price as any)?.product;
+  const productMeta = product?.metadata?.credits;
+  if (productMeta) return (parseInt(productMeta, 10) || 0) * qty;
+
+  // 3. Fall back to name matching. Accept both "Credit" and "Slot" variants
+  //    because earlier docs used different names than earlier code.
+  const name = (item.description || '').trim();
+  const byName: Record<string, number> = {
+    '1 Photo Credit':  1,
+    '1 Photo Slot':    1,
+    '5 Photo Credits': 5,
+    '5 Photo Slots':   5,
+  };
+  if (byName[name]) return byName[name] * qty;
+
+  // 4. Last-resort price inference: $1 → 1 credit, $4 → 5 credits.
+  //    Matches the published pricing; fine as long as nothing changes.
+  const cents = item.amount_total || 0;
+  if (cents === 100) return 1 * qty;
+  if (cents === 400) return 5 * qty;
+
+  console.warn(`creditsForLineItem: no match for "${name}" ($${cents / 100})`);
+  return 0;
+}
 
 serve(async (req) => {
   const signature = req.headers.get('stripe-signature');
@@ -51,89 +82,140 @@ serve(async (req) => {
     return new Response(`Webhook error: ${err}`, { status: 400 });
   }
 
-  console.log('Stripe event:', event.type);
+  // ── Idempotency ──────────────────────────────────────────────────────────
+  // Insert the event.id into public.stripe_events. If it fails with a
+  // unique_violation (23505) it's a Stripe retry — short-circuit so we
+  // don't double-credit on duplicate deliveries.
+  const { error: dedupeErr } = await supabase
+    .from('stripe_events')
+    .insert({ event_id: event.id, type: event.type });
+  if (dedupeErr) {
+    if (dedupeErr.code === '23505') {
+      console.log(`Duplicate event ${event.id} — already processed`);
+      return new Response(JSON.stringify({ received: true, duplicate: true }), {
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+    // Any other DB error — log and continue rather than fail-closed, because
+    // Stripe will retry and we don't want the dedupe layer to block real events.
+    console.error('stripe_events insert error (proceeding):', dedupeErr);
+  }
 
-  // ── One-time payment completed ────────────────────────────────────────────
+  console.log('Stripe event:', event.type, event.id);
+
+  // ── Checkout completed (one-time credits OR first subscription payment) ──
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object as Stripe.Checkout.Session;
-    const techEmail = session.client_reference_id;
+    const techId = session.client_reference_id;  // now a techs.id (UUID)
 
-    if (!techEmail) {
+    if (!techId) {
       console.warn('No client_reference_id — cannot identify tech');
       return new Response('OK', { status: 200 });
     }
 
-    // Subscription purchase → set paid tier
     if (session.mode === 'subscription') {
-      const expiresAt = new Date();
-      expiresAt.setMonth(expiresAt.getMonth() + 1);
-      await supabase.from('techs').update({
+      // Pull the sub so we can store current_period_end as the real
+      // expires_at (authoritative source, beats computing +1 month).
+      const sub = await stripe.subscriptions.retrieve(session.subscription as string);
+      const expiresAt = new Date(sub.current_period_end * 1000);
+      const customerId = session.customer as string;
+      const { error } = await supabase.from('techs').update({
         subscription_tier: 'paid',
-        subscription_expires_at: expiresAt.toISOString()
-      }).eq('email', techEmail);
-      console.log(`Set paid tier for ${techEmail} until ${expiresAt.toISOString()}`);
+        subscription_expires_at: expiresAt.toISOString(),
+        stripe_customer_id: customerId,
+      }).eq('id', techId);
+      if (error) console.error(`techs.update failed for ${techId}:`, error);
+      else console.log(`Set paid tier for tech ${techId} until ${expiresAt.toISOString()}`);
+
+      // If this is a re-subscribe after a previous cancellation, restore
+      // any photos we paused on the way out. Safe no-op when nothing paused.
+      const { error: rpcErr } = await supabase.rpc('resume_paused_photos', {
+        p_customer_id: customerId,
+      });
+      if (rpcErr) console.error(`resume_paused_photos failed on checkout:`, rpcErr);
     }
 
-    // One-time payment → add photo credits
     if (session.mode === 'payment') {
-      // Get line items to determine credit amount
-      const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
+      const lineItems = await stripe.checkout.sessions.listLineItems(session.id, {
+        expand: ['data.price.product'],
+      });
       let creditsToAdd = 0;
       for (const item of lineItems.data) {
-        const productName = item.description || '';
-        creditsToAdd += CREDIT_MAP[productName] || 0;
+        creditsToAdd += creditsForLineItem(item);
       }
       if (creditsToAdd > 0) {
-        // Fetch current credits
         const { data } = await supabase
           .from('techs')
           .select('photo_credits')
-          .eq('email', techEmail)
+          .eq('id', techId)
           .single();
         const current = data?.photo_credits || 0;
-        await supabase.from('techs').update({
-          photo_credits: current + creditsToAdd
-        }).eq('email', techEmail);
-        console.log(`Added ${creditsToAdd} credits to ${techEmail} (now ${current + creditsToAdd})`);
+        const { error } = await supabase.from('techs').update({
+          photo_credits: current + creditsToAdd,
+        }).eq('id', techId);
+        if (error) console.error(`techs.update failed for ${techId}:`, error);
+        else console.log(`Added ${creditsToAdd} credits to tech ${techId} (now ${current + creditsToAdd})`);
+      } else {
+        console.warn(`No credits matched for session ${session.id} — check product metadata in Stripe`);
       }
     }
   }
 
-  // ── Subscription renewal (monthly invoice paid) ──────────────────────────
-  if (event.type === 'invoice.payment_succeeded') {
-    const invoice = event.data.object as Stripe.Invoice;
-    // Only handle subscription renewals, not the first payment (that's checkout.session.completed)
-    if (invoice.billing_reason === 'subscription_cycle') {
-      const customerEmail = invoice.customer_email;
-      if (customerEmail) {
-        const expiresAt = new Date();
-        expiresAt.setMonth(expiresAt.getMonth() + 1);
-        await supabase.from('techs').update({
-          subscription_tier: 'paid',
-          subscription_expires_at: expiresAt.toISOString()
-        }).eq('email', customerEmail);
-        console.log(`Renewed paid tier for ${customerEmail} until ${expiresAt.toISOString()}`);
-      }
+  // ── Subscription renewed, plan changed, card updated, etc. ───────────────
+  // This fires on monthly renewals (current_period_end moves forward),
+  // status transitions (past_due → active, etc.), and plan swaps. We use
+  // Stripe's current_period_end as the source of truth for expires_at.
+  if (event.type === 'customer.subscription.updated') {
+    const sub = event.data.object as Stripe.Subscription;
+    const customerId = sub.customer as string;
+    const expiresAt = new Date(sub.current_period_end * 1000);
+    const isActive = sub.status === 'active' || sub.status === 'trialing';
+
+    const { error } = await supabase.from('techs').update({
+      subscription_tier: isActive ? 'paid' : 'free',
+      subscription_expires_at: isActive ? expiresAt.toISOString() : null,
+    }).eq('stripe_customer_id', customerId);
+
+    if (error) console.error(`techs.update failed for customer ${customerId}:`, error);
+    else console.log(`Sub updated for ${customerId}: status=${sub.status}, expires=${expiresAt.toISOString()}`);
+
+    // When the subscription transitions back to active (reactivation,
+    // dunning recovery, trial end, etc.), restore any previously paused
+    // photos. No-op when nothing paused.
+    if (isActive) {
+      const { error: rpcErr } = await supabase.rpc('resume_paused_photos', {
+        p_customer_id: customerId,
+      });
+      if (rpcErr) console.error(`resume_paused_photos failed:`, rpcErr);
     }
   }
 
-  // ── Subscription cancelled/expired ───────────────────────────────────────
+  // ── Subscription cancelled ───────────────────────────────────────────────
+  // Flip tier back to free AND pause any photos beyond free_limit. This
+  // closes the "pay once, upload-everything, cancel" abuse vector: the
+  // tech's work isn't deleted, but it's hidden from public view until they
+  // re-subscribe (or buy specific photos out with Spotlight credits).
   if (event.type === 'customer.subscription.deleted') {
-    const subscription = event.data.object as Stripe.Subscription;
-    const customerId = subscription.customer as string;
-    // Look up customer email from Stripe
-    const customer = await stripe.customers.retrieve(customerId) as Stripe.Customer;
-    const email = customer.email;
-    if (email) {
-      await supabase.from('techs').update({
-        subscription_tier: 'free',
-        subscription_expires_at: null
-      }).eq('email', email);
-      console.log(`Reverted ${email} to free tier`);
-    }
+    const sub = event.data.object as Stripe.Subscription;
+    const customerId = sub.customer as string;
+
+    const { error } = await supabase.from('techs').update({
+      subscription_tier: 'free',
+      subscription_expires_at: null,
+    }).eq('stripe_customer_id', customerId);
+
+    if (error) console.error(`techs.update failed for customer ${customerId}:`, error);
+    else console.log(`Reverted customer ${customerId} to free tier`);
+
+    const { data: pauseResult, error: rpcErr } = await supabase.rpc(
+      'pause_photos_beyond_free_limit',
+      { p_customer_id: customerId, p_free_limit: 5 },
+    );
+    if (rpcErr) console.error(`pause_photos_beyond_free_limit failed:`, rpcErr);
+    else console.log(`Paused photos for ${customerId}:`, pauseResult);
   }
 
   return new Response(JSON.stringify({ received: true }), {
-    headers: { 'Content-Type': 'application/json' }
+    headers: { 'Content-Type': 'application/json' },
   });
 });

@@ -94,16 +94,24 @@ begin
   -- If a row already exists for this email, leave it alone and report
   -- success - caller treats this as "already seeded". Prevents double
   -- submits from overwriting user-edited data.
+  --
+  -- last_password_change is stamped to now() so the first-login
+  -- checkFirstLogin() flow DOESN'T force this user to immediately
+  -- change the password they just picked. That flow is intended for
+  -- users whose passwords were set FOR them (the 17 techs onboarded
+  -- with temp passwords) - not for fresh signups.
   if not exists (
     select 1 from public.users where lower(email) = lower(btrim(p_email))
   ) then
     begin
       insert into public.users (
         name, email, role, joined, phone, address, city, state, zip,
-        bio, image_url, liability_version, liability_accepted_at
+        bio, image_url, liability_version, liability_accepted_at,
+        last_password_change
       ) values (
         p_name, p_email, p_role, v_now_date, p_phone, p_address, p_city, p_state, p_zip,
-        p_bio, p_image_url, p_liability_version, p_liability_accepted_at
+        p_bio, p_image_url, p_liability_version, p_liability_accepted_at,
+        now()
       );
     exception when unique_violation then
       -- Phone or secondary-email collision: surface it so the client

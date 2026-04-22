@@ -1986,6 +1986,23 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
   </div>
 
   <div class="scroll-content" style="padding:20px 16px 100px;">
+    <!-- Paused-photos banner: shows when a Glow Up cancellation paused part
+         of a tech's portfolio. Photos aren't deleted — they're just hidden
+         from public view until the tech re-subscribes. This banner is how
+         they find out + reactivate. Populated by updatePausedPhotosBanner(). -->
+    <div id="myph-paused-banner" style="display:none;background:linear-gradient(160deg, #FFF5F0 0%, #FDEBE4 100%);border:1px solid rgba(196,120,106,0.25);border-radius:14px;padding:16px 16px 14px;margin-bottom:16px;">
+      <div style="display:flex;align-items:flex-start;gap:12px;">
+        <div style="flex-shrink:0;width:34px;height:34px;border-radius:10px;background:rgba(196,120,106,0.14);display:flex;align-items:center;justify-content:center;">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#C4786A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
+        </div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px;"><span id="myph-paused-count">0</span> photos paused</div>
+          <div style="font-size:12.5px;color:var(--charcoal);line-height:1.5;margin-bottom:10px;">Your Glow Up ended, so photos beyond your free 5 are hidden from your profile. Nothing's deleted — reactivate Glow Up and everything comes right back.</div>
+          <button type="button" onclick="purchaseUnlimited()" style="padding:8px 16px;border-radius:100px;border:none;background:var(--rose);color:white;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;">Resume Glow Up — $9/mo</button>
+        </div>
+      </div>
+    </div>
+
     <!-- Summary bar -->
     <div id="myph-summary" style="background:var(--cream);border-radius:14px;padding:12px 14px;margin-bottom:16px;font-size:13px;color:var(--charcoal);text-align:center;">Loading your photos…</div>
 
@@ -2154,7 +2171,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
             <div style="font-size:15px;font-weight:700;color:white;">Glow Up</div>
             <div style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.8);">$9 / month</div>
           </div>
-          <div style="font-size:12px;color:rgba(255,255,255,0.75);line-height:1.5;"><b style="color:white;">Your all-time portfolio.</b> Every set you've ever done, preserved in one place as long as you're with us. Unlimited photos, maximum feed rotation. For techs ready to document their career — not just their top 5.</div>
+          <div style="font-size:12px;color:rgba(255,255,255,0.75);line-height:1.5;"><b style="color:white;">Your all-time portfolio.</b> Every set you've ever done, preserved in one place as long as you're with us. Maximum feed rotation. For techs ready to document their career — not just their top 5.</div>
           <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-top:6px;">Cancel any time</div>
         </div>
 
@@ -3000,24 +3017,27 @@ function esc(str) {
     .replace(/'/g, '&#39;');
 }
 
-let _techTier = null; // { tier, photo_credits, subscription_expires_at, total_photos }
+let _techTier = null; // { id, tier, photo_credits, subscription_expires_at, total_photos, paused_count }
 
 async function loadTechTier(email) {
   if (!email) return;
   try {
     const r = await fetch(
-      `${SUPABASE_URL}/rest/v1/techs?email=eq.${encodeURIComponent(email)}&select=subscription_tier,photo_credits,subscription_expires_at,photos`,
+      `${SUPABASE_URL}/rest/v1/techs?email=eq.${encodeURIComponent(email)}&select=id,subscription_tier,photo_credits,subscription_expires_at,photos,paused_photos`,
       { headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${window._mncAccessToken || SUPABASE_ANON_KEY}` } }
     );
     if (!r.ok) return;
     const d = await r.json();
     if (!d[0]) return;
     const photos = Array.isArray(d[0].photos) ? d[0].photos : [];
+    const paused = Array.isArray(d[0].paused_photos) ? d[0].paused_photos : [];
     _techTier = {
+      id: d[0].id,   // UUID — used as Stripe client_reference_id so the webhook can identify the tech
       tier: d[0].subscription_tier || 'free',
       photo_credits: d[0].photo_credits || 0,
       subscription_expires_at: d[0].subscription_expires_at || null,
-      total_photos: photos.length
+      total_photos: photos.length,
+      paused_count: paused.length
     };
     // Check if subscription expired
     if (_techTier.tier === 'paid' && _techTier.subscription_expires_at) {
@@ -3061,32 +3081,64 @@ function closeUpgradeModal() {
   document.getElementById('upgrade-modal').style.display = 'none';
 }
 
-function purchasePhotos(qty) {
-  const email = currentUserEmail || '';
-  const link = qty === 1 ? STRIPE_CONFIG.link_1_photo : STRIPE_CONFIG.link_5_photos;
-  // Append tech email as client_reference_id so webhook knows who to credit
-  const url = link + (link.includes('?') ? '&' : '?') + 'client_reference_id=' + encodeURIComponent(email);
-  if (link.includes('YOUR_')) {
+// Stripe's client_reference_id field is alphanumeric + dashes/underscores only,
+// up to 200 chars. Email addresses contain "@" and "." so Stripe drops them,
+// which would leave the webhook unable to identify who paid. We pass the tech's
+// techs.id (UUID) instead — the webhook looks up the row by id.
+function _stripeLaunch(link, label) {
+  if (!_techTier || !_techTier.id) {
+    showToast('Still loading your account — try again in a second');
+    return;
+  }
+  if (!link || link.includes('YOUR_')) {
     showToast('Stripe not set up yet — add your payment links to STRIPE_CONFIG');
     return;
   }
+  const url = link + (link.includes('?') ? '&' : '?') + 'client_reference_id=' + encodeURIComponent(_techTier.id);
+  _armTierRefreshOnReturn();
   closeUpgradeModal();
   window.open(url, '_blank');
-  // Show return instruction
-  setTimeout(() => showToast('Complete payment in browser, then return here to upload'), 500);
+  setTimeout(() => showToast(label || 'Complete payment in browser, then return here'), 500);
+}
+
+function purchasePhotos(qty) {
+  const link = qty === 1 ? STRIPE_CONFIG.link_1_photo : STRIPE_CONFIG.link_5_photos;
+  _stripeLaunch(link, 'Complete payment in browser, then return here to upload');
 }
 
 function purchaseUnlimited() {
-  const email = currentUserEmail || '';
-  const link = STRIPE_CONFIG.link_unlimited;
-  const url = link + (link.includes('?') ? '&' : '?') + 'client_reference_id=' + encodeURIComponent(email);
-  if (link.includes('YOUR_')) {
-    showToast('Stripe not set up yet — add your payment links to STRIPE_CONFIG');
-    return;
-  }
-  closeUpgradeModal();
-  window.open(url, '_blank');
-  setTimeout(() => showToast('Complete payment in browser, then return here'), 500);
+  _stripeLaunch(STRIPE_CONFIG.link_unlimited, 'Complete payment in browser, then return here');
+}
+
+// Stripe Payment Links open in a new tab. When the tech comes back, we want
+// the UI to reflect the new credits / paid tier without a manual refresh.
+// We arm a one-shot visibilitychange listener that fires when the tab is
+// focused again, refreshes _techTier from Supabase, and rebuilds the UI.
+// One-shot so we don't keep refetching on every tab switch afterward.
+let _tierRefreshArmed = false;
+function _armTierRefreshOnReturn() {
+  if (_tierRefreshArmed) return;
+  _tierRefreshArmed = true;
+  const handler = async () => {
+    if (document.visibilityState !== 'visible') return;
+    document.removeEventListener('visibilitychange', handler);
+    _tierRefreshArmed = false;
+    if (!currentUserEmail) return;
+    const beforeTier = _techTier && _techTier.tier;
+    const beforeCredits = _techTier && _techTier.photo_credits;
+    await loadTechTier(currentUserEmail);
+    if (typeof updatePhotoLimitUI === 'function') updatePhotoLimitUI();
+    // Nudge the tech if something actually changed
+    if (_techTier) {
+      if (beforeTier !== 'paid' && _techTier.tier === 'paid') {
+        showToast("You're on Glow Up — your all-time portfolio is unlocked!");
+      } else if ((_techTier.photo_credits || 0) > (beforeCredits || 0)) {
+        const added = _techTier.photo_credits - (beforeCredits || 0);
+        showToast(`Added ${added} photo credit${added !== 1 ? 's' : ''} — you're all set.`);
+      }
+    }
+  };
+  document.addEventListener('visibilitychange', handler);
 }
 
 // Call this when tech dashboard loads
@@ -3099,11 +3151,28 @@ async function initBillingForTech() {
 function updatePhotoLimitUI() {
   // Update photo count badge in tech dashboard / edit modal
   const remaining = photosRemaining();
-  const isUnlimited = _techTier && _techTier.tier === 'paid';
+  const onGlowUp = _techTier && _techTier.tier === 'paid';
   const badge = document.getElementById('photo-limit-badge');
   if (badge) {
-    badge.textContent = isUnlimited ? 'Unlimited' : `${remaining} slot${remaining !== 1 ? 's' : ''} remaining`;
+    badge.textContent = onGlowUp ? 'Glow Up — all sets' : `${remaining} slot${remaining !== 1 ? 's' : ''} remaining`;
     badge.style.color = remaining === 0 ? 'var(--rose)' : 'var(--green)';
+  }
+  updatePausedPhotosBanner();
+}
+
+// Show / hide the "X photos paused" banner on the My Photos screen based on
+// _techTier.paused_count. Called from updatePhotoLimitUI() (and wherever tier
+// data refreshes) so the banner stays in sync with Supabase state.
+function updatePausedPhotosBanner() {
+  const banner = document.getElementById('myph-paused-banner');
+  if (!banner) return;
+  const n = (_techTier && _techTier.paused_count) || 0;
+  if (n > 0) {
+    const countEl = document.getElementById('myph-paused-count');
+    if (countEl) countEl.textContent = n;
+    banner.style.display = 'block';
+  } else {
+    banner.style.display = 'none';
   }
 }
 
@@ -3675,6 +3744,47 @@ function getTempPassword(email) {
   return 'MNC' + localPart.slice(-4);
 }
 
+// Shared password validator — returns null if the password passes, or a
+// user-facing error string if it doesn't. Called by both signup (when
+// picking a new account password) and the change-password flow.
+//
+// Intentionally gentle: 8-char minimum, reject the most commonly-guessed
+// passwords and trivially weak patterns (all same char, straight digit
+// sequences). NOT demanding uppercase / digits / symbols — modern NIST
+// guidance says forced-complexity rules just push users toward "Abc1!"
+// which is barely harder to guess than "password".
+function validatePassword(pw) {
+  if (!pw || pw.length < 8) {
+    return 'Your password should be at least 8 characters \u2014 keep it strong!';
+  }
+  var lower = pw.toLowerCase();
+  var BAD = [
+    'password','password1','password123','12345678','123456789','1234567890',
+    'qwerty','qwerty123','qwertyuiop','letmein','letmein1','welcome','welcome1',
+    'iloveyou','admin','admin123','abc12345','monkey','dragon','master',
+    'sunshine','princess','football','baseball','changeme','trustno1',
+    'passw0rd','hello123','shadow','superman'
+  ];
+  if (BAD.indexOf(lower) !== -1) {
+    return 'That one\u2019s on every hacker\u2019s first guess \u2014 please choose something else.';
+  }
+  // Reject all-same-character (aaaaaaaa, 11111111, etc.)
+  if (/^(.)\1+$/.test(pw)) {
+    return 'A little variety please \u2014 no all-same-character passwords.';
+  }
+  // Reject straight-run digit sequences (12345678, 01234567, etc.)
+  if (/^(?:0123456789|1234567890|0123456789\d*|12345678\d*|23456789\d*)$/.test(pw)) {
+    return 'Try something less guessable than a straight number sequence.';
+  }
+  // Reject straight-run alpha sequences (abcdefgh, abcdefghij, etc.).
+  // Using startsWith so any pure prefix of the alphabet is caught, not
+  // just the full 26-char sequence.
+  if ('abcdefghijklmnopqrstuvwxyz'.startsWith(lower)) {
+    return 'Try something less guessable than the alphabet.';
+  }
+  return null;
+}
+
 async function checkFirstLogin(email) {
   // Returns true if user needs to change password (last_password_change is null)
   if (!sbClient) return false;
@@ -3710,7 +3820,8 @@ async function doChangePassword() {
   var errEl = document.getElementById('cp-error');
   var btn = document.getElementById('cp-btn');
   errEl.style.display = 'none';
-  if (!np || np.length < 8) { errEl.textContent = 'Please choose a password of at least 8 characters.'; errEl.style.display = 'block'; return; }
+  var npErr = validatePassword(np);
+  if (npErr) { errEl.textContent = npErr; errEl.style.display = 'block'; return; }
   if (np !== cp) { errEl.textContent = 'Passwords do not match. Please try again.'; errEl.style.display = 'block'; return; }
   btn.textContent = 'Saving…'; btn.disabled = true;
   try {
@@ -8761,7 +8872,8 @@ function goSignupStep2() {
   if (existingByPhone) { showExistingAccountPrompt({ email: existingByPhone.email || '', phone: phone, collision: 'phone' }); return; }
   const existingByEmail = ALL_USERS.find(function(u) { return u.email && u.email.toLowerCase() === email.toLowerCase(); });
   if (existingByEmail) { showExistingAccountPrompt({ email: email, phone: phone, collision: 'email' }); return; }
-  if (pass.length < 8) { showSignupError('Your password should be at least 8 characters — keep it strong!'); return; }
+  var passErr = validatePassword(pass);
+  if (passErr) { showSignupError(passErr); return; }
   const errEl = document.getElementById('signup-error');
   if (errEl) errEl.style.display = 'none';
   regData.first = first; regData.last = last; regData.email = email; regData.phone = phone; regData.pass = pass;
@@ -11222,7 +11334,7 @@ async function checkStorageReady() {
       headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY }
     });
     if (res.ok) {
-      el.innerHTML = '<span style="color:var(--green);">Photo storage ready — unlimited uploads enabled</span>';
+      el.innerHTML = '<span style="color:var(--green);">Photo storage ready — uploads enabled</span>';
     } else {
       el.innerHTML = '<span style="color:var(--gold);">⚠️ Photo storage not set up yet — see instructions below</span>';
     }
@@ -12689,12 +12801,12 @@ function parseTimeStr(timeStr, refDate) {
         <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--rose);fill:none;stroke-width:2.5;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg>
       </div>
 
-      <!-- $9/month unlimited -->
+      <!-- $9/month all-time portfolio -->
       <div onclick="purchaseUnlimited()" style="border:2px solid var(--charcoal);border-radius:18px;padding:16px;cursor:pointer;display:flex;align-items:center;gap:14px;background:var(--charcoal);transition:all 0.15s;">
         <div style="width:44px;height:44px;border-radius:14px;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:'Playfair Display',serif;font-size:14px;font-weight:700;color:white;line-height:1.1;text-align:center;">$9<br><span style="font-size:9px;font-weight:500;">/ mo</span></div>
         <div style="flex:1;">
           <div style="font-size:15px;font-weight:600;color:white;">Glow Up <span style="font-size:11px;font-weight:500;color:rgba(255,255,255,0.7);">— all-time portfolio</span></div>
-          <div style="font-size:12px;color:rgba(255,255,255,0.65);">Every set preserved · Unlimited photos · Cancel anytime</div>
+          <div style="font-size:12px;color:rgba(255,255,255,0.65);">Every set preserved · All your work on display · Cancel anytime</div>
         </div>
         <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:rgba(255,255,255,0.6);fill:none;stroke-width:2.5;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg>
       </div>
