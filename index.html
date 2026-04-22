@@ -273,24 +273,24 @@ body{font-family:'DM Sans',sans-serif;background:#ddd4cc;display:flex;justify-co
 .logo-sub{font-size:9px;font-weight:500;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-top:2px;}
 .btn{width:100%;padding:15px;border-radius:12px;font-family:'DM Sans','Helvetica Neue',Helvetica,Arial,sans-serif;font-size:15px;font-weight:500;cursor:pointer;transition:all 0.15s ease;position:relative;}
 .btn-rose{
-  background:linear-gradient(160deg,#F5EDE8 0%,#EBD9D0 100%);
+  background:linear-gradient(160deg,#FCE4DB 0%,#F1C2B4 100%);
   color:#3D1F1A;
-  border:1px solid rgba(139,80,65,0.22);
-  border-bottom:3px solid rgba(120,60,48,0.35);
-  box-shadow:0 2px 8px rgba(120,60,48,0.08),inset 0 1px 0 rgba(255,255,255,0.6);
+  border:1px solid rgba(139,80,65,0.28);
+  border-bottom:3px solid rgba(120,60,48,0.4);
+  box-shadow:0 2px 8px rgba(169,102,93,0.14),inset 0 1px 0 rgba(255,255,255,0.55);
   letter-spacing:0.2px;
   position:relative;
   overflow:hidden;
 }
 .btn-rose:hover{
-  background:linear-gradient(160deg,#EDE3DC 0%,#E0CFC5 100%);
-  box-shadow:0 4px 12px rgba(120,60,48,0.14),inset 0 1px 0 rgba(255,255,255,0.5);
+  background:linear-gradient(160deg,#F8D8CC 0%,#EBB0A0 100%);
+  box-shadow:0 4px 14px rgba(169,102,93,0.22),inset 0 1px 0 rgba(255,255,255,0.45);
 }
 .btn-rose:active{
-  background:linear-gradient(160deg,#DDD0C8 0%,#D4C2B8 100%);
-  border-bottom:1px solid rgba(120,60,48,0.25);
+  background:linear-gradient(160deg,#E8C0B2 0%,#D8A495 100%);
+  border-bottom:1px solid rgba(120,60,48,0.3);
   transform:translateY(1px);
-  box-shadow:0 1px 4px rgba(120,60,48,0.1);
+  box-shadow:0 1px 4px rgba(120,60,48,0.14);
 }
 .btn-outline{
   background:linear-gradient(160deg,#D4908A 0%,#A9665D 100%);
@@ -376,18 +376,20 @@ body{font-family:'DM Sans',sans-serif;background:#ddd4cc;display:flex;justify-co
 .header .logo-mark, .header [class*="logo"]{color:#FAF0EB !important;font-weight:700 !important;}
 .back-btn{width:36px;height:36px;border-radius:50%;border:1px solid rgba(255,240,230,0.3);background:transparent;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;color:#FAF0EB;}
 .avatar{width:36px;height:36px;border-radius:50%;background:var(--rose-light);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:500;color:var(--rose-dark);cursor:pointer;border:2px solid var(--rose-mid);}
-.bottom-nav{background:white;border-top:1px solid var(--border);display:flex;padding:10px 0 24px;}
+.bottom-nav{background:white;border-top:1px solid var(--border);display:flex;padding:6px 0 16px;}
 .screen:not(.active) .bottom-nav{display:none;}
-.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:4px 0;}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:4px 6px;border-radius:14px;transition:background 0.2s ease;}
+.nav-item:hover{background:rgba(224,168,152,0.10);}
+.nav-item.active{background:var(--rose-light);}
 .nav-icon{width:22px;height:22px;display:flex;align-items:center;justify-content:center;}
-.nav-icon svg{width:22px;height:22px;stroke:var(--muted);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;transition:stroke 0.2s;}
-.nav-item.active .nav-icon svg{stroke:var(--rose);}
+.nav-icon svg{width:22px;height:22px;stroke:#B89290;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;transition:stroke 0.2s;}
+.nav-item.active .nav-icon svg{stroke:var(--rose-dark);stroke-width:2;}
 .icon-glass{width:48px;height:48px;border-radius:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:transparent!important;}
 .icon-glass svg{width:26px;height:26px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;}
 .icon-sm svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;}
 .icon-sm{display:inline-flex;align-items:center;justify-content:center;}
-.nav-label{font-size:10px;font-weight:500;color:var(--muted);}
-.nav-item.active .nav-label{color:var(--rose);}
+.nav-label{font-size:10px;font-weight:500;color:#8B6F6A;letter-spacing:0.1px;}
+.nav-item.active .nav-label{color:var(--rose-dark);font-weight:700;}
 .badge{font-size:11px;padding:3px 9px;border-radius:100px;font-weight:500;}
 .badge-now{background:var(--rose-light);color:var(--rose-dark);border:1px solid var(--rose-mid);}
 .badge-today{background:var(--gold-light);color:#7A5020;border:1px solid var(--gold-mid);}
@@ -1815,7 +1817,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
           <circle cx="0" cy="0" r="0.8" fill="#8A5C2A"/>
         </g>
       </svg>
-      <div><div class="logo-mark">My Nail Connection</div><div class="logo-sub">Dashboard</div></div>
+      <div><div class="logo-mark">My Nail Connection</div><div class="logo-sub" style="font-family:'Playfair Display',serif;font-style:italic;font-size:12px;font-weight:500;letter-spacing:0.3px;color:#E8C890;margin-top:2px;text-transform:none;">Tech Portal</div></div>
     </div>
     <div style="display:flex;align-items:center;gap:8px;">
       <!-- "Preview client view" eyeball removed 2026-04-21 — the bottom
@@ -1858,29 +1860,24 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       <button class="toggle off" id="td-t-now" style="display:none;" aria-hidden="true"></button>
       <button class="toggle off" id="td-t-today" style="display:none;" aria-hidden="true"></button>
       <button class="toggle off" id="td-t-new" style="display:none;" aria-hidden="true"></button>
-      <!-- Secondary: privacy chip (less frequent change, so de-emphasized) -->
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px;padding:8px 14px;background:var(--cream);border-radius:12px;">
-        <div style="font-size:11.5px;color:var(--muted);display:flex;align-items:center;gap:8px;">
-          <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:var(--muted);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
-          <span>Hide street address on public map</span>
-        </div>
-        <button class="toggle off" id="td-t-hideaddr" onclick="toggleHideAddress()" style="transform:scale(0.8);transform-origin:right center;"></button>
-      </div>
+      <!-- Hide-address privacy toggle moved to Manage modal 2026-04-22.
+           It's a one-time setup decision (mobile techs travel to clients, so
+           they hide their street) — doesn't belong on the daily dashboard. -->
     </div>
 
     <!-- YOUR PRESENCE — small stats row, tappable -->
     <div style="margin:16px 20px 0;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
       <div class="presence-stat" onclick="openMyPhotos()">
         <div class="presence-stat-num" id="td-stat-photos">—</div>
-        <div class="presence-stat-label">Photos</div>
+        <div class="presence-stat-label">Sets</div>
       </div>
       <div class="presence-stat" onclick="window._pendingProfileTab='posts';show('profile-screen')">
         <div class="presence-stat-num" id="td-stat-posts">—</div>
-        <div class="presence-stat-label">Posts</div>
+        <div class="presence-stat-label">Drops</div>
       </div>
       <div class="presence-stat">
         <div class="presence-stat-num" id="td-stat-saves">—</div>
-        <div class="presence-stat-label">Saved by</div>
+        <div class="presence-stat-label">Fans</div>
       </div>
     </div>
 
@@ -1951,7 +1948,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
     <!-- Dashboard — self-reference; uses a grid icon to visually distinguish
          from Home (both labels used the house icon previously, which read as
          "two homes"). -->
-    <div class="nav-item active"><span class="nav-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></span><span class="nav-label" style="color:var(--rose);">Dashboard</span></div>
+    <div class="nav-item active"><span class="nav-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></span><span class="nav-label">Tech Portal</span></div>
 
     <!-- Profile removed — tech-home IS the tech's profile, so a Profile
          button pointing back here was a no-op and visually crowded the
@@ -2036,7 +2033,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
 
   <div class="bottom-nav">
     <div class="nav-item" onclick="show('home')"><span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg></span><span class="nav-label">Home</span></div>
-    <div class="nav-item" onclick="show('tech-home')"><span class="nav-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></span><span class="nav-label">Dashboard</span></div>
+    <div class="nav-item" onclick="show('tech-home')"><span class="nav-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></span><span class="nav-label">Tech Portal</span></div>
     <div class="nav-item active"><span class="nav-icon"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></span><span class="nav-label" style="color:var(--rose);">My Photos</span></div>
     <!-- Profile removed — tech-home IS the tech's profile; Dashboard above
          already covers "back to your portal." -->
@@ -2235,7 +2232,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
   </div>
   <div class="bottom-nav">
     <div class="nav-item" onclick="show('home')"><span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg></span><span class="nav-label">Home</span></div>
-    <div class="nav-item" onclick="show('tech-home')"><span class="nav-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></span><span class="nav-label">Dashboard</span></div>
+    <div class="nav-item" onclick="show('tech-home')"><span class="nav-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></span><span class="nav-label">Tech Portal</span></div>
     <!-- Profile removed — tech-only screen; Dashboard above covers it. -->
     <div class="nav-item" onclick="doSignOut()" style="opacity:0.55;" title="Sign Out"><span class="nav-icon"><svg viewBox="0 0 24 24" style="width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span><span class="nav-label">Sign Out</span></div>
   </div>
@@ -2951,9 +2948,18 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
           <div><label style="font-size:10px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px;letter-spacing:0.8px;">STATE</label><input id="te-state" type="text" placeholder="e.g. TX" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;box-sizing:border-box;"/></div>
           <div><label style="font-size:10px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px;letter-spacing:0.8px;">ZIP</label><input id="te-zip" type="text" placeholder="e.g. 90210" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;box-sizing:border-box;"/></div>
         </div>
-        <!-- "Hide street address" was previously here. Removed because the
-             tech already has the same toggle on tech-home (td-t-hideaddr).
-             Both UIs writing the same field invited drift; keep one source. -->
+        <!-- Hide-address privacy toggle. Moved here from tech-home 2026-04-22
+             because it's a one-time setup choice (mobile techs hide their
+             street so the public map doesn't show where they live), not a
+             daily-dashboard toggle. Loaded/saved via the normal saveTechEdit
+             flow — see the te-hide-address refs in save/load code. -->
+        <label style="display:flex;align-items:flex-start;gap:10px;padding:11px 14px;background:var(--cream);border-radius:10px;cursor:pointer;border:1.5px solid var(--border);">
+          <input type="checkbox" id="te-hide-address" style="accent-color:var(--rose);width:18px;height:18px;flex-shrink:0;margin-top:1px;"/>
+          <div style="flex:1;">
+            <div style="font-size:13px;font-weight:500;color:var(--charcoal);">Hide my street address</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:3px;line-height:1.4;">For mobile techs who travel to clients. Your city &amp; state still show so clients can find you by area.</div>
+          </div>
+        </label>
       </div>
 
       <!-- Email / Phone + Contact methods (MOVED DOWN — set once, rarely edited) -->
@@ -9939,8 +9945,8 @@ async function loadTechDashboard() {
   if (subtle) {
     var h = new Date().getHours();
     subtle.textContent = h < 12
-      ? 'Let\'s see what today brings.'
-      : (h < 17 ? 'Here\'s how your day is looking.' : 'Wrapping up the day — nicely done.');
+      ? 'Your canvas awaits.'
+      : (h < 17 ? 'Right in your rhythm.' : 'A day well made.');
   }
 }
 
