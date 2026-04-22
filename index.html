@@ -8372,6 +8372,23 @@ function buildFeedCard(post, tech) {
   text.textContent = post.body || '';
   body.appendChild(text);
 
+  // Photo — if the post has an attached image (auto-created from portfolio
+  // upload under the 2026-04-22 pivot, or manually attached to a text post),
+  // render it inline in the feed card. Uses the existing .board-post-img
+  // styling (rounded, max-height capped). Click opens the gallery viewer.
+  if (post.image_url) {
+    var imgEl = document.createElement('img');
+    imgEl.className = 'board-post-img';
+    imgEl.src = post.image_url;
+    imgEl.loading = 'lazy';
+    imgEl.alt = '';
+    imgEl.onclick = function(ev) {
+      ev.stopPropagation(); // don't also trigger the card's openTechDetail
+      if (typeof openGalleryPhoto === 'function') openGalleryPhoto(post.image_url);
+    };
+    body.appendChild(imgEl);
+  }
+
   card.appendChild(body);
   return card;
 }
