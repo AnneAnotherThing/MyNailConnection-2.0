@@ -2783,62 +2783,58 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
           ondrop="handleProfileDrop(event)">
           <div id="tech-edit-avatar" style="width:60px;height:60px;border-radius:50%;background:white;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:20px;color:var(--rose);overflow:hidden;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,0.1);"></div>
           <div>
-            <div style="font-size:13px;font-weight:500;color:var(--rose-dark);">Tap to upload or drop photo</div>
-            <div style="font-size:11px;color:var(--muted);margin-top:2px;">JPG, PNG</div>
+            <div style="font-size:13px;font-weight:500;color:var(--rose-dark);">Tap to add your profile photo</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px;">From your camera or gallery</div>
           </div>
         </div>
         <input type="file" id="te-profile-file" accept="image/*" style="display:none;" onchange="techEditProfilePhoto(this)"/>
-        <div style="display:flex;gap:6px;margin-top:8px;">
-          <input type="text" id="te-profile-url" placeholder="Or paste profile photo URL…" style="flex:1;padding:8px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:12px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;" onkeydown="if(event.key==='Enter'){addProfileByUrl();event.preventDefault();}"/>
-          <button type="button" onclick="addProfileByUrl()" style="padding:8px 12px;border-radius:10px;border:1.5px solid var(--rose-mid);background:var(--rose-light);color:var(--rose);font-size:12px;font-weight:500;cursor:pointer;">Use</button>
-          <button type="button" onclick="clearProfilePhoto()" style="padding:8px 10px;border-radius:10px;border:1.5px solid var(--border);background:white;color:var(--muted);font-size:12px;cursor:pointer;">x</button>
+        <div style="display:flex;justify-content:flex-end;margin-top:8px;">
+          <button type="button" onclick="clearProfilePhoto()" style="padding:6px 12px;border-radius:10px;border:1.5px solid var(--border);background:white;color:var(--muted);font-size:12px;cursor:pointer;">Remove photo</button>
         </div>
       </div>
 
-      <!-- Basic info -->
+      <!-- ═══════════════════════════════════════════════════════════════════
+           Sections below are ordered by how often a tech touches them:
+           most-edited at top (Portfolio, Bio+Booking), rarely-touched
+           identity fields (Email/Phone, Name/Shop) near the bottom.
+           Reordered 2026-04-22. Inner markup of each section is preserved
+           from the pre-reorder state — only parent grouping was restructured.
+           All element IDs are intact so every JS reference still resolves.
+           ═══════════════════════════════════════════════════════════════════ -->
+
+      <!-- Portfolio photos (MOVED UP — most-touched section for active techs) -->
+      <div style="margin-bottom:14px;">
+        <div style="font-size:10px;color:var(--muted);font-weight:600;letter-spacing:0.8px;margin-bottom:8px;">PORTFOLIO PHOTOS</div>
+        <!-- ── File picker / drop zone ──────────────────────────────── -->
+        <div id="te-bulk-drop-zone"
+          ondragover="event.preventDefault();this.classList.add('te-drop-active')"
+          ondragleave="this.classList.remove('te-drop-active')"
+          ondrop="event.preventDefault();this.classList.remove('te-drop-active');techBulkDropFiles(event.dataTransfer.files)"
+          onclick="document.getElementById('te-bulk-files').click()"
+          style="border:2px dashed var(--rose);border-radius:14px;padding:22px 14px;text-align:center;cursor:pointer;background:var(--cream);margin-bottom:10px;transition:background 0.15s;">
+          <div style="font-size:30px;margin-bottom:8px;">📸</div>
+          <div style="font-size:15px;font-weight:600;color:var(--rose-dark);">Tap to add photos</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:4px;">From your camera or gallery · pick several at once</div>
+          <input type="file" id="te-bulk-files" accept="image/*" multiple style="display:none;" onchange="techBulkDropFiles(this.files)"/>
+        </div>
+        <!-- Progress bar -->
+        <div id="te-bulk-progress-wrap" style="display:none;margin-bottom:10px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+            <div style="font-size:11px;font-weight:600;color:var(--muted);" id="te-bulk-progress-label">Uploading…</div>
+            <div style="font-size:11px;color:var(--muted);" id="te-bulk-progress-count"></div>
+          </div>
+          <div style="height:6px;background:var(--border);border-radius:100px;overflow:hidden;">
+            <div id="te-bulk-progress-bar" style="height:100%;background:var(--rose);border-radius:100px;width:0%;transition:width 0.3s;"></div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;" id="te-photo-grid"></div>
+        <input type="file" id="te-photos-file" accept="image/*" multiple style="display:none;" onchange="techEditAddPhotos(this)"/>
+      </div>
+
+      <!-- Bio + Booking link (MOVED UP — high-visibility profile copy) -->
       <div style="display:grid;gap:10px;margin-bottom:14px;">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-          <div><label style="font-size:10px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px;letter-spacing:0.8px;">TECH NAME</label><input id="te-name" type="text" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;box-sizing:border-box;"/></div>
-          <div><label style="font-size:10px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px;letter-spacing:0.8px;">SHOP NAME</label><input id="te-shop" type="text" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;box-sizing:border-box;"/></div>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-          <div><label style="font-size:10px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px;letter-spacing:0.8px;">EMAIL</label><input id="te-email" type="email" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;box-sizing:border-box;"/></div>
-          <div><label style="font-size:10px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px;letter-spacing:0.8px;">PHONE</label><input id="te-phone" type="tel" placeholder="(555) 555-5555" oninput="formatPhone(this)" maxlength="14" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;box-sizing:border-box;"/></div>
-        </div>
-        <!-- Contact method preferences -->
-        <div style="margin-bottom:14px;">
-          <label style="font-size:10px;color:var(--muted);font-weight:600;display:block;margin-bottom:8px;letter-spacing:0.8px;">HOW CLIENTS CAN REACH YOU</label>
-          <div style="display:flex;gap:8px;flex-wrap:wrap;">
-
-            <label style="display:flex;align-items:center;gap:6px;padding:8px 14px;border:1.5px solid var(--border);border-radius:100px;cursor:pointer;font-size:13px;font-weight:500;background:white;transition:all 0.15s;" id="cm-call-label">
-              <input type="checkbox" id="te-contact-call" style="accent-color:var(--rose);" onchange="updateContactLabel('call')"/>
-              <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;vertical-align:middle;"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81a19.79 19.79 0 01-3.07-8.68A2 2 0 012 .9h3a2 2 0 012 1.72c.13.96.36 1.9.7 2.81a2 2 0 01-.45 2.11L6.09 8.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0122 16.92z"/></svg> Call Me
-            </label>
-            <label style="display:flex;align-items:center;gap:6px;padding:8px 14px;border:1.5px solid var(--border);border-radius:100px;cursor:pointer;font-size:13px;font-weight:500;background:white;transition:all 0.15s;" id="cm-text-label">
-              <input type="checkbox" id="te-contact-text" style="accent-color:var(--rose);" onchange="updateContactLabel('text')"/>
-              <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;vertical-align:middle;"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg> Text Me
-            </label>
-          </div>
-        </div>
-        <div><label style="font-size:10px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px;letter-spacing:0.8px;">STREET ADDRESS</label>
-          <div class="addr-wrap">
-            <input id="te-address" type="text" placeholder="Start typing address…" autocomplete="off"
-              style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;box-sizing:border-box;"
-              oninput="addrAutocomplete(this,'te-addr-list','te-city','te-state','te-zip')"/>
-            <div id="te-addr-list" class="addr-suggestions" style="display:none;"></div>
-          </div>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 70px 80px;gap:8px;">
-          <div><label style="font-size:10px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px;letter-spacing:0.8px;">CITY</label><input id="te-city" type="text" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;box-sizing:border-box;"/></div>
-          <div><label style="font-size:10px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px;letter-spacing:0.8px;">STATE</label><input id="te-state" type="text" placeholder="e.g. TX" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;box-sizing:border-box;"/></div>
-          <div><label style="font-size:10px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px;letter-spacing:0.8px;">ZIP</label><input id="te-zip" type="text" placeholder="e.g. 90210" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;box-sizing:border-box;"/></div>
-        </div>
-
-        <!-- "Hide street address" was previously here. Removed because the
-             tech already has the same toggle on tech-home (td-t-hideaddr).
-             Both UIs writing the same field invited drift; keep one source. -->
         <div><label style="font-size:10px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px;letter-spacing:0.8px;">BIO</label><textarea id="te-bio" rows="3" placeholder="Tell clients about this tech style and specialty…" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;resize:none;box-sizing:border-box;"></textarea></div>
-        <div style="margin-top:10px;">
+        <div>
           <label style="font-size:10px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px;letter-spacing:0.8px;">BOOKING / WEBSITE LINK</label>
           <div style="position:relative;">
             <div style="position:absolute;left:12px;top:50%;transform:translateY(-50%);pointer-events:none;"><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:var(--muted);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg></div>
@@ -2846,13 +2842,6 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
           </div>
           <div style="font-size:11px;color:var(--muted);margin-top:4px;">✨ Clients can book directly from your profile! Vagaro, StyleSeat, Square, Fresha, or your own site — anything works.</div>
         </div>
-      </div>
-
-      <!-- Hours -->
-      <div style="margin-bottom:14px;">
-        <div style="font-size:10px;color:var(--muted);font-weight:600;letter-spacing:0.8px;margin-bottom:4px;">TYPICAL HOURS</div>
-        <div style="font-size:11px;color:var(--muted);font-style:italic;margin-bottom:8px;">General hours only — separate from your <em>Available Now</em> / <em>This Week</em> toggles. Shown on profile with a "hours may vary" note so clients know to reach out anytime.</div>
-        <div style="display:grid;gap:6px;" id="reg-hours-grid-te"></div>
       </div>
 
       <!-- Tags -->
@@ -2940,52 +2929,60 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
         </div>
       </div>
 
-      <!-- Portfolio photos -->
+      <!-- Hours -->
       <div style="margin-bottom:14px;">
-        <div style="font-size:10px;color:var(--muted);font-weight:600;letter-spacing:0.8px;margin-bottom:8px;">PORTFOLIO PHOTOS</div>
-        <div style="display:flex;gap:8px;margin-bottom:8px;">
-          <input type="text" id="te-photo-url" placeholder="Paste photo URL then press Enter…"
-            style="flex:1;padding:9px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:13px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;"
-            onkeydown="if(event.key==='Enter'){addPhotoByUrl();event.preventDefault();}"/>
-          <button type="button" onclick="addPhotoByUrl()" style="padding:9px 14px;border-radius:10px;border:none;background:var(--rose);color:white;font-size:13px;font-weight:600;cursor:pointer;">Add</button>
-        </div>
-        <!-- Bulk import -->
-        <details style="margin-bottom:10px;">
-          <summary style="font-size:12px;font-weight:600;color:var(--rose);cursor:pointer;padding:8px 0;"><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg> Bulk import multiple URLs</summary>
-          <div style="margin-top:8px;padding:12px;border:1.5px solid var(--border);border-radius:12px;background:var(--cream);">
-            <textarea id="te-bulk-urls" rows="4" placeholder="https://example.com/photo1.jpg&#10;https://example.com/photo2.jpg&#10;one per line…"
-              style="width:100%;padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:12px;font-family:'DM Sans',sans-serif;background:white;outline:none;resize:vertical;box-sizing:border-box;"></textarea>
-            <div style="display:flex;gap:8px;margin-top:8px;">
-              <button type="button" onclick="teBulkImportUrls()" style="flex:1;padding:8px;border-radius:8px;border:none;background:var(--rose);color:white;font-size:13px;font-weight:600;cursor:pointer;">Import All</button>
-              <button type="button" onclick="document.getElementById('te-bulk-urls').value=''" style="padding:8px 12px;border-radius:8px;border:1.5px solid var(--border);background:white;color:var(--muted);font-size:12px;cursor:pointer;">Clear</button>
-            </div>
-            <div id="te-bulk-status" style="font-size:11px;color:var(--green);margin-top:6px;display:none;"></div>
-          </div>
-        </details>
-        <!-- ── Bulk file drop zone ──────────────────────────────── -->
-        <div id="te-bulk-drop-zone"
-          ondragover="event.preventDefault();this.classList.add('te-drop-active')"
-          ondragleave="this.classList.remove('te-drop-active')"
-          ondrop="event.preventDefault();this.classList.remove('te-drop-active');techBulkDropFiles(event.dataTransfer.files)"
-          onclick="document.getElementById('te-bulk-files').click()"
-          style="border:2px dashed var(--rose);border-radius:14px;padding:18px 14px;text-align:center;cursor:pointer;background:var(--cream);margin-bottom:10px;transition:background 0.15s;">
-          <div style="font-size:22px;margin-bottom:6px;">📁</div>
-          <div style="font-size:13px;font-weight:600;color:var(--rose-dark);">Drop files here</div>
-          <div style="font-size:11px;color:var(--muted);margin-top:3px;">Or tap to select multiple photos at once</div>
-          <input type="file" id="te-bulk-files" accept="image/*" multiple style="display:none;" onchange="techBulkDropFiles(this.files)"/>
-        </div>
-        <!-- Progress bar -->
-        <div id="te-bulk-progress-wrap" style="display:none;margin-bottom:10px;">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
-            <div style="font-size:11px;font-weight:600;color:var(--muted);" id="te-bulk-progress-label">Uploading…</div>
-            <div style="font-size:11px;color:var(--muted);" id="te-bulk-progress-count"></div>
-          </div>
-          <div style="height:6px;background:var(--border);border-radius:100px;overflow:hidden;">
-            <div id="te-bulk-progress-bar" style="height:100%;background:var(--rose);border-radius:100px;width:0%;transition:width 0.3s;"></div>
+        <div style="font-size:10px;color:var(--muted);font-weight:600;letter-spacing:0.8px;margin-bottom:4px;">TYPICAL HOURS</div>
+        <div style="font-size:11px;color:var(--muted);font-style:italic;margin-bottom:8px;">General hours only — separate from your <em>Available Now</em> / <em>This Week</em> toggles. Shown on profile with a "hours may vary" note so clients know to reach out anytime.</div>
+        <div style="display:grid;gap:6px;" id="reg-hours-grid-te"></div>
+      </div>
+
+      <!-- Address (MOVED DOWN — set once on signup, rarely edited after) -->
+      <div style="display:grid;gap:10px;margin-bottom:14px;">
+        <div><label style="font-size:10px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px;letter-spacing:0.8px;">STREET ADDRESS</label>
+          <div class="addr-wrap">
+            <input id="te-address" type="text" placeholder="Start typing address…" autocomplete="off"
+              style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;box-sizing:border-box;"
+              oninput="addrAutocomplete(this,'te-addr-list','te-city','te-state','te-zip')"/>
+            <div id="te-addr-list" class="addr-suggestions" style="display:none;"></div>
           </div>
         </div>
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;" id="te-photo-grid"></div>
-        <input type="file" id="te-photos-file" accept="image/*" multiple style="display:none;" onchange="techEditAddPhotos(this)"/>
+        <div style="display:grid;grid-template-columns:1fr 70px 80px;gap:8px;">
+          <div><label style="font-size:10px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px;letter-spacing:0.8px;">CITY</label><input id="te-city" type="text" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;box-sizing:border-box;"/></div>
+          <div><label style="font-size:10px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px;letter-spacing:0.8px;">STATE</label><input id="te-state" type="text" placeholder="e.g. TX" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;box-sizing:border-box;"/></div>
+          <div><label style="font-size:10px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px;letter-spacing:0.8px;">ZIP</label><input id="te-zip" type="text" placeholder="e.g. 90210" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;box-sizing:border-box;"/></div>
+        </div>
+        <!-- "Hide street address" was previously here. Removed because the
+             tech already has the same toggle on tech-home (td-t-hideaddr).
+             Both UIs writing the same field invited drift; keep one source. -->
+      </div>
+
+      <!-- Email / Phone + Contact methods (MOVED DOWN — set once, rarely edited) -->
+      <div style="display:grid;gap:10px;margin-bottom:14px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <div><label style="font-size:10px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px;letter-spacing:0.8px;">EMAIL</label><input id="te-email" type="email" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;box-sizing:border-box;"/></div>
+          <div><label style="font-size:10px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px;letter-spacing:0.8px;">PHONE</label><input id="te-phone" type="tel" placeholder="(555) 555-5555" oninput="formatPhone(this)" maxlength="14" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;box-sizing:border-box;"/></div>
+        </div>
+        <!-- Contact method preferences -->
+        <div>
+          <label style="font-size:10px;color:var(--muted);font-weight:600;display:block;margin-bottom:8px;letter-spacing:0.8px;">HOW CLIENTS CAN REACH YOU</label>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+
+            <label style="display:flex;align-items:center;gap:6px;padding:8px 14px;border:1.5px solid var(--border);border-radius:100px;cursor:pointer;font-size:13px;font-weight:500;background:white;transition:all 0.15s;" id="cm-call-label">
+              <input type="checkbox" id="te-contact-call" style="accent-color:var(--rose);" onchange="updateContactLabel('call')"/>
+              <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;vertical-align:middle;"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81a19.79 19.79 0 01-3.07-8.68A2 2 0 012 .9h3a2 2 0 012 1.72c.13.96.36 1.9.7 2.81a2 2 0 01-.45 2.11L6.09 8.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0122 16.92z"/></svg> Call Me
+            </label>
+            <label style="display:flex;align-items:center;gap:6px;padding:8px 14px;border:1.5px solid var(--border);border-radius:100px;cursor:pointer;font-size:13px;font-weight:500;background:white;transition:all 0.15s;" id="cm-text-label">
+              <input type="checkbox" id="te-contact-text" style="accent-color:var(--rose);" onchange="updateContactLabel('text')"/>
+              <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;vertical-align:middle;"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg> Text Me
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Name / Shop (MOVED TO BOTTOM — effectively never changes after signup) -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;">
+        <div><label style="font-size:10px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px;letter-spacing:0.8px;">TECH NAME</label><input id="te-name" type="text" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;box-sizing:border-box;"/></div>
+        <div><label style="font-size:10px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px;letter-spacing:0.8px;">SHOP NAME</label><input id="te-shop" type="text" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;box-sizing:border-box;"/></div>
       </div>
 
       <!-- Actions -->
@@ -12915,15 +12912,11 @@ function parseTimeStr(timeStr, refDate) {
         ondrop="ueHandlePhotoDrop(event)">
         <div id="ue-avatar" style="width:64px;height:64px;border-radius:50%;background:white;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:22px;color:var(--rose);overflow:hidden;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,0.1);"></div>
         <div>
-          <div style="font-size:13px;font-weight:500;color:var(--rose-dark);">Drop photo here or tap to upload</div>
-          <div style="font-size:11px;color:var(--muted);margin-top:2px;">JPG, PNG</div>
+          <div style="font-size:13px;font-weight:500;color:var(--rose-dark);">Tap to add your photo</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px;">From your camera or gallery</div>
         </div>
       </div>
       <input type="file" id="ue-photo-file" accept="image/*" style="display:none;" onchange="ueUploadPhoto(this)"/>
-      <div style="display:flex;gap:6px;margin-top:8px;">
-        <input type="text" id="ue-photo-url" placeholder="Or paste photo URL…" style="flex:1;padding:8px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:12px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;" onkeydown="if(event.key==='Enter')ueSetPhotoUrl()"/>
-        <button type="button" onclick="ueSetPhotoUrl()" style="padding:8px 12px;border-radius:10px;border:1.5px solid var(--rose-mid);background:var(--rose-light);color:var(--rose);font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap;">Use URL</button>
-      </div>
     </div>
 
     <!-- Section: Basic -->

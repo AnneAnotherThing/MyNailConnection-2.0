@@ -330,14 +330,6 @@
   <section class="sec-high">
     <h2>🟠 High <span class="pill">Fix before launch</span></h2>
 
-    <input type="checkbox" id="t7"/>
-    <label class="task" for="t7">
-      <span class="checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
-      <span class="task-body">
-        <div class="title">Register Stripe webhook endpoint <span class="prio-pill prio-crit">Critical</span></div>
-        <div class="desc"><strong>Partial progress 2026-04-22:</strong> ✓ Products created in live mode ($1 single / $5-for-10 / $9-mo Glow Up with credit metadata). ✓ Payment Links generated. ✓ URLs pasted into <code>STRIPE_CONFIG</code> at <code>index.html:3343</code> with renamed keys (<code>link_10_photos</code>, <code>link_glow_up</code>). ✓ Upgrade modal copy updated to match ($5 / 10 photos). ✓ Webhook fallback maps updated to match the new pricing. <br><br><strong>Still outstanding:</strong> In Stripe Dashboard → Developers → Webhooks, add endpoint pointing at <code>https://ktiztunuifzbzwzyqrrq.supabase.co/functions/v1/stripe-webhook</code> and subscribe to <code>checkout.session.completed</code>, <code>customer.subscription.updated</code>, <code>customer.subscription.deleted</code>. Copy the live-mode signing secret (<code>whsec_...</code>) and paste it into Supabase → Edge Functions → stripe-webhook → Secrets as <code>STRIPE_WEBHOOK_SECRET</code>. Without this, Stripe events won't reach the webhook and credit-granting won't happen.</div>
-      </span>
-    </label>
 
     <input type="checkbox" id="t_weekly_slots_schema"/>
     <label class="task" for="t_weekly_slots_schema">
@@ -799,6 +791,15 @@
     <h2>✅ Completed <span class="pill">Items with <span class="needs-confirm">Confirm</span> need your eyeball</span></h2>
 
     <!-- ░░░░░░░░░░░░░░  2026-04-22 SESSION  ░░░░░░░░░░░░░░ -->
+
+    <input type="checkbox" id="t7" checked/>
+    <label class="task" for="t7">
+      <span class="checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
+      <span class="task-body">
+        <div class="title">Stripe end-to-end live — full loop verified <span class="prio-pill prio-crit">Critical</span></div>
+        <div class="desc">Closed 2026-04-22 with a real $1 test purchase on Anne's own tech account. Verified: Stripe payment → <code>checkout.session.completed</code> webhook fired → Supabase edge function processed → <code>techs.photo_credits</code> incremented → app UI reflected the new credit. Setup inventory: 3 live-mode products (<em>1 Photo Credit $1</em>, <em>10 Photo Credits $5</em>, <em>Glow Up $9/mo</em>) with <code>credits</code> price metadata; 3 Payment Links pasted into <code>STRIPE_CONFIG</code> at <code>index.html:3343</code> with renamed keys (<code>link_10_photos</code>, <code>link_glow_up</code>, <code>plan_glow_up</code>); upgrade modal copy updated to match ($5 / 10 photos / Save $5); webhook endpoint registered at <code>https://ktiztunuifzbzwzyqrrq.supabase.co/functions/v1/stripe-webhook</code> subscribed to <code>checkout.session.completed</code>, <code>customer.subscription.updated</code>, <code>customer.subscription.deleted</code>; <code>STRIPE_WEBHOOK_SECRET</code> set in Supabase edge function secrets; webhook fallback maps updated with legacy pre-pivot entries retained for event replay. <strong>Note:</strong> the <em>semantics</em> of Glow Up still need the weekly-slots rewrite (separate task) — this item confirms the payment plumbing, not the subscription behavior.</div>
+      </span>
+    </label>
 
     <input type="checkbox" id="t_seo_routing" checked/>
     <label class="task" for="t_seo_routing">
