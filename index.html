@@ -2775,7 +2775,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
 
       <!-- Profile photo -->
       <div style="margin-bottom:16px;">
-        <div style="font-size:11px;color:var(--muted);font-weight:600;letter-spacing:0.8px;margin-bottom:8px;">PROFILE PHOTO</div>
+        <div style="font-size:11px;color:var(--muted);font-weight:600;letter-spacing:0.8px;margin-bottom:8px;">SHOW YOUR FACE</div>
         <div id="profile-drop-zone" style="display:flex;align-items:center;gap:14px;padding:14px;border:2px dashed var(--rose-mid);border-radius:14px;background:var(--rose-light);cursor:pointer;"
           onclick="document.getElementById('te-profile-file').click()"
           ondragover="event.preventDefault();this.style.borderColor='var(--rose)';"
@@ -2804,7 +2804,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
 
       <!-- Portfolio photos (MOVED UP — most-touched section for active techs) -->
       <div style="margin-bottom:14px;">
-        <div style="font-size:10px;color:var(--muted);font-weight:600;letter-spacing:0.8px;margin-bottom:8px;">PORTFOLIO PHOTOS</div>
+        <div style="font-size:10px;color:var(--muted);font-weight:600;letter-spacing:0.8px;margin-bottom:8px;">YOUR NAIL WORK</div>
         <!-- ── File picker / drop zone ──────────────────────────────── -->
         <div id="te-bulk-drop-zone"
           ondragover="event.preventDefault();this.classList.add('te-drop-active')"
@@ -2833,9 +2833,9 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
 
       <!-- Bio + Booking link (MOVED UP — high-visibility profile copy) -->
       <div style="display:grid;gap:10px;margin-bottom:14px;">
-        <div><label style="font-size:10px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px;letter-spacing:0.8px;">BIO</label><textarea id="te-bio" rows="3" placeholder="Tell clients about this tech style and specialty…" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;resize:none;box-sizing:border-box;"></textarea></div>
+        <div><label style="font-size:10px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px;letter-spacing:0.8px;">ABOUT YOU</label><textarea id="te-bio" rows="3" placeholder="Tell clients about this tech style and specialty…" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;resize:none;box-sizing:border-box;"></textarea></div>
         <div>
-          <label style="font-size:10px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px;letter-spacing:0.8px;">BOOKING / WEBSITE LINK</label>
+          <label style="font-size:10px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px;letter-spacing:0.8px;">WHERE TO BOOK YOU</label>
           <div style="position:relative;">
             <div style="position:absolute;left:12px;top:50%;transform:translateY(-50%);pointer-events:none;"><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:var(--muted);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg></div>
             <input id="te-booking-link" type="url" placeholder="https://vagaro.com/yourname or your website…" style="width:100%;padding:10px 12px 10px 34px;border:1.5px solid var(--border);border-radius:10px;font-size:13px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;box-sizing:border-box;"/>
@@ -2846,14 +2846,14 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
 
       <!-- Tags -->
       <div style="margin-bottom:14px;">
-        <div style="font-size:10px;color:var(--muted);font-weight:600;letter-spacing:0.8px;margin-bottom:4px;">SPECIALTY TAGS</div>
+        <div style="font-size:10px;color:var(--muted);font-weight:600;letter-spacing:0.8px;margin-bottom:4px;">WHAT YOU DO</div>
         <div style="font-size:11px;color:var(--muted);margin-bottom:10px;">Tap to select all that apply. These help clients find you.</div>
         <div id="te-tags">
 
           <!-- SHAPE -->
           <details open style="margin-bottom:10px;border:1.5px solid var(--border);border-radius:14px;overflow:hidden;">
             <summary style="padding:10px 14px;font-size:12px;font-weight:600;color:var(--charcoal);cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;background:var(--cream);">
-              <span>💅 Shape</span>
+              <span>💅 Your shapes</span>
               <span id="te-shape-count" style="font-size:11px;font-weight:400;color:var(--rose);"></span>
             </summary>
             <div style="padding:10px 12px 12px;display:flex;flex-wrap:wrap;gap:6px;">
@@ -2871,7 +2871,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
           <!-- TYPE / MATERIAL -->
           <details open style="margin-bottom:10px;border:1.5px solid var(--border);border-radius:14px;overflow:hidden;">
             <summary style="padding:10px 14px;font-size:12px;font-weight:600;color:var(--charcoal);cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;background:var(--cream);">
-              <span>🧴 Material / Type</span>
+              <span>🧴 What you use</span>
               <span id="te-type-count" style="font-size:11px;font-weight:400;color:var(--rose);"></span>
             </summary>
             <div style="padding:10px 12px 12px;display:flex;flex-wrap:wrap;gap:6px;">
@@ -2889,7 +2889,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
           <!-- STYLE -->
           <details open style="margin-bottom:4px;border:1.5px solid var(--border);border-radius:14px;overflow:hidden;">
             <summary style="padding:10px 14px;font-size:12px;font-weight:600;color:var(--charcoal);cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;background:var(--cream);">
-              <span>✨ Style</span>
+              <span>✨ Your styles</span>
               <span id="te-style-count" style="font-size:11px;font-weight:400;color:var(--rose);"></span>
             </summary>
             <div style="padding:10px 12px 12px;display:flex;flex-wrap:wrap;gap:6px;">
@@ -2916,7 +2916,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
           <!-- WHERE THEY WORK -->
           <details open style="margin-bottom:4px;border:1.5px solid var(--border);border-radius:14px;overflow:hidden;">
             <summary style="padding:10px 14px;font-size:12px;font-weight:600;color:var(--charcoal);cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;background:var(--cream);">
-              <span>📍 Where They Work</span>
+              <span>📍 Where you work</span>
               <span id="te-setup-count" style="font-size:11px;font-weight:400;color:var(--rose);"></span>
             </summary>
             <div style="padding:10px 12px 12px;display:flex;flex-wrap:wrap;gap:6px;">
@@ -2931,14 +2931,14 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
 
       <!-- Hours -->
       <div style="margin-bottom:14px;">
-        <div style="font-size:10px;color:var(--muted);font-weight:600;letter-spacing:0.8px;margin-bottom:4px;">TYPICAL HOURS</div>
+        <div style="font-size:10px;color:var(--muted);font-weight:600;letter-spacing:0.8px;margin-bottom:4px;">WHEN YOU WORK</div>
         <div style="font-size:11px;color:var(--muted);font-style:italic;margin-bottom:8px;">General hours only — separate from your <em>Available Now</em> / <em>This Week</em> toggles. Shown on profile with a "hours may vary" note so clients know to reach out anytime.</div>
         <div style="display:grid;gap:6px;" id="reg-hours-grid-te"></div>
       </div>
 
       <!-- Address (MOVED DOWN — set once on signup, rarely edited after) -->
       <div style="display:grid;gap:10px;margin-bottom:14px;">
-        <div><label style="font-size:10px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px;letter-spacing:0.8px;">STREET ADDRESS</label>
+        <div><label style="font-size:10px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px;letter-spacing:0.8px;">WHERE YOU'RE BASED</label>
           <div class="addr-wrap">
             <input id="te-address" type="text" placeholder="Start typing address…" autocomplete="off"
               style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;box-sizing:border-box;"
@@ -2959,8 +2959,8 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       <!-- Email / Phone + Contact methods (MOVED DOWN — set once, rarely edited) -->
       <div style="display:grid;gap:10px;margin-bottom:14px;">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-          <div><label style="font-size:10px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px;letter-spacing:0.8px;">EMAIL</label><input id="te-email" type="email" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;box-sizing:border-box;"/></div>
-          <div><label style="font-size:10px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px;letter-spacing:0.8px;">PHONE</label><input id="te-phone" type="tel" placeholder="(555) 555-5555" oninput="formatPhone(this)" maxlength="14" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;box-sizing:border-box;"/></div>
+          <div><label style="font-size:10px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px;letter-spacing:0.8px;">YOUR EMAIL</label><input id="te-email" type="email" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;box-sizing:border-box;"/></div>
+          <div><label style="font-size:10px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px;letter-spacing:0.8px;">YOUR PHONE</label><input id="te-phone" type="tel" placeholder="(555) 555-5555" oninput="formatPhone(this)" maxlength="14" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;box-sizing:border-box;"/></div>
         </div>
         <!-- Contact method preferences -->
         <div>
@@ -2981,8 +2981,8 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
 
       <!-- Name / Shop (MOVED TO BOTTOM — effectively never changes after signup) -->
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;">
-        <div><label style="font-size:10px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px;letter-spacing:0.8px;">TECH NAME</label><input id="te-name" type="text" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;box-sizing:border-box;"/></div>
-        <div><label style="font-size:10px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px;letter-spacing:0.8px;">SHOP NAME</label><input id="te-shop" type="text" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;box-sizing:border-box;"/></div>
+        <div><label style="font-size:10px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px;letter-spacing:0.8px;">YOUR NAME</label><input id="te-name" type="text" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;box-sizing:border-box;"/></div>
+        <div><label style="font-size:10px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px;letter-spacing:0.8px;">YOUR SHOP</label><input id="te-shop" type="text" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;box-sizing:border-box;"/></div>
       </div>
 
       <!-- Actions -->
