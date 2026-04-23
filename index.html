@@ -12193,6 +12193,59 @@ function clearSplashWelcoming() {
   if (nameEl) nameEl.innerHTML = '';
 }
 
+// ── Consume Supabase redirect tokens from the URL hash ─────────────────
+// Email confirmation, magic link, and OAuth (Google / Apple) flows all
+// bounce the user back with `#access_token=...&refresh_token=...` in the
+// URL fragment. The supabase-js SDK picks these up automatically via
+// `detectSessionInUrl`, but this app talks to Supabase via raw fetch
+// calls — so without this helper the tokens just sit in the URL and the
+// user appears un-signed-in even though Supabase has authenticated them.
+//
+// We parse the fragment, persist it via saveSession() so the rest of the
+// app code sees a normal resumed session, then strip the tokens out of
+// the URL so they're not exposed in the address bar / browser history.
+//
+// Called BEFORE restorePersistedSession() in DOMContentLoaded so that
+// restore sees the freshly-saved session and routes to the right home
+// screen — identical flow to a returning user on a saved session.
+// Added 2026-04-23 to fix: "after confirming email it dropped me on the
+// marketing page and wasn't signed in." Applies to Google + Apple OAuth
+// too — same redirect mechanism, same hash-token delivery.
+async function consumeRedirectTokensIfPresent() {
+  var hash = window.location.hash || '';
+  if (!hash || hash.indexOf('access_token=') === -1) return false;
+  var params;
+  try { params = new URLSearchParams(hash.replace(/^#/, '')); } catch(_) { return false; }
+  var access_token = params.get('access_token');
+  if (!access_token) return false;
+  var refresh_token = params.get('refresh_token');
+  var expires_in    = parseInt(params.get('expires_in') || '3600', 10);
+  // Strip tokens from the URL immediately so a back-nav / share can't
+  // leak them. replaceState (not pushState) so there's no extra history
+  // entry to back into.
+  try {
+    history.replaceState(null, '', window.location.pathname + window.location.search);
+  } catch(_) {}
+  // Hydrate the user object so restorePersistedSession can populate
+  // currentUserEmail / currentUser without extra round-trips. Failure
+  // is non-fatal — saveSession still persists the tokens; the app just
+  // falls back to email-less state until the next /users fetch.
+  var user = null;
+  try {
+    var r = await fetch(SUPABASE_URL + '/auth/v1/user', {
+      headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + access_token }
+    });
+    if (r.ok) user = await r.json();
+  } catch(_) {}
+  saveSession({
+    access_token:  access_token,
+    refresh_token: refresh_token,
+    expires_in:    expires_in,
+    user:          user
+  });
+  return true;
+}
+
 // ── Restore persisted session on page load ─────────────────────────────
 // If localStorage has a valid session, populate runtime state and route
 // to the correct home screen so the user skips the splash/sign-in.
@@ -12272,6 +12325,11 @@ document.addEventListener('DOMContentLoaded', async function() {
       }
     });
   }
+
+  // Consume any redirect tokens Supabase left in the URL hash (email
+  // confirm, magic link, Google / Apple OAuth). Runs BEFORE session
+  // restore so a fresh confirmation is treated like a saved session.
+  try { await consumeRedirectTokensIfPresent(); } catch(e) { /* fall through */ }
 
   // Attempt silent sign-in from persisted session. If successful, user is
   // already on their correct home screen by the time the rest of this
