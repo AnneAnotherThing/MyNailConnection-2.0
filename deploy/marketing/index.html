@@ -20,11 +20,15 @@
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png"/>
 <link rel="icon" type="image/webp" sizes="192x192" href="images/mncLogo-192.webp"/>
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png"/>
-<link rel="manifest" href="manifest.json"/>
+<!-- NOTE 2026-04-23: marketing is intentionally NOT a PWA. The manifest
+     link + apple-mobile-web-app meta tags that used to live here were
+     removed so Chrome stops showing the "Install app" prompt on the
+     landing page and iOS "Add to Home Screen" opens in Safari instead
+     of standalone mode. PWA behavior is reserved for /app/ (the signed-
+     in product). See the inline cleanup script near </body> for how
+     returning visitors with a stale root-scoped service worker get
+     unregistered. -->
 <meta name="theme-color" content="#C4786A"/>
-<meta name="apple-mobile-web-app-capable" content="yes"/>
-<meta name="apple-mobile-web-app-status-bar-style" content="default"/>
-<meta name="apple-mobile-web-app-title" content="Nail Connection"/>
 <meta name="application-name" content="My Nail Connection"/>
 <meta name="msapplication-TileColor" content="#C4786A"/>
 
@@ -2109,6 +2113,39 @@
       trigger();
     }
   }, { passive: true });
+})();
+</script>
+
+<!-- ── De-PWA cleanup for returning visitors ────────────────────────────
+     Before 2026-04-23 the app registered /sw.js with scope '/' — which
+     meant the marketing site at the root ended up controlled by that
+     service worker, got cached as a PWA shell, and started showing
+     install prompts / serving stale HTML offline. The app's registration
+     was fixed today to use a relative path (scope '/app/'), but returning
+     marketing visitors still have the stale root-scoped SW living in
+     their browser. This snippet unregisters it and clears the mnc-*
+     caches so marketing goes back to behaving like a plain static site.
+     No-op on browsers without a stale SW. Only touches scope='/'
+     registrations — the app's '/app/' SW is left alone. -->
+<script>
+(function dePwaCleanup() {
+  if (!('serviceWorker' in navigator)) return;
+  try {
+    var rootScope = window.location.origin + '/';
+    navigator.serviceWorker.getRegistrations().then(function(regs) {
+      regs.forEach(function(r) {
+        if (r.scope === rootScope) {
+          r.unregister().catch(function(){});
+        }
+      });
+    });
+    if (window.caches && caches.keys) {
+      caches.keys().then(function(keys) {
+        keys.filter(function(k){ return k.indexOf('mnc-') === 0; })
+            .forEach(function(k){ caches.delete(k).catch(function(){}); });
+      });
+    }
+  } catch(_) {}
 })();
 </script>
 </body>
