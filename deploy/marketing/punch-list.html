@@ -799,8 +799,8 @@
     <label class="task" for="t_seo_routing">
       <span class="checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
       <span class="task-body">
-        <div class="title">Marketing + app split across two hosts <span class="prio-pill prio-high">High</span></div>
-        <div class="desc">Resolved 2026-04-22 by Anne. Marketing site (<code>marketing.html</code>, renamed to <code>index.html</code> at the marketing deploy root) now serves <code>https://mynailconnection.com/</code>. The PWA app (<code>index.html</code>) lives at <code>https://app.mynailconnection.com/</code>. SEO metadata (canonical, OG URL, sitemap, JSON-LD) all already pointed at the apex domain → marketing, so this lands cleanly. Heads-up: <code>reset-password.html</code> sits alongside the app at <code>app.mynailconnection.com/reset-password.html</code> — make sure Supabase Auth → URL Configuration → Site URL points there before any password-reset testing.</div>
+        <div class="title">Marketing + app unified under one GitHub Pages repo <span class="prio-pill prio-high">High</span></div>
+        <div class="desc">Revised 2026-04-23 — moving off Netlify to GitHub Pages. Marketing site (<code>marketing.html</code>, renamed to <code>index.html</code> at the bundle root) now serves <code>https://mynailconnection.com/</code>. The PWA app (<code>index.html</code>) lives at <code>https://mynailconnection.com/app/</code> — same host, different subpath. <code>reset-password.html</code> sits alongside the app at <code>https://mynailconnection.com/app/reset-password.html</code>. Both sites published from a single <code>deploy/ghpages/</code> bundle pushed to the <code>anneanotherthing.github.io</code> user-site repo. <strong>Before re-testing password reset:</strong> update Supabase Auth → URL Configuration → Site URL to the new <code>/app/</code> path and add it to the Redirect URLs allowlist.</div>
       </span>
     </label>
 
@@ -1036,7 +1036,7 @@
       <span class="checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
       <span class="task-body">
         <div class="title">Stripe billing wired up with placeholder links <span class="prio-pill prio-high">High</span><span class="needs-confirm">Confirm</span></div>
-        <div class="desc">Pricing: 5 free photos (permanent, can't be removed), $1/photo, $4 for 5, $9/mo Glow Up (all-time portfolio). Upgrade modal updated. Webhook handles renewals via <code>customer.subscription.updated</code> and pauses photos beyond free limit on cancellation (via <code>pause_photos_beyond_free_limit</code> RPC). First 5 photos locked from deletion. CREDIT_MAP aligned to "1 Photo Credit" / "5 Photo Credits" + price-metadata fallback. Only missing piece: real Stripe payment links (currently placeholder URLs). <strong>Confirm by:</strong> upload 6 photos as a test tech — the 6th should trigger the upgrade modal with correct pricing.</div>
+        <div class="desc">Pricing: 5 free photos (permanent, can't be removed), $1/photo, $5 for 10, $9/mo Glow Up (5 new photo slots per week, Sunday reset, no rollover). Upgrade modal updated. Webhook handles renewals via <code>customer.subscription.updated</code> and pauses photos beyond free limit on cancellation (via <code>pause_photos_beyond_free_limit</code> RPC). First 5 photos locked from deletion. CREDIT_MAP aligned to "1 Photo Credit" / "10 Photo Credits" + price-metadata fallback. Only missing piece: real Stripe payment links (currently placeholder URLs). <strong>Confirm by:</strong> upload 6 photos as a test tech — the 6th should trigger the upgrade modal with correct pricing.</div>
       </span>
     </label>
 

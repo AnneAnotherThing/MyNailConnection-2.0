@@ -2,23 +2,25 @@
 # ─────────────────────────────────────────────────────────────────────────
 # deploy/sync.sh
 #
-# Mirror MNC source files into deploy/app/ and deploy/marketing/ so the
-# drag-ready bundles always match the latest source. Anne drags those
-# folders into Netlify to publish — she does NOT publish from here. This
-# script just keeps the bundles current.
+# Builds three deploy bundles from the MNC source:
+#
+#   deploy/app/        ← Netlify-style app bundle (legacy, safety net)
+#   deploy/marketing/  ← Netlify-style marketing bundle (legacy, safety net)
+#   deploy/ghpages/    ← GitHub Pages bundle — the real publish target.
+#                         Marketing at root, app under /app/, CNAME pinned
+#                         to mynailconnection.com. Push the contents of
+#                         this folder to the anneanotherthing.github.io
+#                         user-site repo to deploy.
+#
+# Migration note (2026-04-23): Anne is moving off Netlify to GitHub Pages
+# because Netlify build credits were getting eaten. The two Netlify
+# bundles stay around for now as a rollback option but the ghpages bundle
+# is what ships. When the GH Pages setup has baked in for a week or two,
+# the Netlify sections below can be deleted.
 #
 # Run this after any edit to MNC/*.html (or after touching the static
 # assets like favicons, manifest.json, sw.js, sitemap.xml). It's safe to
 # run repeatedly; cp -f overwrites destinations idempotently.
-#
-# Layout this script knows about (from CLAUDE.md):
-#   /marketing/  ← serves the root domain. marketing.html is RENAMED to
-#                  index.html so it serves at the domain root with no
-#                  rename step at deploy time.
-#   /app/        ← serves the app subdomain/subpath. Hosts the real
-#                  index.html plus reset-password.html.
-#   privacy.html, terms.html, favicons, manifest.json, sw.js — duplicated
-#   into BOTH bundles so each is self-contained for Netlify drag-and-drop.
 # ─────────────────────────────────────────────────────────────────────────
 
 set -e
@@ -26,6 +28,7 @@ cd "$(dirname "$0")/.."  # cd to MNC repo root
 
 APP=deploy/app
 MKT=deploy/marketing
+GH=deploy/ghpages
 
 # Copy a file if it exists at the source; soft-skip if it doesn't.
 copy_if_exists() {
@@ -102,5 +105,52 @@ copy_if_exists robots.txt              "$MKT/robots.txt"
 # Use rsync --delete so removed source files are removed from the bundle.
 [ -d images ]      && rsync -a --delete images/      "$MKT/images/"
 [ -d app-screens ] && rsync -a --delete app-screens/ "$MKT/app-screens/"
+
+# ── GitHub Pages bundle (deploy/ghpages/) ───────────────────────────────
+# Single-tree layout served by one repo:
+#   /index.html            ← marketing.html renamed to root index
+#   /app/index.html        ← the real app
+#   /app/reset-password.html
+#   /CNAME                 ← pins custom domain to mynailconnection.com
+#   (favicons, manifest, sw.js, images/, app-screens/ at root — shared)
+#   (privacy.html + terms.html duplicated to /app/ so the app's relative
+#    links resolve whether or not the marketing ones are still there)
+mkdir -p "$GH" "$GH/app"
+
+# Marketing at root
+copy_if_exists marketing.html          "$GH/index.html"
+copy_if_exists 404.html                "$GH/404.html"
+copy_if_exists stats.html              "$GH/stats.html"
+copy_if_exists punch-list.html         "$GH/punch-list.html"
+copy_if_exists tech-guide.html         "$GH/tech-guide.html"
+copy_if_exists privacy.html            "$GH/privacy.html"
+copy_if_exists terms.html              "$GH/terms.html"
+copy_if_exists og-image.png            "$GH/og-image.png"
+copy_if_exists favicon.ico             "$GH/favicon.ico"
+copy_if_exists favicon-32.png          "$GH/favicon-32.png"
+copy_if_exists apple-touch-icon.png    "$GH/apple-touch-icon.png"
+copy_if_exists manifest.json           "$GH/manifest.json"
+copy_if_exists sw.js                   "$GH/sw.js"
+copy_if_exists sitemap.xml             "$GH/sitemap.xml"
+copy_if_exists robots.txt              "$GH/robots.txt"
+[ -d images ]      && rsync -a --delete images/      "$GH/images/"
+[ -d app-screens ] && rsync -a --delete app-screens/ "$GH/app-screens/"
+
+# App under /app/
+copy_if_exists index.html              "$GH/app/index.html"
+copy_if_exists reset-password.html     "$GH/app/reset-password.html"
+copy_if_exists privacy.html            "$GH/app/privacy.html"
+copy_if_exists terms.html              "$GH/app/terms.html"
+copy_if_exists mncLogo-transparent.png "$GH/app/mncLogo-transparent.png"
+copy_if_exists favicon.ico             "$GH/app/favicon.ico"
+copy_if_exists favicon-32.png          "$GH/app/favicon-32.png"
+copy_if_exists apple-touch-icon.png    "$GH/app/apple-touch-icon.png"
+copy_if_exists manifest.json           "$GH/app/manifest.json"
+copy_if_exists sw.js                   "$GH/app/sw.js"
+
+# Custom domain pin for GitHub Pages. This file must sit at the publish
+# root and contain exactly the apex domain — that's how GH Pages knows to
+# serve mynailconnection.com instead of anneanotherthing.github.io.
+echo "mynailconnection.com" > "$GH/CNAME"
 
 echo "✓ deploy/ synced from MNC root at $(date '+%Y-%m-%d %H:%M:%S')"

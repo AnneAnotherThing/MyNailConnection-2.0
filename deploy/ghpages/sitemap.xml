@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+
+  <!-- Home / marketing landing -->
+  <url>
+    <loc>https://mynailconnection.com/</loc>
+    <lastmod>2026-04-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://mynailconnection.com/og-image.png</image:loc>
+      <image:title>My Nail Connection — Find Your Tech. Love Your Nails.</image:title>
+      <image:caption>Connect with talented nail techs near you.</image:caption>
+    </image:image>
+  </url>
+
+  <!-- Explicit marketing URL (in case / doesn't rewrite) -->
+  <url>
+    <loc>https://mynailconnection.com/marketing.html</loc>
+    <lastmod>2026-04-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Tech onboarding guide -->
+  <url>
+    <loc>https://mynailconnection.com/tech-guide.html</loc>
+    <lastmod>2026-04-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Legal -->
+  <url>
+    <loc>https://mynailconnection.com/privacy.html</loc>
+    <lastmod>2026-04-17</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://mynailconnection.com/terms.html</loc>
+    <lastmod>2026-04-17</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+
+</urlset>

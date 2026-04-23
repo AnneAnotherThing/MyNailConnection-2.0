@@ -1,0 +1,56 @@
+# robots.txt for My Nail Connection
+# https://mynailconnection.com/
+# Goal: let search engines crawl public marketing pages,
+# block internal tooling / build artifacts / admin surfaces.
+
+User-agent: *
+Allow: /
+
+# Public marketing + docs — crawlable
+Allow: /marketing.html
+Allow: /tech-guide.html
+Allow: /privacy.html
+Allow: /terms.html
+Allow: /images/
+Allow: /screenshots/
+Allow: /og-image.png
+
+# Internal / ops pages — keep out of the index
+Disallow: /punch-list.html
+Disallow: /stats.html
+Disallow: /stats
+Disallow: /ANDROID-BUILD-RUNBOOK.html
+Disallow: /android/
+Disallow: /node_modules/
+Disallow: /supabase/
+Disallow: /www/
+Disallow: /*.sql$
+
+# Block noisy / low-value param crawls (utm, fbclid, gclid)
+Disallow: /*?utm_
+Disallow: /*&utm_
+Disallow: /*?fbclid=
+Disallow: /*?gclid=
+
+# Aggressive scrapers — opt out of AI training crawlers by default.
+# (If you want to be in these models' training data, remove the block.)
+User-agent: GPTBot
+Disallow: /
+
+User-agent: ClaudeBot
+Disallow: /
+
+User-agent: anthropic-ai
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: Google-Extended
+Disallow: /
+
+User-agent: PerplexityBot
+Disallow: /
+
+# Sitemap
+Sitemap: https://mynailconnection.com/sitemap.xml
