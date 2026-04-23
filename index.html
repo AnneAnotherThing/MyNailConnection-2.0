@@ -708,7 +708,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
   window.__googlePlacesReady = false;
   window.initGooglePlaces = function() { window.__googlePlacesReady = true; };
 </script>
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBvNjc1gbKNEiSySlTyEwyKyHLoassn8e4&libraries=places&callback=initGooglePlaces" async defer></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBvNjc1gbKNEiSySlTyEwyKyHLoassn8e4&libraries=places&loading=async&callback=initGooglePlaces" async defer></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 </head>
@@ -1039,7 +1039,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
 
     <!-- Magnolia bloom — fills bottom of screen, nudged up a smidge from -20% -->
     <div style="position:absolute;bottom:-15%;left:-30%;right:-30%;height:110%;pointer-events:none;z-index:1;transform:scale(1);transform-origin:50% 100%;">
-      <svg viewBox="0 0 400 260" width="100%" height="100%" preserveAspectRatio="xMidYMax meet" xmlns="http://www.w3.org/2000/svg" style="opacity:0.72;width:100%;height:100%;" preserveAspectRatio="xMidYMax meet">
+      <svg viewBox="0 0 400 260" width="100%" height="100%" preserveAspectRatio="xMidYMax meet" xmlns="http://www.w3.org/2000/svg" style="opacity:0.5;width:100%;height:100%;" preserveAspectRatio="xMidYMax meet">
 
       <!-- Whole cluster nudged right; adjust translate X to taste -->
       <g transform="translate(30,0)">
@@ -2058,7 +2058,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
            Populated by updateSlotsRemainingDisplay() via
            loadTechHomeStats. Empty by default so the first paint
            doesn't flash a misleading "0 remaining" while tier loads. -->
-      <div id="td-slots-remaining" style="margin-top:8px;font-size:11px;color:var(--muted);text-align:center;letter-spacing:0.2px;"></div>
+      <div id="td-slots-remaining" data-slots-remaining style="margin-top:8px;font-size:11px;color:var(--muted);text-align:center;letter-spacing:0.2px;"></div>
     </div>
 
     <!-- PORTFOLIO PREVIEW — horizontal scroll of recent photos + Manage link -->
@@ -2960,7 +2960,17 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
 
       <!-- Portfolio photos (MOVED UP — most-touched section for active techs) -->
       <div style="margin-bottom:14px;">
-        <div style="font-size:10px;color:var(--muted);font-weight:600;letter-spacing:0.8px;margin-bottom:8px;">YOUR NAIL WORK</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;">
+          <div style="font-size:10px;color:var(--muted);font-weight:600;letter-spacing:0.8px;">YOUR NAIL WORK</div>
+          <!-- Slots-remaining chip. Gets populated by updateSlotsRemainingDisplay()
+               via the data-slots-remaining hook. Sits in-line with the section
+               label so techs know their allowance the moment they're about to
+               upload — avoids the "why isn't this letting me add more photos?"
+               confusion on free tier, and surfaces "5 of 5 weekly · refills Sun"
+               for Glow Up subscribers. 2026-04-23 per Anne. -->
+          <div id="te-slots-remaining" data-slots-remaining
+               style="font-size:11px;font-weight:600;color:var(--rose-dark);background:var(--rose-light);padding:4px 10px;border-radius:100px;letter-spacing:0.1px;"></div>
+        </div>
         <!-- ── File picker / drop zone ──────────────────────────────── -->
         <div id="te-bulk-drop-zone"
           ondragover="event.preventDefault();this.classList.add('te-drop-active')"
@@ -3278,10 +3288,12 @@ function photosRemaining() {
 // date, zero + has credits, zero + needs upgrade). 2026-04-22 per
 // Anne's "we need to see how many credits are available at any given
 // time" feedback.
-function updateSlotsRemainingDisplay() {
-  const el = document.getElementById('td-slots-remaining');
-  if (!el) return;
-  if (!_techTier) { el.textContent = ''; return; }
+// Builds the tier-aware "slots remaining" copy once per call. Separated
+// from the DOM write so multiple screens can share the exact same text
+// without the logic drifting. Returns '' when we don't yet know the
+// tier — callers can use that as a "hide this line" signal.
+function _slotsRemainingText() {
+  if (!_techTier) return '';
   const credits = _techTier.photo_credits || 0;
   if (_techTier.tier === 'paid') {
     const weekly = _weeklySlotsRemaining();
@@ -3290,35 +3302,41 @@ function updateSlotsRemainingDisplay() {
     if (resetAt && resetAt.getTime() > Date.now()) {
       try { resetStr = resetAt.toLocaleDateString(undefined, { weekday: 'short' }); } catch(_) {}
     }
-    if (weekly > 0 && credits > 0) {
-      el.textContent = weekly + ' of 5 weekly + ' + credits + ' credit' + (credits === 1 ? '' : 's') + ' · refills ' + resetStr;
-    } else if (weekly > 0) {
-      el.textContent = weekly + ' of 5 weekly slots · refills ' + resetStr;
-    } else if (credits > 0) {
-      el.textContent = 'Weekly limit hit (refills ' + resetStr + ') · ' + credits + ' credit' + (credits === 1 ? '' : 's') + ' available';
-    } else {
-      el.textContent = 'Weekly limit hit — refills ' + resetStr + ' or add credits';
-    }
-  } else {
-    // Free tier with the corrected credits-deplete math:
-    //   freeRemaining = max(0, free_limit - total_photos)  (first 5 uploads only)
-    //   remaining = freeRemaining + credits
-    // Credits deplete as they're used by consume_upload_slot, so the
-    // number shown here is what they can actually upload right now.
-    const used = _techTier.total_photos || 0;
-    const freeSlots = STRIPE_CONFIG.free_limit;
-    const freeRemaining = Math.max(0, freeSlots - used);
-    const remaining = freeRemaining + credits;
-    if (remaining === 0) {
-      el.textContent = 'All ' + freeSlots + ' free slots used · add credits to keep going';
-    } else if (freeRemaining > 0 && credits > 0) {
-      el.textContent = freeRemaining + ' free + ' + credits + ' credit' + (credits === 1 ? '' : 's') + ' available';
-    } else if (credits > 0) {
-      el.textContent = credits + ' credit' + (credits === 1 ? '' : 's') + ' left · ' + freeSlots + ' free slots used';
-    } else {
-      el.textContent = freeRemaining + ' of ' + freeSlots + ' free slots remaining';
-    }
+    if (weekly > 0 && credits > 0) return weekly + ' of 5 weekly + ' + credits + ' credit' + (credits === 1 ? '' : 's') + ' · refills ' + resetStr;
+    if (weekly > 0)                return weekly + ' of 5 weekly slots · refills ' + resetStr;
+    if (credits > 0)               return 'Weekly limit hit (refills ' + resetStr + ') · ' + credits + ' credit' + (credits === 1 ? '' : 's') + ' available';
+    return 'Weekly limit hit — refills ' + resetStr + ' or add credits';
   }
+  // Free tier with the corrected credits-deplete math:
+  //   freeRemaining = max(0, free_limit - total_photos)  (first 5 uploads only)
+  //   remaining = freeRemaining + credits
+  // Credits deplete as they're used by consume_upload_slot, so the
+  // number shown here is what they can actually upload right now.
+  const used = _techTier.total_photos || 0;
+  const freeSlots = STRIPE_CONFIG.free_limit;
+  const freeRemaining = Math.max(0, freeSlots - used);
+  const remaining = freeRemaining + credits;
+  if (remaining === 0)                     return 'All ' + freeSlots + ' free slots used · add credits to keep going';
+  if (freeRemaining > 0 && credits > 0)    return freeRemaining + ' free + ' + credits + ' credit' + (credits === 1 ? '' : 's') + ' available';
+  if (credits > 0)                         return credits + ' credit' + (credits === 1 ? '' : 's') + ' left · ' + freeSlots + ' free slots used';
+  return freeRemaining + ' of ' + freeSlots + ' free slots remaining';
+}
+
+// Writes the slots-remaining copy to every element that opts in via the
+// `data-slots-remaining` attribute. Any screen that wants to surface
+// the breakdown just adds that attribute to a placeholder — no extra JS
+// wiring needed. This is why the same phrase now lives on tech-home
+// AND inside the edit-tech modal's portfolio section: both elements
+// carry the attribute, and this one function keeps them synced.
+function updateSlotsRemainingDisplay() {
+  const text = _slotsRemainingText();
+  document.querySelectorAll('[data-slots-remaining]').forEach(el => {
+    el.textContent = text;
+    // Collapse the element when we have nothing to say (no tier loaded
+    // yet) so the empty chip doesn't leave a gap. Callers using inline
+    // styles keep their display when text is present.
+    el.style.display = text ? '' : 'none';
+  });
 }
 
 // Per-file RPC gate. Calls public.consume_upload_slot(email) which
@@ -7654,9 +7672,15 @@ async function loadMyPhotosData() {
   const summary = document.getElementById('myph-summary');
   if (!summary) return;
   summary.textContent = 'Loading your photos…';
-  document.getElementById('myph-untagged-wrap').style.display = 'none';
-  document.getElementById('myph-tagged-wrap').style.display = 'none';
-  document.getElementById('myph-empty').style.display = 'none';
+  // Grid is hidden until render; empty state hidden until we know photo count.
+  // The old myph-untagged-wrap / myph-tagged-wrap elements were dropped in the
+  // 2026-04-22 unified-grid redesign — prior code tried to hide them here and
+  // threw a null deref, which the catch below masked as "Error loading photos."
+  // That was the "my photos tab doesn't work" bug. 2026-04-23.
+  const _mphGridWrap = document.getElementById('myph-grid-wrap');
+  if (_mphGridWrap) _mphGridWrap.style.display = 'none';
+  const _mphEmpty = document.getElementById('myph-empty');
+  if (_mphEmpty) _mphEmpty.style.display = 'none';
 
   try {
     const res = await fetch(
@@ -12255,7 +12279,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 
   // ── Register service worker ───────────────────────────────────────────────
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js')
+    navigator.serviceWorker.register('sw.js')
       .then(reg => {
         if (window.__MNC_DEV__) console.log('MNC SW registered:', reg.scope);
         // Listen for messages from SW (e.g. notification clicks)
