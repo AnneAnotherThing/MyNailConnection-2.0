@@ -1955,11 +1955,20 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       <div style="font-size:12.5px;color:var(--charcoal);line-height:1.45;">Your next 5 are free and live in your portfolio forever. Start your reputation — every new photo lights up the feed for an hour so clients see your work fresh.</div>
     </div>
 
-    <!-- PRIMARY ACTION -->
-    <div style="margin:16px 20px 0;">
-      <button onclick="openNewPostModal()" class="btn btn-outline" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px;font-size:14px;">
-        <svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    <!-- PRIMARY ACTIONS — Post and Upload live side by side so the two
+         most-common tech actions are one tap away from the dashboard.
+         The Upload button short-circuits into the edit modal's bulk
+         uploader (added 2026-04-22 per Anne); the existing modal still
+         owns the Save Changes commit so photos flow through the tier
+         gate and the normal persistence path. -->
+    <div style="margin:16px 20px 0;display:flex;gap:8px;">
+      <button onclick="openNewPostModal()" class="btn btn-outline" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;font-size:13px;padding-left:8px;padding-right:8px;">
+        <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         Post an Update
+      </button>
+      <button onclick="openPhotoUploadFromHome()" class="btn btn-outline" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;font-size:13px;padding-left:8px;padding-right:8px;">
+        <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        Upload Photos
       </button>
     </div>
 
@@ -3699,6 +3708,20 @@ async function subscribeToPush(userId) {
 // Show in-app push permission prompt
 async function showPushPrompt(userId) {
   if (!PUSH_ENABLED) return;
+  if (!('Notification' in window)) return;
+  // If permission was already granted on this browser (e.g. a different
+  // user on the same browser already subscribed), silently re-subscribe
+  // so the existing push endpoint is tied to the currently signed-in
+  // user. Without this, the test-user flow breaks: admin grants
+  // permission → admin row saved → admin signs out → test user signs in
+  // → showPushPrompt bailed → test user has no push_subscriptions row →
+  // pushes to test user go nowhere. The push_subscriptions upsert uses
+  // `resolution=merge-duplicates` on the unique endpoint column, so this
+  // safely REBINDS the endpoint from admin to test user.
+  if (Notification.permission === 'granted') {
+    try { await subscribeToPush(userId); } catch(e) {}
+    return;
+  }
   if (Notification.permission !== 'default') return;
   const banner = document.getElementById('push-banner');
   if (banner) {
@@ -6678,6 +6701,23 @@ async function openTechEditFromProfile() {
 function closeTechEdit() {
   document.getElementById('tech-edit-modal').style.display = 'none';
   currentEditTech = null;
+}
+
+// Tech-home "Upload Photos" shortcut — opens the edit modal and
+// immediately triggers the bulk file picker so the tech can add photos
+// without hunting for the Manage modal → Portfolio section. The modal
+// still owns the commit path (Save Changes button), which is important
+// because saveTechEdit is the only place photos get persisted to
+// public.techs.photos. Added 2026-04-22 per Anne.
+async function openPhotoUploadFromHome() {
+  if (!currentUserEmail) { showToast('Please sign in first'); return; }
+  await openTechEditFromProfile();
+  // Modal is now open and currentEditTech is seeded. Give the browser
+  // one paint so the hidden file input is mounted, then trigger it.
+  setTimeout(function() {
+    var picker = document.getElementById('te-bulk-files');
+    if (picker) picker.click();
+  }, 80);
 }
 
 async function deleteTech() {
@@ -13101,15 +13141,22 @@ function parseTimeStr(timeStr, refDate) {
         <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--muted);fill:none;stroke-width:2.5;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg>
       </div>
 
-      <!-- 10 photos/$5 bundle -->
-      <div onclick="purchasePhotos(10)" style="border:2px solid var(--rose);border-radius:18px;padding:16px;cursor:pointer;display:flex;align-items:center;gap:14px;background:var(--rose-light);position:relative;transition:all 0.15s;">
-        <div style="position:absolute;top:-10px;right:16px;background:var(--rose);color:white;font-size:10px;font-weight:700;padding:3px 10px;border-radius:100px;letter-spacing:0.5px;">BEST VALUE</div>
-        <div style="width:44px;height:44px;border-radius:14px;background:white;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--rose);">$5</div>
-        <div style="flex:1;">
-          <div style="font-size:15px;font-weight:600;color:var(--charcoal);">Spotlight Pack <span style="font-size:11px;font-weight:500;color:var(--rose);">— 10 photos</span></div>
-          <div style="font-size:12px;color:var(--rose);">One-time · Save $5 · Show up 10x more often</div>
+      <!-- 10 photos/$5 bundle — the BEST VALUE badge lives in a wrapper
+           sibling (not inside the card) because the card gets
+           overflow:hidden from the #upgrade-modal hover-shine CSS rule,
+           which was clipping the badge's upper half and making it read
+           as a half-bar. Wrapper keeps the click target untouched.
+           2026-04-22. -->
+      <div style="position:relative;">
+        <div style="position:absolute;top:-10px;right:16px;background:var(--rose);color:white;font-size:10px;font-weight:700;padding:3px 10px;border-radius:100px;letter-spacing:0.5px;z-index:2;box-shadow:0 2px 6px rgba(178,110,95,0.35);">BEST VALUE</div>
+        <div onclick="purchasePhotos(10)" style="border:2px solid var(--rose);border-radius:18px;padding:16px;cursor:pointer;display:flex;align-items:center;gap:14px;background:var(--rose-light);transition:all 0.15s;">
+          <div style="width:44px;height:44px;border-radius:14px;background:white;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--rose);">$5</div>
+          <div style="flex:1;">
+            <div style="font-size:15px;font-weight:600;color:var(--charcoal);">Spotlight Pack <span style="font-size:11px;font-weight:500;color:var(--rose);">— 10 photos</span></div>
+            <div style="font-size:12px;color:var(--rose);">One-time · Save $5 · Show up 10x more often</div>
+          </div>
+          <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--rose);fill:none;stroke-width:2.5;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg>
         </div>
-        <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--rose);fill:none;stroke-width:2.5;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg>
       </div>
 
       <!-- $9/month all-time portfolio -->
