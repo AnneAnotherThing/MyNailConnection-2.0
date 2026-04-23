@@ -6344,7 +6344,11 @@ async function loadBulletinBoard(techId) {
 
   try {
     const res = await fetch(
-      `${SUPABASE_URL}/rest/v1/board_posts?tech_id=eq.${encodeURIComponent(techId)}&order=created_at.desc`,
+      // Filter by publish_at so viewers never see a tech's pending /
+      // scheduled posts before they're released (staggered pivot
+      // 2026-04-22). The tech's own "Your Posts" list on tech-home
+      // shows pending separately with scheduled times.
+      `${SUPABASE_URL}/rest/v1/board_posts?tech_id=eq.${encodeURIComponent(techId)}&publish_at=lte.${encodeURIComponent(new Date().toISOString())}&order=publish_at.desc`,
       { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` } }
     );
     const posts = res.ok ? await res.json() : [];
@@ -6566,21 +6570,47 @@ function openTechDetail(tech) {
 }
 
 
-function openGalleryPhoto(url) {
-  // Simple full-screen lightbox
+function openGalleryPhoto(url, caption) {
+  // Full-screen lightbox with an optional caption shown below the image.
+  // Caption is the tech's per-photo note (set in the bulk review sheet
+  // or via My Gallery tag editor). Keeps grids compact — captions only
+  // appear on tap, not as permanent overlays on the thumbnails.
+  // 2026-04-22 per Anne ("expand to see or something").
   var overlay = document.getElementById('gallery-lightbox');
   if (!overlay) {
     overlay = document.createElement('div');
     overlay.id = 'gallery-lightbox';
-    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:999;display:flex;align-items:center;justify-content:center;cursor:pointer;';
-    overlay.onclick = function() { overlay.style.display = 'none'; };
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;padding:20px;gap:14px;';
+    overlay.onclick = function(ev) {
+      // Tapping the caption shouldn't close, so any click in the overlay
+      // OUTSIDE the caption element dismisses. Caption text has its own
+      // pointerdown.stopPropagation to stay put.
+      overlay.style.display = 'none';
+    };
     var img = document.createElement('img');
     img.id = 'gallery-lightbox-img';
-    img.style.cssText = 'max-width:95vw;max-height:90vh;object-fit:contain;border-radius:8px;';
+    img.style.cssText = 'max-width:95vw;max-height:78vh;object-fit:contain;border-radius:8px;';
     overlay.appendChild(img);
+    var cap = document.createElement('div');
+    cap.id = 'gallery-lightbox-caption';
+    cap.style.cssText = 'max-width:95vw;font-size:14px;color:#F5E6DE;line-height:1.5;text-align:center;padding:8px 14px;background:rgba(0,0,0,0.55);border-radius:10px;font-style:italic;font-family:"DM Sans",sans-serif;display:none;';
+    // Let the caption be tappable/selectable without closing the overlay.
+    cap.addEventListener('click', function(ev) { ev.stopPropagation(); });
+    overlay.appendChild(cap);
     document.body.appendChild(overlay);
   }
   document.getElementById('gallery-lightbox-img').src = url;
+  var capEl = document.getElementById('gallery-lightbox-caption');
+  if (capEl) {
+    var text = (caption == null ? '' : String(caption)).trim();
+    if (text) {
+      capEl.textContent = text;
+      capEl.style.display = 'block';
+    } else {
+      capEl.textContent = '';
+      capEl.style.display = 'none';
+    }
+  }
   overlay.style.display = 'flex';
 }
 
@@ -7329,6 +7359,11 @@ async function techBulkDropFiles(fileList) {
   const edit = techEdits[editKey];
   if (!edit.photos) edit.photos = [];
 
+  // Mark where this batch starts so the post-upload review sheet
+  // can open on ONLY the photos added in THIS run (not pre-existing
+  // portfolio items). 2026-04-22 staggered + tag-at-upload flow.
+  const bulkReviewStartIdx = edit.photos.length;
+
   const techSlug = (currentEditTech.name || 'new-tech').toLowerCase().replace(/[^a-z0-9]/g, '-');
 
   // Show progress
@@ -7423,6 +7458,13 @@ async function techBulkDropFiles(fileList) {
   // on each other).
   if (trimmedCount > 0) {
     setTimeout(function() { showUpgradeModal(); }, 900);
+  }
+
+  // Review & tag sheet -- automatically opens so techs tag + caption
+  // the new batch right now, not later from My Gallery. Only opens
+  // if at least one photo actually made it through upload.
+  if (edit.photos.length > bulkReviewStartIdx) {
+    setTimeout(function() { try { openBulkReviewSheet(bulkReviewStartIdx); } catch(_) {} }, 600);
   }
 }
 
@@ -7758,6 +7800,147 @@ function closeMyPhotoTagSheet() {
   _myphSheetIdx = -1;
   // Re-render the grid so the badge reflects the new tag state.
   try { renderMyPhotos(); } catch(_) {}
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// BULK UPLOAD REVIEW SHEET — tag + caption each just-uploaded photo in
+// place, without forcing a trip to My Gallery. Triggered at the end of
+// techBulkDropFiles(). Operates on edit.photos[i] for indices in the
+// range [startIdx .. end-of-array]. Taps on chips mutate edit.photos
+// directly; the parent Save Changes button commits to DB. 2026-04-22.
+
+function openBulkReviewSheet(startIdx) {
+  if (!currentEditTech) return;
+  const editKey = currentEditTech.name || '__new__';
+  const edit = techEdits[editKey];
+  if (!edit || !edit.photos || startIdx >= edit.photos.length) return;
+
+  const sheet = document.getElementById('bulk-review-sheet');
+  const body  = document.getElementById('bulk-review-body');
+  if (!sheet || !body) return;
+
+  function render() {
+    body.innerHTML = '';
+    // Stable references: iterate by identity so chip/caption callbacks
+    // don't get tripped up when a photo is removed mid-session.
+    for (let i = startIdx; i < edit.photos.length; i++) {
+      const photo = edit.photos[i];
+      body.appendChild(buildBulkReviewCard(photo, i, render));
+    }
+    if (edit.photos.length <= startIdx) {
+      // All photos from this batch got removed — close the sheet.
+      closeBulkReviewSheet();
+    }
+  }
+
+  render();
+  sheet.style.display = 'flex';
+}
+
+function buildBulkReviewCard(photo, idx, onChange) {
+  const card = document.createElement('div');
+  card.style.cssText = 'background:white;border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:14px;box-shadow:0 2px 8px rgba(0,0,0,0.04);';
+
+  const imgWrap = document.createElement('div');
+  imgWrap.style.cssText = 'position:relative;';
+  const img = document.createElement('img');
+  img.src = photo.url;
+  img.style.cssText = 'width:100%;aspect-ratio:1;object-fit:cover;display:block;';
+  imgWrap.appendChild(img);
+  // Remove-from-batch button — also deletes from edit.photos.
+  const remove = document.createElement('button');
+  remove.type = 'button';
+  remove.textContent = 'Remove';
+  remove.title = 'Remove this photo from the batch';
+  remove.style.cssText = 'position:absolute;top:10px;right:10px;background:rgba(20,10,15,0.72);color:white;border:none;border-radius:100px;padding:5px 10px;font-size:11px;font-weight:600;cursor:pointer;backdrop-filter:blur(4px);';
+  remove.onclick = function() {
+    const editKey = currentEditTech && (currentEditTech.name || '__new__');
+    const edit = techEdits[editKey];
+    if (!edit || !edit.photos) return;
+    // Find current index (array may have shifted due to prior removals)
+    const curIdx = edit.photos.indexOf(photo);
+    if (curIdx !== -1) edit.photos.splice(curIdx, 1);
+    try { renderTePhotoGrid(edit.photos); } catch(_) {}
+    if (typeof onChange === 'function') onChange();
+  };
+  imgWrap.appendChild(remove);
+  card.appendChild(imgWrap);
+
+  const content = document.createElement('div');
+  content.style.cssText = 'padding:12px 14px 14px;';
+
+  // Caption input
+  const captionLbl = document.createElement('div');
+  captionLbl.textContent = 'CAPTION (optional)';
+  captionLbl.style.cssText = 'font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);margin-bottom:5px;';
+  content.appendChild(captionLbl);
+  const captionIn = document.createElement('input');
+  captionIn.type = 'text';
+  captionIn.maxLength = 120;
+  captionIn.placeholder = 'A line about this set — style, occasion, anything.';
+  captionIn.value = photo.caption || '';
+  captionIn.style.cssText = 'width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:13px;font-family:"DM Sans",sans-serif;background:var(--cream);outline:none;box-sizing:border-box;margin-bottom:12px;';
+  captionIn.oninput = function() {
+    photo.caption = captionIn.value;
+  };
+  content.appendChild(captionIn);
+
+  // Tag chips grouped by category (reuses existing PHOTO_TAG_TAXONOMY
+  // and buildTagChip() via a lightweight adapter).
+  Object.keys(PHOTO_TAG_TAXONOMY).forEach(function(cat) {
+    const catDiv = document.createElement('div');
+    catDiv.style.cssText = 'margin-bottom:10px;';
+    const label = document.createElement('div');
+    label.textContent = cat.toUpperCase();
+    label.style.cssText = 'font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);margin-bottom:6px;';
+    catDiv.appendChild(label);
+    const chips = document.createElement('div');
+    chips.style.cssText = 'display:flex;flex-wrap:wrap;gap:5px;';
+    PHOTO_TAG_TAXONOMY[cat].forEach(function(tag) {
+      chips.appendChild(buildBulkReviewChip(photo, tag));
+    });
+    catDiv.appendChild(chips);
+    content.appendChild(catDiv);
+  });
+
+  card.appendChild(content);
+  return card;
+}
+
+// Chip specifically for the bulk-review flow — mutates the photo object
+// in place (not _myPhotosState.photos, since bulk review operates on the
+// edit modal's `edit.photos` which is a different array).
+function buildBulkReviewChip(photo, tag) {
+  const chip = document.createElement('button');
+  chip.type = 'button';
+  chip.textContent = tag;
+  function applyStyle() {
+    const isOn = (photo.tags || []).includes(tag);
+    chip.style.cssText = 'font-size:11px;padding:5px 10px;border-radius:100px;cursor:pointer;font-family:"DM Sans",sans-serif;transition:all 0.15s ease;border:1px solid ' +
+      (isOn ? 'var(--rose);background:var(--rose);color:white;'
+            : 'var(--border);background:white;color:var(--charcoal);');
+  }
+  applyStyle();
+  chip.onclick = function() {
+    photo.tags = photo.tags || [];
+    const pos = photo.tags.indexOf(tag);
+    if (pos === -1) photo.tags.push(tag); else photo.tags.splice(pos, 1);
+    applyStyle();
+  };
+  return chip;
+}
+
+function closeBulkReviewSheet() {
+  const sheet = document.getElementById('bulk-review-sheet');
+  if (sheet) sheet.style.display = 'none';
+  // Re-render the tech-edit photo grid so captions/tags are reflected
+  // (though the current grid doesn't visualize them yet, this is a
+  // no-op hook for when it does).
+  try {
+    const editKey = currentEditTech && (currentEditTech.name || '__new__');
+    const edit = techEdits[editKey];
+    if (edit) renderTePhotoGrid(edit.photos || []);
+  } catch(_) {}
 }
 
 function buildUntaggedCard(photo, idx) {
@@ -8256,6 +8439,15 @@ async function saveTechEdit() {
     const safePhotos = (techData.photos || []).filter(p => {
       const url = p.url || p;
       return typeof url === 'string' && url.startsWith('http');
+    }).map(p => {
+      // Strip the transient `caption` field before persisting. It's
+      // only used once as the feed post body (see inserts above); the
+      // archived photo entry should never carry it.
+      if (p && typeof p === 'object' && 'caption' in p) {
+        const { caption, ...rest } = p;
+        return rest;
+      }
+      return p;
     });
     techData.photos = safePhotos;
 
@@ -8324,15 +8516,33 @@ async function saveTechEdit() {
           .map(p => (typeof p === 'string' ? p : p && p.url) || '')
           .filter(u => u && !oldUrls.has(u));
         if (newUrls.length && edit.email) {
-          const photoExpiresAt = new Date(Date.now() + 3600000).toISOString();
+          // Staggered release (2026-04-22 Glow Up pivot): first photo
+          // publishes immediately for instant gratification, the rest
+          // stagger one hour apart. publish_at < now = visible in
+          // feed; publish_at > now = pending (shown only in the tech's
+          // own 'Your Posts' list with scheduled times). Auto-posts
+          // do NOT set expires_at — they roll off when the 100-post
+          // rolling feed cap displaces them.
           const feedAuthBearer = 'Bearer ' + (window._mncAccessToken || SUPABASE_ANON_KEY);
-          const inserts = newUrls.map(imgUrl => ({
-            tech_id: edit.email,
-            type: 'inspo', // "inspo" = auto-created portfolio-photo post (no UI pill)
-            body: '',
-            image_url: imgUrl,
-            expires_at: photoExpiresAt
-          }));
+          const nowMs = Date.now();
+          const HOUR_MS = 3600000;
+          // Caption lives ONLY on the initial feed post (board_posts.body).
+          // It's stripped from the archived photo object before that
+          // saves to techs.photos below, so captions are ephemeral to
+          // the initial release; they don't linger on the portfolio
+          // thumbnail forever. 2026-04-23 per Anne: 'just the initial
+          // post please.'
+          const inserts = newUrls.map((imgUrl, i) => {
+            const entry = safePhotos.find(p => (p && (p.url || p)) === imgUrl);
+            const caption = (entry && entry.caption) ? String(entry.caption).trim() : '';
+            return {
+              tech_id: edit.email,
+              type: 'inspo',
+              body: caption,
+              image_url: imgUrl,
+              publish_at: new Date(nowMs + i * HOUR_MS).toISOString()
+            };
+          });
           fetch(`${SUPABASE_URL}/rest/v1/board_posts`, {
             method: 'POST',
             headers: {
@@ -8343,12 +8553,13 @@ async function saveTechEdit() {
             },
             body: JSON.stringify(inserts)
           }).catch(err => console.warn('auto-feed post failed (non-fatal):', err));
-          // Post-upload success modal — funnels the tech to tag-their-
-          // photos (drives search discoverability) and to see their first
-          // post live in the feed (delight). Fires after closeTechEdit runs
-          // so it doesn't stack on the edit modal. 2026-04-22 per Anne.
+          // Post-upload success modal — funnels the tech to tag
+          // their photos AND see the first post live. Pass the final
+          // release timestamp so the modal can say "last one up around
+          // 6:18 PM" for multi-photo batches.
+          const lastReleaseMs = nowMs + (newUrls.length - 1) * HOUR_MS;
           setTimeout(function() {
-            try { showPostUploadSuccessModal(newUrls.length); } catch(_) {}
+            try { showPostUploadSuccessModal(newUrls.length, newUrls.length > 1 ? lastReleaseMs : null); } catch(_) {}
           }, 600);
         }
       } catch(e) { console.warn('auto-feed diff failed (non-fatal):', e); }
@@ -8795,7 +9006,15 @@ async function loadHomeFeed() {
     // Filter out expired posts. Photo posts live 1 hour, text posts live
     // 24 hours; legacy rows with NULL expires_at show until manually deleted.
     var nowIso = new Date().toISOString();
-    var url = SUPABASE_URL + '/rest/v1/board_posts?select=*&or=(expires_at.is.null,expires_at.gt.' + encodeURIComponent(nowIso) + ')&order=created_at.desc&limit=100';
+    // 2026-04-22 staggered pivot: sort by publish_at desc, filter to
+    // the window where publish_at <= now so pending releases stay
+    // hidden. Rolling 100-post cap keeps the feed visually full at
+    // sparse launch scale. expires_at filter preserved for legacy
+    // manual posts that still set it.
+    var url = SUPABASE_URL + '/rest/v1/board_posts?select=*'
+      + '&publish_at=lte.' + encodeURIComponent(nowIso)
+      + '&or=(expires_at.is.null,expires_at.gt.' + encodeURIComponent(nowIso) + ')'
+      + '&order=publish_at.desc&limit=100';
     var r = await fetch(url, { headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + (window._mncAccessToken || SUPABASE_ANON_KEY) } });
     _homeFeedPosts = r.ok ? await r.json() : [];
     renderHomeFeedFromCache();
@@ -8921,9 +9140,15 @@ async function pollHomeFeedForNew() {
     return loadHomeFeed();
   }
   try {
-    var latest = _homeFeedPosts[0].created_at;
-    var url = SUPABASE_URL + '/rest/v1/board_posts?select=*&order=created_at.desc&limit=50'
-            + '&created_at=gt.' + encodeURIComponent(latest);
+    // Poll by publish_at not created_at so staggered photos appear at
+    // release time. Also filter publish_at<=now so pending future
+    // releases stay hidden even if another client happens to poll
+    // between their upload and their scheduled release.
+    var latest = _homeFeedPosts[0].publish_at || _homeFeedPosts[0].created_at;
+    var nowIso = new Date().toISOString();
+    var url = SUPABASE_URL + '/rest/v1/board_posts?select=*&order=publish_at.desc&limit=50'
+            + '&publish_at=gt.' + encodeURIComponent(latest)
+            + '&publish_at=lte.' + encodeURIComponent(nowIso);
     var r = await fetch(url, { headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + (window._mncAccessToken || SUPABASE_ANON_KEY) } });
     var newPosts = r.ok ? await r.json() : [];
     if (!newPosts.length) return;
@@ -10433,27 +10658,79 @@ async function loadMyBoardPosts() {
   const techId = currentUserEmail;
   if (!techId) return;
 
+  // Split into Pending (publish_at in future) and Live. Pending shows
+  // with a scheduled-time chip so the tech knows when each releases.
+  // Staggered-release pivot 2026-04-22. Uses publish_at desc ordering
+  // so soonest-releasing pending is at top, most-recent live at top
+  // of its section. Tap an x on a pending post to cancel its release.
   try {
     const res = await fetch(
-      `${SUPABASE_URL}/rest/v1/board_posts?tech_id=eq.${encodeURIComponent(techId)}&order=created_at.desc`,
+      `${SUPABASE_URL}/rest/v1/board_posts?tech_id=eq.${encodeURIComponent(techId)}&order=publish_at.desc`,
       { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` } }
     );
-    const posts = res.ok ? await res.json() : [];
+    const allPosts = res.ok ? await res.json() : [];
 
-    if (!posts.length) {
+    if (!allPosts.length) {
       container.innerHTML = '<div style="text-align:center;padding:24px;background:var(--cream);border-radius:14px;"><div style="font-size:22px;margin-bottom:6px;"><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;vertical-align:middle;"><line x1="12" y1="17" x2="12" y2="22"/><path d="M5 17h14v-1.76a2 2 0 00-1.11-1.79l-1.78-.9A2 2 0 0115 10.76V6h1a2 2 0 000-4H8a2 2 0 000 4h1v4.76a2 2 0 01-1.11 1.79l-1.78.9A2 2 0 005 15.24V17z"/></svg></div><div style="font-size:13px;color:var(--muted);">You haven\'t posted anything yet</div></div>';
       return;
     }
-    container.innerHTML = posts.map(p => {
-      const type = BOARD_TYPES[p.type] || BOARD_TYPES.announcement;
-      const dateStr = new Date(p.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
-      return `<div class="board-post" style="position:relative;">
-        <button onclick="deletePost('${p.id}')" style="position:absolute;top:10px;right:10px;background:none;border:none;cursor:pointer;font-size:16px;color:var(--muted);">x</button>
-        <div class="board-post-type ${type.cls}">${type.icon} ${type.label}</div>
-        <div class="board-post-body">${esc(p.body)}</div>
-        <div class="board-post-date">${dateStr}</div>
-      </div>`;
-    }).join('');
+
+    const nowMs = Date.now();
+    const pending = [], live = [];
+    allPosts.forEach(p => {
+      const pMs = p.publish_at ? new Date(p.publish_at).getTime() : new Date(p.created_at).getTime();
+      if (pMs > nowMs) pending.push({ p, pMs }); else live.push({ p, pMs });
+    });
+    pending.sort((a, b) => a.pMs - b.pMs); // soonest release first
+
+    function relUntil(ms) {
+      const diffMin = Math.max(0, Math.round((ms - nowMs) / 60000));
+      if (diffMin < 2) return 'any moment now';
+      if (diffMin < 60) return 'in ' + diffMin + 'm';
+      const h = Math.floor(diffMin / 60);
+      const m = diffMin % 60;
+      return m ? 'in ' + h + 'h ' + m + 'm' : 'in ' + h + 'h';
+    }
+    function absTime(ms) {
+      try { return new Date(ms).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }); }
+      catch(_) { return ''; }
+    }
+
+    let html = '';
+    if (pending.length) {
+      html += '<div style="font-size:11px;font-weight:700;letter-spacing:1.2px;color:var(--rose);text-transform:uppercase;margin:0 0 8px;">Releasing soon \u00b7 ' + pending.length + '</div>';
+      html += pending.map(({ p, pMs }) => {
+        const thumb = p.image_url
+          ? '<img src="' + esc(p.image_url) + '" style="width:44px;height:44px;border-radius:10px;object-fit:cover;flex-shrink:0;"/>'
+          : '<div style="width:44px;height:44px;border-radius:10px;background:var(--cream);flex-shrink:0;"></div>';
+        return '<div class="board-post" style="position:relative;display:flex;align-items:center;gap:12px;padding:10px 12px;background:linear-gradient(135deg,#FFF5EF 0%,#FBE4D9 100%);border:1px solid var(--rose-mid);">'
+          + thumb
+          + '<div style="flex:1;min-width:0;">'
+          +   '<div style="font-size:13px;font-weight:600;color:var(--rose-dark);line-height:1.2;">Goes live ' + relUntil(pMs) + '</div>'
+          +   '<div style="font-size:11px;color:var(--muted);margin-top:2px;">Scheduled for ' + absTime(pMs) + '</div>'
+          + '</div>'
+          + '<button onclick="deletePost(\'' + p.id + '\')" style="background:none;border:none;cursor:pointer;font-size:16px;color:var(--muted);flex-shrink:0;padding:4px 8px;" title="Cancel this release">x</button>'
+          + '</div>';
+      }).join('');
+      html += '<div style="height:12px;"></div>';
+    }
+
+    if (live.length) {
+      if (pending.length) {
+        html += '<div style="font-size:11px;font-weight:700;letter-spacing:1.2px;color:var(--muted);text-transform:uppercase;margin:0 0 8px;">Live</div>';
+      }
+      html += live.map(({ p }) => {
+        const type = BOARD_TYPES[p.type] || BOARD_TYPES.announcement;
+        const dateStr = new Date(p.publish_at || p.created_at).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+        return '<div class="board-post" style="position:relative;">'
+          + '<button onclick="deletePost(\'' + p.id + '\')" style="position:absolute;top:10px;right:10px;background:none;border:none;cursor:pointer;font-size:16px;color:var(--muted);">x</button>'
+          + '<div class="board-post-type ' + type.cls + '">' + type.icon + ' ' + type.label + '</div>'
+          + '<div class="board-post-body">' + esc(p.body) + '</div>'
+          + '<div class="board-post-date">' + dateStr + '</div>'
+          + '</div>';
+      }).join('');
+    }
+    container.innerHTML = html;
   } catch(e) {}
 }
 
@@ -14369,6 +14646,35 @@ function postUploadGoToFeed() {
       <img id="myph-tag-sheet-img" src="" alt="" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:14px;margin-bottom:14px;background:var(--cream);"/>
       <div id="myph-tag-sheet-chips"></div>
       <div style="font-size:11px;color:var(--muted);text-align:center;margin-top:14px;font-style:italic;">Changes save automatically.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════════════
+     BULK UPLOAD REVIEW SHEET
+     Opens automatically after a bulk photo upload completes. Lets the
+     tech tag + caption each just-uploaded photo in place, before the
+     parent Save Changes commits. Reduces the "upload now, tag later"
+     friction that was sending techs to My Gallery as a separate trip.
+     Populated by openBulkReviewSheet(startIdx) against edit.photos.
+     Changes write back to edit.photos[i].tags / .caption and persist
+     when the tech taps the modal's Save Changes. 2026-04-22 per Anne. -->
+<div id="bulk-review-sheet" class="modal-overlay" style="display:none;position:fixed;inset:0;z-index:9070;background:rgba(20,10,15,0.72);backdrop-filter:blur(4px);align-items:flex-end;justify-content:center;">
+  <div style="background:white;border-radius:28px 28px 0 0;width:100%;max-width:480px;max-height:92vh;display:flex;flex-direction:column;box-shadow:0 -8px 40px rgba(0,0,0,0.22);">
+    <div style="width:40px;height:4px;background:var(--border);border-radius:100px;margin:12px auto 8px;flex-shrink:0;"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 18px 10px;flex-shrink:0;border-bottom:1px solid var(--border);">
+      <div>
+        <div style="font-family:'Playfair Display',serif;font-size:18px;font-weight:600;color:var(--charcoal);line-height:1.2;">Tag your new photos</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:2px;">Add tags and a caption so clients find your work</div>
+      </div>
+      <button onclick="closeBulkReviewSheet()" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted);line-height:1;flex-shrink:0;padding:4px 8px;">&times;</button>
+    </div>
+    <div id="bulk-review-body" style="overflow-y:auto;padding:16px 18px 4px;flex:1;">
+      <!-- populated by openBulkReviewSheet() -->
+    </div>
+    <div style="flex-shrink:0;padding:12px 18px 24px;border-top:1px solid var(--border);background:white;">
+      <button onclick="closeBulkReviewSheet()" class="btn btn-rose" style="width:100%;">Done</button>
+      <div style="font-size:11px;color:var(--muted);text-align:center;margin-top:8px;font-style:italic;">Don't forget to tap <strong>Save Changes</strong> on the profile to keep your edits.</div>
     </div>
   </div>
 </div>
