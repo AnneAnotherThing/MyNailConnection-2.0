@@ -4869,7 +4869,12 @@ function saveAvailability() {
     },
     body: JSON.stringify({ is_available: nowOn, is_same_day: todayOn, accepting_new_clients: newOn })
   }).then(function(r) {
-    if (!r.ok) console.warn('saveAvailability failed:', r.status);
+    if (!r.ok) { console.warn('saveAvailability failed:', r.status); return; }
+    // Refresh ALL_TECHS so every surface (tech-detail, browse cards, map
+    // pins, avail count tiles) reflects the new state without a reload.
+    // Anne asked for this 2026-04-22 — she was seeing "No availability set"
+    // on her own profile right after flipping the hero chips on.
+    try { loadTechsFromSupabase(); } catch(e) {}
   }).catch(function(e) { console.warn('saveAvailability error:', e); });
 
   // Toast message
@@ -4902,7 +4907,7 @@ function scheduleAvailabilityResets() {
       method: 'PATCH',
       headers: { 'Content-Type':'application/json','apikey':SUPABASE_ANON_KEY,'Authorization':'Bearer '+(window._mncAccessToken||SUPABASE_ANON_KEY),'Prefer':'return=minimal' },
       body: JSON.stringify({ is_available: false })
-    });
+    }).then(function() { try { loadTechsFromSupabase(); } catch(e) {} });
     var nowBtn = document.getElementById('t-now');
     var dashBtn = document.getElementById('td-t-now');
     if (nowBtn) { nowBtn.classList.remove('on'); nowBtn.classList.add('off'); }
@@ -4917,7 +4922,7 @@ function scheduleAvailabilityResets() {
       method: 'PATCH',
       headers: { 'Content-Type':'application/json','apikey':SUPABASE_ANON_KEY,'Authorization':'Bearer '+(window._mncAccessToken||SUPABASE_ANON_KEY),'Prefer':'return=minimal' },
       body: JSON.stringify({ is_same_day: false })
-    });
+    }).then(function() { try { loadTechsFromSupabase(); } catch(e) {} });
     var todayBtn = document.getElementById('t-today');
     var dashBtn = document.getElementById('td-t-today');
     if (todayBtn) { todayBtn.classList.remove('on'); todayBtn.classList.add('off'); }
@@ -6075,6 +6080,14 @@ function openTechDetail(tech) {
     galleryCount.textContent = '';
     galleryEmpty.style.display = 'block';
   }
+
+  // Availability badges (Available now / This week / New clients) + typical
+  // hours. renderTechDetailAvail was defined but never called until
+  // 2026-04-22 — meant the profile always showed "No availability set right
+  // now" even when the tech had toggled themselves on. Reads is_available /
+  // is_same_day / accepting_new_clients + hours_available off the tech
+  // record; safe for any caller since all fields are optional.
+  renderTechDetailAvail(tech);
 
   // Load bulletin board
   const techBoardId = tech.email || tech.name;
@@ -10329,6 +10342,10 @@ async function toggleHideAddress() {
     );
     if (!res.ok) throw new Error('save failed');
     showToast(newVal ? 'Your address is now hidden on the public map' : 'Your address is now visible on the public map');
+    // Refresh in-memory tech list so the map and cards pick up the new
+    // hide_address_public state immediately (same always-refresh pattern
+    // Anne asked for on availability saves).
+    try { loadTechsFromSupabase(); } catch(e) {}
   } catch(e) {
     // revert UI on failure
     btn.classList.toggle('on', !newVal);
