@@ -1452,6 +1452,13 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
            refreshAdminNav). One button per destination, no duplication. -->
       <button id="home-tech-portal-btn" style="display:none;" aria-hidden="true"></button>
       <button id="home-admin-portal-btn" style="display:none;" aria-hidden="true"></button>
+      <!-- Small sign-out icon — shown only for techs by styleNavForRole,
+           since the bottom-nav Sign Out slot was repurposed for My
+           Gallery. Non-techs still have Sign Out in their nav and don't
+           see this icon. 2026-04-22 per Anne. -->
+      <button id="home-signout-btn" onclick="doSignOut()" title="Sign Out" aria-label="Sign Out" style="display:none;background:rgba(255,255,255,0.14);border:1px solid rgba(255,255,255,0.22);width:34px;height:34px;border-radius:50%;align-items:center;justify-content:center;cursor:pointer;padding:0;">
+        <svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:#FAF0EB;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </button>
       <div class="avatar" onclick="navToProfile()" id="home-avatar-btn">?</div>
     </div>
   </div>
@@ -2167,22 +2174,16 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
     <!-- Summary bar -->
     <div id="myph-summary" style="background:var(--cream);border-radius:14px;padding:12px 14px;margin-bottom:16px;font-size:13px;color:var(--charcoal);text-align:center;">Loading your photos…</div>
 
-    <!-- Untagged section -->
-    <div id="myph-untagged-wrap" style="display:none;margin-bottom:24px;">
+    <!-- Unified 2-col grid — all photos in one place, status badge per
+         thumbnail, tap opens the tag editor. Matches browse-style aesthetic
+         (2-col, square crops, tight gap) so clients and techs see a
+         consistent "gallery" surface. 2026-04-22 per Anne. -->
+    <div id="myph-grid-wrap" style="display:none;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-        <div style="font-size:12px;font-weight:700;letter-spacing:1.2px;color:var(--rose);text-transform:uppercase;">Needs Tagging <span id="myph-untagged-count"></span></div>
-        <div style="font-size:11px;color:var(--muted);">Tap chips to tag</div>
+        <div style="font-size:12px;font-weight:700;letter-spacing:1.2px;color:var(--muted);text-transform:uppercase;">Your Photos <span id="myph-total-count" style="color:var(--muted);font-weight:500;"></span></div>
+        <div style="font-size:11px;color:var(--muted);">Tap a photo to tag</div>
       </div>
-      <div id="myph-untagged-grid" style="display:grid;grid-template-columns:1fr;gap:14px;"></div>
-    </div>
-
-    <!-- Tagged (collapsed) section -->
-    <div id="myph-tagged-wrap" style="display:none;">
-      <button id="myph-tagged-toggle" onclick="toggleMyPhotosTagged()" style="width:100%;padding:12px 14px;background:white;border:1px solid var(--border);border-radius:12px;font-size:13px;font-weight:600;color:var(--charcoal);cursor:pointer;font-family:'DM Sans',sans-serif;display:flex;align-items:center;justify-content:space-between;">
-        <span>Tagged <span id="myph-tagged-count" style="color:var(--muted);font-weight:500;"></span></span>
-        <span id="myph-tagged-caret" style="color:var(--muted);">▸</span>
-      </button>
-      <div id="myph-tagged-grid" style="display:none;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px;"></div>
+      <div id="myph-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;"></div>
     </div>
 
     <!-- Empty state -->
@@ -3248,29 +3249,41 @@ function _weeklySlotsRemaining() {
 // decisions). Authoritative enforcement happens server-side via the
 // consume_upload_slot RPC called per file. Allow when _techTier isn't
 // loaded so the first-paint isn't falsely locked.
+//
+// MATH NOTE (2026-04-22): With the per-upload RPC, credits DEPLETE as
+// they're used. So total_photos grows to include spent-credit uploads
+// while photo_credits only reflects what's unspent. The old formula
+// `used < free + credits` was wrong — it compared a cumulative count
+// against current remaining capacity, giving nonsense like "used=13,
+// free=5, credits=2 → 13 < 7 = false" (blocked) even though the user
+// has unused credits. Correct rule: you can upload if you have free
+// slots LEFT (first `free_limit` uploads) OR any credits remaining.
 function canUploadPhoto() {
   if (!_techTier) return true;
   if (_techTier.tier === 'paid') {
-    // Subscriber can proceed if they have weekly slots OR credits.
-    return _weeklySlotsRemaining() > 0 || _techTier.photo_credits > 0;
+    return _weeklySlotsRemaining() > 0 || (_techTier.photo_credits || 0) > 0;
   }
-  const used = _techTier.total_photos;
+  const used = _techTier.total_photos || 0;
   const freeSlots = STRIPE_CONFIG.free_limit;
-  const credits = _techTier.photo_credits;
-  return used < freeSlots + credits;
+  const credits = _techTier.photo_credits || 0;
+  return used < freeSlots || credits > 0;
 }
 
 // UI-facing "how many more can you upload before you need to pay?" —
-// for non-subscribers, the free + credits headroom; for subscribers,
-// remaining weekly slots PLUS credits (credits burst past the cap).
-// Infinity is no longer correct for subscribers now that the weekly
-// cap applies.
+// for subscribers: remaining weekly slots + credits (credits burst past
+// the cap). For free tier: unused free slots (first 5 only) + credits.
+// Critical that used >= free_limit is clamped at 0 so we don't subtract
+// into negative and pretend the tech has less room than zero.
 function photosRemaining() {
   if (!_techTier) return STRIPE_CONFIG.free_limit;
   if (_techTier.tier === 'paid') {
     return _weeklySlotsRemaining() + (_techTier.photo_credits || 0);
   }
-  return Math.max(0, (STRIPE_CONFIG.free_limit + _techTier.photo_credits) - _techTier.total_photos);
+  const used = _techTier.total_photos || 0;
+  const freeSlots = STRIPE_CONFIG.free_limit;
+  const credits = _techTier.photo_credits || 0;
+  const freeRemaining = Math.max(0, freeSlots - used);
+  return freeRemaining + credits;
 }
 
 // Writes the persistent "slots remaining" line on tech-home. Called
@@ -3303,18 +3316,23 @@ function updateSlotsRemainingDisplay() {
       el.textContent = 'Weekly limit hit — refills ' + resetStr + ' or add credits';
     }
   } else {
-    // Free tier: "{N} photo slots available" where N = (free + credits) - used.
+    // Free tier with the corrected credits-deplete math:
+    //   freeRemaining = max(0, free_limit - total_photos)  (first 5 uploads only)
+    //   remaining = freeRemaining + credits
+    // Credits deplete as they're used by consume_upload_slot, so the
+    // number shown here is what they can actually upload right now.
     const used = _techTier.total_photos || 0;
     const freeSlots = STRIPE_CONFIG.free_limit;
-    const remaining = Math.max(0, (freeSlots + credits) - used);
+    const freeRemaining = Math.max(0, freeSlots - used);
+    const remaining = freeRemaining + credits;
     if (remaining === 0) {
-      el.textContent = (credits > 0)
-        ? 'All ' + (freeSlots + credits) + ' slots full · add credits below to keep going'
-        : 'All ' + freeSlots + ' free slots used · add credits to keep going';
+      el.textContent = 'All ' + freeSlots + ' free slots used · add credits to keep going';
+    } else if (freeRemaining > 0 && credits > 0) {
+      el.textContent = freeRemaining + ' free + ' + credits + ' credit' + (credits === 1 ? '' : 's') + ' available';
     } else if (credits > 0) {
-      el.textContent = remaining + ' slot' + (remaining === 1 ? '' : 's') + ' left (' + freeSlots + ' free + ' + credits + ' credit' + (credits === 1 ? '' : 's') + ')';
+      el.textContent = credits + ' credit' + (credits === 1 ? '' : 's') + ' left · ' + freeSlots + ' free slots used';
     } else {
-      el.textContent = remaining + ' of ' + freeSlots + ' free slots remaining';
+      el.textContent = freeRemaining + ' of ' + freeSlots + ' free slots remaining';
     }
   }
 }
@@ -3391,12 +3409,12 @@ function showUpgradeModal() {
       creditsRow.style.display = 'block';
       creditsRow.textContent = `You have ${credits} credit${credits === 1 ? '' : 's'} available — your next upload will use one.`;
     } else if (!isSubscriber && credits > 0) {
-      // Free tier AT CAP with credits — means free+credits are all
-      // spent. Don't say "unused." Be honest.
-      const used = (_techTier && _techTier.total_photos) || 0;
-      const freeSlots = STRIPE_CONFIG.free_limit;
+      // Free tier arriving at the modal with credits remaining — this
+      // shouldn't really happen under the corrected math (credits
+      // should let them upload). If it does, show a helpful nudge
+      // rather than the old nonsense sum.
       creditsRow.style.display = 'block';
-      creditsRow.textContent = `All ${used} of your slots are full (${freeSlots} free + ${credits} purchased). Top up below to add more.`;
+      creditsRow.textContent = `You have ${credits} credit${credits === 1 ? '' : 's'} left — your next upload will use one automatically.`;
     } else {
       creditsRow.style.display = 'none';
     }
@@ -7637,55 +7655,109 @@ async function loadMyPhotosData() {
 }
 
 function renderMyPhotos() {
+  // Unified grid: every photo in a single 2-col layout, status badge
+  // per thumb (tagged/untagged), tap opens the tag-editor sheet. No
+  // more split "untagged above / tagged collapsed below" — one clean
+  // scannable surface. 2026-04-22 per Anne.
   const photos = _myPhotosState.photos;
-  const untagged = [], tagged = [];
-  photos.forEach(function(p, i) {
-    if (p.tags && p.tags.length) tagged.push({ p, i });
-    else untagged.push({ p, i });
-  });
+  const taggedCount = photos.filter(function(p) { return p.tags && p.tags.length; }).length;
 
-  const summary = document.getElementById('myph-summary');
-  const emptyEl = document.getElementById('myph-empty');
-  const utWrap  = document.getElementById('myph-untagged-wrap');
-  const tgWrap  = document.getElementById('myph-tagged-wrap');
+  const summary  = document.getElementById('myph-summary');
+  const emptyEl  = document.getElementById('myph-empty');
+  const gridWrap = document.getElementById('myph-grid-wrap');
+  const totalEl  = document.getElementById('myph-total-count');
+  const grid     = document.getElementById('myph-grid');
 
   if (!photos.length) {
-    summary.style.display = 'none';
-    utWrap.style.display = 'none';
-    tgWrap.style.display = 'none';
-    emptyEl.style.display = 'block';
+    if (summary)  summary.style.display = 'none';
+    if (gridWrap) gridWrap.style.display = 'none';
+    if (emptyEl)  emptyEl.style.display = 'block';
     return;
   }
 
-  emptyEl.style.display = 'none';
-  summary.style.display = 'block';
-  summary.textContent = tagged.length + ' of ' + photos.length + ' photos tagged';
-
-  // Untagged — prominent grid
-  document.getElementById('myph-untagged-count').textContent = '(' + untagged.length + ')';
-  if (untagged.length) {
-    utWrap.style.display = 'block';
-    const grid = document.getElementById('myph-untagged-grid');
-    grid.textContent = '';
-    untagged.forEach(function(entry) {
-      grid.appendChild(buildUntaggedCard(entry.p, entry.i));
-    });
-  } else {
-    utWrap.style.display = 'none';
+  if (emptyEl)  emptyEl.style.display = 'none';
+  if (summary) {
+    summary.style.display = 'block';
+    summary.textContent = taggedCount + ' of ' + photos.length + ' photos tagged';
   }
+  if (gridWrap) gridWrap.style.display = 'block';
+  if (totalEl)  totalEl.textContent = '(' + photos.length + ')';
 
-  // Tagged — collapsed disclosure
-  document.getElementById('myph-tagged-count').textContent = '(' + tagged.length + ')';
-  if (tagged.length) {
-    tgWrap.style.display = 'block';
-    const grid = document.getElementById('myph-tagged-grid');
+  if (grid) {
     grid.textContent = '';
-    tagged.forEach(function(entry) {
-      grid.appendChild(buildTaggedThumbnail(entry.p, entry.i));
+    photos.forEach(function(p, i) {
+      grid.appendChild(buildGalleryCard(p, i));
     });
-  } else {
-    tgWrap.style.display = 'none';
   }
+}
+
+// One card in the unified 2-col gallery grid. Status badge overlay
+// (green ✓ N if tagged, rose "Needs tags" if not) gives at-a-glance
+// signal; tap opens the tag-editor sheet.
+function buildGalleryCard(photo, idx) {
+  const card = document.createElement('div');
+  card.style.cssText = 'position:relative;border-radius:12px;overflow:hidden;cursor:pointer;background:var(--cream);';
+  card.onclick = function() { openMyPhotoTagSheet(idx); };
+
+  const img = document.createElement('img');
+  img.src = photo.url;
+  img.loading = 'lazy';
+  img.style.cssText = 'width:100%;aspect-ratio:1;object-fit:cover;display:block;';
+  card.appendChild(img);
+
+  const tagCount = (photo.tags && photo.tags.length) || 0;
+  const badge = document.createElement('div');
+  if (tagCount > 0) {
+    badge.textContent = '✓ ' + tagCount + ' tag' + (tagCount === 1 ? '' : 's');
+    badge.style.cssText = 'position:absolute;bottom:6px;left:6px;background:rgba(76,140,95,0.92);color:white;font-size:10.5px;font-weight:600;padding:3px 8px;border-radius:100px;letter-spacing:0.2px;backdrop-filter:blur(4px);';
+  } else {
+    badge.textContent = 'Needs tags';
+    badge.style.cssText = 'position:absolute;bottom:6px;left:6px;background:rgba(196,120,106,0.92);color:white;font-size:10.5px;font-weight:600;padding:3px 8px;border-radius:100px;letter-spacing:0.2px;backdrop-filter:blur(4px);';
+  }
+  card.appendChild(badge);
+  return card;
+}
+
+// Bottom-sheet tag editor. Opened by tapping a grid card. Renders the
+// full PHOTO_TAG_TAXONOMY as chip groups; toggling a chip saves via
+// the existing toggleMyPhotoTag() debounced path. Track which photo
+// index is open so chip taps know which photo to mutate.
+let _myphSheetIdx = -1;
+function openMyPhotoTagSheet(idx) {
+  const photo = _myPhotosState.photos[idx];
+  if (!photo) return;
+  _myphSheetIdx = idx;
+  const sheet = document.getElementById('myph-tag-sheet');
+  const imgEl = document.getElementById('myph-tag-sheet-img');
+  const chipsWrap = document.getElementById('myph-tag-sheet-chips');
+  if (imgEl) imgEl.src = photo.url;
+  if (chipsWrap) {
+    chipsWrap.innerHTML = '';
+    Object.keys(PHOTO_TAG_TAXONOMY).forEach(function(cat) {
+      const catDiv = document.createElement('div');
+      catDiv.style.cssText = 'margin-bottom:14px;';
+      const label = document.createElement('div');
+      label.textContent = cat;
+      label.style.cssText = 'font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);margin-bottom:7px;text-transform:uppercase;';
+      catDiv.appendChild(label);
+      const chips = document.createElement('div');
+      chips.style.cssText = 'display:flex;flex-wrap:wrap;gap:6px;';
+      PHOTO_TAG_TAXONOMY[cat].forEach(function(t) {
+        chips.appendChild(buildTagChip(idx, t, photo));
+      });
+      catDiv.appendChild(chips);
+      chipsWrap.appendChild(catDiv);
+    });
+  }
+  if (sheet) sheet.style.display = 'flex';
+}
+
+function closeMyPhotoTagSheet() {
+  const sheet = document.getElementById('myph-tag-sheet');
+  if (sheet) sheet.style.display = 'none';
+  _myphSheetIdx = -1;
+  // Re-render the grid so the badge reflects the new tag state.
+  try { renderMyPhotos(); } catch(_) {}
 }
 
 function buildUntaggedCard(photo, idx) {
@@ -8314,6 +8386,13 @@ async function saveTechEdit() {
   // Reload fresh from Supabase so admin list stays in sync
   await loadTechsFromSupabase();
   renderTechAdminList();
+  // CRITICAL: refresh _techTier too so total_photos / photo_credits
+  // reflect the post-save state. Without this, a tech who deletes
+  // photos down to 4 and tries to re-upload hits the stale cached
+  // "used=5" count in canUploadPhoto(), gets the upgrade modal,
+  // and thinks we're charging them again. 2026-04-22 regression fix.
+  try { if (typeof loadTechTier === 'function' && currentUserEmail) await loadTechTier(currentUserEmail); } catch(_){}
+  try { if (typeof updatePhotoLimitUI === 'function') updatePhotoLimitUI(); } catch(_){}
   // Refresh the tech-home Dashboard panels too, so edits made through
   // the tech-edit modal (new photos via "Manage", bio changes,
   // availability toggles) reflect back on the Dashboard immediately.
@@ -10566,6 +10645,35 @@ function styleNavForRole() {
   // admins see nothing there. 2026-04-22.
   var galleryCard = document.getElementById('home-my-gallery-card');
   if (galleryCard) galleryCard.style.display = isTechSlot ? 'block' : 'none';
+
+  // Swap the bottom-nav "Sign Out" slot → "My Gallery" for techs.
+  // Sign-out moves to a small header icon (home-signout-btn) so techs
+  // don't lose the action. Non-techs keep Sign Out where it is.
+  // 2026-04-22 per Anne.
+  var GALLERY_ICON = '<rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>';
+  var SIGNOUT_ICON = '<path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>';
+  document.querySelectorAll('.bottom-nav .nav-item').forEach(function(item) {
+    var lbl = item.querySelector('.nav-label');
+    if (!lbl) return;
+    var text = (lbl.textContent || '').trim();
+    if (text !== 'Sign Out' && text !== 'My Gallery') return;
+    var svg = item.querySelector('.nav-icon svg');
+    if (isTechSlot) {
+      lbl.textContent = 'My Gallery';
+      if (svg) svg.innerHTML = GALLERY_ICON;
+      item.setAttribute('onclick', "show('my-photos')");
+      item.setAttribute('title', 'My Gallery');
+      item.style.opacity = '';
+    } else {
+      lbl.textContent = 'Sign Out';
+      if (svg) svg.innerHTML = SIGNOUT_ICON;
+      item.setAttribute('onclick', 'doSignOut()');
+      item.setAttribute('title', 'Sign Out');
+      item.style.opacity = '0.55';
+    }
+  });
+  var signoutBtn = document.getElementById('home-signout-btn');
+  if (signoutBtn) signoutBtn.style.display = isTechSlot ? 'flex' : 'none';
 }
 
 // ── Tech Dashboard ────────────────────────────────────────────────────────────
@@ -13823,7 +13931,7 @@ function postUploadGoToFeed() {
            as a half-bar. Wrapper keeps the click target untouched.
            2026-04-22. -->
       <div style="position:relative;">
-        <div style="position:absolute;top:-10px;right:16px;background:var(--rose);color:white;font-size:10px;font-weight:700;padding:3px 10px;border-radius:100px;letter-spacing:0.5px;z-index:2;box-shadow:0 2px 6px rgba(178,110,95,0.35);">BEST VALUE</div>
+        <div style="position:absolute;top:-10px;right:16px;background:var(--rose);color:white;font-size:10px;font-weight:700;padding:3px 10px;border-radius:100px;letter-spacing:0.5px;z-index:2;box-shadow:0 2px 6px rgba(178,110,95,0.35);">SAVE 50%</div>
         <div onclick="purchasePhotos(10)" style="border:2px solid var(--rose);border-radius:18px;padding:16px;cursor:pointer;display:flex;align-items:center;gap:14px;background:var(--rose-light);transition:all 0.15s;">
           <div style="width:44px;height:44px;border-radius:14px;background:white;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--rose);">$5</div>
           <div style="flex:1;">
@@ -13834,16 +13942,23 @@ function postUploadGoToFeed() {
         </div>
       </div>
 
-      <!-- $9/month all-time portfolio — hidden when GLOW_UP_ENABLED is
-           false (pre-weekly-slots-pivot). showUpgradeModal toggles this
-           each open so the flag is respected without a reload. -->
-      <div id="upgrade-opt-glowup" onclick="purchaseUnlimited()" style="border:2px solid var(--charcoal);border-radius:18px;padding:16px;cursor:pointer;display:flex;align-items:center;gap:14px;background:var(--charcoal);transition:all 0.15s;">
-        <div style="width:44px;height:44px;border-radius:14px;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:'Playfair Display',serif;font-size:14px;font-weight:700;color:white;line-height:1.1;text-align:center;">$9<br><span style="font-size:9px;font-weight:500;">/ mo</span></div>
-        <div style="flex:1;">
-          <div style="font-size:15px;font-weight:600;color:white;">Glow Up <span style="font-size:11px;font-weight:500;color:rgba(255,255,255,0.7);">— all-time portfolio</span></div>
-          <div style="font-size:12px;color:rgba(255,255,255,0.65);">Every set preserved · All your work on display · Cancel anytime</div>
+      <!-- $9/month Glow Up — the real hero offering. Bright rose →
+           gold gradient with a "BEST DEAL" ribbon so it visually beats
+           the one-time packs. Copy spells out the weekly rhythm so
+           techs know what they're actually getting. Hidden when
+           GLOW_UP_ENABLED is false; showUpgradeModal toggles this each
+           open. 2026-04-22 per Anne: "make it a nicer color, brighter,
+           gradient... 5 photos a week needs spelled out." -->
+      <div style="position:relative;">
+        <div style="position:absolute;top:-10px;right:16px;background:linear-gradient(135deg,#E8C890 0%,#D4A060 100%);color:#3D2508;font-size:10px;font-weight:800;padding:3px 10px;border-radius:100px;letter-spacing:0.6px;z-index:2;box-shadow:0 2px 6px rgba(168,130,50,0.35);">BEST VALUE</div>
+        <div id="upgrade-opt-glowup" onclick="purchaseUnlimited()" style="border:2px solid var(--rose-dark);border-radius:18px;padding:16px;cursor:pointer;display:flex;align-items:center;gap:14px;background:linear-gradient(135deg,#D98872 0%,#C4786A 45%,#A85968 100%);transition:all 0.15s;box-shadow:0 6px 20px rgba(178,110,95,0.28);">
+          <div style="width:46px;height:46px;border-radius:14px;background:rgba(255,255,255,0.22);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:'Playfair Display',serif;font-size:15px;font-weight:700;color:white;line-height:1.1;text-align:center;backdrop-filter:blur(4px);">$9<br><span style="font-size:9px;font-weight:500;opacity:0.88;">/ mo</span></div>
+          <div style="flex:1;">
+            <div style="font-size:15.5px;font-weight:700;color:white;letter-spacing:0.2px;">Glow Up</div>
+            <div style="font-size:12.5px;color:rgba(255,255,255,0.92);line-height:1.45;margin-top:3px;"><b>5 new photos every week</b> &middot; resets Sunday<br><span style="font-size:11.5px;opacity:0.85;">All your work stays live. Buy credits to go faster.</span></div>
+          </div>
+          <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:white;fill:none;stroke-width:2.5;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg>
         </div>
-        <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:rgba(255,255,255,0.6);fill:none;stroke-width:2.5;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg>
       </div>
 
     </div>
@@ -14238,6 +14353,27 @@ function postUploadGoToFeed() {
 </div>
 
 <!-- ════════════════════════════════════════════════════════════════════════
+     MY-GALLERY TAG EDITOR SHEET
+     Tap a photo in the gallery grid → this bottom sheet opens with the
+     photo preview + tag chips grouped by category. Chips save via the
+     same toggleMyPhotoTag() path the old inline cards used. Closing the
+     sheet keeps the tech on the gallery grid, preserving scroll. 2026-04-22. -->
+<div id="myph-tag-sheet" class="modal-overlay" style="display:none;position:fixed;inset:0;z-index:9060;background:rgba(20,10,15,0.72);backdrop-filter:blur(4px);align-items:flex-end;justify-content:center;">
+  <div style="background:white;border-radius:28px 28px 0 0;width:100%;max-width:440px;max-height:88vh;display:flex;flex-direction:column;box-shadow:0 -8px 40px rgba(0,0,0,0.22);">
+    <div style="width:40px;height:4px;background:var(--border);border-radius:100px;margin:12px auto 8px;flex-shrink:0;"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 18px 12px;flex-shrink:0;">
+      <div style="font-family:'Playfair Display',serif;font-size:17px;font-weight:600;color:var(--charcoal);">Tag this photo</div>
+      <button onclick="closeMyPhotoTagSheet()" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted);line-height:1;">&times;</button>
+    </div>
+    <div style="overflow-y:auto;padding:0 18px 24px;">
+      <img id="myph-tag-sheet-img" src="" alt="" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:14px;margin-bottom:14px;background:var(--cream);"/>
+      <div id="myph-tag-sheet-chips"></div>
+      <div style="font-size:11px;color:var(--muted);text-align:center;margin-top:14px;font-style:italic;">Changes save automatically.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════════════
      FEEDBACK BUTTON + MODAL
      Floating chip on every signed-in screen; taps open a modal that
      writes into public.feedback. Auto-captures current screen, user
@@ -14248,40 +14384,4 @@ function postUploadGoToFeed() {
 </button>
 
 <div id="feedback-modal" class="modal-overlay" style="display:none;position:fixed;inset:0;z-index:9100;background:rgba(20,10,15,0.72);backdrop-filter:blur(4px);align-items:flex-end;justify-content:center;">
-  <div style="background:white;border-radius:28px 28px 0 0;width:100%;max-width:440px;padding:20px 22px 34px;box-shadow:0 -8px 40px rgba(0,0,0,0.22);">
-    <div style="width:40px;height:4px;background:var(--border);border-radius:100px;margin:0 auto 14px;"></div>
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-      <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:600;color:var(--charcoal);">Send feedback</div>
-      <button onclick="closeFeedbackModal()" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted);line-height:1;">&times;</button>
-    </div>
-    <div style="font-size:13px;color:var(--muted);line-height:1.5;margin-bottom:16px;">Thanks for helping us shape MNC. We read every one.</div>
-    <div style="display:flex;flex-direction:column;gap:12px;">
-      <div>
-        <label style="font-size:11px;font-weight:600;letter-spacing:0.8px;color:var(--muted);display:block;margin-bottom:5px;">WHAT'S THIS ABOUT?</label>
-        <select id="fb-category" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;box-sizing:border-box;">
-          <option value="Bug">Bug &mdash; something's broken</option>
-          <option value="Idea">Idea &mdash; I wish it did X</option>
-          <option value="Question">Question &mdash; how does X work?</option>
-          <option value="Payment">Payment issue</option>
-          <option value="Other">Something else</option>
-        </select>
-      </div>
-      <div>
-        <label style="font-size:11px;font-weight:600;letter-spacing:0.8px;color:var(--muted);display:block;margin-bottom:5px;">TELL US</label>
-        <textarea id="fb-message" rows="5" placeholder="What happened, what you tried, and what you expected..." style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;resize:vertical;box-sizing:border-box;min-height:90px;"></textarea>
-      </div>
-      <div id="fb-context" style="font-size:11px;color:var(--muted);line-height:1.5;padding:10px 12px;background:var(--cream);border-radius:10px;border:1px dashed var(--border);">
-        <div style="font-weight:600;letter-spacing:0.5px;margin-bottom:4px;text-transform:uppercase;font-size:10px;">We'll auto-attach</div>
-        <div id="fb-context-body">Your email, current screen, device info, and a recent console snapshot so we don't have to ask.</div>
-      </div>
-      <div id="fb-status" style="display:none;font-size:12.5px;line-height:1.4;padding:10px 12px;border-radius:10px;"></div>
-      <div style="display:flex;gap:8px;margin-top:4px;">
-        <button onclick="closeFeedbackModal()" style="flex:1;padding:12px;border-radius:100px;border:1.5px solid var(--border);background:white;font-size:14px;font-weight:500;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;">Cancel</button>
-        <button id="fb-send" onclick="submitFeedback()" class="btn btn-rose" style="flex:2;">Send feedback</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-</body>
-</html>
+  <div style="background:white;border-radius:28px 28px 0 0;width:100%;ma

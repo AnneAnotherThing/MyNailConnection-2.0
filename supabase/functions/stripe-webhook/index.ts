@@ -127,16 +127,16 @@ serve(async (req) => {
   let modeLabel: string;
   const body = await req.text();
   try {
-    event = stripeLive.webhooks.constructEvent(body, signature, webhookSecretLive);
+    event = await stripeLive.webhooks.constructEventAsync(body, signature, webhookSecretLive);
     stripe = stripeLive;
     modeLabel = 'LIVE';
   } catch (liveErr) {
     if (stripeTest && STRIPE_WEBHOOK_SECRET_TEST) {
       try {
-        // constructEvent doesn't actually use the instance's API key — it
+        // constructEventAsync doesn't actually use the instance's API key — it
         // only verifies HMAC against the supplied secret — so reusing
         // stripeLive's verifier with the test secret is fine.
-        event = stripeLive.webhooks.constructEvent(body, signature, STRIPE_WEBHOOK_SECRET_TEST);
+        event = await stripeLive.webhooks.constructEventAsync(body, signature, STRIPE_WEBHOOK_SECRET_TEST);
         stripe = stripeTest;
         modeLabel = 'TEST';
       } catch (testErr) {

@@ -1,0 +1,22 @@
+# Supabase CLI / function deployment config.
+#
+# Each [functions.<name>] block controls how that function is deployed
+# and gated. `verify_jwt = false` disables the Supabase gateway's JWT
+# requirement on inbound requests — necessary for any function that
+# receives traffic from external services that authenticate themselves
+# differently (Stripe uses Stripe-Signature, not a Bearer JWT).
+#
+# Without this, the gateway 401s those requests before they reach the
+# function — and our function's own signature verification never runs.
+# Anne hit exactly that on 2026-04-22 when test-mode Stripe webhooks
+# started returning 401 Unauthorized.
+
+[functions.stripe-webhook]
+verify_jwt = false
+
+[functions.send-push]
+# send-push is called from our own authenticated app, so JWT-verify is
+# fine (default true) — callers pass the user's access token.
+
+[functions.broadcast-push]
+# Same as send-push: only our admin UI calls it, with the admin's JWT.
