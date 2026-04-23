@@ -136,6 +136,15 @@ copy_if_exists robots.txt              "$GH/robots.txt"
 [ -d images ]      && rsync -a --delete images/      "$GH/images/"
 [ -d app-screens ] && rsync -a --delete app-screens/ "$GH/app-screens/"
 
+# ── .well-known/ — Android App Links + iOS Universal Links ──────────────
+# assetlinks.json is served from https://mynailconnection.com/.well-known/
+# so Android can auto-verify this domain belongs to our app package. When
+# iOS ships, apple-app-site-association will live alongside it (no file
+# extension, served as application/json). Without this directory in the
+# publish root, tapping a Supabase auth-email link opens a browser tab
+# instead of deep-linking into the installed app. — 2026-04-23
+[ -d .well-known ] && rsync -a --delete .well-known/ "$GH/.well-known/"
+
 # App under /app/
 copy_if_exists index.html              "$GH/app/index.html"
 copy_if_exists reset-password.html     "$GH/app/reset-password.html"

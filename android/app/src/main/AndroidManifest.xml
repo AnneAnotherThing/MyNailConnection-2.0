@@ -22,6 +22,36 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
+            <!-- ─────────────────────────────────────────────────────────
+                 App Links — lets auth-email links (Supabase confirm /
+                 reset / magic-link URLs routed through mynailconnection.com)
+                 open the installed app instead of the browser.
+
+                 Requires /.well-known/assetlinks.json served from
+                 https://mynailconnection.com/.well-known/assetlinks.json
+                 with this app's SHA-256 fingerprint (see assetlinks.json
+                 in the repo root). Without that file, autoVerify fails
+                 silently and the link opens in the browser. — 2026-04-23
+            ───────────────────────────────────────────────────────── -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" />
+                <data android:host="mynailconnection.com" />
+                <data android:pathPrefix="/app" />
+            </intent-filter>
+
+            <!-- Custom URL scheme fallback (matches strings.xml
+                 custom_url_scheme). Useful for any
+                 com.mynailconnection.app://… redirect we wire later. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="@string/custom_url_scheme" />
+            </intent-filter>
+
         </activity>
 
         <provider
@@ -38,4 +68,11 @@
     <!-- Permissions -->
 
     <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- Android 13+ (API 33+) requires runtime permission for
+         notifications. Capacitor push plugin registers the FCM service
+         but doesn't declare this — the host app has to. Without it,
+         requestPermissions() will resolve 'denied' silently on
+         Android 13+. — 2026-04-23 -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 </manifest>
