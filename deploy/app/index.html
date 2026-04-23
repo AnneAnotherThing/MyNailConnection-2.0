@@ -3437,12 +3437,12 @@ const STRIPE_CONFIG = {
   link_glow_up:   'https://buy.stripe.com/eVqeVc1EQeFD4SIgojgEg02',
   // ── TEST-MODE PAYMENT LINKS ─────────────────────────────────────────────
   // Paste in from Stripe Dashboard → flip "Viewing test data" → Payment
-  // Links. Test links start with https://buy.stripe.com/test_... Leave as
-  // '' until the test-mode products + links are set up; `_stripeLaunch`
-  // falls back to the live link and shows a toast so you know.
-  link_1_photo_test:   '',
-  link_10_photos_test: '',
-  link_glow_up_test:   '',
+  // Links. Test links start with https://buy.stripe.com/test_... If left
+  // blank, `_stripeLink` falls back to the live link and shows a toast so
+  // you know. Filled in 2026-04-22 after Anne set up the test products.
+  link_1_photo_test:   'https://buy.stripe.com/test_28E14pfiz3OP0x1fZK5kk03',
+  link_10_photos_test: 'https://buy.stripe.com/test_9B6eVf0nF5WX6Vp5l65kk04',
+  link_glow_up_test:   'https://buy.stripe.com/test_cNi7sN4DVadd93x00M5kk05',
   // Plan names (for display)
   plan_free: 'Starter',
   plan_credits: 'Spotlight',
