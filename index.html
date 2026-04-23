@@ -1548,6 +1548,74 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
          mechanics (auto-scroll, poll, 2-col grid, expiry filter) are
          intact — just on a different screen. -->
 
+    <!-- Decorative magnolia flourish — the same blooming SVG from the
+         splash screen, scaled down to fill the bottom of the home view
+         without dominating. Same mnolia-branch / mag-petal / mag-center
+         / mag-leaf classes, so the CSS animations (bloom-then-sway) fire
+         automatically once on page load. Anne 2026-04-22. -->
+    <div aria-hidden="true" style="margin:24px auto 8px;max-width:280px;width:100%;opacity:0.85;pointer-events:none;">
+      <svg viewBox="0 0 400 260" width="100%" height="auto" preserveAspectRatio="xMidYMax meet" xmlns="http://www.w3.org/2000/svg" style="display:block;">
+        <g transform="translate(30,0)">
+          <!-- Main branches -->
+          <path class="mnolia-branch" d="M200 240 C200 225 198 210 196 195 C193 180 185 168 178 155" fill="none" stroke="#9C7A60" stroke-width="4" stroke-linecap="round" style="animation-delay:0s"/>
+          <path class="mnolia-branch" d="M178 155 C165 148 148 144 130 140" fill="none" stroke="#9C7A60" stroke-width="3" stroke-linecap="round" style="animation-delay:0.3s"/>
+          <path class="mnolia-branch" d="M190 175 C205 165 230 158 258 152" fill="none" stroke="#9C7A60" stroke-width="2.5" stroke-linecap="round" style="animation-delay:0.4s"/>
+          <path class="mnolia-branch" d="M178 155 C172 140 168 125 170 108" fill="none" stroke="#9C7A60" stroke-width="2.5" stroke-linecap="round" style="animation-delay:0.55s"/>
+          <path class="mnolia-branch" d="M178 155 C190 145 208 138 225 130" fill="none" stroke="#9C7A60" stroke-width="2" stroke-linecap="round" style="animation-delay:0.7s"/>
+          <path class="mnolia-branch" d="M130 140 C112 134 94 138 76 132" fill="none" stroke="#9C7A60" stroke-width="2" stroke-linecap="round" style="animation-delay:0.85s"/>
+          <!-- Leaves -->
+          <ellipse class="mag-leaf" cx="183" cy="168" rx="18" ry="9" fill="#B0906A" style="--lr:-35deg;--lox:178px;--loy:155px;--delay:0.9s"/>
+          <ellipse class="mag-leaf" cx="218" cy="172" rx="16" ry="8" fill="#A8845E" style="--lr:20deg;--lox:215px;--loy:165px;--delay:1.05s"/>
+          <ellipse class="mag-leaf" cx="148" cy="148" rx="15" ry="7" fill="#B0906A" style="--lr:-20deg;--lox:145px;--loy:125px;--delay:1.15s"/>
+          <ellipse class="mag-leaf" cx="102" cy="138" rx="14" ry="7" fill="#A8845E" style="--lr:15deg;--lox:100px;--loy:112px;--delay:1.3s"/>
+          <ellipse class="mag-leaf" cx="248" cy="162" rx="15" ry="7" fill="#B0906A" style="--lr:-10deg;--lox:250px;--loy:150px;--delay:1.4s"/>
+          <!-- FLOWER 1 — main center bloom -->
+          <g transform="translate(170,112)">
+            <ellipse class="mag-petal swaying" cx="0" cy="-32" rx="14" ry="30" fill="#EDD0C8" style="--start-r:0deg;--end-r:0deg;--delay:1.0s;--dur:2.2s; transform-origin:0px 0px;"/>
+            <ellipse class="mag-petal swaying" cx="28" cy="-18" rx="14" ry="30" fill="#E8C5BC" style="--start-r:72deg;--end-r:72deg;--delay:1.2s;--dur:2.4s; transform-origin:0px 0px;"/>
+            <ellipse class="mag-petal swaying" cx="18" cy="22" rx="14" ry="30" fill="#EDD0C8" style="--start-r:144deg;--end-r:144deg;--delay:1.4s;--dur:2.5s; transform-origin:0px 0px;"/>
+            <ellipse class="mag-petal swaying" cx="-18" cy="22" rx="14" ry="30" fill="#E4BFBA" style="--start-r:216deg;--end-r:216deg;--delay:1.55s;--dur:2.4s; transform-origin:0px 0px;"/>
+            <ellipse class="mag-petal swaying" cx="-28" cy="-18" rx="14" ry="30" fill="#EDD0C8" style="--start-r:288deg;--end-r:288deg;--delay:1.75s;--dur:2.2s; transform-origin:0px 0px;"/>
+            <ellipse class="mag-petal" cx="0" cy="-20" rx="10" ry="22" fill="#F5E2DA" style="--start-r:36deg;--end-r:36deg;--delay:1.95s;--dur:4s; transform-origin:0px 0px;"/>
+            <ellipse class="mag-petal" cx="18" cy="8" rx="10" ry="22" fill="#F0D8D0" style="--start-r:108deg;--end-r:108deg;--delay:2.1s;--dur:4s; transform-origin:0px 0px;"/>
+            <ellipse class="mag-petal" cx="-18" cy="8" rx="10" ry="22" fill="#F5E2DA" style="--start-r:180deg;--end-r:180deg;--delay:2.25s;--dur:4s; transform-origin:0px 0px;"/>
+            <circle class="mag-center" cx="0" cy="0" r="9" fill="#E8C890" style="--delay:2.55s"/>
+            <circle class="mag-center" cx="0" cy="0" r="5" fill="#D4A060" style="--delay:2.7s"/>
+            <circle class="mag-center" cx="0" cy="0" r="2" fill="#8A5C2A" style="--delay:2.8s"/>
+          </g>
+          <!-- FLOWER 2 — right side -->
+          <g transform="translate(256,155)">
+            <ellipse class="mag-petal swaying" cx="0" cy="-22" rx="10" ry="22" fill="#EDD0C8" style="--start-r:0deg;--end-r:0deg;--delay:1.4s;--dur:2.5s; transform-origin:0px 0px;"/>
+            <ellipse class="mag-petal swaying" cx="19" cy="-10" rx="10" ry="22" fill="#E8C5BC" style="--start-r:72deg;--end-r:72deg;--delay:1.55s;--dur:2.5s; transform-origin:0px 0px;"/>
+            <ellipse class="mag-petal swaying" cx="12" cy="16" rx="10" ry="22" fill="#EDD0C8" style="--start-r:144deg;--end-r:144deg;--delay:1.75s;--dur:2.5s; transform-origin:0px 0px;"/>
+            <ellipse class="mag-petal swaying" cx="-12" cy="16" rx="10" ry="22" fill="#E4BFBA" style="--start-r:216deg;--end-r:216deg;--delay:1.95s;--dur:2.5s; transform-origin:0px 0px;"/>
+            <ellipse class="mag-petal swaying" cx="-19" cy="-10" rx="10" ry="22" fill="#EDD0C8" style="--start-r:288deg;--end-r:288deg;--delay:2.15s;--dur:2.5s; transform-origin:0px 0px;"/>
+            <circle class="mag-center" cx="0" cy="0" r="6" fill="#E8C890" style="--delay:2.7s"/>
+            <circle class="mag-center" cx="0" cy="0" r="3" fill="#D4A060" style="--delay:2.85s"/>
+          </g>
+          <!-- FLOWER 3 — left side bud -->
+          <g transform="translate(78,136)">
+            <ellipse class="mag-petal" cx="0" cy="-18" rx="9" ry="20" fill="#F0D8D8" style="--start-r:0deg;--end-r:0deg;--delay:1.6s;--dur:2.8s; transform-origin:0px 0px;"/>
+            <ellipse class="mag-petal" cx="15" cy="-8" rx="9" ry="20" fill="#EAD0CC" style="--start-r:72deg;--end-r:72deg;--delay:1.85s;--dur:2.8s; transform-origin:0px 0px;"/>
+            <ellipse class="mag-petal" cx="10" cy="14" rx="9" ry="20" fill="#F0D8D8" style="--start-r:144deg;--end-r:144deg;--delay:2.1s;--dur:2.8s; transform-origin:0px 0px;"/>
+            <ellipse class="mag-petal" cx="-10" cy="14" rx="9" ry="20" fill="#EAD0CC" style="--start-r:216deg;--end-r:216deg;--delay:2.3s;--dur:2.8s; transform-origin:0px 0px;"/>
+            <ellipse class="mag-petal" cx="-15" cy="-8" rx="9" ry="20" fill="#F0D8D8" style="--start-r:288deg;--end-r:288deg;--delay:2.55s;--dur:2.8s; transform-origin:0px 0px;"/>
+            <circle class="mag-center" cx="0" cy="0" r="6" fill="#EDCC88" style="--delay:3.0s"/>
+            <circle class="mag-center" cx="0" cy="0" r="3" fill="#C89848" style="--delay:3.15s"/>
+          </g>
+          <!-- FLOWER 4 — small bud top right -->
+          <g transform="translate(222,130)">
+            <ellipse class="mag-petal" cx="0" cy="-14" rx="7" ry="16" fill="#F0D8D8" style="--start-r:0deg;--end-r:0deg;--delay:2.1s;--dur:3s; transform-origin:0px 0px;"/>
+            <ellipse class="mag-petal" cx="12" cy="-6" rx="7" ry="16" fill="#EAD0CC" style="--start-r:72deg;--end-r:72deg;--delay:2.3s;--dur:3s; transform-origin:0px 0px;"/>
+            <ellipse class="mag-petal" cx="8" cy="10" rx="7" ry="16" fill="#F0D8D8" style="--start-r:144deg;--end-r:144deg;--delay:2.55s;--dur:3s; transform-origin:0px 0px;"/>
+            <ellipse class="mag-petal" cx="-8" cy="10" rx="7" ry="16" fill="#EAD0CC" style="--start-r:216deg;--end-r:216deg;--delay:2.8s;--dur:3s; transform-origin:0px 0px;"/>
+            <ellipse class="mag-petal" cx="-12" cy="-6" rx="7" ry="16" fill="#F0D8D8" style="--start-r:288deg;--end-r:288deg;--delay:3.0s;--dur:3s; transform-origin:0px 0px;"/>
+            <circle class="mag-center" cx="0" cy="0" r="4" fill="#EDCC88" style="--delay:3.35s"/>
+          </g>
+        </g>
+      </svg>
+    </div>
+
   </div>
 
 
@@ -2331,7 +2399,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
         <div style="width:68px;height:68px;border-radius:50%;border:2.5px solid rgba(255,240,230,0.85);background:var(--rose-light);display:flex;align-items:center;justify-content:center;overflow:hidden;box-shadow:0 3px 16px rgba(0,0,0,0.22), 0 0 0 5px rgba(255,210,195,0.12);" id="profile-photo-wrap">
           <div style="font-family:'Playfair Display',serif;font-size:24px;color:var(--rose-dark);" id="profile-initials">?</div>
         </div>
-        <div aria-hidden="true" style="position:absolute;right:-2px;bottom:-2px;width:24px;height:24px;border-radius:50%;background:var(--rose);border:2.5px solid white;display:flex;align-items:center;justify-content:center;pointer-events:none;box-shadow:0 2px 6px rgba(0,0,0,0.3);">
+        <div id="profile-photo-camera-badge" aria-hidden="true" style="position:absolute;right:-2px;bottom:-2px;width:24px;height:24px;border-radius:50%;background:var(--rose);border:2.5px solid white;display:flex;align-items:center;justify-content:center;pointer-events:none;box-shadow:0 2px 6px rgba(0,0,0,0.3);">
           <svg viewBox="0 0 24 24" style="width:11px;height:11px;stroke:white;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
         </div>
       </div>
@@ -9774,8 +9842,13 @@ async function initProfileScreen() {
   // (techs: photo-or-initials; clients/admins: photo-or-MNC-coin).
   updateAvatar();
   // Clients don't need a profile photo (their profile isn't visible to
-  // anyone) — kill the tap-to-upload handler so the coin isn't a
-  // misleading affordance. Techs + admins retain it.
+  // anyone) — kill the tap-to-upload handler AND hide the camera badge
+  // so the coin doesn't look tappable. Previously the click was
+  // disabled but the camera icon stayed, which misled clients into
+  // thinking they could edit (Anne 2026-04-22). Techs + admins retain
+  // both. The badge is re-shown below for techs so role flips within a
+  // session don't leave it stuck hidden.
+  var cameraBadge = document.getElementById('profile-photo-camera-badge');
   if (window._mncCurrentRole !== 'tech') {
     var wrap_ = document.getElementById('profile-photo-wrap');
     var tapWrap = wrap_ ? wrap_.parentElement : null;
@@ -9784,6 +9857,9 @@ async function initProfileScreen() {
       tapWrap.style.cursor = 'default';
       tapWrap.removeAttribute('title');
     }
+    if (cameraBadge) cameraBadge.style.display = 'none';
+  } else {
+    if (cameraBadge) cameraBadge.style.display = 'flex';
   }
 
   // Fetch role + location from Supabase
