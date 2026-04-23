@@ -54,6 +54,20 @@ const supabase = createClient(
   Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 );
 
+// Next Sunday 00:00 UTC strictly after a given timestamp. Used to
+// initialize / refresh techs.weekly_reset_at when a Glow Up subscription
+// activates or renews. Matches the SQL next_sunday_utc_midnight() helper
+// so test and DB behaviour align. 2026-04-22 per the Glow Up weekly-
+// slots pivot.
+function nextSundayUtcMidnight(now: Date = new Date()): Date {
+  const d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+  const dow = d.getUTCDay(); // 0=Sun, 1=Mon, ..., 6=Sat
+  const daysToAdd = dow === 0 ? 7 : (7 - dow);
+  d.setUTCDate(d.getUTCDate() + daysToAdd);
+  // d is already 00:00:00 UTC of that day.
+  return d;
+}
+
 // Resolve credits for a Checkout Session line item. Tries several strategies
 // in order, so we don't silently no-op if Anne ever renames products or tweaks
 // pricing in the Stripe Dashboard.
@@ -180,13 +194,21 @@ serve(async (req) => {
       const sub = await stripe.subscriptions.retrieve(session.subscription as string);
       const expiresAt = new Date(sub.current_period_end * 1000);
       const customerId = session.customer as string;
+      // Initialize Glow Up weekly allowance: 5 new photos/week,
+      // Sunday 00:00 UTC reset. On re-subscription after cancellation
+      // the tech gets a fresh 0/5 this week regardless of what the
+      // counter was before — resets aren't rolled over. See the pivot
+      // memo project_mnc_subscription_model_pivot for rationale.
+      const weeklyResetAt = nextSundayUtcMidnight();
       const { error } = await supabase.from('techs').update({
         subscription_tier: 'paid',
         subscription_expires_at: expiresAt.toISOString(),
         stripe_customer_id: customerId,
+        weekly_upload_count: 0,
+        weekly_reset_at: weeklyResetAt.toISOString(),
       }).eq('id', techId);
       if (error) console.error(`techs.update failed for ${techId}:`, error);
-      else console.log(`Set paid tier for tech ${techId} until ${expiresAt.toISOString()}`);
+      else console.log(`Set paid tier for tech ${techId} until ${expiresAt.toISOString()}; weekly resets at ${weeklyResetAt.toISOString()}`);
 
       // If this is a re-subscribe after a previous cancellation, restore
       // any photos we paused on the way out. Safe no-op when nothing paused.
@@ -232,10 +254,31 @@ serve(async (req) => {
     const expiresAt = new Date(sub.current_period_end * 1000);
     const isActive = sub.status === 'active' || sub.status === 'trialing';
 
-    const { error } = await supabase.from('techs').update({
+    // On transition to active (renewal, reactivation from past_due /
+    // dunning, trial end), refresh weekly_reset_at if it's null or
+    // already past — that way a dormant subscriber who reactivates gets
+    // a fresh week. Mid-period renewals where the reset marker is still
+    // in the future leave it alone (the lazy reset inside
+    // consume_upload_slot handles normal week rollovers).
+    const updatePayload: Record<string, unknown> = {
       subscription_tier: isActive ? 'paid' : 'free',
       subscription_expires_at: isActive ? expiresAt.toISOString() : null,
-    }).eq('stripe_customer_id', customerId);
+    };
+    if (isActive) {
+      // Look up current weekly_reset_at to decide whether to overwrite.
+      const { data: cur } = await supabase
+        .from('techs')
+        .select('weekly_reset_at')
+        .eq('stripe_customer_id', customerId)
+        .limit(1)
+        .maybeSingle();
+      const existing = cur?.weekly_reset_at ? new Date(cur.weekly_reset_at as string) : null;
+      if (!existing || existing.getTime() <= Date.now()) {
+        updatePayload.weekly_upload_count = 0;
+        updatePayload.weekly_reset_at = nextSundayUtcMidnight().toISOString();
+      }
+    }
+    const { error } = await supabase.from('techs').update(updatePayload).eq('stripe_customer_id', customerId);
 
     if (error) console.error(`techs.update failed for customer ${customerId}:`, error);
     else console.log(`Sub updated for ${customerId}: status=${sub.status}, expires=${expiresAt.toISOString()}`);

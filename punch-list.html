@@ -331,7 +331,7 @@
     <h2>🟠 High <span class="pill">Fix before launch</span></h2>
 
 
-    <input type="checkbox" id="t_weekly_slots_schema"/>
+    <input type="checkbox" id="t_weekly_slots_schema" checked/>
     <label class="task" for="t_weekly_slots_schema">
       <span class="checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
       <span class="task-body">
@@ -340,7 +340,7 @@
       </span>
     </label>
 
-    <input type="checkbox" id="t_upload_flow_rewrite"/>
+    <input type="checkbox" id="t_upload_flow_rewrite" checked/>
     <label class="task" for="t_upload_flow_rewrite">
       <span class="checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
       <span class="task-body">
@@ -349,7 +349,7 @@
       </span>
     </label>
 
-    <input type="checkbox" id="t_webhook_weekly_slots"/>
+    <input type="checkbox" id="t_webhook_weekly_slots" checked/>
     <label class="task" for="t_webhook_weekly_slots">
       <span class="checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
       <span class="title-spacer" style="display:none"></span>
@@ -373,26 +373,20 @@
       <span class="checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
       <span class="task-body">
         <div class="title">Replace stub <code>privacy.html</code> + <code>terms.html</code> with counsel-reviewed versions</div>
-        <div class="desc">The current files are clearly labeled "pre-launch placeholder" and are fine for a soft open but not for heavy promotion, paid ads, or any EU/UK traffic. Have counsel (or a reputable generator like Termly / iubenda / Rocket Lawyer as a starting point) produce real versions covering: what data we collect, how we use it, Supabase + Stripe as sub-processors, user rights under GDPR Art. 15–17 / CCPA, data retention periods, breach notification, age restrictions, acceptable use, payment terms, subscription cancellation, and governing law. Drop them in at the same filenames — everything linking to them already works.</div>
+        <div class="desc"><strong>Partial — substantive drafts in place, counsel review still required.</strong> Updated 2026-04-22 from the earlier "pre-launch placeholder" stubs to full drafts covering the standard ground: data collection, Supabase/Stripe sub-processors, GDPR/CCPA rights, 30-day deletion, 7-year retention for payment records, breach notification, age restrictions (13+ clients, 18+ techs), payment terms, subscription cancellation with no partial-period refunds, Texas governing law, and the full liability stack the pivot requires — Independent Contractors, Not a Licensing Authority, Assumption of Risk, Indemnification, Disclaimer of Warranties, Limitation of Liability capped at greater of ($100 or trailing-12-mo payments). Both pages carry a prominent "Draft pending legal review" banner so users and courts can see the status. <strong>Still blocking heavy promotion / paid ads / EU-UK traffic:</strong> counsel review in applicable jurisdictions. Good to hand to a lawyer as a starting point rather than pay them to write from scratch. When the reviewed versions land, remove the draft banner, bump <code>Version 2026-04</code>, and fire a one-time "accept updated terms" modal for pre-launch users (not yet built — track as separate task).</div>
       </span>
     </label>
 
-    <input type="checkbox" id="t_liability_acknowledgment"/>
+    <input type="checkbox" id="t_liability_acknowledgment" checked/>
     <label class="task" for="t_liability_acknowledgment">
       <span class="checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
       <span class="task-body">
         <div class="title">Liability acknowledgment checkboxes on tech + client signup</div>
-        <div class="desc">MNC is a discovery platform — we don't verify licenses, insurance, or credentials, and we don't control what happens in someone else's chair. To keep that line clean in court, both sides need to acknowledge it at signup:
-          <ul style="margin:8px 0 0 18px;padding:0;line-height:1.55;">
-            <li><strong>Tech signup flow:</strong> a required checkbox above the "Create profile" button — <em>"I confirm I am properly licensed and insured to practice in my jurisdiction, I will maintain that status, and I understand My Nail Connection does not verify or vouch for my credentials. I am solely responsible for the legality and quality of the services I offer."</em></li>
-            <li><strong>Client signup flow:</strong> a required checkbox — <em>"I understand that My Nail Connection is a discovery platform that connects me with independent nail technicians. MNC does not verify licensing, insurance, sanitation practices, or service quality. Booking with any tech is my choice, and any concerns should be directed to the tech or to my local licensing board."</em></li>
-          </ul>
-          Implementation: both checkboxes must be checked to submit (disabled button until then). Persist the acceptance to each user row (<code>accepted_terms_at timestamptz</code>, <code>accepted_terms_version text</code>) so we can prove acceptance later. Ideally also capture IP + user-agent for audit. Same language — or tighter — also needs to land in the real <code>terms.html</code> that counsel reviews (sections: <em>Independent Contractors</em>, <em>Not a Licensing Authority</em>, <em>Assumption of Risk</em>, <em>Indemnification</em>). Existing users created pre-launch should see a one-time "accept the updated terms" modal the first time they open the app after this ships.
-        </div>
+        <div class="desc">Shipped. Tech signup (<code>#reg-tech-liability</code>, line ~1391 in <code>index.html</code>) requires "I confirm I am properly licensed and insured…" before submit; client signup (<code>#reg-client-liability</code>, ~1230) requires the discovery-platform acknowledgment. Acceptance is persisted per-user via the signup RPC as <code>p_liability_version</code> + <code>p_liability_accepted_at</code> (see line ~9510). Client wrap auto-hides on the tech flow and vice-versa (line ~9331), so neither signer sees the wrong text. Still outstanding: the matching "Independent Contractors / Not a Licensing Authority / Assumption of Risk / Indemnification" sections in the real <code>terms.html</code> (tracked under the legal-docs item above) and a one-time "accept updated terms" modal for pre-launch users whenever legal lands.</div>
       </span>
     </label>
 
-    <input type="checkbox" id="t_dev_contact_feedback"/>
+    <input type="checkbox" id="t_dev_contact_feedback" checked/>
     <label class="task" for="t_dev_contact_feedback">
       <span class="checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
       <span class="task-body">
