@@ -3174,14 +3174,16 @@ function _stripeLaunch(link, label) {
 }
 
 function purchasePhotos(qty) {
-  const link = qty === 1 ? STRIPE_CONFIG.link_1_photo : STRIPE_CONFIG.link_10_photos;
+  const link = qty === 1
+    ? _stripeLink('link_1_photo', 'link_1_photo_test')
+    : _stripeLink('link_10_photos', 'link_10_photos_test');
   _stripeLaunch(link, 'Complete payment in browser, then return here to upload');
 }
 
 function purchaseUnlimited() {
   // Kept name for backward-compat call sites; actually launches Glow Up subscription
   // (5 new photo slots/week, Sunday reset) under the 2026-04-22 pricing pivot.
-  _stripeLaunch(STRIPE_CONFIG.link_glow_up, 'Complete payment in browser, then return here');
+  _stripeLaunch(_stripeLink('link_glow_up', 'link_glow_up_test'), 'Complete payment in browser, then return here');
 }
 
 // Stripe Payment Links open in a new tab. When the tech comes back, we want
@@ -3415,12 +3417,32 @@ const ANNE_USER_ID = 'a2f3d32e-1121-43f1-8649-be5c5e460443';
 // 2. Create Payment Links for each, paste URLs below
 // 3. Add ?client_reference_id={email} to each link so webhook knows which tech
 const STRIPE_CONFIG = {
+  // ── MODE ────────────────────────────────────────────────────────────────
+  // Flip to true to route purchases through Stripe TEST mode. The test
+  // links live alongside the live ones below. The stripe-webhook edge
+  // function verifies signatures against both live and test signing
+  // secrets (via STRIPE_WEBHOOK_SECRET_TEST) and uses the matching API
+  // key for any object retrieval, so test purchases land cleanly without
+  // a redeploy. Use a dedicated throwaway tech row when testing — test
+  // events DO write to the same Supabase DB. Added 2026-04-22.
+  //
+  // Ship with test_mode=false. Only flip to true locally / on a preview
+  // build while you're running through `4242 4242 4242 4242` flows.
+  test_mode: false,
   // Payment link for 1 photo credit ($1) — Live
   link_1_photo:   'https://buy.stripe.com/28E4gycjubtr2KA2xtgEg00',
   // Payment link for 10 photo credits ($5 bundle) — Live
   link_10_photos: 'https://buy.stripe.com/cNi8wOfvG7db4SI3BxgEg01',
   // Payment link for Glow Up subscription ($9/mo = 5 new slots/week, Sunday reset) — Live
   link_glow_up:   'https://buy.stripe.com/eVqeVc1EQeFD4SIgojgEg02',
+  // ── TEST-MODE PAYMENT LINKS ─────────────────────────────────────────────
+  // Paste in from Stripe Dashboard → flip "Viewing test data" → Payment
+  // Links. Test links start with https://buy.stripe.com/test_... Leave as
+  // '' until the test-mode products + links are set up; `_stripeLaunch`
+  // falls back to the live link and shows a toast so you know.
+  link_1_photo_test:   '',
+  link_10_photos_test: '',
+  link_glow_up_test:   '',
   // Plan names (for display)
   plan_free: 'Starter',
   plan_credits: 'Spotlight',
@@ -3428,6 +3450,20 @@ const STRIPE_CONFIG = {
   // Free tier photo limit — first 5 are free and permanent (can't be swapped)
   free_limit: 5
 };
+
+// Pick the right payment link for the current mode. Falls back to the
+// live link (with a toast) if test_mode is on but the test link is
+// still blank — this saves you from a silent "nothing happens" when
+// you've flipped the toggle but haven't pasted test URLs yet.
+function _stripeLink(liveKey, testKey) {
+  if (STRIPE_CONFIG.test_mode) {
+    const testLink = STRIPE_CONFIG[testKey];
+    if (testLink) return testLink;
+    showToast('Test mode on but ' + testKey + ' is empty — using live link');
+    return STRIPE_CONFIG[liveKey];
+  }
+  return STRIPE_CONFIG[liveKey];
+}
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt0aXp0dW51aWZ6Ynp3enlxcnJxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3Njk3MDgsImV4cCI6MjA4OTM0NTcwOH0.QXhI1oO-v5Qs2XOlijjpRgM2pxDD6lkWxUQ6uW6HbtM';
 
 // ── AI Photo Validation ────────────────────────────────────────────────────

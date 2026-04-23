@@ -148,15 +148,63 @@ are expected; the unique-violation on `event_id` causes us to short-circuit
 and return `{ received: true, duplicate: true }` without re-applying the
 effect.
 
-## Testing
+## Testing — dual-mode setup (added 2026-04-22)
 
-Use Stripe test-mode keys (`pk_test_...` / `sk_test_...`) and test payment
-links to verify the full flow before flipping to live:
+The webhook verifies signatures against **both** live and test signing
+secrets and uses the matching API key to retrieve event-referenced
+objects. So you can run test purchases alongside live without a second
+function, and the client has a `STRIPE_CONFIG.test_mode` flag that swaps
+the Payment Link URLs.
 
-1. Buy a 1-photo credit on your own tech account → check `techs.photo_credits`
-   incremented by 1 in Supabase.
-2. Buy the $9/mo sub → check `subscription_tier = 'paid'`,
-   `subscription_expires_at` ~1 month out, `stripe_customer_id` populated.
-3. Simulate a renewal: Stripe Dashboard → Customers → your test sub →
-   "Advance test clock" one month → confirm `subscription_expires_at` moved.
-4. Cancel the sub → confirm tier flips back to `free`.
+### One-time dashboard setup (~15 min, no impact on live)
+
+1. Stripe Dashboard → flip the **"Test mode"** toggle (top-left).
+2. Products → recreate:
+   - **1 Photo Credit** — $1.00 one-time (add Price metadata `credits = 1`)
+   - **10 Photo Credits** — $5.00 one-time (add Price metadata `credits = 10`)
+   - **Glow Up** — $9.00/month recurring
+3. Payment Links → recreate each, enable "Collect client reference ID".
+   Copy each test URL (`https://buy.stripe.com/test_...`) into
+   `STRIPE_CONFIG.link_*_test` in `index.html`.
+4. Developers → Webhooks → + Add endpoint:
+   - URL: same as live (`.../functions/v1/stripe-webhook`)
+   - Events: same three (`checkout.session.completed`,
+     `customer.subscription.updated`, `customer.subscription.deleted`)
+   - Copy the test signing secret (`whsec_...`).
+5. Developers → API keys (test mode) → copy the Secret key (`sk_test_...`).
+6. Set the test secrets on your Supabase function:
+
+   ```bash
+   supabase secrets set STRIPE_WEBHOOK_SECRET_TEST="whsec_your_test_signing_secret"
+   supabase secrets set STRIPE_SECRET_KEY_TEST="sk_test_your_key"
+   supabase functions deploy stripe-webhook   # pick up the dual-mode code
+   ```
+
+### Running tests
+
+1. Flip `STRIPE_CONFIG.test_mode = true` in `index.html` (locally or on a
+   preview build — DO NOT ship `true` to production).
+2. Use a throwaway tech row as your test account (any real row in
+   `public.techs` — its `id` gets passed as `client_reference_id`).
+3. Hit the upgrade flow in the app, pay with `4242 4242 4242 4242` any
+   exp / any CVC.
+4. Verify:
+   - Buy a 1-photo credit → `techs.photo_credits` incremented by 1.
+   - Buy the $9/mo sub → `subscription_tier = 'paid'`,
+     `subscription_expires_at` ~1 month out, `stripe_customer_id` populated.
+   - Simulate a renewal: Stripe → Customers → your test sub → "Advance
+     test clock" one month → `subscription_expires_at` moves forward.
+   - Cancel the sub → tier flips back to `free`.
+5. Check Supabase function logs — test events are logged with a `[TEST]`
+   prefix so they're easy to tell apart from live traffic.
+6. Clean up the test tech row's `photo_credits` / `subscription_tier` /
+   `stripe_customer_id` back to defaults when you're done.
+7. Flip `STRIPE_CONFIG.test_mode` back to `false` before shipping.
+
+### Safety note
+
+Both live and test events write to the same Supabase DB (the dual-mode
+code only changes which Stripe API key is used to retrieve objects, not
+which DB it writes to). Test events on real user rows would grant those
+users real credits. Always use a dedicated throwaway test tech when
+running with `test_mode = true`.

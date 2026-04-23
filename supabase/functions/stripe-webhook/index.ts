@@ -4,11 +4,16 @@
 // Deploy:
 //   supabase functions deploy stripe-webhook
 //
-// Set secrets:
+// Set secrets (live — required):
 //   supabase secrets set STRIPE_WEBHOOK_SECRET="whsec_..."
 //   supabase secrets set STRIPE_SECRET_KEY="sk_live_..."
 //
-// Register THREE events in Stripe Dashboard → Developers → Webhooks:
+// Set secrets (test — optional; enables dual-mode verification):
+//   supabase secrets set STRIPE_WEBHOOK_SECRET_TEST="whsec_..."
+//   supabase secrets set STRIPE_SECRET_KEY_TEST="sk_test_..."
+//
+// Register THREE events in Stripe Dashboard → Developers → Webhooks (BOTH
+// live and test endpoints — same events, same URL, different signing secrets):
 //   - checkout.session.completed       (credit packs + first subscription payment)
 //   - customer.subscription.updated    (monthly renewals, plan changes, card updates)
 //   - customer.subscription.deleted    (cancellations)
@@ -16,13 +21,33 @@
 // DO NOT register invoice.payment_succeeded — customer.subscription.updated
 // covers renewals and is cleaner. The tech-facing monthly receipt email is
 // controlled separately under Stripe → Settings → Emails.
+//
+// Test-mode note: when a test-mode event verifies, this function still
+// writes to the same Supabase DB. Use a dedicated test tech account (any
+// real row in public.techs — pass its id as client_reference_id on the
+// test Payment Link) and clean up its photo_credits / subscription_tier
+// afterward. Test events are logged with a [TEST] prefix so they're
+// easy to pick out in supabase logs.
 
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import Stripe from 'npm:stripe@14';
 
-const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY')!, { apiVersion: '2023-10-16' });
-const webhookSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET')!;
+// Live-mode clients (always required — this is the production path).
+const stripeLive = new Stripe(Deno.env.get('STRIPE_SECRET_KEY')!, { apiVersion: '2023-10-16' });
+const webhookSecretLive = Deno.env.get('STRIPE_WEBHOOK_SECRET')!;
+
+// Test-mode clients (optional — only populated if the _TEST secrets are
+// set). When present, the verifier falls back to the test signing secret
+// if the live one doesn't match, and uses the test API key to retrieve
+// any objects referenced by the event (subscriptions, line items). Keeps
+// the whole test/live split within a single deployed function so Anne
+// doesn't have to maintain two copies. 2026-04-22.
+const STRIPE_SECRET_KEY_TEST = Deno.env.get('STRIPE_SECRET_KEY_TEST');
+const STRIPE_WEBHOOK_SECRET_TEST = Deno.env.get('STRIPE_WEBHOOK_SECRET_TEST');
+const stripeTest = STRIPE_SECRET_KEY_TEST
+  ? new Stripe(STRIPE_SECRET_KEY_TEST, { apiVersion: '2023-10-16' })
+  : null;
 
 const supabase = createClient(
   Deno.env.get('SUPABASE_URL')!,
@@ -77,13 +102,45 @@ serve(async (req) => {
   const signature = req.headers.get('stripe-signature');
   if (!signature) return new Response('No signature', { status: 400 });
 
+  // Dual-secret verification: try live first (the common case), fall back
+  // to test if configured and the live signature doesn't match. The
+  // `stripe` variable below is then pointed at whichever API-key client
+  // matches the event so retrieveSubscription / listLineItems fetch the
+  // right object (test objects aren't accessible with a live key and
+  // vice-versa).
   let event: Stripe.Event;
+  let stripe: Stripe;
+  let modeLabel: string;
+  const body = await req.text();
   try {
-    const body = await req.text();
-    event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
-  } catch (err) {
-    console.error('Webhook signature failed:', err);
-    return new Response(`Webhook error: ${err}`, { status: 400 });
+    event = stripeLive.webhooks.constructEvent(body, signature, webhookSecretLive);
+    stripe = stripeLive;
+    modeLabel = 'LIVE';
+  } catch (liveErr) {
+    if (stripeTest && STRIPE_WEBHOOK_SECRET_TEST) {
+      try {
+        // constructEvent doesn't actually use the instance's API key — it
+        // only verifies HMAC against the supplied secret — so reusing
+        // stripeLive's verifier with the test secret is fine.
+        event = stripeLive.webhooks.constructEvent(body, signature, STRIPE_WEBHOOK_SECRET_TEST);
+        stripe = stripeTest;
+        modeLabel = 'TEST';
+      } catch (testErr) {
+        console.error('Webhook signature failed (tried live + test):', testErr);
+        return new Response(`Webhook error: ${testErr}`, { status: 400 });
+      }
+    } else {
+      console.error('Webhook signature failed:', liveErr);
+      return new Response(`Webhook error: ${liveErr}`, { status: 400 });
+    }
+  }
+
+  // Belt-and-suspenders: the event's own livemode flag should match the
+  // secret that verified it. If not, something's badly misconfigured (e.g.
+  // the test secret was set to the live value in supabase secrets).
+  if (event.livemode !== (stripe === stripeLive)) {
+    console.error(`Mode mismatch: event.livemode=${event.livemode} but verified with ${modeLabel} secret`);
+    return new Response('Mode mismatch — check webhook secrets', { status: 400 });
   }
 
   // ── Idempotency ──────────────────────────────────────────────────────────
@@ -105,7 +162,7 @@ serve(async (req) => {
     console.error('stripe_events insert error (proceeding):', dedupeErr);
   }
 
-  console.log('Stripe event:', event.type, event.id);
+  console.log(`[${modeLabel}] Stripe event:`, event.type, event.id);
 
   // ── Checkout completed (one-time credits OR first subscription payment) ──
   if (event.type === 'checkout.session.completed') {
