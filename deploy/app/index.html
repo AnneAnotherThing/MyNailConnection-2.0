@@ -10732,10 +10732,19 @@ async function loadMyBoardPosts() {
       html += live.map(({ p }) => {
         const type = BOARD_TYPES[p.type] || BOARD_TYPES.announcement;
         const dateStr = new Date(p.publish_at || p.created_at).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+        // Thumbnail was missing from live posts on this dashboard even though
+        // viewers already see it via the public .board-post-img style. Add it
+        // here so techs see a visual preview of each live post — parity with
+        // both the public profile view and the "Releasing soon" cards above.
+        // 2026-04-23 per Anne.
+        const img = p.image_url
+          ? '<img class="board-post-img" src="' + esc(p.image_url) + '" loading="lazy" onclick="openGalleryPhoto(\'' + esc(p.image_url) + '\')"/>'
+          : '';
         return '<div class="board-post" style="position:relative;">'
           + '<button onclick="deletePost(\'' + p.id + '\')" style="position:absolute;top:10px;right:10px;background:none;border:none;cursor:pointer;font-size:16px;color:var(--muted);">x</button>'
           + '<div class="board-post-type ' + type.cls + '">' + type.icon + ' ' + type.label + '</div>'
           + '<div class="board-post-body">' + esc(p.body) + '</div>'
+          + img
           + '<div class="board-post-date">' + dateStr + '</div>'
           + '</div>';
       }).join('');
