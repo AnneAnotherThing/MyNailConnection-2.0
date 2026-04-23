@@ -9570,10 +9570,34 @@ function showConfirmationPending(email) {
         'We just sent a confirmation link to <strong style="color:var(--charcoal);">' + (email || 'your email') + '</strong>. Click it to finish setting up your account.' +
       '</div>' +
       '<div id="resend-msg" style="display:none;font-size:12.5px;color:#2D6A4F;margin:8px 0 2px;"></div>' +
-      '<button type="button" class="btn btn-rose" style="width:100%;margin-top:18px;" onclick="show(\'auth\')">I already confirmed — sign in &rarr;</button>' +
+      '<button type="button" class="btn btn-rose" style="width:100%;margin-top:18px;" onclick="continueAfterConfirmation(\'' + (email || '').replace(/\'/g,"\\'") + '\')">Verified, Let\'s glow! &rarr;</button>' +
       '<button type="button" class="btn btn-outline" style="width:100%;margin-top:8px;font-size:13px;" onclick="resendConfirmation(\'' + (email || '').replace(/\'/g,"\\'") + '\')">Resend confirmation email</button>' +
     '</div>';
   if (card) { card.innerHTML = html; }
+}
+
+// Handler for the "I've confirmed — sign me in" button on the
+// confirmation-pending screen. The old onclick was just show('auth'),
+// which took users to the sign-in form where they had to retype
+// everything — misleading because the button copy promised sign-in.
+// Now: navigate to auth, prefill email, and if regData still holds the
+// password from the signup flow we just came from, run the sign-in
+// automatically. Falls through to manual sign-in if regData was
+// cleared (page refresh / closed-tab-and-reopened scenario). The auth
+// flow itself handles the "still not confirmed" error by reshowing the
+// check-your-inbox state, so a premature tap is self-healing. 2026-04-22.
+async function continueAfterConfirmation(email) {
+  show('auth');
+  const emailInput = document.getElementById('signin-email');
+  if (emailInput && email) emailInput.value = email;
+  if (typeof regData !== 'undefined' && regData && regData.pass && email) {
+    await signInWithEmail(email, regData.pass);
+  } else {
+    // No cached password — focus the password field so the user can
+    // type and tap Enter without hunting for it.
+    const passInput = document.getElementById('signin-password');
+    if (passInput) passInput.focus();
+  }
 }
 
 // Show the same "check your email" state on the sign-in screen when
