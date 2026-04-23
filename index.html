@@ -1548,6 +1548,28 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
          mechanics (auto-scroll, poll, 2-col grid, expiry filter) are
          intact — just on a different screen. -->
 
+    <!-- TECH-ONLY shortcut to My Gallery. Techs live in their own
+         portfolio; clients don't have one. Hidden by default and
+         toggled visible for techs by styleNavForRole() on every screen
+         transition. Added 2026-04-22 per Anne — uses the space freed
+         up by the feed-section move to give techs one-tap access to
+         their photos without a Tech Portal detour. -->
+    <div id="home-my-gallery-card" style="display:none;margin:20px 20px 0;">
+      <button onclick="show('my-photos')"
+              style="width:100%;display:flex;align-items:center;gap:14px;padding:14px 16px;border:1px solid var(--rose-mid);border-radius:16px;background:linear-gradient(135deg,#FFF5EF 0%,#FBE4D9 100%);cursor:pointer;font-family:'DM Sans',sans-serif;box-shadow:0 2px 10px rgba(196,120,106,0.12);transition:transform 0.12s ease, box-shadow 0.2s ease;"
+              onmouseenter="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 16px rgba(196,120,106,0.18)';"
+              onmouseleave="this.style.transform='';this.style.boxShadow='0 2px 10px rgba(196,120,106,0.12)';">
+        <div style="width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,0.7);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <svg viewBox="0 0 24 24" style="width:20px;height:20px;stroke:var(--rose-dark);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        </div>
+        <div style="flex:1;min-width:0;text-align:left;">
+          <div style="font-size:14px;font-weight:600;color:var(--rose-dark);line-height:1.2;">My Gallery</div>
+          <div style="font-size:11.5px;color:var(--charcoal);opacity:0.7;margin-top:2px;">Manage your portfolio photos</div>
+        </div>
+        <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--rose-dark);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg>
+      </button>
+    </div>
+
     <!-- Decorative magnolia flourish — the same blooming SVG from the
          splash screen, scaled down to fill the bottom of the home view
          without dominating. Same mnolia-branch / mag-petal / mag-center
@@ -2029,15 +2051,24 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
          uploader (added 2026-04-22 per Anne); the existing modal still
          owns the Save Changes commit so photos flow through the tier
          gate and the normal persistence path. -->
-    <div style="margin:16px 20px 0;display:flex;gap:8px;">
-      <button onclick="openNewPostModal()" class="btn btn-outline" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;font-size:13px;padding-left:8px;padding-right:8px;">
-        <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        Post an Update
-      </button>
-      <button onclick="openPhotoUploadFromHome()" class="btn btn-outline" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;font-size:13px;padding-left:8px;padding-right:8px;">
-        <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
-        Upload Photos
-      </button>
+    <div style="margin:16px 20px 0;">
+      <div style="display:flex;gap:8px;">
+        <button onclick="openNewPostModal()" class="btn btn-outline" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;font-size:13px;padding-left:8px;padding-right:8px;">
+          <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Post an Update
+        </button>
+        <button onclick="openPhotoUploadFromHome()" class="btn btn-outline" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;font-size:13px;padding-left:8px;padding-right:8px;">
+          <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          Upload Photos
+        </button>
+      </div>
+      <!-- Always-visible slot meter. Tells the tech at a glance how
+           many uploads they can still do right now — free slots left,
+           weekly slots left (if subscriber), + any purchased credits.
+           Populated by updateSlotsRemainingDisplay() via
+           loadTechHomeStats. Empty by default so the first paint
+           doesn't flash a misleading "0 remaining" while tier loads. -->
+      <div id="td-slots-remaining" style="margin-top:8px;font-size:11px;color:var(--muted);text-align:center;letter-spacing:0.2px;"></div>
     </div>
 
     <!-- PORTFOLIO PREVIEW — horizontal scroll of recent photos + Manage link -->
@@ -3242,6 +3273,52 @@ function photosRemaining() {
   return Math.max(0, (STRIPE_CONFIG.free_limit + _techTier.photo_credits) - _techTier.total_photos);
 }
 
+// Writes the persistent "slots remaining" line on tech-home. Called
+// after loadTechTier so _techTier is populated, and re-called after
+// every upload / tier-refresh so the number stays honest without a
+// reload. Copy differs by tier + state so techs never see the generic
+// "N slots" when there's a more specific story to tell (weekly refill
+// date, zero + has credits, zero + needs upgrade). 2026-04-22 per
+// Anne's "we need to see how many credits are available at any given
+// time" feedback.
+function updateSlotsRemainingDisplay() {
+  const el = document.getElementById('td-slots-remaining');
+  if (!el) return;
+  if (!_techTier) { el.textContent = ''; return; }
+  const credits = _techTier.photo_credits || 0;
+  if (_techTier.tier === 'paid') {
+    const weekly = _weeklySlotsRemaining();
+    const resetAt = _techTier.weekly_reset_at ? new Date(_techTier.weekly_reset_at) : null;
+    let resetStr = 'Sunday';
+    if (resetAt && resetAt.getTime() > Date.now()) {
+      try { resetStr = resetAt.toLocaleDateString(undefined, { weekday: 'short' }); } catch(_) {}
+    }
+    if (weekly > 0 && credits > 0) {
+      el.textContent = weekly + ' of 5 weekly + ' + credits + ' credit' + (credits === 1 ? '' : 's') + ' · refills ' + resetStr;
+    } else if (weekly > 0) {
+      el.textContent = weekly + ' of 5 weekly slots · refills ' + resetStr;
+    } else if (credits > 0) {
+      el.textContent = 'Weekly limit hit (refills ' + resetStr + ') · ' + credits + ' credit' + (credits === 1 ? '' : 's') + ' available';
+    } else {
+      el.textContent = 'Weekly limit hit — refills ' + resetStr + ' or add credits';
+    }
+  } else {
+    // Free tier: "{N} photo slots available" where N = (free + credits) - used.
+    const used = _techTier.total_photos || 0;
+    const freeSlots = STRIPE_CONFIG.free_limit;
+    const remaining = Math.max(0, (freeSlots + credits) - used);
+    if (remaining === 0) {
+      el.textContent = (credits > 0)
+        ? 'All ' + (freeSlots + credits) + ' slots full · add credits below to keep going'
+        : 'All ' + freeSlots + ' free slots used · add credits to keep going';
+    } else if (credits > 0) {
+      el.textContent = remaining + ' slot' + (remaining === 1 ? '' : 's') + ' left (' + freeSlots + ' free + ' + credits + ' credit' + (credits === 1 ? '' : 's') + ')';
+    } else {
+      el.textContent = remaining + ' of ' + freeSlots + ' free slots remaining';
+    }
+  }
+}
+
 // Per-file RPC gate. Calls public.consume_upload_slot(email) which
 // atomically reserves a slot (weekly → credit → free fallback) and
 // returns the resolution. Client uploads proceed only on ok=true.
@@ -3277,8 +3354,15 @@ async function consumeUploadSlot() {
         if (row.weekly_reset_at) _techTier.weekly_reset_at = row.weekly_reset_at;
       } else if (row.slot_type === 'credit') {
         _techTier.photo_credits = row.remaining_credits;
+      } else if (row.slot_type === 'free') {
+        // Free slot consumption is implicit via portfolio growth —
+        // the photo array grows elsewhere — so just bump the local
+        // count so the meter updates mid-batch.
+        _techTier.total_photos = (_techTier.total_photos || 0) + 1;
       }
     }
+    // Keep the slot-meter on tech-home honest mid-batch.
+    try { updateSlotsRemainingDisplay(); } catch(_) {}
     return row;
   } catch(e) {
     console.warn('consume_upload_slot error:', e);
@@ -3290,12 +3374,32 @@ function showUpgradeModal() {
   const modal = document.getElementById('upgrade-modal');
   if (!modal) return;
   document.getElementById('upgrade-limit-text').textContent = STRIPE_CONFIG.free_limit;
+  // Credits-row copy is context-aware. Previously it always said "you
+  // have N unused credits already," which confused techs who'd just
+  // filled those credits to capacity — "if I have unused credits, why
+  // can't I upload?" Now we show the balance that matters for the
+  // situation: remaining room if any, otherwise a clear "you used all
+  // your free + purchased slots" statement. 2026-04-22 per Anne.
   const creditsRow = document.getElementById('upgrade-credits-row');
-  if (_techTier && _techTier.photo_credits > 0) {
-    creditsRow.style.display = 'block';
-    creditsRow.textContent = `You have ${_techTier.photo_credits} unused photo credit${_techTier.photo_credits !== 1 ? 's' : ''} already.`;
-  } else {
-    creditsRow.style.display = 'none';
+  if (creditsRow) {
+    const credits = (_techTier && _techTier.photo_credits) || 0;
+    const isSubscriber = _techTier && _techTier.tier === 'paid';
+    if (isSubscriber && credits > 0) {
+      // Subscriber at weekly cap, but they have overflow credits. Show
+      // what they have — next tap uses a credit instead of pushing
+      // them into a purchase they don't need.
+      creditsRow.style.display = 'block';
+      creditsRow.textContent = `You have ${credits} credit${credits === 1 ? '' : 's'} available — your next upload will use one.`;
+    } else if (!isSubscriber && credits > 0) {
+      // Free tier AT CAP with credits — means free+credits are all
+      // spent. Don't say "unused." Be honest.
+      const used = (_techTier && _techTier.total_photos) || 0;
+      const freeSlots = STRIPE_CONFIG.free_limit;
+      creditsRow.style.display = 'block';
+      creditsRow.textContent = `All ${used} of your slots are full (${freeSlots} free + ${credits} purchased). Top up below to add more.`;
+    } else {
+      creditsRow.style.display = 'none';
+    }
   }
   // Subscriber-at-cap messaging swap. Glow Up members who hit the weekly
   // cap see a rhythm-aware hero instead of the "Ready to Grow?" upgrade
@@ -3431,6 +3535,9 @@ function updatePhotoLimitUI() {
     badge.style.color = remaining === 0 ? 'var(--rose)' : 'var(--green)';
   }
   updatePausedPhotosBanner();
+  // Keep the always-visible slot meter on tech-home in sync. Cheap —
+  // a single DOM write driven off _techTier we already loaded.
+  try { updateSlotsRemainingDisplay(); } catch(_) {}
 }
 
 // Show / hide the "X photos paused" banner on the My Photos screen based on
@@ -8164,6 +8271,13 @@ async function saveTechEdit() {
             },
             body: JSON.stringify(inserts)
           }).catch(err => console.warn('auto-feed post failed (non-fatal):', err));
+          // Post-upload success modal — funnels the tech to tag-their-
+          // photos (drives search discoverability) and to see their first
+          // post live in the feed (delight). Fires after closeTechEdit runs
+          // so it doesn't stack on the edit modal. 2026-04-22 per Anne.
+          setTimeout(function() {
+            try { showPostUploadSuccessModal(newUrls.length); } catch(_) {}
+          }, 600);
         }
       } catch(e) { console.warn('auto-feed diff failed (non-fatal):', e); }
       // Geocode in background — doesn't block UI
@@ -10445,6 +10559,13 @@ function styleNavForRole() {
       if (svg) svg.innerHTML = PROFILE_ICON;
     }
   });
+
+  // Tech-only "My Gallery" shortcut on the home screen — visible to
+  // techs (and dual-role admin-techs) so they get one-tap access to
+  // their portfolio without a Tech Portal detour. Clients + pure
+  // admins see nothing there. 2026-04-22.
+  var galleryCard = document.getElementById('home-my-gallery-card');
+  if (galleryCard) galleryCard.style.display = isTechSlot ? 'block' : 'none';
 }
 
 // ── Tech Dashboard ────────────────────────────────────────────────────────────
@@ -13596,6 +13717,60 @@ async function submitFeedback() {
     if (btn) { btn.disabled = false; btn.textContent = 'Send feedback'; }
   }
 }
+
+// ══════════════════════════════════════════════════════════════════════════
+// POST-UPLOAD SUCCESS MODAL
+// ══════════════════════════════════════════════════════════════════════════
+// Fired after a successful Save Changes when one or more photos were
+// added in that save. Celebrates the upload + funnels the tech toward
+// (1) tagging (so clients can find them in specific searches) and
+// (2) the feed (to see their first post live). Copy varies with count
+// and includes the last-release time for staggered multi-photo
+// uploads. 2026-04-22 per Anne.
+function showPostUploadSuccessModal(count, lastReleaseMs) {
+  const modal = document.getElementById('post-upload-success-modal');
+  if (!modal) return;
+  const title = document.getElementById('pus-title');
+  const body  = document.getElementById('pus-body');
+  const n = count || 0;
+  if (!n) return;
+  if (n === 1) {
+    if (title) title.textContent = 'Photo uploaded!';
+    if (body) body.innerHTML = 'Your photo is <b>live in the feed now</b>. Tag it so clients searching for your style can find you.';
+  } else if (lastReleaseMs) {
+    // Staggered-release scenario — first is live, rest publish 1/hr.
+    let lastStr = '';
+    try { lastStr = new Date(lastReleaseMs).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }); } catch(_) {}
+    if (title) title.textContent = n + ' photos uploaded!';
+    if (body) {
+      body.innerHTML = '<b>Your first photo is live</b> in the feed now. The rest release one per hour'
+        + (lastStr ? ' &mdash; last one up around <b>' + lastStr + '</b>.' : '.')
+        + '<br><br>Tag them all so they show up in specific searches.';
+    }
+  } else {
+    // Immediate-release scenario (no stagger) — all live right now.
+    if (title) title.textContent = n + ' photos uploaded!';
+    if (body) {
+      body.innerHTML = 'All ' + n + ' photos are <b>live in the feed now</b>.<br><br>Tag them all so clients searching for specific styles can find you.';
+    }
+  }
+  modal.style.display = 'flex';
+}
+
+function closePostUploadModal() {
+  const modal = document.getElementById('post-upload-success-modal');
+  if (modal) modal.style.display = 'none';
+}
+
+function postUploadGoToTag() {
+  closePostUploadModal();
+  try { show('my-photos'); } catch(_) {}
+}
+
+function postUploadGoToFeed() {
+  closePostUploadModal();
+  try { show('feed'); } catch(_) {}
+}
 </script>
 
 
@@ -14042,14 +14217,32 @@ async function submitFeedback() {
 </div>
 
 <!-- ════════════════════════════════════════════════════════════════════════
+     POST-UPLOAD SUCCESS MODAL
+     Fires after Save Changes when 1+ new photos were just added. Two
+     clear CTAs: tag photos (the high-value next action — clients find
+     the tech by tags) and see the first post live in the feed (the
+     instant-gratification moment). 2026-04-22. -->
+<div id="post-upload-success-modal" class="modal-overlay" style="display:none;position:fixed;inset:0;z-index:9050;background:rgba(20,10,15,0.68);backdrop-filter:blur(4px);align-items:center;justify-content:center;">
+  <div style="background:white;border-radius:22px;width:100%;max-width:380px;margin:20px;padding:24px 22px;box-shadow:0 8px 40px rgba(0,0,0,0.22);text-align:center;">
+    <div style="width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,#FFF5EF 0%,#FBE4D9 100%);margin:0 auto 14px;display:flex;align-items:center;justify-content:center;">
+      <svg viewBox="0 0 24 24" style="width:28px;height:28px;stroke:var(--rose-dark);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+    </div>
+    <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:600;color:var(--charcoal);margin-bottom:8px;" id="pus-title">Photos uploaded!</div>
+    <div style="font-size:13.5px;color:#5E524B;line-height:1.6;margin-bottom:20px;" id="pus-body"></div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <button onclick="postUploadGoToTag()" class="btn btn-rose" style="width:100%;">Tag your photos →</button>
+      <button onclick="postUploadGoToFeed()" class="btn btn-outline" style="width:100%;">See your first post live →</button>
+      <button onclick="closePostUploadModal()" style="width:100%;padding:10px;border:none;background:none;color:var(--muted);font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;">Not now</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════════════
      FEEDBACK BUTTON + MODAL
-     Floating chip visible on every signed-in screen; taps open a modal
-     that writes into public.feedback (see sql/feedback-migration.sql).
-     Auto-captures the current screen, user agent, and a rolling buffer
-     of the last ~20 console errors/warnings so Anne + Leslie don't have
-     to play "what screen were you on when that happened?" every time.
-     2026-04-22. -->
-<button id="feedback-fab" onclick="openFeedbackModal()" aria-label="Send feedback" style="display:none;position:fixed;right:14px;bottom:86px;z-index:850;background:var(--rose);color:white;border:none;border-radius:100px;padding:10px 16px;font-size:13px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;box-shadow:0 4px 14px rgba(178,110,95,0.35),0 1px 3px rgba(0,0,0,0.18);display:none;align-items:center;gap:7px;">
+     Floating chip on every signed-in screen; taps open a modal that
+     writes into public.feedback. Auto-captures current screen, user
+     agent, and a rolling buffer of console errors/warnings. 2026-04-22. -->
+<button id="feedback-fab" onclick="openFeedbackModal()" aria-label="Send feedback" style="display:none;position:fixed;right:14px;bottom:86px;z-index:850;background:var(--rose);color:white;border:none;border-radius:100px;padding:10px 16px;font-size:13px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;box-shadow:0 4px 14px rgba(178,110,95,0.35),0 1px 3px rgba(0,0,0,0.18);align-items:center;gap:7px;">
   <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
   Feedback
 </button>
@@ -14057,38 +14250,31 @@ async function submitFeedback() {
 <div id="feedback-modal" class="modal-overlay" style="display:none;position:fixed;inset:0;z-index:9100;background:rgba(20,10,15,0.72);backdrop-filter:blur(4px);align-items:flex-end;justify-content:center;">
   <div style="background:white;border-radius:28px 28px 0 0;width:100%;max-width:440px;padding:20px 22px 34px;box-shadow:0 -8px 40px rgba(0,0,0,0.22);">
     <div style="width:40px;height:4px;background:var(--border);border-radius:100px;margin:0 auto 14px;"></div>
-
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
       <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:600;color:var(--charcoal);">Send feedback</div>
-      <button onclick="closeFeedbackModal()" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted);line-height:1;">×</button>
+      <button onclick="closeFeedbackModal()" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted);line-height:1;">&times;</button>
     </div>
-
     <div style="font-size:13px;color:var(--muted);line-height:1.5;margin-bottom:16px;">Thanks for helping us shape MNC. We read every one.</div>
-
     <div style="display:flex;flex-direction:column;gap:12px;">
       <div>
         <label style="font-size:11px;font-weight:600;letter-spacing:0.8px;color:var(--muted);display:block;margin-bottom:5px;">WHAT'S THIS ABOUT?</label>
         <select id="fb-category" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;box-sizing:border-box;">
-          <option value="Bug">🐛 Bug — something's broken</option>
-          <option value="Idea">💡 Idea — I wish it did X</option>
-          <option value="Question">❓ Question — how does X work?</option>
-          <option value="Payment">💳 Payment issue</option>
+          <option value="Bug">Bug &mdash; something's broken</option>
+          <option value="Idea">Idea &mdash; I wish it did X</option>
+          <option value="Question">Question &mdash; how does X work?</option>
+          <option value="Payment">Payment issue</option>
           <option value="Other">Something else</option>
         </select>
       </div>
-
       <div>
         <label style="font-size:11px;font-weight:600;letter-spacing:0.8px;color:var(--muted);display:block;margin-bottom:5px;">TELL US</label>
-        <textarea id="fb-message" rows="5" placeholder="What happened, what you tried, and what you expected…" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;resize:vertical;box-sizing:border-box;min-height:90px;"></textarea>
+        <textarea id="fb-message" rows="5" placeholder="What happened, what you tried, and what you expected..." style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;resize:vertical;box-sizing:border-box;min-height:90px;"></textarea>
       </div>
-
       <div id="fb-context" style="font-size:11px;color:var(--muted);line-height:1.5;padding:10px 12px;background:var(--cream);border-radius:10px;border:1px dashed var(--border);">
         <div style="font-weight:600;letter-spacing:0.5px;margin-bottom:4px;text-transform:uppercase;font-size:10px;">We'll auto-attach</div>
         <div id="fb-context-body">Your email, current screen, device info, and a recent console snapshot so we don't have to ask.</div>
       </div>
-
       <div id="fb-status" style="display:none;font-size:12.5px;line-height:1.4;padding:10px 12px;border-radius:10px;"></div>
-
       <div style="display:flex;gap:8px;margin-top:4px;">
         <button onclick="closeFeedbackModal()" style="flex:1;padding:12px;border-radius:100px;border:1.5px solid var(--border);background:white;font-size:14px;font-weight:500;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;">Cancel</button>
         <button id="fb-send" onclick="submitFeedback()" class="btn btn-rose" style="flex:2;">Send feedback</button>
@@ -14099,4 +14285,3 @@ async function submitFeedback() {
 
 </body>
 </html>
-</div>
