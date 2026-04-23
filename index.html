@@ -2673,7 +2673,12 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       <button id="atab-techs" onclick="adminTab2('techs')" style="flex:1;padding:10px 4px;border:none;border-radius:10px 10px 0 0;font-size:12px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;background:rgba(255,255,255,0.2);color:white;">Techs</button>
       <button id="atab-clients" onclick="adminTab2('clients')" style="flex:1;padding:10px 4px;border:none;border-radius:10px 10px 0 0;font-size:12px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;background:rgba(255,255,255,0.2);color:white;">Clients</button>
       <button id="atab-inbox" onclick="adminTab2('inbox')" style="flex:1;padding:10px 4px;border:none;border-radius:10px 10px 0 0;font-size:12px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;background:rgba(255,255,255,0.2);color:white;position:relative;">Inbox<span id="atab-inbox-badge" style="display:none;margin-left:4px;background:#E8376A;color:white;font-size:10px;padding:1px 6px;border-radius:10px;vertical-align:middle;font-weight:700;">0</span></button>
-      <button id="atab-broadcast" onclick="adminTab2('broadcast')" style="flex:1;padding:10px 4px;border:none;border-radius:10px 10px 0 0;font-size:12px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;background:rgba(255,255,255,0.2);color:white;">📢 Push</button>
+      <!-- Push tab hidden 2026-04-23 per Anne — parked as phase-2 future
+           enhancement. Tab button + content div both stay in the DOM so
+           the tooling behind it (sendPushToUser, broadcast self-test,
+           etc.) keeps compiling and can be restored by removing this
+           display:none. -->
+      <button id="atab-broadcast" onclick="adminTab2('broadcast')" style="display:none;flex:1;padding:10px 4px;border:none;border-radius:10px 10px 0 0;font-size:12px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;background:rgba(255,255,255,0.2);color:white;">📢 Push</button>
       <button id="atab-settings" onclick="adminTab2('settings')" style="flex:1;padding:10px 4px;border:none;border-radius:10px 10px 0 0;font-size:12px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;background:rgba(255,255,255,0.2);color:white;">Settings</button>
     </div>
   </div>
@@ -13974,9 +13979,18 @@ window._mncConsoleBuffer = window._mncConsoleBuffer || [];
 
 // Show the FAB when a user is signed in, hide when they're not. Called
 // after any auth state change (sign-in, sign-out, session restore).
+//
+// FEEDBACK FAB disabled 2026-04-23 per Anne — parked as phase-2 future
+// enhancement. Everything behind the button (modal, submitFeedback RPC,
+// public.feedback table) still exists and works; we're just keeping the
+// surface off the app until we're ready. To re-enable, delete the early
+// return below. The feature flag keeps the rest of this function honest
+// if it's called from auth state transitions.
+var FEEDBACK_FAB_ENABLED = false;
 function updateFeedbackButtonVisibility() {
   var btn = document.getElementById('feedback-fab');
   if (!btn) return;
+  if (!FEEDBACK_FAB_ENABLED) { btn.style.display = 'none'; return; }
   // currentUserEmail is set by the auth flows; absence = not signed in.
   var signedIn = !!(typeof currentUserEmail !== 'undefined' && currentUserEmail);
   // Keep the button off the splash and auth screens even if a session
