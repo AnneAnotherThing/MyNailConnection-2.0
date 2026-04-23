@@ -2902,9 +2902,15 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
        otherwise it inherits display:none from any inactive parent screen. -->
   <div id="tech-edit-modal" class="modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:600;overflow-y:auto;align-items:stretch;justify-content:stretch;">
     <div style="background:white;margin:24px 12px 40px;border-radius:20px;padding:20px;max-width:480px;margin-left:auto;margin-right:auto;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
-        <div style="font-family:'Playfair Display',serif;font-size:18px;font-weight:600;" id="tech-edit-title">Edit Tech</div>
-        <button onclick="closeTechEdit()" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted);">x</button>
+      <!-- Sticky header: title + Save + close. Save mirrors the Save
+           Changes button at the bottom so techs who've just added
+           photos don't have to scroll past every other section (bio,
+           tags, hours, address, contact, name/shop) to commit. Sticky
+           so it stays visible as the modal scrolls. 2026-04-22 per Anne. -->
+      <div style="position:sticky;top:0;z-index:5;background:white;margin:-20px -20px 16px;padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px;">
+        <div style="font-family:'Playfair Display',serif;font-size:18px;font-weight:600;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" id="tech-edit-title">Edit Tech</div>
+        <button type="button" class="btn btn-rose" onclick="saveTechEdit()" style="padding:8px 18px;font-size:13px;flex-shrink:0;">Save</button>
+        <button onclick="closeTechEdit()" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted);line-height:1;flex-shrink:0;">x</button>
       </div>
 
       <!-- Profile photo -->
@@ -6962,8 +6968,10 @@ async function deleteTech() {
   const email = currentEditTech.email || '';
   if (!(await showConfirm('Delete ' + name + '?', { body: 'This deletes their account and all their photos. This cannot be undone.', okLabel: 'Delete tech' }))) return;
 
-  const btn = document.querySelector('#tech-edit-modal .btn-rose');
-  if (btn) { btn.disabled = true; }
+  // Disable both Save buttons (sticky-header + bottom) during delete so
+  // the user can't double-tap or kick off a save mid-delete. Modal
+  // closes on success, so no restore needed.
+  document.querySelectorAll('#tech-edit-modal .btn-rose').forEach(b => { b.disabled = true; });
 
   try {
     // 1. Delete all storage photos
@@ -7736,11 +7744,13 @@ async function removeTePhoto(idx) {
   if (!currentEditTech) return;
   const edit = techEdits[currentEditTech.name];
   if (!edit || !edit.photos) return;
-  // First 5 photos are free and permanent — can't be removed or swapped
-  if (idx < STRIPE_CONFIG.free_limit) {
-    showToast('Your first ' + STRIPE_CONFIG.free_limit + ' photos are permanent and can\'t be removed');
-    return;
-  }
+  // Free photos USED to be permanent (hard-blocked in the first 5 slots)
+  // but that surprised users who accidentally uploaded a bad shot with
+  // no way to swap. Now deletion is allowed regardless of slot: the
+  // capacity check (`used < free_limit + credits`) still caps free
+  // users at 5 visible photos, so removal just frees a slot for a swap
+  // rather than refunding a paid credit. For Glow Up subscribers,
+  // weekly cap still governs new uploads, so no churn abuse. 2026-04-22.
   const photo = edit.photos[idx];
   // If it is a Supabase Storage URL, delete from bucket too
   if (photo && photo.url && photo.url.includes('/storage/v1/object/public/tech-photos/')) {
@@ -7961,8 +7971,28 @@ async function confirmTechCleanup() {
 
 async function saveTechEdit() {
   if (!currentEditTech) return;
-  const btn = document.querySelector('#tech-edit-modal .btn-rose');
-  if (btn) { btn.textContent = 'Saving…'; btn.disabled = true; }
+  // Both the sticky-header "Save" button (added 2026-04-22) and the
+  // legacy bottom "Save Changes" button share the .btn-rose class.
+  // Collect both so the disabled / "Saving…" state is visible wherever
+  // the user happens to be looking. Remember each button's original
+  // label so restore works regardless of their copy differences.
+  const btns = document.querySelectorAll('#tech-edit-modal .btn-rose');
+  const originalLabels = Array.from(btns).map(b => b.textContent);
+  btns.forEach(b => { b.textContent = 'Saving…'; b.disabled = true; });
+  // Legacy single-button variable kept for the many later references
+  // in this function that check / set btn.textContent on error paths.
+  // Points at the first (sticky-header) button; its state mirrors the
+  // others since they update together via originalLabels.
+  const btn = btns[0] || null;
+  // Helper: restore every .btn-rose to its original label + enabled
+  // state. Called on every error / success exit below. Preserves the
+  // "Save" / "Save Changes" label differences between the two buttons.
+  function restoreSaveBtns() {
+    btns.forEach((b, i) => {
+      b.textContent = originalLabels[i] || 'Save Changes';
+      b.disabled = false;
+    });
+  }
   const isNew = !currentEditTech.name || currentEditTech.name === '';
   const editKey = isNew ? '__new__' : currentEditTech.name;
   if (!techEdits[editKey]) techEdits[editKey] = {};
@@ -7997,20 +8027,20 @@ async function saveTechEdit() {
   // Validate required fields
   if (!edit.name) {
     showToast('Please enter the tech name');
-    if (btn) { btn.textContent = 'Save Changes'; btn.disabled = false; }
+    restoreSaveBtns();
     document.getElementById('te-name').focus();
     return;
   }
   if (!edit.email) {
     showToast('Email is required — it is used as the unique ID for each tech');
-    if (btn) { btn.textContent = 'Save Changes'; btn.disabled = false; }
+    restoreSaveBtns();
     document.getElementById('te-email').focus();
     return;
   }
   // Basic email format check
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(edit.email)) {
     showToast('Please enter a valid email address');
-    if (btn) { btn.textContent = 'Save Changes'; btn.disabled = false; }
+    restoreSaveBtns();
     document.getElementById('te-email').focus();
     return;
   }
@@ -8099,7 +8129,7 @@ async function saveTechEdit() {
         ? 'Saved — ' + ((edit.photos||[]).length - safePhotos.length) + ' base64 photo(s) skipped (use URLs)'
         : '' + edit.name + ' saved!';
       showToast(saved);
-      if (btn) { btn.textContent = 'Save Changes'; btn.disabled = false; }
+      restoreSaveBtns();
 
       // ── Portfolio → feed pivot (2026-04-22) ───────────────────────────────
       // Under Anne's "portfolio primary, feed bonus" framing: every new
@@ -8163,10 +8193,10 @@ async function saveTechEdit() {
   } catch(e) {
     showToast('' + e.message);
     console.error('saveTechEdit error:', e);
-    if (btn) { btn.textContent = 'Save Changes'; btn.disabled = false; }
+    restoreSaveBtns();
     return; // do not update local state if save failed
   }
-  if (btn) { btn.textContent = 'Save Changes'; btn.disabled = false; }
+  restoreSaveBtns();
   // Reload fresh from Supabase so admin list stays in sync
   await loadTechsFromSupabase();
   renderTechAdminList();
@@ -8211,7 +8241,7 @@ async function saveTechEdit() {
     delete techEdits['__new__'];
     initUsers();
   }
-  if (btn) { btn.textContent = 'Save Changes'; btn.disabled = false; }
+  restoreSaveBtns();
   closeTechEdit();
   renderTechAdminList();
 }
@@ -12416,7 +12446,7 @@ async function saveUserEdit() {
     showToast('Saved locally (offline)');
   }
 
-  if (btn) { btn.textContent = 'Save Changes'; btn.disabled = false; }
+  restoreSaveBtns();
   closeUserEdit();
   initUsers();
   renderUsers();
