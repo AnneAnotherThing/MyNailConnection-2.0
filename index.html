@@ -4274,6 +4274,77 @@ async function showPushPrompt(userId) {
   }
 }
 
+// ── Capacitor Android hardware back button ───────────────────────────────────
+// Default Android behavior: the hardware back button exits the app from
+// anywhere. That's fine when the user is on home, but jarring when they're
+// two or three screens deep — they expect back to walk them out of the
+// current screen or modal, not slam them out of MNC entirely. This handler
+// intercepts the event and does in-app navigation first, only letting the
+// app exit when the user is already at a root screen. 2026-04-23 per Anne.
+//
+// Registered once per app load (from DOMContentLoaded), not per sign-in —
+// that would leak listeners.
+async function initCapacitorBackButton() {
+  if (!window.Capacitor || !window.Capacitor.isNativePlatform()) return;
+  const { App } = window.Capacitor.Plugins;
+  if (!App || !App.addListener) return;
+
+  // Root screens where "back" should either exit or just do nothing.
+  // tech-home is included because it's the tech's true landing surface —
+  // backing out of it is fine since Home is reachable via bottom nav.
+  const ROOT_SCREENS = [
+    'splash', 'auth', 'signup', 'signup-role', 'signup-location', 'signup-tech',
+    'welcome-new', 'home', 'tech-home', 'admin'
+  ];
+
+  App.addListener('backButton', function(ev) {
+    try {
+      // 1) Close the topmost visible modal-overlay first. Covers nearly
+      //    every modal in the app: release wizard, tech-edit, upgrade,
+      //    photo lightbox, my-photo tag sheet, welcome-back, etc.
+      //    querySelectorAll preserves DOM order, so the last visible one
+      //    is the topmost (z-index aside — close order matches DOM order
+      //    which is a reasonable approximation and keeps this simple).
+      var overlays = document.querySelectorAll('.modal-overlay');
+      for (var i = overlays.length - 1; i >= 0; i--) {
+        var m = overlays[i];
+        // inline display is how the app toggles these; read the style
+        // attribute (not computed style) so we don't trigger on CSS
+        // default flex/block for elements that ship hidden via inline.
+        var d = m.style.display;
+        if (d && d !== 'none') {
+          m.style.display = 'none';
+          return;
+        }
+      }
+
+      // 2) Root screens — let Android exit the app per convention.
+      if (ROOT_SCREENS.indexOf(_currentScreen) !== -1) {
+        if (App.exitApp) App.exitApp();
+        return;
+      }
+
+      // 3) Otherwise navigate back in-app. Prefer _prevScreen (tracked
+      //    by show()); fall back to the user's natural home if prev is
+      //    empty or points at the same screen.
+      var target = (_prevScreen && _prevScreen !== _currentScreen) ? _prevScreen : null;
+      if (!target) {
+        // Figure out the right home: tech-home for techs/admin-with-tech,
+        // client home for everyone else. Same signal navToProfile uses.
+        var role = window._mncCurrentRole || '';
+        var hasTechRow = !!window._mncIsTechTableUser;
+        target = (role === 'tech' || (role === 'admin' && hasTechRow)) ? 'tech-home' : 'home';
+      }
+      show(target);
+    } catch (e) {
+      // Any error falls back to default exit so we never wedge the user
+      // on a broken back action.
+      console.warn('backButton handler error:', e);
+      if (App.exitApp) App.exitApp();
+    }
+  });
+}
+
 // ── Capacitor native push (used when running as iOS/Android app) ─────────────
 async function initCapacitorPush() {
   if (!PUSH_ENABLED) return;
@@ -12529,6 +12600,12 @@ document.addEventListener('DOMContentLoaded', async function() {
       }
     });
   }
+
+  // Register Android hardware back button handler once per app load.
+  // Fires only inside the Capacitor native shell; no-op on web. Routing
+  // needs _currentScreen + show() + _prevScreen to exist already, and
+  // those are defined at module scope above, so order is fine.
+  try { initCapacitorBackButton(); } catch(e) { /* fall through — non-fatal */ }
 
   // Consume any redirect tokens Supabase left in the URL hash (email
   // confirm, magic link, Google / Apple OAuth). Runs BEFORE session
