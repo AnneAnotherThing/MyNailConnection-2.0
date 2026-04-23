@@ -1529,17 +1529,21 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
         <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--gold);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg>
       </div>
 
-      <!-- Available Now / Within 24h -->
+      <!-- Available Now / Within 24h — the dot + count are live via
+           updateAvailCounts(). When nobody matches, the card flips to an
+           inactive treatment (dim + "Not at this time" note + click
+           disabled) so clients don't tap through to an empty list.
+           2026-04-23 per Anne. -->
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-        <div onclick="ddSelections.availNow=true;ddSelections.availToday=false;applyFilters();show('browse-location')" id="avail-btn-now" style="cursor:pointer;border-radius:12px;background:linear-gradient(160deg,#F5EDE8 0%,#EBD9D0 100%);border:1px solid rgba(139,80,65,0.22);border-bottom:3px solid rgba(120,60,48,0.35);box-shadow:0 2px 8px rgba(120,60,48,0.08);padding:8px 12px;display:flex;align-items:center;gap:9px;">
-          <div style="width:8px;height:8px;border-radius:50%;background:#22c55e;flex-shrink:0;"></div>
+        <div onclick="handleAvailBtnClick('now')" id="avail-btn-now" style="cursor:pointer;border-radius:12px;background:linear-gradient(160deg,#F5EDE8 0%,#EBD9D0 100%);border:1px solid rgba(139,80,65,0.22);border-bottom:3px solid rgba(120,60,48,0.35);box-shadow:0 2px 8px rgba(120,60,48,0.08);padding:8px 12px;display:flex;align-items:center;gap:9px;transition:opacity 0.2s, filter 0.2s;">
+          <div id="avail-dot-now" style="width:8px;height:8px;border-radius:50%;background:#22c55e;flex-shrink:0;transition:background 0.2s;"></div>
           <div>
             <div style="font-size:13px;font-weight:600;color:var(--charcoal);">Available Now</div>
             <div style="font-size:11px;color:var(--muted);margin-top:1px;" id="avail-count-now">— techs</div>
           </div>
         </div>
-        <div onclick="ddSelections.availNow=false;ddSelections.availToday=true;applyFilters();show('browse-location')" id="avail-btn-today" style="cursor:pointer;border-radius:12px;background:linear-gradient(160deg,#F5EDE8 0%,#EBD9D0 100%);border:1px solid rgba(139,80,65,0.22);border-bottom:3px solid rgba(120,60,48,0.35);box-shadow:0 2px 8px rgba(120,60,48,0.08);padding:8px 12px;display:flex;align-items:center;gap:9px;">
-          <div style="width:8px;height:8px;border-radius:50%;background:#f59e0b;flex-shrink:0;"></div>
+        <div onclick="handleAvailBtnClick('today')" id="avail-btn-today" style="cursor:pointer;border-radius:12px;background:linear-gradient(160deg,#F5EDE8 0%,#EBD9D0 100%);border:1px solid rgba(139,80,65,0.22);border-bottom:3px solid rgba(120,60,48,0.35);box-shadow:0 2px 8px rgba(120,60,48,0.08);padding:8px 12px;display:flex;align-items:center;gap:9px;transition:opacity 0.2s, filter 0.2s;">
+          <div id="avail-dot-today" style="width:8px;height:8px;border-radius:50%;background:#f59e0b;flex-shrink:0;transition:background 0.2s;"></div>
           <div>
             <div style="font-size:13px;font-weight:600;color:var(--charcoal);">Open This Week</div>
             <div style="font-size:11px;color:var(--muted);margin-top:1px;" id="avail-count-today">— techs</div>
@@ -1842,9 +1846,14 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       </div>
       <!-- Street address — shown only when address is present AND tech
            hasn't toggled hide_address_public. Mobile techs (who come to
-           the client) typically keep their home address hidden. -->
-      <div style="font-size:12.5px;color:var(--muted);margin-top:3px;display:none;padding-left:18px;line-height:1.4;" id="td-address-line">
-        <span id="td-address-text"></span>
+           the client) typically keep their home address hidden. Tap
+           opens the default map app on mobile / Google Maps on desktop
+           via the universal maps.google.com URL pattern. 2026-04-23. -->
+      <div style="font-size:12.5px;margin-top:3px;display:none;padding-left:18px;line-height:1.4;" id="td-address-line">
+        <a id="td-address-link" href="#" target="_blank" rel="noopener" style="color:var(--rose-dark);text-decoration:none;border-bottom:1px dashed var(--rose-mid);padding-bottom:1px;display:inline-flex;align-items:center;gap:5px;">
+          <span id="td-address-text"></span>
+          <svg viewBox="0 0 24 24" style="width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;opacity:0.7;"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        </a>
       </div>
     </div>
 
@@ -6296,15 +6305,64 @@ function updateAvailCounts() {
           scheduleAvailabilityResets();
         }
       });
-      if (nowEl)   nowEl.textContent = liveNow > 0 ? liveNow + ' tech' + (liveNow !== 1 ? 's' : '') + ' →' : 'None right now';
-      if (todayEl) todayEl.textContent = liveToday > 0 ? liveToday + ' tech' + (liveToday !== 1 ? 's' : '') + ' →' : 'None this week';
+      if (nowEl)   nowEl.textContent = liveNow > 0 ? liveNow + ' tech' + (liveNow !== 1 ? 's' : '') + ' →' : 'Not at this time';
+      if (todayEl) todayEl.textContent = liveToday > 0 ? liveToday + ' tech' + (liveToday !== 1 ? 's' : '') + ' →' : 'None booked this week';
+      _applyAvailBtnState('now',   liveNow);
+      _applyAvailBtnState('today', liveToday);
     }).catch(function() {
       // Fallback to local data
       var nowCount  = ALL_TECHS.filter(function(t) { return t.is_available; }).length;
       var todayCount = ALL_TECHS.filter(function(t) { return t.is_same_day || t.is_available; }).length;
-      if (nowEl)   nowEl.textContent = nowCount + ' tech' + (nowCount !== 1 ? 's' : '') + ' →';
-      if (todayEl) todayEl.textContent = todayCount + ' tech' + (todayCount !== 1 ? 's' : '') + ' →';
+      if (nowEl)   nowEl.textContent = nowCount > 0 ? (nowCount + ' tech' + (nowCount !== 1 ? 's' : '') + ' →') : 'Not at this time';
+      if (todayEl) todayEl.textContent = todayCount > 0 ? (todayCount + ' tech' + (todayCount !== 1 ? 's' : '') + ' →') : 'None booked this week';
+      _applyAvailBtnState('now',   nowCount);
+      _applyAvailBtnState('today', todayCount);
     });
+}
+
+// Apply inactive styling to the Available Now / Open This Week cards
+// when the count hits zero — dim, gray the status dot, disable the
+// click. Runs on every refresh so the card snaps back when a tech
+// toggles on. 2026-04-23 per Anne.
+function _applyAvailBtnState(which, count) {
+  var btn = document.getElementById(which === 'now' ? 'avail-btn-now' : 'avail-btn-today');
+  var dot = document.getElementById(which === 'now' ? 'avail-dot-now' : 'avail-dot-today');
+  if (!btn) return;
+  var inactive = !count;
+  btn.dataset.inactive = inactive ? '1' : '';
+  if (inactive) {
+    btn.style.opacity = '0.5';
+    btn.style.filter  = 'saturate(0.4)';
+    btn.style.cursor  = 'default';
+    if (dot) dot.style.background = '#B8AAA3';
+  } else {
+    btn.style.opacity = '';
+    btn.style.filter  = '';
+    btn.style.cursor  = 'pointer';
+    if (dot) dot.style.background = which === 'now' ? '#22c55e' : '#f59e0b';
+  }
+}
+
+// Click handler for the Available buttons. When a button is inactive
+// (count=0), swallow the tap and show a gentle toast instead of routing
+// to an empty browse screen.
+function handleAvailBtnClick(which) {
+  var btn = document.getElementById(which === 'now' ? 'avail-btn-now' : 'avail-btn-today');
+  if (btn && btn.dataset.inactive === '1') {
+    showToast(which === 'now'
+      ? 'No techs are available right now — check back soon.'
+      : 'No techs are showing openings this week yet.');
+    return;
+  }
+  if (which === 'now') {
+    ddSelections.availNow = true;
+    ddSelections.availToday = false;
+  } else {
+    ddSelections.availNow = false;
+    ddSelections.availToday = true;
+  }
+  applyFilters();
+  show('browse-location');
 }
 
 function applyFilters() {
@@ -6630,11 +6688,29 @@ function openTechDetail(tech) {
   //    can keep their home address off the public profile.
   const addrEl = document.getElementById('td-address-line');
   const addrText = document.getElementById('td-address-text');
+  const addrLink = document.getElementById('td-address-link');
   const streetAddress = tech.address || (techEdits[tech.name] && techEdits[tech.name].address) || '';
   const zip = tech.zip || (techEdits[tech.name] && techEdits[tech.name].zip) || '';
   if (addrEl && streetAddress && !tech.hide_address_public) {
-    addrText.textContent = zip ? (streetAddress + ', ' + zip) : streetAddress;
+    const shownAddr = zip ? (streetAddress + ', ' + zip) : streetAddress;
+    addrText.textContent = shownAddr;
     addrEl.style.display = 'block';
+    // Build a full-quality map query by stitching together every
+    // location field we have — street is often ambiguous without
+    // city/state, and Google Maps disambiguates better with more
+    // context. Use the universal URL pattern so iOS opens Maps.app,
+    // Android opens Google Maps, and desktop falls back to the web
+    // map. 2026-04-23.
+    if (addrLink) {
+      const fullQuery = [
+        streetAddress,
+        tech.city || (techEdits[tech.name] && techEdits[tech.name].city),
+        tech.state || (techEdits[tech.name] && techEdits[tech.name].state),
+        zip
+      ].filter(Boolean).join(', ');
+      addrLink.href = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(fullQuery);
+      addrLink.setAttribute('aria-label', 'Open ' + shownAddr + ' in Maps');
+    }
   } else if (addrEl) {
     addrEl.style.display = 'none';
   }
