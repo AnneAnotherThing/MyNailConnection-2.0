@@ -2550,8 +2550,8 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
     <!-- Post body — min-height sized so 280 chars fit without needing to
          scroll inside the textarea (Anne's constraint: see the whole post
          at once). Counter below turns rose as the tech nears the limit. -->
-    <textarea id="new-post-body" placeholder="What's on your mind?" maxlength="280" oninput="updateNewPostCounter(this)" style="width:100%;min-height:180px;padding:13px 16px;border:1.5px solid var(--border);border-radius:12px;font-family:'DM Sans',sans-serif;font-size:14px;background:var(--cream);outline:none;resize:none;box-sizing:border-box;margin-bottom:4px;"></textarea>
-    <div id="new-post-counter" style="text-align:right;font-size:11px;color:var(--muted);font-family:'DM Sans',sans-serif;margin-bottom:12px;letter-spacing:0.3px;">0 / 280</div>
+    <textarea id="new-post-body" placeholder="What's on your mind?" maxlength="500" oninput="updateNewPostCounter(this)" style="width:100%;min-height:200px;padding:13px 16px;border:1.5px solid var(--border);border-radius:12px;font-family:'DM Sans',sans-serif;font-size:14px;background:var(--cream);outline:none;resize:none;box-sizing:border-box;margin-bottom:4px;"></textarea>
+    <div id="new-post-counter" style="text-align:right;font-size:11px;color:var(--muted);font-family:'DM Sans',sans-serif;margin-bottom:12px;letter-spacing:0.3px;">0 / 500</div>
     <div style="display:flex;gap:10px;">
       <button class="btn btn-outline" onclick="closeNewPostModal()" style="flex:1;">Cancel</button>
       <button class="btn btn-rose" onclick="submitPost()" style="flex:2;">Post</button>
@@ -9817,17 +9817,19 @@ async function deletePost(id) {
 
 // ── New post modal ────────────────────────────────────────────────────────────
 // Character counter for the compose textarea. Shifts color as the tech
-// approaches the 280-char limit. No hard block beyond the maxlength attr.
+// approaches the 500-char limit. No hard block beyond the maxlength attr.
+// Bumped from 280→500 on 2026-04-22 since the feed moved to its own
+// screen and posts have room to be longer/richer.
 function updateNewPostCounter(ta) {
   var used = (ta && ta.value ? ta.value.length : 0);
-  var max = 280;
+  var max = 500;
   var el = document.getElementById('new-post-counter');
   if (!el) return;
   el.textContent = used + ' / ' + max;
-  if (used >= 260) {
+  if (used >= 460) {
     el.style.color = 'var(--rose-dark)';
     el.style.fontWeight = '600';
-  } else if (used >= 210) {
+  } else if (used >= 400) {
     el.style.color = 'var(--rose)';
     el.style.fontWeight = '500';
   } else {
