@@ -7622,12 +7622,15 @@ async function techBulkDropFiles(fileList) {
     setTimeout(function() { showUpgradeModal(); }, 900);
   }
 
-  // Review & tag sheet -- automatically opens so techs tag + caption
-  // the new batch right now, not later from My Gallery. Only opens
-  // if at least one photo actually made it through upload.
-  if (edit.photos.length > bulkReviewStartIdx) {
-    setTimeout(function() { try { openBulkReviewSheet(bulkReviewStartIdx); } catch(_) {} }, 600);
-  }
+  // Bulk-review sheet retired 2026-04-23: it duplicated the Release
+  // Wizard's tag+caption step. The wizard now owns that interaction —
+  // runs after Save Changes, gates board_posts release, and is the
+  // single source of truth. The openBulkReviewSheet function + its
+  // DOM are left in place as dead code for easy rollback, but nothing
+  // calls them in the auto-open path anymore. Per Anne feedback:
+  // "right after i uploaded it asked me to caption and tag, then
+  // i saved, and i was brought to another opportunity to caption and
+  // release. duplicative."
 }
 
 const PHOTO_TAG_TAXONOMY = {
@@ -7635,7 +7638,7 @@ const PHOTO_TAG_TAXONOMY = {
     'Square','Round','Oval','Almond','Coffin','Stiletto','Squoval','Lipstick'
   ],
   'Type': [
-    'Acrylic','Hard Gel','Soft Gel','Dip Powder','PolyGel','Silk Wrap','Press-On','Natural Nail'
+    'Acrylic','Hard Gel','Soft Gel','Gel-X','Dip Powder','PolyGel','Silk Wrap','Press-On','Natural Nail'
   ],
   'Style': [
     'Solid Color','French Manicure','Deep French','Reverse French','Ombré',
