@@ -1,0 +1,59 @@
+# ─────────────────────────────────────────────────────────────────────────
+# GitHub Pages auto-deploy
+#
+# On every push to main, publishes the contents of deploy/ghpages/ to the
+# GitHub Pages site at mynailconnection.com. Nothing else in the repo
+# (sql/, supabase/, node_modules/, android/, CLAUDE.md, etc.) gets served
+# publicly — only the curated deploy/ghpages/ tree goes up.
+#
+# Context: Anne moved off Netlify on 2026-04-23 to stop burning build
+# credits. This Action replaces the old "drag the zip into Netlify" step.
+# Workflow now: Claude edits source → runs deploy/sync.sh (regenerates
+# deploy/ghpages/) → Anne pushes main via GitHub Desktop → this Action
+# deploys → site updates within ~2 minutes.
+#
+# Pages source MUST be configured as "GitHub Actions" (not "Deploy from a
+# branch") in the repo's Settings → Pages page for this to take effect.
+# ─────────────────────────────────────────────────────────────────────────
+
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  # Allow manual re-run from the Actions tab without needing a new commit.
+  workflow_dispatch:
+
+# Grant the Action the minimum permissions needed to publish to Pages.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Only one Pages deploy at a time; skip redundant runs, don't cancel
+# in-flight ones (so a quick follow-up push doesn't kill a mid-deploy).
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload site artifact (deploy/ghpages/)
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./deploy/ghpages
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -21,47 +21,61 @@ and some assets but are not the same thing. Do not mix them up.
   landing; references `/mncLogo-transparent.png`, `/privacy.html`,
   `/terms.html` by root-relative paths).
 
-## Deploy target (current assumption — verify with Anne before assuming)
+## Deploy target (as of 2026-04-23)
 
-- **Marketing** deploys to `https://mynailconnection.com/`
-  (rename `marketing.html` → `index.html` on upload).
-- **App** deploys somewhere else — either `app.mynailconnection.com/`
-  or `mynailconnection.com/app/`. Keep `index.html` as the root file
-  of whichever location you pick, with `reset-password.html` and its
-  assets alongside it.
+- Both sites ship from a **single GitHub Pages deploy** on this repo
+  (`MyNailConnection-2.0`). Marketing serves at `https://mynailconnection.com/`,
+  app at `https://mynailconnection.com/app/`, reset-password at
+  `https://mynailconnection.com/app/reset-password.html`.
+- Deploy is driven by `.github/workflows/deploy.yml`, which publishes
+  the contents of `deploy/ghpages/` to Pages on every push to `main`.
+- **Pages source MUST be set to "GitHub Actions"** (not "Deploy from a
+  branch") in the repo Settings → Pages. If someone sets it back to
+  "branch / main", Pages will serve the raw repo root — which is the
+  app's `index.html` plus everything else — and marketing breaks.
+- Migration rationale: Anne moved off Netlify on 2026-04-23 to stop
+  burning build credits. The two Netlify bundles under `deploy/app/`
+  and `deploy/marketing/` are retained as a rollback option and will
+  be deleted once the GH Pages setup has baked in for a couple of weeks.
 
 ## When producing a deploy bundle
 
-**Always** split into `/marketing/` and `/app/` subfolders. Duplicate the
-shared files (`favicon.ico`, `favicon-32.png`, `apple-touch-icon.png`,
-`privacy.html`, `terms.html`) into **both** folders so each is a
-self-contained deploy. The prior incident where I (Claude) bundled the
-app's `index.html` in a single zip labeled generically caused Anne to
-think the marketing page was being overwritten. Don't repeat that.
+The Action publishes whatever is in `deploy/ghpages/`, so that folder
+IS the published site. Its structure (built by `deploy/sync.sh`):
+
+- Marketing lives at the root of the bundle (`marketing.html` → renamed
+  to `index.html` at bundle time).
+- App lives under `deploy/ghpages/app/`, along with `reset-password.html`.
+- Shared files (`favicon.ico`, `favicon-32.png`, `apple-touch-icon.png`,
+  `privacy.html`, `terms.html`, `manifest.json`, `sw.js`) are duplicated
+  into both root and `/app/` so relative links resolve in both contexts.
+- `CNAME` at the bundle root pins the custom domain to
+  `mynailconnection.com` (required by GH Pages to serve the site under
+  the custom domain instead of `anneanotherthing.github.io/...`).
 
 ## Keep `deploy/` synced with source — run `deploy/sync.sh`
 
 **RULE:** after any edit to `index.html`, `marketing.html`, `tech-guide.html`,
 or any of the shared source files (`privacy.html`, `terms.html`, favicons,
 `manifest.json`, `sw.js`, `sitemap.xml`, `robots.txt`, `images/`, `app-screens/`),
-run `deploy/sync.sh` so the drag-ready bundles always match the latest
-source. Anne asked for this on 2026-04-20 after the deploy folders had
-drifted 2+ days behind the active source.
+run `deploy/sync.sh` so `deploy/ghpages/` always matches the latest source.
+Without this, a commit + push won't actually ship any changes because the
+Action publishes `deploy/ghpages/` — whatever state that folder is in.
 
-The script copies `marketing.html` → `deploy/marketing/index.html` with the
-rename baked in, duplicates shared files into both bundles, and rsyncs
-the `images/` and `app-screens/` folders into `deploy/marketing/`. It's
+The script copies `marketing.html` → `deploy/ghpages/index.html` with the
+rename baked in, copies the real `index.html` (app) to `deploy/ghpages/app/`,
+duplicates shared files into both root and `/app/`, rsyncs `images/` and
+`app-screens/` into the bundle root, and writes the `CNAME` file. It's
 idempotent — safe to run repeatedly.
 
 Anne does **not** need to run the script herself. As long as Claude edits
 source files via tools, Claude should run `deploy/sync.sh` at the end of
-each edit batch (or after any single meaningful edit) so the bundles stay
-current. Anne then drags the `deploy/marketing/` and `deploy/app/` folders
-into Netlify when she's ready to ship.
+each edit batch (or after any single meaningful edit) so the bundle stays
+current. Then Anne pushes `main` via GitHub Desktop and the Action ships it.
 
-If Anne edits a source file directly (in her own editor), `deploy/` will
-drift until someone runs the script — that's a known limitation of the
-copy-based approach. For now, Claude treats sync as a post-edit habit.
+If Anne edits a source file directly (in her own editor), `deploy/ghpages/`
+will drift until someone runs the script — and the next deploy will ship
+stale content. For now, Claude treats sync as a post-edit habit.
 
 ### sync.sh auto-bumps the service worker cache
 
