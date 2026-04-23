@@ -3767,10 +3767,15 @@ async function initCapacitorPush() {
 }
 
 // ── Send push via Edge Function ───────────────────────────────────────────────
+// Returns the parsed edge-function response: { sent, failed, reason?, error? }
+// so callers can surface real delivery status. Previous version was
+// fire-and-forget (no res.ok check, no return), so a 400/500 or a
+// {sent:0,reason:'no subscriptions found'} response looked like success to the
+// caller — Anne's "test push works but nothing arrives" bug. 2026-04-22.
 async function sendPushToUser(userId, { title, body, url, tag }) {
-  if (!userId) return;
+  if (!userId) return { sent: 0, error: 'missing user_id' };
   try {
-    await fetch(`${SUPABASE_URL}/functions/v1/send-push`, {
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/send-push`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -3779,7 +3784,15 @@ async function sendPushToUser(userId, { title, body, url, tag }) {
       },
       body: JSON.stringify({ user_id: userId, title, body, url, tag })
     });
-  } catch(e) { console.warn('Push send failed:', e); }
+    const data = await res.json().catch(function() { return {}; });
+    if (!res.ok) {
+      return { sent: 0, error: data.error || ('HTTP ' + res.status) };
+    }
+    return data;
+  } catch(e) {
+    console.warn('Push send failed:', e);
+    return { sent: 0, error: (e && e.message) || 'network error' };
+  }
 }
 
 // ── Relative time helper ──────────────────────────────────────────────────────
@@ -4952,6 +4965,12 @@ function adminTab2(tab) {
   }
   if (tab === 'inbox') loadAdminInbox();
   if (tab === 'broadcast') {
+    // Load the admin user list in the background — both the self-test
+    // and the single-user send look up user_ids from ALL_USERS, and
+    // without this, opening Broadcast as the first admin action meant
+    // both paths failed with "Couldn't resolve user_id". Fire-and-forget
+    // so the form is interactive instantly.
+    try { loadMembersFromSupabase(); } catch(e) {}
     // Just focus the title so admin can start typing; the form is static
     setTimeout(function() { var t = document.getElementById('bcast-title'); if (t) t.focus(); }, 50);
   }
@@ -4989,16 +5008,46 @@ async function sendTestToSelf() {
   // has this cached). If the lookup fails, guide the admin toward a fix.
   const email = (currentUserEmail || '').toLowerCase();
   if (!email) return setStatus('Not signed in — refresh and try again.', 'error');
-  const me = (typeof ALL_USERS !== 'undefined' ? ALL_USERS : []).find(function(u) {
-    return u && u.email && u.email.toLowerCase() === email;
-  });
-  if (!me || !me.id) return setStatus("Couldn't resolve your own user_id from the admin list. Tap Members first to populate, then try again.", 'error');
+  function findMe() {
+    return (typeof ALL_USERS !== 'undefined' ? ALL_USERS : []).find(function(u) {
+      return u && u.email && u.email.toLowerCase() === email;
+    });
+  }
+  let me = findMe();
+  if (!me || !me.id) {
+    // The broadcast tab now kicks off loadMembersFromSupabase() on open,
+    // but if that hasn't finished yet this fires. Re-pull inline so the
+    // admin isn't stuck behind a "tap Members first" hint.
+    try { await loadMembersFromSupabase(); } catch(e) {}
+    me = findMe();
+    if (!me || !me.id) {
+      return setStatus("Couldn't resolve your own user_id from the admin list. Refresh and try again — if this keeps happening, your users-table row may be missing.", 'error');
+    }
+  }
 
   if (btn) { btn.disabled = true; btn.style.opacity = '0.65'; }
   setStatus('Firing test push to ' + (me.name || email) + '…', 'warn');
   try {
-    await sendPushToUser(me.id, { title: title, body: body, url: url, tag: 'admin-test-self' });
-    setStatus('✓ Test push sent to <b>yourself</b>.<br><span style="font-size:11px;opacity:0.85;">Check notifications. If nothing lands, confirm you allowed push for this site.</span>', 'success');
+    const result = await sendPushToUser(me.id, { title: title, body: body, url: url, tag: 'admin-test-self' });
+    // sendPushToUser now returns { sent, failed?, reason?, error? }. Don't
+    // claim success when nothing actually went out — previously we always
+    // reported "✓ sent" even when the edge function said sent=0.
+    if (result && result.error) {
+      setStatus('Send failed: ' + result.error, 'error');
+    } else if (result && result.sent > 0) {
+      let msg = '✓ Test push delivered to <b>' + result.sent + ' device' + (result.sent === 1 ? '' : 's') + '</b>.';
+      if (result.failed) msg += ' (' + result.failed + ' failed)';
+      setStatus(msg, 'success');
+    } else {
+      // sent=0 with no error = the edge function ran but found no
+      // push_subscriptions row for this user. That means the browser/device
+      // never completed its subscribe flow — usually a permission prompt
+      // that was dismissed or never shown.
+      const reason = (result && result.reason) ? ' (' + result.reason + ')' : '';
+      setStatus('No devices are subscribed to push for this account' + reason +
+        '.<br><span style="font-size:11px;opacity:0.85;">Allow notifications in your browser on a device where you\'re signed in, then try again. Nothing has been delivered.</span>',
+        'warn');
+    }
   } catch (e) {
     setStatus('Send failed: ' + (e && e.message ? e.message : 'unknown error'), 'error');
   } finally {
@@ -5075,21 +5124,46 @@ async function sendBroadcast() {
   if (audience === 'user') {
     var pickedEmail = (document.getElementById('bcast-user-picker').value || '').trim();
     if (!pickedEmail) return setStatus('Pick a user to send to.', 'error');
-    var u = (typeof ALL_USERS !== 'undefined' ? ALL_USERS : []).find(function(x) {
-      return x && x.email && x.email.toLowerCase() === pickedEmail.toLowerCase();
-    });
+    function findPicked() {
+      return (typeof ALL_USERS !== 'undefined' ? ALL_USERS : []).find(function(x) {
+        return x && x.email && x.email.toLowerCase() === pickedEmail.toLowerCase();
+      });
+    }
+    var u = findPicked();
+    // If we can't find the user or they're missing an id, refresh the
+    // member list and retry once before giving up. ALL_USERS wasn't
+    // carrying the users.id column prior to 2026-04-22, so old cached
+    // sessions may still hit this path even after the fix ships.
+    if (!u || !u.id) {
+      try { await loadMembersFromSupabase(); } catch(e) {}
+      u = findPicked();
+    }
     if (!u) return setStatus("Couldn't find that user in the admin list — refresh and try again.", 'error');
-    if (!u.id) return setStatus("That user doesn't have a stored user_id — push can't be addressed.", 'error');
+    if (!u.id) return setStatus("That user doesn't have a stored user_id — their users-table row may be missing.", 'error');
     var displayName = u.name || pickedEmail;
     if (!(await showConfirm('Send this push to ' + displayName + '?', { body: title + '\n\n' + body, okLabel: 'Send push' }))) return;
     btn.disabled = true;
     btn.textContent = 'Sending…';
     setStatus('Sending to ' + displayName + '…', 'warn');
     try {
-      await sendPushToUser(u.id, { title: title, body: body, url: url, tag: 'admin-direct' });
-      setStatus('✓ Push sent to ' + displayName + '.<br><span style="font-size:11px;opacity:0.8;">They only receive it if they\'ve allowed push notifications on their device.</span>', 'success');
-      document.getElementById('bcast-title').value = '';
-      document.getElementById('bcast-body').value  = '';
+      const result = await sendPushToUser(u.id, { title: title, body: body, url: url, tag: 'admin-direct' });
+      // Honest reporting: only claim delivery when sent>0. Previously we
+      // always said "✓ Push sent" even when the edge function returned
+      // sent=0 (user had no push_subscriptions rows).
+      if (result && result.error) {
+        setStatus('Send failed: ' + result.error, 'error');
+      } else if (result && result.sent > 0) {
+        let msg = '✓ Delivered to ' + displayName + ' (' + result.sent + ' device' + (result.sent === 1 ? '' : 's') + ').';
+        if (result.failed) msg += '<br><span style="font-size:11px;opacity:0.8;">' + result.failed + ' device(s) failed.</span>';
+        setStatus(msg, 'success');
+        document.getElementById('bcast-title').value = '';
+        document.getElementById('bcast-body').value  = '';
+      } else {
+        const reason = (result && result.reason) ? ' (' + result.reason + ')' : '';
+        setStatus('No devices subscribed for ' + displayName + reason +
+          '. Nothing was delivered — they need to allow notifications in their browser first.',
+          'warn');
+      }
     } catch (e) {
       setStatus('Send failed: ' + (e && e.message ? e.message : 'unknown error'), 'error');
     } finally {
@@ -10738,6 +10812,15 @@ async function loadMembersFromSupabase() {
     const techs = techsRes.ok ? await techsRes.json() : [];
 
     // Merge into ALL_USERS — add new ones, update existing
+    //
+    // `id` MUST be carried through. It's the users-table UUID, which is
+    // the same value push_subscriptions.user_id is keyed on (see
+    // showPushPrompt → subscribeToPush(row.id)). If id is missing, the
+    // admin broadcast self-test and single-user send both fail their
+    // `if (!me.id)` / `if (!u.id)` guard and bail with "Couldn't resolve
+    // user_id" — even though the underlying push plumbing is fine.
+    // Added 2026-04-22. Prefer users-table id when available; fall back
+    // to techs-table id for tech-only accounts.
     const merge = (records, forceRole) => {
       records.forEach(r => {
         if (!r.email) return;
@@ -10756,8 +10839,14 @@ async function loadMembersFromSupabase() {
           existing.zip = r.zip || existing.zip;
           existing.phone = r.phone || existing.phone;
           existing.bio = r.bio || existing.bio;
+          // Only overwrite id if the users-table pass provides one —
+          // techs-table id is a different (tech row) UUID and would break
+          // push routing if it clobbered the real users.id.
+          if (forceRole === 'client' && r.id) existing.id = r.id;
+          else if (!existing.id && r.id) existing.id = r.id;
         } else {
           ALL_USERS.push({
+            id: r.id || null,
             name: r.name || r.email.split('@')[0],
             email: r.email,
             role: resolvedRole,
