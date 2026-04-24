@@ -10564,7 +10564,14 @@ async function completeSignup() {
 
   // Try Supabase auth signup
   try {
-    const signupRes = await fetch(SUPABASE_URL + '/auth/v1/signup', {
+    // emailRedirectTo pins the confirmation link to the app (/app/) rather
+    // than whatever Supabase's dashboard Site URL happens to be. Without
+    // this the verification email can land on the marketing root
+    // (mynailconnection.com/) if the Site URL ever drifts. Passing it
+    // explicitly keeps the flow resilient to dashboard config changes.
+    // 2026-04-23.
+    const confirmRedirect = (window.location.origin || 'https://mynailconnection.com') + '/app/';
+    const signupRes = await fetch(SUPABASE_URL + '/auth/v1/signup?redirect_to=' + encodeURIComponent(confirmRedirect), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY },
       body: JSON.stringify({ email: regData.email, password: regData.pass,
