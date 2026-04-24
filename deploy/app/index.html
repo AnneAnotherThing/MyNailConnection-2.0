@@ -2191,7 +2191,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
         <div style="flex:1;min-width:0;">
           <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px;"><span id="myph-paused-count">0</span> photos paused</div>
           <div style="font-size:12.5px;color:var(--charcoal);line-height:1.5;margin-bottom:10px;">Your Glow Up ended, so photos beyond your free 5 are hidden from your profile. Nothing's deleted — reactivate Glow Up and everything comes right back.</div>
-          <button type="button" onclick="purchaseUnlimited()" style="padding:8px 16px;border-radius:100px;border:none;background:var(--rose);color:white;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;">Resume Glow Up — $9/mo</button>
+          <button type="button" onclick="purchaseUnlimited()" style="padding:8px 16px;border-radius:100px;border:none;background:var(--rose);color:white;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;">Resume Glow Up — $10/mo</button>
         </div>
       </div>
     </div>
@@ -2357,23 +2357,23 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
         <div style="border:1.5px solid var(--rose-mid);border-radius:14px;padding:14px;background:var(--rose-light);">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
             <div style="font-size:15px;font-weight:700;color:var(--rose-dark);">Spotlight</div>
-            <div style="font-size:13px;font-weight:600;color:var(--rose-dark);">$1 / photo</div>
+            <div style="font-size:13px;font-weight:600;color:var(--rose-dark);">$5 / 10 photos</div>
           </div>
-          <div style="font-size:12px;color:var(--rose-dark);line-height:1.5;">Add photos one at a time as your portfolio grows. One-time purchase — no subscription, no commitment. Perfect when business starts picking up.</div>
-          <div style="font-size:11px;color:var(--muted);margin-top:6px;">Also available: 5 photos for $4 (save $1)</div>
+          <div style="font-size:12px;color:var(--rose-dark);line-height:1.5;"><b>Archive your work.</b> Photos go to your portfolio so clients can browse what you do. No subscription, no commitment. Perfect when business is steady and you just want a clean showcase.</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:6px;">Portfolio only — the live feed is Glow Up exclusive.</div>
         </div>
 
         <!-- Glow Up -->
         <div style="border:1.5px solid var(--charcoal);border-radius:14px;padding:14px;background:var(--charcoal);">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
             <div style="font-size:15px;font-weight:700;color:white;">Glow Up</div>
-            <div style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.8);">$9 / month</div>
+            <div style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.8);">$10 / month</div>
           </div>
-          <div style="font-size:12px;color:rgba(255,255,255,0.75);line-height:1.5;"><b style="color:white;">Your all-time portfolio.</b> Every set you've ever done, preserved in one place as long as you're with us. Maximum feed rotation. For techs ready to document their career — not just their top 5.</div>
+          <div style="font-size:12px;color:rgba(255,255,255,0.75);line-height:1.5;"><b style="color:white;">Post a new look every day.</b> 40 uploads a month, refilled on your anniversary. Every photo hits the feed so clients discover you fresh — not just in your portfolio.</div>
           <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-top:6px;">Cancel any time</div>
         </div>
 
-        <div style="font-size:12px;color:var(--muted);text-align:center;padding-top:4px;line-height:1.5;">All plans include availability toggles, posts, contact options, and full client discovery. The only difference is how many photos you can upload — and how often your work appears in the feed.</div>
+        <div style="font-size:12px;color:var(--muted);text-align:center;padding-top:4px;line-height:1.5;">Starter &amp; Glow Up photos show up in the live feed. Spotlight bundles are portfolio-only — great for building an archive without a subscription.</div>
       </div>
     </div>
 
@@ -2424,7 +2424,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
         </div>
         <div style="display:flex;gap:12px;align-items:flex-start;">
           <div style="width:28px;height:28px;border-radius:50%;background:var(--rose-light);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px;font-weight:700;color:var(--rose);">4</div>
-          <div><div style="font-size:13px;font-weight:600;color:var(--charcoal);margin-bottom:2px;">Upgrade when it is paying for itself</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Glow Up turns your 5 free slots into your <em>all-time portfolio</em> — every set you've ever done, in one place. If one new client from MNC covers the cost many times over, that is your moment. Let the results tell you when you are ready.</div></div>
+          <div><div style="font-size:13px;font-weight:600;color:var(--charcoal);margin-bottom:2px;">Upgrade when it is paying for itself</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Glow Up unlocks the live feed — <em>post a new look every day</em>, 40&#47;month, every upload surfaces to clients browsing fresh work. If one new client from MNC covers the cost many times over, that is your moment. Let the results tell you when you are ready.</div></div>
         </div>
       </div>
     </div>
@@ -3243,17 +3243,18 @@ function esc(str) {
 }
 
 // { id, tier, photo_credits, subscription_expires_at, total_photos,
-//   paused_count, weekly_upload_count, weekly_reset_at }
-// weekly_* are subscriber-only (null for free tier). They're the
-// source-of-truth for "5 new per week, Sunday UTC reset" enforcement
-// introduced with the 2026-04-22 Glow Up pivot.
+//   paused_count, period_upload_count, period_reset_at }
+// period_* are subscriber-only (null for free tier). They're the
+// source-of-truth for "40 per month, rolling monthly reset" enforcement
+// introduced with the 2026-04-23 monthly-cadence pivot (replaced the
+// earlier weekly_* columns).
 let _techTier = null;
 
 async function loadTechTier(email) {
   if (!email) return;
   try {
     const r = await fetch(
-      `${SUPABASE_URL}/rest/v1/techs?email=eq.${encodeURIComponent(email)}&select=id,subscription_tier,photo_credits,subscription_expires_at,photos,paused_photos,weekly_upload_count,weekly_reset_at`,
+      `${SUPABASE_URL}/rest/v1/techs?email=eq.${encodeURIComponent(email)}&select=id,subscription_tier,photo_credits,subscription_expires_at,photos,paused_photos,period_upload_count,period_reset_at`,
       { headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${window._mncAccessToken || SUPABASE_ANON_KEY}` } }
     );
     if (!r.ok) return;
@@ -3268,8 +3269,8 @@ async function loadTechTier(email) {
       subscription_expires_at: d[0].subscription_expires_at || null,
       total_photos: photos.length,
       paused_count: paused.length,
-      weekly_upload_count: d[0].weekly_upload_count || 0,
-      weekly_reset_at: d[0].weekly_reset_at || null
+      period_upload_count: d[0].period_upload_count || 0,
+      period_reset_at: d[0].period_reset_at || null
     };
     // Check if subscription expired
     if (_techTier.tier === 'paid' && _techTier.subscription_expires_at) {
@@ -3280,16 +3281,18 @@ async function loadTechTier(email) {
   } catch(e) { console.warn('loadTechTier error:', e); }
 }
 
-// Subscriber-aware remaining weekly slots (0–5). Projects a lazy reset
-// client-side so the UI shows 5 immediately on Sunday even before the
-// server-side consume RPC has had a chance to run. Returns 0 for non-
-// subscribers (they don't consume weekly slots).
-function _weeklySlotsRemaining() {
+// Subscriber-aware remaining monthly slots (0–STRIPE_CONFIG.monthly_limit).
+// Projects a lazy reset client-side so the UI shows the full allowance
+// immediately after the anniversary refill, even before the server-side
+// consume RPC has had a chance to run. Returns 0 for non-subscribers
+// (they don't consume subscription slots).
+function _periodSlotsRemaining() {
   if (!_techTier || _techTier.tier !== 'paid') return 0;
-  const resetAt = _techTier.weekly_reset_at ? new Date(_techTier.weekly_reset_at) : null;
-  // No reset marker, or the week has rolled over → full allowance.
-  if (!resetAt || resetAt.getTime() <= Date.now()) return 5;
-  return Math.max(0, 5 - (_techTier.weekly_upload_count || 0));
+  const cap = STRIPE_CONFIG.monthly_limit || 40;
+  const resetAt = _techTier.period_reset_at ? new Date(_techTier.period_reset_at) : null;
+  // No reset marker, or the month has rolled over → full allowance.
+  if (!resetAt || resetAt.getTime() <= Date.now()) return cap;
+  return Math.max(0, cap - (_techTier.period_upload_count || 0));
 }
 
 // Advisory check used by UI pre-gates (upload buttons, "can tap?"
@@ -3308,7 +3311,7 @@ function _weeklySlotsRemaining() {
 function canUploadPhoto() {
   if (!_techTier) return true;
   if (_techTier.tier === 'paid') {
-    return _weeklySlotsRemaining() > 0 || (_techTier.photo_credits || 0) > 0;
+    return _periodSlotsRemaining() > 0 || (_techTier.photo_credits || 0) > 0;
   }
   const used = _techTier.total_photos || 0;
   const freeSlots = STRIPE_CONFIG.free_limit;
@@ -3317,14 +3320,14 @@ function canUploadPhoto() {
 }
 
 // UI-facing "how many more can you upload before you need to pay?" —
-// for subscribers: remaining weekly slots + credits (credits burst past
+// for subscribers: remaining monthly slots + credits (credits burst past
 // the cap). For free tier: unused free slots (first 5 only) + credits.
 // Critical that used >= free_limit is clamped at 0 so we don't subtract
 // into negative and pretend the tech has less room than zero.
 function photosRemaining() {
   if (!_techTier) return STRIPE_CONFIG.free_limit;
   if (_techTier.tier === 'paid') {
-    return _weeklySlotsRemaining() + (_techTier.photo_credits || 0);
+    return _periodSlotsRemaining() + (_techTier.photo_credits || 0);
   }
   const used = _techTier.total_photos || 0;
   const freeSlots = STRIPE_CONFIG.free_limit;
@@ -3349,18 +3352,18 @@ function _slotsRemainingText() {
   if (!_techTier) return '';
   const credits = _techTier.photo_credits || 0;
   if (_techTier.tier === 'paid') {
-    const weekly = _weeklySlotsRemaining();
-    const resetAt = _techTier.weekly_reset_at ? new Date(_techTier.weekly_reset_at) : null;
-    let resetStr = 'Sunday';
+    const monthly = _periodSlotsRemaining();
+    const resetAt = _techTier.period_reset_at ? new Date(_techTier.period_reset_at) : null;
+    // 2026-04-23: monthly cadence reset could be weeks out, so render a
+    // specific date ("refills May 23") rather than a weekday alone.
+    let resetStr = 'next month';
     if (resetAt && resetAt.getTime() > Date.now()) {
-      try { resetStr = resetAt.toLocaleDateString(undefined, { weekday: 'short' }); } catch(_) {}
+      try { resetStr = resetAt.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }); } catch(_) {}
     }
-    // Phrase unambiguously: "You have N remaining" not "N of 5" which reads
-    // as "used N out of 5." Dropped 2026-04-23 per Anne.
-    if (weekly > 0 && credits > 0) return 'You have ' + weekly + ' upload' + (weekly === 1 ? '' : 's') + ' left this week + ' + credits + ' credit' + (credits === 1 ? '' : 's') + ' · refills ' + resetStr;
-    if (weekly > 0)                return 'You have ' + weekly + ' upload' + (weekly === 1 ? '' : 's') + ' left this week · refills ' + resetStr;
-    if (credits > 0)               return 'Weekly limit hit (refills ' + resetStr + ') · ' + credits + ' credit' + (credits === 1 ? '' : 's') + ' available';
-    return 'Weekly limit hit — refills ' + resetStr + ' or add credits';
+    if (monthly > 0 && credits > 0) return 'You have ' + monthly + ' upload' + (monthly === 1 ? '' : 's') + ' left this month + ' + credits + ' credit' + (credits === 1 ? '' : 's') + ' · refills ' + resetStr;
+    if (monthly > 0)                return 'You have ' + monthly + ' upload' + (monthly === 1 ? '' : 's') + ' left this month · refills ' + resetStr;
+    if (credits > 0)                return 'Monthly limit hit (refills ' + resetStr + ') · ' + credits + ' credit' + (credits === 1 ? '' : 's') + ' available';
+    return 'Monthly limit hit — refills ' + resetStr + ' or add credits';
   }
   // Free tier with the corrected credits-deplete math:
   //   freeRemaining = max(0, free_limit - total_photos)  (first 5 uploads only)
@@ -3388,24 +3391,24 @@ function _slotsRemainingParts() {
   if (!_techTier) return null;
   const credits = _techTier.photo_credits || 0;
   if (_techTier.tier === 'paid') {
-    const weekly = _weeklySlotsRemaining();
-    const resetAt = _techTier.weekly_reset_at ? new Date(_techTier.weekly_reset_at) : null;
-    let resetStr = 'Sunday';
+    const monthly = _periodSlotsRemaining();
+    const resetAt = _techTier.period_reset_at ? new Date(_techTier.period_reset_at) : null;
+    let resetStr = 'next month';
     if (resetAt && resetAt.getTime() > Date.now()) {
-      try { resetStr = resetAt.toLocaleDateString(undefined, { weekday: 'short' }); } catch(_) {}
+      try { resetStr = resetAt.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }); } catch(_) {}
     }
-    if (weekly > 0 && credits > 0) {
+    if (monthly > 0 && credits > 0) {
       return {
-        number: String(weekly),
-        label: 'weekly upload' + (weekly === 1 ? '' : 's') + ' left',
+        number: String(monthly),
+        label: 'monthly upload' + (monthly === 1 ? '' : 's') + ' left',
         subtitle: '+ ' + credits + ' credit' + (credits === 1 ? '' : 's') + ' · refills ' + resetStr,
         tone: 'ok'
       };
     }
-    if (weekly > 0) {
+    if (monthly > 0) {
       return {
-        number: String(weekly),
-        label: 'upload' + (weekly === 1 ? '' : 's') + ' left this week',
+        number: String(monthly),
+        label: 'upload' + (monthly === 1 ? '' : 's') + ' left this month',
         subtitle: 'Refills ' + resetStr,
         tone: 'ok'
       };
@@ -3414,7 +3417,7 @@ function _slotsRemainingParts() {
       return {
         number: String(credits),
         label: 'credit' + (credits === 1 ? '' : 's') + ' available',
-        subtitle: 'Weekly limit hit · refills ' + resetStr,
+        subtitle: 'Monthly limit hit · refills ' + resetStr,
         tone: 'warn'
       };
     }
@@ -3534,8 +3537,11 @@ async function consumeUploadSlot() {
     // cache; staleness here would mis-render mid-batch.
     if (_techTier) {
       if (row.slot_type === 'weekly') {
-        _techTier.weekly_upload_count = (_techTier.weekly_upload_count || 0) + 1;
-        if (row.weekly_reset_at) _techTier.weekly_reset_at = row.weekly_reset_at;
+        // RPC keeps the 'weekly' label + weekly_reset_at response field
+        // for wire-compat, but the underlying cadence is monthly now.
+        // Store on the new period_* keys of _techTier.
+        _techTier.period_upload_count = (_techTier.period_upload_count || 0) + 1;
+        if (row.weekly_reset_at) _techTier.period_reset_at = row.weekly_reset_at;
       } else if (row.slot_type === 'credit') {
         _techTier.photo_credits = row.remaining_credits;
       } else if (row.slot_type === 'free') {
@@ -3594,18 +3600,20 @@ function showUpgradeModal() {
   var bodyEl   = document.getElementById('upgrade-body');
   var isSubscriber = _techTier && _techTier.tier === 'paid';
   if (isSubscriber && eyebrow && headline && bodyEl) {
-    var resetAt = _techTier.weekly_reset_at ? new Date(_techTier.weekly_reset_at) : null;
+    var resetAt = _techTier.period_reset_at ? new Date(_techTier.period_reset_at) : null;
     var resetStr = '';
     if (resetAt && resetAt.getTime() > Date.now()) {
-      // Format "Sun 4/28" in local timezone so it reads naturally.
-      var opts = { weekday: 'short', month: 'numeric', day: 'numeric' };
-      try { resetStr = resetAt.toLocaleDateString(undefined, opts); } catch(_) { resetStr = 'Sunday'; }
+      // Format "May 23" in local timezone — monthly reset is far enough
+      // out that weekday alone isn't meaningful.
+      var opts = { month: 'short', day: 'numeric' };
+      try { resetStr = resetAt.toLocaleDateString(undefined, opts); } catch(_) { resetStr = 'next month'; }
     } else {
-      resetStr = 'Sunday';
+      resetStr = 'next month';
     }
     eyebrow.textContent = 'Glow Up member';
-    headline.textContent = 'Weekly limit reached';
-    bodyEl.innerHTML = 'You have used all <b>5</b> of this week\'s new-photo slots. '
+    headline.textContent = 'Monthly limit reached';
+    var cap = (STRIPE_CONFIG && STRIPE_CONFIG.monthly_limit) || 40;
+    bodyEl.innerHTML = 'You have used all <b>' + cap + '</b> of this month\'s uploads. '
       + 'They refill on <b style="color:var(--rose-dark);">' + resetStr + '</b> — '
       + 'or add credits below to keep going now.';
   } else if (eyebrow && headline && bodyEl) {
@@ -3615,8 +3623,8 @@ function showUpgradeModal() {
     headline.textContent = 'Ready to Grow?';
     bodyEl.innerHTML = 'You have used all <b id="upgrade-limit-text">'
       + STRIPE_CONFIG.free_limit
-      + '</b> free photo slots. Add more à la carte — or unlock your '
-      + '<b style="color:var(--rose-dark);">all-time portfolio</b> with Glow Up.';
+      + '</b> free photo slots. Grab a <b style="color:var(--rose-dark);">Spotlight pack</b> to keep adding to your portfolio, or step into '
+      + '<b style="color:var(--rose-dark);">Glow Up</b> to post daily — every upload goes to the feed.';
   }
   // Respect the Glow Up feature flag on every open. Hiding both the card
   // itself AND allowing a reshow via flag flip means we don't need a
@@ -3692,7 +3700,7 @@ function _armTierRefreshOnReturn() {
     // Nudge the tech if something actually changed
     if (_techTier) {
       if (beforeTier !== 'paid' && _techTier.tier === 'paid') {
-        showToast("You're on Glow Up — your all-time portfolio is unlocked!");
+        showToast("You're on Glow Up — post a new look every day, every upload goes to the feed!");
       } else if ((_techTier.photo_credits || 0) > (beforeCredits || 0)) {
         const added = _techTier.photo_credits - (beforeCredits || 0);
         showToast(`Added ${added} photo credit${added !== 1 ? 's' : ''} — you're all set.`);
@@ -3906,13 +3914,14 @@ const ANNE_USER_ID = 'a2f3d32e-1121-43f1-8649-be5c5e460443';
 // 1. Create products in Stripe Dashboard → Products
 // 2. Create Payment Links for each, paste URLs below
 // 3. Add ?client_reference_id={email} to each link so webhook knows which tech
-// Glow Up ($9/mo subscription) is visible on the upgrade modal once
-// the weekly-slots pivot shipped (2026-04-22): schema columns
-// weekly_upload_count + weekly_reset_at on techs, consume_upload_slot
-// RPC gating every upload, webhook initializes weekly_reset_at on
-// subscribe / reactivate. Flip back to `false` if you ever need to
-// pause new subscriptions without redeploying — the upgrade card and
-// the purchaseUnlimited() guard both respect this flag.
+// Glow Up ($10/mo subscription) is visible on the upgrade modal. The
+// 2026-04-23 pivot moved us to monthly cadence: schema columns
+// period_upload_count + period_reset_at on techs, consume_upload_slot
+// RPC gating every upload with a 40-photo monthly cap, webhook
+// initializes period_reset_at on subscribe / reactivate. Flip back to
+// `false` if you ever need to pause new subscriptions without
+// redeploying — the upgrade card and the purchaseUnlimited() guard
+// both respect this flag.
 const GLOW_UP_ENABLED = true;
 
 const STRIPE_CONFIG = {
@@ -3925,15 +3934,21 @@ const STRIPE_CONFIG = {
   // a redeploy. Use a dedicated throwaway tech row when testing — test
   // events DO write to the same Supabase DB. Added 2026-04-22.
   //
-  // Ship with test_mode=true. Only flip to true locally / on a preview
-  // build while you're running through `4242 4242 4242 4242` flows.
-  test_mode: false,
+  // IMPORTANT: ship with test_mode=FALSE. Currently TRUE for a dry-run
+  // of the 2026-04-23 monthly-cadence pivot — flip back to false before
+  // the real launch push. Only keep true locally / on a preview build
+  // while running through `4242 4242 4242 4242` flows.
+  test_mode: true,
   // Payment link for 1 photo credit ($1) — Live
   link_1_photo:   'https://buy.stripe.com/28E4gycjubtr2KA2xtgEg00',
-  // Payment link for 10 photo credits ($5 bundle) — Live
+  // Payment link for 10 photo credits ($5 bundle, portfolio-only) — Live
   link_10_photos: 'https://buy.stripe.com/cNi8wOfvG7db4SI3BxgEg01',
-  // Payment link for Glow Up subscription ($9/mo = 5 new slots/week, Sunday reset) — Live
-  link_glow_up:   'https://buy.stripe.com/eVqeVc1EQeFD4SIgojgEg02',
+  // Payment link for Glow Up subscription ($10/mo = 40 photos/month, monthly rolling reset, feed-eligible) — Live
+  // NOTE: new product+price created 2026-04-23 (the previous $9 price
+  // had been used for internal testing). Success URL on the Payment
+  // Link is set to https://mynailconnection.com/app/?welcome=glow-up
+  // so returning customers land on the in-app welcome modal.
+  link_glow_up:   'https://buy.stripe.com/cNifZg6ZaapngBq5JFgEg03',
   // ── TEST-MODE PAYMENT LINKS ─────────────────────────────────────────────
   // Paste in from Stripe Dashboard → flip "Viewing test data" → Payment
   // Links. Test links start with https://buy.stripe.com/test_... If left
@@ -3941,13 +3956,22 @@ const STRIPE_CONFIG = {
   // you know. Filled in 2026-04-22 after Anne set up the test products.
   link_1_photo_test:   'https://buy.stripe.com/test_28E14pfiz3OP0x1fZK5kk03',
   link_10_photos_test: 'https://buy.stripe.com/test_9B6eVf0nF5WX6Vp5l65kk04',
-  link_glow_up_test:   'https://buy.stripe.com/test_cNi7sN4DVadd93x00M5kk05',
+  // Glow Up test link refreshed 2026-04-23 for the new $10/mo monthly-
+  // cadence product. The earlier test link (…5kk05) was against the
+  // old $9/5-weekly model and shouldn't be reused.
+  link_glow_up_test:   'https://buy.stripe.com/test_5kQ6oJ9Yf3OPa7B4h25kk06',
   // Plan names (for display)
   plan_free: 'Starter',
   plan_credits: 'Spotlight',
   plan_glow_up: 'Glow Up',
-  // Free tier photo limit — first 5 are free and permanent (can't be swapped)
-  free_limit: 5
+  // Free tier photo limit — first 5 are free, permanent, and feed-eligible
+  // (welcome boost for new techs). Keep in sync with v_free_limit inside
+  // consume_upload_slot() RPC.
+  free_limit: 5,
+  // Glow Up monthly allowance — 40 feed-eligible uploads per rolling
+  // 30-day window. Keep in sync with v_period_cap inside
+  // consume_upload_slot() RPC.
+  monthly_limit: 40
 };
 
 // Pick the right payment link for the current mode. Falls back to the
@@ -7582,19 +7606,23 @@ async function techEditAddPhotos(input) {
     if (!slot.ok) {
       showToast(slot.reason === 'capped'
         ? (_techTier && _techTier.tier === 'paid'
-            ? "Weekly limit hit. Resets Sunday, or buy credits."
+            ? "Monthly limit hit. Refills on your next anniversary, or buy credits."
             : "No free slots or credits left.")
         : 'Could not reserve an upload slot — try again');
       if (slot.reason === 'capped') setTimeout(showUpgradeModal, 600);
       break;
     }
 
-    // Always show base64 preview immediately
+    // Always show base64 preview immediately. slot_type is stamped on
+    // the photo so the release wizard knows whether this upload is
+    // feed-eligible (free/subscriber → yes; credit → portfolio only).
+    // 2026-04-23 portfolio/feed split.
+    const _slotType = slot.slot_type || null;
     await new Promise(resolve => {
       const reader = new FileReader();
       reader.onload = async function(e) {
         const preview = e.target.result;
-        edit.photos.push({ url: preview, tags: [] });
+        edit.photos.push({ url: preview, tags: [], slot_type: _slotType });
         added++;
         renderTePhotoGrid(edit.photos);
         resolve();
@@ -7651,10 +7679,10 @@ async function techBulkDropFiles(fileList) {
     // nudge; non-subscribers see the existing credit-upgrade framing.
     var isSubscriber = _techTier && _techTier.tier === 'paid';
     if (isSubscriber) {
-      var weeklyLeft = _weeklySlotsRemaining();
+      var monthlyLeft = _periodSlotsRemaining();
       var credits = (_techTier && _techTier.photo_credits) || 0;
       showToast('Only ' + remaining + ' upload' + (remaining === 1 ? '' : 's') +
-        ' left this week (' + weeklyLeft + ' weekly + ' + credits + ' credits). Rest after Sunday or buy more credits.');
+        ' left this month (' + monthlyLeft + ' monthly + ' + credits + ' credits). Rest after the next refill or buy more credits.');
     } else {
       showToast('Only ' + remaining + ' free slot' + (remaining === 1 ? '' : 's') + ' left — upload the rest after upgrading');
     }
@@ -7711,15 +7739,17 @@ async function techBulkDropFiles(fileList) {
     if (!slot.ok) {
       label.textContent = 'Stopped — ' + (slot.reason === 'capped'
         ? (_techTier && _techTier.tier === 'paid'
-            ? 'weekly limit hit. Resets Sunday, or buy credits to keep going.'
+            ? 'monthly limit hit. Refills on your next anniversary, or buy credits to keep going.'
             : 'no free slots or credits left.')
         : 'could not reserve an upload slot (' + (slot.reason || 'unknown') + ')');
       if (slot.reason === 'capped') setTimeout(showUpgradeModal, 700);
       break;
     }
 
-    // Show preview immediately
-    const photoEntry = { url: b64data.preview, tags: [] };
+    // Show preview immediately. slot_type stamped on the photo so the
+    // release wizard can tell feed-eligible uploads (free / subscriber)
+    // from portfolio-only ones (credit / pay-per-photo). 2026-04-23.
+    const photoEntry = { url: b64data.preview, tags: [], slot_type: slot.slot_type || null };
     edit.photos.push(photoEntry);
     renderTePhotoGrid(edit.photos);
 
@@ -12614,6 +12644,13 @@ document.addEventListener('DOMContentLoaded', async function() {
   // handler runs. If not, the splash stays up as normal.
   try { await restorePersistedSession(); } catch(e) { /* fall through */ }
 
+  // If the user just landed back from a Stripe checkout success redirect,
+  // show the matching welcome modal. Runs after the session restore so
+  // _techTier is populated with the fresh entitlement when available.
+  // Defers slightly so the modal renders on top of whatever landed screen
+  // the session restore chose, not on top of the splash mid-transition.
+  setTimeout(function() { try { maybeShowStripeWelcome(); } catch(_) {} }, 400);
+
   updateGreeting();
   var techEl = document.getElementById('stat-techs');
   var memberEl = document.getElementById('stat-members');
@@ -14522,6 +14559,141 @@ function postUploadGoToFeed() {
 }
 
 // ══════════════════════════════════════════════════════════════════════════
+// STRIPE CHECKOUT WELCOME MODAL
+// ══════════════════════════════════════════════════════════════════════════
+// The success URL on each Stripe Payment Link should be:
+//   Glow Up:              https://mynailconnection.com/app/?welcome=glow-up
+//   Spotlight 10 bundle:  https://mynailconnection.com/app/?welcome=spotlight-10
+//   Spotlight single:     https://mynailconnection.com/app/?welcome=spotlight-1
+//
+// On DOMContentLoaded (after restorePersistedSession() runs so the tier
+// cache is fresh), we read ?welcome=<variant>, render the variant's copy,
+// and strip the param so a refresh doesn't re-trigger. The modal's
+// content is data-driven so there's one modal for all three variants.
+//
+// Heads-up: the Stripe webhook may have a few seconds of lag after the
+// checkout before it stamps the tech's tier. The modal copy is driven by
+// the URL param (not tier state), so the welcome message is always
+// accurate even if _techTier hasn't caught up yet.
+
+// Variant definitions. Each returns the content for the modal.
+function _stripeWelcomeVariants() {
+  // Refill date comes from _techTier if it's been loaded; otherwise we
+  // approximate with "about a month from today" so the copy never lies.
+  var refillDateStr = '';
+  try {
+    if (_techTier && _techTier.period_reset_at) {
+      var d = new Date(_techTier.period_reset_at);
+      if (d.getTime() > Date.now()) {
+        refillDateStr = d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+      }
+    }
+    if (!refillDateStr) {
+      var approx = new Date();
+      approx.setMonth(approx.getMonth() + 1);
+      refillDateStr = approx.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+    }
+  } catch(_) { refillDateStr = 'next month'; }
+
+  return {
+    'glow-up': {
+      eyebrow: 'Welcome to Glow Up',
+      title: "You're in! \uD83C\uDF38",
+      body: 'Post a new look every day — every upload releases to the feed for clients browsing fresh work.',
+      statNum: String((STRIPE_CONFIG && STRIPE_CONFIG.monthly_limit) || 40),
+      statLabel: 'uploads this month',
+      statSub: 'Your monthly refill: ' + refillDateStr,
+      primaryBtn: 'Post your first look \u2192',
+      primaryAction: 'upload'
+    },
+    'spotlight-10': {
+      eyebrow: 'Spotlight pack added',
+      title: '10 photos credited \uD83C\uDF38',
+      body: 'Archive your work in your portfolio whenever inspiration hits. Credits never expire.',
+      statNum: '10',
+      statLabel: 'portfolio uploads ready',
+      statSub: 'Portfolio only — Glow Up adds feed exposure if you want it later.',
+      primaryBtn: 'Add your first photo \u2192',
+      primaryAction: 'upload'
+    },
+    'spotlight-1': {
+      eyebrow: 'Photo credit added',
+      title: '1 photo credited \uD83C\uDF38',
+      body: 'One more portfolio photo is yours to upload whenever you are ready. Credits never expire.',
+      statNum: '1',
+      statLabel: 'portfolio upload ready',
+      statSub: 'Portfolio only — Glow Up adds feed exposure if you want it later.',
+      primaryBtn: 'Add your photo \u2192',
+      primaryAction: 'upload'
+    }
+  };
+}
+
+function _stripeWelcomeApplyVariant(variant) {
+  var all = _stripeWelcomeVariants();
+  var v = all[variant];
+  if (!v) return false;
+  var g = function(id) { return document.getElementById(id); };
+  if (g('sw-eyebrow'))   g('sw-eyebrow').textContent   = v.eyebrow;
+  if (g('sw-title'))     g('sw-title').textContent     = v.title;
+  if (g('sw-body'))      g('sw-body').textContent      = v.body;
+  if (g('sw-stat-num'))  g('sw-stat-num').textContent  = v.statNum;
+  if (g('sw-stat-label'))g('sw-stat-label').textContent= v.statLabel;
+  if (g('sw-stat-sub'))  g('sw-stat-sub').textContent  = v.statSub;
+  if (g('sw-primary-btn')) g('sw-primary-btn').textContent = v.primaryBtn;
+  // Stash the action on the primary button's data attribute so the
+  // onclick handler can pick it up.
+  var btn = g('sw-primary-btn');
+  if (btn) btn.dataset.action = v.primaryAction;
+  return true;
+}
+
+function maybeShowStripeWelcome() {
+  try {
+    var params = new URLSearchParams(window.location.search);
+    var variant = params.get('welcome');
+    if (!variant) return;
+    var applied = _stripeWelcomeApplyVariant(variant);
+    if (!applied) return;
+    var modal = document.getElementById('stripe-welcome-modal');
+    if (!modal) return;
+    modal.style.display = 'flex';
+    // Strip the ?welcome= param so a refresh doesn't retrigger. Keep
+    // the rest of the URL intact — other query params (utm, etc.) pass
+    // through for whatever analytics is listening.
+    params.delete('welcome');
+    var newQs = params.toString();
+    var newUrl = window.location.pathname + (newQs ? ('?' + newQs) : '') + window.location.hash;
+    try { window.history.replaceState({}, '', newUrl); } catch(_) {}
+    // Best-effort tier refresh so the slot-card and any downstream UI
+    // reflect the new entitlement without a page reload. If the webhook
+    // hasn't processed yet, loadTechTier is safely idempotent — next
+    // call picks up the change whenever it lands.
+    try {
+      if (currentUserEmail && typeof loadTechTier === 'function') {
+        loadTechTier(currentUserEmail).then(function() {
+          try { updateSlotsRemainingDisplay(); } catch(_) {}
+        });
+      }
+    } catch(_) {}
+  } catch(e) { console.warn('maybeShowStripeWelcome error:', e); }
+}
+
+function closeStripeWelcome() {
+  var modal = document.getElementById('stripe-welcome-modal');
+  if (modal) modal.style.display = 'none';
+}
+
+function stripeWelcomePrimary() {
+  var btn = document.getElementById('sw-primary-btn');
+  var action = btn && btn.dataset && btn.dataset.action;
+  closeStripeWelcome();
+  if (action === 'upload') {
+    try { openPhotoUploadFromHome(); } catch(_) {}
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════════
 // RELEASE WIZARD
 // ══════════════════════════════════════════════════════════════════════════
 // Replaces the "auto-publish on upload + nag-to-tag-after" pattern with a
@@ -14533,7 +14705,7 @@ function postUploadGoToFeed() {
 // just anchored at the moment of tagging rather than the moment of save).
 // If the tech closes/skips, photos stay pending_feed:true in techs.photos
 // and are surfaced by the tech-home "needs tagging" nudge. 2026-04-23.
-window._mncReleaseWizard = { urls: [], idx: 0, techEmail: null, tags: {}, captions: {}, releasedCount: 0 };
+window._mncReleaseWizard = { urls: [], idx: 0, techEmail: null, tags: {}, captions: {}, slotTypes: {}, releasedCount: 0 };
 
 function startReleaseWizard(newUrls, techEmail) {
   if (!newUrls || !newUrls.length || !techEmail) return;
@@ -14543,16 +14715,19 @@ function startReleaseWizard(newUrls, techEmail) {
     techEmail: techEmail,
     tags: {},       // url -> array of selected tag strings
     captions: {},   // url -> caption string
+    slotTypes: {},  // url -> 'weekly' | 'credit' | 'free' | null (decides feed eligibility)
     releasedCount: 0
   };
   const modal = document.getElementById('release-wizard-modal');
   if (!modal) return;
   modal.style.display = 'flex';
-  // Pre-fill tags from whatever the tech already selected during the
-  // pre-save bulk-review sheet — no reason to make them re-tag if they
-  // already did the work. Captions get stripped before save (per 2026-04-23
-  // 'just the initial post' rule), so those always start fresh. Best-effort:
-  // if the DB read fails, we just render empty and the tech tags from scratch.
+  // Pre-fill tags + slot_type from whatever was stamped on the photo
+  // during upload. slot_type drives feed eligibility at release time:
+  // 'credit' (pay-per-photo) stays portfolio-only; 'weekly'/'free' hit
+  // the bulletin feed. Captions get stripped before save so they start
+  // fresh. Best-effort: if the DB read fails, we render empty and the
+  // tech tags from scratch; photos without a stamped slot_type default
+  // to feed-eligible (legacy behavior). 2026-04-23 portfolio/feed split.
   (async function prefill() {
     try {
       const res = await fetch(SUPABASE_URL + '/rest/v1/techs?email=eq.' + encodeURIComponent(techEmail) + '&select=photos', {
@@ -14566,8 +14741,9 @@ function startReleaseWizard(newUrls, techEmail) {
         const photos = (rows && rows[0] && Array.isArray(rows[0].photos)) ? rows[0].photos : [];
         const st = window._mncReleaseWizard;
         photos.forEach(function(p) {
-          if (p && typeof p === 'object' && p.url && Array.isArray(p.tags) && p.tags.length) {
-            if (st.urls.indexOf(p.url) !== -1) st.tags[p.url] = p.tags.slice();
+          if (p && typeof p === 'object' && p.url && st.urls.indexOf(p.url) !== -1) {
+            if (Array.isArray(p.tags) && p.tags.length) st.tags[p.url] = p.tags.slice();
+            if (p.slot_type) st.slotTypes[p.url] = p.slot_type;
           }
         });
       }
@@ -14592,6 +14768,21 @@ function renderReleaseWizardStep() {
 
   const err = document.getElementById('rw-error');
   if (err) { err.style.display = 'none'; err.textContent = ''; }
+
+  // Feed-vs-portfolio hint + button label. 'credit' slot_type means
+  // this upload goes to portfolio only — reword the CTA so the tech
+  // isn't misled by "Release to feed." 2026-04-23 split.
+  const slotType = st.slotTypes[url] || null;
+  const goesToFeed = (slotType !== 'credit');
+  const hint = document.getElementById('rw-destination-hint');
+  if (hint) {
+    hint.textContent = goesToFeed
+      ? 'This release lives in the bulletin feed + your portfolio.'
+      : 'This photo lives in your portfolio. Glow Up releases add feed exposure too.';
+    hint.style.color = goesToFeed ? 'var(--sage, #6B8E7B)' : 'var(--muted)';
+  }
+  const releaseBtn = document.getElementById('rw-release-btn');
+  if (releaseBtn) releaseBtn.textContent = goesToFeed ? 'Release to feed →' : 'Add to portfolio →';
 
   // Build chips grouped by category. Uses the same PHOTO_TAG_TAXONOMY
   // that the my-photos tag sheet uses, so the gate and the later edit
@@ -14728,54 +14919,65 @@ async function releaseCurrentWizardPhoto() {
     return;
   }
 
-  // Insert board_posts row with staggered publish_at. First released
-  // photo (releasedCount === 0) is live immediately; each subsequent
-  // release adds +1hr to keep the feed from flooding with one tech's
-  // batch. Anchor is wall-clock now so the stagger is always forward-
-  // looking from the moment of tagging.
-  const HOUR_MS = 3600000;
-  const publishAt = new Date(Date.now() + st.releasedCount * HOUR_MS).toISOString();
-  try {
-    const ires = await fetch(SUPABASE_URL + '/rest/v1/board_posts', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'apikey': SUPABASE_ANON_KEY,
-        'Authorization': 'Bearer ' + (window._mncAccessToken || SUPABASE_ANON_KEY),
-        'Prefer': 'return=minimal'
-      },
-      body: JSON.stringify({
-        tech_id: st.techEmail,
-        type: 'inspo',
-        body: caption,
-        image_url: url,
-        publish_at: publishAt
-      })
-    });
-    if (!ires.ok) {
+  // Feed eligibility gate (2026-04-23 portfolio/feed split):
+  //   slot_type 'credit'           → pay-per-photo → PORTFOLIO ONLY, skip feed
+  //   slot_type 'weekly' or 'free' → subscriber / welcome → feed post
+  //   slot_type null (legacy)      → feed post (preserves pre-split behavior)
+  // For credit uploads we only persisted tags+caption above; no
+  // board_posts insert, no stagger counter bump.
+  const slotType = st.slotTypes[url] || null;
+  const feedEligible = (slotType !== 'credit');
+
+  if (feedEligible) {
+    // Insert board_posts row with staggered publish_at. First eligible
+    // release (releasedCount === 0) is live immediately; each subsequent
+    // feed-eligible release adds +1hr to keep the feed from flooding
+    // with one tech's batch. Portfolio-only releases don't count toward
+    // the stagger.
+    const HOUR_MS = 3600000;
+    const publishAt = new Date(Date.now() + st.releasedCount * HOUR_MS).toISOString();
+    try {
+      const ires = await fetch(SUPABASE_URL + '/rest/v1/board_posts', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': 'Bearer ' + (window._mncAccessToken || SUPABASE_ANON_KEY),
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify({
+          tech_id: st.techEmail,
+          type: 'inspo',
+          body: caption,
+          image_url: url,
+          publish_at: publishAt
+        })
+      });
+      if (!ires.ok) {
+        if (errEl) {
+          errEl.style.display = 'block';
+          errEl.textContent = 'Tags saved but feed post failed — try again or skip.';
+        }
+        if (btn) { btn.disabled = false; btn.textContent = 'Release to feed →'; }
+        return;
+      }
+    } catch(e) {
       if (errEl) {
         errEl.style.display = 'block';
-        errEl.textContent = 'Tags saved but feed post failed — try again or skip.';
+        errEl.textContent = 'Network hiccup — ' + ((e && e.message) || 'try again.');
       }
       if (btn) { btn.disabled = false; btn.textContent = 'Release to feed →'; }
       return;
     }
-  } catch(e) {
-    if (errEl) {
-      errEl.style.display = 'block';
-      errEl.textContent = 'Network hiccup — ' + ((e && e.message) || 'try again.');
-    }
-    if (btn) { btn.disabled = false; btn.textContent = 'Release to feed →'; }
-    return;
+    st.releasedCount += 1;
   }
 
-  st.releasedCount += 1;
   if (btn) { btn.disabled = false; btn.textContent = 'Release to feed →'; }
 
   // Advance to next photo or close the wizard.
   st.idx += 1;
   if (st.idx >= st.urls.length) {
-    showToast('All photos released! 🌸');
+    showToast(st.releasedCount > 0 ? 'All photos released! 🌸' : 'Photos added to your portfolio. 🌸');
     closeReleaseWizard();
   } else {
     renderReleaseWizardStep();
@@ -14849,7 +15051,7 @@ function closeReleaseWizard() {
       </div>
       <div id="upgrade-eyebrow" style="font-size:11px;font-weight:700;letter-spacing:2px;color:var(--rose);text-transform:uppercase;margin-bottom:6px;">You are on the Starter Plan</div>
       <div id="upgrade-headline" style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--charcoal);margin-bottom:6px;">Ready to Grow?</div>
-      <div id="upgrade-body" style="font-size:14px;color:var(--muted);line-height:1.5;">You have used all <b id="upgrade-limit-text">5</b> free photo slots. Add more à la carte — or unlock your <b style="color:var(--rose-dark);">all-time portfolio</b> with Glow Up.</div>
+      <div id="upgrade-body" style="font-size:14px;color:var(--muted);line-height:1.5;">You have used all <b id="upgrade-limit-text">5</b> free photo slots. Grab a <b style="color:var(--rose-dark);">Spotlight pack</b> for your portfolio, or step into <b style="color:var(--rose-dark);">Glow Up</b> to post daily — every upload goes to the feed.</div>
     </div>
 
     <!-- Options -->
@@ -14862,43 +15064,43 @@ function closeReleaseWizard() {
         <div style="width:44px;height:44px;border-radius:14px;background:var(--cream);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:var(--rose);">$1</div>
         <div style="flex:1;">
           <div style="font-size:15px;font-weight:600;color:var(--charcoal);">Spotlight <span style="font-size:11px;font-weight:500;color:var(--muted);">— 1 photo</span></div>
-          <div style="font-size:12px;color:var(--muted);">One-time · Add one more photo to the feed</div>
+          <div style="font-size:12px;color:var(--muted);">One-time · Portfolio only</div>
         </div>
         <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--muted);fill:none;stroke-width:2.5;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg>
       </div>
 
-      <!-- 10 photos/$5 bundle — the BEST VALUE badge lives in a wrapper
+      <!-- 10 photos/$5 bundle — SAVE 50% badge lives in a wrapper
            sibling (not inside the card) because the card gets
            overflow:hidden from the #upgrade-modal hover-shine CSS rule,
-           which was clipping the badge's upper half and making it read
-           as a half-bar. Wrapper keeps the click target untouched.
-           2026-04-22. -->
+           which was clipping the badge's upper half. Wrapper keeps the
+           click target untouched. Copy highlights the portfolio-only
+           nature so techs understand Spotlight vs Glow Up. 2026-04-23. -->
       <div style="position:relative;">
         <div style="position:absolute;top:-10px;right:16px;background:var(--rose);color:white;font-size:10px;font-weight:700;padding:3px 10px;border-radius:100px;letter-spacing:0.5px;z-index:2;box-shadow:0 2px 6px rgba(178,110,95,0.35);">SAVE 50%</div>
         <div onclick="purchasePhotos(10)" style="border:2px solid var(--rose);border-radius:18px;padding:16px;cursor:pointer;display:flex;align-items:center;gap:14px;background:var(--rose-light);transition:all 0.15s;">
           <div style="width:44px;height:44px;border-radius:14px;background:white;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--rose);">$5</div>
           <div style="flex:1;">
             <div style="font-size:15px;font-weight:600;color:var(--charcoal);">Spotlight Pack <span style="font-size:11px;font-weight:500;color:var(--rose);">— 10 photos</span></div>
-            <div style="font-size:12px;color:var(--rose);">One-time · Save $5 · Show up 10x more often</div>
+            <div style="font-size:12px;color:var(--rose);">One-time · Archive your work · Portfolio only</div>
           </div>
           <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--rose);fill:none;stroke-width:2.5;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg>
         </div>
       </div>
 
-      <!-- $9/month Glow Up — the real hero offering. Bright rose →
-           gold gradient with a "BEST DEAL" ribbon so it visually beats
-           the one-time packs. Copy spells out the weekly rhythm so
-           techs know what they're actually getting. Hidden when
-           GLOW_UP_ENABLED is false; showUpgradeModal toggles this each
-           open. 2026-04-22 per Anne: "make it a nicer color, brighter,
-           gradient... 5 photos a week needs spelled out." -->
+      <!-- $10/month Glow Up — the hero offering. Bright rose → gold
+           gradient with a "BEST VALUE" ribbon. Copy leads with "a new
+           look every day" (identity framing) instead of the raw cap
+           number, pairs it with "every upload goes to the feed" —
+           action-framed so we aren't promising permanence (the feed is
+           a 100-post rolling window and an "always in" claim would be
+           inaccurate). 2026-04-23 pivot: monthly 40, feed-exclusive. -->
       <div style="position:relative;">
         <div style="position:absolute;top:-10px;right:16px;background:linear-gradient(135deg,#E8C890 0%,#D4A060 100%);color:#3D2508;font-size:10px;font-weight:800;padding:3px 10px;border-radius:100px;letter-spacing:0.6px;z-index:2;box-shadow:0 2px 6px rgba(168,130,50,0.35);">BEST VALUE</div>
         <div id="upgrade-opt-glowup" onclick="purchaseUnlimited()" style="border:2px solid var(--rose-dark);border-radius:18px;padding:16px;cursor:pointer;display:flex;align-items:center;gap:14px;background:linear-gradient(135deg,#D98872 0%,#C4786A 45%,#A85968 100%);transition:all 0.15s;box-shadow:0 6px 20px rgba(178,110,95,0.28);">
-          <div style="width:46px;height:46px;border-radius:14px;background:rgba(255,255,255,0.22);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:'Playfair Display',serif;font-size:15px;font-weight:700;color:white;line-height:1.1;text-align:center;backdrop-filter:blur(4px);">$9<br><span style="font-size:9px;font-weight:500;opacity:0.88;">/ mo</span></div>
+          <div style="width:46px;height:46px;border-radius:14px;background:rgba(255,255,255,0.22);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:'Playfair Display',serif;font-size:15px;font-weight:700;color:white;line-height:1.1;text-align:center;backdrop-filter:blur(4px);">$10<br><span style="font-size:9px;font-weight:500;opacity:0.88;">/ mo</span></div>
           <div style="flex:1;">
             <div style="font-size:15.5px;font-weight:700;color:white;letter-spacing:0.2px;">Glow Up</div>
-            <div style="font-size:12.5px;color:rgba(255,255,255,0.92);line-height:1.45;margin-top:3px;"><b>5 new photos every week</b> &middot; resets Sunday<br><span style="font-size:11.5px;opacity:0.85;">All your work stays live. Buy credits to go faster.</span></div>
+            <div style="font-size:12.5px;color:rgba(255,255,255,0.92);line-height:1.45;margin-top:3px;"><b>Post a new look every day</b> &middot; 40&#47;mo, every upload goes to the feed<br><span style="font-size:11.5px;opacity:0.85;">Refills on your anniversary. Buy credits for overflow.</span></div>
           </div>
           <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:white;fill:none;stroke-width:2.5;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg>
         </div>
@@ -15275,6 +15477,42 @@ function closeReleaseWizard() {
 </div>
 
 <!-- ════════════════════════════════════════════════════════════════════════
+     STRIPE CHECKOUT WELCOME MODAL
+     Fires when the user lands back on the app with ?welcome=<variant> in
+     the URL (set as the Stripe Payment Link's success URL). Content is
+     variant-driven so one modal handles Glow Up + the two Spotlight
+     bundle sizes. Shown via maybeShowStripeWelcome() on DOMContentLoaded
+     after the session has restored. URL param gets stripped after show
+     via history.replaceState so a refresh doesn't re-trigger. 2026-04-23. -->
+<div id="stripe-welcome-modal" class="modal-overlay" style="display:none;position:fixed;inset:0;z-index:9080;background:rgba(20,10,15,0.72);backdrop-filter:blur(4px);align-items:center;justify-content:center;">
+  <div style="background:white;border-radius:24px;width:100%;max-width:400px;margin:20px;padding:28px 24px 22px;box-shadow:0 10px 50px rgba(0,0,0,0.24);text-align:center;">
+    <div id="sw-icon-wrap" style="width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,#FFF5EF 0%,#FBE4D9 100%);margin:0 auto 16px;display:flex;align-items:center;justify-content:center;">
+      <!-- Icon varies by variant; replaced at render time. -->
+      <svg viewBox="0 0 24 24" style="width:34px;height:34px;stroke:var(--rose-dark);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+    </div>
+    <div id="sw-eyebrow" style="font-size:11px;font-weight:700;letter-spacing:1.4px;color:var(--rose);text-transform:uppercase;margin-bottom:8px;">Welcome to Glow Up</div>
+    <div id="sw-title" style="font-family:'Playfair Display',serif;font-size:24px;font-weight:600;color:var(--charcoal);margin-bottom:10px;line-height:1.15;">You're in! 🌸</div>
+    <div id="sw-body" style="font-size:14px;color:#5E524B;line-height:1.55;margin-bottom:16px;">Post a new look every day — every upload releases to the feed.</div>
+
+    <!-- Key-stat strip: big number + label + subtitle (e.g., refill date).
+         Populated per-variant. -->
+    <div id="sw-stat" style="background:linear-gradient(160deg,#FFF8F3 0%,#FBE8DC 100%);border:1px solid rgba(196,120,106,0.22);border-radius:14px;padding:14px 16px;margin-bottom:18px;">
+      <div style="display:flex;align-items:baseline;justify-content:center;gap:10px;">
+        <div id="sw-stat-num" style="font-family:'Playfair Display',serif;font-size:36px;font-weight:600;color:var(--rose-dark);line-height:1;">40</div>
+        <div id="sw-stat-label" style="font-size:14px;color:var(--charcoal);font-weight:500;">uploads this month</div>
+      </div>
+      <div id="sw-stat-sub" style="font-size:12px;color:var(--muted);margin-top:6px;"></div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <button id="sw-primary-btn" onclick="stripeWelcomePrimary()" class="btn btn-rose" style="width:100%;">Post your first look →</button>
+      <button onclick="closeStripeWelcome()" style="width:100%;padding:10px;border:none;background:none;color:var(--muted);font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;">I'll explore first</button>
+    </div>
+    <div style="font-size:11px;color:var(--muted);margin-top:14px;line-height:1.5;">Stripe emailed you a receipt. Manage your subscription any time from your profile.</div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════════════
      POST-UPLOAD SUCCESS MODAL
      Fires after Save Changes when 1+ new photos were just added. Two
      clear CTAs: tag photos (the high-value next action — clients find
@@ -15320,6 +15558,10 @@ function closeReleaseWizard() {
       <textarea id="rw-caption" rows="2" maxlength="240" placeholder="Say something about this set — technique, inspiration, client vibe…" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:12px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--charcoal);background:var(--cream);resize:vertical;min-height:58px;margin-bottom:14px;box-sizing:border-box;"></textarea>
       <div style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;">Tags <span style="color:var(--rose);">*</span> <span style="color:var(--muted);font-weight:500;text-transform:none;letter-spacing:0;">(at least one)</span></div>
       <div id="rw-chips"></div>
+      <!-- Destination hint — updated per-photo by renderReleaseWizardStep
+           based on the photo's slot_type. "credit" → portfolio-only copy;
+           "weekly"/"free" → feed+portfolio copy. -->
+      <div id="rw-destination-hint" style="font-size:12px;margin-top:12px;padding:8px 10px;background:var(--cream);border-radius:8px;line-height:1.4;"></div>
       <div id="rw-error" style="display:none;color:#B3261E;font-size:12px;margin-top:10px;padding:8px 10px;background:#FDECEA;border-radius:8px;"></div>
     </div>
     <div style="padding:12px 18px 18px;border-top:1px solid var(--border);flex-shrink:0;background:white;">

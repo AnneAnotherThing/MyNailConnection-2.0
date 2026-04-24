@@ -54,17 +54,15 @@ const supabase = createClient(
   Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 );
 
-// Next Sunday 00:00 UTC strictly after a given timestamp. Used to
-// initialize / refresh techs.weekly_reset_at when a Glow Up subscription
-// activates or renews. Matches the SQL next_sunday_utc_midnight() helper
-// so test and DB behaviour align. 2026-04-22 per the Glow Up weekly-
-// slots pivot.
-function nextSundayUtcMidnight(now: Date = new Date()): Date {
-  const d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
-  const dow = d.getUTCDay(); // 0=Sun, 1=Mon, ..., 6=Sat
-  const daysToAdd = dow === 0 ? 7 : (7 - dow);
-  d.setUTCDate(d.getUTCDate() + daysToAdd);
-  // d is already 00:00:00 UTC of that day.
+// One-month-from-now timestamp. Used to initialize / refresh
+// techs.period_reset_at when a Glow Up subscription activates or
+// renews. Replaces nextSundayUtcMidnight() from the 2026-04-22 weekly
+// model. 2026-04-23 monthly-cadence pivot: subs refill on the rolling
+// anniversary of the last refill, not a calendar day. Matches the SQL
+// inline `now() + interval '1 month'` inside consume_upload_slot().
+function nextMonthFromNow(now: Date = new Date()): Date {
+  const d = new Date(now.getTime());
+  d.setUTCMonth(d.getUTCMonth() + 1);
   return d;
 }
 
@@ -194,21 +192,21 @@ serve(async (req) => {
       const sub = await stripe.subscriptions.retrieve(session.subscription as string);
       const expiresAt = new Date(sub.current_period_end * 1000);
       const customerId = session.customer as string;
-      // Initialize Glow Up weekly allowance: 5 new photos/week,
-      // Sunday 00:00 UTC reset. On re-subscription after cancellation
-      // the tech gets a fresh 0/5 this week regardless of what the
-      // counter was before — resets aren't rolled over. See the pivot
+      // Initialize Glow Up monthly allowance: 40 uploads, refills on the
+      // rolling 1-month anniversary of this activation. On re-subscription
+      // after cancellation the tech gets a fresh 0/40 regardless of what
+      // the counter was before — resets aren't rolled over. See the pivot
       // memo project_mnc_subscription_model_pivot for rationale.
-      const weeklyResetAt = nextSundayUtcMidnight();
+      const periodResetAt = nextMonthFromNow();
       const { error } = await supabase.from('techs').update({
         subscription_tier: 'paid',
         subscription_expires_at: expiresAt.toISOString(),
         stripe_customer_id: customerId,
-        weekly_upload_count: 0,
-        weekly_reset_at: weeklyResetAt.toISOString(),
+        period_upload_count: 0,
+        period_reset_at: periodResetAt.toISOString(),
       }).eq('id', techId);
       if (error) console.error(`techs.update failed for ${techId}:`, error);
-      else console.log(`Set paid tier for tech ${techId} until ${expiresAt.toISOString()}; weekly resets at ${weeklyResetAt.toISOString()}`);
+      else console.log(`Set paid tier for tech ${techId} until ${expiresAt.toISOString()}; monthly refill at ${periodResetAt.toISOString()}`);
 
       // If this is a re-subscribe after a previous cancellation, restore
       // any photos we paused on the way out. Safe no-op when nothing paused.
@@ -255,27 +253,27 @@ serve(async (req) => {
     const isActive = sub.status === 'active' || sub.status === 'trialing';
 
     // On transition to active (renewal, reactivation from past_due /
-    // dunning, trial end), refresh weekly_reset_at if it's null or
+    // dunning, trial end), refresh period_reset_at if it's null or
     // already past — that way a dormant subscriber who reactivates gets
-    // a fresh week. Mid-period renewals where the reset marker is still
+    // a fresh month. Mid-period renewals where the reset marker is still
     // in the future leave it alone (the lazy reset inside
-    // consume_upload_slot handles normal week rollovers).
+    // consume_upload_slot handles normal rollovers).
     const updatePayload: Record<string, unknown> = {
       subscription_tier: isActive ? 'paid' : 'free',
       subscription_expires_at: isActive ? expiresAt.toISOString() : null,
     };
     if (isActive) {
-      // Look up current weekly_reset_at to decide whether to overwrite.
+      // Look up current period_reset_at to decide whether to overwrite.
       const { data: cur } = await supabase
         .from('techs')
-        .select('weekly_reset_at')
+        .select('period_reset_at')
         .eq('stripe_customer_id', customerId)
         .limit(1)
         .maybeSingle();
-      const existing = cur?.weekly_reset_at ? new Date(cur.weekly_reset_at as string) : null;
+      const existing = cur?.period_reset_at ? new Date(cur.period_reset_at as string) : null;
       if (!existing || existing.getTime() <= Date.now()) {
-        updatePayload.weekly_upload_count = 0;
-        updatePayload.weekly_reset_at = nextSundayUtcMidnight().toISOString();
+        updatePayload.period_upload_count = 0;
+        updatePayload.period_reset_at = nextMonthFromNow().toISOString();
       }
     }
     const { error } = await supabase.from('techs').update(updatePayload).eq('stripe_customer_id', customerId);
