@@ -1347,6 +1347,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
         <div style="display:flex;flex-wrap:wrap;gap:7px;" id="reg-tags">
           <label class="te-tag"><input type="checkbox" value="Gel"><span>Gel</span></label>
           <label class="te-tag"><input type="checkbox" value="Acrylic"><span>Acrylic</span></label>
+          <label class="te-tag"><input type="checkbox" value="Gel-X"><span>Gel-X</span></label>
           <label class="te-tag"><input type="checkbox" value="Dip Powder"><span>Dip Powder</span></label>
           <label class="te-tag"><input type="checkbox" value="Builder Gel"><span>Builder Gel</span></label>
           <label class="te-tag"><input type="checkbox" value="Polygel"><span>Polygel</span></label>
@@ -2199,6 +2200,25 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
     <!-- Summary bar -->
     <div id="myph-summary" style="background:var(--cream);border-radius:14px;padding:12px 14px;margin-bottom:16px;font-size:13px;color:var(--charcoal);text-align:center;">Loading your photos…</div>
 
+    <!-- Filter bar — quick-chips for All / Needs tagging, plus three
+         category filters (Shape / Type / Style). Lets the tech slice
+         their gallery for targeted tagging cleanup. Hidden on empty
+         state. Rendered/populated by renderMyPhotosFilterBar(); the
+         filter state lives on window._myphFilter. 2026-04-23. -->
+    <div id="myph-filter-bar" style="display:none;margin-bottom:14px;">
+      <div id="myph-filter-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;"></div>
+      <div id="myph-filter-active" style="display:none;font-size:11px;color:var(--rose-dark);background:var(--rose-light);padding:7px 10px;border-radius:8px;align-items:center;justify-content:space-between;gap:8px;">
+        <span id="myph-filter-active-text"></span>
+        <button type="button" onclick="clearMyPhotosFilter()" style="font-size:11px;border:none;background:none;color:var(--rose-dark);font-weight:700;cursor:pointer;text-decoration:underline;padding:0;font-family:'DM Sans',sans-serif;">Clear</button>
+      </div>
+    </div>
+
+    <!-- Filter picker sheet — opens as a fixed-position floating panel
+         when a category chip is tapped. Using fixed (viewport-relative)
+         keeps the positioning math simple and works regardless of which
+         ancestor is the scroll container. -->
+    <div id="myph-filter-sheet" style="display:none;position:fixed;z-index:9090;background:white;border:1.5px solid var(--border);border-radius:14px;box-shadow:0 8px 28px rgba(0,0,0,0.18);padding:12px;max-width:90vw;"></div>
+
     <!-- Unified 2-col grid — all photos in one place, status badge per
          thumbnail, tap opens the tag editor. Matches browse-style aesthetic
          (2-col, square crops, tight gap) so clients and techs see a
@@ -2209,6 +2229,10 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
         <div style="font-size:11px;color:var(--muted);">Tap a photo to tag</div>
       </div>
       <div id="myph-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;"></div>
+      <div id="myph-filter-empty" style="display:none;text-align:center;padding:40px 20px;color:var(--muted);font-size:13px;line-height:1.55;">
+        No photos match this filter.
+        <br><button type="button" onclick="clearMyPhotosFilter()" style="font-size:12px;padding:7px 16px;border-radius:100px;border:1.5px solid var(--rose-mid);background:white;color:var(--rose-dark);font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;margin-top:10px;">Clear filter</button>
+      </div>
     </div>
 
     <!-- Empty state — now with a direct Upload CTA since uploads live
@@ -2392,7 +2416,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
           </div>
           <div style="background:var(--cream);border-radius:12px;padding:12px 14px;">
             <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:var(--rose-dark);margin-bottom:6px;">NAIL TYPE</div>
-            <div style="font-size:12px;color:var(--charcoal);line-height:1.7;">Acrylic · Hard Gel · Soft Gel · Dip Powder · PolyGel · Silk Wrap · Press-On</div>
+            <div style="font-size:12px;color:var(--charcoal);line-height:1.7;">Acrylic · Hard Gel · Soft Gel · Gel-X · Dip Powder · PolyGel · Silk Wrap · Press-On</div>
           </div>
           <div style="background:var(--rose-light);border-radius:12px;padding:12px 14px;">
             <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:var(--rose-dark);margin-bottom:6px;">NAIL STYLE</div>
@@ -3097,6 +3121,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
               <label class="te-tag"><input type="checkbox" value="Acrylic"/><span>Acrylic</span></label>
               <label class="te-tag"><input type="checkbox" value="Hard Gel"/><span>Hard Gel</span></label>
               <label class="te-tag"><input type="checkbox" value="Soft Gel"/><span>Soft Gel</span></label>
+              <label class="te-tag"><input type="checkbox" value="Gel-X"/><span>Gel-X</span></label>
               <label class="te-tag"><input type="checkbox" value="Dip Powder"/><span>Dip Powder</span></label>
               <label class="te-tag"><input type="checkbox" value="PolyGel"/><span>PolyGel</span></label>
               <label class="te-tag"><input type="checkbox" value="Silk Wrap"/><span>Silk Wrap</span></label>
@@ -3215,7 +3240,12 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
 
       <!-- Actions -->
       <button type="button" class="btn btn-rose" onclick="saveTechEdit()" style="margin-bottom:10px;">Save Changes</button>
-      <button type="button" onclick="deleteTech()" style="width:100%;padding:12px;border-radius:100px;border:1.5px solid var(--rose-mid);background:white;color:#C0404A;font-size:14px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;"><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg> Delete This Tech</button>
+      <!-- Destructive button — only ever shown when an ADMIN is editing
+           someone else's profile. Hidden via JS in openTechEdit() when
+           the current user is editing their own profile, because "Delete
+           This Tech" pointed at yourself is never the right action. A
+           tech who wants to leave MNC should contact Anne. 2026-04-23. -->
+      <button id="te-delete-tech-btn" type="button" onclick="deleteTech()" style="width:100%;padding:12px;border-radius:100px;border:1.5px solid var(--rose-mid);background:white;color:#C0404A;font-size:14px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;"><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg> Delete This Tech</button>
     </div>
   </div>
 
@@ -7317,7 +7347,7 @@ function teSerializeHours() {
 
 function updateTeTagCounts() {
   var groups = { shape: ['Square','Round','Oval','Almond','Coffin','Stiletto','Squoval','Lipstick'],
-                 type:  ['Acrylic','Hard Gel','Soft Gel','Dip Powder','PolyGel','Silk Wrap','Press-On','Natural Nail'],
+                 type:  ['Acrylic','Hard Gel','Soft Gel','Gel-X','Dip Powder','PolyGel','Silk Wrap','Press-On','Natural Nail'],
                  style: ['Solid Color','French Manicure','Deep French','Reverse French','Ombré','Nail Art','Glitter','Chrome','Cat Eye','Matte','Milky/Sheer','Jelly Nails','Aura Nails','Marble','3D Nails','Encapsulated','Bling/Rhinestones'] };
   ['shape','type','style'].forEach(function(g) {
     var checked = document.querySelectorAll('#te-tags input:checked');
@@ -7356,6 +7386,16 @@ function openTechEdit(tech) {
   }
   document.getElementById('tech-edit-modal').style.display = 'block';
   document.getElementById('tech-edit-title').textContent = tech.name || 'New Tech';
+  // Hide "Delete This Tech" when the tech is editing their own profile.
+  // Still visible to admins editing another tech's row. 2026-04-23.
+  try {
+    var _deleteBtn = document.getElementById('te-delete-tech-btn');
+    var _isSelfEdit = (
+      tech && tech.email && currentUserEmail &&
+      String(tech.email).toLowerCase() === String(currentUserEmail).toLowerCase()
+    );
+    if (_deleteBtn) _deleteBtn.style.display = _isSelfEdit ? 'none' : '';
+  } catch(_) {}
   // Avatar
   const av = document.getElementById('tech-edit-avatar');
   const photoUrl = edit.photoUrl || tech.imageUrl;
@@ -7830,13 +7870,32 @@ function renderTePhotoGrid(photos) {
   // Only the tech who owns these photos should tag them — the tech
   // knows their own work best. Admins editing someone else's profile get
   // the grid with remove-photo only (no tag chips). Leslie-style admins
-  // editing their OWN profile still see tags (editingSelf catches that).
+  // editing their OWN profile hit the editingSelf branch too.
   var editingSelf = (
     typeof currentEditTech !== 'undefined' &&
     currentEditTech && currentEditTech.email &&
     currentUserEmail &&
     String(currentEditTech.email).toLowerCase() === String(currentUserEmail).toLowerCase()
   );
+
+  // 2026-04-23: for self-edit, skip rendering the per-photo thumbnails +
+  // remove + tag chips. The gallery screen (my-photos) is now the
+  // tech's proper showcase and tag/remove surface, and duplicating it
+  // here is clutter. Still leave the upload zone + progress bar + slots
+  // chip visible (those are the parts the tech interacts with when
+  // adding new work) — only the "here are your existing photos" grid
+  // goes. Admins editing another tech's row keep the full grid because
+  // they legitimately need to moderate/remove from this side.
+  if (editingSelf) {
+    var hint = document.createElement('div');
+    hint.style.cssText = 'padding:14px 16px;border-radius:12px;background:var(--cream);border:1px dashed var(--border);font-size:12px;color:var(--muted);line-height:1.5;text-align:center;';
+    var count = (photos || []).length;
+    hint.innerHTML = count
+      ? ('You have <b style="color:var(--charcoal);">' + count + '</b> photo' + (count === 1 ? '' : 's') + ' in your portfolio. Manage and tag them in your <a onclick="closeTechEdit(); show(\'my-photos\');" style="color:var(--rose);cursor:pointer;font-weight:600;text-decoration:underline;text-underline-offset:2px;">Gallery</a>.')
+      : 'Tap the upload zone above to add your first photos. They&rsquo;ll live in your <a onclick="closeTechEdit(); show(\'my-photos\');" style="color:var(--rose);cursor:pointer;font-weight:600;text-decoration:underline;text-underline-offset:2px;">Gallery</a> for tagging and review.';
+    grid.appendChild(hint);
+    return;
+  }
 
   photos.forEach(function(p, i) {
     var div = document.createElement('div');
@@ -8041,41 +8100,242 @@ async function loadMyPhotosData() {
   }
 }
 
+// Gallery filter state. 'mode' drives the quick-chip selection:
+//   'all'           — show every photo
+//   'needsTags'     — only photos with 0 tags
+//   'filtered'      — apply shape/type/style tag filters (AND together)
+// shape/type/style hold the single tag value selected per category
+// (null when that category isn't filtered). Kept on window so other
+// modules can read it without import gymnastics. 2026-04-23.
+window._myphFilter = { mode: 'all', shape: null, type: null, style: null };
+
 function renderMyPhotos() {
   // Unified grid: every photo in a single 2-col layout, status badge
-  // per thumb (tagged/untagged), tap opens the tag-editor sheet. No
-  // more split "untagged above / tagged collapsed below" — one clean
-  // scannable surface. 2026-04-22 per Anne.
-  const photos = _myPhotosState.photos;
-  const taggedCount = photos.filter(function(p) { return p.tags && p.tags.length; }).length;
+  // per thumb (tagged/untagged), tap opens the tag-editor sheet. Filter
+  // bar above narrows the visible set without touching _myPhotosState.
+  const allPhotos = _myPhotosState.photos;
+  const taggedCount = allPhotos.filter(function(p) { return p.tags && p.tags.length; }).length;
 
   const summary  = document.getElementById('myph-summary');
   const emptyEl  = document.getElementById('myph-empty');
   const gridWrap = document.getElementById('myph-grid-wrap');
   const totalEl  = document.getElementById('myph-total-count');
   const grid     = document.getElementById('myph-grid');
+  const filterBar = document.getElementById('myph-filter-bar');
+  const filterEmpty = document.getElementById('myph-filter-empty');
 
-  if (!photos.length) {
+  if (!allPhotos.length) {
     if (summary)  summary.style.display = 'none';
     if (gridWrap) gridWrap.style.display = 'none';
+    if (filterBar) filterBar.style.display = 'none';
     if (emptyEl)  emptyEl.style.display = 'block';
     return;
   }
 
+  // Apply filter
+  const visible = _applyMyPhotosFilter(allPhotos);
+
   if (emptyEl)  emptyEl.style.display = 'none';
   if (summary) {
     summary.style.display = 'block';
-    summary.textContent = taggedCount + ' of ' + photos.length + ' photos tagged';
+    summary.textContent = taggedCount + ' of ' + allPhotos.length + ' photos tagged';
   }
-  if (gridWrap) gridWrap.style.display = 'block';
-  if (totalEl)  totalEl.textContent = '(' + photos.length + ')';
+  if (filterBar) filterBar.style.display = 'block';
+  if (gridWrap)  gridWrap.style.display = 'block';
+  if (totalEl) {
+    // Show "(8 of 17)" when filtered, "(17)" when showing all
+    var f = window._myphFilter;
+    var filtered = (f.mode !== 'all') || f.shape || f.type || f.style;
+    totalEl.textContent = filtered
+      ? ('(' + visible.length + ' of ' + allPhotos.length + ')')
+      : ('(' + allPhotos.length + ')');
+  }
+
+  renderMyPhotosFilterBar();
 
   if (grid) {
     grid.textContent = '';
-    photos.forEach(function(p, i) {
-      grid.appendChild(buildGalleryCard(p, i));
+    visible.forEach(function(p) {
+      // Use the ORIGINAL index (from _myPhotosState.photos) so tap-to-tag
+      // still lands on the correct entry, even when filtered.
+      var origIdx = allPhotos.indexOf(p);
+      grid.appendChild(buildGalleryCard(p, origIdx));
     });
+    // Empty-filter state (no photos match) vs empty-portfolio state.
+    if (filterEmpty) {
+      filterEmpty.style.display = visible.length === 0 ? 'block' : 'none';
+    }
+    grid.style.display = visible.length === 0 ? 'none' : 'grid';
   }
+}
+
+// Apply window._myphFilter to the photos list and return the filtered
+// subset. Pure function — doesn't touch state.
+function _applyMyPhotosFilter(photos) {
+  var f = window._myphFilter || { mode: 'all' };
+  return photos.filter(function(p) {
+    var tags = Array.isArray(p.tags) ? p.tags : [];
+    if (f.mode === 'needsTags') {
+      return tags.length === 0;
+    }
+    // mode === 'all' or 'filtered' — honor shape/type/style if set
+    if (f.shape && tags.indexOf(f.shape) === -1) return false;
+    if (f.type  && tags.indexOf(f.type)  === -1) return false;
+    if (f.style && tags.indexOf(f.style) === -1) return false;
+    return true;
+  });
+}
+
+// Renders the filter-bar chips: quick-chips (All, Needs tagging) and the
+// three category dropdowns (Shape, Type, Style). Active state is driven
+// by window._myphFilter. 2026-04-23.
+function renderMyPhotosFilterBar() {
+  var chipsWrap = document.getElementById('myph-filter-chips');
+  if (!chipsWrap) return;
+  chipsWrap.innerHTML = '';
+
+  var f = window._myphFilter;
+
+  function chipStyle(active) {
+    return 'font-size:12px;padding:6px 12px;border-radius:100px;cursor:pointer;font-family:"DM Sans",sans-serif;font-weight:500;border:1.5px solid ' +
+      (active ? 'var(--rose-dark);background:var(--rose);color:white;'
+              : 'var(--border);background:white;color:var(--charcoal);');
+  }
+
+  // Quick-chip: All
+  var allBtn = document.createElement('button');
+  allBtn.type = 'button';
+  allBtn.textContent = 'All';
+  allBtn.style.cssText = chipStyle(f.mode === 'all' && !f.shape && !f.type && !f.style);
+  allBtn.onclick = function() {
+    window._myphFilter = { mode: 'all', shape: null, type: null, style: null };
+    renderMyPhotos();
+  };
+  chipsWrap.appendChild(allBtn);
+
+  // Quick-chip: Needs tagging — count badge is helpful since it's the
+  // whole point of this filter (find the untagged pile).
+  var untagged = (_myPhotosState.photos || []).filter(function(p) {
+    return !p.tags || !p.tags.length;
+  }).length;
+  var needsBtn = document.createElement('button');
+  needsBtn.type = 'button';
+  needsBtn.textContent = 'Needs tagging' + (untagged ? ' · ' + untagged : '');
+  needsBtn.style.cssText = chipStyle(f.mode === 'needsTags');
+  needsBtn.onclick = function() {
+    window._myphFilter = { mode: 'needsTags', shape: null, type: null, style: null };
+    renderMyPhotos();
+  };
+  chipsWrap.appendChild(needsBtn);
+
+  // Category chips — one per PHOTO_TAG_TAXONOMY group. Tapping opens a
+  // picker sheet positioned under the chip. If a value is already set,
+  // the chip shows that value (e.g., "Shape: Almond").
+  Object.keys(PHOTO_TAG_TAXONOMY).forEach(function(cat) {
+    var catKey = cat.toLowerCase();
+    var selected = f[catKey];
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.textContent = selected ? (cat + ': ' + selected) : (cat + ' ▾');
+    btn.style.cssText = chipStyle(!!selected);
+    btn.onclick = function(ev) {
+      ev.stopPropagation();
+      _openMyPhotosFilterPicker(cat, btn);
+    };
+    chipsWrap.appendChild(btn);
+  });
+
+  // Active-filter banner — reminds what's applied + Clear shortcut.
+  var activeBar = document.getElementById('myph-filter-active');
+  var activeText = document.getElementById('myph-filter-active-text');
+  var activeBits = [];
+  if (f.mode === 'needsTags')    activeBits.push('Needs tagging');
+  if (f.shape)                   activeBits.push('Shape: ' + f.shape);
+  if (f.type)                    activeBits.push('Type: ' + f.type);
+  if (f.style)                   activeBits.push('Style: ' + f.style);
+  if (activeBar && activeText) {
+    if (activeBits.length) {
+      activeBar.style.display = 'flex';
+      activeText.textContent = 'Filtering by: ' + activeBits.join(' · ');
+    } else {
+      activeBar.style.display = 'none';
+    }
+  }
+}
+
+// Opens a floating picker sheet anchored under a category chip with
+// the list of available tags for that category. Tapping a tag sets
+// window._myphFilter[cat] and re-renders; tapping "Any" clears just
+// that category.
+function _openMyPhotosFilterPicker(cat, anchorBtn) {
+  var sheet = document.getElementById('myph-filter-sheet');
+  if (!sheet) return;
+  var catKey = cat.toLowerCase();
+  var tags = PHOTO_TAG_TAXONOMY[cat] || [];
+
+  sheet.innerHTML = '';
+
+  // "Any" clears only this category
+  var anyBtn = document.createElement('button');
+  anyBtn.type = 'button';
+  anyBtn.textContent = 'Any ' + cat.toLowerCase();
+  anyBtn.style.cssText = 'font-size:12px;padding:6px 10px;border-radius:100px;cursor:pointer;border:1.5px dashed var(--border);background:white;color:var(--muted);font-family:"DM Sans",sans-serif;margin:0 5px 5px 0;';
+  anyBtn.onclick = function() {
+    window._myphFilter[catKey] = null;
+    sheet.style.display = 'none';
+    renderMyPhotos();
+  };
+  sheet.appendChild(anyBtn);
+
+  tags.forEach(function(tag) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.textContent = tag;
+    var selected = window._myphFilter[catKey] === tag;
+    b.style.cssText = 'font-size:12px;padding:6px 10px;border-radius:100px;cursor:pointer;font-family:"DM Sans",sans-serif;margin:0 5px 5px 0;border:1.5px solid ' +
+      (selected ? 'var(--rose-dark);background:var(--rose);color:white;'
+                : 'var(--border);background:white;color:var(--charcoal);');
+    b.onclick = function() {
+      window._myphFilter[catKey] = tag;
+      // Auto-promote mode to 'filtered' if user was on needsTags — mixing
+      // needs-tagging AND a specific tag doesn't make sense.
+      if (window._myphFilter.mode === 'needsTags') window._myphFilter.mode = 'all';
+      sheet.style.display = 'none';
+      renderMyPhotos();
+    };
+    sheet.appendChild(b);
+  });
+
+  // Position the sheet below the chip. Uses viewport coords because the
+  // sheet is position:fixed. Clamp right-edge so a long Style list
+  // never sails off-screen on narrow phones.
+  sheet.style.display = 'block';
+  // First set display so we can measure, then compute clamped left.
+  var rect = anchorBtn.getBoundingClientRect();
+  var sheetWidth = Math.min(sheet.offsetWidth || 320, window.innerWidth - 16);
+  var desiredLeft = rect.left;
+  var maxLeft = window.innerWidth - sheetWidth - 8;
+  var clampedLeft = Math.max(8, Math.min(desiredLeft, maxLeft));
+  sheet.style.left = clampedLeft + 'px';
+  sheet.style.top  = (rect.bottom + 4) + 'px';
+
+  // One-shot outside-click dismisses the sheet.
+  setTimeout(function() {
+    function onDocClick(e) {
+      if (!sheet.contains(e.target)) {
+        sheet.style.display = 'none';
+        document.removeEventListener('click', onDocClick);
+      }
+    }
+    document.addEventListener('click', onDocClick);
+  }, 0);
+}
+
+function clearMyPhotosFilter() {
+  window._myphFilter = { mode: 'all', shape: null, type: null, style: null };
+  var sheet = document.getElementById('myph-filter-sheet');
+  if (sheet) sheet.style.display = 'none';
+  renderMyPhotos();
 }
 
 // One card in the unified 2-col gallery grid. Status badge overlay
@@ -8145,6 +8405,72 @@ function closeMyPhotoTagSheet() {
   _myphSheetIdx = -1;
   // Re-render the grid so the badge reflects the new tag state.
   try { renderMyPhotos(); } catch(_) {}
+}
+
+// Remove the currently-open gallery photo from the tech's portfolio.
+// Called from the trash button at the bottom of myph-tag-sheet.
+// 2026-04-23 per Anne: gallery should own photo removal now that the
+// tech-edit modal is for profile settings, not photo management.
+//
+// Flow:
+//   1. Confirm (destructive — no undo).
+//   2. Splice _myPhotosState.photos at _myphSheetIdx.
+//   3. PATCH techs.photos with the new array via saveMyPhotos (the
+//      existing persistence path — keeps RLS + auth handling consistent).
+//   4. Best-effort DELETE on the Supabase Storage object so we don't
+//      leak files. Failure is non-fatal (storage can be cleaned later).
+//   5. Close the sheet and re-render the grid.
+async function removeMyPhotoFromGallery() {
+  if (_myphSheetIdx < 0) return;
+  const photo = _myPhotosState.photos[_myphSheetIdx];
+  if (!photo) return;
+
+  const ok = await showConfirm('Remove this photo?', {
+    body: 'This removes it from your portfolio and deletes the file. This cannot be undone.',
+    okLabel: 'Remove photo',
+    tone: 'danger'
+  });
+  if (!ok) return;
+
+  // 1. Splice locally
+  const removed = _myPhotosState.photos.splice(_myphSheetIdx, 1)[0];
+  _myPhotosState.dirty = true;
+
+  // 2. Persist the updated photos array (uses the same path the
+  //    auto-save + manual Save button use, so RLS behaves as expected).
+  try {
+    await saveMyPhotos();
+  } catch(e) {
+    // On failure, put the photo back so the user doesn't see it vanish
+    // with an unsaved error.
+    _myPhotosState.photos.splice(_myphSheetIdx, 0, removed);
+    showToast('Could not remove photo — please try again.');
+    return;
+  }
+
+  // 3. Best-effort storage cleanup. If this fails, the photo is gone
+  //    from the portfolio but an orphan file stays in the bucket —
+  //    harmless, and the storage purge SQL in the dev notes can sweep
+  //    orphans if that becomes a problem.
+  try {
+    const url = removed && removed.url;
+    if (url && url.indexOf('/storage/v1/object/public/tech-photos/') !== -1) {
+      const filePath = url.split('/storage/v1/object/public/tech-photos/')[1];
+      await fetch(SUPABASE_URL + '/storage/v1/object/tech-photos/' + filePath, {
+        method: 'DELETE',
+        headers: {
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': 'Bearer ' + (window._mncAccessToken || SUPABASE_ANON_KEY)
+        }
+      });
+    }
+  } catch(_) {}
+
+  // 4. Close the sheet + refresh the grid + bump any derived UI that
+  //    cares about photo count (home stats, nudges, etc.).
+  closeMyPhotoTagSheet();
+  showToast('Photo removed');
+  try { if (typeof loadTechsFromSupabase === 'function') loadTechsFromSupabase(); } catch(_) {}
 }
 
 // ══════════════════════════════════════════════════════════════════════════
@@ -15601,6 +15927,15 @@ function closeReleaseWizard() {
       <img id="myph-tag-sheet-img" src="" alt="" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:14px;margin-bottom:14px;background:var(--cream);"/>
       <div id="myph-tag-sheet-chips"></div>
       <div style="font-size:11px;color:var(--muted);text-align:center;margin-top:14px;font-style:italic;">Changes save automatically.</div>
+      <!-- Destructive action — isolated at the bottom of the sheet so a
+           mis-tap doesn't wipe a photo while the user is tagging. Calls
+           removeMyPhotoFromGallery() which handles the splice + PATCH +
+           storage cleanup + re-render. 2026-04-23 per Anne: "we have a
+           gallery now, we can remove photos from there." -->
+      <button type="button" onclick="removeMyPhotoFromGallery()" style="width:100%;margin-top:18px;padding:11px;border-radius:100px;border:1.5px solid rgba(192,64,74,0.35);background:white;color:#C0404A;font-size:13px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;display:flex;align-items:center;justify-content:center;gap:8px;">
+        <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+        Remove this photo
+      </button>
     </div>
   </div>
 </div>
