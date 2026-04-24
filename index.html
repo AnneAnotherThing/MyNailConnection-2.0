@@ -2359,8 +2359,8 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
             <div style="font-size:15px;font-weight:700;color:var(--rose-dark);">Spotlight</div>
             <div style="font-size:13px;font-weight:600;color:var(--rose-dark);">$5 / 10 photos</div>
           </div>
-          <div style="font-size:12px;color:var(--rose-dark);line-height:1.5;"><b>Archive your work.</b> Photos go to your portfolio so clients can browse what you do. No subscription, no commitment. Perfect when business is steady and you just want a clean showcase.</div>
-          <div style="font-size:11px;color:var(--muted);margin-top:6px;">Portfolio only — the live feed is Glow Up exclusive.</div>
+          <div style="font-size:12px;color:var(--rose-dark);line-height:1.5;"><b>Build out your showcase, one pack at a time.</b> 10 photos for $5 &mdash; half the per-photo cost. No subscription, no commitment. Perfect when business is steady and you want a clean, growing portfolio clients can browse.</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:6px;">Your work lives in your portfolio. Glow Up adds the live feed on top.</div>
         </div>
 
         <!-- Glow Up -->
@@ -2369,11 +2369,11 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
             <div style="font-size:15px;font-weight:700;color:white;">Glow Up</div>
             <div style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.8);">$10 / month</div>
           </div>
-          <div style="font-size:12px;color:rgba(255,255,255,0.75);line-height:1.5;"><b style="color:white;">Post a new look every day.</b> 40 uploads a month, refilled on your anniversary. Every photo hits the feed so clients discover you fresh — not just in your portfolio.</div>
+          <div style="font-size:12px;color:rgba(255,255,255,0.75);line-height:1.5;"><b style="color:white;">Keep the feed fresh all month long.</b> Up to 40 uploads a month &mdash; plenty for a new look every day, with room to spare for busy weeks. Every photo lands in front of clients browsing fresh work, and your portfolio grows with it. Refills on your anniversary.</div>
           <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-top:6px;">Cancel any time</div>
         </div>
 
-        <div style="font-size:12px;color:var(--muted);text-align:center;padding-top:4px;line-height:1.5;">Starter &amp; Glow Up photos show up in the live feed. Spotlight bundles are portfolio-only — great for building an archive without a subscription.</div>
+        <div style="font-size:12px;color:var(--muted);text-align:center;padding-top:4px;line-height:1.5;">Every tier grows your portfolio. Glow Up uploads also land in the live feed, where clients discover fresh work.</div>
       </div>
     </div>
 
@@ -2424,7 +2424,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
         </div>
         <div style="display:flex;gap:12px;align-items:flex-start;">
           <div style="width:28px;height:28px;border-radius:50%;background:var(--rose-light);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px;font-weight:700;color:var(--rose);">4</div>
-          <div><div style="font-size:13px;font-weight:600;color:var(--charcoal);margin-bottom:2px;">Upgrade when it is paying for itself</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Glow Up unlocks the live feed — <em>post a new look every day</em>, 40&#47;month, every upload surfaces to clients browsing fresh work. If one new client from MNC covers the cost many times over, that is your moment. Let the results tell you when you are ready.</div></div>
+          <div><div style="font-size:13px;font-weight:600;color:var(--charcoal);margin-bottom:2px;">Upgrade when it is paying for itself</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Glow Up unlocks the live feed &mdash; up to 40 uploads a month, enough for a new look every day with room for busy weeks. Every upload surfaces to clients browsing fresh work. If one new client from MNC covers the cost many times over, that is your moment. Let the results tell you when you are ready.</div></div>
         </div>
       </div>
     </div>
@@ -14606,7 +14606,7 @@ function _stripeWelcomeVariants() {
     'glow-up': {
       eyebrow: 'Welcome to Glow Up',
       title: "You're in! \uD83C\uDF38",
-      body: 'Post a new look every day — every upload releases to the feed for clients browsing fresh work.',
+      body: 'Post a new look every day, with plenty of room for busy weeks. Every upload releases to the feed for clients browsing fresh work.',
       statNum: String((STRIPE_CONFIG && STRIPE_CONFIG.monthly_limit) || 40),
       statLabel: 'uploads this month',
       statSub: 'Your monthly refill: ' + refillDateStr,
@@ -15071,7 +15071,7 @@ function closeReleaseWizard() {
         <div style="width:44px;height:44px;border-radius:14px;background:var(--cream);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:var(--rose);">$1</div>
         <div style="flex:1;">
           <div style="font-size:15px;font-weight:600;color:var(--charcoal);">Spotlight <span style="font-size:11px;font-weight:500;color:var(--muted);">— 1 photo</span></div>
-          <div style="font-size:12px;color:var(--muted);">One-time · Portfolio only</div>
+          <div style="font-size:12px;color:var(--muted);">One-time · Grow your portfolio with one more look</div>
         </div>
         <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--muted);fill:none;stroke-width:2.5;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg>
       </div>
@@ -15080,34 +15080,36 @@ function closeReleaseWizard() {
            sibling (not inside the card) because the card gets
            overflow:hidden from the #upgrade-modal hover-shine CSS rule,
            which was clipping the badge's upper half. Wrapper keeps the
-           click target untouched. Copy highlights the portfolio-only
-           nature so techs understand Spotlight vs Glow Up. 2026-04-23. -->
+           click target untouched. Copy leads with the portfolio-growth
+           benefit (reframed from "portfolio only" 2026-04-23 per Anne:
+           "'portfolio only' sounds negative — lead with value"). -->
       <div style="position:relative;">
         <div style="position:absolute;top:-10px;right:16px;background:var(--rose);color:white;font-size:10px;font-weight:700;padding:3px 10px;border-radius:100px;letter-spacing:0.5px;z-index:2;box-shadow:0 2px 6px rgba(178,110,95,0.35);">SAVE 50%</div>
         <div onclick="purchasePhotos(10)" style="border:2px solid var(--rose);border-radius:18px;padding:16px;cursor:pointer;display:flex;align-items:center;gap:14px;background:var(--rose-light);transition:all 0.15s;">
           <div style="width:44px;height:44px;border-radius:14px;background:white;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--rose);">$5</div>
           <div style="flex:1;">
             <div style="font-size:15px;font-weight:600;color:var(--charcoal);">Spotlight Pack <span style="font-size:11px;font-weight:500;color:var(--rose);">— 10 photos</span></div>
-            <div style="font-size:12px;color:var(--rose);">One-time · Archive your work · Portfolio only</div>
+            <div style="font-size:12px;color:var(--rose);">Save $5 · Build out your showcase — 10 sets at half the per-photo cost</div>
           </div>
           <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--rose);fill:none;stroke-width:2.5;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg>
         </div>
       </div>
 
       <!-- $10/month Glow Up — the hero offering. Bright rose → gold
-           gradient with a "BEST VALUE" ribbon. Copy leads with "a new
-           look every day" (identity framing) instead of the raw cap
-           number, pairs it with "every upload goes to the feed" —
-           action-framed so we aren't promising permanence (the feed is
-           a 100-post rolling window and an "always in" claim would be
-           inaccurate). 2026-04-23 pivot: monthly 40, feed-exclusive. -->
+           gradient with a "BEST VALUE" ribbon. Copy embellished 2026-04-23
+           per Anne: lead with "keep the feed fresh" benefit, concrete 40
+           number, one-a-day rhythm, and an explicit "portfolio grows
+           too" so no one thinks the subscription SKIPS the portfolio.
+           Action-framed ("every upload lands in the feed") so we aren't
+           making a duration/permanence promise the rolling feed can't
+           keep. 2026-04-23 pivot: monthly 40, feed-exclusive. -->
       <div style="position:relative;">
         <div style="position:absolute;top:-10px;right:16px;background:linear-gradient(135deg,#E8C890 0%,#D4A060 100%);color:#3D2508;font-size:10px;font-weight:800;padding:3px 10px;border-radius:100px;letter-spacing:0.6px;z-index:2;box-shadow:0 2px 6px rgba(168,130,50,0.35);">BEST VALUE</div>
         <div id="upgrade-opt-glowup" onclick="purchaseUnlimited()" style="border:2px solid var(--rose-dark);border-radius:18px;padding:16px;cursor:pointer;display:flex;align-items:center;gap:14px;background:linear-gradient(135deg,#D98872 0%,#C4786A 45%,#A85968 100%);transition:all 0.15s;box-shadow:0 6px 20px rgba(178,110,95,0.28);">
           <div style="width:46px;height:46px;border-radius:14px;background:rgba(255,255,255,0.22);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:'Playfair Display',serif;font-size:15px;font-weight:700;color:white;line-height:1.1;text-align:center;backdrop-filter:blur(4px);">$10<br><span style="font-size:9px;font-weight:500;opacity:0.88;">/ mo</span></div>
           <div style="flex:1;">
             <div style="font-size:15.5px;font-weight:700;color:white;letter-spacing:0.2px;">Glow Up</div>
-            <div style="font-size:12.5px;color:rgba(255,255,255,0.92);line-height:1.45;margin-top:3px;"><b>Post a new look every day</b> &middot; 40&#47;mo, every upload goes to the feed<br><span style="font-size:11.5px;opacity:0.85;">Refills on your anniversary. Buy credits for overflow.</span></div>
+            <div style="font-size:12.5px;color:rgba(255,255,255,0.92);line-height:1.45;margin-top:3px;"><b>Keep the feed fresh all month long</b> &middot; Up to 40 uploads a month &mdash; that&rsquo;s a new look every day, plus room for busy weeks. Every upload lands in front of clients browsing fresh work, and your portfolio grows with it.<br><span style="font-size:11.5px;opacity:0.85;">Refills on your anniversary. Buy credits for overflow.</span></div>
           </div>
           <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:white;fill:none;stroke-width:2.5;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg>
         </div>
@@ -15499,7 +15501,7 @@ function closeReleaseWizard() {
     </div>
     <div id="sw-eyebrow" style="font-size:11px;font-weight:700;letter-spacing:1.4px;color:var(--rose);text-transform:uppercase;margin-bottom:8px;">Welcome to Glow Up</div>
     <div id="sw-title" style="font-family:'Playfair Display',serif;font-size:24px;font-weight:600;color:var(--charcoal);margin-bottom:10px;line-height:1.15;">You're in! 🌸</div>
-    <div id="sw-body" style="font-size:14px;color:#5E524B;line-height:1.55;margin-bottom:16px;">Post a new look every day — every upload releases to the feed.</div>
+    <div id="sw-body" style="font-size:14px;color:#5E524B;line-height:1.55;margin-bottom:16px;">Post a new look every day, with plenty of room for busy weeks. Every upload releases to the feed.</div>
 
     <!-- Key-stat strip: big number + label + subtitle (e.g., refill date).
          Populated per-variant. -->
