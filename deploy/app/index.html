@@ -2393,7 +2393,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
             <div style="font-size:15px;font-weight:700;color:white;">Glow Up</div>
             <div style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.8);">$10 / month</div>
           </div>
-          <div style="font-size:12px;color:rgba(255,255,255,0.75);line-height:1.5;"><b style="color:white;">Keep the feed fresh all month long.</b> Up to 40 uploads a month &mdash; plenty for a new look every day, with room to spare for busy weeks. Every photo lands in front of clients browsing fresh work, and your portfolio grows with it. Refills on your anniversary.</div>
+          <div style="font-size:12px;color:rgba(255,255,255,0.75);line-height:1.5;"><b style="color:white;">Keep the feed fresh all month long.</b> Up to 40 uploads a month &mdash; plenty for a new look every day, with room to spare for busy weeks. Every photo lands in front of clients browsing fresh work, and your portfolio grows with it. Refills on your monthly anniversary.</div>
           <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-top:6px;">Cancel any time</div>
         </div>
 
@@ -7646,7 +7646,7 @@ async function techEditAddPhotos(input) {
     if (!slot.ok) {
       showToast(slot.reason === 'capped'
         ? (_techTier && _techTier.tier === 'paid'
-            ? "Monthly limit hit. Refills on your next anniversary, or buy credits."
+            ? "Monthly limit hit. Refills on your next monthly anniversary, or buy credits."
             : "No free slots or credits left.")
         : 'Could not reserve an upload slot — try again');
       if (slot.reason === 'capped') setTimeout(showUpgradeModal, 600);
@@ -7779,7 +7779,7 @@ async function techBulkDropFiles(fileList) {
     if (!slot.ok) {
       label.textContent = 'Stopped — ' + (slot.reason === 'capped'
         ? (_techTier && _techTier.tier === 'paid'
-            ? 'monthly limit hit. Refills on your next anniversary, or buy credits to keep going.'
+            ? 'monthly limit hit. Refills on your next monthly anniversary, or buy credits to keep going.'
             : 'no free slots or credits left.')
         : 'could not reserve an upload slot (' + (slot.reason || 'unknown') + ')');
       if (slot.reason === 'capped') setTimeout(showUpgradeModal, 700);
@@ -15444,7 +15444,7 @@ function closeReleaseWizard() {
               &#128640;&nbsp; Every post lands in the live feed<br>
               &#127800;&nbsp; Your portfolio grows with every photo
             </div>
-            <div style="font-size:11px;color:rgba(255,255,255,0.72);margin-top:8px;">Refills on your anniversary &middot; Cancel any time</div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.72);margin-top:8px;">Refills on your monthly anniversary &middot; Cancel any time</div>
           </div>
           <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:white;fill:none;stroke-width:2.5;flex-shrink:0;align-self:flex-start;margin-top:4px;"><path d="M9 18l6-6-6-6"/></svg>
         </div>
