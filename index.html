@@ -468,6 +468,15 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
   0%, 100% { transform: scale(1); opacity: 1; }
   50%      { transform: scale(1.35); opacity: 0.7; }
 }
+/* Broadcast wave — used by the "What's Happening" feed icon.
+   Two arcs with staggered timing create a rolling-outward signal
+   feel (one arc bright while the other dims, then vice versa).
+   Replaces the old red-dot indicator so the liveness cue lives in
+   the icon itself, not an overlay badge. Added 2026-04-24. */
+@keyframes broadcast-wave {
+  0%, 100% { opacity: 0.3; }
+  50%      { opacity: 1; }
+}
 .modal-overlay{position:fixed;inset:0;background:rgba(44,36,32,0.5);z-index:500;display:none;align-items:flex-end;justify-content:center;}
 .modal-overlay.open{display:flex;}
 .modal{background:white;border-radius:28px 28px 0 0;padding:28px 24px 40px;width:420px;max-height:85vh;overflow-y:auto;}
@@ -1516,12 +1525,17 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       <!-- What's Happening — live activity feed, opens a dedicated screen.
            Added 2026-04-22 per Anne's "three equal-billing browse buttons"
            design: feed lives off-home now so it doesn't pull clients away
-           from browsing + booking. Gold-toned icon with a pulsing dot to
-           signal liveness without being as hypnotic as the inline feed. -->
+           from browsing + booking. Gold-toned RSS/feed-style glyph — corner
+           dot + two arcs that pulse outward in a rolling wave to signal
+           liveness. 2026-04-24: swapped from speech-bubble + red indicator
+           dot; the arcs now carry the liveness cue themselves. -->
       <div onclick="show('feed')" style="cursor:pointer;border-radius:12px;background:linear-gradient(160deg,#F5EDE8 0%,#EBD9D0 100%);border:1px solid rgba(139,80,65,0.22);border-bottom:3px solid rgba(120,60,48,0.35);box-shadow:0 2px 8px rgba(120,60,48,0.08);display:flex;align-items:center;gap:14px;padding:10px 14px;">
         <div style="width:72px;height:72px;border-radius:14px;overflow:hidden;flex-shrink:0;background:linear-gradient(135deg,#E8C890 0%,#D4A060 55%,#B8853A 100%);display:flex;align-items:center;justify-content:center;position:relative;">
-          <svg viewBox="0 0 24 24" style="width:34px;height:34px;stroke:white;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
-          <span style="position:absolute;top:11px;right:13px;width:9px;height:9px;border-radius:50%;background:#C0404A;box-shadow:0 0 0 3px rgba(192,64,74,0.28);animation:pulse 1.8s infinite;"></span>
+          <svg viewBox="0 0 24 24" style="width:34px;height:34px;stroke:white;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;">
+            <circle cx="5.5" cy="18.5" r="1.7" fill="white" stroke="none"/>
+            <path d="M4 11a9 9 0 019 9" style="animation:broadcast-wave 1.8s ease-in-out infinite;"/>
+            <path d="M4 4a16 16 0 0116 16" style="animation:broadcast-wave 1.8s ease-in-out infinite;animation-delay:-0.9s;"/>
+          </svg>
         </div>
         <div style="flex:1;">
           <div style="font-size:15px;font-weight:600;color:var(--charcoal);">What's Happening</div>
@@ -5555,27 +5569,45 @@ function saveAvailability() {
   // Push to Supabase if tech
   const email = currentUserEmail || (document.getElementById('signin-email') || {}).value || '';
   if (!email) return;
+  // Use `Prefer: return=representation` instead of `return=minimal` so
+  // PostgREST sends back the array of rows actually updated. This lets
+  // us detect the orphaned-auth case where the PATCH's email=eq filter
+  // matches zero rows — which is a silent no-op with return=minimal
+  // (Supabase returns 204 and the UI thinks it saved). Anne 2026-04-24
+  // after an orphan account (amwhite1971) kept flipping her toggles
+  // with nothing persisting to the DB.
   fetch(SUPABASE_URL + '/rest/v1/techs?email=eq.' + encodeURIComponent(email), {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
       'apikey': SUPABASE_ANON_KEY,
       'Authorization': 'Bearer ' + (window._mncAccessToken || SUPABASE_ANON_KEY),
-      'Prefer': 'return=minimal'
+      'Prefer': 'return=representation'
     },
     body: JSON.stringify({ is_available: nowOn, is_same_day: todayOn, accepting_new_clients: newOn })
   }).then(function(r) {
-    if (!r.ok) { console.warn('saveAvailability failed:', r.status); return; }
+    if (!r.ok) { console.warn('saveAvailability failed:', r.status); return null; }
+    return r.json().catch(function() { return null; });
+  }).then(function(rows) {
+    if (rows && Array.isArray(rows) && rows.length === 0) {
+      // Zero rows matched — this user has no techs row. Happens for
+      // orphan auth accounts whose signup-profile RPC never ran.
+      showToast("We couldn't save that — your tech profile is missing. Please contact Anne.");
+      console.warn('saveAvailability: PATCH matched 0 rows for', email);
+      return;
+    }
+    // Success — fire the confirmation toast now that we know a row
+    // actually updated (moved in here 2026-04-24 so orphan accounts
+    // don't see a false "You're showing as available right now!" toast
+    // flashing before the "profile missing" error).
+    var msg = nowOn ? "You're showing as available right now!" : todayOn ? "Open this week is on" : newOn ? "Accepting new clients is on" : "All availability turned off";
+    showToast(msg);
     // Refresh ALL_TECHS so every surface (tech-detail, browse cards, map
     // pins, avail count tiles) reflects the new state without a reload.
     // Anne asked for this 2026-04-22 — she was seeing "No availability set"
     // on her own profile right after flipping the hero chips on.
     try { loadTechsFromSupabase(); } catch(e) {}
   }).catch(function(e) { console.warn('saveAvailability error:', e); });
-
-  // Toast message
-  var msg = nowOn ? "You're showing as available right now!" : todayOn ? "Open this week is on" : newOn ? "Accepting new clients is on" : "All availability turned off";
-  showToast(msg);
 }
 
 // ── Auto-reset logic ────────────────────────────────────────────
