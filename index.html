@@ -13140,6 +13140,88 @@ function clearSplashWelcoming() {
 // Added 2026-04-23 to fix: "after confirming email it dropped me on the
 // marketing page and wasn't signed in." Applies to Google + Apple OAuth
 // too — same redirect mechanism, same hash-token delivery.
+// Direct-link email verify handler. Pairs with a custom Supabase email
+// template that points the confirmation link directly at this app
+// (mynailconnection.com/app/...) instead of the supabase.co verify
+// endpoint. The default Supabase template uses {{ .ConfirmationURL }},
+// which generates a supabase.co URL that 302-redirects to our Site URL.
+// On iOS that redirect is fatal: Universal Links only fire on a DIRECT
+// tap to a domain in the AASA file, never on a redirect. So the email
+// link opens Safari, follows the 302 to /app/, and the native app
+// never gets a chance to claim the URL.
+//
+// The fix on the Supabase side (Authentication → Email Templates →
+// Confirm signup, Reset password, Magic link, Invite, Email change) is
+// to swap the link target to:
+//
+//   https://mynailconnection.com/app/?token_hash={{ .TokenHash }}&type={{ .EmailType }}
+//
+// Now the email link is a direct tap to mynailconnection.com — iOS
+// matches it against the AASA's /app/* path and hands off to the
+// installed app. This handler runs on app load, sees the query params,
+// calls /auth/v1/verify itself to convert the token_hash into a session,
+// then strips the params from the URL.
+//
+// Web users (no app installed) hit the same URL in Safari, the page
+// loads, this handler runs, same outcome — they're signed in.
+//
+// 2026-04-27. Fixes: "verify email link opens browser instead of app
+// in TestFlight."
+async function consumeMagicLinkVerifyIfPresent() {
+  var qs;
+  try { qs = new URLSearchParams(window.location.search); } catch(_) { return false; }
+  var tokenHash = qs.get('token_hash');
+  var type      = qs.get('type');
+  if (!tokenHash || !type) return false;
+
+  // Whitelist supported email types so a malformed link can't drive us
+  // into an unknown verify branch. Mirrors Supabase's GoTrue enum.
+  var validTypes = ['signup', 'recovery', 'invite', 'email_change', 'magiclink', 'email'];
+  if (validTypes.indexOf(type) === -1) return false;
+
+  try {
+    var r = await fetch(SUPABASE_URL + '/auth/v1/verify', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_ANON_KEY
+      },
+      body: JSON.stringify({ token_hash: tokenHash, type: type })
+    });
+    if (!r.ok) {
+      // Strip the params either way so a back-nav doesn't replay the
+      // failed verify. Surface a soft toast so the user knows why
+      // they're staring at the sign-in screen.
+      try { history.replaceState(null, '', window.location.pathname); } catch(_) {}
+      try { showToast('That confirmation link has expired. Please sign in or request a new one.'); } catch(_) {}
+      try { console.warn('magic-link verify failed:', r.status); } catch(_) {}
+      return false;
+    }
+    var body = await r.json();
+    if (!body || !body.access_token) {
+      try { history.replaceState(null, '', window.location.pathname); } catch(_) {}
+      return false;
+    }
+    // Persist via the same shape consumeRedirectTokensIfPresent uses,
+    // so the rest of the app sees a normal resumed session and the
+    // sign-in routing fires identically.
+    saveSession({
+      access_token:  body.access_token,
+      refresh_token: body.refresh_token,
+      expires_in:    body.expires_in || 3600,
+      user:          body.user || null
+    });
+    // Strip token_hash + type from the address bar — replaceState
+    // (not pushState) so the user can't back-nav to a one-time token.
+    try { history.replaceState(null, '', window.location.pathname); } catch(_) {}
+    return true;
+  } catch(e) {
+    try { console.warn('magic-link verify threw:', e); } catch(_) {}
+    try { history.replaceState(null, '', window.location.pathname); } catch(_) {}
+    return false;
+  }
+}
+
 async function consumeRedirectTokensIfPresent() {
   var hash = window.location.hash || '';
   if (!hash || hash.indexOf('access_token=') === -1) return false;
@@ -13261,9 +13343,19 @@ document.addEventListener('DOMContentLoaded', async function() {
   // those are defined at module scope above, so order is fine.
   try { initCapacitorBackButton(); } catch(e) { /* fall through — non-fatal */ }
 
+  // Direct-link email verify (?token_hash=...&type=signup) — pairs with
+  // a custom Supabase email template that links straight to our domain
+  // so iOS Universal Links can hand off to the native app. Runs BEFORE
+  // consumeRedirectTokensIfPresent because the two paths are mutually
+  // exclusive (token_hash on the query string vs access_token in the
+  // hash fragment), and either way a successful verify lands us in the
+  // same persisted-session shape. 2026-04-27.
+  try { await consumeMagicLinkVerifyIfPresent(); } catch(e) { /* fall through */ }
+
   // Consume any redirect tokens Supabase left in the URL hash (email
-  // confirm, magic link, Google / Apple OAuth). Runs BEFORE session
-  // restore so a fresh confirmation is treated like a saved session.
+  // confirm via the legacy template, magic link, Google / Apple OAuth).
+  // Runs BEFORE session restore so a fresh confirmation is treated like
+  // a saved session.
   try { await consumeRedirectTokensIfPresent(); } catch(e) { /* fall through */ }
 
   // Attempt silent sign-in from persisted session. If successful, user is

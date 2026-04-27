@@ -3,7 +3,7 @@
 
 // IMPORTANT: bump this string every release so returning users get the
 // new build instead of a stale cached copy. Old caches are deleted on activate.
-const CACHE_NAME = 'mnc-v189';
+const CACHE_NAME = 'mnc-v190';
 const STATIC_ASSETS = ['/', '/index.html', '/manifest.json'];
 
 // ── Install ───────────────────────────────────────────────────────────────────

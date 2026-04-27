@@ -13140,6 +13140,88 @@ function clearSplashWelcoming() {
 // Added 2026-04-23 to fix: "after confirming email it dropped me on the
 // marketing page and wasn't signed in." Applies to Google + Apple OAuth
 // too — same redirect mechanism, same hash-token delivery.
+// Direct-link email verify handler. Pairs with a custom Supabase email
+// template that points the confirmation link directly at this app
+// (mynailconnection.com/app/...) instead of the supabase.co verify
+// endpoint. The default Supabase template uses {{ .ConfirmationURL }},
+// which generates a supabase.co URL that 302-redirects to our Site URL.
+// On iOS that redirect is fatal: Universal Links only fire on a DIRECT
+// tap to a domain in the AASA file, never on a redirect. So the email
+// link opens Safari, follows the 302 to /app/, and the native app
+// never gets a chance to claim the URL.
+//
+// The fix on the Supabase side (Authentication → Email Templates →
+// Confirm signup, Reset password, Magic link, Invite, Email change) is
+// to swap the link target to:
+//
+//   https://mynailconnection.com/app/?token_hash={{ .TokenHash }}&type={{ .EmailType }}
+//
+// Now the email link is a direct tap to mynailconnection.com — iOS
+// matches it against the AASA's /app/* path and hands off to the
+// installed app. This handler runs on app load, sees the query params,
+// calls /auth/v1/verify itself to convert the token_hash into a session,
+// then strips the params from the URL.
+//
+// Web users (no app installed) hit the same URL in Safari, the page
+// loads, this handler runs, same outcome — they're signed in.
+//
+// 2026-04-27. Fixes: "verify email link opens browser instead of app
+// in TestFlight."
+async function consumeMagicLinkVerifyIfPresent() {
+  var qs;
+  try { qs = new URLSearchParams(window.location.search); } catch(_) { return false; }
+  var tokenHash = qs.get('token_hash');
+  var type      = qs.get('type');
+  if (!tokenHash || !type) return false;
+
+  // Whitelist supported email types so a malformed link can't drive us
+  // into an unknown verify branch. Mirrors Supabase's GoTrue enum.
+  var validTypes = ['signup', 'recovery', 'invite', 'email_change', 'magiclink', 'email'];
+  if (validTypes.indexOf(type) === -1) return false;
+
+  try {
+    var r = await fetch(SUPABASE_URL + '/auth/v1/verify', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_ANON_KEY
+      },
+      body: JSON.stringify({ token_hash: tokenHash, type: type })
+    });
+    if (!r.ok) {
+      // Strip the params either way so a back-nav doesn't replay the
+      // failed verify. Surface a soft toast so the user knows why
+      // they're staring at the sign-in screen.
+      try { history.replaceState(null, '', window.location.pathname); } catch(_) {}
+      try { showToast('That confirmation link has expired. Please sign in or request a new one.'); } catch(_) {}
+      try { console.warn('magic-link verify failed:', r.status); } catch(_) {}
+      return false;
+    }
+    var body = await r.json();
+    if (!body || !body.access_token) {
+      try { history.replaceState(null, '', window.location.pathname); } catch(_) {}
+      return false;
+    }
+    // Persist via the same shape consumeRedirectTokensIfPresent uses,
+    // so the rest of the app sees a normal resumed session and the
+    // sign-in routing fires identically.
+    saveSession({
+      access_token:  body.access_token,
+      refresh_token: body.refresh_token,
+      expires_in:    body.expires_in || 3600,
+      user:          body.user || null
+    });
+    // Strip token_hash + type from the address bar — replaceState
+    // (not pushState) so the user can't back-nav to a one-time token.
+    try { history.replaceState(null, '', window.location.pathname); } catch(_) {}
+    return true;
+  } catch(e) {
+    try { console.warn('magic-link verify threw:', e); } catch(_) {}
+    try { history.replaceState(null, '', window.location.pathname); } catch(_) {}
+    return false;
+  }
+}
+
 async function consumeRedirectTokensIfPresent() {
   var hash = window.location.hash || '';
   if (!hash || hash.indexOf('access_token=') === -1) return false;
@@ -13261,9 +13343,19 @@ document.addEventListener('DOMContentLoaded', async function() {
   // those are defined at module scope above, so order is fine.
   try { initCapacitorBackButton(); } catch(e) { /* fall through — non-fatal */ }
 
+  // Direct-link email verify (?token_hash=...&type=signup) — pairs with
+  // a custom Supabase email template that links straight to our domain
+  // so iOS Universal Links can hand off to the native app. Runs BEFORE
+  // consumeRedirectTokensIfPresent because the two paths are mutually
+  // exclusive (token_hash on the query string vs access_token in the
+  // hash fragment), and either way a successful verify lands us in the
+  // same persisted-session shape. 2026-04-27.
+  try { await consumeMagicLinkVerifyIfPresent(); } catch(e) { /* fall through */ }
+
   // Consume any redirect tokens Supabase left in the URL hash (email
-  // confirm, magic link, Google / Apple OAuth). Runs BEFORE session
-  // restore so a fresh confirmation is treated like a saved session.
+  // confirm via the legacy template, magic link, Google / Apple OAuth).
+  // Runs BEFORE session restore so a fresh confirmation is treated like
+  // a saved session.
   try { await consumeRedirectTokensIfPresent(); } catch(e) { /* fall through */ }
 
   // Attempt silent sign-in from persisted session. If successful, user is
@@ -16104,51 +16196,4 @@ function closeReleaseWizard() {
 <div id="welcome-back-sheet" style="display:none;position:fixed;inset:0;z-index:490;align-items:flex-end;justify-content:center;pointer-events:none;">
   <div style="pointer-events:auto;background:white;border-radius:24px 24px 0 0;padding:20px 20px 40px;width:100%;max-width:480px;box-shadow:0 -4px 30px rgba(0,0,0,0.12);">
     <div style="width:32px;height:4px;background:var(--border);border-radius:100px;margin:0 auto 18px;"></div>
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
-      <div>
-        <div style="font-family:'Playfair Display',serif;font-size:17px;font-weight:600;color:var(--charcoal);margin-bottom:3px;">Welcome back 🌸</div>
-        <div style="font-size:13px;color:var(--muted);">Last time you browsed by <strong id="wb-pref-label"></strong></div>
-      </div>
-    </div>
-    <div style="display:flex;flex-direction:column;gap:10px;">
-      <button onclick="applyWelcomeBackPref()" class="btn btn-rose" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px;">
-        <svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><polyline points="5 12 12 5 19 12"/><polyline points="5 19 12 12 19 19"/></svg>
-        Pick up where I left off
-      </button>
-      <div style="display:flex;gap:8px;">
-        <button onclick="changeWelcomeBackPref()" class="btn btn-outline" style="flex:1;font-size:13px;">Change preference</button>
-        <button onclick="dismissWelcomeBack()" style="flex:1;padding:12px;border-radius:100px;border:1.5px solid var(--border);background:white;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;">Browse normally</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ════════════════════════════════════════════════════════════════════════
-     STRIPE CHECKOUT WELCOME MODAL
-     Fires when the user lands back on the app with ?welcome=<variant> in
-     the URL (set as the Stripe Payment Link's success URL). Content is
-     variant-driven so one modal handles Glow Up + the two Spotlight
-     bundle sizes. Shown via maybeShowStripeWelcome() on DOMContentLoaded
-     after the session has restored. URL param gets stripped after show
-     via history.replaceState so a refresh doesn't re-trigger. 2026-04-23. -->
-<div id="stripe-welcome-modal" class="modal-overlay" style="display:none;position:fixed;inset:0;z-index:9080;background:rgba(20,10,15,0.72);backdrop-filter:blur(4px);align-items:center;justify-content:center;">
-  <div style="background:white;border-radius:24px;width:100%;max-width:400px;margin:20px;padding:28px 24px 22px;box-shadow:0 10px 50px rgba(0,0,0,0.24);text-align:center;">
-    <div id="sw-icon-wrap" style="width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,#FFF5EF 0%,#FBE4D9 100%);margin:0 auto 16px;display:flex;align-items:center;justify-content:center;">
-      <!-- Icon varies by variant; replaced at render time. -->
-      <svg viewBox="0 0 24 24" style="width:34px;height:34px;stroke:var(--rose-dark);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-    </div>
-    <div id="sw-eyebrow" style="font-size:11px;font-weight:700;letter-spacing:1.4px;color:var(--rose);text-transform:uppercase;margin-bottom:8px;">Welcome to Glow Up</div>
-    <div id="sw-title" style="font-family:'Playfair Display',serif;font-size:24px;font-weight:600;color:var(--charcoal);margin-bottom:10px;line-height:1.15;">You're in! 🌸</div>
-    <div id="sw-body" style="font-size:14px;color:#5E524B;line-height:1.55;margin-bottom:16px;">Post a new look every day, with plenty of room for busy weeks. Every upload releases to the feed.</div>
-
-    <!-- Key-stat strip: big number + label + subtitle (e.g., refill date).
-         Populated per-variant. -->
-    <div id="sw-stat" style="background:linear-gradient(160deg,#FFF8F3 0%,#FBE8DC 100%);border:1px solid rgba(196,120,106,0.22);border-radius:14px;padding:14px 16px;margin-bottom:18px;">
-      <div style="display:flex;align-items:baseline;justify-content:center;gap:10px;">
-        <div id="sw-stat-num" style="font-family:'Playfair Display',serif;font-size:36px;font-weight:600;color:var(--rose-dark);line-height:1;">40</div>
-        <div id="sw-stat-label" style="font-size:14px;color:var(--charcoal);font-weight:500;">uploads this month</div>
-      </div>
-      <div id="sw-stat-sub" style="font-size:12px;color:var(--muted);margin-top:6px;"></div>
-    </div>
-
-    <div style="display:flex;flex-direction:column
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16
