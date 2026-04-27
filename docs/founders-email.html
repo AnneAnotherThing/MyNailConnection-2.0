@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Welcome back — your Glow Up is on us</title>
+<!-- Most email clients (Gmail, Apple Mail, Outlook for Mac) strip <head>
+     <style> blocks but allow Google Fonts via <link>. We inline EVERY
+     critical style on the elements themselves so the design holds even
+     in the strictest sandboxes. The <style> block here is a progressive
+     enhancement — used only by clients that support it. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  body { margin:0; padding:0; }
+  @keyframes glow-up-shimmer {
+    0%, 100% { box-shadow: 0 2px 8px rgba(168,130,50,0.38); }
+    50%      { box-shadow: 0 2px 14px rgba(232,200,144,0.85); }
+  }
+  .gu-shimmer { animation: glow-up-shimmer 2.4s ease-in-out infinite; }
+</style>
+</head>
+<body style="margin:0;padding:0;background:#F5EDE8;font-family:'DM Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#3D2D24;">
+
+<!-- Outer wrapper — uses a table for max compatibility with older email clients -->
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#F5EDE8;">
+  <tr><td align="center" style="padding:32px 16px;">
+
+    <!-- Email card — 480px max width, white card on cream backdrop -->
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="480" style="max-width:480px;width:100%;background:white;border-radius:18px;overflow:hidden;box-shadow:0 6px 28px rgba(120,60,48,0.10);">
+
+      <!-- Header — rose gradient with the wordmark -->
+      <tr><td align="center" style="background:linear-gradient(135deg,#D98872 0%,#C4786A 45%,#A85968 100%);padding:28px 24px 22px;">
+        <div style="font-family:'Playfair Display',Georgia,serif;font-size:22px;font-weight:700;color:#FAF0EB;letter-spacing:0.3px;">My Nail Connection</div>
+        <div style="font-size:11px;font-weight:500;color:rgba(250,240,235,0.78);letter-spacing:1.5px;text-transform:uppercase;margin-top:4px;">A founders thank-you</div>
+      </td></tr>
+
+      <!-- Body -->
+      <tr><td style="padding:28px 28px 24px;">
+
+        <p style="margin:0 0 14px;font-size:15px;line-height:1.55;color:#3D2D24;">Hi {{first_name}},</p>
+
+        <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#3D2D24;">
+          You were here for MNC 1.0 — bugs and all — and that's not nothing. As a thank-you, your <strong style="color:#A85968;">Glow Up subscription is on us. Forever.</strong>
+        </p>
+
+        <!-- The badge — same gold-pill treatment as it appears in the app -->
+        <p align="center" style="margin:18px 0 14px;">
+          <span class="gu-shimmer" style="display:inline-block;background:linear-gradient(135deg,#F2D690 0%,#D4A85C 100%);color:#3D2508;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:800;letter-spacing:0.5px;padding:8px 18px;border-radius:100px;box-shadow:0 2px 8px rgba(168,130,50,0.38);">
+            ✨&nbsp;&nbsp;Glow Up
+          </span>
+        </p>
+
+        <p style="margin:0 0 18px;font-size:15px;line-height:1.6;color:#3D2D24;">
+          That's <strong>40 photos a month</strong>, every upload landing in the live feed, plus this gold badge on your profile so clients know you've been here from the start.
+        </p>
+
+        <!-- CTA -->
+        <p align="center" style="margin:22px 0 8px;">
+          <a href="https://mynailconnection.com/app/" style="display:inline-block;background:linear-gradient(135deg,#D98872 0%,#A85968 100%);color:white;text-decoration:none;font-family:'DM Sans',sans-serif;font-weight:700;font-size:15px;letter-spacing:0.3px;padding:13px 28px;border-radius:100px;box-shadow:0 4px 14px rgba(168,89,104,0.35);">
+            Sign in &amp; see your badge →
+          </a>
+        </p>
+
+        <p style="margin:14px 0 0;font-size:12.5px;line-height:1.55;color:#7A6258;text-align:center;">
+          Forgot your password? Tap <em>Forgot password?</em> on sign-in — fresh link in seconds.
+        </p>
+
+      </td></tr>
+
+      <!-- Footer — sign off + magnolia accent -->
+      <tr><td style="padding:0 28px 26px;">
+        <hr style="border:none;border-top:1px solid #EFE2DA;margin:8px 0 16px;"/>
+        <p style="margin:0;font-size:14px;line-height:1.55;color:#3D2D24;">
+          Welcome back.
+        </p>
+        <p style="margin:6px 0 0;font-family:'Playfair Display',Georgia,serif;font-size:18px;font-weight:600;color:#A85968;">
+          — Anne
+        </p>
+        <p style="margin:2px 0 0;font-size:12px;color:#7A6258;letter-spacing:0.4px;">My Nail Connection</p>
+      </td></tr>
+
+    </table>
+
+    <!-- Outer footnote -->
+    <p style="margin:14px 0 0;font-size:11px;color:#7A6258;line-height:1.5;text-align:center;max-width:420px;">
+      You're receiving this because you were a founding tech on My Nail Connection.<br>
+      <a href="https://mynailconnection.com/" style="color:#A85968;text-decoration:none;">mynailconnection.com</a>
+    </p>
+
+  </td></tr>
+</table>
+
+</body>
+</html>

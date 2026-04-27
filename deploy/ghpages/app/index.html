@@ -477,6 +477,85 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
   0%, 100% { opacity: 0.3; }
   50%      { opacity: 1; }
 }
+/* Glow Up subscriber badge — appears on tech cards in browse lists and
+   on the tech-detail profile header. Gold gradient nods to the "BEST
+   VALUE" pill on the upgrade modal so the visual language feels
+   continuous: same gold = same membership. The faint shimmer is one-
+   off (animation-iteration-count:1 below) on the smaller card variant
+   so the badge doesn't perpetually attract the eye on a busy grid;
+   the larger detail-header variant gets a gentle infinite shimmer.
+   2026-04-27. */
+.glow-up-badge {
+  background: linear-gradient(135deg, #F2D690 0%, #D4A85C 100%);
+  color: #3D2508;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+  padding: 2.5px 9px;
+  border-radius: 100px;
+  box-shadow: 0 1px 4px rgba(168,130,50,0.30);
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+}
+.glow-up-badge--lg {
+  font-size: 12px;
+  padding: 4px 12px;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 8px rgba(168,130,50,0.38);
+}
+@keyframes glow-up-shimmer {
+  0%, 100% { box-shadow: 0 2px 8px rgba(168,130,50,0.38); }
+  50%      { box-shadow: 0 2px 14px rgba(232,200,144,0.85); }
+}
+.glow-up-badge--lg { animation: glow-up-shimmer 2.4s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .glow-up-badge--lg { animation: none; }
+}
+/* "Available Now" home card — live treatment.
+   Two layered effects, both off when the card is inactive (count=0):
+     1. avail-now-dot-pulse — green ring expanding outward from the
+        status dot, mimicking a radar/heartbeat ping. Communicates
+        "live" without words.
+     2. avail-now-shimmer   — a soft white highlight sweeping across
+        the card every ~3.6s, drawing the eye when the home view
+        first paints. Pseudo-element so it can't disturb layout.
+   Both animations select :not([data-inactive="1"]) so the dim/no-techs
+   state stays calm and obviously "nothing here." 2026-04-27 per Anne. */
+#avail-btn-now { position: relative; overflow: hidden; }
+#avail-btn-now > * { position: relative; z-index: 1; }
+#avail-btn-now::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(110deg,
+    transparent 30%,
+    rgba(255,255,255,0.55) 50%,
+    transparent 70%);
+  transform: translateX(-110%);
+  pointer-events: none;
+  z-index: 0;
+}
+#avail-btn-now:not([data-inactive="1"])::before {
+  animation: avail-now-shimmer 3.6s ease-in-out infinite;
+}
+#avail-btn-now:not([data-inactive="1"]) #avail-dot-now {
+  animation: avail-now-dot-pulse 1.6s ease-out infinite;
+}
+@keyframes avail-now-shimmer {
+  0%   { transform: translateX(-110%); }
+  55%  { transform: translateX(110%); }
+  100% { transform: translateX(110%); }
+}
+@keyframes avail-now-dot-pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(34,197,94,0.65); transform: scale(1); }
+  60%  { box-shadow: 0 0 0 9px rgba(34,197,94,0);  transform: scale(1.1); }
+  100% { box-shadow: 0 0 0 0 rgba(34,197,94,0);    transform: scale(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  #avail-btn-now::before,
+  #avail-btn-now:not([data-inactive="1"]) #avail-dot-now { animation: none; }
+}
 .modal-overlay{position:fixed;inset:0;background:rgba(44,36,32,0.5);z-index:500;display:none;align-items:flex-end;justify-content:center;}
 .modal-overlay.open{display:flex;}
 .modal{background:white;border-radius:28px 28px 0 0;padding:28px 24px 40px;width:420px;max-height:85vh;overflow-y:auto;}
@@ -1760,6 +1839,17 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
     <button id="style-clear-btn" onclick="clearStyleFilters()" style="display:none;padding:5px 12px;border-radius:100px;border:1.5px solid var(--rose-mid);background:var(--rose-light);color:var(--rose-dark);font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;flex-shrink:0;">✕ Clear</button>
   </div>
 
+  <!-- Active-filters bar — mirror of browse-location's pattern. The
+       inline "✕ Clear" pill on the radius strip above is at the end of
+       a horizontal-scroll row and gets cut off on narrow screens, so
+       Anne couldn't find it. This bar sits in normal flow, full-width,
+       and only appears when at least one filter is on. 2026-04-27. -->
+  <div id="style-filters-active-bar" style="display:none;padding:9px 16px;background:var(--rose-light);border-bottom:1px solid var(--rose-mid);font-size:12.5px;color:var(--rose-dark);align-items:center;gap:8px;flex-shrink:0;">
+    <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:var(--rose);fill:none;stroke-width:2.5;flex-shrink:0;stroke-linecap:round;"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
+    <span><b id="style-filters-active-count">0</b> filter<span id="style-filters-plural">s</span> active</span>
+    <button onclick="clearStyleFilters()" style="margin-left:auto;background:var(--rose-dark);color:white;border:none;padding:5px 14px;border-radius:100px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;">✕ Clear all</button>
+  </div>
+
   <!-- Photo grid — endless scroll -->
   <div class="scroll-content" style="background:#F0ECEA;">
     <div id="style-photo-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:3px;padding:3px;align-items:start;"></div>
@@ -1850,7 +1940,14 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
 
     <!-- Name + joined + location + street address -->
     <div style="padding:18px 20px 0;">
-      <div style="font-family:'Playfair Display',serif;font-size:26px;font-weight:600;" id="td-name">Tech Name</div>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <div style="font-family:'Playfair Display',serif;font-size:26px;font-weight:600;" id="td-name">Tech Name</div>
+        <!-- Glow Up subscriber badge — set visible by openTechDetail()
+             when tech.is_subscriber is true. Larger 'lg' variant has the
+             gentle shimmer animation; the styling lives in the global
+             .glow-up-badge / .glow-up-badge--lg CSS. 2026-04-27. -->
+        <span id="td-glow-up-badge" class="badge glow-up-badge glow-up-badge--lg" style="display:none;" title="Glow Up member"><span style="margin-right:4px;">✨</span>Glow Up</span>
+      </div>
       <!-- Popularity chips — populated by renderTechPopularity(). Hidden
            when the tech has no count above threshold AND isn't brand-new. -->
       <div id="td-popularity" class="popularity-row" style="display:none;"></div>
@@ -3297,10 +3394,21 @@ let _techTier = null;
 async function loadTechTier(email) {
   if (!email) return;
   try {
-    const r = await fetch(
-      `${SUPABASE_URL}/rest/v1/techs?email=eq.${encodeURIComponent(email)}&select=id,subscription_tier,photo_credits,subscription_expires_at,photos,paused_photos,period_upload_count,period_reset_at`,
-      { headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${window._mncAccessToken || SUPABASE_ANON_KEY}` } }
-    );
+    // Lower-case once. Both fetches are case-sensitive on PostgREST eq.
+    const e = String(email).trim().toLowerCase();
+    // Parallel: techs row + comp grant lookup. The comp table is a few
+    // dozen rows at most, so this is cheap. Promise.all keeps it off the
+    // critical path.
+    const [r, cr] = await Promise.all([
+      fetch(
+        `${SUPABASE_URL}/rest/v1/techs?email=eq.${encodeURIComponent(e)}&select=id,subscription_tier,photo_credits,subscription_expires_at,photos,paused_photos,period_upload_count,period_reset_at,lifetime_free_used`,
+        { headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${window._mncAccessToken || SUPABASE_ANON_KEY}` } }
+      ),
+      fetch(
+        `${SUPABASE_URL}/rest/v1/tech_comps?email=eq.${encodeURIComponent(e)}&select=monthly_limit,note,granted_at`,
+        { headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${window._mncAccessToken || SUPABASE_ANON_KEY}` } }
+      )
+    ]);
     if (!r.ok) return;
     const d = await r.json();
     if (!d[0]) return;
@@ -3314,13 +3422,43 @@ async function loadTechTier(email) {
       total_photos: photos.length,
       paused_count: paused.length,
       period_upload_count: d[0].period_upload_count || 0,
-      period_reset_at: d[0].period_reset_at || null
+      period_reset_at: d[0].period_reset_at || null,
+      // lifetime_free_used: real free-upload counter on public.techs.
+      // Replaces the old "use jsonb_array_length(photos) as the de-facto
+      // counter" rule — that fell apart because the app's edit buffer
+      // doesn't write to techs.photos until Save, so a tech could blast
+      // past the 5-free cap mid-session. consume_upload_slot now mutates
+      // this column on every free grant. 2026-04-27.
+      lifetime_free_used: d[0].lifetime_free_used || 0,
+      // Comp flags — populated below from tech_comps. Defaults assume
+      // "not comped" so callers can read these unconditionally.
+      is_comped: false,
+      comp_monthly_limit: 40,
+      comp_note: ''
     };
     // Check if subscription expired
     if (_techTier.tier === 'paid' && _techTier.subscription_expires_at) {
       if (new Date(_techTier.subscription_expires_at) < new Date()) {
         _techTier.tier = 'free';
       }
+    }
+    // Comp overrides Stripe state. A row in tech_comps means: subscriber
+    // forever, no expiry, monthly_limit slots per month (default 40).
+    // The RPC enforces this server-side regardless of what we set here;
+    // we mirror it client-side so canUploadPhoto / the upgrade modal /
+    // the subscriber-badge UI all reflect the comp without an extra
+    // round-trip. 2026-04-27 comps system.
+    if (cr && cr.ok) {
+      try {
+        const cd = await cr.json();
+        if (cd && cd[0]) {
+          _techTier.tier = 'paid';
+          _techTier.subscription_expires_at = null;  // never expires
+          _techTier.is_comped = true;
+          _techTier.comp_monthly_limit = cd[0].monthly_limit || 40;
+          _techTier.comp_note = cd[0].note || '';
+        }
+      } catch(_) {}
     }
   } catch(e) { console.warn('loadTechTier error:', e); }
 }
@@ -3332,7 +3470,12 @@ async function loadTechTier(email) {
 // (they don't consume subscription slots).
 function _periodSlotsRemaining() {
   if (!_techTier || _techTier.tier !== 'paid') return 0;
-  const cap = STRIPE_CONFIG.monthly_limit || 40;
+  // Comped techs may have a custom monthly_limit (Anne can set per row
+  // in tech_comps). Fall back to STRIPE_CONFIG for normal Stripe paid
+  // subs. 2026-04-27 comps system.
+  const cap = _techTier.is_comped
+    ? (_techTier.comp_monthly_limit || 40)
+    : (STRIPE_CONFIG.monthly_limit || 40);
   const resetAt = _techTier.period_reset_at ? new Date(_techTier.period_reset_at) : null;
   // No reset marker, or the month has rolled over → full allowance.
   if (!resetAt || resetAt.getTime() <= Date.now()) return cap;
@@ -3357,10 +3500,14 @@ function canUploadPhoto() {
   if (_techTier.tier === 'paid') {
     return _periodSlotsRemaining() > 0 || (_techTier.photo_credits || 0) > 0;
   }
-  const used = _techTier.total_photos || 0;
+  // 2026-04-27: gate on lifetime_free_used (the new authoritative counter
+  // on public.techs) rather than total_photos. total_photos derives from
+  // jsonb_array_length(techs.photos), which lags behind the edit buffer
+  // and let testers blast past the 5-free cap mid-session.
+  const usedFree = _techTier.lifetime_free_used || 0;
   const freeSlots = STRIPE_CONFIG.free_limit;
   const credits = _techTier.photo_credits || 0;
-  return used < freeSlots || credits > 0;
+  return usedFree < freeSlots || credits > 0;
 }
 
 // UI-facing "how many more can you upload before you need to pay?" —
@@ -3373,10 +3520,11 @@ function photosRemaining() {
   if (_techTier.tier === 'paid') {
     return _periodSlotsRemaining() + (_techTier.photo_credits || 0);
   }
-  const used = _techTier.total_photos || 0;
+  // 2026-04-27: see canUploadPhoto note — same lifetime_free_used switch.
+  const usedFree = _techTier.lifetime_free_used || 0;
   const freeSlots = STRIPE_CONFIG.free_limit;
   const credits = _techTier.photo_credits || 0;
-  const freeRemaining = Math.max(0, freeSlots - used);
+  const freeRemaining = Math.max(0, freeSlots - usedFree);
   return freeRemaining + credits;
 }
 
@@ -3410,13 +3558,16 @@ function _slotsRemainingText() {
     return 'Monthly limit hit — refills ' + resetStr + ' or add credits';
   }
   // Free tier with the corrected credits-deplete math:
-  //   freeRemaining = max(0, free_limit - total_photos)  (first 5 uploads only)
+  //   freeRemaining = max(0, free_limit - lifetime_free_used)
   //   remaining = freeRemaining + credits
   // Credits deplete as they're used by consume_upload_slot, so the
   // number shown here is what they can actually upload right now.
-  const used = _techTier.total_photos || 0;
+  // 2026-04-27: switched from total_photos to lifetime_free_used so
+  // mid-session uploads display the right remaining count even before
+  // the user taps Save.
+  const usedFree = _techTier.lifetime_free_used || 0;
   const freeSlots = STRIPE_CONFIG.free_limit;
-  const freeRemaining = Math.max(0, freeSlots - used);
+  const freeRemaining = Math.max(0, freeSlots - usedFree);
   const remaining = freeRemaining + credits;
   if (remaining === 0)                     return 'All ' + freeSlots + ' free slots used · add credits to keep going';
   if (freeRemaining > 0 && credits > 0)    return 'You have ' + freeRemaining + ' free upload' + (freeRemaining === 1 ? '' : 's') + ' + ' + credits + ' credit' + (credits === 1 ? '' : 's') + ' available';
@@ -3472,10 +3623,11 @@ function _slotsRemainingParts() {
       tone: 'bad'
     };
   }
-  // Free tier
-  const used = _techTier.total_photos || 0;
+  // Free tier — gate on lifetime_free_used (real counter), not
+  // total_photos (lags behind the unsaved edit buffer). 2026-04-27.
+  const usedFree = _techTier.lifetime_free_used || 0;
   const freeSlots = STRIPE_CONFIG.free_limit;
-  const freeRemaining = Math.max(0, freeSlots - used);
+  const freeRemaining = Math.max(0, freeSlots - usedFree);
   const remaining = freeRemaining + credits;
   if (remaining === 0) {
     return {
@@ -3589,10 +3741,15 @@ async function consumeUploadSlot() {
       } else if (row.slot_type === 'credit') {
         _techTier.photo_credits = row.remaining_credits;
       } else if (row.slot_type === 'free') {
-        // Free slot consumption is implicit via portfolio growth —
-        // the photo array grows elsewhere — so just bump the local
-        // count so the meter updates mid-batch.
+        // 2026-04-27: server-side consume_upload_slot now mutates
+        // techs.lifetime_free_used on every free grant, so the
+        // authoritative free counter is decoupled from the photos
+        // array. Mirror that locally so canUploadPhoto / photosRemaining
+        // / the slots-remaining meter all reflect the new state without
+        // a refetch. Keep total_photos in lockstep too — UI elements
+        // that show "you have N portfolio photos" still read it.
         _techTier.total_photos = (_techTier.total_photos || 0) + 1;
+        _techTier.lifetime_free_used = (_techTier.lifetime_free_used || 0) + 1;
       }
     }
     // Keep the slot-meter on tech-home honest mid-batch.
@@ -3673,6 +3830,10 @@ function showUpgradeModal() {
   // Respect the Glow Up feature flag on every open. Hiding both the card
   // itself AND allowing a reshow via flag flip means we don't need a
   // reload when the pivot is wired.
+  // (2026-04-27 note: comped techs see the Glow Up card too — Anne's
+  // call. Keeps the upgrade modal visually consistent for everyone, and
+  // the in-app messaging elsewhere already calls out that they're on
+  // Glow Up via the badge + "Glow Up member" eyebrow.)
   var glowCard = document.getElementById('upgrade-opt-glowup');
   if (glowCard) glowCard.style.display = GLOW_UP_ENABLED ? 'flex' : 'none';
   modal.style.display = 'flex';
@@ -3978,11 +4139,13 @@ const STRIPE_CONFIG = {
   // a redeploy. Use a dedicated throwaway tech row when testing — test
   // events DO write to the same Supabase DB. Added 2026-04-22.
   //
-  // IMPORTANT: ship with test_mode=FALSE. Currently TRUE for a dry-run
-  // of the 2026-04-23 monthly-cadence pivot — flip back to false before
-  // the real launch push. Only keep true locally / on a preview build
-  // while running through `4242 4242 4242 4242` flows.
-  test_mode: false,
+  // IMPORTANT: ship with test_mode=FALSE. Currently TRUE for end-to-end
+  // testing of the 2026-04-27 paywall + comps + casing fixes. Flip back
+  // to false BEFORE the real launch push. While true, the upgrade modal
+  // / purchase buttons route to the test-mode Stripe links so $4242
+  // cards work and no real charges happen. Test events still hit the
+  // production Supabase DB though, so use a throwaway tech.
+  test_mode: true,
   // Payment link for 1 photo credit ($1) — Live
   link_1_photo:   'https://buy.stripe.com/28E4gycjubtr2KA2xtgEg00',
   // Payment link for 10 photo credits ($5 bundle, portfolio-only) — Live
@@ -6668,6 +6831,12 @@ function renderTechCards(query, filteredList) {
     const bookingBadge = t.booking_link
       ? `<span class="badge" style="background:#E8F5EE;color:#1A7A4A;font-size:10px;">Book Online</span>`
       : '';
+    // Glow Up subscriber badge — gold, with a sparkle. Lights up for
+    // Stripe-paid subs AND comped founders (tech.is_subscriber covers
+    // both via the tech_comps sync trigger). 2026-04-27.
+    const glowUpBadge = t.is_subscriber
+      ? `<span class="badge glow-up-badge" title="Glow Up member"><span style="margin-right:3px;">✨</span>Glow Up</span>`
+      : '';
 
     // Popularity chip slot — empty on first paint, hydrated async by
     // hydrateGridPopularityChips() using a single batched RPC pair.
@@ -6683,7 +6852,7 @@ function renderTechCards(query, filteredList) {
         <div style="flex:1;min-width:0;">
           <div style="font-weight:600;font-size:14px;color:var(--charcoal);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(t.name)}</div>
           <div style="display:flex;align-items:center;gap:5px;margin-top:3px;flex-wrap:wrap;">
-            ${availBadge}${newClientBadge}${bookingBadge}
+            ${glowUpBadge}${availBadge}${newClientBadge}${bookingBadge}
             <span style="font-size:11px;color:var(--muted);">${esc(formatJoinedBadge(t.joined))}</span>
           </div>
           <div class="tech-card-pop" data-tech-email="${popKey}"></div>
@@ -6799,6 +6968,12 @@ function openTechDetail(tech) {
   // ── Header & hero
   document.getElementById('td-header-name').textContent = tech.name;
   document.getElementById('td-name').textContent = tech.name;
+  // Glow Up subscriber badge — show when this tech is_subscriber. Covers
+  // both Stripe-paid and comped (the tech_comps trigger sets
+  // subscription_tier='paid' on the techs row, which is what
+  // is_subscriber resolves from). 2026-04-27.
+  var _gub = document.getElementById('td-glow-up-badge');
+  if (_gub) _gub.style.display = tech.is_subscriber ? 'inline-flex' : 'none';
   document.getElementById('td-initials').textContent = tech.initials;
   document.getElementById('td-initials').style.color = tech.color;
   document.getElementById('td-hero').style.background = tech.bg;
@@ -10158,6 +10333,22 @@ function renderStyleGrid() {
   var _dot = document.getElementById('style-filter-dot');
   if (_dot) _dot.style.display = (styleActiveFilters.shape || styleActiveFilters.type || styleActiveFilters.style) ? 'block' : 'none';
 
+  // Active-filters bar (full-width, can't get clipped by horizontal
+  // scroll). Show when ≥1 filter is on; hide otherwise. Count includes
+  // the three tag dimensions plus the radius. 2026-04-27.
+  var _activeBar = document.getElementById('style-filters-active-bar');
+  if (_activeBar) {
+    var _n = (styleActiveFilters.shape ? 1 : 0)
+           + (styleActiveFilters.type  ? 1 : 0)
+           + (styleActiveFilters.style ? 1 : 0)
+           + (styleRadius              ? 1 : 0);
+    _activeBar.style.display = _n > 0 ? 'flex' : 'none';
+    var _cntEl = document.getElementById('style-filters-active-count');
+    if (_cntEl) _cntEl.textContent = _n;
+    var _plEl = document.getElementById('style-filters-plural');
+    if (_plEl) _plEl.textContent = _n === 1 ? '' : 's';
+  }
+
   if (!photos.length) {
     grid.innerHTML = '';
     if (empty) empty.style.display = 'block';
@@ -10998,7 +11189,14 @@ async function completeSignup() {
   const nameEl = document.getElementById('welcome-name-display');
   if (nameEl) nameEl.textContent = 'Welcome, ' + regData.first + '!';
   currentUserName = { first: regData.first, last: regData.last };
-  currentUserEmail = regData.email;
+  // Lowercase the email here — Supabase auto-lowercases auth.users.email on
+  // signup, so every PostgREST query keyed on email (showCorrectHome,
+  // user_favorites lookups, push subscribe, etc.) needs the lowered form
+  // to match. Without this, an iOS-keyboard auto-capitalized "Sonoran…"
+  // signs up fine, but the public.users row lookup misses the auth row
+  // because PostgREST eq. is case-sensitive — the symptom is "I signed up
+  // as a tech but only see client UI." 2026-04-27.
+  currentUserEmail = (regData.email || '').trim().toLowerCase();
   updateAvatar();
   // Update local role so showCorrectHome routes correctly
   const existingU = ALL_USERS.find(u => u.email && u.email.toLowerCase() === regData.email.toLowerCase());
@@ -11652,7 +11850,15 @@ function isTechUser() {
 }
 
 async function showCorrectHome() {
-  const email = currentUserEmail || '';
+  // Lowercase before any PostgREST eq.email lookup. Supabase auto-lowers
+  // auth.users.email but historically public.users / public.techs got
+  // whatever case the user typed at signup. PostgREST eq. is case-
+  // sensitive, so a row with email "Sonoran…@gmail.com" won't be found
+  // by a lowercase query — falls through to "client home" even though
+  // role='tech'. Defensive: even if this account was already healed by
+  // the email-casing backfill, lowering here makes future regressions
+  // impossible. 2026-04-27.
+  const email = (currentUserEmail || '').trim().toLowerCase();
   if (!email) { show('home'); return; }
   try {
     // Fetch role AND photo from users table
@@ -14488,7 +14694,16 @@ async function loadTechsFromSupabase() {
         accepting_new_clients: !!t.accepting_new_clients,
         hide_address_public: !!t.hide_address_public,
         contact_methods: t.contact_methods || { call: true, text: true },
-        booking_link: t.booking_link || ''
+        booking_link: t.booking_link || '',
+        // Subscriber flag drives the Glow Up badge on cards / tech
+        // detail header. True for both Stripe-paid (active sub) AND
+        // comped techs (the tech_comps INSERT trigger writes
+        // subscription_tier='paid' + subscription_expires_at=null
+        // onto the techs row, so this single check covers both).
+        // 2026-04-27 comps system + subscriber badge.
+        is_subscriber: t.subscription_tier === 'paid'
+                       && (!t.subscription_expires_at
+                           || new Date(t.subscription_expires_at) > new Date())
       };
     });
 
@@ -15902,123 +16117,4 @@ function closeReleaseWizard() {
     <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:600;color:var(--charcoal);margin-bottom:8px;" id="pus-title">Photos uploaded!</div>
     <div style="font-size:13.5px;color:#5E524B;line-height:1.6;margin-bottom:20px;" id="pus-body"></div>
     <div style="display:flex;flex-direction:column;gap:8px;">
-      <button onclick="postUploadGoToTag()" class="btn btn-rose" style="width:100%;">Tag your photos →</button>
-      <button onclick="postUploadGoToFeed()" class="btn btn-outline" style="width:100%;">See your first post live →</button>
-      <button onclick="closePostUploadModal()" style="width:100%;padding:10px;border:none;background:none;color:var(--muted);font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;">Not now</button>
-    </div>
-  </div>
-</div>
-
-<!-- ════════════════════════════════════════════════════════════════════════
-     RELEASE WIZARD
-     Bottom-sheet that walks the tech through each newly-uploaded photo
-     one at a time. A photo does NOT publish to the feed until the tech
-     picks at least one tag (any category) AND writes a caption. If the
-     tech closes the wizard or skips, untagged photos stay in portfolio
-     but not on feed; the tech-home "needs tagging" nudge catches them.
-     2026-04-23: gate-before-live per Anne — replaces the previous behavior
-     of publishing photo-1 immediately and then prompting to tag. -->
-<div id="release-wizard-modal" class="modal-overlay" style="display:none;position:fixed;inset:0;z-index:9070;background:rgba(20,10,15,0.74);backdrop-filter:blur(4px);align-items:flex-end;justify-content:center;">
-  <div style="background:white;border-radius:28px 28px 0 0;width:100%;max-width:440px;max-height:92vh;display:flex;flex-direction:column;box-shadow:0 -8px 40px rgba(0,0,0,0.24);">
-    <div style="width:40px;height:4px;background:var(--border);border-radius:100px;margin:12px auto 8px;flex-shrink:0;"></div>
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 18px 12px;flex-shrink:0;">
-      <div>
-        <div style="font-family:'Playfair Display',serif;font-size:18px;font-weight:600;color:var(--charcoal);line-height:1.2;">Tag &amp; caption to release</div>
-        <div id="rw-step-counter" style="font-size:11px;color:var(--muted);margin-top:2px;letter-spacing:0.4px;text-transform:uppercase;font-weight:600;">Photo 1 of 1</div>
-      </div>
-      <button onclick="closeReleaseWizard()" aria-label="Close" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted);line-height:1;padding:4px 8px;">&times;</button>
-    </div>
-    <div style="overflow-y:auto;padding:0 18px 12px;flex:1 1 auto;">
-      <img id="rw-photo-img" src="" alt="" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:14px;margin-bottom:14px;background:var(--cream);"/>
-      <div style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;">Caption <span style="color:var(--rose);">*</span></div>
-      <textarea id="rw-caption" rows="2" maxlength="240" placeholder="Say something about this set — technique, inspiration, client vibe…" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:12px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--charcoal);background:var(--cream);resize:vertical;min-height:58px;margin-bottom:14px;box-sizing:border-box;"></textarea>
-      <div style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;">Tags <span style="color:var(--rose);">*</span> <span style="color:var(--muted);font-weight:500;text-transform:none;letter-spacing:0;">(at least one)</span></div>
-      <div id="rw-chips"></div>
-      <!-- Destination hint — updated per-photo by renderReleaseWizardStep
-           based on the photo's slot_type. "credit" → portfolio-only copy;
-           "weekly"/"free" → feed+portfolio copy. -->
-      <div id="rw-destination-hint" style="font-size:12px;margin-top:12px;padding:8px 10px;background:var(--cream);border-radius:8px;line-height:1.4;"></div>
-      <div id="rw-error" style="display:none;color:#B3261E;font-size:12px;margin-top:10px;padding:8px 10px;background:#FDECEA;border-radius:8px;"></div>
-    </div>
-    <div style="padding:12px 18px 18px;border-top:1px solid var(--border);flex-shrink:0;background:white;">
-      <button id="rw-release-btn" onclick="releaseCurrentWizardPhoto()" class="btn btn-rose" style="width:100%;margin-bottom:8px;">Release to feed →</button>
-      <div style="display:flex;gap:8px;">
-        <button onclick="skipCurrentWizardPhoto()" class="btn btn-outline" style="flex:1;font-size:13px;">Skip for now</button>
-        <button onclick="closeReleaseWizard()" style="flex:1;padding:12px;border-radius:100px;border:1.5px solid var(--border);background:white;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;">Finish later</button>
-      </div>
-      <div style="font-size:11px;color:var(--muted);text-align:center;margin-top:10px;line-height:1.5;">Skipped photos stay in your portfolio but won't appear in the feed until you tag them.</div>
-    </div>
-  </div>
-</div>
-
-<!-- ════════════════════════════════════════════════════════════════════════
-     MY-GALLERY TAG EDITOR SHEET
-     Tap a photo in the gallery grid → this bottom sheet opens with the
-     photo preview + tag chips grouped by category. Chips save via the
-     same toggleMyPhotoTag() path the old inline cards used. Closing the
-     sheet keeps the tech on the gallery grid, preserving scroll. 2026-04-22. -->
-<div id="myph-tag-sheet" class="modal-overlay" style="display:none;position:fixed;inset:0;z-index:9060;background:rgba(20,10,15,0.72);backdrop-filter:blur(4px);align-items:flex-end;justify-content:center;">
-  <div style="background:white;border-radius:28px 28px 0 0;width:100%;max-width:440px;max-height:88vh;display:flex;flex-direction:column;box-shadow:0 -8px 40px rgba(0,0,0,0.22);">
-    <div style="width:40px;height:4px;background:var(--border);border-radius:100px;margin:12px auto 8px;flex-shrink:0;"></div>
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 18px 12px;flex-shrink:0;">
-      <div style="font-family:'Playfair Display',serif;font-size:17px;font-weight:600;color:var(--charcoal);">Tag this photo</div>
-      <button onclick="closeMyPhotoTagSheet()" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted);line-height:1;">&times;</button>
-    </div>
-    <div style="overflow-y:auto;padding:0 18px 24px;">
-      <img id="myph-tag-sheet-img" src="" alt="" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:14px;margin-bottom:14px;background:var(--cream);"/>
-      <div id="myph-tag-sheet-chips"></div>
-      <div style="font-size:11px;color:var(--muted);text-align:center;margin-top:14px;font-style:italic;">Changes save automatically.</div>
-      <!-- Destructive action — isolated at the bottom of the sheet so a
-           mis-tap doesn't wipe a photo while the user is tagging. Calls
-           removeMyPhotoFromGallery() which handles the splice + PATCH +
-           storage cleanup + re-render. 2026-04-23 per Anne: "we have a
-           gallery now, we can remove photos from there." -->
-      <button type="button" onclick="removeMyPhotoFromGallery()" style="width:100%;margin-top:18px;padding:11px;border-radius:100px;border:1.5px solid rgba(192,64,74,0.35);background:white;color:#C0404A;font-size:13px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;display:flex;align-items:center;justify-content:center;gap:8px;">
-        <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
-        Remove this photo
-      </button>
-    </div>
-  </div>
-</div>
-
-<!-- ════════════════════════════════════════════════════════════════════════
-     BULK UPLOAD REVIEW SHEET
-     Opens automatically after a bulk photo upload completes. Lets the
-     tech tag + caption each just-uploaded photo in place, before the
-     parent Save Changes commits. Reduces the "upload now, tag later"
-     friction that was sending techs to My Gallery as a separate trip.
-     Populated by openBulkReviewSheet(startIdx) against edit.photos.
-     Changes write back to edit.photos[i].tags / .caption and persist
-     when the tech taps the modal's Save Changes. 2026-04-22 per Anne. -->
-<div id="bulk-review-sheet" class="modal-overlay" style="display:none;position:fixed;inset:0;z-index:9070;background:rgba(20,10,15,0.72);backdrop-filter:blur(4px);align-items:flex-end;justify-content:center;">
-  <div style="background:white;border-radius:28px 28px 0 0;width:100%;max-width:480px;max-height:92vh;display:flex;flex-direction:column;box-shadow:0 -8px 40px rgba(0,0,0,0.22);">
-    <div style="width:40px;height:4px;background:var(--border);border-radius:100px;margin:12px auto 8px;flex-shrink:0;"></div>
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 18px 10px;flex-shrink:0;border-bottom:1px solid var(--border);">
-      <div>
-        <div style="font-family:'Playfair Display',serif;font-size:18px;font-weight:600;color:var(--charcoal);line-height:1.2;">Tag your new photos</div>
-        <div style="font-size:12px;color:var(--muted);margin-top:2px;">Add tags and a caption so clients find your work</div>
-      </div>
-      <button onclick="closeBulkReviewSheet()" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted);line-height:1;flex-shrink:0;padding:4px 8px;">&times;</button>
-    </div>
-    <div id="bulk-review-body" style="overflow-y:auto;padding:16px 18px 4px;flex:1;">
-      <!-- populated by openBulkReviewSheet() -->
-    </div>
-    <div style="flex-shrink:0;padding:12px 18px 24px;border-top:1px solid var(--border);background:white;">
-      <button onclick="closeBulkReviewSheet()" class="btn btn-rose" style="width:100%;">Done</button>
-      <div style="font-size:11px;color:var(--muted);text-align:center;margin-top:8px;font-style:italic;">Don't forget to tap <strong>Save Changes</strong> on the profile to keep your edits.</div>
-    </div>
-  </div>
-</div>
-
-<!-- ════════════════════════════════════════════════════════════════════════
-     FEEDBACK BUTTON + MODAL
-     Floating chip on every signed-in screen; taps open a modal that
-     writes into public.feedback. Auto-captures current screen, user
-     agent, and a rolling buffer of console errors/warnings. 2026-04-22. -->
-<button id="feedback-fab" onclick="openFeedbackModal()" aria-label="Send feedback" style="display:none;position:fixed;right:14px;bottom:86px;z-index:850;background:var(--rose);color:white;border:none;border-radius:100px;padding:10px 16px;font-size:13px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;box-shadow:0 4px 14px rgba(178,110,95,0.35),0 1px 3px rgba(0,0,0,0.18);align-items:center;gap:7px;">
-  <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
-  Feedback
-</button>
-
-<div id="feedback-modal" class="modal-overlay" style="display:none;position:fixed;inset:0;z-index:9100;background:rgba(20,10,15,0.72);backdrop-filter:blur(4px);align-items:flex-end;justify-content:center;">
-  <div style="background:white;border-radius:28px 28px 0 0;width:100%;ma
+      <button onclick="postUpload
