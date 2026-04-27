@@ -14778,6 +14778,18 @@ function goSignupStep5() {
   if (sub) sub.textContent = "Your ZIP helps clients find you in their area";
   const backBtn = document.getElementById('location-back-btn');
   if (backBtn) backBtn.setAttribute('onclick', "show('signup-tech')");
+  // Pre-fill the visible ZIP from the hidden reg-zip-field that the
+  // signup-tech address autocomplete populates. Without this, techs
+  // who used the autocomplete in step 3 would land here on a blank
+  // ZIP input and have to type it again — even though we already have
+  // it. Empty stays empty so the manual fallback still works when
+  // autocomplete didn't fire. 2026-04-27 per Anne ("does step 5 even
+  // tell us anything?").
+  const zipField = document.getElementById('reg-zip-field');
+  const zipInput = document.getElementById('reg-zip');
+  if (zipField && zipInput && zipField.value && !zipInput.value) {
+    zipInput.value = zipField.value;
+  }
   show('signup-location');
 }
 
@@ -16381,9 +16393,4 @@ function closeReleaseWizard() {
   </div>
 </div>
 
-<!-- ════════════════════════════════════════════════════════════════════════
-     FEEDBACK BUTTON + MODAL
-     Floating chip on every signed-in screen; taps open a modal that
-     writes into public.feedback. Auto-captures current screen, user
-     agent, and a rolling buffer of console errors/warnings. 2026-04-22. -->
-<button id="feedback-fab" onclick="openFeedbackModal()" aria-label="Send feedback" style="display:none;position:fixed;right:14px;bottom:86px;z-index:850;background:var(--rose);color:white;border:none;border-radius:100px;padding:10px 16px;font-size:13px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;box-shad
+<!-- ════════════════════════════════════════
