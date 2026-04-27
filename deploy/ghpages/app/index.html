@@ -1760,11 +1760,10 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
     <div style="width:32px;"></div>
   </div>
   <div class="scroll-content" style="padding:14px 20px 80px;">
-    <!-- Test-data banner — same semantics as before the relocation. -->
-    <div id="home-feed-test-banner" style="display:inline-flex;align-items:center;gap:6px;margin-bottom:10px;padding:4px 9px;background:var(--gold-light);border:1px solid #D4B080;border-radius:999px;font-size:10.5px;color:#7A5020;line-height:1.2;">
-      <svg viewBox="0 0 24 24" style="width:11px;height:11px;stroke:#7A5020;fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-      <span><b style="font-weight:700;">Test posts</b> — admin can clear in Settings</span>
-    </div>
+    <!-- Pre-launch "test posts — admin can clear" banner removed
+         2026-04-27 (test data wiped, real launch underway). The
+         updateTestBannerVisibility() helper still exists as a safe
+         no-op via its `if (!banner) return;` guard. -->
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;gap:10px;flex-wrap:wrap;">
       <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;">Recent from techs near you</div>
       <div id="feed-radius-chips" style="display:flex;gap:4px;">
@@ -3702,6 +3701,46 @@ function updateSlotsRemainingDisplay() {
   }
 }
 
+// Photo autosave helpers — write-through append/remove to public.techs.
+// Photos used to live in techEdits[editKey].photos until the user tapped
+// Save. That cost real photos (and real slots) when techs uploaded then
+// closed the modal without saving. Now: every successful upload calls
+// appendTechPhoto immediately, and every removeTePhoto calls
+// removeTechPhotoByUrl. Save still commits other field edits + photo
+// tag edits. RPCs in sql/photo-autosave-rpcs.sql.
+//
+// Best-effort: a 404 from missing RPC or 5xx fall through silently to
+// the legacy buffer-then-Save path, so the modal doesn't break if Anne
+// hasn't deployed the SQL yet. 2026-04-27.
+async function appendTechPhoto(photo) {
+  if (!currentUserEmail || !photo || !photo.url) return;
+  try {
+    await fetch(SUPABASE_URL + '/rest/v1/rpc/append_tech_photo', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': 'Bearer ' + (window._mncAccessToken || SUPABASE_ANON_KEY)
+      },
+      body: JSON.stringify({ p_email: currentUserEmail, p_photo: photo })
+    });
+  } catch(e) { try { console.warn('appendTechPhoto:', e); } catch(_){} }
+}
+async function removeTechPhotoByUrl(url) {
+  if (!currentUserEmail || !url) return;
+  try {
+    await fetch(SUPABASE_URL + '/rest/v1/rpc/remove_tech_photo_by_url', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': 'Bearer ' + (window._mncAccessToken || SUPABASE_ANON_KEY)
+      },
+      body: JSON.stringify({ p_email: currentUserEmail, p_url: url })
+    });
+  } catch(e) { try { console.warn('removeTechPhotoByUrl:', e); } catch(_){} }
+}
+
 // Per-file RPC gate. Calls public.consume_upload_slot(email) which
 // atomically reserves a slot (weekly → credit → free fallback) and
 // returns the resolution. Client uploads proceed only on ok=true.
@@ -4139,13 +4178,13 @@ const STRIPE_CONFIG = {
   // a redeploy. Use a dedicated throwaway tech row when testing — test
   // events DO write to the same Supabase DB. Added 2026-04-22.
   //
-  // IMPORTANT: ship with test_mode=FALSE. Currently TRUE for end-to-end
-  // testing of the 2026-04-27 paywall + comps + casing fixes. Flip back
-  // to false BEFORE the real launch push. While true, the upgrade modal
-  // / purchase buttons route to the test-mode Stripe links so $4242
-  // cards work and no real charges happen. Test events still hit the
-  // production Supabase DB though, so use a throwaway tech.
-  test_mode: true,
+  // IMPORTANT: ship with test_mode=FALSE. Flipped back to false on
+  // 2026-04-27 after end-to-end testing of the paywall + comps + casing
+  // fixes passed. Re-flip to true if you need to run another round of
+  // $4242-card flows; flip back before any push to the live App Store
+  // build, otherwise live customers route to test Stripe links and no
+  // real money flows.
+  test_mode: false,
   // Payment link for 1 photo credit ($1) — Live
   link_1_photo:   'https://buy.stripe.com/28E4gycjubtr2KA2xtgEg00',
   // Payment link for 10 photo credits ($5 bundle, portfolio-only) — Live
@@ -7888,6 +7927,11 @@ async function techEditAddPhotos(input) {
             // Replace the base64 entry with the real URL
             const idx = edit.photos.findIndex(p => p.url === preview);
             if (idx !== -1) { edit.photos[idx].url = publicUrl; renderTePhotoGrid(edit.photos); }
+            // Write-through autosave — persist this photo to techs.photos
+            // immediately so the user can't lose it by closing the modal
+            // without tapping Save. Best-effort; legacy Save path covers
+            // failures. 2026-04-27.
+            appendTechPhoto({ url: publicUrl, tags: [], slot_type: _slotType });
           }
         } catch(err) {} // keep base64 fallback
       };
@@ -8018,6 +8062,9 @@ async function techBulkDropFiles(fileList) {
         const publicUrl = SUPABASE_URL + '/storage/v1/object/public/tech-photos/' + fileName;
         const idx = edit.photos.indexOf(photoEntry);
         if (idx !== -1) { edit.photos[idx].url = publicUrl; renderTePhotoGrid(edit.photos); }
+        // Write-through autosave (bulk handler). See techEditAddPhotos
+        // for the rationale. 2026-04-27.
+        appendTechPhoto({ url: publicUrl, tags: [], slot_type: photoEntry.slot_type || null });
       }
     } catch(e) {} // keep base64 preview as fallback
 
@@ -9004,6 +9051,15 @@ async function removeTePhoto(idx) {
   }
   edit.photos.splice(idx, 1);
   renderTePhotoGrid(edit.photos);
+  // Write-through delete — keep the techs.photos array in sync with the
+  // local edit buffer the moment the user removes a photo. Without this,
+  // a tech could remove a photo, leave the modal, and find it still in
+  // their portfolio next session. Best-effort; falls through silently
+  // on RPC failure (the legacy Save path still patches the array on
+  // explicit Save). 2026-04-27 photo autosave.
+  if (photo && photo.url && !photo.url.startsWith('data:')) {
+    removeTechPhotoByUrl(photo.url);
+  }
   showToast('Photo removed');
 }
 
@@ -16095,26 +16151,4 @@ function closeReleaseWizard() {
       <div id="sw-stat-sub" style="font-size:12px;color:var(--muted);margin-top:6px;"></div>
     </div>
 
-    <div style="display:flex;flex-direction:column;gap:8px;">
-      <button id="sw-primary-btn" onclick="stripeWelcomePrimary()" class="btn btn-rose" style="width:100%;">Post your first look →</button>
-      <button onclick="closeStripeWelcome()" style="width:100%;padding:10px;border:none;background:none;color:var(--muted);font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;">I'll explore first</button>
-    </div>
-    <div style="font-size:11px;color:var(--muted);margin-top:14px;line-height:1.5;">Stripe emailed you a receipt. Manage your subscription any time from your profile.</div>
-  </div>
-</div>
-
-<!-- ════════════════════════════════════════════════════════════════════════
-     POST-UPLOAD SUCCESS MODAL
-     Fires after Save Changes when 1+ new photos were just added. Two
-     clear CTAs: tag photos (the high-value next action — clients find
-     the tech by tags) and see the first post live in the feed (the
-     instant-gratification moment). 2026-04-22. -->
-<div id="post-upload-success-modal" class="modal-overlay" style="display:none;position:fixed;inset:0;z-index:9050;background:rgba(20,10,15,0.68);backdrop-filter:blur(4px);align-items:center;justify-content:center;">
-  <div style="background:white;border-radius:22px;width:100%;max-width:380px;margin:20px;padding:24px 22px;box-shadow:0 8px 40px rgba(0,0,0,0.22);text-align:center;">
-    <div style="width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,#FFF5EF 0%,#FBE4D9 100%);margin:0 auto 14px;display:flex;align-items:center;justify-content:center;">
-      <svg viewBox="0 0 24 24" style="width:28px;height:28px;stroke:var(--rose-dark);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-    </div>
-    <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:600;color:var(--charcoal);margin-bottom:8px;" id="pus-title">Photos uploaded!</div>
-    <div style="font-size:13.5px;color:#5E524B;line-height:1.6;margin-bottom:20px;" id="pus-body"></div>
-    <div style="display:flex;flex-direction:column;gap:8px;">
-      <button onclick="postUpload
+    <div style="display:flex;flex-direction:column
