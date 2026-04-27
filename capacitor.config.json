@@ -1,7 +1,7 @@
 {
   "appId": "com.mynailconnection.app",
   "appName": "My Nail Connection",
-  "webDir": "www",
+  "webDir": "deploy/ghpages/app",
   "server": {
     "androidScheme": "https"
   },
