@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Support — My Nail Connection</title>
+  <meta name="description" content="Help and support for My Nail Connection — find your local nail tech, see who's open, save what you love.">
+  <link rel="icon" href="/favicon.ico">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --rose:        #C4786A;
+      --rose-dark:   #8B4A40;
+      --rose-light:  #F5EDE8;
+      --rose-mid:    #E5C7BD;
+      --gold:        #D4A85C;
+      --gold-light:  #F2D690;
+      --cream:       #FAF5F2;
+      --charcoal:    #3D2D24;
+      --muted:       #8A7A74;
+      --border:      #EFE2DA;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      color: var(--charcoal);
+      background: var(--cream);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+    /* Hero */
+    .hero {
+      background: linear-gradient(135deg, #D98872 0%, #C4786A 45%, #A85968 100%);
+      color: white;
+      padding: 60px 22px 52px;
+      text-align: center;
+    }
+    .hero-eyebrow {
+      font-size: 11.5px;
+      font-weight: 500;
+      color: rgba(255,255,255,0.78);
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+    .hero h1 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 42px;
+      font-weight: 600;
+      margin: 0 0 14px;
+      letter-spacing: -0.3px;
+      line-height: 1.15;
+    }
+    .hero p {
+      font-size: 16px;
+      max-width: 520px;
+      margin: 0 auto;
+      color: rgba(255,255,255,0.92);
+    }
+    /* Container */
+    main {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 44px 20px 56px;
+    }
+    section {
+      background: white;
+      border-radius: 18px;
+      padding: 28px 28px 22px;
+      margin-bottom: 22px;
+      box-shadow: 0 2px 14px rgba(120,60,48,0.06);
+    }
+    h2 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--rose-dark);
+      margin: 0 0 16px;
+      letter-spacing: 0.1px;
+    }
+    h3 {
+      font-size: 15.5px;
+      font-weight: 700;
+      color: var(--charcoal);
+      margin: 22px 0 7px;
+    }
+    h3:first-of-type { margin-top: 4px; }
+    p, li {
+      font-size: 15px;
+      line-height: 1.65;
+      color: var(--charcoal);
+      margin: 0 0 10px;
+    }
+    a {
+      color: var(--rose-dark);
+      text-decoration: none;
+      border-bottom: 1px dashed var(--rose-mid);
+      padding-bottom: 1px;
+      transition: color 0.15s ease, border-color 0.15s ease;
+    }
+    a:hover { color: var(--rose); border-bottom-style: solid; }
+    strong { color: var(--charcoal); font-weight: 700; }
+    /* Contact card */
+    .contact-card {
+      background: linear-gradient(135deg, var(--rose-light) 0%, var(--cream) 100%);
+      border: 1px solid var(--rose-mid);
+      text-align: center;
+    }
+    .contact-card h2 { color: var(--rose-dark); }
+    .contact-card p { font-size: 15px; }
+    .email-cta {
+      display: inline-block;
+      background: linear-gradient(135deg, #D98872 0%, #A85968 100%);
+      color: white;
+      font-weight: 700;
+      font-size: 15px;
+      padding: 13px 30px;
+      border-radius: 100px;
+      text-decoration: none;
+      border-bottom: none;
+      box-shadow: 0 4px 14px rgba(168,89,104,0.30);
+      margin: 6px 0 4px;
+      letter-spacing: 0.2px;
+    }
+    .email-cta:hover {
+      color: white;
+      border-bottom: none;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(168,89,104,0.38);
+    }
+    .fine-print {
+      font-size: 12.5px;
+      color: var(--muted);
+      margin-top: 14px;
+      line-height: 1.55;
+    }
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 30px 20px 40px;
+      color: var(--muted);
+      font-size: 12.5px;
+      line-height: 1.7;
+    }
+    footer a {
+      color: var(--muted);
+      border-bottom: 1px dashed transparent;
+    }
+    footer a:hover { color: var(--rose-dark); border-bottom-color: var(--rose-mid); }
+    .footer-divider { color: #C4B0A6; margin: 0 8px; }
+    /* Mobile */
+    @media (max-width: 600px) {
+      .hero { padding: 46px 18px 38px; }
+      .hero h1 { font-size: 30px; }
+      .hero p { font-size: 15px; }
+      main { padding: 30px 14px 48px; }
+      section { padding: 22px 20px 18px; border-radius: 14px; }
+      h2 { font-size: 22px; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="hero">
+    <div class="hero-eyebrow">My Nail Connection</div>
+    <h1>How can we help?</h1>
+    <p>Quick answers to common questions, plus a real human you can email if anything's not working.</p>
+  </header>
+
+  <main>
+
+    <!-- For Clients -->
+    <section>
+      <h2>For clients</h2>
+
+      <h3>How do I find a nail tech?</h3>
+      <p>Open the app and tap <strong>Find a Tech</strong> to browse techs near you, or tap <strong>Browse by Look</strong> to scroll fresh nail work and tap any photo to visit the artist behind it.</p>
+
+      <h3>How do I book?</h3>
+      <p>Open any tech's profile and tap <strong>Call</strong>, <strong>Text</strong>, or — if they've added one — <strong>Book Online</strong>. Booking happens directly with the tech, not through My Nail Connection.</p>
+
+      <h3>How do I save looks I love?</h3>
+      <p>Tap the heart on any photo to save it to your inspo board. Find your saved looks anytime under <strong>Profile → Inspo</strong>.</p>
+
+      <h3>How do I save my favorite techs?</h3>
+      <p>On any tech's profile, tap the star at the top right. Your favorites live under <strong>Profile → Favorites</strong> for one-tap access next time you need an appointment.</p>
+
+      <h3>I didn't get the email confirmation link.</h3>
+      <p>Check your spam folder first. If it's not there after a few minutes, request a fresh link by tapping <strong>Resend confirmation</strong> on the sign-in screen.</p>
+
+      <h3>What's the "Available Now" badge?</h3>
+      <p>Techs flip a switch on their dashboard when they're open and accepting same-day appointments. The green dot means they're free right now; the gold one means they have openings this week.</p>
+    </section>
+
+    <!-- For Techs -->
+    <section>
+      <h2>For nail techs</h2>
+
+      <h3>How do I sign up as a tech?</h3>
+      <p>Tap <strong>Sign Up</strong> on the welcome screen and choose <strong>I'm a nail tech</strong>. You'll fill out your profile, location, and contact preferences. Your portfolio comes next.</p>
+
+      <h3>How do I upload portfolio photos?</h3>
+      <p>From your tech home, tap <strong>Tech Portal → Manage</strong>, then tap the upload area to add photos from your camera roll. Photos save automatically as they upload — you don't need to tap Save for them to land in your portfolio.</p>
+
+      <h3>What's Glow Up?</h3>
+      <p>Glow Up is a monthly subscription that gives Glow Up members a generous photo allowance every month, posts every upload to the live feed where new clients are discovering work, and adds a Glow Up badge to your profile so clients know you're an active artist.</p>
+
+      <h3>How do I cancel Glow Up?</h3>
+      <p>If you subscribed via the App Store, open <strong>Settings → [Your Name] → Subscriptions</strong> on your iPhone and tap <strong>My Nail Connection → Cancel Subscription</strong>. If you subscribed through the website, email us at <a href="mailto:anne@mynailconnection.com">anne@mynailconnection.com</a> and we'll take care of it.</p>
+
+      <h3>How do photo credits work?</h3>
+      <p>Spotlight credits ($5 for 10) let you add photos to your portfolio outside your subscription allowance. Spotlight uploads stay on your portfolio but don't post to the live feed — that's a Glow Up benefit.</p>
+    </section>
+
+    <!-- Account & Privacy -->
+    <section>
+      <h2>Account &amp; privacy</h2>
+
+      <h3>How do I change my password?</h3>
+      <p>On the sign-in screen, tap <strong>Forgot password?</strong> Enter your email and we'll send a reset link. The link is valid for one hour.</p>
+
+      <h3>How do I delete my account?</h3>
+      <p>Email us at <a href="mailto:anne@mynailconnection.com?subject=Delete%20my%20account">anne@mynailconnection.com</a> from the address you signed up with and ask us to delete your account. We'll confirm and process the deletion within 7 days. All your data — profile, favorites, saved looks, uploaded photos — is permanently removed.</p>
+
+      <h3>What information do you collect?</h3>
+      <p>We collect what's needed to run the app: your email and password (for sign-in), your name and city/state (for your profile), and uploaded photos if you're a nail tech. Full details in our <a href="/privacy.html">Privacy Policy</a>.</p>
+
+      <h3>Can I export my data?</h3>
+      <p>Yes. Email <a href="mailto:anne@mynailconnection.com?subject=Data%20export%20request">anne@mynailconnection.com</a> from the address on your account and we'll send you a copy of everything we have on file within 30 days.</p>
+    </section>
+
+    <!-- Troubleshooting -->
+    <section>
+      <h2>Something's not working</h2>
+
+      <h3>The app won't open or keeps crashing.</h3>
+      <p>Force-quit the app and reopen. If that doesn't help, delete and reinstall — your account and saved data live on our servers, not on your phone, so nothing will be lost. Still broken? Email us with your phone model and the time the crash happened.</p>
+
+      <h3>I'm not getting push notifications.</h3>
+      <p>Check <strong>Settings → Notifications → My Nail Connection</strong> on your phone and make sure notifications are allowed. If they are, sign out and back into the app to refresh your subscription.</p>
+
+      <h3>Photos are missing from my portfolio.</h3>
+      <p>Pull to refresh on your tech home. If they still don't show up, email us with the approximate upload time and we'll check the storage logs.</p>
+
+      <h3>My subscription didn't activate after I paid.</h3>
+      <p>Subscriptions usually take 1–3 seconds to reflect in the app, but occasionally Apple's servers run slow. Force-quit and reopen the app, or sign out and back in. If the Glow Up badge still isn't showing after 10 minutes, email us with the email on your account and the date of the charge.</p>
+    </section>
+
+    <!-- Contact -->
+    <section class="contact-card">
+      <h2>Still need help?</h2>
+      <p>We're a small, indie team and we read every email. Tell us what's going on and we'll get back to you within one business day.</p>
+      <p style="margin: 18px 0 6px;">
+        <a class="email-cta" href="mailto:anne@mynailconnection.com">Email us →</a>
+      </p>
+      <p class="fine-print">When you write in, please include your account email and a description of the problem. A screenshot helps a ton. If your app crashed, the date and time helps us track it down.</p>
+    </section>
+
+  </main>
+
+  <footer>
+    <p>
+      <a href="/">Home</a>
+      <span class="footer-divider">·</span>
+      <a href="/privacy.html">Privacy</a>
+      <span class="footer-divider">·</span>
+      <a href="/terms.html">Terms</a>
+    </p>
+    <p>© 2026 My Nail Connection</p>
+  </footer>
+
+</body>
+</html>

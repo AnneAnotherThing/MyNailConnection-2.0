@@ -1227,6 +1227,14 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
     <div style="text-align:center;margin-top:18px;">
       <span style="font-size:12px;color:var(--muted);cursor:pointer;" onclick="show('splash')"><svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:var(--muted);fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;display:inline-block;vertical-align:middle;margin-right:4px;"><path d="M15 18l-6-6 6-6"/></svg> Back</span>
     </div>
+    <!-- Support link — discreet, muted. Sits below Back so users
+         who tried Forgot Password and still can't get in have a path
+         to a real human. target="_blank" so the support page opens
+         in the device's browser without nuking the half-typed
+         sign-in form. 2026-04-27. -->
+    <div style="text-align:center;margin-top:10px;">
+      <a href="https://mynailconnection.com/support.html" target="_blank" rel="noopener" style="font-size:12px;color:var(--muted);text-decoration:none;border-bottom:1px dashed var(--rose-mid);padding-bottom:1px;">Need help? Contact support</a>
+    </div>
   </div>
 </div>
 
