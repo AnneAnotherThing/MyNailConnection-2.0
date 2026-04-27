@@ -2,7 +2,7 @@
   "applinks": {
     "details": [
       {
-        "appIDs": ["V5FRR9WM4W.com.mynailconnection.app"],
+        "appIDs": ["YYS8GZPZ78.com.mynailconnection.app"],
         "components": [
           {
             "/": "/app/reset-password.html",
@@ -17,6 +17,6 @@
     ]
   },
   "webcredentials": {
-    "apps": ["V5FRR9WM4W.com.mynailconnection.app"]
+    "apps": ["YYS8GZPZ78.com.mynailconnection.app"]
   }
 }

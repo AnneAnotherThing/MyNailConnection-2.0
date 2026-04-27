@@ -45,3 +45,13 @@ upload_certificate.pem
 upload_certificate.crt
 *.p8
 *.p12
+
+# iOS code-signing intermediates — never commit
+*.csr
+*.key
+*.cer
+*.p12
+*.mobileprovision
+
+# All iOS code-signing artifacts (CSRs, keys, certs, profiles, decoded plists)
+signing/
