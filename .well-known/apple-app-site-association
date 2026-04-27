@@ -1,0 +1,22 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["V5FRR9WM4W.com.mynailconnection.app"],
+        "components": [
+          {
+            "/": "/app/reset-password.html",
+            "comment": "Supabase password reset deep-link target"
+          },
+          {
+            "/": "/app/*",
+            "comment": "All app-namespaced paths open in the installed app"
+          }
+        ]
+      }
+    ]
+  },
+  "webcredentials": {
+    "apps": ["V5FRR9WM4W.com.mynailconnection.app"]
+  }
+}

@@ -37,3 +37,11 @@ Thumbs.db
 # Logs
 *.log
 npm-debug.log*
+
+# Android signing — NEVER commit. Keystore = private signing key. Loss = compromised app identity.
+*.jks
+*.keystore
+upload_certificate.pem
+upload_certificate.crt
+*.p8
+*.p12
