@@ -19,24 +19,17 @@
    - **Invite User**
    - **Change Email Address**
 
-   Find the line in the HTML that currently looks like one of these:
+   Search the template HTML for **every** occurrence of `{{ .ConfirmationURL }}` (typically the main CTA button's `href`, plus a fallback "copy this link" footer that has it in both the `href` and the visible link text). Replace each one with the direct-link URL — using a hardcoded `type=` value that matches the template:
 
-   ```html
-   <a href="{{ .ConfirmationURL }}">Confirm your mail</a>
-   ```
+   | Template | Replacement URL |
+   |---|---|
+   | Confirm signup | `https://mynailconnection.com/app/?token_hash={{ .TokenHash }}&type=signup` |
+   | Magic Link | `https://mynailconnection.com/app/?token_hash={{ .TokenHash }}&type=magiclink` |
+   | Reset Password | `https://mynailconnection.com/app/?token_hash={{ .TokenHash }}&type=recovery` |
+   | Invite User | `https://mynailconnection.com/app/?token_hash={{ .TokenHash }}&type=invite` |
+   | Change Email Address | `https://mynailconnection.com/app/?token_hash={{ .TokenHash }}&type=email_change` |
 
-   Replace it with:
-
-   ```html
-   <a href="https://mynailconnection.com/app/?token_hash={{ .TokenHash }}&type={{ .EmailActionType }}">Confirm your mail</a>
-   ```
-
-   The `{{ .EmailActionType }}` variable resolves per template:
-   - signup → `signup`
-   - magiclink → `magiclink`
-   - recovery → `recovery`
-   - invite → `invite`
-   - email_change_current / email_change_new → `email_change`
+   *(Note: `{{ .EmailActionType }}` is NOT a valid Supabase template variable — hardcode the `type=` per template instead.)*
 
 3. Save each template.
 
