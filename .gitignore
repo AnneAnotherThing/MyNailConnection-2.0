@@ -55,3 +55,6 @@ upload_certificate.crt
 
 # All iOS code-signing artifacts (CSRs, keys, certs, profiles, decoded plists)
 signing/
+
+# Local sentinel for sync.sh's auto-build-bump (per-machine, not shared)
+.last-build-bump

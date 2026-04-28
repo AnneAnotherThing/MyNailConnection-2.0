@@ -70,6 +70,73 @@ if [ -f sw.js ]; then
   fi
 fi
 
+# ── Auto-bump native build numbers (iOS CFBundleVersion + Android versionCode)
+# Problem this solves: every Capawesome upload to App Store Connect / Play
+# Console requires a strictly higher build number than anything previously
+# uploaded. Forgetting to bump = upload fails with
+# "ENTITY_ERROR.ATTRIBUTE.INVALID.DUPLICATE / The bundle version must be
+# higher than the previously uploaded version" (iOS) or "Version code N has
+# already been used" (Android). Anne kept hitting this — 2026-04-28.
+#
+# Fix: same trigger pattern as the sw.js cache bump above. When any source
+# HTML (or capacitor.config.json / AndroidManifest.xml) is newer than the
+# .last-build-bump marker, we bump iOS CURRENT_PROJECT_VERSION (Debug+Release
+# configs in project.pbxproj) and Android versionCode (build.gradle), each
+# by +1, and touch the marker. Repeated syncs without HTML edits stay no-op.
+#
+# .last-build-bump is gitignored — per-machine sentinel, never shared.
+# First-ever run (no marker on disk) initializes the marker without bumping
+# so wiring this up doesn't fire a stray bump on the next sync.
+if [ ! -f .last-build-bump ]; then
+  touch .last-build-bump
+  echo "  build-bump: marker initialized (no bump on first run)"
+else
+  needs_build_bump=0
+  for f in index.html marketing.html reset-password.html tech-guide.html \
+           capacitor.config.json android/app/src/main/AndroidManifest.xml; do
+    if [ -f "$f" ] && [ "$f" -nt .last-build-bump ]; then
+      needs_build_bump=1
+      break
+    fi
+  done
+  if [ "$needs_build_bump" = "1" ]; then
+    # iOS — CURRENT_PROJECT_VERSION appears twice in project.pbxproj (Debug
+    # + Release configs). Same number in both is the standard Capacitor
+    # default and what App Store Connect treats as a single build.
+    #
+    # First strip any trailing NUL bytes from prior cross-platform writes —
+    # build #12 (2026-04-28) failed at pod install because 4 trailing NULs
+    # at end-of-file made CocoaPods' Nanaimo plist parser reject the file.
+    # tr is binary-safe and self-heals on every run regardless of how the
+    # NULs got there.
+    PBX=ios/App/App.xcodeproj/project.pbxproj
+    if [ -f "$PBX" ]; then
+      tr -d '\000' < "$PBX" > "$PBX.clean" && mv "$PBX.clean" "$PBX"
+      ios_current=$(grep -am1 "CURRENT_PROJECT_VERSION = " "$PBX" | grep -oE "[0-9]+")
+      if [ -n "$ios_current" ]; then
+        ios_next=$((ios_current + 1))
+        sed "s/CURRENT_PROJECT_VERSION = ${ios_current};/CURRENT_PROJECT_VERSION = ${ios_next};/g" \
+          "$PBX" > "$PBX.tmp" && mv "$PBX.tmp" "$PBX"
+        echo "  bumped iOS CFBundleVersion: ${ios_current} → ${ios_next}"
+      fi
+    fi
+    # Android — versionCode is a single integer line in build.gradle.
+    # versionName ("2.0.0") is the user-facing version and stays untouched.
+    if [ -f android/app/build.gradle ]; then
+      android_current=$(grep -E "^[[:space:]]*versionCode[[:space:]]+[0-9]+" android/app/build.gradle \
+                        | head -1 | grep -oE "[0-9]+")
+      if [ -n "$android_current" ]; then
+        android_next=$((android_current + 1))
+        sed "s/versionCode ${android_current}$/versionCode ${android_next}/" \
+          android/app/build.gradle > android/app/build.gradle.tmp \
+          && mv android/app/build.gradle.tmp android/app/build.gradle
+        echo "  bumped Android versionCode: ${android_current} → ${android_next}"
+      fi
+    fi
+    touch .last-build-bump
+  fi
+fi
+
 # ── App bundle ──────────────────────────────────────────────────────────
 copy_if_exists index.html              "$APP/index.html"
 copy_if_exists reset-password.html     "$APP/reset-password.html"
@@ -165,3 +232,4 @@ copy_if_exists sw.js                   "$GH/app/sw.js"
 echo "mynailconnection.com" > "$GH/CNAME"
 
 echo "✓ deploy/ synced from MNC root at $(date '+%Y-%m-%d %H:%M:%S')"
+
