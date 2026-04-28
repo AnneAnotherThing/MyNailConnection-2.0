@@ -411,6 +411,20 @@ body{font-family:'DM Sans',sans-serif;background:#ddd4cc;display:flex;justify-co
 .avatar{width:36px;height:36px;border-radius:50%;background:var(--rose-light);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:500;color:var(--rose-dark);cursor:pointer;border:2px solid var(--rose-mid);}
 .bottom-nav{background:white;border-top:1px solid var(--border);display:flex;padding:6px 0 16px;}
 .screen:not(.active) .bottom-nav{display:none;}
+/* ── Native safe-area inset handling ─────────────────────────────────────────
+   The viewport meta sets `viewport-fit=cover`, so on native (Capacitor) the
+   webview draws under Android's status bar at the top and gesture-nav zone
+   at the bottom (and iOS notch / home indicator). Without these insets:
+     • Top: `.header` buttons (back arrow, avatar) get clipped under the
+       status bar — Anne's "top of the screen" report.
+     • Bottom: `.bottom-nav` items sit inside Android's back-swipe gesture
+       zone, so taps register as system back and "back you out" instead of
+       activating the nav item — Anne's "bottom of the screen backs me out".
+   `calc(env(...) + N)` keeps the existing visual padding as a baseline on
+   devices/browsers that report 0 inset, and adds the system-reserved zone
+   on top where it exists. — 2026-04-28 */
+.header { padding-top: calc(env(safe-area-inset-top, 0px) + 16px); }
+.bottom-nav { padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 16px); }
 .nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:4px 6px;border-radius:14px;transition:background 0.2s ease;}
 .nav-item:hover{background:rgba(224,168,152,0.10);}
 .nav-item.active{background:var(--rose-light);}
