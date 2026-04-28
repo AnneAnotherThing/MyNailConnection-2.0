@@ -32,8 +32,16 @@
 	</array>
 	<key>UIRequiredDeviceCapabilities</key>
 	<array>
-		<string>armv7</string>
+		<string>arm64</string>
 	</array>
+	<key>NSCameraUsageDescription</key>
+	<string>My Nail Connection needs access to your camera so you can capture nail photos to upload to your portfolio or post to the feed.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>My Nail Connection needs access to your photo library so you can choose nail photos to upload to your portfolio or post to the feed.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>My Nail Connection saves nail photos you take in-app to your photo library so you have your own copy.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>My Nail Connection uses your location to show nail techs near you and filter the home feed by distance.</string>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
