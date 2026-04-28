@@ -1685,7 +1685,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
          bloom animation is actually visible on load. My Gallery card
          that used to sit above this was removed 2026-04-23 now that the
          bottom nav handles that jump. -->
-    <div aria-hidden="true" style="margin:-12px auto 8px;max-width:280px;width:100%;opacity:0.85;pointer-events:none;">
+    <div aria-hidden="true" style="margin:-18px auto 0;max-width:180px;width:100%;opacity:0.7;pointer-events:none;">
       <svg viewBox="0 0 400 260" width="100%" height="auto" preserveAspectRatio="xMidYMax meet" xmlns="http://www.w3.org/2000/svg" style="display:block;">
         <g transform="translate(30,0)">
           <!-- Main branches -->
@@ -1746,6 +1746,41 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
           </g>
         </g>
       </svg>
+    </div>
+
+    <!-- Find us on social — small icon row sits below the magnolia at the
+         bottom of the home scroll. Tappable to the dedicated find-us page,
+         OR direct-to-platform via the individual icons. Tucked in tightly
+         under the illustration so it reads as a soft footer flourish. -->
+    <div style="text-align:center;padding:0 20px 18px;">
+      <div style="font-family:'Playfair Display',serif;font-style:italic;font-size:11px;color:var(--muted);opacity:0.85;letter-spacing:0.4px;margin-bottom:10px;">find us on</div>
+      <div style="display:flex;justify-content:center;gap:14px;">
+        <a href="https://www.instagram.com/mynailconnection" target="_blank" rel="noopener noreferrer" aria-label="Instagram"
+           style="width:38px;height:38px;border-radius:11px;background:radial-gradient(circle at 30% 110%, #FED576 0%, #F47133 30%, #BC3081 60%, #4C63D2 100%);display:flex;align-items:center;justify-content:center;text-decoration:none;box-shadow:0 2px 6px rgba(188,48,129,0.22);">
+          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:white;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;">
+            <rect x="3" y="3" width="18" height="18" rx="5"/>
+            <circle cx="12" cy="12" r="4"/>
+            <circle cx="17.5" cy="6.5" r="1" fill="white" stroke="none"/>
+          </svg>
+        </a>
+        <a href="https://www.tiktok.com/@mynailconnection" target="_blank" rel="noopener noreferrer" aria-label="TikTok"
+           style="width:38px;height:38px;border-radius:11px;background:#0F0F0F;display:flex;align-items:center;justify-content:center;text-decoration:none;box-shadow:0 2px 6px rgba(0,0,0,0.18);">
+          <svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:white;">
+            <path d="M14 3h2.5a4.5 4.5 0 004.5 4.5V10a7 7 0 01-4.5-1.6V15.5a5.5 5.5 0 11-5.5-5.5 5.6 5.6 0 011 .1v2.6a3 3 0 102 2.8V3z"/>
+          </svg>
+        </a>
+        <a href="https://www.facebook.com/profile.php?id=61570995887375" target="_blank" rel="noopener noreferrer" aria-label="Facebook"
+           style="width:38px;height:38px;border-radius:11px;background:#1877F2;display:flex;align-items:center;justify-content:center;text-decoration:none;box-shadow:0 2px 6px rgba(24,119,242,0.22);">
+          <svg viewBox="0 0 24 24" style="width:20px;height:20px;fill:white;">
+            <path d="M13.5 21v-7.5h2.5l.4-3h-2.9V8.6c0-.9.25-1.5 1.5-1.5h1.6V4.4a21 21 0 00-2.4-.13c-2.4 0-4 1.45-4 4.1V10.5H7.5v3h2.7V21h3.3z"/>
+          </svg>
+        </a>
+      </div>
+      <div style="margin-top:10px;display:flex;justify-content:center;gap:14px;align-items:center;">
+        <a onclick="show('find-us')" style="font-size:11px;color:var(--muted);text-decoration:underline;cursor:pointer;text-underline-offset:3px;letter-spacing:0.2px;">See all our links →</a>
+        <span style="opacity:0.4;font-size:11px;">·</span>
+        <a onclick="shareApp()" style="font-size:11px;color:var(--rose-dark);text-decoration:underline;cursor:pointer;text-underline-offset:3px;letter-spacing:0.2px;font-weight:600;">Share the app</a>
+      </div>
     </div>
 
   </div>
@@ -2596,6 +2631,133 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
 </div>
 
 
+<!-- FIND US ON — public social links for MNC. Linked from the profile
+     footer. External taps open in the system browser via target=_blank
+     (same pattern used elsewhere in the app for booking + maps links). -->
+<div class="screen" id="find-us">
+  <div class="header">
+    <button class="back-btn" onclick="backSmart()">←</button>
+    <div style="text-align:center;"><div class="logo-mark" style="font-size:17px;">Find Us On</div></div>
+    <div style="width:36px;"></div>
+  </div>
+  <div class="scroll-content" style="padding-bottom:60px;">
+
+    <!-- Intro -->
+    <div style="padding:24px 20px 4px;text-align:center;">
+      <div style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--charcoal);margin-bottom:6px;">Follow My Nail Connection</div>
+      <div style="font-size:13px;color:var(--muted);line-height:1.6;max-width:320px;margin:0 auto;">Behind-the-scenes nail inspo, tech spotlights, and updates straight from MNC.</div>
+    </div>
+
+    <!-- Magnolia divider, same motif used elsewhere -->
+    <div aria-hidden="true" style="padding:18px 40px 6px;display:flex;align-items:center;justify-content:center;gap:14px;">
+      <span style="flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--rose-mid),transparent);"></span>
+      <svg viewBox="0 0 40 40" style="width:16px;height:16px;flex-shrink:0;opacity:0.7;" aria-hidden="true">
+        <g transform="translate(20 20)">
+          <ellipse cx="0" cy="-7" rx="2.5" ry="6" fill="#E8C5BC"/>
+          <ellipse cx="0" cy="-7" rx="2.5" ry="6" fill="#EDD0C8" transform="rotate(60)"/>
+          <ellipse cx="0" cy="-7" rx="2.5" ry="6" fill="#E8C5BC" transform="rotate(120)"/>
+          <ellipse cx="0" cy="-7" rx="2.5" ry="6" fill="#E4BFBA" transform="rotate(180)"/>
+          <ellipse cx="0" cy="-7" rx="2.5" ry="6" fill="#EDD0C8" transform="rotate(240)"/>
+          <ellipse cx="0" cy="-7" rx="2.5" ry="6" fill="#E8C5BC" transform="rotate(300)"/>
+          <circle cx="0" cy="0" r="2" fill="#D4A060"/>
+        </g>
+      </svg>
+      <span style="flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--rose-mid),transparent);"></span>
+    </div>
+
+    <!-- Social cards -->
+    <div style="padding:6px 20px 0;display:flex;flex-direction:column;gap:12px;">
+
+      <!-- Instagram -->
+      <a href="https://www.instagram.com/mynailconnection" target="_blank" rel="noopener noreferrer"
+         style="display:flex;align-items:center;gap:14px;padding:14px 16px;background:white;border:1px solid var(--border);border-radius:18px;text-decoration:none;color:inherit;box-shadow:0 1px 3px rgba(0,0,0,0.03);transition:transform 0.15s ease, box-shadow 0.15s ease;"
+         onmousedown="this.style.transform='scale(0.99)'" onmouseup="this.style.transform=''" onmouseleave="this.style.transform=''">
+        <div style="width:46px;height:46px;border-radius:12px;background:radial-gradient(circle at 30% 110%, #FED576 0%, #F47133 30%, #BC3081 60%, #4C63D2 100%);display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 8px rgba(188,48,129,0.25);">
+          <svg viewBox="0 0 24 24" style="width:22px;height:22px;stroke:white;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;">
+            <rect x="3" y="3" width="18" height="18" rx="5"/>
+            <circle cx="12" cy="12" r="4"/>
+            <circle cx="17.5" cy="6.5" r="1" fill="white" stroke="none"/>
+          </svg>
+        </div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:13px;font-weight:700;color:var(--charcoal);letter-spacing:0.2px;">Instagram</div>
+          <div style="font-size:13px;color:var(--muted);margin-top:2px;">@mynailconnection</div>
+        </div>
+        <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:var(--muted);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;opacity:0.6;"><path d="M9 18l6-6-6-6"/></svg>
+      </a>
+
+      <!-- TikTok -->
+      <a href="https://www.tiktok.com/@mynailconnection" target="_blank" rel="noopener noreferrer"
+         style="display:flex;align-items:center;gap:14px;padding:14px 16px;background:white;border:1px solid var(--border);border-radius:18px;text-decoration:none;color:inherit;box-shadow:0 1px 3px rgba(0,0,0,0.03);transition:transform 0.15s ease, box-shadow 0.15s ease;"
+         onmousedown="this.style.transform='scale(0.99)'" onmouseup="this.style.transform=''" onmouseleave="this.style.transform=''">
+        <div style="width:46px;height:46px;border-radius:12px;background:#0F0F0F;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,0.18);position:relative;">
+          <!-- TikTok 'note' glyph with subtle cyan/pink offsets -->
+          <svg viewBox="0 0 24 24" style="width:22px;height:22px;position:absolute;left:13px;top:12px;fill:#25F4EE;opacity:0.85;">
+            <path d="M14 4v9.2a3.5 3.5 0 11-3.5-3.5"/>
+          </svg>
+          <svg viewBox="0 0 24 24" style="width:22px;height:22px;position:absolute;left:11px;top:12px;fill:#FE2C55;opacity:0.85;">
+            <path d="M14 4v9.2a3.5 3.5 0 11-3.5-3.5"/>
+          </svg>
+          <svg viewBox="0 0 24 24" style="width:22px;height:22px;position:relative;fill:white;">
+            <path d="M14 3h2.5a4.5 4.5 0 004.5 4.5V10a7 7 0 01-4.5-1.6V15.5a5.5 5.5 0 11-5.5-5.5 5.6 5.6 0 011 .1v2.6a3 3 0 102 2.8V3z"/>
+          </svg>
+        </div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:13px;font-weight:700;color:var(--charcoal);letter-spacing:0.2px;">TikTok</div>
+          <div style="font-size:13px;color:var(--muted);margin-top:2px;">@mynailconnection</div>
+        </div>
+        <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:var(--muted);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;opacity:0.6;"><path d="M9 18l6-6-6-6"/></svg>
+      </a>
+
+      <!-- Facebook -->
+      <a href="https://www.facebook.com/profile.php?id=61570995887375" target="_blank" rel="noopener noreferrer"
+         style="display:flex;align-items:center;gap:14px;padding:14px 16px;background:white;border:1px solid var(--border);border-radius:18px;text-decoration:none;color:inherit;box-shadow:0 1px 3px rgba(0,0,0,0.03);transition:transform 0.15s ease, box-shadow 0.15s ease;"
+         onmousedown="this.style.transform='scale(0.99)'" onmouseup="this.style.transform=''" onmouseleave="this.style.transform=''">
+        <div style="width:46px;height:46px;border-radius:12px;background:#1877F2;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 8px rgba(24,119,242,0.25);">
+          <svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:white;">
+            <path d="M13.5 21v-7.5h2.5l.4-3h-2.9V8.6c0-.9.25-1.5 1.5-1.5h1.6V4.4a21 21 0 00-2.4-.13c-2.4 0-4 1.45-4 4.1V10.5H7.5v3h2.7V21h3.3z"/>
+          </svg>
+        </div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:13px;font-weight:700;color:var(--charcoal);letter-spacing:0.2px;">Facebook</div>
+          <div style="font-size:13px;color:var(--muted);margin-top:2px;">@mynailconnection</div>
+        </div>
+        <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:var(--muted);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;opacity:0.6;"><path d="M9 18l6-6-6-6"/></svg>
+      </a>
+
+    </div>
+
+    <!-- Tagline -->
+    <div style="text-align:center;padding:22px 30px 0;font-size:11.5px;color:var(--muted);font-style:italic;line-height:1.6;">
+      Tag <span style="color:var(--rose-dark);font-style:normal;font-weight:600;">@mynailconnection</span> in your work — we love resharing!
+    </div>
+
+    <!-- Share the app — uses the native OS share sheet via navigator.share()
+         where available (iOS, Android, Capacitor WebViews), falls back to
+         clipboard copy. -->
+    <div style="text-align:center;padding:24px 20px 0;">
+      <button onclick="shareApp()" type="button"
+              style="display:inline-flex;align-items:center;gap:10px;padding:12px 22px;border:none;border-radius:100px;background:linear-gradient(135deg,var(--rose-dark),var(--rose));color:white;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:600;letter-spacing:0.3px;cursor:pointer;box-shadow:0 4px 14px rgba(178,110,95,0.32),0 1px 3px rgba(0,0,0,0.12);">
+        <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;">
+          <path d="M4 12v7a2 2 0 002 2h12a2 2 0 002-2v-7"/>
+          <polyline points="16 6 12 2 8 6"/>
+          <line x1="12" y1="2" x2="12" y2="15"/>
+        </svg>
+        Share My Nail Connection
+      </button>
+      <div style="font-size:11px;color:var(--muted);margin-top:10px;font-style:italic;">Spread the word — your friends will thank you 🌸</div>
+    </div>
+
+    <div style="height:30px;"></div>
+  </div>
+  <div class="bottom-nav">
+    <div class="nav-item" onclick="show('home')"><span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg></span><span class="nav-label">Home</span></div>
+    <div class="nav-item" onclick="navToProfile()"><span class="nav-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></span><span class="nav-label">Profile</span></div>
+    <div class="nav-item" onclick="doSignOut()" style="opacity:0.55;" title="Sign Out"><span class="nav-icon"><svg viewBox="0 0 24 24" style="width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span><span class="nav-label">Sign Out</span></div>
+  </div>
+</div>
+
+
 <!-- PROFILE -->
 <div class="screen" id="profile-screen">
   <!-- Polished header with identity baked in. Softer spacing, larger
@@ -2757,6 +2919,8 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
          underlined links instead of big bordered buttons. -->
     <div style="text-align:center;margin:28px 20px 8px;font-size:11.5px;color:var(--muted);line-height:1.7;">
       <a onclick="replayTutorial()" style="color:var(--muted);text-decoration:underline;cursor:pointer;text-underline-offset:3px;">Replay tutorial</a>
+      <span style="margin:0 8px;opacity:0.5;">·</span>
+      <a onclick="show('find-us')" style="color:var(--muted);text-decoration:underline;cursor:pointer;text-underline-offset:3px;">Find us on social</a>
       <span style="margin:0 8px;opacity:0.5;">·</span>
       <span style="font-style:italic;">App acting up? <a onclick="openContactAnne()" style="color:var(--rose);text-decoration:underline;cursor:pointer;text-underline-offset:3px;font-style:normal;font-weight:500;">Nudge support</a>.</span>
     </div>
@@ -4094,6 +4258,49 @@ function replayTutorial() {
   const tutRole = role || 'client';
   showTutorial(tutRole);
 }
+
+// Share the app — uses the OS share sheet via navigator.share() when
+// available (iOS Safari, Android Chrome, Capacitor WebViews), and falls
+// back to copying the link to the clipboard otherwise. The user-cancel
+// case throws AbortError; we swallow it silently so it doesn't trigger
+// the "couldn't share" path. Triggered from any "Share the app" button
+// in the UI (home screen, find-us page, etc).
+async function shareApp() {
+  const shareData = {
+    title: 'My Nail Connection',
+    text: 'Find amazing nail techs near you on My Nail Connection 💅',
+    url: 'https://mynailconnection.com'
+  };
+  try {
+    if (navigator.share) {
+      await navigator.share(shareData);
+      return;
+    }
+  } catch (e) {
+    // AbortError = user dismissed the share sheet; not an error.
+    if (e && e.name === 'AbortError') return;
+    // Other errors fall through to clipboard fallback below.
+  }
+  // Fallback: copy the link.
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(shareData.url);
+      showToast('Link copied — paste it anywhere to share!');
+    } else {
+      // Last-resort fallback for very old browsers.
+      const ta = document.createElement('textarea');
+      ta.value = shareData.url;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      showToast('Link copied — paste it anywhere to share!');
+    }
+  } catch (e) {
+    showToast('Couldn\'t copy — the link is mynailconnection.com');
+  }
+}
+window.shareApp = shareApp;
 
 function closeTutorial() {
   document.getElementById('tutorial-overlay').style.display = 'none';

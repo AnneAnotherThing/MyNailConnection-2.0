@@ -233,4 +233,3 @@ copy_if_exists sw.js                   "$GH/app/sw.js"
 echo "mynailconnection.com" > "$GH/CNAME"
 
 echo "✓ deploy/ synced from MNC root at $(date '+%Y-%m-%d %H:%M:%S')"
-
