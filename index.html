@@ -2209,7 +2209,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
                 border:1px solid var(--rose-mid);cursor:pointer;
                 box-shadow:0 2px 10px rgba(196,120,106,0.14);">
       <div style="font-family:'Playfair Display',serif;font-size:17px;font-weight:600;color:var(--rose-dark);margin-bottom:4px;">Post your first look 🌸</div>
-      <div style="font-size:12.5px;color:var(--charcoal);line-height:1.45;">Your next 5 are free and live in your portfolio forever. Start your reputation — every new photo lights up the feed for an hour so clients see your work fresh.</div>
+      <div style="font-size:12.5px;color:var(--charcoal);line-height:1.45;">Your first 5 are on us — they live in your portfolio forever <i>and</i> light up the live feed so clients discover your fresh work. After that, <b style="color:var(--rose-dark);">Glow Up</b> keeps your feed presence going (Spotlight credits grow your portfolio).</div>
     </div>
 
     <!-- PRIMARY ACTIONS — Post and Upload live side by side so the two
@@ -2359,7 +2359,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
         <div style="flex:1;min-width:0;">
           <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px;"><span id="myph-paused-count">0</span> photos paused</div>
           <div style="font-size:12.5px;color:var(--charcoal);line-height:1.5;margin-bottom:10px;">Your Glow Up ended, so photos beyond your free 5 are hidden from your profile. Nothing's deleted — reactivate Glow Up and everything comes right back.</div>
-          <button type="button" onclick="purchaseUnlimited()" style="padding:8px 16px;border-radius:100px;border:none;background:var(--rose);color:white;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;">Resume Glow Up — $10/mo</button>
+          <button type="button" onclick="purchaseUnlimited()" style="padding:8px 16px;border-radius:100px;border:none;background:var(--rose);color:white;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;">Resume Glow Up — $10.99/mo</button>
         </div>
       </div>
     </div>
@@ -2558,7 +2558,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
         <div style="border:1.5px solid var(--charcoal);border-radius:14px;padding:14px;background:var(--charcoal);">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
             <div style="font-size:15px;font-weight:700;color:white;">Glow Up</div>
-            <div style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.8);">$10 / month</div>
+            <div style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.8);">$10.99 / month</div>
           </div>
           <div style="font-size:12px;color:rgba(255,255,255,0.75);line-height:1.5;"><b style="color:white;">Keep the feed fresh all month long.</b> Up to 40 uploads a month &mdash; plenty for a new look every day, with room to spare for busy weeks. Every photo lands in front of clients browsing fresh work, and your portfolio grows with it. Refills on your monthly anniversary.</div>
           <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-top:6px;">Cancel any time</div>
@@ -2940,11 +2940,19 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       </svg>
       <span style="flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--rose-mid),transparent);"></span>
     </div>
-    <div style="padding:14px 20px 24px;text-align:center;">
+    <div style="padding:14px 20px 4px;text-align:center;">
       <button type="button" onclick="doSignOut()" style="padding:10px 22px;border-radius:100px;border:1.5px solid var(--border);background:white;color:var(--muted);font-size:12.5px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;display:inline-flex;align-items:center;gap:7px;letter-spacing:0.3px;">
         <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
         Sign Out
       </button>
+    </div>
+    <!-- Account deletion entry point — required to be findable in-app per
+         Apple App Store Guideline 5.1.1(v). Kept low-prominence (small,
+         muted, plain text) so it's not accidentally tapped, but visible
+         enough that a reviewer can locate it without searching. The
+         destructive flow itself lives in #delete-account-modal. -->
+    <div style="padding:8px 20px 24px;text-align:center;">
+      <a onclick="openDeleteAccountModal()" style="font-size:11px;color:var(--muted);text-decoration:underline;cursor:pointer;text-underline-offset:3px;letter-spacing:0.2px;opacity:0.75;">Delete my account</a>
     </div>
   </div><!-- /.scroll-content — closes BEFORE .bottom-nav so the nav stays pinned to the bottom of the screen, not scrolling with content -->
   <div class="bottom-nav">
@@ -3132,6 +3140,67 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
           <div style="font-size:11px;color:var(--muted);margin-top:2px;">People on the pre-launch list</div>
         </div>
         <div id="stat-waitlist-count" style="font-family:'Playfair Display',serif;font-size:30px;font-weight:700;color:var(--rose-dark);line-height:1;">—</div>
+      </div>
+
+      <!-- ░░░ Subscription source + lifetime purchase counts ░░░
+           Reads from techs.subscription_source + techs.glow_up_months_purchased
+           + techs.spotlight_*_purchased_count (added in subscription-source-
+           tracking-migration.sql). Updated by webhooks: stripe-webhook for
+           Stripe + revenuecat-webhook for Apple/Google IAP. Lets Anne see
+           at a glance which platform is driving subscriptions and what the
+           lifetime purchase mix looks like. -->
+      <div style="background:white;border:1px solid var(--border);border-radius:16px;padding:14px 16px;margin-bottom:14px;box-shadow:0 2px 10px rgba(44,36,32,0.04);">
+        <div style="font-size:11px;font-weight:600;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:12px;">Subscriptions by source</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;">
+          <div style="background:linear-gradient(135deg,#635BFF 0%,#4D45D9 100%);border-radius:12px;padding:10px 12px;color:white;">
+            <div style="font-size:9.5px;letter-spacing:1.2px;font-weight:700;text-transform:uppercase;opacity:0.85;">Stripe (web/Android)</div>
+            <div id="stat-sub-stripe" style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700;margin-top:2px;line-height:1;">—</div>
+          </div>
+          <div style="background:linear-gradient(135deg,#1D1D1F 0%,#000 100%);border-radius:12px;padding:10px 12px;color:white;">
+            <div style="font-size:9.5px;letter-spacing:1.2px;font-weight:700;text-transform:uppercase;opacity:0.85;">Apple IAP</div>
+            <div id="stat-sub-apple" style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700;margin-top:2px;line-height:1;">—</div>
+          </div>
+          <div style="background:linear-gradient(135deg,#34A853 0%,#1B7430 100%);border-radius:12px;padding:10px 12px;color:white;">
+            <div style="font-size:9.5px;letter-spacing:1.2px;font-weight:700;text-transform:uppercase;opacity:0.85;">Google Play</div>
+            <div id="stat-sub-google" style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700;margin-top:2px;line-height:1;">—</div>
+          </div>
+          <div style="background:linear-gradient(135deg,#E8C890 0%,#D4A060 100%);border-radius:12px;padding:10px 12px;color:#3D2508;">
+            <div style="font-size:9.5px;letter-spacing:1.2px;font-weight:700;text-transform:uppercase;opacity:0.85;">Comped</div>
+            <div id="stat-sub-comp" style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700;margin-top:2px;line-height:1;">—</div>
+          </div>
+        </div>
+        <div id="stat-sub-total" style="font-size:12px;color:var(--muted);text-align:center;padding-top:4px;border-top:1px solid var(--border);"><b style="color:var(--rose-dark);">—</b> active Glow Up subscribers total</div>
+      </div>
+
+      <!-- Lifetime purchase counts — totals only go up. Glow Up months
+           accumulate one per subscriber per month; Spotlight bundles
+           accumulate one per purchase. Useful for revenue-back-of-napkin. -->
+      <div style="background:white;border:1px solid var(--border);border-radius:16px;padding:14px 16px;margin-bottom:14px;box-shadow:0 2px 10px rgba(44,36,32,0.04);">
+        <div style="font-size:11px;font-weight:600;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:12px;">Lifetime purchases</div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--rose-light);border-radius:10px;">
+            <div>
+              <div style="font-size:13px;font-weight:600;color:var(--rose-dark);">Glow Up months billed</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:1px;">All-time, all sources · est. <span id="stat-glow-up-revenue">$—</span> gross</div>
+            </div>
+            <div id="stat-glow-up-months" style="font-family:'Playfair Display',serif;font-size:26px;font-weight:700;color:var(--rose-dark);line-height:1;">—</div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:#F5EDE8;border-radius:10px;">
+            <div>
+              <div style="font-size:13px;font-weight:600;color:var(--charcoal);">Spotlight: 1 Photo</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:1px;">$0.99 each · est. <span id="stat-spot1-revenue">$—</span> gross</div>
+            </div>
+            <div id="stat-spot1-count" style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--charcoal);line-height:1;">—</div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:#F5EDE8;border-radius:10px;">
+            <div>
+              <div style="font-size:13px;font-weight:600;color:var(--charcoal);">Spotlight: 10 Photos</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:1px;">$4.99 each · est. <span id="stat-spot10-revenue">$—</span> gross</div>
+            </div>
+            <div id="stat-spot10-count" style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--charcoal);line-height:1;">—</div>
+          </div>
+        </div>
+        <div style="font-size:10.5px;color:var(--muted);text-align:center;font-style:italic;margin-top:10px;line-height:1.45;">Gross estimates do not subtract Stripe (~3%) or Apple/Google (15-30%) fees.</div>
       </div>
 
       <button onclick="loadAdminStats()" style="width:100%;padding:11px;border:none;border-radius:12px;background:white;color:var(--rose-dark);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;border:1px solid var(--border);">Refresh</button>
@@ -4088,16 +4157,33 @@ function _stripeLaunch(link, label) {
   setTimeout(() => showToast(label || 'Complete payment in browser, then return here'), 500);
 }
 
-function purchasePhotos(qty) {
+async function purchasePhotos(qty) {
+  // iOS: route through Apple In-App Purchase via RevenueCat. Required by
+  // Apple Guideline 3.1.1 — in-app subscriptions/consumables must use IAP,
+  // not external payment links.
+  if (isIOS()) {
+    const productId = qty === 1 ? IAP_PRODUCT_SPOTLIGHT_1 : IAP_PRODUCT_SPOTLIGHT_10;
+    closeUpgradeModal();
+    const result = await purchaseIAP(productId);
+    if (result.ok) {
+      showToast(qty === 1 ? 'Photo credit added.' : '10 photo credits added.');
+      // Server-side webhook updates the techs row authoritatively; give it
+      // a beat then re-fetch tier so the UI reflects the new credit count.
+      setTimeout(function(){ try { loadTechTier(currentUserEmail); } catch(_){} }, 2000);
+    } else if (result.reason !== 'cancelled') {
+      showToast('Purchase failed. Please try again.');
+    }
+    return;
+  }
+  // Web + Android: existing Stripe Payment Link flow
   const link = qty === 1
     ? _stripeLink('link_1_photo', 'link_1_photo_test')
     : _stripeLink('link_10_photos', 'link_10_photos_test');
   _stripeLaunch(link, 'Complete payment in browser, then return here to upload');
 }
 
-function purchaseUnlimited() {
-  // Kept name for backward-compat call sites; actually launches Glow Up subscription
-  // (5 new photo slots/week, Sunday reset) under the 2026-04-22 pricing pivot.
+async function purchaseUnlimited() {
+  // Kept name for backward-compat call sites; actually launches Glow Up subscription.
   // While GLOW_UP_ENABLED is false, block all entry points — modal card is
   // hidden but the Resume-Glow-Up banner at #myph-paused-banner also routes
   // here, so we belt-and-suspenders it. Toast explains so users whose banner
@@ -4106,6 +4192,19 @@ function purchaseUnlimited() {
     showToast("Glow Up subscriptions are paused while we finish the update — one-time photo packs still work.");
     return;
   }
+  // iOS: route through Apple IAP via RevenueCat (required by Apple 3.1.1)
+  if (isIOS()) {
+    closeUpgradeModal();
+    const result = await purchaseIAP(IAP_PRODUCT_GLOW_UP);
+    if (result.ok) {
+      showToast("You're on Glow Up — post a new look every day, every upload goes to the feed!");
+      setTimeout(function(){ try { loadTechTier(currentUserEmail); } catch(_){} }, 2000);
+    } else if (result.reason !== 'cancelled') {
+      showToast('Subscription failed. Please try again.');
+    }
+    return;
+  }
+  // Web + Android: existing Stripe Payment Link flow
   _stripeLaunch(_stripeLink('link_glow_up', 'link_glow_up_test'), 'Complete payment in browser, then return here');
 }
 
@@ -4302,6 +4401,258 @@ async function shareApp() {
 }
 window.shareApp = shareApp;
 
+// ── Account deletion ─────────────────────────────────────────────────────
+// Required for Apple App Store Guideline 5.1.1(v) — apps that allow
+// signup must allow in-app account deletion that doesn't require email,
+// phone, or other customer-service rounds.
+//
+// Flow:
+//   openDeleteAccountModal() → user reviews the warning → user types
+//   "DELETE" to confirm (anti-fat-finger guard) → confirmDeleteAccount()
+//   calls the delete-account Edge Function → on success, signs out
+//   locally and routes to the splash/auth screen.
+//
+// Why the typed confirmation: Apple allows confirmation steps to prevent
+// accidental deletion. A typed word is the strongest signal-of-intent
+// pattern that doesn't require multi-screen flows. (Per Apple: "apps may
+// include confirmation steps to prevent users from accidentally deleting
+// their account.")
+function openDeleteAccountModal() {
+  // Reset modal state on every open.
+  var inp = document.getElementById('delete-account-confirm-input');
+  if (inp) inp.value = '';
+  var btn = document.getElementById('delete-account-confirm-btn');
+  if (btn) {
+    btn.disabled = true;
+    btn.style.opacity = '0.5';
+    btn.style.cursor = 'not-allowed';
+    btn.textContent = 'Permanently delete my account';
+  }
+  var err = document.getElementById('delete-account-error');
+  if (err) err.style.display = 'none';
+  var modal = document.getElementById('delete-account-modal');
+  if (modal) modal.style.display = 'flex';
+  // Tiny defer so the modal renders before focus moves into the input.
+  setTimeout(function(){ if (inp) try { inp.focus(); } catch(_){} }, 50);
+}
+window.openDeleteAccountModal = openDeleteAccountModal;
+
+// Live-validate the typed confirmation. Enables the destructive button
+// only when the user types "DELETE" exactly (case-sensitive — caps lock
+// is a meaningful intent signal here).
+function _validateDeleteAccountInput() {
+  var inp = document.getElementById('delete-account-confirm-input');
+  var btn = document.getElementById('delete-account-confirm-btn');
+  if (!inp || !btn) return;
+  var ok = (inp.value || '').trim() === 'DELETE';
+  btn.disabled = !ok;
+  btn.style.opacity = ok ? '1' : '0.5';
+  btn.style.cursor = ok ? 'pointer' : 'not-allowed';
+}
+window._validateDeleteAccountInput = _validateDeleteAccountInput;
+
+async function confirmDeleteAccount() {
+  var btn = document.getElementById('delete-account-confirm-btn');
+  var err = document.getElementById('delete-account-error');
+  if (err) err.style.display = 'none';
+  if (btn) {
+    btn.disabled = true;
+    btn.style.opacity = '0.6';
+    btn.style.cursor = 'wait';
+    btn.textContent = 'Deleting…';
+  }
+  try {
+    var token = window._mncAccessToken || '';
+    if (!token) throw new Error('not signed in');
+    var res = await fetch(SUPABASE_URL + '/functions/v1/delete-account', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + token,
+        'apikey': SUPABASE_ANON_KEY
+      }
+    });
+    var body = await res.json().catch(function(){ return {}; });
+    if (!res.ok || !body.ok) {
+      throw new Error(body.error || ('HTTP ' + res.status));
+    }
+    // Success — clear all local state and route out.
+    try { localStorage.removeItem('mnc_session'); } catch(_) {}
+    try { localStorage.removeItem('mnc_persisted_role'); } catch(_) {}
+    try { sessionStorage.clear(); } catch(_) {}
+    window._mncAccessToken = null;
+    currentUserEmail = '';
+    if (typeof currentUser !== 'undefined') currentUser = null;
+    // Hide the modal so the splash isn't covered by a dim overlay.
+    var modal = document.getElementById('delete-account-modal');
+    if (modal) modal.style.display = 'none';
+    // Show a brief confirmation, then send them to auth.
+    showToast('Account deleted. Thanks for trying MNC.');
+    setTimeout(function(){
+      try { show('auth'); } catch(_) { try { show('splash'); } catch(__){} }
+    }, 600);
+  } catch (e) {
+    if (btn) {
+      btn.disabled = false;
+      btn.style.opacity = '1';
+      btn.style.cursor = 'pointer';
+      btn.textContent = 'Permanently delete my account';
+    }
+    if (err) {
+      err.textContent = 'Could not delete account. ' + (e && e.message ? e.message : '') + ' Please try again or email anne@mynailconnection.com.';
+      err.style.display = 'block';
+    }
+  }
+}
+window.confirmDeleteAccount = confirmDeleteAccount;
+
+function closeDeleteAccountModal() {
+  var modal = document.getElementById('delete-account-modal');
+  if (modal) modal.style.display = 'none';
+}
+window.closeDeleteAccountModal = closeDeleteAccountModal;
+
+// ── iOS detection + RevenueCat IAP ───────────────────────────────────────
+// Apple App Store Guideline 3.1.1 requires that subscriptions unlocking
+// in-app features on iOS use Apple In-App Purchase. We use RevenueCat as
+// the SDK wrapper because it handles receipt validation, multi-platform
+// reconciliation, and subscription state out of the box.
+//
+// Platform routing pattern used throughout the purchase code paths:
+//   if (isIOS()) { route to native IAP via RevenueCat }
+//   else        { route to existing Stripe Payment Link }
+//
+// Web and Android stay on Stripe (cheapest fees, existing infrastructure).
+// iOS uses native IAP per Apple's rules.
+//
+// RevenueCat Product IDs MUST match what's configured in App Store Connect:
+//   com.mynailconnection.app.glow_up_monthly  ($10.99/mo subscription)
+//   com.mynailconnection.app.spotlight_1      ($0.99 consumable)
+//   com.mynailconnection.app.spotlight_10     ($4.99 consumable)
+//
+// Public iOS SDK key from RevenueCat dashboard → API keys:
+const REVENUECAT_IOS_PUBLIC_KEY = 'appl_vnRanZywThaWNJjqbZSlbLUJKfE';
+const IAP_PRODUCT_GLOW_UP     = 'com.mynailconnection.app.glow_up_monthly';
+const IAP_PRODUCT_SPOTLIGHT_1 = 'com.mynailconnection.app.spotlight_1';
+const IAP_PRODUCT_SPOTLIGHT_10= 'com.mynailconnection.app.spotlight_10';
+
+// Platform check: TRUE only when running inside the iOS Capacitor shell
+// (not Safari on iPhone, not the PWA). All Apple IAP routing keys off this.
+function isIOS() {
+  try {
+    return !!(window.Capacitor &&
+              window.Capacitor.isNativePlatform &&
+              window.Capacitor.isNativePlatform() &&
+              window.Capacitor.getPlatform &&
+              window.Capacitor.getPlatform() === 'ios');
+  } catch(_) { return false; }
+}
+window.isIOS = isIOS;
+
+// Initialize RevenueCat. No-op on non-iOS platforms (Stripe handles those).
+// Called once per app load AFTER sign-in (we need the user_id to identify
+// the subscriber to RevenueCat). Idempotent — safe to call multiple times.
+let _rcInitialized = false;
+async function initRevenueCat() {
+  if (!isIOS()) return;
+  if (_rcInitialized) return;
+  // Plugin loads as a Capacitor plugin via the global Purchases object
+  // (set up by @revenuecat/purchases-capacitor at runtime). On non-iOS or
+  // if the plugin isn't bundled (web preview), it will be undefined.
+  const Purchases = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Purchases;
+  if (!Purchases) {
+    console.warn('RevenueCat plugin not available; IAP disabled in this build');
+    return;
+  }
+  try {
+    // Use the auth.users.id as the App User ID so RevenueCat customers
+    // map 1:1 to Supabase auth users. Same ID across renewals + reinstalls
+    // means subscription state survives the user wiping/restoring.
+    const appUserId = (currentUser && currentUser.id) || currentUserEmail || null;
+    await Purchases.configure({
+      apiKey: REVENUECAT_IOS_PUBLIC_KEY,
+      appUserID: appUserId
+    });
+    _rcInitialized = true;
+    if (window.__MNC_DEV__) console.log('RevenueCat configured for', appUserId);
+  } catch (e) {
+    console.warn('RevenueCat configure failed:', e);
+  }
+}
+window.initRevenueCat = initRevenueCat;
+
+// Purchase a product through Apple IAP via RevenueCat. Returns a promise
+// that resolves with { ok, customerInfo, productId } on success, or
+// { ok: false, reason, error } on failure / cancellation.
+//
+// On success the RevenueCat webhook (revenuecat-webhook Edge Function)
+// will independently fire a server-to-server event that updates the
+// techs row (subscription_source, subscription_tier, photo_credits, the
+// per-product lifetime counters). The client-side response is for UI
+// feedback only — DO NOT trust it for granting entitlement; let the
+// server-side webhook be the source of truth.
+async function purchaseIAP(productId) {
+  await initRevenueCat();
+  const Purchases = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Purchases;
+  if (!Purchases) return { ok: false, reason: 'plugin_unavailable' };
+  try {
+    // Fetch the StoreProduct first (RevenueCat needs it to call purchase).
+    const offerings = await Purchases.getOfferings();
+    let storeProduct = null;
+    // Try the "current" offering first (RevenueCat's recommended structure)
+    if (offerings && offerings.current && offerings.current.availablePackages) {
+      const pkg = offerings.current.availablePackages.find(p => p.product && p.product.identifier === productId);
+      if (pkg) {
+        const result = await Purchases.purchasePackage({ aPackage: pkg });
+        return { ok: true, customerInfo: result.customerInfo, productId };
+      }
+    }
+    // Fallback: direct product purchase by ID (used for one-off consumables
+    // that aren't grouped in an offering)
+    const products = await Purchases.getProducts({ productIdentifiers: [productId] });
+    if (products && products.products && products.products.length > 0) {
+      const result = await Purchases.purchaseStoreProduct({ product: products.products[0] });
+      return { ok: true, customerInfo: result.customerInfo, productId };
+    }
+    return { ok: false, reason: 'product_not_found', productId };
+  } catch (e) {
+    // userCancelled is the most common path — treat as soft failure
+    if (e && (e.userCancelled || (e.code === '1') || /cancel/i.test(e.message || ''))) {
+      return { ok: false, reason: 'cancelled' };
+    }
+    return { ok: false, reason: 'error', error: String(e && e.message || e) };
+  }
+}
+window.purchaseIAP = purchaseIAP;
+
+// Restore previously-purchased subscriptions/non-consumables. Required by
+// Apple — the App Store reviewer expects a "Restore Purchases" path.
+// For MNC this is hooked into the upgrade modal as a small "Restore
+// purchases" link. On success, the RevenueCat webhook fires and the
+// techs row is refreshed via loadTechTier().
+async function restoreIAPPurchases() {
+  if (!isIOS()) {
+    showToast('Restore purchases is only needed in the iOS app.');
+    return;
+  }
+  await initRevenueCat();
+  const Purchases = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Purchases;
+  if (!Purchases) {
+    showToast('Couldn\'t reach the App Store. Please try again.');
+    return;
+  }
+  try {
+    const result = await Purchases.restorePurchases();
+    showToast('Purchases restored. Refreshing your account…');
+    // Give the RevenueCat webhook a few seconds to update Supabase before
+    // we re-fetch the tier; otherwise the user sees stale state.
+    setTimeout(function(){ try { loadTechTier(); } catch(_){} }, 2500);
+  } catch (e) {
+    showToast('Restore failed. ' + (e && e.message ? e.message : 'Please try again.'));
+  }
+}
+window.restoreIAPPurchases = restoreIAPPurchases;
+
 function closeTutorial() {
   document.getElementById('tutorial-overlay').style.display = 'none';
   // Mark as seen for this role
@@ -4387,7 +4738,7 @@ const ANNE_USER_ID = 'a2f3d32e-1121-43f1-8649-be5c5e460443';
 // 1. Create products in Stripe Dashboard → Products
 // 2. Create Payment Links for each, paste URLs below
 // 3. Add ?client_reference_id={email} to each link so webhook knows which tech
-// Glow Up ($10/mo subscription) is visible on the upgrade modal. The
+// Glow Up ($10.99/mo subscription) is visible on the upgrade modal. The
 // 2026-04-23 pivot moved us to monthly cadence: schema columns
 // period_upload_count + period_reset_at on techs, consume_upload_slot
 // RPC gating every upload with a 40-photo monthly cap, webhook
@@ -4418,12 +4769,18 @@ const STRIPE_CONFIG = {
   link_1_photo:   'https://buy.stripe.com/28E4gycjubtr2KA2xtgEg00',
   // Payment link for 10 photo credits ($5 bundle, portfolio-only) — Live
   link_10_photos: 'https://buy.stripe.com/cNi8wOfvG7db4SI3BxgEg01',
-  // Payment link for Glow Up subscription ($10/mo = 40 photos/month, monthly rolling reset, feed-eligible) — Live
+  // Payment link for Glow Up subscription ($10.99/mo = 40 photos/month, monthly rolling reset, feed-eligible) — Live
+  // Price bumped from $10 to $10.99 on 2026-04-28 to match Apple IAP tier 11
+  // (Apple's available tiers don't include $10; nearest are $9.99 or $10.99).
+  // We picked $10.99 across all platforms so the Stripe / Apple / Google
+  // experience reads identically. NOTE: you must create a NEW Stripe Payment
+  // Link for $10.99 and paste its URL below — existing $10 subscribers stay
+  // grandfathered on the old link's price (Stripe doesn't auto-bump active subs).
   // NOTE: new product+price created 2026-04-23 (the previous $9 price
   // had been used for internal testing). Success URL on the Payment
   // Link is set to https://mynailconnection.com/app/?welcome=glow-up
   // so returning customers land on the in-app welcome modal.
-  link_glow_up:   'https://buy.stripe.com/cNifZg6ZaapngBq5JFgEg03',
+  link_glow_up:   'https://buy.stripe.com/8x2fZgabm9ljgBq9ZVgEg04',
   // ── TEST-MODE PAYMENT LINKS ─────────────────────────────────────────────
   // Paste in from Stripe Dashboard → flip "Viewing test data" → Payment
   // Links. Test links start with https://buy.stripe.com/test_... If left
@@ -4431,7 +4788,7 @@ const STRIPE_CONFIG = {
   // you know. Filled in 2026-04-22 after Anne set up the test products.
   link_1_photo_test:   'https://buy.stripe.com/test_28E14pfiz3OP0x1fZK5kk03',
   link_10_photos_test: 'https://buy.stripe.com/test_9B6eVf0nF5WX6Vp5l65kk04',
-  // Glow Up test link refreshed 2026-04-23 for the new $10/mo monthly-
+  // Glow Up test link refreshed 2026-04-23 for the new $10.99/mo monthly-
   // cadence product. The earlier test link (…5kk05) was against the
   // old $9/5-weekly model and shouldn't be reused.
   link_glow_up_test:   'https://buy.stripe.com/test_5kQ6oJ9Yf3OPa7B4h25kk06',
@@ -5125,6 +5482,7 @@ async function signInWithEmail(email, password) {
     updateAvatar();
     loadUserAvailability(emailVal);
     initCapacitorPush(); // init native push if in app shell
+    initRevenueCat();    // init Apple IAP via RevenueCat (iOS only, no-op elsewhere)
     var needsPasswordChange = await checkFirstLogin(emailVal);
     if (needsPasswordChange) { show('change-password-screen'); } else { await showCorrectHome(); }
   } catch(e) {
@@ -14552,9 +14910,76 @@ async function loadAdminStats() {
   // ── Waitlist total (just the count, no list or source breakdown) ─────
   setTxt('stat-waitlist-count', ((waitlistRecent || []).length).toLocaleString());
 
+  // ── Subscription source + lifetime purchase stats ────────────────────
+  // Fires in parallel; doesn't block the rest of the dashboard from
+  // rendering. Reads techs row with the columns added in
+  // subscription-source-tracking-migration.sql. Aggregates client-side
+  // since the dataset is small (~hundreds of rows expected at most for
+  // the foreseeable future); switch to an RPC if this ever gets slow.
+  loadSubscriptionStats(h).catch(function(e){ try { console.warn('subscription stats:', e); } catch(_){} });
+
   // ── Last-updated stamp ────────────────────────────────────────────────
   const pad2 = n => n < 10 ? '0' + n : '' + n;
   setTxt('stats-updated', pad2(now.getHours()) + ':' + pad2(now.getMinutes()));
+}
+
+// Subscription source breakdown + lifetime purchase totals. Pulls just
+// the columns we need from techs and rolls them up. Kept separate from
+// loadAdminStats() so a slow query (or a missing column on a stale DB)
+// doesn't take down the whole dashboard.
+async function loadSubscriptionStats(headers) {
+  const setTxt = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+  const GLOW_UP_PRICE  = 10.99;
+  const SPOT1_PRICE    = 0.99;
+  const SPOT10_PRICE   = 4.99;
+  try {
+    // Pull the subscription-relevant columns. Filter to only the columns
+    // we need to keep the response small.
+    const url = SUPABASE_URL + '/rest/v1/techs'
+              + '?select=subscription_source,subscription_tier,glow_up_months_purchased,spotlight_1_purchased_count,spotlight_10_purchased_count';
+    const res = await fetch(url, { headers: headers });
+    if (!res.ok) {
+      // Most likely cause: SQL migration hasn't been run yet, so the new
+      // columns don't exist and PostgREST throws. Show a helpful default
+      // and return — don't break the dashboard.
+      setTxt('stat-sub-total', 'Run sql/subscription-source-tracking-migration.sql to enable');
+      return;
+    }
+    const techs = await res.json();
+    const sources = { stripe: 0, apple_iap: 0, google_play: 0, comp: 0 };
+    let glowUpMonths = 0, spot1Count = 0, spot10Count = 0, paidTotal = 0;
+    (techs || []).forEach(function(t){
+      if (t.subscription_tier === 'paid') {
+        paidTotal++;
+        var src = (t.subscription_source || '').toLowerCase();
+        if (sources.hasOwnProperty(src)) sources[src]++;
+      }
+      glowUpMonths += (t.glow_up_months_purchased || 0);
+      spot1Count   += (t.spotlight_1_purchased_count || 0);
+      spot10Count  += (t.spotlight_10_purchased_count || 0);
+    });
+    setTxt('stat-sub-stripe', sources.stripe.toLocaleString());
+    setTxt('stat-sub-apple',  sources.apple_iap.toLocaleString());
+    setTxt('stat-sub-google', sources.google_play.toLocaleString());
+    setTxt('stat-sub-comp',   sources.comp.toLocaleString());
+    var totalEl = document.getElementById('stat-sub-total');
+    if (totalEl) {
+      totalEl.innerHTML = '<b style="color:var(--rose-dark);">' + paidTotal.toLocaleString()
+                        + '</b> active Glow Up subscribers total';
+    }
+    setTxt('stat-glow-up-months', glowUpMonths.toLocaleString());
+    setTxt('stat-spot1-count',    spot1Count.toLocaleString());
+    setTxt('stat-spot10-count',   spot10Count.toLocaleString());
+    // Gross revenue estimates (no fee deductions). Useful as a quick eye
+    // on lifetime momentum; for accounting use Stripe Dashboard / App
+    // Store Connect Sales reports.
+    setTxt('stat-glow-up-revenue', '$' + (glowUpMonths * GLOW_UP_PRICE).toFixed(2));
+    setTxt('stat-spot1-revenue',   '$' + (spot1Count   * SPOT1_PRICE  ).toFixed(2));
+    setTxt('stat-spot10-revenue',  '$' + (spot10Count  * SPOT10_PRICE ).toFixed(2));
+  } catch (e) {
+    var totalEl2 = document.getElementById('stat-sub-total');
+    if (totalEl2) totalEl2.textContent = 'Could not load subscription stats';
+  }
 }
 
 async function loadUserAvailability(email) {
@@ -16057,7 +16482,7 @@ function closeReleaseWizard() {
         </div>
       </div>
 
-      <!-- $10/month Glow Up — the hero offering. 2026-04-23 rewrite
+      <!-- $10.99/month Glow Up — the hero offering. 2026-04-23 rewrite
            per Anne: the previous copy "didn't stand out" — too much
            dense prose, not enough emotional hook. This version leads
            with a two-beat headline ("Own the feed. Every day.") set
@@ -16068,7 +16493,7 @@ function closeReleaseWizard() {
       <div style="position:relative;">
         <div style="position:absolute;top:-10px;right:16px;background:linear-gradient(135deg,#E8C890 0%,#D4A060 100%);color:#3D2508;font-size:10px;font-weight:800;padding:3px 10px;border-radius:100px;letter-spacing:0.6px;z-index:2;box-shadow:0 2px 6px rgba(168,130,50,0.35);">BEST VALUE</div>
         <div id="upgrade-opt-glowup" onclick="purchaseUnlimited()" style="border:2px solid var(--rose-dark);border-radius:18px;padding:16px;cursor:pointer;display:flex;align-items:center;gap:14px;background:linear-gradient(135deg,#D98872 0%,#C4786A 45%,#A85968 100%);transition:all 0.15s;box-shadow:0 6px 20px rgba(178,110,95,0.28);">
-          <div style="width:46px;height:46px;border-radius:14px;background:rgba(255,255,255,0.22);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:'Playfair Display',serif;font-size:15px;font-weight:700;color:white;line-height:1.1;text-align:center;backdrop-filter:blur(4px);">$10<br><span style="font-size:9px;font-weight:500;opacity:0.88;">/ mo</span></div>
+          <div style="width:46px;height:46px;border-radius:14px;background:rgba(255,255,255,0.22);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:'Playfair Display',serif;font-size:13px;font-weight:700;color:white;line-height:1.1;text-align:center;backdrop-filter:blur(4px);">$10.99<br><span style="font-size:9px;font-weight:500;opacity:0.88;">/ mo</span></div>
           <div style="flex:1;">
             <div style="display:flex;align-items:center;gap:6px;">
               <div style="font-size:15.5px;font-weight:700;color:white;letter-spacing:0.2px;">Glow Up</div>
@@ -16091,9 +16516,14 @@ function closeReleaseWizard() {
     <!-- Credits remaining -->
     <div id="upgrade-credits-row" style="display:none;margin:14px 20px 0;padding:10px 14px;background:var(--green-light);border-radius:12px;font-size:12px;color:var(--green);text-align:center;font-weight:500;"></div>
 
-    <!-- Cancel -->
+    <!-- Cancel + Restore Purchases (Restore is required by Apple App
+         Review for any iOS app that sells IAP. The link is harmless on
+         web/Android — it just shows a toast saying it's iOS-only.) -->
     <div style="padding:16px 20px 0;text-align:center;">
       <button onclick="closeUpgradeModal()" style="font-size:13px;color:var(--muted);background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;">Maybe later</button>
+      <div style="margin-top:8px;">
+        <a onclick="restoreIAPPurchases()" style="font-size:11px;color:var(--muted);text-decoration:underline;cursor:pointer;text-underline-offset:3px;letter-spacing:0.2px;opacity:0.8;">Restore previous purchases</a>
+      </div>
     </div>
   </div>
 </div>
@@ -16133,6 +16563,45 @@ function closeReleaseWizard() {
 </div>
 
 <!-- CONTACT ANNE MODAL (from tech's Your Business dashboard) -->
+<!-- DELETE ACCOUNT MODAL — required for Apple App Store Guideline
+     5.1.1(v). Linked from the profile screen footer. The destructive
+     button is disabled until the user types DELETE exactly. After a
+     successful deletion the client signs out + routes to the auth screen.
+     Backend: supabase/functions/delete-account/index.ts. -->
+<div class="modal-overlay" id="delete-account-modal" style="display:none;">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div style="font-family:'Playfair Display',serif;font-size:22px;font-weight:600;color:#8B2035;margin-bottom:4px;">Delete your account?</div>
+    <div style="font-size:13.5px;color:var(--muted);margin-bottom:14px;line-height:1.55;">This cannot be undone. We'll permanently delete:</div>
+    <ul style="font-size:13px;color:var(--charcoal);line-height:1.7;margin:0 0 14px 22px;padding:0;">
+      <li>Your profile, photos, and portfolio</li>
+      <li>Your messages and feed posts</li>
+      <li>Your subscription history (any active subscription will end)</li>
+      <li>Your sign-in credentials</li>
+    </ul>
+    <div style="background:#FDF4E8;border:1px solid #F0D8A8;border-left:4px solid #D4A060;border-radius:10px;padding:12px 14px;font-size:12.5px;color:#5C3D0F;line-height:1.55;margin-bottom:18px;">
+      <b>Heads up:</b> if you have an active <b>Glow Up</b> subscription, deleting your MNC account does <b>not</b> automatically cancel it on your end (Apple, Google, or Stripe will keep billing until you cancel separately). Cancel in your store/Stripe first if you want to stop charges.
+    </div>
+    <div id="delete-account-error" style="display:none;background:#FDE8EC;border:1px solid #F0B0BC;border-radius:10px;padding:10px 14px;font-size:13px;color:#8B2035;margin-bottom:14px;line-height:1.5;"></div>
+    <div style="margin-bottom:14px;">
+      <label style="display:block;font-size:12px;font-weight:600;color:var(--charcoal);margin-bottom:6px;letter-spacing:0.3px;">Type <b style="color:#8B2035;">DELETE</b> to confirm:</label>
+      <input id="delete-account-confirm-input" type="text" autocomplete="off" autocapitalize="characters" oninput="_validateDeleteAccountInput()"
+             placeholder="DELETE"
+             style="width:100%;padding:13px 16px;border:1.5px solid var(--border);border-radius:12px;font-family:'DM Sans',sans-serif;font-size:14px;box-sizing:border-box;outline:none;background:var(--cream);color:var(--charcoal);letter-spacing:1.5px;text-transform:uppercase;"/>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <button type="button" id="delete-account-confirm-btn" onclick="confirmDeleteAccount()" disabled
+              style="width:100%;padding:13px 16px;border:none;border-radius:100px;background:#8B2035;color:white;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:not-allowed;opacity:0.5;letter-spacing:0.3px;">
+        Permanently delete my account
+      </button>
+      <button type="button" onclick="closeDeleteAccountModal()"
+              style="width:100%;padding:11px 16px;border:1.5px solid var(--border);border-radius:100px;background:white;color:var(--charcoal);font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:500;cursor:pointer;">
+        Cancel
+      </button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="contact-anne-modal" style="display:none;">
   <div class="modal">
     <div class="modal-handle"></div>

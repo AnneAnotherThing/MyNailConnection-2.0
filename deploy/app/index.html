@@ -2209,7 +2209,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
                 border:1px solid var(--rose-mid);cursor:pointer;
                 box-shadow:0 2px 10px rgba(196,120,106,0.14);">
       <div style="font-family:'Playfair Display',serif;font-size:17px;font-weight:600;color:var(--rose-dark);margin-bottom:4px;">Post your first look 🌸</div>
-      <div style="font-size:12.5px;color:var(--charcoal);line-height:1.45;">Your next 5 are free and live in your portfolio forever. Start your reputation — every new photo lights up the feed for an hour so clients see your work fresh.</div>
+      <div style="font-size:12.5px;color:var(--charcoal);line-height:1.45;">Your first 5 are on us — they live in your portfolio forever <i>and</i> light up the live feed so clients discover your fresh work. After that, <b style="color:var(--rose-dark);">Glow Up</b> keeps your feed presence going (Spotlight credits grow your portfolio).</div>
     </div>
 
     <!-- PRIMARY ACTIONS — Post and Upload live side by side so the two
@@ -2359,7 +2359,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
         <div style="flex:1;min-width:0;">
           <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px;"><span id="myph-paused-count">0</span> photos paused</div>
           <div style="font-size:12.5px;color:var(--charcoal);line-height:1.5;margin-bottom:10px;">Your Glow Up ended, so photos beyond your free 5 are hidden from your profile. Nothing's deleted — reactivate Glow Up and everything comes right back.</div>
-          <button type="button" onclick="purchaseUnlimited()" style="padding:8px 16px;border-radius:100px;border:none;background:var(--rose);color:white;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;">Resume Glow Up — $10/mo</button>
+          <button type="button" onclick="purchaseUnlimited()" style="padding:8px 16px;border-radius:100px;border:none;background:var(--rose);color:white;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;">Resume Glow Up — $10.99/mo</button>
         </div>
       </div>
     </div>
@@ -2558,7 +2558,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
         <div style="border:1.5px solid var(--charcoal);border-radius:14px;padding:14px;background:var(--charcoal);">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
             <div style="font-size:15px;font-weight:700;color:white;">Glow Up</div>
-            <div style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.8);">$10 / month</div>
+            <div style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.8);">$10.99 / month</div>
           </div>
           <div style="font-size:12px;color:rgba(255,255,255,0.75);line-height:1.5;"><b style="color:white;">Keep the feed fresh all month long.</b> Up to 40 uploads a month &mdash; plenty for a new look every day, with room to spare for busy weeks. Every photo lands in front of clients browsing fresh work, and your portfolio grows with it. Refills on your monthly anniversary.</div>
           <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-top:6px;">Cancel any time</div>
@@ -2940,11 +2940,19 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       </svg>
       <span style="flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--rose-mid),transparent);"></span>
     </div>
-    <div style="padding:14px 20px 24px;text-align:center;">
+    <div style="padding:14px 20px 4px;text-align:center;">
       <button type="button" onclick="doSignOut()" style="padding:10px 22px;border-radius:100px;border:1.5px solid var(--border);background:white;color:var(--muted);font-size:12.5px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;display:inline-flex;align-items:center;gap:7px;letter-spacing:0.3px;">
         <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
         Sign Out
       </button>
+    </div>
+    <!-- Account deletion entry point — required to be findable in-app per
+         Apple App Store Guideline 5.1.1(v). Kept low-prominence (small,
+         muted, plain text) so it's not accidentally tapped, but visible
+         enough that a reviewer can locate it without searching. The
+         destructive flow itself lives in #delete-account-modal. -->
+    <div style="padding:8px 20px 24px;text-align:center;">
+      <a onclick="openDeleteAccountModal()" style="font-size:11px;color:var(--muted);text-decoration:underline;cursor:pointer;text-underline-offset:3px;letter-spacing:0.2px;opacity:0.75;">Delete my account</a>
     </div>
   </div><!-- /.scroll-content — closes BEFORE .bottom-nav so the nav stays pinned to the bottom of the screen, not scrolling with content -->
   <div class="bottom-nav">
@@ -3132,6 +3140,67 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
           <div style="font-size:11px;color:var(--muted);margin-top:2px;">People on the pre-launch list</div>
         </div>
         <div id="stat-waitlist-count" style="font-family:'Playfair Display',serif;font-size:30px;font-weight:700;color:var(--rose-dark);line-height:1;">—</div>
+      </div>
+
+      <!-- ░░░ Subscription source + lifetime purchase counts ░░░
+           Reads from techs.subscription_source + techs.glow_up_months_purchased
+           + techs.spotlight_*_purchased_count (added in subscription-source-
+           tracking-migration.sql). Updated by webhooks: stripe-webhook for
+           Stripe + revenuecat-webhook for Apple/Google IAP. Lets Anne see
+           at a glance which platform is driving subscriptions and what the
+           lifetime purchase mix looks like. -->
+      <div style="background:white;border:1px solid var(--border);border-radius:16px;padding:14px 16px;margin-bottom:14px;box-shadow:0 2px 10px rgba(44,36,32,0.04);">
+        <div style="font-size:11px;font-weight:600;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:12px;">Subscriptions by source</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;">
+          <div style="background:linear-gradient(135deg,#635BFF 0%,#4D45D9 100%);border-radius:12px;padding:10px 12px;color:white;">
+            <div style="font-size:9.5px;letter-spacing:1.2px;font-weight:700;text-transform:uppercase;opacity:0.85;">Stripe (web/Android)</div>
+            <div id="stat-sub-stripe" style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700;margin-top:2px;line-height:1;">—</div>
+          </div>
+          <div style="background:linear-gradient(135deg,#1D1D1F 0%,#000 100%);border-radius:12px;padding:10px 12px;color:white;">
+            <div style="font-size:9.5px;letter-spacing:1.2px;font-weight:700;text-transform:uppercase;opacity:0.85;">Apple IAP</div>
+            <div id="stat-sub-apple" style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700;margin-top:2px;line-height:1;">—</div>
+          </div>
+          <div style="background:linear-gradient(135deg,#34A853 0%,#1B7430 100%);border-radius:12px;padding:10px 12px;color:white;">
+            <div style="font-size:9.5px;letter-spacing:1.2px;font-weight:700;text-transform:uppercase;opacity:0.85;">Google Play</div>
+            <div id="stat-sub-google" style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700;margin-top:2px;line-height:1;">—</div>
+          </div>
+          <div style="background:linear-gradient(135deg,#E8C890 0%,#D4A060 100%);border-radius:12px;padding:10px 12px;color:#3D2508;">
+            <div style="font-size:9.5px;letter-spacing:1.2px;font-weight:700;text-transform:uppercase;opacity:0.85;">Comped</div>
+            <div id="stat-sub-comp" style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700;margin-top:2px;line-height:1;">—</div>
+          </div>
+        </div>
+        <div id="stat-sub-total" style="font-size:12px;color:var(--muted);text-align:center;padding-top:4px;border-top:1px solid var(--border);"><b style="color:var(--rose-dark);">—</b> active Glow Up subscribers total</div>
+      </div>
+
+      <!-- Lifetime purchase counts — totals only go up. Glow Up months
+           accumulate one per subscriber per month; Spotlight bundles
+           accumulate one per purchase. Useful for revenue-back-of-napkin. -->
+      <div style="background:white;border:1px solid var(--border);border-radius:16px;padding:14px 16px;margin-bottom:14px;box-shadow:0 2px 10px rgba(44,36,32,0.04);">
+        <div style="font-size:11px;font-weight:600;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:12px;">Lifetime purchases</div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--rose-light);border-radius:10px;">
+            <div>
+              <div style="font-size:13px;font-weight:600;color:var(--rose-dark);">Glow Up months billed</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:1px;">All-time, all sources · est. <span id="stat-glow-up-revenue">$—</span> gross</div>
+            </div>
+            <div id="stat-glow-up-months" style="font-family:'Playfair Display',serif;font-size:26px;font-weight:700;color:var(--rose-dark);line-height:1;">—</div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:#F5EDE8;border-radius:10px;">
+            <div>
+              <div style="font-size:13px;font-weight:600;color:var(--charcoal);">Spotlight: 1 Photo</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:1px;">$0.99 each · est. <span id="stat-spot1-revenue">$—</span> gross</div>
+            </div>
+            <div id="stat-spot1-count" style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--charcoal);line-height:1;">—</div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:#F5EDE8;border-radius:10px;">
+            <div>
+              <div style="font-size:13px;font-weight:600;color:var(--charcoal);">Spotlight: 10 Photos</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:1px;">$4.99 each · est. <span id="stat-spot10-revenue">$—</span> gross</div>
+            </div>
+            <div id="stat-spot10-count" style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--charcoal);line-height:1;">—</div>
+          </div>
+        </div>
+        <div style="font-size:10.5px;color:var(--muted);text-align:center;font-style:italic;margin-top:10px;line-height:1.45;">Gross estimates do not subtract Stripe (~3%) or Apple/Google (15-30%) fees.</div>
       </div>
 
       <button onclick="loadAdminStats()" style="width:100%;padding:11px;border:none;border-radius:12px;background:white;color:var(--rose-dark);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;border:1px solid var(--border);">Refresh</button>
@@ -4088,16 +4157,33 @@ function _stripeLaunch(link, label) {
   setTimeout(() => showToast(label || 'Complete payment in browser, then return here'), 500);
 }
 
-function purchasePhotos(qty) {
+async function purchasePhotos(qty) {
+  // iOS: route through Apple In-App Purchase via RevenueCat. Required by
+  // Apple Guideline 3.1.1 — in-app subscriptions/consumables must use IAP,
+  // not external payment links.
+  if (isIOS()) {
+    const productId = qty === 1 ? IAP_PRODUCT_SPOTLIGHT_1 : IAP_PRODUCT_SPOTLIGHT_10;
+    closeUpgradeModal();
+    const result = await purchaseIAP(productId);
+    if (result.ok) {
+      showToast(qty === 1 ? 'Photo credit added.' : '10 photo credits added.');
+      // Server-side webhook updates the techs row authoritatively; give it
+      // a beat then re-fetch tier so the UI reflects the new credit count.
+      setTimeout(function(){ try { loadTechTier(currentUserEmail); } catch(_){} }, 2000);
+    } else if (result.reason !== 'cancelled') {
+      showToast('Purchase failed. Please try again.');
+    }
+    return;
+  }
+  // Web + Android: existing Stripe Payment Link flow
   const link = qty === 1
     ? _stripeLink('link_1_photo', 'link_1_photo_test')
     : _stripeLink('link_10_photos', 'link_10_photos_test');
   _stripeLaunch(link, 'Complete payment in browser, then return here to upload');
 }
 
-function purchaseUnlimited() {
-  // Kept name for backward-compat call sites; actually launches Glow Up subscription
-  // (5 new photo slots/week, Sunday reset) under the 2026-04-22 pricing pivot.
+async function purchaseUnlimited() {
+  // Kept name for backward-compat call sites; actually launches Glow Up subscription.
   // While GLOW_UP_ENABLED is false, block all entry points — modal card is
   // hidden but the Resume-Glow-Up banner at #myph-paused-banner also routes
   // here, so we belt-and-suspenders it. Toast explains so users whose banner
@@ -4106,6 +4192,19 @@ function purchaseUnlimited() {
     showToast("Glow Up subscriptions are paused while we finish the update — one-time photo packs still work.");
     return;
   }
+  // iOS: route through Apple IAP via RevenueCat (required by Apple 3.1.1)
+  if (isIOS()) {
+    closeUpgradeModal();
+    const result = await purchaseIAP(IAP_PRODUCT_GLOW_UP);
+    if (result.ok) {
+      showToast("You're on Glow Up — post a new look every day, every upload goes to the feed!");
+      setTimeout(function(){ try { loadTechTier(currentUserEmail); } catch(_){} }, 2000);
+    } else if (result.reason !== 'cancelled') {
+      showToast('Subscription failed. Please try again.');
+    }
+    return;
+  }
+  // Web + Android: existing Stripe Payment Link flow
   _stripeLaunch(_stripeLink('link_glow_up', 'link_glow_up_test'), 'Complete payment in browser, then return here');
 }
 
@@ -4302,6 +4401,258 @@ async function shareApp() {
 }
 window.shareApp = shareApp;
 
+// ── Account deletion ─────────────────────────────────────────────────────
+// Required for Apple App Store Guideline 5.1.1(v) — apps that allow
+// signup must allow in-app account deletion that doesn't require email,
+// phone, or other customer-service rounds.
+//
+// Flow:
+//   openDeleteAccountModal() → user reviews the warning → user types
+//   "DELETE" to confirm (anti-fat-finger guard) → confirmDeleteAccount()
+//   calls the delete-account Edge Function → on success, signs out
+//   locally and routes to the splash/auth screen.
+//
+// Why the typed confirmation: Apple allows confirmation steps to prevent
+// accidental deletion. A typed word is the strongest signal-of-intent
+// pattern that doesn't require multi-screen flows. (Per Apple: "apps may
+// include confirmation steps to prevent users from accidentally deleting
+// their account.")
+function openDeleteAccountModal() {
+  // Reset modal state on every open.
+  var inp = document.getElementById('delete-account-confirm-input');
+  if (inp) inp.value = '';
+  var btn = document.getElementById('delete-account-confirm-btn');
+  if (btn) {
+    btn.disabled = true;
+    btn.style.opacity = '0.5';
+    btn.style.cursor = 'not-allowed';
+    btn.textContent = 'Permanently delete my account';
+  }
+  var err = document.getElementById('delete-account-error');
+  if (err) err.style.display = 'none';
+  var modal = document.getElementById('delete-account-modal');
+  if (modal) modal.style.display = 'flex';
+  // Tiny defer so the modal renders before focus moves into the input.
+  setTimeout(function(){ if (inp) try { inp.focus(); } catch(_){} }, 50);
+}
+window.openDeleteAccountModal = openDeleteAccountModal;
+
+// Live-validate the typed confirmation. Enables the destructive button
+// only when the user types "DELETE" exactly (case-sensitive — caps lock
+// is a meaningful intent signal here).
+function _validateDeleteAccountInput() {
+  var inp = document.getElementById('delete-account-confirm-input');
+  var btn = document.getElementById('delete-account-confirm-btn');
+  if (!inp || !btn) return;
+  var ok = (inp.value || '').trim() === 'DELETE';
+  btn.disabled = !ok;
+  btn.style.opacity = ok ? '1' : '0.5';
+  btn.style.cursor = ok ? 'pointer' : 'not-allowed';
+}
+window._validateDeleteAccountInput = _validateDeleteAccountInput;
+
+async function confirmDeleteAccount() {
+  var btn = document.getElementById('delete-account-confirm-btn');
+  var err = document.getElementById('delete-account-error');
+  if (err) err.style.display = 'none';
+  if (btn) {
+    btn.disabled = true;
+    btn.style.opacity = '0.6';
+    btn.style.cursor = 'wait';
+    btn.textContent = 'Deleting…';
+  }
+  try {
+    var token = window._mncAccessToken || '';
+    if (!token) throw new Error('not signed in');
+    var res = await fetch(SUPABASE_URL + '/functions/v1/delete-account', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + token,
+        'apikey': SUPABASE_ANON_KEY
+      }
+    });
+    var body = await res.json().catch(function(){ return {}; });
+    if (!res.ok || !body.ok) {
+      throw new Error(body.error || ('HTTP ' + res.status));
+    }
+    // Success — clear all local state and route out.
+    try { localStorage.removeItem('mnc_session'); } catch(_) {}
+    try { localStorage.removeItem('mnc_persisted_role'); } catch(_) {}
+    try { sessionStorage.clear(); } catch(_) {}
+    window._mncAccessToken = null;
+    currentUserEmail = '';
+    if (typeof currentUser !== 'undefined') currentUser = null;
+    // Hide the modal so the splash isn't covered by a dim overlay.
+    var modal = document.getElementById('delete-account-modal');
+    if (modal) modal.style.display = 'none';
+    // Show a brief confirmation, then send them to auth.
+    showToast('Account deleted. Thanks for trying MNC.');
+    setTimeout(function(){
+      try { show('auth'); } catch(_) { try { show('splash'); } catch(__){} }
+    }, 600);
+  } catch (e) {
+    if (btn) {
+      btn.disabled = false;
+      btn.style.opacity = '1';
+      btn.style.cursor = 'pointer';
+      btn.textContent = 'Permanently delete my account';
+    }
+    if (err) {
+      err.textContent = 'Could not delete account. ' + (e && e.message ? e.message : '') + ' Please try again or email anne@mynailconnection.com.';
+      err.style.display = 'block';
+    }
+  }
+}
+window.confirmDeleteAccount = confirmDeleteAccount;
+
+function closeDeleteAccountModal() {
+  var modal = document.getElementById('delete-account-modal');
+  if (modal) modal.style.display = 'none';
+}
+window.closeDeleteAccountModal = closeDeleteAccountModal;
+
+// ── iOS detection + RevenueCat IAP ───────────────────────────────────────
+// Apple App Store Guideline 3.1.1 requires that subscriptions unlocking
+// in-app features on iOS use Apple In-App Purchase. We use RevenueCat as
+// the SDK wrapper because it handles receipt validation, multi-platform
+// reconciliation, and subscription state out of the box.
+//
+// Platform routing pattern used throughout the purchase code paths:
+//   if (isIOS()) { route to native IAP via RevenueCat }
+//   else        { route to existing Stripe Payment Link }
+//
+// Web and Android stay on Stripe (cheapest fees, existing infrastructure).
+// iOS uses native IAP per Apple's rules.
+//
+// RevenueCat Product IDs MUST match what's configured in App Store Connect:
+//   com.mynailconnection.app.glow_up_monthly  ($10.99/mo subscription)
+//   com.mynailconnection.app.spotlight_1      ($0.99 consumable)
+//   com.mynailconnection.app.spotlight_10     ($4.99 consumable)
+//
+// Public iOS SDK key from RevenueCat dashboard → API keys:
+const REVENUECAT_IOS_PUBLIC_KEY = 'appl_vnRanZywThaWNJjqbZSlbLUJKfE';
+const IAP_PRODUCT_GLOW_UP     = 'com.mynailconnection.app.glow_up_monthly';
+const IAP_PRODUCT_SPOTLIGHT_1 = 'com.mynailconnection.app.spotlight_1';
+const IAP_PRODUCT_SPOTLIGHT_10= 'com.mynailconnection.app.spotlight_10';
+
+// Platform check: TRUE only when running inside the iOS Capacitor shell
+// (not Safari on iPhone, not the PWA). All Apple IAP routing keys off this.
+function isIOS() {
+  try {
+    return !!(window.Capacitor &&
+              window.Capacitor.isNativePlatform &&
+              window.Capacitor.isNativePlatform() &&
+              window.Capacitor.getPlatform &&
+              window.Capacitor.getPlatform() === 'ios');
+  } catch(_) { return false; }
+}
+window.isIOS = isIOS;
+
+// Initialize RevenueCat. No-op on non-iOS platforms (Stripe handles those).
+// Called once per app load AFTER sign-in (we need the user_id to identify
+// the subscriber to RevenueCat). Idempotent — safe to call multiple times.
+let _rcInitialized = false;
+async function initRevenueCat() {
+  if (!isIOS()) return;
+  if (_rcInitialized) return;
+  // Plugin loads as a Capacitor plugin via the global Purchases object
+  // (set up by @revenuecat/purchases-capacitor at runtime). On non-iOS or
+  // if the plugin isn't bundled (web preview), it will be undefined.
+  const Purchases = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Purchases;
+  if (!Purchases) {
+    console.warn('RevenueCat plugin not available; IAP disabled in this build');
+    return;
+  }
+  try {
+    // Use the auth.users.id as the App User ID so RevenueCat customers
+    // map 1:1 to Supabase auth users. Same ID across renewals + reinstalls
+    // means subscription state survives the user wiping/restoring.
+    const appUserId = (currentUser && currentUser.id) || currentUserEmail || null;
+    await Purchases.configure({
+      apiKey: REVENUECAT_IOS_PUBLIC_KEY,
+      appUserID: appUserId
+    });
+    _rcInitialized = true;
+    if (window.__MNC_DEV__) console.log('RevenueCat configured for', appUserId);
+  } catch (e) {
+    console.warn('RevenueCat configure failed:', e);
+  }
+}
+window.initRevenueCat = initRevenueCat;
+
+// Purchase a product through Apple IAP via RevenueCat. Returns a promise
+// that resolves with { ok, customerInfo, productId } on success, or
+// { ok: false, reason, error } on failure / cancellation.
+//
+// On success the RevenueCat webhook (revenuecat-webhook Edge Function)
+// will independently fire a server-to-server event that updates the
+// techs row (subscription_source, subscription_tier, photo_credits, the
+// per-product lifetime counters). The client-side response is for UI
+// feedback only — DO NOT trust it for granting entitlement; let the
+// server-side webhook be the source of truth.
+async function purchaseIAP(productId) {
+  await initRevenueCat();
+  const Purchases = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Purchases;
+  if (!Purchases) return { ok: false, reason: 'plugin_unavailable' };
+  try {
+    // Fetch the StoreProduct first (RevenueCat needs it to call purchase).
+    const offerings = await Purchases.getOfferings();
+    let storeProduct = null;
+    // Try the "current" offering first (RevenueCat's recommended structure)
+    if (offerings && offerings.current && offerings.current.availablePackages) {
+      const pkg = offerings.current.availablePackages.find(p => p.product && p.product.identifier === productId);
+      if (pkg) {
+        const result = await Purchases.purchasePackage({ aPackage: pkg });
+        return { ok: true, customerInfo: result.customerInfo, productId };
+      }
+    }
+    // Fallback: direct product purchase by ID (used for one-off consumables
+    // that aren't grouped in an offering)
+    const products = await Purchases.getProducts({ productIdentifiers: [productId] });
+    if (products && products.products && products.products.length > 0) {
+      const result = await Purchases.purchaseStoreProduct({ product: products.products[0] });
+      return { ok: true, customerInfo: result.customerInfo, productId };
+    }
+    return { ok: false, reason: 'product_not_found', productId };
+  } catch (e) {
+    // userCancelled is the most common path — treat as soft failure
+    if (e && (e.userCancelled || (e.code === '1') || /cancel/i.test(e.message || ''))) {
+      return { ok: false, reason: 'cancelled' };
+    }
+    return { ok: false, reason: 'error', error: String(e && e.message || e) };
+  }
+}
+window.purchaseIAP = purchaseIAP;
+
+// Restore previously-purchased subscriptions/non-consumables. Required by
+// Apple — the App Store reviewer expects a "Restore Purchases" path.
+// For MNC this is hooked into the upgrade modal as a small "Restore
+// purchases" link. On success, the RevenueCat webhook fires and the
+// techs row is refreshed via loadTechTier().
+async function restoreIAPPurchases() {
+  if (!isIOS()) {
+    showToast('Restore purchases is only needed in the iOS app.');
+    return;
+  }
+  await initRevenueCat();
+  const Purchases = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Purchases;
+  if (!Purchases) {
+    showToast('Couldn\'t reach the App Store. Please try again.');
+    return;
+  }
+  try {
+    const result = await Purchases.restorePurchases();
+    showToast('Purchases restored. Refreshing your account…');
+    // Give the RevenueCat webhook a few seconds to update Supabase before
+    // we re-fetch the tier; otherwise the user sees stale state.
+    setTimeout(function(){ try { loadTechTier(); } catch(_){} }, 2500);
+  } catch (e) {
+    showToast('Restore failed. ' + (e && e.message ? e.message : 'Please try again.'));
+  }
+}
+window.restoreIAPPurchases = restoreIAPPurchases;
+
 function closeTutorial() {
   document.getElementById('tutorial-overlay').style.display = 'none';
   // Mark as seen for this role
@@ -4387,7 +4738,7 @@ const ANNE_USER_ID = 'a2f3d32e-1121-43f1-8649-be5c5e460443';
 // 1. Create products in Stripe Dashboard → Products
 // 2. Create Payment Links for each, paste URLs below
 // 3. Add ?client_reference_id={email} to each link so webhook knows which tech
-// Glow Up ($10/mo subscription) is visible on the upgrade modal. The
+// Glow Up ($10.99/mo subscription) is visible on the upgrade modal. The
 // 2026-04-23 pivot moved us to monthly cadence: schema columns
 // period_upload_count + period_reset_at on techs, consume_upload_slot
 // RPC gating every upload with a 40-photo monthly cap, webhook
@@ -4418,12 +4769,18 @@ const STRIPE_CONFIG = {
   link_1_photo:   'https://buy.stripe.com/28E4gycjubtr2KA2xtgEg00',
   // Payment link for 10 photo credits ($5 bundle, portfolio-only) — Live
   link_10_photos: 'https://buy.stripe.com/cNi8wOfvG7db4SI3BxgEg01',
-  // Payment link for Glow Up subscription ($10/mo = 40 photos/month, monthly rolling reset, feed-eligible) — Live
+  // Payment link for Glow Up subscription ($10.99/mo = 40 photos/month, monthly rolling reset, feed-eligible) — Live
+  // Price bumped from $10 to $10.99 on 2026-04-28 to match Apple IAP tier 11
+  // (Apple's available tiers don't include $10; nearest are $9.99 or $10.99).
+  // We picked $10.99 across all platforms so the Stripe / Apple / Google
+  // experience reads identically. NOTE: you must create a NEW Stripe Payment
+  // Link for $10.99 and paste its URL below — existing $10 subscribers stay
+  // grandfathered on the old link's price (Stripe doesn't auto-bump active subs).
   // NOTE: new product+price created 2026-04-23 (the previous $9 price
   // had been used for internal testing). Success URL on the Payment
   // Link is set to https://mynailconnection.com/app/?welcome=glow-up
   // so returning customers land on the in-app welcome modal.
-  link_glow_up:   'https://buy.stripe.com/cNifZg6ZaapngBq5JFgEg03',
+  link_glow_up:   'https://buy.stripe.com/8x2fZgabm9ljgBq9ZVgEg04',
   // ── TEST-MODE PAYMENT LINKS ─────────────────────────────────────────────
   // Paste in from Stripe Dashboard → flip "Viewing test data" → Payment
   // Links. Test links start with https://buy.stripe.com/test_... If left
@@ -4431,7 +4788,7 @@ const STRIPE_CONFIG = {
   // you know. Filled in 2026-04-22 after Anne set up the test products.
   link_1_photo_test:   'https://buy.stripe.com/test_28E14pfiz3OP0x1fZK5kk03',
   link_10_photos_test: 'https://buy.stripe.com/test_9B6eVf0nF5WX6Vp5l65kk04',
-  // Glow Up test link refreshed 2026-04-23 for the new $10/mo monthly-
+  // Glow Up test link refreshed 2026-04-23 for the new $10.99/mo monthly-
   // cadence product. The earlier test link (…5kk05) was against the
   // old $9/5-weekly model and shouldn't be reused.
   link_glow_up_test:   'https://buy.stripe.com/test_5kQ6oJ9Yf3OPa7B4h25kk06',
@@ -5125,6 +5482,7 @@ async function signInWithEmail(email, password) {
     updateAvatar();
     loadUserAvailability(emailVal);
     initCapacitorPush(); // init native push if in app shell
+    initRevenueCat();    // init Apple IAP via RevenueCat (iOS only, no-op elsewhere)
     var needsPasswordChange = await checkFirstLogin(emailVal);
     if (needsPasswordChange) { show('change-password-screen'); } else { await showCorrectHome(); }
   } catch(e) {
@@ -14552,9 +14910,76 @@ async function loadAdminStats() {
   // ── Waitlist total (just the count, no list or source breakdown) ─────
   setTxt('stat-waitlist-count', ((waitlistRecent || []).length).toLocaleString());
 
+  // ── Subscription source + lifetime purchase stats ────────────────────
+  // Fires in parallel; doesn't block the rest of the dashboard from
+  // rendering. Reads techs row with the columns added in
+  // subscription-source-tracking-migration.sql. Aggregates client-side
+  // since the dataset is small (~hundreds of rows expected at most for
+  // the foreseeable future); switch to an RPC if this ever gets slow.
+  loadSubscriptionStats(h).catch(function(e){ try { console.warn('subscription stats:', e); } catch(_){} });
+
   // ── Last-updated stamp ────────────────────────────────────────────────
   const pad2 = n => n < 10 ? '0' + n : '' + n;
   setTxt('stats-updated', pad2(now.getHours()) + ':' + pad2(now.getMinutes()));
+}
+
+// Subscription source breakdown + lifetime purchase totals. Pulls just
+// the columns we need from techs and rolls them up. Kept separate from
+// loadAdminStats() so a slow query (or a missing column on a stale DB)
+// doesn't take down the whole dashboard.
+async function loadSubscriptionStats(headers) {
+  const setTxt = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+  const GLOW_UP_PRICE  = 10.99;
+  const SPOT1_PRICE    = 0.99;
+  const SPOT10_PRICE   = 4.99;
+  try {
+    // Pull the subscription-relevant columns. Filter to only the columns
+    // we need to keep the response small.
+    const url = SUPABASE_URL + '/rest/v1/techs'
+              + '?select=subscription_source,subscription_tier,glow_up_months_purchased,spotlight_1_purchased_count,spotlight_10_purchased_count';
+    const res = await fetch(url, { headers: headers });
+    if (!res.ok) {
+      // Most likely cause: SQL migration hasn't been run yet, so the new
+      // columns don't exist and PostgREST throws. Show a helpful default
+      // and return — don't break the dashboard.
+      setTxt('stat-sub-total', 'Run sql/subscription-source-tracking-migration.sql to enable');
+      return;
+    }
+    const techs = await res.json();
+    const sources = { stripe: 0, apple_iap: 0, google_play: 0, comp: 0 };
+    let glowUpMonths = 0, spot1Count = 0, spot10Count = 0, paidTotal = 0;
+    (techs || []).forEach(function(t){
+      if (t.subscription_tier === 'paid') {
+        paidTotal++;
+        var src = (t.subscription_source || '').toLowerCase();
+        if (sources.hasOwnProperty(src)) sources[src]++;
+      }
+      glowUpMonths += (t.glow_up_months_purchased || 0);
+      spot1Count   += (t.spotlight_1_purchased_count || 0);
+      spot10Count  += (t.spotlight_10_purchased_count || 0);
+    });
+    setTxt('stat-sub-stripe', sources.stripe.toLocaleString());
+    setTxt('stat-sub-apple',  sources.apple_iap.toLocaleString());
+    setTxt('stat-sub-google', sources.google_play.toLocaleString());
+    setTxt('stat-sub-comp',   sources.comp.toLocaleString());
+    var totalEl = document.getElementById('stat-sub-total');
+    if (totalEl) {
+      totalEl.innerHTML = '<b style="color:var(--rose-dark);">' + paidTotal.toLocaleString()
+                        + '</b> active Glow Up subscribers total';
+    }
+    setTxt('stat-glow-up-months', glowUpMonths.toLocaleString());
+    setTxt('stat-spot1-count',    spot1Count.toLocaleString());
+    setTxt('stat-spot10-count',   spot10Count.toLocaleString());
+    // Gross revenue estimates (no fee deductions). Useful as a quick eye
+    // on lifetime momentum; for accounting use Stripe Dashboard / App
+    // Store Connect Sales reports.
+    setTxt('stat-glow-up-revenue', '$' + (glowUpMonths * GLOW_UP_PRICE).toFixed(2));
+    setTxt('stat-spot1-revenue',   '$' + (spot1Count   * SPOT1_PRICE  ).toFixed(2));
+    setTxt('stat-spot10-revenue',  '$' + (spot10Count  * SPOT10_PRICE ).toFixed(2));
+  } catch (e) {
+    var totalEl2 = document.getElementById('stat-sub-total');
+    if (totalEl2) totalEl2.textContent = 'Could not load subscription stats';
+  }
 }
 
 async function loadUserAvailability(email) {
@@ -16057,7 +16482,7 @@ function closeReleaseWizard() {
         </div>
       </div>
 
-      <!-- $10/month Glow Up — the hero offering. 2026-04-23 rewrite
+      <!-- $10.99/month Glow Up — the hero offering. 2026-04-23 rewrite
            per Anne: the previous copy "didn't stand out" — too much
            dense prose, not enough emotional hook. This version leads
            with a two-beat headline ("Own the feed. Every day.") set
@@ -16068,7 +16493,7 @@ function closeReleaseWizard() {
       <div style="position:relative;">
         <div style="position:absolute;top:-10px;right:16px;background:linear-gradient(135deg,#E8C890 0%,#D4A060 100%);color:#3D2508;font-size:10px;font-weight:800;padding:3px 10px;border-radius:100px;letter-spacing:0.6px;z-index:2;box-shadow:0 2px 6px rgba(168,130,50,0.35);">BEST VALUE</div>
         <div id="upgrade-opt-glowup" onclick="purchaseUnlimited()" style="border:2px solid var(--rose-dark);border-radius:18px;padding:16px;cursor:pointer;display:flex;align-items:center;gap:14px;background:linear-gradient(135deg,#D98872 0%,#C4786A 45%,#A85968 100%);transition:all 0.15s;box-shadow:0 6px 20px rgba(178,110,95,0.28);">
-          <div style="width:46px;height:46px;border-radius:14px;background:rgba(255,255,255,0.22);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:'Playfair Display',serif;font-size:15px;font-weight:700;color:white;line-height:1.1;text-align:center;backdrop-filter:blur(4px);">$10<br><span style="font-size:9px;font-weight:500;opacity:0.88;">/ mo</span></div>
+          <div style="width:46px;height:46px;border-radius:14px;background:rgba(255,255,255,0.22);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:'Playfair Display',serif;font-size:13px;font-weight:700;color:white;line-height:1.1;text-align:center;backdrop-filter:blur(4px);">$10.99<br><span style="font-size:9px;font-weight:500;opacity:0.88;">/ mo</span></div>
           <div style="flex:1;">
             <div style="display:flex;align-items:center;gap:6px;">
               <div style="font-size:15.5px;font-weight:700;color:white;letter-spacing:0.2px;">Glow Up</div>
@@ -16091,9 +16516,14 @@ function closeReleaseWizard() {
     <!-- Credits remaining -->
     <div id="upgrade-credits-row" style="display:none;margin:14px 20px 0;padding:10px 14px;background:var(--green-light);border-radius:12px;font-size:12px;color:var(--green);text-align:center;font-weight:500;"></div>
 
-    <!-- Cancel -->
+    <!-- Cancel + Restore Purchases (Restore is required by Apple App
+         Review for any iOS app that sells IAP. The link is harmless on
+         web/Android — it just shows a toast saying it's iOS-only.) -->
     <div style="padding:16px 20px 0;text-align:center;">
       <button onclick="closeUpgradeModal()" style="font-size:13px;color:var(--muted);background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;">Maybe later</button>
+      <div style="margin-top:8px;">
+        <a onclick="restoreIAPPurchases()" style="font-size:11px;color:var(--muted);text-decoration:underline;cursor:pointer;text-underline-offset:3px;letter-spacing:0.2px;opacity:0.8;">Restore previous purchases</a>
+      </div>
     </div>
   </div>
 </div>
@@ -16133,327 +16563,26 @@ function closeReleaseWizard() {
 </div>
 
 <!-- CONTACT ANNE MODAL (from tech's Your Business dashboard) -->
-<div class="modal-overlay" id="contact-anne-modal" style="display:none;">
+<!-- DELETE ACCOUNT MODAL — required for Apple App Store Guideline
+     5.1.1(v). Linked from the profile screen footer. The destructive
+     button is disabled until the user types DELETE exactly. After a
+     successful deletion the client signs out + routes to the auth screen.
+     Backend: supabase/functions/delete-account/index.ts. -->
+<div class="modal-overlay" id="delete-account-modal" style="display:none;">
   <div class="modal">
     <div class="modal-handle"></div>
-    <div style="font-family:'Playfair Display',serif;font-size:22px;font-weight:600;color:var(--rose-dark);margin-bottom:4px;">What's glitchy?</div>
-    <div style="font-size:13.5px;color:var(--muted);margin-bottom:18px;line-height:1.55;">Tell us what's happening — broken button, weird error, something that just feels off — and we'll dig in. An admin will text you back at the number on your profile.</div>
-    <div id="contact-anne-success" style="display:none;background:#EAF3EC;border:1px solid #A8D5B0;border-radius:10px;padding:12px 14px;font-size:13px;color:#2D6A4F;margin-bottom:16px;line-height:1.55;"></div>
-    <div id="contact-anne-error" style="display:none;background:#FDE8EC;border:1px solid #F0B0BC;border-radius:10px;padding:10px 14px;font-size:13px;color:#8B2035;margin-bottom:14px;"></div>
-    <div class="input-group" style="margin-bottom:10px;">
-      <label>What's going on?</label>
-      <textarea id="contact-anne-note" placeholder="Briefly — what's broken or acting weird?" rows="4" style="width:100%;padding:13px 16px;border:1.5px solid var(--border);border-radius:12px;font-family:'DM Sans',sans-serif;font-size:14px;box-sizing:border-box;outline:none;background:var(--cream);color:var(--charcoal);resize:vertical;min-height:90px;line-height:1.5;"></textarea>
+    <div style="font-family:'Playfair Display',serif;font-size:22px;font-weight:600;color:#8B2035;margin-bottom:4px;">Delete your account?</div>
+    <div style="font-size:13.5px;color:var(--muted);margin-bottom:14px;line-height:1.55;">This cannot be undone. We'll permanently delete:</div>
+    <ul style="font-size:13px;color:var(--charcoal);line-height:1.7;margin:0 0 14px 22px;padding:0;">
+      <li>Your profile, photos, and portfolio</li>
+      <li>Your messages and feed posts</li>
+      <li>Your subscription history (any active subscription will end)</li>
+      <li>Your sign-in credentials</li>
+    </ul>
+    <div style="background:#FDF4E8;border:1px solid #F0D8A8;border-left:4px solid #D4A060;border-radius:10px;padding:12px 14px;font-size:12.5px;color:#5C3D0F;line-height:1.55;margin-bottom:18px;">
+      <b>Heads up:</b> if you have an active <b>Glow Up</b> subscription, deleting your MNC account does <b>not</b> automatically cancel it on your end (Apple, Google, or Stripe will keep billing until you cancel separately). Cancel in your store/Stripe first if you want to stop charges.
     </div>
-    <div style="display:flex;align-items:flex-start;gap:10px;margin:8px 0 16px;padding:12px 14px;background:var(--rose-light);border-radius:12px;border:1px solid rgba(224,168,152,0.3);">
-      <input id="contact-anne-consent" type="checkbox" checked style="flex-shrink:0;width:18px;height:18px;margin:2px 0 0;accent-color:var(--rose);cursor:pointer;"/>
-      <label for="contact-anne-consent" style="margin:0;cursor:pointer;flex:1;">
-        <span style="display:block;font-size:12.5px;color:var(--charcoal);font-weight:500;">OK for an admin to text me back</span>
-        <span style="display:block;font-size:11px;color:var(--muted);line-height:1.45;margin-top:2px;">We'll use the phone number on your profile.</span>
-      </label>
-    </div>
-    <button class="btn btn-rose" id="contact-anne-btn" onclick="submitContactAnne()" style="margin-top:4px;">Send Note</button>
-    <button class="btn btn-outline" style="margin-top:10px;" onclick="closeModal('contact-anne-modal')">Cancel</button>
-  </div>
-</div>
-
-<!-- USER EDIT MODAL -->
-<div id="user-edit-modal" class="modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:500;overflow-y:auto;">
-  <div style="background:white;margin:40px 16px 60px;border-radius:20px;padding:20px;max-width:500px;margin-left:auto;margin-right:auto;">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
-      <div style="font-family:'Playfair Display',serif;font-size:18px;font-weight:600;">Edit Client</div>
-      <button onclick="closeUserEdit()" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted);">x</button>
-    </div>
-    <div id="ue-db-status" style="font-size:11px;color:var(--muted);margin-bottom:14px;"></div>
-
-    <!-- Profile photo — all users -->
-    <div style="margin-bottom:16px;">
-      <div id="ue-photo-dropzone"
-        style="display:flex;align-items:center;gap:14px;padding:14px;border:2px dashed var(--rose-mid);border-radius:14px;background:var(--rose-light);cursor:pointer;transition:all 0.2s;"
-        onclick="document.getElementById('ue-photo-file').click()"
-        ondragover="event.preventDefault();this.style.borderColor='var(--rose)';this.style.background='#F2D8E0';"
-        ondragleave="this.style.borderColor='var(--rose-mid)';this.style.background='var(--rose-light)';"
-        ondrop="ueHandlePhotoDrop(event)">
-        <div id="ue-avatar" style="width:64px;height:64px;border-radius:50%;background:white;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:22px;color:var(--rose);overflow:hidden;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,0.1);"></div>
-        <div>
-          <div style="font-size:13px;font-weight:500;color:var(--rose-dark);">Tap to add your photo</div>
-          <div style="font-size:11px;color:var(--muted);margin-top:2px;">From your camera or gallery</div>
-        </div>
-      </div>
-      <input type="file" id="ue-photo-file" accept="image/*" style="display:none;" onchange="ueUploadPhoto(this)"/>
-    </div>
-
-    <!-- Section: Basic -->
-    <div style="font-size:10px;font-weight:600;letter-spacing:1.5px;color:var(--muted);margin-bottom:8px;">BASIC INFO</div>
-    <div style="display:grid;gap:10px;margin-bottom:16px;">
-      <div><label style="font-size:11px;color:var(--muted);font-weight:500;display:block;margin-bottom:4px;">NAME</label>
-        <input id="ue-name" type="text" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;box-sizing:border-box;"/></div>
-      <div><label style="font-size:11px;color:var(--muted);font-weight:500;display:block;margin-bottom:4px;">EMAIL</label>
-        <input id="ue-email" type="email" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;box-sizing:border-box;"/></div>
-      <div><label style="font-size:11px;color:var(--muted);font-weight:500;display:block;margin-bottom:4px;">PHONE</label>
-        <input id="ue-phone" type="tel" oninput="formatPhone(this)" maxlength="14" placeholder="(555) 555-5555" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;box-sizing:border-box;"/></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-        <div><label style="font-size:11px;color:var(--muted);font-weight:500;display:block;margin-bottom:4px;">ROLE</label>
-          <select id="ue-role" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;box-sizing:border-box;">
-            <option value="client">Client</option>
-            <option value="tech">Nail Tech</option>
-            <option value="admin">Admin</option>
-          </select></div>
-        <div><label style="font-size:11px;color:var(--muted);font-weight:500;display:block;margin-bottom:4px;">JOINED</label>
-          <input id="ue-joined" type="date" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;box-sizing:border-box;"/></div>
-      </div>
-    </div>
-
-    <!-- Section: Location -->
-    <div style="font-size:10px;font-weight:600;letter-spacing:1.5px;color:var(--muted);margin-bottom:8px;">LOCATION</div>
-    <div style="display:grid;gap:10px;margin-bottom:16px;">
-      <div>
-        <label style="font-size:11px;color:var(--muted);font-weight:500;display:block;margin-bottom:4px;">ADDRESS</label>
-        <div class="addr-wrap">
-          <input id="ue-address" type="text" placeholder="Start typing address…" autocomplete="off"
-            style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;box-sizing:border-box;"
-            oninput="addrAutocomplete(this,'ue-addr-list','ue-city','ue-state','ue-zip')"/>
-          <div id="ue-addr-list" class="addr-suggestions" style="display:none;"></div>
-        </div>
-        <input type="hidden" id="ue-address-full"/>
-        <div style="display:flex;gap:8px;align-items:center;margin-top:6px;">
-          <select id="ue-state" style="width:180px;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:13px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;color:var(--charcoal);" onchange="this.nextElementSibling && (this.nextElementSibling.style.display='')">
-          <option value="">State…</option>
-          <option value="AL">AL — Alabama</option>
-          <option value="AK">AK — Alaska</option>
-          <option value="AZ">AZ — Arizona</option>
-          <option value="AR">AR — Arkansas</option>
-          <option value="CA">CA — California</option>
-          <option value="CO">CO — Colorado</option>
-          <option value="CT">CT — Connecticut</option>
-          <option value="DE">DE — Delaware</option>
-          <option value="FL">FL — Florida</option>
-          <option value="GA">GA — Georgia</option>
-          <option value="HI">HI — Hawaii</option>
-          <option value="ID">ID — Idaho</option>
-          <option value="IL">IL — Illinois</option>
-          <option value="IN">IN — Indiana</option>
-          <option value="IA">IA — Iowa</option>
-          <option value="KS">KS — Kansas</option>
-          <option value="KY">KY — Kentucky</option>
-          <option value="LA">LA — Louisiana</option>
-          <option value="ME">ME — Maine</option>
-          <option value="MD">MD — Maryland</option>
-          <option value="MA">MA — Massachusetts</option>
-          <option value="MI">MI — Michigan</option>
-          <option value="MN">MN — Minnesota</option>
-          <option value="MS">MS — Mississippi</option>
-          <option value="MO">MO — Missouri</option>
-          <option value="MT">MT — Montana</option>
-          <option value="NE">NE — Nebraska</option>
-          <option value="NV">NV — Nevada</option>
-          <option value="NH">NH — New Hampshire</option>
-          <option value="NJ">NJ — New Jersey</option>
-          <option value="NM">NM — New Mexico</option>
-          <option value="NY">NY — New York</option>
-          <option value="NC">NC — North Carolina</option>
-          <option value="ND">ND — North Dakota</option>
-          <option value="OH">OH — Ohio</option>
-          <option value="OK">OK — Oklahoma</option>
-          <option value="OR">OR — Oregon</option>
-          <option value="PA">PA — Pennsylvania</option>
-          <option value="RI">RI — Rhode Island</option>
-          <option value="SC">SC — South Carolina</option>
-          <option value="SD">SD — South Dakota</option>
-          <option value="TN">TN — Tennessee</option>
-          <option value="TX">TX — Texas</option>
-          <option value="UT">UT — Utah</option>
-          <option value="VT">VT — Vermont</option>
-          <option value="VA">VA — Virginia</option>
-          <option value="WA">WA — Washington</option>
-          <option value="WV">WV — West Virginia</option>
-          <option value="WI">WI — Wisconsin</option>
-          <option value="WY">WY — Wyoming</option>
-        </select>
-          
-        </div>
-        <input type="hidden" id="ue-city"/>
-        <input type="hidden" id="ue-zip"/>
-        </div>
-        <div id="ue-address-parsed" style="display:none;"></div>
-      </div>
-    </div>
-
-    <!-- Section: Tech-specific (shown for Nail Tech / Both) -->
-    <div id="ue-tech-section">
-      <div style="font-size:10px;font-weight:600;letter-spacing:1.5px;color:var(--muted);margin-bottom:8px;">TECH DETAILS</div>
-      <div style="display:grid;gap:10px;margin-bottom:16px;">
-        <div><label style="font-size:11px;color:var(--muted);font-weight:500;display:block;margin-bottom:4px;">SHOP / STUDIO NAME</label>
-          <input id="ue-shop" type="text" placeholder="e.g. Glam Nails by Leslie" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;box-sizing:border-box;"/></div>
-        <div>
-          <label style="font-size:11px;color:var(--muted);font-weight:500;display:block;margin-bottom:4px;">TYPICAL HOURS</label>
-          <div style="font-size:11px;color:var(--muted);line-height:1.5;margin-bottom:8px;font-style:italic;">Your general hours — not a guarantee. Clients see these with a note that they may vary.</div>
-          <div id="ue-hours-grid" style="display:grid;gap:6px;">
-            <!-- populated by JS -->
-          </div>
-          <input type="hidden" id="ue-hours"/>
-        </div>
-        <div><label style="font-size:11px;color:var(--muted);font-weight:500;display:block;margin-bottom:4px;">BIO</label>
-          <textarea id="ue-bio" rows="3" placeholder="Tell clients a little about yourself…" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;resize:none;box-sizing:border-box;"></textarea></div>
-        <div><label style="font-size:11px;color:var(--muted);font-weight:500;display:block;margin-bottom:4px;">NOTES (ADMIN ONLY)</label>
-          <textarea id="ue-notes" rows="2" placeholder="Internal notes…" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;resize:none;box-sizing:border-box;"></textarea></div>
-
-        <!-- Gallery — techs only -->
-        <div>
-          <label style="font-size:11px;color:var(--muted);font-weight:500;display:block;margin-bottom:6px;">PORTFOLIO GALLERY</label>
-          <label style="display:flex;align-items:center;gap:8px;padding:9px 14px;border:1.5px dashed var(--rose-mid);border-radius:10px;cursor:pointer;font-size:13px;color:var(--rose);background:var(--rose-light);margin-bottom:8px;">
-            <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:var(--rose);fill:none;stroke-width:2;stroke-linecap:round;"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-            Upload photos
-            <input type="file" accept="image/*" multiple onchange="ueAddGalleryPhotos(this)" style="display:none;"/>
-          </label>
-          <div style="margin-bottom:8px;">
-            <textarea id="ue-gallery-url" rows="3" placeholder="Paste one URL per line — add as many as you like" style="width:100%;padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:12px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;resize:vertical;box-sizing:border-box;"></textarea>
-            <button type="button" onclick="ueAddGalleryUrl()" style="margin-top:5px;width:100%;padding:8px;border-radius:8px;border:1.5px solid var(--rose-mid);background:var(--rose-light);color:var(--rose);font-size:12px;font-weight:500;cursor:pointer;">Add All URLs</button>
-          </div>
-          <div id="ue-gallery-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;"></div>
-        </div>
-      </div>
-    </div>
-
-    <button type="button" class="btn btn-rose" id="ue-save-btn" onclick="saveUserEdit()">Save Changes</button>
-    <button type="button" class="btn btn-outline" style="margin-top:10px;" onclick="closeUserEdit()">Cancel</button>
-  </div>
-</div>
-
-<!-- FILTERS MODAL -->
-<div id="filters-modal" class="modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:400;">
-  <div style="position:absolute;bottom:0;left:0;right:0;background:white;border-radius:24px 24px 0 0;padding:0 0 40px;max-height:88vh;overflow-y:auto;">
-    <!-- Handle -->
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px 12px;position:sticky;top:0;background:white;border-bottom:1px solid var(--border);z-index:1;">
-      <div style="font-family:'Playfair Display',serif;font-size:18px;font-weight:600;">Filter Techs</div>
-      <div style="display:flex;align-items:center;gap:12px;">
-        <button onclick="clearAllFilters();closeFiltersModal();" style="font-size:13px;color:var(--rose);background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;">Clear all</button>
-        <button onclick="closeFiltersModal()" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted);">x</button>
-      </div>
-    </div>
-
-    <div style="padding:0 20px;">
-
-      <!-- Availability -->
-      <div style="padding:16px 0;border-bottom:1px solid var(--border);">
-        <div style="font-size:12px;font-weight:600;letter-spacing:1px;color:var(--muted);margin-bottom:10px;">AVAILABILITY</div>
-        <div style="display:flex;flex-wrap:wrap;gap:7px;">
-          <label class="acc-chip" id="fm-avail-now-chip"><input type="checkbox" id="fm-avail-now" onchange="applyFilters()"><span>Available Now</span></label>
-          <label class="acc-chip" id="fm-avail-today-chip"><input type="checkbox" id="fm-avail-today" onchange="applyFilters()"><span>Open This Week</span></label>
-        </div>
-      </div>
-
-
-      <!-- Distance -->
-      <div style="padding:16px 0;border-bottom:1px solid var(--border);">
-        <div style="font-size:12px;font-weight:600;letter-spacing:1px;color:var(--muted);margin-bottom:12px;">DISTANCE</div>
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-          <span style="font-size:13px;color:var(--muted);">Within</span>
-          <span style="font-size:14px;font-weight:600;color:var(--rose);" id="fm-dist-label">Any distance</span>
-        </div>
-        <input type="range" min="0" max="50" step="1" value="0" id="fm-dist-slider" style="width:100%;accent-color:var(--rose);" oninput="fmDistChange(this.value)"/>
-        <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:11px;color:var(--muted);"><span>Any</span><span>10 mi</span><span>25 mi</span><span>50 mi</span></div>
-
-      </div>
-
-      <!-- Nail Shape -->
-      <div style="padding:16px 0;border-bottom:1px solid var(--border);">
-        <div style="font-size:12px;font-weight:600;letter-spacing:1px;color:var(--muted);margin-bottom:10px;">NAIL SHAPE</div>
-        <div style="display:flex;flex-wrap:wrap;gap:7px;" id="fm-chips-shape"></div>
-      </div>
-
-      <!-- Nail Type -->
-      <div style="padding:16px 0;border-bottom:1px solid var(--border);">
-        <div style="font-size:12px;font-weight:600;letter-spacing:1px;color:var(--muted);margin-bottom:10px;">NAIL TYPE</div>
-        <div style="display:flex;flex-wrap:wrap;gap:7px;" id="fm-chips-type"></div>
-      </div>
-
-      <!-- Nail Style -->
-      <div style="padding:16px 0;border-bottom:1px solid var(--border);">
-        <div style="font-size:12px;font-weight:600;letter-spacing:1px;color:var(--muted);margin-bottom:10px;">NAIL STYLE</div>
-        <div style="display:flex;flex-wrap:wrap;gap:7px;" id="fm-chips-style"></div>
-      </div>
-
-
-    </div>
-
-    <!-- Apply button -->
-    <div style="padding:16px 20px 0;position:sticky;bottom:0;background:white;border-top:1px solid var(--border);">
-      <button class="btn btn-rose" onclick="closeFiltersModal()" style="width:100%;" id="fm-apply-btn">Show Results</button>
-    </div>
-  </div>
-</div>
-<!-- BROWSE PREFERENCE MODAL — shown once on first client login -->
-<div id="browse-pref-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:500;display:none;align-items:flex-end;justify-content:center;">
-  <div style="background:white;border-radius:28px 28px 0 0;padding:0 0 48px;width:100%;max-width:480px;max-height:85vh;overflow-y:auto;">
-    <!-- Handle bar -->
-    <div style="width:36px;height:4px;background:var(--border);border-radius:100px;margin:14px auto 0;"></div>
-
-    <div style="padding:28px 24px 0;">
-      <div style="font-family:'Playfair Display',serif;font-size:22px;font-weight:600;color:var(--charcoal);margin-bottom:6px;">What matters most to you?</div>
-      <div style="font-size:14px;color:var(--muted);line-height:1.5;margin-bottom:28px;">Choose how you'd like to find your perfect nail tech. You can always change this later.</div>
-
-      <!-- Option 1: Browse by Look -->
-      <div onclick="setBrowsePref('look')" class="browse-pref-card" style="display:flex;align-items:center;gap:16px;padding:18px;border:1.5px solid var(--border);border-radius:18px;margin-bottom:12px;cursor:pointer;transition:all 0.15s;">
-        <div style="width:52px;height:52px;border-radius:16px;background:var(--rose-light);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-          <svg viewBox="0 0 24 24" style="width:26px;height:26px;stroke:var(--rose);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-        </div>
-        <div style="flex:1;">
-          <div style="font-size:15px;font-weight:600;color:var(--charcoal);margin-bottom:3px;">The Look</div>
-          <div style="font-size:13px;color:var(--muted);line-height:1.4;">Browse nail photos and discover the artist behind each one. Perfect if you know the vibe you want.</div>
-        </div>
-        <div class="bpref-check" style="width:22px;height:22px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;"></div>
-      </div>
-
-      <!-- Option 2: By Availability -->
-      <div onclick="setBrowsePref('availability')" class="browse-pref-card" style="display:flex;align-items:center;gap:16px;padding:18px;border:1.5px solid var(--border);border-radius:18px;margin-bottom:12px;cursor:pointer;transition:all 0.15s;">
-        <div style="width:52px;height:52px;border-radius:16px;background:#EAF3EC;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-          <svg viewBox="0 0 24 24" style="width:26px;height:26px;stroke:#2E6B44;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><circle cx="12" cy="16" r="2" fill="#2E6B44"/></svg>
-        </div>
-        <div style="flex:1;">
-          <div style="font-size:15px;font-weight:600;color:var(--charcoal);margin-bottom:3px;">Availability</div>
-          <div style="font-size:13px;color:var(--muted);line-height:1.4;">See who's open now or this week. Great when you need an appointment fast.</div>
-        </div>
-        <div class="bpref-check" style="width:22px;height:22px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;"></div>
-      </div>
-
-      <!-- Option 3: By Distance -->
-      <div onclick="setBrowsePref('distance')" class="browse-pref-card" style="display:flex;align-items:center;gap:16px;padding:18px;border:1.5px solid var(--border);border-radius:18px;margin-bottom:28px;cursor:pointer;transition:all 0.15s;">
-        <div style="width:52px;height:52px;border-radius:16px;background:#E8EEF2;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-          <svg viewBox="0 0 24 24" style="width:26px;height:26px;stroke:#3A5268;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;"><circle cx="12" cy="10" r="3"/><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
-        </div>
-        <div style="flex:1;">
-          <div style="font-size:15px;font-weight:600;color:var(--charcoal);margin-bottom:3px;">Distance</div>
-          <div style="font-size:13px;color:var(--muted);line-height:1.4;">Find techs near you on the map. Filter by how far you're willing to travel.</div>
-        </div>
-        <div class="bpref-check" style="width:22px;height:22px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;"></div>
-      </div>
-
-      <button onclick="applyBrowsePref()" id="browse-pref-btn" class="btn btn-rose" style="width:100%;opacity:0.45;pointer-events:none;">Let's Go</button>
-      <button onclick="closeBrowsePrefModal()" style="width:100%;margin-top:10px;background:none;border:none;font-size:13px;color:var(--muted);cursor:pointer;padding:8px;font-family:'DM Sans',sans-serif;">Skip for now</button>
-    </div>
-  </div>
-</div>
-<!-- WELCOME BACK SHEET — shown on return client logins -->
-<div id="welcome-back-sheet" style="display:none;position:fixed;inset:0;z-index:490;align-items:flex-end;justify-content:center;pointer-events:none;">
-  <div style="pointer-events:auto;background:white;border-radius:24px 24px 0 0;padding:20px 20px 40px;width:100%;max-width:480px;box-shadow:0 -4px 30px rgba(0,0,0,0.12);">
-    <div style="width:32px;height:4px;background:var(--border);border-radius:100px;margin:0 auto 18px;"></div>
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
-      <div>
-        <div style="font-family:'Playfair Display',serif;font-size:17px;font-weight:600;color:var(--charcoal);margin-bottom:3px;">Welcome back 🌸</div>
-        <div style="font-size:13px;color:var(--muted);">Last time you browsed by <strong id="wb-pref-label"></strong></div>
-      </div>
-    </div>
-    <div style="display:flex;flex-direction:column;gap:10px;">
-      <button onclick="applyWelcomeBackPref()" class="btn btn-rose" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px;">
-        <svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><polyline points="5 12 12 5 19 12"/><polyline points="5 19 12 12 19 19"/></svg>
-        Pick up where I left off
-      </button>
-      <div style="display:flex;gap:8px;">
-        <button onclick="changeWelcomeBackPref()" class="btn btn-outline" style="flex:1;font-size:13px;">Change preference</button>
-        <button onclick="dismissWelcomeBack()" style="flex:1;padding:12px;border-radius:100px;border:1.5px solid var(--border);background:white;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;">Browse normally</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ══════════�
+    <div id="delete-account-error" style="display:none;background:#FDE8EC;border:1px solid #F0B0BC;border-radius:10px;padding:10px 14px;font-size:13px;color:#8B2035;margin-bottom:14px;line-height:1.5;"></div>
+    <div style="margin-bottom:14px;">
+      <label style="display:block;font-size:12px;font-weight:600;color:var(--charcoal);margin-bottom:6px;letter-spacing:0.3px;">Type <b style="color:#8B2035;">DELETE</b> to confirm:</label>
+      <input id="delete-account-confirm-input" type="text" autocomplete="off" autocapital
