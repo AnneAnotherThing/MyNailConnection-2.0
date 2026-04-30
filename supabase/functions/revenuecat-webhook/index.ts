@@ -48,7 +48,15 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 // Map of RevenueCat product IDs → MNC product semantics. Single source of
 // truth for what each Apple/Google product translates to internally.
 const PRODUCT_MAP: Record<string, { kind: 'subscription' | 'photos1' | 'photos10' }> = {
-  'com.mynailconnection.app.glow_up_monthly': { kind: 'subscription' },
+  // Glow Up was originally provisioned as 'glow_up_monthly' but had to be
+  // recreated as 'pro_glow_up' on 2026-04-30 — the original ID was
+  // accidentally created in App Store Connect's "In-App Purchases"
+  // section as a non-renewing subscription instead of the "Subscriptions"
+  // section as auto-renewable. Apple doesn't allow type changes after
+  // creation, and the original product ID was retired and unavailable for
+  // reuse after deletion, so we settled on 'pro_glow_up' for the new
+  // auto-renewable product.
+  'com.mynailconnection.app.pro_glow_up':     { kind: 'subscription' },
   'com.mynailconnection.app.spotlight_1':     { kind: 'photos1' },
   'com.mynailconnection.app.spotlight_10':    { kind: 'photos10' },
 };
@@ -97,16 +105,20 @@ serve(async (req) => {
 
   // Resolve the techs row from app_user_id. We use auth.users.id as the
   // RevenueCat App User ID at configure() time, so app_user_id should
-  // match auth.users.id (which equals public.users.id in MNC).
-  const { data: userRow, error: userErr } = await admin
+  // match auth.users.id (which usually equals public.users.id in MNC).
+  // Three lookup paths in order of preference, each handling a different
+  // failure mode of the user-table sync:
+  const { data: userRow } = await admin
     .from('users')
     .select('id, email')
     .eq('id', appUserId)
     .single();
 
-  // If we can't find by id (someone with an unusual app_user_id), fall
-  // back to revenuecat_app_user_id lookup on techs.
   let techEmail: string | null = userRow?.email?.toLowerCase() || null;
+
+  // Fallback 1: a previous webhook hit already stamped revenuecat_app_user_id
+  // on the techs row, so we can find the tech by that id even if public.users
+  // no longer matches.
   if (!techEmail) {
     const { data: techRow } = await admin
       .from('techs')
@@ -115,6 +127,23 @@ serve(async (req) => {
       .maybeSingle();
     techEmail = techRow?.email?.toLowerCase() || null;
   }
+
+  // Fallback 2: query auth.users directly. The app_user_id IS auth.users.id
+  // (set at Purchases.configure time from currentUser.id), so this lookup
+  // can't miss for any signed-in purchaser. Catches the orphan-auth pattern
+  // where public.users.id and auth.users.id drifted apart (account
+  // recreation, manual data fixes, stale signups). Source of truth for
+  // app_user_id → email mapping. — added 2026-04-30 after a TestFlight test
+  // surfaced the drift on a recreated test account.
+  if (!techEmail) {
+    try {
+      const { data: authUserData } = await admin.auth.admin.getUserById(appUserId);
+      techEmail = authUserData?.user?.email?.toLowerCase() || null;
+    } catch (e) {
+      console.warn('auth.admin.getUserById threw for app_user_id', appUserId, e);
+    }
+  }
+
   if (!techEmail) {
     console.warn('No matching tech found for app_user_id:', appUserId);
     return new Response('ok (no matching tech)', { status: 200 });
