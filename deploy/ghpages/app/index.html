@@ -4744,8 +4744,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.0',     /* __APP_BUILD_NAME__   */
-  android: 213,         /* __APP_BUILD_ANDROID__ */
-  ios:     18,          /* __APP_BUILD_IOS__     */
+  android: 214,         /* __APP_BUILD_ANDROID__ */
+  ios:     19,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -5220,6 +5220,26 @@ async function initCapacitorBackButton() {
 }
 
 // ── Capacitor native push (used when running as iOS/Android app) ─────────────
+//
+// Feature flag: NATIVE_PUSH_REGISTER_ENABLED gates the FCM/APNs register()
+// call separately from PUSH_ENABLED. We learned the hard way (2026-04-30)
+// that PushNotifications.register() throws a NATIVE Java exception when
+// google-services.json isn't actually in the Capawesome build —
+// FirebaseMessaging.getInstance() blows up before our JS try/catch can
+// catch anything, taking down the activity. That was the exact crash
+// Google's reviewer attached to the rejection, AND the one Anne hit
+// herself: "accept the permission, app closes, reopen and you're in."
+//
+// Until google-services.json is verified live in Capawesome's Android
+// build env (and an APNs key is wired for iOS), we DON'T call register().
+// requestPermissions() is fine — it doesn't touch FCM internals.
+//
+// Flip this to true ONLY after pushing a build where:
+//   - Android: google-services.json is in Capawesome's build inputs and
+//     `apply plugin: 'com.google.gms.google-services'` succeeded
+//   - iOS: APNs key is uploaded to RevenueCat / configured in Capawesome
+const NATIVE_PUSH_REGISTER_ENABLED = false;
+
 async function initCapacitorPush() {
   if (!PUSH_ENABLED) return;
   // Only runs if inside a Capacitor native app shell
@@ -5228,22 +5248,26 @@ async function initCapacitorPush() {
   const { PushNotifications } = window.Capacitor.Plugins;
   if (!PushNotifications) return;
 
-  // CRITICAL: wrap the permission + register calls in try/catch.
-  // Without this, a misconfigured FCM build (missing or stale
-  // google-services.json) caused a hard crash sequence on Android 13+:
-  //   user taps "Allow" on POST_NOTIFICATIONS dialog
-  //   → PushNotifications.register() calls FirebaseMessaging.getToken()
-  //   → Firebase not initialized → native Java exception → activity dies
-  //   → user reopens, lands on home (session persisted), thinks "weird"
-  // That's exactly what blocked the 2026-04 Play Store submission and
-  // matches the screenshot Google's reviewer attached. Defensive try/catch
-  // means worst case is "no push for this user" — never a crash. — 2026-04-30
+  // requestPermissions is safe — it just resolves the OS permission state
+  // and doesn't touch Firebase. Keep it inside try/catch anyway.
   try {
     const perm = await PushNotifications.requestPermissions();
     if (perm.receive !== 'granted') return;
+  } catch (e) {
+    console.warn('Capacitor push permission request failed:', e);
+    return;
+  }
+
+  // GATE: only call register() when FCM/APNs are confirmed wired up.
+  if (!NATIVE_PUSH_REGISTER_ENABLED) {
+    console.warn('Native push register skipped: NATIVE_PUSH_REGISTER_ENABLED is false (set true after google-services.json + APNs are verified in the build)');
+    return;
+  }
+
+  try {
     await PushNotifications.register();
   } catch (e) {
-    console.warn('Capacitor push init failed, continuing without push:', e);
+    console.warn('Capacitor push register failed, continuing without push:', e);
     return;
   }
 
@@ -17103,15 +17127,4 @@ function closeReleaseWizard() {
            removeMyPhotoFromGallery() which handles the splice + PATCH +
            storage cleanup + re-render. 2026-04-23 per Anne: "we have a
            gallery now, we can remove photos from there." -->
-      <button type="button" onclick="removeMyPhotoFromGallery()" style="width:100%;margin-top:18px;padding:11px;border-radius:100px;border:1.5px solid rgba(192,64,74,0.35);background:white;color:#C0404A;font-size:13px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;display:flex;align-items:center;justify-content:center;gap:8px;">
-        <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
-        Remove this photo
-      </button>
-    </div>
-  </div>
-</div>
-
-<!-- ════════════════════════════════════════════════════════════════════════
-     BULK UPLOAD REVIEW SHEET
-     Opens automatically after a bulk photo upload completes. Lets the
-     tech tag + caption each just
+      <button type="button" onclick="removeMyPhotoFromGallery()" style="width:100%;margin-top:18px;padding:11px;border-radius:
