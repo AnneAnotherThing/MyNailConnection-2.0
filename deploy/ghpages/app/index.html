@@ -4303,6 +4303,7 @@ async function purchasePhotos(qty) {
     closeUpgradeModal();
     const result = await purchaseIAP(productId);
     if (result.ok) {
+      if (IAP_DIAGNOSTIC_MODE) alert(_iapSuccessDiagnostic(result));
       showToast(qty === 1 ? 'Photo credit added.' : '10 photo credits added.');
       // Server-side webhook updates the techs row authoritatively; give it
       // a beat then re-fetch tier so the UI reflects the new credit count.
@@ -4335,6 +4336,7 @@ async function purchaseUnlimited() {
     closeUpgradeModal();
     const result = await purchaseIAP(IAP_PRODUCT_GLOW_UP);
     if (result.ok) {
+      if (IAP_DIAGNOSTIC_MODE) alert(_iapSuccessDiagnostic(result));
       showToast("You're on Glow Up — post a new look every day, every upload goes to the feed!");
       setTimeout(function(){ try { loadTechTier(currentUserEmail); } catch(_){} }, 2000);
     } else if (result.reason !== 'cancelled') {
@@ -4753,7 +4755,7 @@ async function purchaseIAP(productId) {
       const pkg = offerings.current.availablePackages.find(p => p.product && p.product.identifier === productId);
       if (pkg) {
         const result = await Purchases.purchasePackage({ aPackage: pkg });
-        return { ok: true, customerInfo: result.customerInfo, productId };
+        return { ok: true, customerInfo: result.customerInfo, productId, path: 'package' };
       }
     }
     // Fallback: direct product purchase by ID (used for one-off consumables
@@ -4761,7 +4763,7 @@ async function purchaseIAP(productId) {
     const products = await Purchases.getProducts({ productIdentifiers: [productId] });
     if (products && products.products && products.products.length > 0) {
       const result = await Purchases.purchaseStoreProduct({ product: products.products[0] });
-      return { ok: true, customerInfo: result.customerInfo, productId };
+      return { ok: true, customerInfo: result.customerInfo, productId, path: 'product' };
     }
     return { ok: false, reason: 'product_not_found', productId };
   } catch (e) {
@@ -4772,6 +4774,41 @@ async function purchaseIAP(productId) {
     return { ok: false, reason: 'error', error: String(e && e.message || e) };
   }
 }
+
+// Verbose diagnostic for the SUCCESS path of an IAP purchase. We hit a
+// scenario on 2026-04-30 where Spotlight (consumable) purchases reported
+// success client-side (toast appeared, customerInfo returned) but RC's
+// dashboard had no event for them — Apple-says-success but RC-doesn't-
+// record-it. To distinguish "RC SDK reported a real transaction" from
+// "RC SDK returned a stale/empty customerInfo with no actual transaction",
+// we surface the relevant fields of customerInfo as an alert when
+// IAP_DIAGNOSTIC_MODE is on. The most telling field is whether the just-
+// purchased productId actually appears in allPurchasedProductIds; if it
+// doesn't, the SDK's promise resolved without an actual completed
+// purchase — which is the signal something failed silently between Apple
+// and RC. — 2026-04-30
+function _iapSuccessDiagnostic(result) {
+  const ci = (result && result.customerInfo) || {};
+  const productId = result && result.productId;
+  const purchasedIds = ci.allPurchasedProductIds || [];
+  const justPurchased = productId && purchasedIds.indexOf(productId) >= 0;
+  return [
+    'IAP DIAG (success path via ' + (result.path || '?') + '):',
+    '',
+    'productId: ' + productId,
+    'In allPurchasedProductIds? ' + (justPurchased ? 'YES ✓' : 'NO ✗ ← suspicious'),
+    '',
+    'allPurchasedProductIds: ' + JSON.stringify(purchasedIds),
+    'activeSubscriptions: ' + JSON.stringify(ci.activeSubscriptions || []),
+    'nonSubscriptionTransactions count: ' + ((ci.nonSubscriptionTransactions || []).length),
+    'entitlements active: ' + JSON.stringify(Object.keys((ci.entitlements && ci.entitlements.active) || {})),
+    '',
+    (justPurchased
+      ? 'SDK confirms the purchase landed. If RC dashboard still shows nothing, the issue is webhook delivery, not the SDK.'
+      : 'SDK does NOT show this product in purchased history. The "success" was spurious — Apple/RC chain didn\'t actually complete the transaction.')
+  ].join('\n');
+}
+window._iapSuccessDiagnostic = _iapSuccessDiagnostic;
 window.purchaseIAP = purchaseIAP;
 
 // Build a verbose diagnostic message from a purchaseIAP() failure result.
@@ -4913,8 +4950,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.1',     /* __APP_BUILD_NAME__   */
-  android: 222,         /* __APP_BUILD_ANDROID__ */
-  ios:     26,          /* __APP_BUILD_IOS__     */
+  android: 223,         /* __APP_BUILD_ANDROID__ */
+  ios:     27,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -17189,29 +17226,4 @@ function closeReleaseWizard() {
       <!-- Icon varies by variant; replaced at render time. -->
       <svg viewBox="0 0 24 24" style="width:34px;height:34px;stroke:var(--rose-dark);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
     </div>
-    <div id="sw-eyebrow" style="font-size:11px;font-weight:700;letter-spacing:1.4px;color:var(--rose);text-transform:uppercase;margin-bottom:8px;">Welcome to Glow Up</div>
-    <div id="sw-title" style="font-family:'Playfair Display',serif;font-size:24px;font-weight:600;color:var(--charcoal);margin-bottom:10px;line-height:1.15;">You're in! 🌸</div>
-    <div id="sw-body" style="font-size:14px;color:#5E524B;line-height:1.55;margin-bottom:16px;">Post a new look every day, with plenty of room for busy weeks. Every upload releases to the feed.</div>
-
-    <!-- Key-stat strip: big number + label + subtitle (e.g., refill date).
-         Populated per-variant. -->
-    <div id="sw-stat" style="background:linear-gradient(160deg,#FFF8F3 0%,#FBE8DC 100%);border:1px solid rgba(196,120,106,0.22);border-radius:14px;padding:14px 16px;margin-bottom:18px;">
-      <div style="display:flex;align-items:baseline;justify-content:center;gap:10px;">
-        <div id="sw-stat-num" style="font-family:'Playfair Display',serif;font-size:36px;font-weight:600;color:var(--rose-dark);line-height:1;">40</div>
-        <div id="sw-stat-label" style="font-size:14px;color:var(--charcoal);font-weight:500;">uploads this month</div>
-      </div>
-      <div id="sw-stat-sub" style="font-size:12px;color:var(--muted);margin-top:6px;"></div>
-    </div>
-
-    <div style="display:flex;flex-direction:column;gap:8px;">
-      <button id="sw-primary-btn" onclick="stripeWelcomePrimary()" class="btn btn-rose" style="width:100%;">Post your first look →</button>
-      <button onclick="closeStripeWelcome()" style="width:100%;padding:10px;border:none;background:none;color:var(--muted);font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;">I'll explore first</button>
-    </div>
-    <div style="font-size:11px;color:var(--muted);margin-top:14px;line-height:1.5;">Stripe emailed you a receipt. Manage your subscription any time from your profile.</div>
-  </div>
-</div>
-
-<!-- ════════════════════════════════════════════════════════════════════════
-     POST-UPLOAD SUCCESS MODAL
-     Fires after Save Changes when 1+ new photos were just added. Two
-     clear CTAs: tag photos (t
+    <div id="sw-eyebrow" style="font-size:11px;font-weight:700;letter-spacing:1.4px;color:var(--rose);t
