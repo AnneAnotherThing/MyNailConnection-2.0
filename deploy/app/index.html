@@ -71,7 +71,7 @@
   --white:#FFFFFF;--border:rgba(139,94,107,0.15);--shadow:0 2px 20px rgba(44,36,32,0.08);
 }
 html,body{margin:0;padding:0;min-height:100vh;}
-body{font-family:'DM Sans',sans-serif;background:#ddd4cc;display:flex;justify-content:center;align-items:flex-start;}
+body{font-family:'DM Sans',sans-serif;background:#FAF5F7;display:flex;justify-content:center;align-items:flex-start;}
 
 /* ── Phone container — always 430px max, centered ── */
 .device{
@@ -86,11 +86,21 @@ body{font-family:'DM Sans',sans-serif;background:#ddd4cc;display:flex;justify-co
   isolation:isolate;
 }
 
-/* Desktop: show as phone frame */
+/* Desktop / tablet: show as a centered phone frame on a soft branded
+   backdrop. The 480px breakpoint covers anything wider than a portrait
+   phone — desktop browsers, iPad portrait + landscape, large Android
+   tablets, foldables in unfolded mode. The pale-rose backdrop (#FAF5F7,
+   same as the splash screen) keeps the surround intentional rather than
+   "tiny phone UI floating on a gray rectangle." — minimal-scope tablet
+   support, 2026-04-30. */
 @media(min-width:480px){
-  body{padding:24px 0;background:#ddd4cc;}
+  body{padding:24px 0;background:#FAF5F7;}
   .device{
-    height:812px;
+    /* On tablets in landscape the viewport can be SHORTER than 812px;
+       cap to the viewport so the device frame never overflows below
+       the visible area. min(812px, ...) keeps phone-frame look on
+       desktop while adapting on iPad landscape (~768px tall). */
+    height:min(812px, calc(100dvh - 48px));
     border-radius:44px;
     /* Beveled effect: bright highlight top-left, dark shadow bottom-right, deep drop shadow */
     box-shadow:
@@ -4744,8 +4754,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.1',     /* __APP_BUILD_NAME__   */
-  android: 216,         /* __APP_BUILD_ANDROID__ */
-  ios:     21,          /* __APP_BUILD_IOS__     */
+  android: 217,         /* __APP_BUILD_ANDROID__ */
+  ios:     22,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -17119,12 +17129,4 @@ function closeReleaseWizard() {
       <button onclick="closeMyPhotoTagSheet()" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted);line-height:1;">&times;</button>
     </div>
     <div style="overflow-y:auto;padding:0 18px 24px;">
-      <img id="myph-tag-sheet-img" src="" alt="" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:14px;margin-bottom:14px;background:var(--cream);"/>
-      <div id="myph-tag-sheet-chips"></div>
-      <div style="font-size:11px;color:var(--muted);text-align:center;margin-top:14px;font-style:italic;">Changes save automatically.</div>
-      <!-- Destructive action — isolated at the bottom of the sheet so a
-           mis-tap doesn't wipe a photo while the user is tagging. Calls
-           removeMyPhotoFromGallery() which handles the splice + PATCH +
-           storage cleanup + re-render. 2026-04-23 per Anne: "we have a
-           gallery now, we can remove photos from there." -->
-      <button type="button" onclick="removeMyPhotoFromGallery()" style="width:100%;margin-top:18px;padding:11px;border-radius:
+      <img id="myph-tag-sheet-img" src="" alt="" style="width:100%;aspect-ratio:1;object-fit:cover;border
