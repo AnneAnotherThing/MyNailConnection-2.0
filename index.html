@@ -116,6 +116,46 @@ body{font-family:'DM Sans',sans-serif;background:#FAF5F7;display:flex;justify-co
     outline: none;
     border: none;
   }
+
+  /* ── iPad / tablet modal clamp ──────────────────────────────────────────
+     Every modal in the app is `position:fixed; inset:0` anchored to the
+     viewport. On a phone that's identical to the .device frame, but on
+     iPad the viewport is much bigger than the centered 430×812 phone
+     frame, so:
+       • bottom-sheet modals (align-items:flex-end) slide up from the
+         bottom of the iPad screen, not the bottom of the phone frame,
+         landing far below where the user tapped
+       • centered overlays sit on a giant tan backdrop disconnected from
+         the .device the user is interacting with
+     This block clamps every modal/overlay to the same footprint as
+     .device so the modal feels attached to the phone, not floating on
+     the iPad. !important is required because the modals carry their
+     anchoring (position/inset) as inline style attributes. — 2026-04-30 */
+  .modal-overlay,
+  #tutorial-overlay,
+  #tech-edit-modal,
+  #upgrade-modal,
+  #confirm-modal,
+  #user-edit-modal,
+  #filters-modal,
+  #browse-pref-modal,
+  #welcome-back-sheet,
+  #stripe-welcome-modal,
+  #post-upload-success-modal,
+  #release-wizard-modal,
+  #myph-tag-sheet,
+  #feedback-modal {
+    top: 24px !important;
+    left: 50% !important;
+    right: auto !important;
+    bottom: auto !important;
+    width: 430px !important;
+    max-width: 100vw !important;
+    height: min(812px, calc(100dvh - 48px)) !important;
+    transform: translateX(-50%) !important;
+    border-radius: 44px !important;
+    overflow: hidden !important;
+  }
 }
 
 /* All screens fill the device exactly — never wider */
@@ -4186,7 +4226,8 @@ async function purchasePhotos(qty) {
       // a beat then re-fetch tier so the UI reflects the new credit count.
       setTimeout(function(){ try { loadTechTier(currentUserEmail); } catch(_){} }, 2000);
     } else if (result.reason !== 'cancelled') {
-      showToast('Purchase failed. Please try again.');
+      if (IAP_DIAGNOSTIC_MODE) alert(_iapDiagnosticMessage(result));
+      else showToast('Purchase failed. Please try again.');
     }
     return;
   }
@@ -4215,7 +4256,8 @@ async function purchaseUnlimited() {
       showToast("You're on Glow Up — post a new look every day, every upload goes to the feed!");
       setTimeout(function(){ try { loadTechTier(currentUserEmail); } catch(_){} }, 2000);
     } else if (result.reason !== 'cancelled') {
-      showToast('Subscription failed. Please try again.');
+      if (IAP_DIAGNOSTIC_MODE) alert(_iapDiagnosticMessage(result));
+      else showToast('Subscription failed. Please try again.');
     }
     return;
   }
@@ -4551,6 +4593,16 @@ const IAP_PRODUCT_GLOW_UP     = 'com.mynailconnection.app.glow_up_monthly';
 const IAP_PRODUCT_SPOTLIGHT_1 = 'com.mynailconnection.app.spotlight_1';
 const IAP_PRODUCT_SPOTLIGHT_10= 'com.mynailconnection.app.spotlight_10';
 
+// While debugging IAP failures during App Review prep, this flag swaps the
+// generic "Purchase failed." toast for a verbose native alert() that names
+// the actual failure branch (plugin missing vs product not found vs RC
+// error vs the underlying error string). The point is to learn WHICH
+// branch fails on Leslie's device when the Apple sandbox sheet never
+// appears — the generic toast tells us nothing. Flip to false before the
+// production App Store submission so end-users don't see internal jargon.
+// — 2026-04-30
+const IAP_DIAGNOSTIC_MODE = true;
+
 // Platform check: TRUE only when running inside the iOS Capacitor shell
 // (not Safari on iPhone, not the PWA). All Apple IAP routing keys off this.
 function isIOS() {
@@ -4639,6 +4691,31 @@ async function purchaseIAP(productId) {
   }
 }
 window.purchaseIAP = purchaseIAP;
+
+// Build a verbose diagnostic message from a purchaseIAP() failure result.
+// Used by purchasePhotos / purchaseUnlimited when IAP_DIAGNOSTIC_MODE is on.
+// Each branch corresponds to a specific failure mode in purchaseIAP — the
+// alert text spells out the most likely root cause so we can fix the right
+// thing without round-tripping a build. Order matches purchaseIAP's return
+// shapes. — 2026-04-30
+function _iapDiagnosticMessage(result) {
+  if (!result) return 'IAP DIAG: no result returned from purchaseIAP().';
+  const r = result.reason || 'unknown';
+  const det = result.error ? '\n\nDetail: ' + String(result.error).slice(0, 240) : '';
+  switch (r) {
+    case 'plugin_unavailable':
+      return 'IAP DIAG: plugin_unavailable\n\nThe @revenuecat/purchases-capacitor plugin is not registered on window.Capacitor.Plugins.Purchases. The pod likely did not get bundled into the iOS build. Capawesome build needs to npm install + npx cap sync ios so the plugin is added to the Podfile and pod install picks it up.';
+    case 'product_not_found':
+      return 'IAP DIAG: product_not_found for ' + (result.productId || '(unknown product)') + '\n\nRevenueCat is loaded but Apple returned no products for this ID. Most likely causes (in order):\n\n1. The In-App Purchase capability is not enabled on the iOS App ID (Apple Developer portal → Identifiers → com.mynailconnection.app → Capabilities).\n2. The capability is enabled on the App ID but the provisioning profile in this build is stale and does not include it.\n3. The products are in App Store Connect but not in "Ready to Submit" status.\n4. The Bundle ID in the build does not match what RevenueCat / App Store Connect expect.';
+    case 'error':
+      return 'IAP DIAG: error from RevenueCat / StoreKit.' + det;
+    case 'cancelled':
+      return 'IAP DIAG: user cancelled (this should never reach the diagnostic — bug in caller logic).';
+    default:
+      return 'IAP DIAG: unknown reason "' + r + '".' + det;
+  }
+}
+window._iapDiagnosticMessage = _iapDiagnosticMessage;
 
 // Restore previously-purchased subscriptions/non-consumables. Required by
 // Apple — the App Store reviewer expects a "Restore Purchases" path.
@@ -4754,7 +4831,7 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.1',     /* __APP_BUILD_NAME__   */
-  android: 217,         /* __APP_BUILD_ANDROID__ */
+  android: 218,         /* __APP_BUILD_ANDROID__ */
   ios:     22,          /* __APP_BUILD_IOS__     */
 };
 
@@ -17090,43 +17167,4 @@ function closeReleaseWizard() {
         <div style="font-family:'Playfair Display',serif;font-size:18px;font-weight:600;color:var(--charcoal);line-height:1.2;">Tag &amp; caption to release</div>
         <div id="rw-step-counter" style="font-size:11px;color:var(--muted);margin-top:2px;letter-spacing:0.4px;text-transform:uppercase;font-weight:600;">Photo 1 of 1</div>
       </div>
-      <button onclick="closeReleaseWizard()" aria-label="Close" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted);line-height:1;padding:4px 8px;">&times;</button>
-    </div>
-    <div style="overflow-y:auto;padding:0 18px 12px;flex:1 1 auto;">
-      <img id="rw-photo-img" src="" alt="" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:14px;margin-bottom:14px;background:var(--cream);"/>
-      <div style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;">Caption <span style="color:var(--rose);">*</span></div>
-      <textarea id="rw-caption" rows="2" maxlength="240" placeholder="Say something about this set — technique, inspiration, client vibe…" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:12px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--charcoal);background:var(--cream);resize:vertical;min-height:58px;margin-bottom:14px;box-sizing:border-box;"></textarea>
-      <div style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;">Tags <span style="color:var(--rose);">*</span> <span style="color:var(--muted);font-weight:500;text-transform:none;letter-spacing:0;">(at least one)</span></div>
-      <div id="rw-chips"></div>
-      <!-- Destination hint — updated per-photo by renderReleaseWizardStep
-           based on the photo's slot_type. "credit" → portfolio-only copy;
-           "weekly"/"free" → feed+portfolio copy. -->
-      <div id="rw-destination-hint" style="font-size:12px;margin-top:12px;padding:8px 10px;background:var(--cream);border-radius:8px;line-height:1.4;"></div>
-      <div id="rw-error" style="display:none;color:#B3261E;font-size:12px;margin-top:10px;padding:8px 10px;background:#FDECEA;border-radius:8px;"></div>
-    </div>
-    <div style="padding:12px 18px 18px;border-top:1px solid var(--border);flex-shrink:0;background:white;">
-      <button id="rw-release-btn" onclick="releaseCurrentWizardPhoto()" class="btn btn-rose" style="width:100%;margin-bottom:8px;">Release to feed →</button>
-      <div style="display:flex;gap:8px;">
-        <button onclick="skipCurrentWizardPhoto()" class="btn btn-outline" style="flex:1;font-size:13px;">Skip for now</button>
-        <button onclick="closeReleaseWizard()" style="flex:1;padding:12px;border-radius:100px;border:1.5px solid var(--border);background:white;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;">Finish later</button>
-      </div>
-      <div style="font-size:11px;color:var(--muted);text-align:center;margin-top:10px;line-height:1.5;">Skipped photos stay in your portfolio but won't appear in the feed until you tag them.</div>
-    </div>
-  </div>
-</div>
-
-<!-- ════════════════════════════════════════════════════════════════════════
-     MY-GALLERY TAG EDITOR SHEET
-     Tap a photo in the gallery grid → this bottom sheet opens with the
-     photo preview + tag chips grouped by category. Chips save via the
-     same toggleMyPhotoTag() path the old inline cards used. Closing the
-     sheet keeps the tech on the gallery grid, preserving scroll. 2026-04-22. -->
-<div id="myph-tag-sheet" class="modal-overlay" style="display:none;position:fixed;inset:0;z-index:9060;background:rgba(20,10,15,0.72);backdrop-filter:blur(4px);align-items:flex-end;justify-content:center;">
-  <div style="background:white;border-radius:28px 28px 0 0;width:100%;max-width:440px;max-height:88vh;display:flex;flex-direction:column;box-shadow:0 -8px 40px rgba(0,0,0,0.22);">
-    <div style="width:40px;height:4px;background:var(--border);border-radius:100px;margin:12px auto 8px;flex-shrink:0;"></div>
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 18px 12px;flex-shrink:0;">
-      <div style="font-family:'Playfair Display',serif;font-size:17px;font-weight:600;color:var(--charcoal);">Tag this photo</div>
-      <button onclick="closeMyPhotoTagSheet()" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted);line-height:1;">&times;</button>
-    </div>
-    <div style="overflow-y:auto;padding:0 18px 24px;">
-      <img id="myph-tag-sheet-img" src="" alt="" style="width:100%;aspect-ratio:1;object-fit:cover;border
+      <button onclick="closeReleaseWizard()" aria-label="Close" style="background:non

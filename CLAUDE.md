@@ -148,6 +148,12 @@ exclusive, they just represent the two URLs each deploy target serves.
 - [ ] Supabase URL Configuration reviewed (Site URL + Redirect URLs)
       before any `auth/v1/recover` test.
 - [ ] Dry-run password reset on Anne's own account before batch sends.
+- [ ] **Before App Store production submission only:** grep `index.html`
+      for `IAP_DIAGNOSTIC_MODE = true` and flip to `false`, then re-run
+      `deploy/sync.sh`. The flag swaps the generic "Purchase failed"
+      toast for a verbose native `alert()` naming the IAP failure
+      branch — useful for TestFlight debugging, NOT for end-users.
+      Added 2026-04-30 during pre-submission diagnostics.
 
 ## Folder layout (as of 2026-04-18 — after organizing)
 
