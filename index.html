@@ -5207,12 +5207,24 @@ async function initCapacitorPush() {
   const { PushNotifications } = window.Capacitor.Plugins;
   if (!PushNotifications) return;
 
-  // Request permission
-  const perm = await PushNotifications.requestPermissions();
-  if (perm.receive !== 'granted') return;
-
-  // Register with APNs/FCM
-  await PushNotifications.register();
+  // CRITICAL: wrap the permission + register calls in try/catch.
+  // Without this, a misconfigured FCM build (missing or stale
+  // google-services.json) caused a hard crash sequence on Android 13+:
+  //   user taps "Allow" on POST_NOTIFICATIONS dialog
+  //   → PushNotifications.register() calls FirebaseMessaging.getToken()
+  //   → Firebase not initialized → native Java exception → activity dies
+  //   → user reopens, lands on home (session persisted), thinks "weird"
+  // That's exactly what blocked the 2026-04 Play Store submission and
+  // matches the screenshot Google's reviewer attached. Defensive try/catch
+  // means worst case is "no push for this user" — never a crash. — 2026-04-30
+  try {
+    const perm = await PushNotifications.requestPermissions();
+    if (perm.receive !== 'granted') return;
+    await PushNotifications.register();
+  } catch (e) {
+    console.warn('Capacitor push init failed, continuing without push:', e);
+    return;
+  }
 
   // Get the device token and save to Supabase
   PushNotifications.addListener('registration', async (token) => {
@@ -5481,10 +5493,17 @@ async function signInWithEmail(email, password) {
 
     updateAvatar();
     loadUserAvailability(emailVal);
-    initCapacitorPush(); // init native push if in app shell
     initRevenueCat();    // init Apple IAP via RevenueCat (iOS only, no-op elsewhere)
     var needsPasswordChange = await checkFirstLogin(emailVal);
     if (needsPasswordChange) { show('change-password-screen'); } else { await showCorrectHome(); }
+    // Push init is deferred until AFTER the home screen renders. The
+    // POST_NOTIFICATIONS prompt + FCM register call have crashed the
+    // WebView on misconfigured Android builds (see the try/catch inside
+    // initCapacitorPush for the gory detail). Even if anything goes wrong
+    // there now, the user already has a usable signed-in home — no
+    // "login bounce" symptom. The setTimeout gives the home screen a beat
+    // to paint before native code touches Firebase. — 2026-04-30
+    setTimeout(function() { try { initCapacitorPush(); } catch(_){} }, 1500);
   } catch(e) {
     console.warn('signIn error:', e);
     showAuthError('Sign in failed. Please check your connection and try again.');

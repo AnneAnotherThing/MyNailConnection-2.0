@@ -5207,12 +5207,24 @@ async function initCapacitorPush() {
   const { PushNotifications } = window.Capacitor.Plugins;
   if (!PushNotifications) return;
 
-  // Request permission
-  const perm = await PushNotifications.requestPermissions();
-  if (perm.receive !== 'granted') return;
-
-  // Register with APNs/FCM
-  await PushNotifications.register();
+  // CRITICAL: wrap the permission + register calls in try/catch.
+  // Without this, a misconfigured FCM build (missing or stale
+  // google-services.json) caused a hard crash sequence on Android 13+:
+  //   user taps "Allow" on POST_NOTIFICATIONS dialog
+  //   → PushNotifications.register() calls FirebaseMessaging.getToken()
+  //   → Firebase not initialized → native Java exception → activity dies
+  //   → user reopens, lands on home (session persisted), thinks "weird"
+  // That's exactly what blocked the 2026-04 Play Store submission and
+  // matches the screenshot Google's reviewer attached. Defensive try/catch
+  // means worst case is "no push for this user" — never a crash. — 2026-04-30
+  try {
+    const perm = await PushNotifications.requestPermissions();
+    if (perm.receive !== 'granted') return;
+    await PushNotifications.register();
+  } catch (e) {
+    console.warn('Capacitor push init failed, continuing without push:', e);
+    return;
+  }
 
   // Get the device token and save to Supabase
   PushNotifications.addListener('registration', async (token) => {
@@ -5481,10 +5493,17 @@ async function signInWithEmail(email, password) {
 
     updateAvatar();
     loadUserAvailability(emailVal);
-    initCapacitorPush(); // init native push if in app shell
     initRevenueCat();    // init Apple IAP via RevenueCat (iOS only, no-op elsewhere)
     var needsPasswordChange = await checkFirstLogin(emailVal);
     if (needsPasswordChange) { show('change-password-screen'); } else { await showCorrectHome(); }
+    // Push init is deferred until AFTER the home screen renders. The
+    // POST_NOTIFICATIONS prompt + FCM register call have crashed the
+    // WebView on misconfigured Android builds (see the try/catch inside
+    // initCapacitorPush for the gory detail). Even if anything goes wrong
+    // there now, the user already has a usable signed-in home — no
+    // "login bounce" symptom. The setTimeout gives the home screen a beat
+    // to paint before native code touches Firebase. — 2026-04-30
+    setTimeout(function() { try { initCapacitorPush(); } catch(_){} }, 1500);
   } catch(e) {
     console.warn('signIn error:', e);
     showAuthError('Sign in failed. Please check your connection and try again.');
@@ -17083,15 +17102,4 @@ function closeReleaseWizard() {
   </div>
 </div>
 
-<!-- ════════════════════════════════════════════════════════════════════════
-     FEEDBACK BUTTON + MODAL
-     Floating chip on every signed-in screen; taps open a modal that
-     writes into public.feedback. Auto-captures current screen, user
-     agent, and a rolling buffer of console errors/warnings. 2026-04-22. -->
-<button id="feedback-fab" onclick="openFeedbackModal()" aria-label="Send feedback" style="display:none;position:fixed;right:14px;bottom:86px;z-index:850;background:var(--rose);color:white;border:none;border-radius:100px;padding:10px 16px;font-size:13px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;box-shadow:0 4px 14px rgba(178,110,95,0.35),0 1px 3px rgba(0,0,0,0.18);align-items:center;gap:7px;">
-  <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
-  Feedback
-</button>
-
-<div id="feedback-modal" class="modal-overlay" style="display:none;position:fixed;inset:0;z-index:9100;background:rgba(20,10,15,0.72);backdrop-filter:blur(4px);align-items:flex-end;justify-content:center;">
-  <div style="background:white;border-radius:28px 28px 0 0;width:100%;ma
+<!-- ═════════════════════════════════
