@@ -72,11 +72,20 @@ serve(async (req) => {
   }
 
   let payload: any;
-  try { payload = await req.json(); }
-  catch { return new Response('bad json', { status: 400 }); }
+  let rawBody: string = '';
+  try {
+    rawBody = await req.text();
+    payload = JSON.parse(rawBody);
+  } catch (e) {
+    console.warn('webhook bad json:', rawBody.slice(0, 500), 'err:', String(e));
+    return new Response('bad json', { status: 400 });
+  }
 
   const event = payload && payload.event;
-  if (!event) return new Response('no event', { status: 400 });
+  if (!event) {
+    console.warn('webhook no event in payload — top-level keys:', Object.keys(payload || {}));
+    return new Response('no event', { status: 400 });
+  }
 
   const eventType: string = event.type || '';
   const productId: string = event.product_id || '';
@@ -86,7 +95,29 @@ serve(async (req) => {
   const originalTransactionId: string = event.original_transaction_id || event.transaction_id || '';
   const purchaseToken: string | undefined = event.purchase_token; // Google only
 
+  // Log every incoming event with key fields so we can see the shape
+  // RevenueCat is actually sending. Critical when a webhook returns 400
+  // and we can't tell from the dashboard alone which validation failed.
+  // — 2026-04-30 instrumentation; remove once IAP is stable.
+  console.log('webhook event received', JSON.stringify({
+    type: eventType,
+    product_id: productId || '(missing)',
+    app_user_id: appUserId || '(missing)',
+    store,
+    transaction_id: originalTransactionId || '(missing)',
+    event_keys: Object.keys(event)
+  }));
+
   if (!appUserId || !productId) {
+    // Some RC event types legitimately don't carry product_id — e.g. TRANSFER
+    // (when purchases move between app_user_ids) and SUBSCRIBER_ALIAS.
+    // Returning 200 with "ignored" so RC doesn't endlessly retry, but log so
+    // we know it happened and can decide later whether to wire up handling.
+    if (eventType === 'TRANSFER' || eventType === 'SUBSCRIBER_ALIAS' || eventType === 'TEST') {
+      console.log('webhook event ignored (no product_id expected for type):', eventType);
+      return new Response('ok (event type has no product_id)', { status: 200 });
+    }
+    console.warn('webhook missing app_user_id or product_id for type:', eventType, 'event keys:', Object.keys(event));
     return new Response('missing app_user_id or product_id', { status: 400 });
   }
 
