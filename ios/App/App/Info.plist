@@ -57,5 +57,14 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+	<!-- Encryption export compliance — declares that MNC uses no
+	     non-exempt encryption. The app uses only HTTPS (TLS) which is
+	     exempt under US export regulations §740.17(b)(3)(i). Setting
+	     this to <false/> bypasses Apple's per-build export-compliance
+	     question in App Store Connect on every submission.
+	     Reference: https://developer.apple.com/documentation/security/complying_with_encryption_export_regulations
+	     2026-04-30 -->
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 </dict>
 </plist>
