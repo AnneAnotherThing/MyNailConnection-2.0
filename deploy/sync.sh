@@ -117,6 +117,13 @@ else
         ios_next=$((ios_current + 1))
         sed "s/CURRENT_PROJECT_VERSION = ${ios_current};/CURRENT_PROJECT_VERSION = ${ios_next};/g" \
           "$PBX" > "$PBX.tmp" && mv "$PBX.tmp" "$PBX"
+        # Mirror into index.html APP_BUILD.ios so the in-app build tag
+        # rendered on the sign-in screen stays accurate. Sentinel comment
+        # __APP_BUILD_IOS__ is unique enough to grep without false hits.
+        if [ -f index.html ]; then
+          sed -E "s|ios:[[:space:]]+[0-9]+,([[:space:]]*/\* __APP_BUILD_IOS__)|ios:     ${ios_next},\1|" \
+            index.html > index.html.tmp && mv index.html.tmp index.html
+        fi
         echo "  bumped iOS CFBundleVersion: ${ios_current} → ${ios_next}"
       fi
     fi
@@ -130,6 +137,11 @@ else
         sed "s/versionCode ${android_current}$/versionCode ${android_next}/" \
           android/app/build.gradle > android/app/build.gradle.tmp \
           && mv android/app/build.gradle.tmp android/app/build.gradle
+        # Mirror into index.html APP_BUILD.android (see iOS comment above).
+        if [ -f index.html ]; then
+          sed -E "s|android:[[:space:]]+[0-9]+,([[:space:]]*/\* __APP_BUILD_ANDROID__)|android: ${android_next},\1|" \
+            index.html > index.html.tmp && mv index.html.tmp index.html
+        fi
         echo "  bumped Android versionCode: ${android_current} → ${android_next}"
       fi
     fi
