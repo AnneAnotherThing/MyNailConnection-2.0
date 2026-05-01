@@ -5058,8 +5058,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.1',     /* __APP_BUILD_NAME__   */
-  android: 240,         /* __APP_BUILD_ANDROID__ */
-  ios:     45,          /* __APP_BUILD_IOS__     */
+  android: 239,         /* __APP_BUILD_ANDROID__ */
+  ios:     44,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -5265,15 +5265,6 @@ async function refreshSession() {
     if (!res.ok) { clearSession(); return null; }
     const data = await res.json();
     if (!data || !data.access_token) { clearSession(); return null; }
-    // Preserve the user object across refresh. Supabase's refresh-token
-    // endpoint doesn't always include user in its response, so without
-    // this carry-forward saveSession would write user:null. That breaks
-    // currentUser on the next restorePersistedSession, which breaks
-    // initRevenueCat (bails on !currentUser.id), which breaks IAP with
-    // "Purchases must be configured." The bug surfaced ~1hr after each
-    // sign-in (when the access token first refreshes). 2026-04-30 — this
-    // is the actual root cause of the recurring IAP regression.
-    if (!data.user && s.user) data.user = s.user;
     saveSession(data);
     return loadSession();
   } catch(e) { return null; }

@@ -5058,8 +5058,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.1',     /* __APP_BUILD_NAME__   */
-  android: 238,         /* __APP_BUILD_ANDROID__ */
-  ios:     43,          /* __APP_BUILD_IOS__     */
+  android: 240,         /* __APP_BUILD_ANDROID__ */
+  ios:     45,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -5265,6 +5265,15 @@ async function refreshSession() {
     if (!res.ok) { clearSession(); return null; }
     const data = await res.json();
     if (!data || !data.access_token) { clearSession(); return null; }
+    // Preserve the user object across refresh. Supabase's refresh-token
+    // endpoint doesn't always include user in its response, so without
+    // this carry-forward saveSession would write user:null. That breaks
+    // currentUser on the next restorePersistedSession, which breaks
+    // initRevenueCat (bails on !currentUser.id), which breaks IAP with
+    // "Purchases must be configured." The bug surfaced ~1hr after each
+    // sign-in (when the access token first refreshes). 2026-04-30 — this
+    // is the actual root cause of the recurring IAP regression.
+    if (!data.user && s.user) data.user = s.user;
     saveSession(data);
     return loadSession();
   } catch(e) { return null; }
@@ -15090,50 +15099,90 @@ async function deleteUser(idx) {
   if (!u) return;
   if (!(await showConfirm('Delete ' + u.name + '?', { body: 'This removes their account and all their data. This cannot be undone.', okLabel: 'Delete user' }))) return;
 
+  // Use the signed-in admin's JWT for DELETEs — the anon key gets RLS-
+  // rejected silently (the row stays in Supabase even though the UI
+  // pretends it deleted). Anne 2026-04-30: bug found post-launch.
+  const authHeader = 'Bearer ' + (window._mncAccessToken || SUPABASE_ANON_KEY);
+  const failures = [];
+
   try {
-    // Delete storage photos if any
+    // 1. Delete avatar storage object if any (best-effort — protect_delete()
+    //    trigger may block; that's the orphan-storage tradeoff documented
+    //    in reference_supabase_storage_delete_blocked memory).
     const photoUrl = u.image_url || u.avatar_url || '';
     if (photoUrl && photoUrl.includes('/storage/v1/object/public/tech-photos/')) {
       const filePath = photoUrl.split('/storage/v1/object/public/tech-photos/')[1];
-      await fetch(SUPABASE_URL + '/storage/v1/object/tech-photos/' + filePath, {
-        method: 'DELETE',
-        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY }
-      }).catch(() => {});
+      try {
+        await fetch(SUPABASE_URL + '/storage/v1/object/tech-photos/' + filePath, {
+          method: 'DELETE',
+          headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': authHeader }
+        });
+      } catch(_) {}
     }
 
-    // Delete gallery photos if tech
+    // 2. Delete gallery photos if tech (best-effort)
     const tech = ALL_TECHS.find(t => t.email === u.email);
     if (tech && tech.photos) {
       for (const p of tech.photos) {
         const url = p.url || p;
         if (url && url.includes('/storage/v1/object/public/tech-photos/')) {
           const filePath = url.split('/storage/v1/object/public/tech-photos/')[1];
-          await fetch(SUPABASE_URL + '/storage/v1/object/tech-photos/' + filePath, {
-            method: 'DELETE',
-            headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY }
-          }).catch(() => {});
+          try {
+            await fetch(SUPABASE_URL + '/storage/v1/object/tech-photos/' + filePath, {
+              method: 'DELETE',
+              headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': authHeader }
+            });
+          } catch(_) {}
         }
       }
     }
 
-    // Delete from all DB tables
-    for (const table of ['users', 'techs']) {
-      await fetch(SUPABASE_URL + '/rest/v1/' + table + '?email=eq.' + encodeURIComponent(u.email), {
-        method: 'DELETE',
-        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY }
-      }).catch(() => {});
+    // 3. Delete public DB rows — DELETE techs FIRST, then users (FK order).
+    //    Surface failures: if RLS rejects (insufficient policy or stale
+    //    JWT) we do NOT remove from local state and we tell the user.
+    //    Requires a `users_delete_admin` RLS policy on public.users —
+    //    see sql/admin-user-delete-policy.sql.
+    for (const table of ['techs', 'users']) {
+      try {
+        const r = await fetch(SUPABASE_URL + '/rest/v1/' + table + '?email=eq.' + encodeURIComponent(u.email), {
+          method: 'DELETE',
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': authHeader,
+            'Prefer': 'return=representation'
+          }
+        });
+        if (!r.ok) {
+          failures.push(table + ' (HTTP ' + r.status + ')');
+        } else {
+          // 200 with empty array means RLS matched 0 rows — silent fail.
+          try {
+            const body = await r.json();
+            if (Array.isArray(body) && body.length === 0) {
+              failures.push(table + ' (no rows matched — RLS or missing row)');
+            }
+          } catch(_) {}
+        }
+      } catch(e) {
+        failures.push(table + ' (' + (e && e.message ? e.message : 'network') + ')');
+      }
     }
   } catch(e) {
-    showToast('' + e.message);
+    showToast('' + (e && e.message ? e.message : 'delete failed'));
     return;
   }
 
-  // Remove from local arrays
+  if (failures.length) {
+    showToast("Couldn't fully delete — " + failures.join(', '), 6000);
+    return;
+  }
+
+  // All DB deletes succeeded — remove from local arrays
   ALL_USERS.splice(idx, 1);
   const tidx = ALL_TECHS.findIndex(t => t.email === u.email);
   if (tidx > -1) ALL_TECHS.splice(tidx, 1);
 
-  showToast(u.name + ' deleted');
+  showToast(u.name + ' deleted (auth.users row may still exist — purge manually if needed)');
   initUsers();
   renderUsers();
 }
