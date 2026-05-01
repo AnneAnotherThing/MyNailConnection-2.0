@@ -3399,7 +3399,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
                confusion on free tier, and surfaces "5 of 5 weekly · refills Sun"
                for Glow Up subscribers. 2026-04-23 per Anne. -->
           <div id="te-slots-remaining" data-slots-remaining
-               style="font-size:14px;font-weight:700;color:white;background:linear-gradient(135deg,var(--rose) 0%,var(--rose-dark) 100%);padding:8px 16px;border-radius:100px;box-shadow:0 3px 10px rgba(196,120,106,0.4);letter-spacing:0.4px;"></div>
+               style="font-size:11px;font-weight:600;color:var(--rose-dark);background:var(--rose-light);padding:4px 10px;border-radius:100px;letter-spacing:0.1px;"></div>
         </div>
         <!-- ── File picker / drop zone ──────────────────────────────── -->
         <div id="te-bulk-drop-zone"
@@ -3983,85 +3983,6 @@ async function removeTechPhotoByUrl(url) {
     });
   } catch(e) { try { console.warn('removeTechPhotoByUrl:', e); } catch(_){} }
 }
-
-// ── Credit refund on Cancel — undo unsaved uploads ────────────────────────
-// Anne's bug 2026-04-30: tech buys 10 credits, picks photos, photos appear
-// in the grid (UI only — credits already consumed by consumeUploadSlot),
-// hits Cancel — credits gone, photos never persisted to techs.photos.
-// Fix: when closeTechEdit runs WITHOUT a save, diff edit.photos against
-// the DB's current techs.photos to find uploads that were credited but
-// never persisted (storage upload didn't finish in time, or webhook
-// hadn't landed). Refund the consumed slots/credits/free counter for
-// each uncommitted upload. Best-effort PATCH — race window with concurrent
-// webhook updates is small and acceptable for shipping.
-let _techEditWasSaved = false;
-window._techEditWasSaved = false;
-
-async function _refundUnsavedSessionUploads() {
-  try {
-    if (!currentEditTech || !currentUserEmail) return;
-    const editKey = currentEditTech.name || '__new__';
-    const edit = techEdits[editKey];
-    if (!edit || !Array.isArray(edit.photos) || edit.photos.length === 0) return;
-    // Re-fetch DB state to know what's actually persisted
-    const r = await fetch(SUPABASE_URL + '/rest/v1/techs?email=eq.' + encodeURIComponent(currentUserEmail) +
-      '&select=photos,photo_credits,period_upload_count,lifetime_free_used', {
-      headers: {
-        'apikey': SUPABASE_ANON_KEY,
-        'Authorization': 'Bearer ' + (window._mncAccessToken || SUPABASE_ANON_KEY)
-      }
-    });
-    if (!r.ok) return;
-    const rows = await r.json();
-    if (!rows || !rows[0]) return;
-    const dbRow = rows[0];
-    const dbPhotos = dbRow.photos || [];
-    const dbUrls = new Set(
-      dbPhotos.map(function(p){ return (typeof p === 'string') ? p : (p && p.url); })
-              .filter(Boolean)
-    );
-    // Uploads that the UI has, but the DB doesn't yet — these were credited
-    // but never made it to disk. Refund them.
-    const uncommitted = edit.photos.filter(function(p){
-      return p && p.url && !dbUrls.has(p.url) && p.slot_type;
-    });
-    if (uncommitted.length === 0) return;
-    // Tally by slot_type so we can adjust the right counters
-    const counts = { credit: 0, weekly: 0, free: 0 };
-    uncommitted.forEach(function(p){
-      if (counts[p.slot_type] !== undefined) counts[p.slot_type]++;
-    });
-    const updates = {};
-    if (counts.credit > 0) updates.photo_credits       = (dbRow.photo_credits || 0) + counts.credit;
-    if (counts.weekly > 0) updates.period_upload_count = Math.max(0, (dbRow.period_upload_count || 0) - counts.weekly);
-    if (counts.free   > 0) updates.lifetime_free_used  = Math.max(0, (dbRow.lifetime_free_used  || 0) - counts.free);
-    if (Object.keys(updates).length === 0) return;
-    await fetch(SUPABASE_URL + '/rest/v1/techs?email=eq.' + encodeURIComponent(currentUserEmail), {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        'apikey': SUPABASE_ANON_KEY,
-        'Authorization': 'Bearer ' + (window._mncAccessToken || SUPABASE_ANON_KEY),
-        'Prefer': 'return=minimal'
-      },
-      body: JSON.stringify(updates)
-    });
-    // Refresh local tier so the UI reflects the refund
-    try { if (typeof loadTechTier === 'function') await loadTechTier(currentUserEmail); } catch(_){}
-    try { if (typeof updatePhotoLimitUI === 'function') updatePhotoLimitUI(); } catch(_){}
-    // User-facing toast so they know the cancel was clean
-    const parts = [];
-    if (counts.credit) parts.push(counts.credit + ' credit'  + (counts.credit > 1 ? 's' : ''));
-    if (counts.weekly) parts.push(counts.weekly + ' monthly slot' + (counts.weekly > 1 ? 's' : ''));
-    if (counts.free)   parts.push(counts.free   + ' free upload'  + (counts.free   > 1 ? 's' : ''));
-    if (parts.length && typeof showToast === 'function') {
-      showToast('Cancelled — ' + parts.join(' + ') + ' returned to your account.');
-    }
-  } catch(e) {
-    try { console.warn('refund failed:', e); } catch(_){}
-  }
-}
-window._refundUnsavedSessionUploads = _refundUnsavedSessionUploads;
 
 // Per-file RPC gate. Calls public.consume_upload_slot(email) which
 // atomically reserves a slot (weekly → credit → free fallback) and
@@ -5056,8 +4977,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.1',     /* __APP_BUILD_NAME__   */
-  android: 237,         /* __APP_BUILD_ANDROID__ */
-  ios:     42,          /* __APP_BUILD_IOS__     */
+  android: 234,         /* __APP_BUILD_ANDROID__ */
+  ios:     39,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -8675,11 +8596,6 @@ async function openTechEditFromProfile() {
 }
 
 function closeTechEdit() {
-  // Refund any credits/slots used for photos that were uploaded in this
-  // session but never persisted (Cancel without storage-upload completing).
-  // Fire-and-forget — runs async, modal closes immediately. 2026-04-30.
-  if (!_techEditWasSaved) { try { _refundUnsavedSessionUploads(); } catch(_){} }
-  _techEditWasSaved = false;
   document.getElementById('tech-edit-modal').style.display = 'none';
   currentEditTech = null;
 }
@@ -8867,55 +8783,41 @@ async function techEditAddPhotos(input) {
       break;
     }
 
-    // ── Save-immediately model (Anne 2026-04-30) ───────────────────────
-    // Pre-compute the deterministic publicUrl and persist the photo to
-    // techs.photos RIGHT NOW via appendTechPhoto, before storage upload
-    // even starts. Why: prevents the credit-loss-on-Cancel scenario
-    // where credits get consumed but Cancel happens before storage
-    // upload completes. With this flow, the photo IS in the DB the
-    // moment the credit is consumed — no race window. If the user
-    // changes their mind, they can use the X button per photo (already
-    // wired to removeTechPhotoByUrl) to remove from the gallery.
-    // Storage upload still runs in background; on failure, we yank the
-    // entry from both DB and local edit buffer.
+    // Always show base64 preview immediately. slot_type is stamped on
+    // the photo so the release wizard knows whether this upload is
+    // feed-eligible (free/subscriber → yes; credit → portfolio only).
+    // 2026-04-23 portfolio/feed split.
     const _slotType = slot.slot_type || null;
-    const _ext = file.name.split('.').pop() || 'jpg';
-    const _fileName = 'gallery/' + techSlug + '/' + Date.now() + '-' + Math.random().toString(36).slice(2,7) + '.' + _ext;
-    const _publicUrl = SUPABASE_URL + '/storage/v1/object/public/tech-photos/' + _fileName;
-    // Persist immediately — race-free against Cancel.
-    try { appendTechPhoto({ url: _publicUrl, tags: [], slot_type: _slotType }); } catch(_){}
     await new Promise(resolve => {
       const reader = new FileReader();
       reader.onload = async function(e) {
         const preview = e.target.result;
-        // Local edit buffer stores the publicUrl (so save flow is consistent)
-        // plus _previewSrc (base64) so renderTePhotoGrid can show the photo
-        // instantly while the storage upload is still in flight.
-        edit.photos.push({ url: _publicUrl, _previewSrc: preview, tags: [], slot_type: _slotType });
+        edit.photos.push({ url: preview, tags: [], slot_type: _slotType });
         added++;
         renderTePhotoGrid(edit.photos);
         resolve();
-        // Background storage upload. On failure, yank from both DB and
-        // local buffer so the publicUrl doesn't sit forever as a 404.
+        // Try to swap base64 with Supabase URL in background
         try {
-          const res = await fetch(SUPABASE_URL + '/storage/v1/object/tech-photos/' + _fileName, {
+          const ext = file.name.split('.').pop() || 'jpg';
+          const fileName = 'gallery/' + techSlug + '/' + Date.now() + '-' + Math.random().toString(36).slice(2,7) + '.' + ext;
+          const res = await fetch(SUPABASE_URL + '/storage/v1/object/tech-photos/' + fileName, {
             method: 'POST',
             headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
                        'Content-Type': file.type, 'x-upsert': 'true' },
             body: file
           });
-          if (!res.ok) throw new Error('upload-failed-' + res.status);
-          // Storage upload succeeded — clear the _previewSrc so subsequent
-          // renders use the real URL (which now resolves).
-          const idx = edit.photos.findIndex(p => p.url === _publicUrl);
-          if (idx !== -1) { delete edit.photos[idx]._previewSrc; }
-        } catch(err) {
-          // Yank — DB + local. User-facing toast so they know.
-          try { await removeTechPhotoByUrl(_publicUrl); } catch(_){}
-          const idx = edit.photos.findIndex(p => p.url === _publicUrl);
-          if (idx !== -1) { edit.photos.splice(idx, 1); renderTePhotoGrid(edit.photos); }
-          try { showToast('Upload failed — photo removed.'); } catch(_){}
-        }
+          if (res.ok) {
+            const publicUrl = SUPABASE_URL + '/storage/v1/object/public/tech-photos/' + fileName;
+            // Replace the base64 entry with the real URL
+            const idx = edit.photos.findIndex(p => p.url === preview);
+            if (idx !== -1) { edit.photos[idx].url = publicUrl; renderTePhotoGrid(edit.photos); }
+            // Write-through autosave — persist this photo to techs.photos
+            // immediately so the user can't lose it by closing the modal
+            // without tapping Save. Best-effort; legacy Save path covers
+            // failures. 2026-04-27.
+            appendTechPhoto({ url: publicUrl, tags: [], slot_type: _slotType });
+          }
+        } catch(err) {} // keep base64 fallback
       };
       reader.readAsDataURL(file);
     });
@@ -9019,22 +8921,18 @@ async function techBulkDropFiles(fileList) {
       break;
     }
 
-    // Save-immediately model — pre-compute publicUrl, persist to DB
-    // RIGHT NOW (before storage upload), then upload in background.
-    // Cancel-after-pick can no longer lose the photo. Same rationale
-    // as the single-picker handler. — Anne 2026-04-30.
-    const _slotType = slot.slot_type || null;
-    const _ext = file.name.split('.').pop() || 'jpg';
-    const _fileName = 'gallery/' + techSlug + '/' + Date.now() + '-' + Math.random().toString(36).slice(2,7) + '.' + _ext;
-    const _publicUrl = SUPABASE_URL + '/storage/v1/object/public/tech-photos/' + _fileName;
-    try { appendTechPhoto({ url: _publicUrl, tags: [], slot_type: _slotType }); } catch(_){}
-    const photoEntry = { url: _publicUrl, _previewSrc: b64data.preview, tags: [], slot_type: _slotType };
+    // Show preview immediately. slot_type stamped on the photo so the
+    // release wizard can tell feed-eligible uploads (free / subscriber)
+    // from portfolio-only ones (credit / pay-per-photo). 2026-04-23.
+    const photoEntry = { url: b64data.preview, tags: [], slot_type: slot.slot_type || null };
     edit.photos.push(photoEntry);
     renderTePhotoGrid(edit.photos);
 
-    // Background storage upload. On failure, yank from DB + local.
+    // Upload to Supabase storage in background
     try {
-      const res = await fetch(SUPABASE_URL + '/storage/v1/object/tech-photos/' + _fileName, {
+      const ext = file.name.split('.').pop() || 'jpg';
+      const fileName = 'gallery/' + techSlug + '/' + Date.now() + '-' + Math.random().toString(36).slice(2,7) + '.' + ext;
+      const res = await fetch(SUPABASE_URL + '/storage/v1/object/tech-photos/' + fileName, {
         method: 'POST',
         headers: {
           'apikey': SUPABASE_ANON_KEY,
@@ -9044,18 +8942,15 @@ async function techBulkDropFiles(fileList) {
         },
         body: file
       });
-      if (!res.ok) throw new Error('upload-failed-' + res.status);
-      // Storage upload OK — drop the inline preview so future renders
-      // use the real URL.
-      const idx = edit.photos.indexOf(photoEntry);
-      if (idx !== -1) { delete edit.photos[idx]._previewSrc; }
-    } catch(e) {
-      try { await removeTechPhotoByUrl(_publicUrl); } catch(_){}
-      const idx = edit.photos.indexOf(photoEntry);
-      if (idx !== -1) { edit.photos.splice(idx, 1); renderTePhotoGrid(edit.photos); }
-      try { showToast('Upload failed — photo removed.'); } catch(_){}
-    }
-
+      if (res.ok) {
+        const publicUrl = SUPABASE_URL + '/storage/v1/object/public/tech-photos/' + fileName;
+        const idx = edit.photos.indexOf(photoEntry);
+        if (idx !== -1) { edit.photos[idx].url = publicUrl; renderTePhotoGrid(edit.photos); }
+        // Write-through autosave (bulk handler). See techEditAddPhotos
+        // for the rationale. 2026-04-27.
+        appendTechPhoto({ url: publicUrl, tags: [], slot_type: photoEntry.slot_type || null });
+      }
+    } catch(e) {} // keep base64 preview as fallback
 
     done++;
     bar.style.width = Math.round((done / total) * 100) + '%';
@@ -9145,7 +9040,7 @@ function renderTePhotoGrid(photos) {
     div.style.cssText = 'border-radius:10px;overflow:hidden;background:var(--cream);border:1.5px solid var(--border);';
 
     var img = document.createElement('img');
-    img.src = (p && p._previewSrc) || p.url || p;
+    img.src = p.url || p;
     img.style.cssText = 'width:100%;aspect-ratio:1;object-fit:cover;display:block;';
 
     var removeBtn = document.createElement('button');
@@ -10504,7 +10399,6 @@ async function saveTechEdit() {
   // on screen, so calling unconditionally here is safe.
   try { if (typeof loadTechHomeStats === 'function') loadTechHomeStats(); } catch(_){}
   try { if (typeof loadTechHomePortfolio === 'function') loadTechHomePortfolio(); } catch(_){}
-  _techEditWasSaved = true;
   closeTechEdit();
   return; // local state update below is now handled by loadTechsFromSupabase
   // Add to ALL_TECHS + ALL_USERS if new, otherwise update existing
