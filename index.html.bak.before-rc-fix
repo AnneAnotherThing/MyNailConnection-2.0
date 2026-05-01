@@ -4863,8 +4863,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.1',     /* __APP_BUILD_NAME__   */
-  android: 231,         /* __APP_BUILD_ANDROID__ */
-  ios:     36,          /* __APP_BUILD_IOS__     */
+  android: 230,         /* __APP_BUILD_ANDROID__ */
+  ios:     35,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -14051,13 +14051,6 @@ async function restorePersistedSession() {
       currentUser = s.user;
       currentUserEmail = (s.user.email || '').toLowerCase();
     }
-
-    // Init RevenueCat now that currentUser is loaded. The sign-in flow
-    // does this at line ~5660; the session-restore path was silently
-    // skipping it, so the first purchase errored with "purchases must be
-    // configured before calling this function" because init had bailed
-    // before configure() ran. — 2026-04-30 (post-launch IAP fix)
-    try { initRevenueCat(); } catch(_){}
 
     // Fetch name so tech-dash and greeting render correctly on first paint.
     if (currentUserEmail) {
