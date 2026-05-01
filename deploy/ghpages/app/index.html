@@ -4233,7 +4233,7 @@ async function purchasePhotos(qty) {
     closeUpgradeModal();
     const result = await purchaseIAP(productId);
     if (result.ok) {
-      if (IAP_DIAGNOSTIC_MODE) alert(_iapSuccessDiagnostic(result));
+      if (IAP_DIAGNOSTIC_SUCCESS_MODE) alert(_iapSuccessDiagnostic(result));
       // Show holding-pattern toast, poll the techs row for the credit
       // increment to land (webhook usually completes in 1-3s but can run
       // up to 10s under load), then show the real success toast and refresh
@@ -4249,7 +4249,7 @@ async function purchasePhotos(qty) {
         showToast('Purchase received. Credits will appear shortly — pull down to refresh.');
       }
     } else if (result.reason !== 'cancelled') {
-      if (IAP_DIAGNOSTIC_MODE) alert(_iapDiagnosticMessage(result));
+      if (IAP_DIAGNOSTIC_FAILURE_MODE) alert(_iapDiagnosticMessage(result));
       else showToast('Purchase failed. Please try again.');
     }
     return;
@@ -4394,7 +4394,7 @@ async function purchaseUnlimited() {
     closeUpgradeModal();
     const result = await purchaseIAP(IAP_PRODUCT_GLOW_UP);
     if (result.ok) {
-      if (IAP_DIAGNOSTIC_MODE) alert(_iapSuccessDiagnostic(result));
+      if (IAP_DIAGNOSTIC_SUCCESS_MODE) alert(_iapSuccessDiagnostic(result));
       _showCreditLoadingBanner('glowup');
       const upgraded = await _waitForTierUpgrade();
       _hideCreditLoadingBanner();
@@ -4404,7 +4404,7 @@ async function purchaseUnlimited() {
         showToast('Subscription received. Glow Up will activate shortly — pull down to refresh.');
       }
     } else if (result.reason !== 'cancelled') {
-      if (IAP_DIAGNOSTIC_MODE) alert(_iapDiagnosticMessage(result));
+      if (IAP_DIAGNOSTIC_FAILURE_MODE) alert(_iapDiagnosticMessage(result));
       else showToast('Subscription failed. Please try again.');
     }
     return;
@@ -4763,15 +4763,27 @@ const IAP_PRODUCT_GLOW_UP     = 'com.mynailconnection.app.pro_glow_up';
 const IAP_PRODUCT_SPOTLIGHT_1 = 'com.mynailconnection.app.spotlight_1';
 const IAP_PRODUCT_SPOTLIGHT_10= 'com.mynailconnection.app.spotlight_10';
 
-// While debugging IAP failures during App Review prep, this flag swaps the
-// generic "Purchase failed." toast for a verbose native alert() that names
-// the actual failure branch (plugin missing vs product not found vs RC
-// error vs the underlying error string). The point is to learn WHICH
-// branch fails on Leslie's device when the Apple sandbox sheet never
-// appears — the generic toast tells us nothing. Flip to false before the
-// production App Store submission so end-users don't see internal jargon.
-// — 2026-04-30
-const IAP_DIAGNOSTIC_MODE = false;
+// IAP diagnostics are split into TWO flags so we can leave failure-detail
+// on (which has never given false positives) without re-enabling the
+// success-path diagnostic (which DID give false positives — the original
+// realPurchase check was too narrow and flagged real spotlight_10 buys
+// as "spurious"; fixed 2026-04-30 in _iapSuccessDiagnostic).
+//
+// IAP_DIAGNOSTIC_FAILURE_MODE — when true, swaps the generic "Purchase
+//   failed." toast for a native alert() naming the failure branch
+//   (plugin_unavailable vs product_not_found vs error + underlying msg).
+//   Safe to leave on while iterating on App Review issues. Flip OFF for
+//   the production App Store submission so end-users don't see jargon.
+//
+// IAP_DIAGNOSTIC_SUCCESS_MODE — when true, alerts the verbose customerInfo
+//   breakdown after a "successful" purchase to detect SDK-says-yes-but-
+//   no-real-transaction cases. Keep OFF unless actively debugging that
+//   class of bug — the original false-alarm risk is reduced but non-zero.
+//
+// Split 2026-05-01 after the single combined flag was turned off entirely
+// because the success-path noise wasted hours of triage time.
+const IAP_DIAGNOSTIC_FAILURE_MODE = true;
+const IAP_DIAGNOSTIC_SUCCESS_MODE = false;
 
 // Platform check: TRUE only when running inside the iOS Capacitor shell
 // (not Safari on iPhone, not the PWA). All Apple IAP routing keys off this.
@@ -4790,41 +4802,59 @@ window.isIOS = isIOS;
 // Called once per app load AFTER sign-in (we need the user_id to identify
 // the subscriber to RevenueCat). Idempotent — safe to call multiple times.
 let _rcInitialized = false;
+// In-flight configure promise. When sign-in fires initRevenueCat() and the
+// user immediately taps Buy, purchaseIAP also awaits initRevenueCat(). If
+// both calls find _rcInitialized=false (because the first hasn't returned
+// yet), without this cache they'd BOTH call Purchases.configure() in
+// parallel — RC v11 throws "Purchases is already configured" from the
+// second one, which surfaces as a generic "Purchase failed." toast before
+// the StoreKit sheet appears. Cache the in-flight promise so concurrent
+// callers await the same underlying configure(). — 2026-05-01
+let _rcInitPromise = null;
 async function initRevenueCat() {
   if (!isIOS()) return;
   if (_rcInitialized) return;
-  // Plugin loads as a Capacitor plugin via the global Purchases object
-  // (set up by @revenuecat/purchases-capacitor at runtime). On non-iOS or
-  // if the plugin isn't bundled (web preview), it will be undefined.
-  const Purchases = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Purchases;
-  if (!Purchases) {
-    console.warn('RevenueCat plugin not available; IAP disabled in this build');
-    return;
-  }
-  // Bail if currentUser hasn't loaded yet — we want to set RC's App User ID
-  // to a UUID, not an email. If we configure here with currentUserEmail as
-  // a fallback, that email becomes the RC customer's primary identifier
-  // FOREVER and webhook lookups have to special-case email-shaped IDs.
-  // Better to wait for currentUser.id and let later code retry.
-  // — 2026-04-30 after testuserbob@gmail.com got stuck with email-as-id
-  if (!currentUser || !currentUser.id) {
-    console.warn('initRevenueCat: currentUser.id not ready yet — deferring');
-    return;
-  }
-  try {
-    // Use the auth.users.id as the App User ID so RevenueCat customers
-    // map 1:1 to Supabase auth users. Same ID across renewals + reinstalls
-    // means subscription state survives the user wiping/restoring.
-    const appUserId = currentUser.id;
-    await Purchases.configure({
-      apiKey: REVENUECAT_IOS_PUBLIC_KEY,
-      appUserID: appUserId
-    });
-    _rcInitialized = true;
-    if (window.__MNC_DEV__) console.log('RevenueCat configured for', appUserId);
-  } catch (e) {
-    console.warn('RevenueCat configure failed:', e);
-  }
+  // If a configure() is already in flight, await it instead of starting a
+  // second one. Critical for the sign-in / quick-tap-Buy race.
+  if (_rcInitPromise) return _rcInitPromise;
+  _rcInitPromise = (async () => {
+    // Plugin loads as a Capacitor plugin via the global Purchases object
+    // (set up by @revenuecat/purchases-capacitor at runtime). On non-iOS or
+    // if the plugin isn't bundled (web preview), it will be undefined.
+    const Purchases = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Purchases;
+    if (!Purchases) {
+      console.warn('RevenueCat plugin not available; IAP disabled in this build');
+      _rcInitPromise = null;  // Allow retry once plugin loads
+      return;
+    }
+    // Bail if currentUser hasn't loaded yet — we want to set RC's App User ID
+    // to a UUID, not an email. If we configure here with currentUserEmail as
+    // a fallback, that email becomes the RC customer's primary identifier
+    // FOREVER and webhook lookups have to special-case email-shaped IDs.
+    // Better to wait for currentUser.id and let later code retry.
+    // — 2026-04-30 after testuserbob@gmail.com got stuck with email-as-id
+    if (!currentUser || !currentUser.id) {
+      console.warn('initRevenueCat: currentUser.id not ready yet — deferring');
+      _rcInitPromise = null;  // Clear so the next call (post-sign-in) retries
+      return;
+    }
+    try {
+      // Use the auth.users.id as the App User ID so RevenueCat customers
+      // map 1:1 to Supabase auth users. Same ID across renewals + reinstalls
+      // means subscription state survives the user wiping/restoring.
+      const appUserId = currentUser.id;
+      await Purchases.configure({
+        apiKey: REVENUECAT_IOS_PUBLIC_KEY,
+        appUserID: appUserId
+      });
+      _rcInitialized = true;
+      if (window.__MNC_DEV__) console.log('RevenueCat configured for', appUserId);
+    } catch (e) {
+      console.warn('RevenueCat configure failed:', e);
+      _rcInitPromise = null;  // Allow retry on next call after a transient failure
+    }
+  })();
+  return _rcInitPromise;
 }
 window.initRevenueCat = initRevenueCat;
 
@@ -4878,7 +4908,7 @@ async function purchaseIAP(productId) {
 // record-it. To distinguish "RC SDK reported a real transaction" from
 // "RC SDK returned a stale/empty customerInfo with no actual transaction",
 // we surface the relevant fields of customerInfo as an alert when
-// IAP_DIAGNOSTIC_MODE is on. The most telling field is whether the just-
+// IAP_DIAGNOSTIC_SUCCESS_MODE is on. The most telling field is whether the just-
 // purchased productId actually appears in allPurchasedProductIds; if it
 // doesn't, the SDK's promise resolved without an actual completed
 // purchase — which is the signal something failed silently between Apple
@@ -4920,7 +4950,7 @@ window._iapSuccessDiagnostic = _iapSuccessDiagnostic;
 window.purchaseIAP = purchaseIAP;
 
 // Build a verbose diagnostic message from a purchaseIAP() failure result.
-// Used by purchasePhotos / purchaseUnlimited when IAP_DIAGNOSTIC_MODE is on.
+// Used by purchasePhotos / purchaseUnlimited when IAP_DIAGNOSTIC_FAILURE_MODE is on.
 // Each branch corresponds to a specific failure mode in purchaseIAP — the
 // alert text spells out the most likely root cause so we can fix the right
 // thing without round-tripping a build. Order matches purchaseIAP's return
@@ -5058,8 +5088,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.1',     /* __APP_BUILD_NAME__   */
-  android: 240,         /* __APP_BUILD_ANDROID__ */
-  ios:     45,          /* __APP_BUILD_IOS__     */
+  android: 241,         /* __APP_BUILD_ANDROID__ */
+  ios:     46,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -14288,7 +14318,7 @@ async function restorePersistedSession() {
     // skipping it, so the first purchase errored with "purchases must be
     // configured before calling this function" because init had bailed
     // before configure() ran. — 2026-04-30 (post-launch IAP fix)
-    try { initRevenueCat(); } catch(_){}
+    try { await initRevenueCat(); } catch(_){}
 
     // Fetch name so tech-dash and greeting render correctly on first paint.
     if (currentUserEmail) {

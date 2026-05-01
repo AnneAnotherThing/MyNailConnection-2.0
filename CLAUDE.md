@@ -149,11 +149,16 @@ exclusive, they just represent the two URLs each deploy target serves.
       before any `auth/v1/recover` test.
 - [ ] Dry-run password reset on Anne's own account before batch sends.
 - [ ] **Before App Store production submission only:** grep `index.html`
-      for `IAP_DIAGNOSTIC_MODE = true` and flip to `false`, then re-run
-      `deploy/sync.sh`. The flag swaps the generic "Purchase failed"
-      toast for a verbose native `alert()` naming the IAP failure
-      branch — useful for TestFlight debugging, NOT for end-users.
-      Added 2026-04-30 during pre-submission diagnostics.
+      for `IAP_DIAGNOSTIC_FAILURE_MODE = true` and `IAP_DIAGNOSTIC_SUCCESS_MODE = true`
+      and flip both to `false`, then re-run `deploy/sync.sh`. These flags
+      swap the generic "Purchase failed" toast / silent success path for
+      verbose native `alert()`s naming the IAP failure branch or showing
+      the customerInfo breakdown. Useful for TestFlight debugging, NOT
+      for end-users. Originally a single `IAP_DIAGNOSTIC_MODE` flag added
+      2026-04-30; split 2026-05-01 because the success-path diagnostic
+      gave false positives that wasted hours of triage time, while the
+      failure-path one is genuinely useful and safe to leave on during
+      active App Review iteration.
 
 ## Folder layout (as of 2026-04-18 — after organizing)
 
