@@ -86,171 +86,6 @@ body{font-family:'DM Sans',sans-serif;background:#FAF5F7;display:flex;justify-co
   isolation:isolate;
 }
 
-/* Desktop / tablet: show as a centered phone frame on a soft branded
-   backdrop. The 480px breakpoint covers anything wider than a portrait
-   phone — desktop browsers, iPad portrait + landscape, large Android
-   tablets, foldables in unfolded mode. The pale-rose backdrop (#FAF5F7,
-   same as the splash screen) keeps the surround intentional rather than
-   "tiny phone UI floating on a gray rectangle." — minimal-scope tablet
-   support, 2026-04-30. */
-@media(min-width:480px){
-  body{padding:24px 0;background:#FAF5F7;}
-  .device{
-    /* On tablets in landscape the viewport can be SHORTER than 812px;
-       cap to the viewport so the device frame never overflows below
-       the visible area. min(812px, ...) keeps phone-frame look on
-       desktop while adapting on iPad landscape (~768px tall). */
-    height:min(900px, calc(100dvh - 48px));
-    border-radius:44px;
-    /* Beveled effect: bright highlight top-left, dark shadow bottom-right, deep drop shadow */
-    box-shadow:
-      /* outer drop shadow */
-      0 32px 80px rgba(0,0,0,0.28),
-      0 8px 24px rgba(0,0,0,0.16),
-      /* bevel highlight — top & left bright edge */
-      inset 0 1px 0 rgba(255,255,255,0.55),
-      inset 1px 0 0 rgba(255,255,255,0.3),
-      /* bevel shadow — bottom & right dark edge */
-      inset 0 -1px 0 rgba(0,0,0,0.18),
-      inset -1px 0 0 rgba(0,0,0,0.12);
-    outline: none;
-    border: none;
-  }
-
-  /* ── iPad / tablet modal positioning ────────────────────────────────────
-     The .device phone frame is a centered 430×812 box on iPad. Modals are
-     position:fixed at viewport scope, which means the dim layer covers
-     the whole iPad (good — disables interaction with stuff outside the
-     modal). The fix is to position the modal CONTENT to align with the
-     .device frame, not the bottom of the iPad screen.
-
-     Three patterns covered:
-       1. Bottom sheets (align-items: flex-end) — push the inner sheet
-          up via margin-bottom so it slides from the bottom of the
-          phone frame instead of the bottom of the iPad.
-       2. Centered modals (align-items: center) — both the modal and
-          the .device are centered in the viewport, so they already
-          align vertically; we just constrain the inner sheet width.
-       3. Stretch modals (align-items: stretch — tech-edit, user-edit,
-          filters) — clamp the whole modal to the .device footprint
-          so the content fills just the phone frame, not the iPad.
-
-     2026-04-30 — replaces an earlier "clamp every modal" approach that
-     made content render invisibly. !important is required on the
-     positioning props because modals carry inset:0 as inline style. */
-
-  /* Bottom-sheet modals: shift the inner sheet up to the bottom of .device */
-  /* Bottom-sheet modals: shift the inner sheet up to the bottom of .device.
-     2026-04-30 (later): added forgot, delete-account, contact-anne, new-post —
-     they all use .modal-overlay default (align-items:flex-end) but were
-     missing here, so on iPad they slid up from the bottom of the iPad
-     instead of the bottom of the phone frame and got partially hidden.
-     Also moved stripe-welcome + post-upload-success to the centered list
-     below — they use align-items:center and dont want the bottom-shift. */
-  #upgrade-modal > div,
-  #release-wizard-modal > div,
-  #myph-tag-sheet > div,
-  #browse-pref-modal > div,
-  #welcome-back-sheet > div,
-  #feedback-modal > div,
-  #forgot-modal > div,
-  #delete-account-modal > div,
-  #contact-anne-modal > div,
-  #new-post-modal > div {
-    margin-bottom: max(0px, calc(100dvh - 24px - min(900px, calc(100dvh - 48px)))) !important;
-    max-width: 430px !important;
-  }
-
-  /* Centered modals: just constrain width so they don't sprawl across iPad */
-  #tutorial-overlay > div,
-  #stripe-welcome-modal > div,
-  #post-upload-success-modal > div,
-  #confirm-modal > div {
-    max-width: 430px !important;
-  }
-
-  /* Stretch modals (user-edit, filters): clamp the whole modal to the
-     .device footprint. tech-edit-modal is intentionally NOT in this list
-     — its inner content + align-items:stretch interacts badly with the
-     clamp and pushes the sticky-header close button off-screen. We let
-     it render at full viewport on iPad instead, so the close "×" stays
-     visible at the top of the iPad screen. — 2026-04-30 */
-  #user-edit-modal,
-  #filters-modal {
-    top: 24px !important;
-    bottom: auto !important;
-    left: 50% !important;
-    right: auto !important;
-    width: 430px !important;
-    max-width: 100vw !important;
-    height: min(900px, calc(100dvh - 48px)) !important;
-    transform: translateX(-50%) !important;
-    border-radius: 44px !important;
-    overflow-y: auto !important;
-  }
-}
-
-/* ── Tablet showcase upgrade ────────────────────────────────────────────
-   At iPad-sized viewports (≥768px wide), expand .device beyond the
-   phone footprint so the photo grids — the heart of the "tech showing
-   her portfolio to a client in the chair" use case — actually breathe.
-   We also bump the relevant grids from 2-3 cols to 3-4 cols so photos
-   appear at showcase density rather than postage-stamp size. The phone-
-   frame visual treatment stays (rounded corners, soft shadow) so the
-   container still feels intentional and branded; it's just bigger.
-   2026-04-30 per Anne. */
-@media(min-width:768px){
-  .device{
-    width: min(900px, calc(100vw - 48px));
-    /* Soften the corner radius slightly on tablet — 44px reads as
-       "phone frame" but at 900px wide it can feel a touch chunky.
-       28px keeps the rounded card feel without screaming "phone." */
-    border-radius: 28px;
-  }
-
-  /* My Photos (tech-side photo manager): 3 → 5 cols on tablet so techs
-     can scan + tag many photos at once. Gallery (td-gallery) stays at 4
-     cols for showcase impact — these are the management surface, not
-     the show-the-client surface. — 2026-04-30 */
-  #myph-grid {
-    grid-template-columns: repeat(5, 1fr) !important;
-  }
-
-  /* Tech Detail gallery — THE client-facing showcase grid. Bumping to
-     4 cols at this width gives showroom density (each photo ~210px
-     wide) without going too small. This is the view a tech will most
-     often pull up to show off her work. */
-  #td-gallery {
-    grid-template-columns: repeat(4, 1fr) !important;
-  }
-
-  /* Style filter result grid */
-  #style-photo-grid {
-    grid-template-columns: 1fr 1fr 1fr !important;
-  }
-
-  /* Inspo board (client's saved looks) */
-  #inspo-grid {
-    grid-template-columns: repeat(4, 1fr) !important;
-  }
-
-  /* Tech-edit photo management grid (inside the upload modal). Same
-     management-not-showcase logic as myph-grid — denser thumbnails so
-     techs see more at once during tagging. */
-  #te-photo-grid {
-    grid-template-columns: repeat(5, 1fr) !important;
-  }
-
-  /* Feed cards have an internal max-width via flex but at 900px the
-     card looks oddly elongated. Cap content width so feed reads at a
-     comfortable column rather than a sprawl. */
-  #feed-list,
-  #home-feed {
-    max-width: 640px;
-    margin-left: auto;
-    margin-right: auto;
-  }
-}
 
 /* All screens fill the device exactly — never wider */
 .screen{
@@ -4753,7 +4588,7 @@ const IAP_PRODUCT_SPOTLIGHT_10= 'com.mynailconnection.app.spotlight_10';
 // appears — the generic toast tells us nothing. Flip to false before the
 // production App Store submission so end-users don't see internal jargon.
 // — 2026-04-30
-const IAP_DIAGNOSTIC_MODE = false;
+const IAP_DIAGNOSTIC_MODE = true;
 
 // Platform check: TRUE only when running inside the iOS Capacitor shell
 // (not Safari on iPhone, not the PWA). All Apple IAP routing keys off this.
@@ -5028,8 +4863,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.1',     /* __APP_BUILD_NAME__   */
-  android: 228,         /* __APP_BUILD_ANDROID__ */
-  ios:     33,          /* __APP_BUILD_IOS__     */
+  android: 230,         /* __APP_BUILD_ANDROID__ */
+  ios:     35,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
