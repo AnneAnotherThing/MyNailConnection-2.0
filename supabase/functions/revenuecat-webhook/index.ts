@@ -159,14 +159,26 @@ serve(async (req) => {
     techEmail = techRow?.email?.toLowerCase() || null;
   }
 
-  // Fallback 2: query auth.users directly. The app_user_id IS auth.users.id
-  // (set at Purchases.configure time from currentUser.id), so this lookup
-  // can't miss for any signed-in purchaser. Catches the orphan-auth pattern
-  // where public.users.id and auth.users.id drifted apart (account
-  // recreation, manual data fixes, stale signups). Source of truth for
-  // app_user_id → email mapping. — added 2026-04-30 after a TestFlight test
-  // surfaced the drift on a recreated test account.
-  if (!techEmail) {
+  // Fallback 2a: app_user_id sometimes IS an email when initRevenueCat() ran
+  // before currentUser.id was populated (race during sign-in or session
+  // restore — the JS code falls back from currentUser.id to currentUserEmail).
+  // Once RC is configured with an email as the App User ID, all that user's
+  // future events carry that email instead of the auth UUID. So before doing
+  // the UUID-based auth.users lookup, sniff the format and use email path
+  // directly if it looks like an email. — added 2026-04-30 after seeing
+  // testuserbob@gmail.com hit this exact pattern in webhook logs.
+  const looksLikeEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(appUserId);
+  if (!techEmail && looksLikeEmail) {
+    techEmail = appUserId.toLowerCase();
+    console.log('app_user_id was an email, using directly:', techEmail);
+  }
+
+  // Fallback 2b: query auth.users by UUID. The app_user_id should be auth.users.id
+  // (set at Purchases.configure time from currentUser.id) for properly
+  // synchronized users. Catches the orphan-auth pattern where public.users.id
+  // and auth.users.id drifted apart. Skipped if we already determined this
+  // is an email (getUserById would throw on a non-UUID input).
+  if (!techEmail && !looksLikeEmail) {
     try {
       const { data: authUserData } = await admin.auth.admin.getUserById(appUserId);
       techEmail = authUserData?.user?.email?.toLowerCase() || null;

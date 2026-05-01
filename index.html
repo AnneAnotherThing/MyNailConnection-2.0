@@ -4715,11 +4715,21 @@ async function initRevenueCat() {
     console.warn('RevenueCat plugin not available; IAP disabled in this build');
     return;
   }
+  // Bail if currentUser hasn't loaded yet — we want to set RC's App User ID
+  // to a UUID, not an email. If we configure here with currentUserEmail as
+  // a fallback, that email becomes the RC customer's primary identifier
+  // FOREVER and webhook lookups have to special-case email-shaped IDs.
+  // Better to wait for currentUser.id and let later code retry.
+  // — 2026-04-30 after testuserbob@gmail.com got stuck with email-as-id
+  if (!currentUser || !currentUser.id) {
+    console.warn('initRevenueCat: currentUser.id not ready yet — deferring');
+    return;
+  }
   try {
     // Use the auth.users.id as the App User ID so RevenueCat customers
     // map 1:1 to Supabase auth users. Same ID across renewals + reinstalls
     // means subscription state survives the user wiping/restoring.
-    const appUserId = (currentUser && currentUser.id) || currentUserEmail || null;
+    const appUserId = currentUser.id;
     await Purchases.configure({
       apiKey: REVENUECAT_IOS_PUBLIC_KEY,
       appUserID: appUserId
@@ -4950,8 +4960,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.1',     /* __APP_BUILD_NAME__   */
-  android: 223,         /* __APP_BUILD_ANDROID__ */
-  ios:     27,          /* __APP_BUILD_IOS__     */
+  android: 224,         /* __APP_BUILD_ANDROID__ */
+  ios:     29,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -17222,8 +17232,4 @@ function closeReleaseWizard() {
      via history.replaceState so a refresh doesn't re-trigger. 2026-04-23. -->
 <div id="stripe-welcome-modal" class="modal-overlay" style="display:none;position:fixed;inset:0;z-index:9080;background:rgba(20,10,15,0.72);backdrop-filter:blur(4px);align-items:center;justify-content:center;">
   <div style="background:white;border-radius:24px;width:100%;max-width:400px;margin:20px;padding:28px 24px 22px;box-shadow:0 10px 50px rgba(0,0,0,0.24);text-align:center;">
-    <div id="sw-icon-wrap" style="width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,#FFF5EF 0%,#FBE4D9 100%);margin:0 auto 16px;display:flex;align-items:center;justify-content:center;">
-      <!-- Icon varies by variant; replaced at render time. -->
-      <svg viewBox="0 0 24 24" style="width:34px;height:34px;stroke:var(--rose-dark);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-    </div>
-    <div id="sw-eyebrow" style="font-size:11px;font-weight:700;letter-spacing:1.4px;color:var(--rose);t
+    <div id="sw-icon-wrap" style="width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,#FFF5EF 0%,#FBE4D9 100%);m
