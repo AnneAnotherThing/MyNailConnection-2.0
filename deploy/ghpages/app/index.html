@@ -2270,6 +2270,18 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       <span style="font-style:italic;">App acting up? <a onclick="openContactAnne()" style="color:var(--rose);text-decoration:underline;cursor:pointer;text-underline-offset:3px;font-style:normal;font-weight:500;">Nudge support</a>.</span>
     </div>
 
+    <!-- Account deletion entry point — required to be findable in-app per
+         Apple App Store Guideline 5.1.1(v). Kept low-prominence (small,
+         muted, plain text) so it's not accidentally tapped, but visible
+         enough that a reviewer can locate it without searching. Mirrors
+         the link on profile-screen so deletion is reachable from BOTH
+         the tech dashboard and the client home — without it techs (the
+         role Apple's reviewer uses to test IAP) had no path to delete.
+         Added 2026-05-01 in response to App Review rejection. -->
+    <div style="padding:8px 20px 24px;text-align:center;">
+      <a onclick="openDeleteAccountModal()" style="font-size:11px;color:var(--muted);text-decoration:underline;cursor:pointer;text-underline-offset:3px;letter-spacing:0.2px;opacity:0.75;">Delete my account</a>
+    </div>
+
   </div>
   <div class="bottom-nav">
     <!-- Home — takes techs back to the default landing (client browse view).
@@ -4782,7 +4794,7 @@ const IAP_PRODUCT_SPOTLIGHT_10= 'com.mynailconnection.app.spotlight_10';
 //
 // Split 2026-05-01 after the single combined flag was turned off entirely
 // because the success-path noise wasted hours of triage time.
-const IAP_DIAGNOSTIC_FAILURE_MODE = true;
+const IAP_DIAGNOSTIC_FAILURE_MODE = false;
 const IAP_DIAGNOSTIC_SUCCESS_MODE = false;
 
 // Platform check: TRUE only when running inside the iOS Capacitor shell
@@ -5088,8 +5100,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.1',     /* __APP_BUILD_NAME__   */
-  android: 241,         /* __APP_BUILD_ANDROID__ */
-  ios:     46,          /* __APP_BUILD_IOS__     */
+  android: 244,         /* __APP_BUILD_ANDROID__ */
+  ios:     49,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
