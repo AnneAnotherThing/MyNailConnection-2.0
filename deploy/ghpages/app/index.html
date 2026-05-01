@@ -2270,6 +2270,17 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       <span style="font-style:italic;">App acting up? <a onclick="openContactAnne()" style="color:var(--rose);text-decoration:underline;cursor:pointer;text-underline-offset:3px;font-style:normal;font-weight:500;">Nudge support</a>.</span>
     </div>
 
+    <!-- Legal links — Terms of Use (Apple standard EULA) + Privacy Policy.
+         Required by Apple Guideline 3.1.2(c) to be reachable "within the
+         app" alongside the subscription disclosure. Placed in the
+         persistent footer so the reviewer can find them without needing
+         to open the upgrade modal. Added 2026-05-01. -->
+    <div style="text-align:center;margin:0 20px;font-size:11px;color:var(--muted);line-height:1.7;">
+      <a href="https://www.apple.com/legal/internet-services/itunes/dev/stdeula/" target="_blank" rel="noopener" style="color:var(--muted);text-decoration:underline;text-underline-offset:3px;opacity:0.85;">Terms of Use (EULA)</a>
+      <span style="margin:0 8px;opacity:0.5;">·</span>
+      <a href="https://mynailconnection.com/privacy.html" target="_blank" rel="noopener" style="color:var(--muted);text-decoration:underline;text-underline-offset:3px;opacity:0.85;">Privacy Policy</a>
+    </div>
+
     <!-- Account deletion entry point — required to be findable in-app per
          Apple App Store Guideline 5.1.1(v). Kept low-prominence (small,
          muted, plain text) so it's not accidentally tapped, but visible
@@ -2942,6 +2953,16 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
         Sign Out
       </button>
     </div>
+    <!-- Legal links — Terms of Use (Apple standard EULA) + Privacy Policy.
+         Required by Apple Guideline 3.1.2(c) to be reachable "within the
+         app" alongside the subscription disclosure. Mirrored on tech-home
+         so both roles see them. Added 2026-05-01. -->
+    <div style="text-align:center;margin:0 20px;font-size:11px;color:var(--muted);line-height:1.7;">
+      <a href="https://www.apple.com/legal/internet-services/itunes/dev/stdeula/" target="_blank" rel="noopener" style="color:var(--muted);text-decoration:underline;text-underline-offset:3px;opacity:0.85;">Terms of Use (EULA)</a>
+      <span style="margin:0 8px;opacity:0.5;">·</span>
+      <a href="https://mynailconnection.com/privacy.html" target="_blank" rel="noopener" style="color:var(--muted);text-decoration:underline;text-underline-offset:3px;opacity:0.85;">Privacy Policy</a>
+    </div>
+
     <!-- Account deletion entry point — required to be findable in-app per
          Apple App Store Guideline 5.1.1(v). Kept low-prominence (small,
          muted, plain text) so it's not accidentally tapped, but visible
@@ -5014,6 +5035,38 @@ async function restoreIAPPurchases() {
 }
 window.restoreIAPPurchases = restoreIAPPurchases;
 
+// ── Subscription management deep link ─────────────────────────────────────
+// One-tap path from the deletion modal to the platform-native subscription
+// management screen, so users never have to hunt through Settings to cancel
+// a Glow Up subscription. Required-ish by Apple Guideline 5.1.1(v): the
+// account deletion flow shouldn't put up barriers, so giving users an easy
+// path to cancel-then-delete is the friendly version. iOS uses the
+// well-known itms-apps:// URL that opens directly into Apple ID →
+// Subscriptions; Android uses the Play Store subscriptions URL; web falls
+// back to the App Store web URL (rare to hit since web subscribers are on
+// Stripe, but harmless if they do). Added 2026-05-01 as part of the
+// 5.1.1(v) cleanup pass after the second App Review rejection.
+function openSubscriptionManagement() {
+  try {
+    if (typeof isIOS === 'function' && isIOS()) {
+      window.location.href = 'itms-apps://apps.apple.com/account/subscriptions';
+      return;
+    }
+    var plat = (window.Capacitor && window.Capacitor.getPlatform) ? window.Capacitor.getPlatform() : '';
+    if (plat === 'android') {
+      window.location.href = 'https://play.google.com/store/account/subscriptions';
+      return;
+    }
+    // Web fallback — opens the App Store subscriptions page in a new tab.
+    window.open('https://apps.apple.com/account/subscriptions', '_blank', 'noopener');
+  } catch (e) {
+    // If anything throws (rare — usually a sandboxed WebView with no
+    // navigation rights), fall back to opening the App Store URL.
+    window.open('https://apps.apple.com/account/subscriptions', '_blank', 'noopener');
+  }
+}
+window.openSubscriptionManagement = openSubscriptionManagement;
+
 function closeTutorial() {
   document.getElementById('tutorial-overlay').style.display = 'none';
   // Mark as seen for this role
@@ -5100,8 +5153,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.1',     /* __APP_BUILD_NAME__   */
-  android: 245,         /* __APP_BUILD_ANDROID__ */
-  ios:     50,          /* __APP_BUILD_IOS__     */
+  android: 248,         /* __APP_BUILD_ANDROID__ */
+  ios:     53,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -17045,7 +17098,7 @@ function closeReleaseWizard() {
          flow. — 2026-05-01 -->
     <div style="margin:16px 20px 0;padding:12px 14px;background:var(--cream);border-radius:10px;font-size:11px;color:var(--muted);line-height:1.55;text-align:center;">
       <div style="margin-bottom:4px;"><b style="color:var(--charcoal);font-weight:600;">Glow Up</b> — $10.99/month auto-renewable subscription. Renews monthly until canceled. Manage or cancel anytime in iOS Settings → Apple ID → Subscriptions.</div>
-      <div>By subscribing you agree to our <a href="https://mynailconnection.com/terms.html" target="_blank" rel="noopener" style="color:var(--rose);text-decoration:underline;">Terms of Use</a> and <a href="https://mynailconnection.com/privacy.html" target="_blank" rel="noopener" style="color:var(--rose);text-decoration:underline;">Privacy Policy</a>.</div>
+      <div>By subscribing you agree to our <a href="https://www.apple.com/legal/internet-services/itunes/dev/stdeula/" target="_blank" rel="noopener" style="color:var(--rose);text-decoration:underline;">Terms of Use (EULA)</a> and <a href="https://mynailconnection.com/privacy.html" target="_blank" rel="noopener" style="color:var(--rose);text-decoration:underline;">Privacy Policy</a>.</div>
     </div>
 
     <!-- Cancel + Restore Purchases (Restore is required by Apple App
@@ -17111,8 +17164,11 @@ function closeReleaseWizard() {
       <li>Your subscription history (any active subscription will end)</li>
       <li>Your sign-in credentials</li>
     </ul>
-    <div style="background:#FDF4E8;border:1px solid #F0D8A8;border-left:4px solid #D4A060;border-radius:10px;padding:12px 14px;font-size:12.5px;color:#5C3D0F;line-height:1.55;margin-bottom:18px;">
-      <b>Heads up:</b> if you have an active <b>Glow Up</b> subscription, deleting your MNC account does <b>not</b> automatically cancel it on your end (Apple, Google, or Stripe will keep billing until you cancel separately). Cancel in your store/Stripe first if you want to stop charges.
+    <div style="background:#FDF4E8;border:1px solid #F0D8A8;border-left:4px solid #D4A060;border-radius:10px;padding:12px 14px;font-size:12.5px;color:#5C3D0F;line-height:1.55;margin-bottom:10px;">
+      <b>Note:</b> deletion removes your MNC account and all your data. If you have an active <b>Glow Up</b> subscription, it will continue billing through the App Store, Google Play, or Stripe until you cancel it separately there. Deleting your account here does not trigger that cancellation.
+    </div>
+    <div style="text-align:center;margin-bottom:18px;">
+      <a onclick="openSubscriptionManagement()" style="font-size:12px;color:var(--rose);text-decoration:underline;cursor:pointer;text-underline-offset:3px;font-weight:500;">Manage my subscriptions &rsaquo;</a>
     </div>
     <div id="delete-account-error" style="display:none;background:#FDE8EC;border:1px solid #F0B0BC;border-radius:10px;padding:10px 14px;font-size:13px;color:#8B2035;margin-bottom:14px;line-height:1.5;"></div>
     <div style="margin-bottom:14px;">
