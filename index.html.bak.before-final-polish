@@ -4305,16 +4305,26 @@ window._waitForTierUpgrade = _waitForTierUpgrade;
 // polling window (~15s max), keeping the user occupied instead of staring
 // at a static toast that fades. Anne's ask 2026-04-30 post-launch:
 // "keep them occupied with something animated until the credits are loaded."
-// ── Post-purchase reassurance banner ──────────────────────────────────────
-// One-shot fade-in / hold / fade-out. Tells the user their credits are on
-// the way without holding them captive to a 15s spinner. Polling for the
-// actual webhook landing happens silently in the background — when it
-// lands, the success toast fires; if it times out, the user already saw
-// this brief "credits will appear" message so they aren't left wondering.
-// Shorter cousin of the earlier cycling banner — Anne 2026-04-30.
-function _showCreditLoadingBanner(/* kind unused now */) {
+const _CREDIT_BANNER_MSGS_SPOTLIGHT = [
+  'Filing your credits into place…',
+  'Buffing the details with Apple…',
+  'Polishing your account…',
+  'Curing the credit base coat…',
+  'Almost set — top coat going on…'
+];
+const _CREDIT_BANNER_MSGS_GLOWUP = [
+  'Lighting up your Glow Up…',
+  'Pouring on the gloss…',
+  'Curing your shine — hang tight…',
+  'Spotlight tuning to perfect…',
+  'Almost ready to dazzle…'
+];
+
+function _showCreditLoadingBanner(kind) {
+  const msgs = (kind === 'glowup')
+    ? _CREDIT_BANNER_MSGS_GLOWUP
+    : _CREDIT_BANNER_MSGS_SPOTLIGHT;
   let el = document.getElementById('credit-loading-banner');
-  if (el && el._removeTimer) { clearTimeout(el._removeTimer); el._removeTimer = null; }
   if (!el) {
     el = document.createElement('div');
     el.id = 'credit-loading-banner';
@@ -4322,58 +4332,46 @@ function _showCreditLoadingBanner(/* kind unused now */) {
       'position:fixed',
       'left:50%',
       'bottom:96px',
-      'transform:translate(-50%, 8px)',
+      'transform:translateX(-50%)',
       'background:white',
       'border:1.5px solid var(--rose-mid)',
       'border-radius:100px',
-      'padding:11px 18px',
+      'padding:11px 18px 11px 14px',
       'box-shadow:0 8px 28px rgba(196,120,106,0.28),0 2px 6px rgba(0,0,0,0.08)',
       'z-index:9500',
+      'display:flex',
+      'align-items:center',
+      'gap:10px',
       'font-family:DM Sans,sans-serif',
       'font-size:13.5px',
       'font-weight:500',
       'color:var(--rose-dark)',
-      'max-width:88vw',
-      'opacity:0',
-      'transition:opacity 0.6s ease, transform 0.6s ease',
-      'pointer-events:none',
-      'text-align:center'
+      'max-width:88vw'
     ].join(';');
-    el.textContent = 'Credits will appear shortly if they haven’t already ✨';
+    el.innerHTML =
+      '<span style="display:inline-block;width:18px;height:18px;border-radius:50%;border:2.5px solid var(--rose-light);border-top-color:var(--rose);animation:spin 0.85s linear infinite;flex-shrink:0;"></span>' +
+      '<span id="credit-loading-msg" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + msgs[0] + '</span>';
     document.body.appendChild(el);
-    // Force a frame so the transition fires
-    requestAnimationFrame(function(){
-      el.style.opacity = '1';
-      el.style.transform = 'translate(-50%, 0)';
-    });
   } else {
-    el.textContent = 'Credits will appear shortly if they haven’t already ✨';
-    el.style.opacity = '1';
-    el.style.transform = 'translate(-50%, 0)';
+    const m = document.getElementById('credit-loading-msg');
+    if (m) m.textContent = msgs[0];
+    el.style.display = 'flex';
   }
-  // Hold visible ~2.4s, then fade out over 0.6s, then remove from DOM.
-  el._removeTimer = setTimeout(function(){
-    if (!el || !el.parentNode) return;
-    el.style.opacity = '0';
-    el.style.transform = 'translate(-50%, 8px)';
-    setTimeout(function(){
-      try { if (el && el.parentNode) el.parentNode.removeChild(el); } catch(_){}
-    }, 700);
+  // Cycle messages every 2.4s. Random start offset so two purchases in a
+  // row don't show identical copy patterns.
+  if (el._cycler) clearInterval(el._cycler);
+  let i = Math.floor(Math.random() * msgs.length);
+  el._cycler = setInterval(function() {
+    i = (i + 1) % msgs.length;
+    const m = document.getElementById('credit-loading-msg');
+    if (m) m.textContent = msgs[i];
   }, 2400);
 }
-
 function _hideCreditLoadingBanner() {
-  // Kept for back-compat — old call sites await it. The new banner is
-  // self-extinguishing on a timer, so this is now a soft no-op that just
-  // removes the element early if it's still around.
   const el = document.getElementById('credit-loading-banner');
   if (!el) return;
-  if (el._removeTimer) { clearTimeout(el._removeTimer); el._removeTimer = null; }
-  el.style.opacity = '0';
-  el.style.transform = 'translate(-50%, 8px)';
-  setTimeout(function(){
-    try { if (el && el.parentNode) el.parentNode.removeChild(el); } catch(_){}
-  }, 600);
+  if (el._cycler) { clearInterval(el._cycler); el._cycler = null; }
+  el.style.display = 'none';
 }
 window._showCreditLoadingBanner = _showCreditLoadingBanner;
 window._hideCreditLoadingBanner = _hideCreditLoadingBanner;
@@ -4771,7 +4769,7 @@ const IAP_PRODUCT_SPOTLIGHT_10= 'com.mynailconnection.app.spotlight_10';
 // appears — the generic toast tells us nothing. Flip to false before the
 // production App Store submission so end-users don't see internal jargon.
 // — 2026-04-30
-const IAP_DIAGNOSTIC_MODE = false;
+const IAP_DIAGNOSTIC_MODE = true;
 
 // Platform check: TRUE only when running inside the iOS Capacitor shell
 // (not Safari on iPhone, not the PWA). All Apple IAP routing keys off this.
@@ -5058,8 +5056,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.1',     /* __APP_BUILD_NAME__   */
-  android: 238,         /* __APP_BUILD_ANDROID__ */
-  ios:     43,          /* __APP_BUILD_IOS__     */
+  android: 237,         /* __APP_BUILD_ANDROID__ */
+  ios:     42,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
