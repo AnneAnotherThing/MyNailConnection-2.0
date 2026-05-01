@@ -5100,8 +5100,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.1',     /* __APP_BUILD_NAME__   */
-  android: 244,         /* __APP_BUILD_ANDROID__ */
-  ios:     49,          /* __APP_BUILD_IOS__     */
+  android: 245,         /* __APP_BUILD_ANDROID__ */
+  ios:     50,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -17035,6 +17035,18 @@ function closeReleaseWizard() {
 
     <!-- Credits remaining -->
     <div id="upgrade-credits-row" style="display:none;margin:14px 20px 0;padding:10px 14px;background:var(--green-light);border-radius:12px;font-size:12px;color:var(--green);text-align:center;font-weight:500;"></div>
+
+    <!-- Subscription disclosure — required by Apple Guideline 3.1.2(c)
+         for auto-renewable subscriptions. Must include title, length,
+         price, and functional links to Privacy Policy + Terms of Use (EULA).
+         The "Glow Up" button above shows title + price, this block provides
+         the renewal terms and the legal links. Apple rejected the previous
+         build (2.0.1 / 49) for missing these links inside the purchase
+         flow. — 2026-05-01 -->
+    <div style="margin:16px 20px 0;padding:12px 14px;background:var(--cream);border-radius:10px;font-size:11px;color:var(--muted);line-height:1.55;text-align:center;">
+      <div style="margin-bottom:4px;"><b style="color:var(--charcoal);font-weight:600;">Glow Up</b> — $10.99/month auto-renewable subscription. Renews monthly until canceled. Manage or cancel anytime in iOS Settings → Apple ID → Subscriptions.</div>
+      <div>By subscribing you agree to our <a href="https://mynailconnection.com/terms.html" target="_blank" rel="noopener" style="color:var(--rose);text-decoration:underline;">Terms of Use</a> and <a href="https://mynailconnection.com/privacy.html" target="_blank" rel="noopener" style="color:var(--rose);text-decoration:underline;">Privacy Policy</a>.</div>
+    </div>
 
     <!-- Cancel + Restore Purchases (Restore is required by Apple App
          Review for any iOS app that sells IAP. The link is harmless on
