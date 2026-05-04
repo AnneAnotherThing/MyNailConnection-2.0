@@ -1,0 +1,23 @@
+SMS to the OGs — copyable text
+================================
+
+VERSION A — short and warm (recommended for SMS)
+--------------------------------------------------
+Hi {{first_name}}! It's Leslie & Anne — My Nail Connection is live and there's a lifetime gift waiting for you. Sign in at https://mynailconnection.com using the email you originally signed up with. Not sure which one? Check your inbox — we just sent you a letter. xo
+
+
+VERSION B — slightly longer (good if you have room)
+---------------------------------------------------
+Hey {{first_name}}, it's Leslie & Anne. We did it — MNC is live in both app stores and on the web. As one of our founding techs you've got Lifetime Pro waiting for you. Log in at https://mynailconnection.com with the email you originally signed up with. If you can't remember which email, peek in your inbox — there's a letter from us with all the details.
+
+
+VERSION C — ultra-short (under 160 chars / single SMS segment)
+--------------------------------------------------------------
+{{first_name}}, MNC is LIVE! Sign in at mynailconnection.com w/ the email you originally used. Lifetime gift inside. Letter w/ details just hit your inbox. — Leslie & Anne
+
+
+Notes
+-----
+- {{first_name}} — replace with each tech's first name (or batch via your messaging tool's merge tags).
+- Send the email FIRST so the SMS reference to "letter in your inbox" is true.
+- "Originally signed up with" matters because their auth account is keyed off that email — if they create a new one, they'll get an empty profile, not the loaded portfolio.

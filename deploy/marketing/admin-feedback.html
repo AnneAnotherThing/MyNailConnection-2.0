@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Founder Feedback — Admin</title>
+  <meta name="robots" content="noindex" />
+  <link rel="icon" href="/favicon.ico" />
+  <style>
+    :root {
+      --bg: #FAF7F4;
+      --paper: #FFFFFF;
+      --ink: #3D1F1A;
+      --ink-soft: #9C7A60;
+      --accent: #C4786A;
+      --accent-soft: #F5EDE8;
+      --border: #EDD0C8;
+      --bug: #A9665D;
+      --feature: #A07840;
+      --referral: #8B5040;
+      --other: #9C7A60;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      line-height: 1.5;
+    }
+    main {
+      max-width: 920px;
+      margin: 0 auto;
+      padding: 32px 20px 60px;
+    }
+    header.page {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+    header.page h1 {
+      font-family: Georgia, serif;
+      font-weight: normal;
+      font-size: 30px;
+      margin: 0 0 6px;
+      color: var(--ink);
+    }
+    header.page p {
+      margin: 0;
+      color: var(--ink-soft);
+      font-size: 14px;
+    }
+    .panel {
+      background: var(--paper);
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 2px 12px rgba(61,31,26,0.06);
+    }
+    .state-msg { text-align: center; padding: 20px 0; color: var(--ink-soft); }
+    .state-msg h2 { font-family: Georgia, serif; font-weight: normal; color: var(--ink); margin-top: 0; }
+    .state-msg a { color: var(--accent); }
+
+    /* Toolbar */
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 18px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .filters { display: flex; gap: 6px; flex-wrap: wrap; }
+    .filter-btn {
+      font: inherit;
+      font-size: 13px;
+      padding: 6px 12px;
+      border: 1px solid var(--border);
+      background: #FFFBF9;
+      color: var(--ink);
+      border-radius: 999px;
+      cursor: pointer;
+      transition: all .12s ease;
+    }
+    .filter-btn:hover { border-color: var(--accent); }
+    .filter-btn.active {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+    .toolbar .spacer { flex: 1; }
+    .toolbar .count { font-size: 13px; color: var(--ink-soft); }
+    .toolbar .show-resolved { font-size: 13px; color: var(--ink-soft); display: flex; align-items: center; gap: 6px; }
+
+    /* List */
+    .list { display: flex; flex-direction: column; gap: 14px; }
+    .item {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px 18px;
+      background: #FFFBF9;
+    }
+    .item.resolved { opacity: .55; }
+    .item-head {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+    .badge {
+      font-size: 11px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 3px 9px;
+      border-radius: 999px;
+      color: #fff;
+      font-weight: 600;
+    }
+    .badge.bug      { background: var(--bug); }
+    .badge.feature  { background: var(--feature); }
+    .badge.referral { background: var(--referral); }
+    .badge.other    { background: var(--other); }
+    .segment { margin: 8px 0 12px; padding: 10px 12px; background: #FFFBF9; border: 1px solid var(--border); border-radius: 6px; }
+    .segment + .segment { margin-top: 8px; }
+    .segment .seg-head { display:flex; align-items:center; gap:8px; margin-bottom:6px; }
+    .segment .msg { margin: 0; }
+    .who { font-weight: 600; font-size: 14px; }
+    .email { font-size: 13px; color: var(--ink-soft); }
+    .when { font-size: 12px; color: var(--ink-soft); margin-left: auto; }
+    .msg {
+      white-space: pre-wrap;
+      font-size: 15px;
+      margin: 8px 0 12px;
+      color: var(--ink);
+    }
+    .item-foot {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      font-size: 13px;
+    }
+    .item-foot label { display: flex; align-items: center; gap: 6px; cursor: pointer; }
+    .ua { font-size: 11px; color: var(--ink-soft); margin-left: auto; max-width: 320px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .empty { text-align: center; padding: 40px 0; color: var(--ink-soft); }
+
+    /* Sign-in form */
+    .signin-form { max-width: 360px; margin: 12px auto 0; text-align: left; }
+    .signin-form label { display: block; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; color: var(--ink-soft); margin: 12px 0 4px; }
+    .signin-form input {
+      display: block; width: 100%; font: inherit; font-size: 15px;
+      padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px;
+      background: #FFFBF9; color: var(--ink); outline: none;
+    }
+    .signin-form input:focus { border-color: var(--accent); }
+    .signin-form button {
+      display: block; width: 100%; margin-top: 16px;
+      background: var(--accent); color: #fff; border: 0; border-radius: 8px;
+      padding: 11px 0; font: inherit; font-size: 15px; font-weight: 600; cursor: pointer;
+    }
+    .signin-form button[disabled] { opacity: .6; }
+    .signin-err { color: var(--bug); font-size: 13px; margin-top: 10px; min-height: 1em; }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .tab-btn {
+      font: inherit;
+      font-size: 14px;
+      padding: 8px 14px;
+      border: 0;
+      background: transparent;
+      color: var(--ink-soft);
+      border-radius: 999px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all .12s ease;
+    }
+    .tab-btn:hover { color: var(--ink); }
+    .tab-btn.active {
+      background: var(--accent);
+      color: #fff;
+      font-weight: 600;
+    }
+    .tab-badge {
+      font-size: 11px;
+      padding: 1px 7px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.25);
+      min-width: 16px;
+      text-align: center;
+    }
+    .tab-btn:not(.active) .tab-badge { background: var(--accent-soft); color: var(--accent); }
+    .tabs .spacer { flex: 1; }
+    .me-name {
+      font-size: 13px;
+      color: var(--ink-soft);
+      padding: 4px 10px;
+      background: var(--accent-soft);
+      border-radius: 999px;
+    }
+    .me-name strong { color: var(--ink); }
+
+    /* Tracker — add form */
+    .tracker-add {
+      background: #FFFBF9;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px 18px;
+      margin-bottom: 18px;
+    }
+    .tracker-add h3 { margin: 0 0 10px; font-family: Georgia, serif; font-weight: normal; font-size: 17px; color: var(--ink); }
+    .tracker-add .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: stretch; }
+    .tracker-add input[type="text"],
+    .tracker-add textarea,
+    .tracker-add select {
+      font: inherit; font-size: 15px;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: #FFFFFF;
+      color: var(--ink);
+      outline: none;
+    }
+    .tracker-add input:focus,
+    .tracker-add textarea:focus,
+    .tracker-add select:focus { border-color: var(--accent); }
+    .tracker-add input[type="text"] { flex: 1; min-width: 200px; }
+    .tracker-add select { min-width: 120px; }
+    .tracker-add textarea { width: 100%; min-height: 60px; resize: vertical; margin-top: 10px; }
+    .tracker-add button {
+      background: var(--accent);
+      color: #fff;
+      border: 0;
+      border-radius: 8px;
+      padding: 10px 18px;
+      font: inherit; font-size: 14px; font-weight: 600;
+      cursor: pointer;
+    }
+    .tracker-add button[disabled] { opacity: .6; cursor: not-allowed; }
+    .tracker-add .err { color: var(--bug); font-size: 13px; margin-top: 8px; min-height: 1em; }
+
+    /* Tracker — items */
+    .pri-badge {
+      font-size: 11px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 3px 9px;
+      border-radius: 999px;
+      color: #fff;
+      font-weight: 600;
+    }
+    .pri-badge.high   { background: var(--bug); }
+    .pri-badge.medium { background: var(--feature); }
+    .pri-badge.low    { background: var(--other); }
+    .who-badge {
+      font-size: 12px;
+      padding: 2px 9px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-weight: 600;
+    }
+    .item.tracker { padding: 14px 16px; }
+    .item.tracker .title-row {
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 6px;
+    }
+    .item.tracker .title-row .title { font-size: 16px; font-weight: 600; color: var(--ink); }
+    .item.tracker .details { font-size: 14px; color: var(--ink); white-space: pre-wrap; margin: 6px 0 10px; }
+    .item.tracker .meta { font-size: 12px; color: var(--ink-soft); display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+    .item.tracker.done { opacity: .55; }
+    .item.tracker.done .title { text-decoration: line-through; }
+    .pri-select {
+      font: inherit; font-size: 12px;
+      padding: 3px 6px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: #FFFFFF;
+    }
+  </style>
+</head>
+<body>
+
+  <main>
+    <header class="page">
+      <h1>MNC Admin</h1>
+      <p>Founder feedback and the launch tracker, side by side.</p>
+    </header>
+
+    <div class="panel">
+
+      <!-- LOADING -->
+      <div id="loading" class="state-msg">Loading…</div>
+
+      <!-- SIGN-IN REQUIRED -->
+      <div id="signin" class="state-msg" hidden>
+        <h2>Admin sign-in</h2>
+        <p>This page is for MNC admins only.</p>
+        <form id="signinForm" class="signin-form">
+          <label for="signin-email">Email</label>
+          <input type="email" id="signin-email" required autocomplete="email" />
+          <label for="signin-pass">Password</label>
+          <input type="password" id="signin-pass" required autocomplete="current-password" />
+          <button type="submit" id="signinBtn">Sign in</button>
+          <p class="signin-err" id="signinErr" aria-live="polite"></p>
+        </form>
+      </div>
+
+      <!-- FORBIDDEN (signed in but not admin) -->
+      <div id="forbidden" class="state-msg" hidden>
+        <h2>Not authorized</h2>
+        <p>You&rsquo;re signed in, but this account isn&rsquo;t flagged as admin.</p>
+        <p><a href="#" id="signOutLink">Sign out</a></p>
+      </div>
+
+      <!-- AUTHED — tabs + both panels -->
+      <div id="authed" hidden>
+
+        <div class="tabs" role="tablist">
+          <button class="tab-btn active" data-tab="feedback" role="tab">Feedback <span class="tab-badge" id="feedbackBadge">0</span></button>
+          <button class="tab-btn" data-tab="tracker" role="tab">Tracker <span class="tab-badge" id="trackerBadge">0</span></button>
+          <span class="spacer"></span>
+          <span class="me-name" id="meName">—</span>
+          <a href="#" id="signOutBtn" style="font-size:13px; color:var(--ink-soft); margin-left:8px;">Sign out</a>
+        </div>
+
+        <!-- FEEDBACK PANEL -->
+        <div id="panelFeedback" class="tab-content">
+          <div class="toolbar">
+            <div class="filters" role="tablist">
+              <button class="filter-btn active" data-cat="all">All</button>
+              <button class="filter-btn" data-cat="wish_to_add">Wishes</button>
+              <button class="filter-btn" data-cat="annoyance">Annoyances</button>
+              <button class="filter-btn" data-cat="message">Other</button>
+            </div>
+            <span class="spacer"></span>
+            <label class="show-resolved">
+              <input type="checkbox" id="hideResolved" checked /> Hide resolved
+            </label>
+            <span class="count" id="count">—</span>
+          </div>
+          <div class="list" id="list"></div>
+        </div>
+
+        <!-- TRACKER PANEL -->
+        <div id="panelTracker" class="tab-content" hidden>
+
+          <div class="tracker-add">
+            <h3>Add to the tracker</h3>
+            <form id="trackerForm">
+              <div class="row">
+                <input type="text" id="trk-title" placeholder="Short title — what needs doing?" required />
+                <select id="trk-priority" aria-label="Priority">
+                  <option value="high">High</option>
+                  <option value="medium" selected>Medium</option>
+                  <option value="low">Low</option>
+                </select>
+                <button type="submit" id="trkAddBtn">Add</button>
+              </div>
+         

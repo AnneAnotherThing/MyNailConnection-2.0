@@ -54,7 +54,7 @@ copy_if_exists() {
 # stay no-op until the user edits HTML again.
 if [ -f sw.js ]; then
   needs_bump=0
-  for f in index.html marketing.html reset-password.html tech-guide.html manifest.json; do
+  for f in index.html marketing.html reset-password.html tech-guide.html founders.html admin-feedback.html manifest.json; do
     if [ -f "$f" ] && [ "$f" -nt sw.js ]; then needs_bump=1; break; fi
   done
   if [ "$needs_bump" = "1" ]; then
@@ -169,6 +169,8 @@ copy_if_exists 404.html                "$MKT/404.html"
 copy_if_exists stats.html              "$MKT/stats.html"
 copy_if_exists punch-list.html         "$MKT/punch-list.html"
 copy_if_exists tech-guide.html         "$MKT/tech-guide.html"
+copy_if_exists founders.html           "$MKT/founders.html"
+copy_if_exists admin-feedback.html     "$MKT/admin-feedback.html"
 copy_if_exists support.html            "$MKT/support.html"
 copy_if_exists privacy.html            "$MKT/privacy.html"
 copy_if_exists terms.html              "$MKT/terms.html"
@@ -203,6 +205,8 @@ copy_if_exists 404.html                "$GH/404.html"
 copy_if_exists stats.html              "$GH/stats.html"
 copy_if_exists punch-list.html         "$GH/punch-list.html"
 copy_if_exists tech-guide.html         "$GH/tech-guide.html"
+copy_if_exists founders.html           "$GH/founders.html"
+copy_if_exists admin-feedback.html     "$GH/admin-feedback.html"
 copy_if_exists support.html            "$GH/support.html"
 copy_if_exists privacy.html            "$GH/privacy.html"
 copy_if_exists terms.html              "$GH/terms.html"

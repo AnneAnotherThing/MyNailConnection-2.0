@@ -2276,9 +2276,9 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
          persistent footer so the reviewer can find them without needing
          to open the upgrade modal. Added 2026-05-01. -->
     <div style="text-align:center;margin:0 20px;font-size:11px;color:var(--muted);line-height:1.7;">
-      <a href="https://www.apple.com/legal/internet-services/itunes/dev/stdeula/" target="_blank" rel="noopener" style="color:var(--muted);text-decoration:underline;text-underline-offset:3px;opacity:0.85;">Terms of Use (EULA)</a>
+      <a href="https://mynailconnection.com/terms.html" onclick="openLegal('terms','Terms of Use');return false;" style="color:var(--muted);text-decoration:underline;text-underline-offset:3px;opacity:0.85;">Terms of Use (EULA)</a>
       <span style="margin:0 8px;opacity:0.5;">·</span>
-      <a href="https://mynailconnection.com/privacy.html" target="_blank" rel="noopener" style="color:var(--muted);text-decoration:underline;text-underline-offset:3px;opacity:0.85;">Privacy Policy</a>
+      <a href="https://mynailconnection.com/privacy.html" onclick="openLegal('privacy','Privacy Policy');return false;" style="color:var(--muted);text-decoration:underline;text-underline-offset:3px;opacity:0.85;">Privacy Policy</a>
     </div>
 
     <!-- Account deletion entry point — required to be findable in-app per
@@ -2958,9 +2958,9 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
          app" alongside the subscription disclosure. Mirrored on tech-home
          so both roles see them. Added 2026-05-01. -->
     <div style="text-align:center;margin:0 20px;font-size:11px;color:var(--muted);line-height:1.7;">
-      <a href="https://www.apple.com/legal/internet-services/itunes/dev/stdeula/" target="_blank" rel="noopener" style="color:var(--muted);text-decoration:underline;text-underline-offset:3px;opacity:0.85;">Terms of Use (EULA)</a>
+      <a href="https://mynailconnection.com/terms.html" onclick="openLegal('terms','Terms of Use');return false;" style="color:var(--muted);text-decoration:underline;text-underline-offset:3px;opacity:0.85;">Terms of Use (EULA)</a>
       <span style="margin:0 8px;opacity:0.5;">·</span>
-      <a href="https://mynailconnection.com/privacy.html" target="_blank" rel="noopener" style="color:var(--muted);text-decoration:underline;text-underline-offset:3px;opacity:0.85;">Privacy Policy</a>
+      <a href="https://mynailconnection.com/privacy.html" onclick="openLegal('privacy','Privacy Policy');return false;" style="color:var(--muted);text-decoration:underline;text-underline-offset:3px;opacity:0.85;">Privacy Policy</a>
     </div>
 
     <!-- Account deletion entry point — required to be findable in-app per
@@ -3389,7 +3389,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
              rendered awkwardly. 2026-04-30 per Anne. -->
         <button type="button" onclick="closeTechEdit()" style="padding:8px 14px;font-size:13px;background:none;border:1.5px solid var(--border);color:var(--muted);border-radius:100px;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500;flex-shrink:0;">Cancel</button>
         <div style="font-family:'Playfair Display',serif;font-size:18px;font-weight:600;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:center;" id="tech-edit-title">Edit Tech</div>
-        <button type="button" class="btn btn-rose" onclick="saveTechEdit()" style="padding:8px 18px;font-size:13px;flex-shrink:0;">Save</button>
+        <button type="button" class="btn btn-rose" onclick="saveTechEdit()" style="padding:8px 18px;font-size:13px;flex-shrink:0;width:auto;">Save</button>
       </div>
 
       <!-- Profile photo -->
@@ -5153,8 +5153,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.1',     /* __APP_BUILD_NAME__   */
-  android: 248,         /* __APP_BUILD_ANDROID__ */
-  ios:     53,          /* __APP_BUILD_IOS__     */
+  android: 260,         /* __APP_BUILD_ANDROID__ */
+  ios:     65,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -17098,7 +17098,7 @@ function closeReleaseWizard() {
          flow. — 2026-05-01 -->
     <div style="margin:16px 20px 0;padding:12px 14px;background:var(--cream);border-radius:10px;font-size:11px;color:var(--muted);line-height:1.55;text-align:center;">
       <div style="margin-bottom:4px;"><b style="color:var(--charcoal);font-weight:600;">Glow Up</b> — $10.99/month auto-renewable subscription. Renews monthly until canceled. Manage or cancel anytime in iOS Settings → Apple ID → Subscriptions.</div>
-      <div>By subscribing you agree to our <a href="https://www.apple.com/legal/internet-services/itunes/dev/stdeula/" target="_blank" rel="noopener" style="color:var(--rose);text-decoration:underline;">Terms of Use (EULA)</a> and <a href="https://mynailconnection.com/privacy.html" target="_blank" rel="noopener" style="color:var(--rose);text-decoration:underline;">Privacy Policy</a>.</div>
+      <div>By subscribing you agree to our <a href="https://mynailconnection.com/terms.html" onclick="openLegal('terms','Terms of Use');return false;" style="color:var(--rose);text-decoration:underline;">Terms of Use (EULA)</a> and <a href="https://mynailconnection.com/privacy.html" onclick="openLegal('privacy','Privacy Policy');return false;" style="color:var(--rose);text-decoration:underline;">Privacy Policy</a>.</div>
     </div>
 
     <!-- Cancel + Restore Purchases (Restore is required by Apple App
@@ -17687,6 +17687,38 @@ function closeReleaseWizard() {
     </div>
   </div>
 </div>
+
+<!-- LEGAL MODAL — opens Terms / Privacy inline (iframe of our own
+     pages) so PWA / wrapped-app users don't get bounced to the system
+     browser. Uses flex centering for predictable positioning regardless
+     of which screen is currently displayed (the auto-margin version we
+     tried first ended up clipped on the left when nested inside MNC's
+     flex-centered .device shell). Iframes only work for our own domain
+     (mynailconnection.com); Apple's stdeula URL refused to iframe due
+     to its X-Frame-Options header — that's why the in-app Terms link
+     was changed to terms.html in the same edit pass. 2026-05-02. -->
+<div id="legal-modal" onclick="if(event.target===this)closeLegalModal()"
+     style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.55);z-index:9999;align-items:stretch;justify-content:center;padding:24px 12px;box-sizing:border-box;">
+  <div style="background:white;border-radius:20px;width:100%;max-width:480px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,0.18);box-sizing:border-box;">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:1px solid var(--border);flex-shrink:0;background:white;">
+      <div id="legal-modal-title" style="font-family:'Playfair Display',serif;font-size:17px;font-weight:600;color:var(--charcoal);">Terms of Use</div>
+      <button type="button" onclick="closeLegalModal()" style="padding:6px 14px;font-size:13px;background:none;border:1.5px solid var(--border);color:var(--muted);border-radius:100px;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500;width:auto;">Close</button>
+    </div>
+    <iframe id="legal-iframe" src="" title="Legal document" style="flex:1;border:none;width:100%;background:white;"></iframe>
+  </div>
+</div>
+<script>
+function openLegal(which, title) {
+  var url = which === 'terms' ? 'https://mynailconnection.com/terms.html' : 'https://mynailconnection.com/privacy.html';
+  document.getElementById('legal-modal-title').textContent = title;
+  document.getElementById('legal-iframe').src = url;
+  document.getElementById('legal-modal').style.display = 'flex';
+}
+function closeLegalModal() {
+  document.getElementById('legal-modal').style.display = 'none';
+  document.getElementById('legal-iframe').src = '';
+}
+</script>
 
 </body>
 </html>
