@@ -272,4 +272,21 @@
       btn.disabled = true;
       btn.textContent = 'Sending...';
 
-      const { error } = await supa.from('founders_feedback').insert(payloa
+      const { error } = await supa.from('founders_feedback').insert(payload);
+
+      if (error) {
+        console.error('Founder feedback insert failed:', error);
+        err.textContent = "Couldn't send — please email anne@mynailconnection.com instead.";
+        btn.disabled = false;
+        btn.textContent = 'Send to Anne & Leslie';
+        return;
+      }
+
+      formSection.classList.add('hidden');
+      thanksSection.classList.remove('hidden');
+      thanksSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  </script>
+
+</body>
+</html>

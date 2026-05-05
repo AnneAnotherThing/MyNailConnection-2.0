@@ -26,56 +26,6 @@
 set -e
 cd "$(dirname "$0")/.."  # cd to MNC repo root
 
-# ── HTML truncation guard ───────────────────────────────────────────────
-# After the Edit/Write tool silently truncated marketing.html on 2026-05-05
-# during a launch-fanfare edit (and the same thing has bitten index.html
-# repeatedly — see CLAUDE.md), we never want a truncated source to reach
-# the deploy bundle. This guard aborts sync if any critical HTML source:
-#   (a) doesn't end with </body>, or
-#   (b) has dropped more than 10% in line count vs its committed git HEAD.
-#
-# Either symptom usually means the file lost its closing scripts + tags
-# during an Edit tool call. Catching it BEFORE the copy means the bundle
-# never gets a broken file, so a stale `git push` can't ship a dead site.
-#
-# Escape hatch: set MNC_SKIP_HTML_GUARD=1 if you're intentionally making
-# a huge deletion and want sync to skip the line-count check this once.
-validate_html() {
-  local f="$1"
-  if [ ! -f "$f" ]; then return 0; fi
-
-  # Closing-tag check — </body> must be in the last few hundred bytes
-  if ! tail -c 400 "$f" | grep -q "</body>"; then
-    echo "✗ ABORT: $f is missing </body> at end of file. Looks truncated." >&2
-    echo "  Recover with: git checkout $f  (or merge the missing tail back manually)" >&2
-    exit 1
-  fi
-
-  # Line-count drop check vs the committed git HEAD version
-  if [ "${MNC_SKIP_HTML_GUARD:-0}" != "1" ] && git rev-parse --verify HEAD >/dev/null 2>&1; then
-    local current committed floor
-    current=$(wc -l < "$f")
-    committed=$(git show "HEAD:$f" 2>/dev/null | wc -l)
-    if [ -n "$committed" ] && [ "$committed" -gt 0 ]; then
-      floor=$(( committed * 90 / 100 ))
-      if [ "$current" -lt "$floor" ]; then
-        echo "✗ ABORT: $f shrank from $committed → $current lines (>10% drop vs git HEAD)." >&2
-        echo "  This usually means Edit/Write silently truncated the file." >&2
-        echo "  Inspect with: git diff $f   |   restore with: git checkout $f" >&2
-        echo "  If the deletion is intentional: MNC_SKIP_HTML_GUARD=1 bash deploy/sync.sh" >&2
-        exit 1
-      fi
-    fi
-  fi
-}
-
-# Validate every critical HTML source before any cache bump or copy
-for f in index.html marketing.html reset-password.html tech-guide.html \
-         privacy.html terms.html 404.html founders.html; do
-  validate_html "$f"
-done
-
-
 APP=deploy/app
 MKT=deploy/marketing
 GH=deploy/ghpages

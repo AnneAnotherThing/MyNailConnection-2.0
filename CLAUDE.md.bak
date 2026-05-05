@@ -103,25 +103,6 @@ idempotent syncs (no edits) don't churn the version number.
 - Legal pages (`privacy.html`, `terms.html`) are shared — edit once,
   re-ship to both bundles.
 
-## Editing HTML files safely — Edit/Write truncation issue
-
-The Edit/Write tools have repeatedly truncated MNC HTML files mid-edit,
-silently dropping the closing `<script>` blocks and `</body></html>`.
-Confirmed cases: `index.html` (1.3MB+, multiple times), `marketing.html`
-(107KB, 2026-05-05), `founders.html` (9KB, found in working copy
-2026-05-05). Trigger appears to be a large `new_string` (~30+ lines)
-replacing content near the END of the file — **not pure file size**.
-
-**Default to bash** (`sed -i`, `python3` + heredoc, `cat`-splice) for any
-non-trivial HTML edit. After every edit, sanity-check:
-`tail -c 200 file.html | grep '</body>'`.
-
-`deploy/sync.sh` has a guard (`validate_html`) that aborts if any source
-HTML is missing `</body>` or has dropped >10% in line count vs git HEAD.
-Trust the guard — it's the deterministic safety net behind the heuristic.
-Bypass with `MNC_SKIP_HTML_GUARD=1` only for genuinely intentional huge
-deletions.
-
 ## What goes in each deploy folder
 
 Most files need to ship to BOTH deploys — the folders are not mutually

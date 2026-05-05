@@ -1696,7 +1696,7 @@
       </svg></div>
   <div class="hero-inner">
     <img src="images/mncLogo-round-512.webp" decoding="async" fetchpriority="high" width="512" height="512" alt="My Nail Connection" class="hero-logo"/>
-    <div class="hero-badge"><span class="hero-badge-dot"></span> Version <strong style="color:#FAF7F4;font-weight:700;letter-spacing:1.5px;">2.0</strong> &mdash; Just launched <svg class="hero-badge-sparkle" aria-hidden="true" viewBox="0 0 16 16" width="11" height="11" style="vertical-align:-1px;"><path d="M8 0 L9 7 L16 8 L9 9 L8 16 L7 9 L0 8 L7 7 Z" fill="#E8C890"/></svg></div>
+    <div class="hero-badge"><span class="hero-badge-dot"></span> Version <strong style="color:#FAF7F4;font-weight:700;letter-spacing:1.5px;">2.0</strong> &mdash; Just launched <span class="hero-badge-sparkle" aria-hidden="true">✨</span></div>
 
     <h1>My Nail Connection.<br/><em>In full bloom.</em></h1>
     <p class="hero-sub">Everything you loved — rebuilt, plus real support, powerful new features, and a community built to grow with you.</p>
@@ -1727,7 +1727,7 @@
 
 <!-- TAGLINE STRIP -->
 <div class="tagline-strip">
-  <strong>MNC 2.0 is officially live!</strong> &nbsp;·&nbsp; Rebuilt from scratch. Better support. Real community.
+  <strong>🎉 MNC 2.0 is officially live!</strong> &nbsp;·&nbsp; Rebuilt from scratch. Better support. Real community.
 </div>
 
 <!-- FOR CLIENTS -->
@@ -2186,8 +2186,8 @@
   }
 
   var startTime = performance.now();
-  var DURATION = 13000;   // total ms before canvas is removed
-  var FADE_AT  = 11000;   // ms after which opacity fades out
+  var DURATION = 9000;   // total ms before canvas is removed
+  var FADE_AT  = 7000;   // ms after which opacity fades out
 
   function tick(now){
     var elapsed = now - startTime;
@@ -2195,7 +2195,7 @@
 
     for (var i = 0; i < pieces.length; i++) {
       var p = pieces[i];
-      p.vy += 0.008;
+      p.vy += 0.012;
       p.vx += (Math.random() - 0.5) * 0.025;
       if (p.vx > 1.2) p.vx = 1.2;
       if (p.vx < -1.2) p.vx = -1.2;
