@@ -366,4 +366,426 @@
                 </select>
                 <button type="submit" id="trkAddBtn">Add</button>
               </div>
-         
+              <textarea id="trk-details" placeholder="Optional — context, repro steps, who reported it, etc."></textarea>
+              <p class="err" id="trkErr" aria-live="polite"></p>
+            </form>
+          </div>
+
+          <div class="toolbar">
+            <div class="filters" role="tablist">
+              <button class="trk-filter-btn filter-btn active" data-pri="all">All priorities</button>
+              <button class="trk-filter-btn filter-btn" data-pri="high">High</button>
+              <button class="trk-filter-btn filter-btn" data-pri="medium">Medium</button>
+              <button class="trk-filter-btn filter-btn" data-pri="low">Low</button>
+            </div>
+            <span class="spacer"></span>
+            <label class="show-resolved">
+              <input type="checkbox" id="hideDone" checked /> Hide done
+            </label>
+            <span class="count" id="trkCount">—</span>
+          </div>
+
+          <div class="list" id="trkList"></div>
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+
+  <script type="module">
+    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+    const SUPABASE_URL = 'https://ktiztunuifzbzwzyqrrq.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt0aXp0dW51aWZ6Ynp3enlxcnJxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3Njk3MDgsImV4cCI6MjA4OTM0NTcwOH0.QXhI1oO-v5Qs2XOlijjpRgM2pxDD6lkWxUQ6uW6HbtM';
+
+    const supa = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      auth: { persistSession: true, autoRefreshToken: true }
+    });
+
+    const $ = (id) => document.getElementById(id);
+    const showOnly = (id) => {
+      ['loading', 'signin', 'forbidden', 'authed'].forEach(s => {
+        $(s).hidden = (s !== id);
+      });
+    };
+
+    // ── State ─────────────────────────────────────────────────────────────
+    let allRows = [];          // founders_feedback rows
+    let trackerRows = [];      // launch_tracker rows
+    let activeCat = 'all';     // feedback filter
+    let activeTrkPri = 'all';  // tracker priority filter
+    let me = { id: null, name: 'Admin', email: null };
+
+    // ── Init ──────────────────────────────────────────────────────────────
+    async function init() {
+      const { data: { session } } = await supa.auth.getSession();
+      if (!session) {
+        showOnly('signin');
+        return;
+      }
+      await loadAll();
+    }
+
+    async function deriveMe(user) {
+      // Try public.users for a name field, fall back to email local-part
+      let displayName = null;
+      try {
+        const { data: profile } = await supa.from('users').select('*').eq('id', user.id).maybeSingle();
+        if (profile) {
+          displayName = profile.first_name || profile.name || profile.display_name
+                     || profile.full_name || null;
+        }
+      } catch (_) { /* table or column missing — fall through */ }
+      if (!displayName) {
+        const meta = user.user_metadata || {};
+        displayName = meta.full_name || meta.name || meta.first_name || null;
+      }
+      if (!displayName && user.email) {
+        const local = user.email.split('@')[0];
+        displayName = local.charAt(0).toUpperCase() + local.slice(1);
+      }
+      me = { id: user.id, name: displayName || 'Admin', email: user.email || null };
+      $('meName').innerHTML = `Signed in as <strong>${escape(me.name)}</strong>`;
+    }
+
+    async function loadAll() {
+      // Try feedback first — its RLS gates everything else (admin role check)
+      const { data: feedback, error: fbErr } = await supa
+        .from('founders_feedback')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (fbErr) {
+        console.error('Feedback load error:', fbErr);
+        showOnly('forbidden');
+        return;
+      }
+
+      allRows = feedback || [];
+
+      // Tracker (admin RLS too)
+      const { data: tracker, error: trkErr } = await supa
+        .from('launch_tracker')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (trkErr) {
+        console.warn('Tracker load error:', trkErr);
+        trackerRows = [];
+      } else {
+        trackerRows = tracker || [];
+      }
+
+      // Get current user's name for "added by" attribution
+      const { data: { user } } = await supa.auth.getUser();
+      if (user) await deriveMe(user);
+
+      // Restore last tab from localStorage
+      const lastTab = localStorage.getItem('mnc_admin_tab') || 'feedback';
+      switchTab(lastTab);
+
+      showOnly('authed');
+      renderFeedback();
+      renderTracker();
+    }
+
+    // Map the content columns onto display labels + badge classes
+    const FIELDS = [
+      { key: 'wish_to_add', label: 'Would add',  badge: 'feature' },
+      { key: 'annoyance',   label: 'Annoyance',  badge: 'bug'     },
+      { key: 'message',     label: 'Other',      badge: 'other'   },
+    ];
+
+    function renderFeedback() {
+      // Update tab badge with unresolved count
+      const unresolved = allRows.filter(r => !r.resolved).length;
+      $('feedbackBadge').textContent = unresolved;
+
+      const hideResolved = $('hideResolved').checked;
+      const filtered = allRows.filter(r => {
+        if (hideResolved && r.resolved) return false;
+        if (activeCat !== 'all') {
+          const v = r[activeCat];
+          if (!v || !String(v).trim()) return false;
+        }
+        return true;
+      });
+
+      $('count').textContent = filtered.length === 1 ? '1 item' : `${filtered.length} items`;
+
+      const list = $('list');
+      if (filtered.length === 0) {
+        list.innerHTML = '<div class="empty">Nothing here. Quiet day.</div>';
+        return;
+      }
+
+      list.innerHTML = filtered.map(r => {
+        const when = new Date(r.created_at).toLocaleString();
+        const escName = escape(r.name);
+        const escEmail = escape(r.email);
+        const escUA = escape(r.user_agent || '');
+        const segmentsHtml = FIELDS
+          .filter(f => r[f.key] && String(r[f.key]).trim())
+          .map(f => `
+            <div class="segment">
+              <div class="seg-head"><span class="badge ${f.badge}">${f.label}</span></div>
+              <div class="msg">${escape(r[f.key])}</div>
+            </div>
+          `).join('');
+        return `
+          <div class="item ${r.resolved ? 'resolved' : ''}" data-id="${r.id}">
+            <div class="item-head">
+              <span class="who">${escName}</span>
+              <span class="email">&lt;${escEmail}&gt;</span>
+              <span class="when">${when}</span>
+            </div>
+            ${segmentsHtml || '<div class="msg" style="opacity:.6;">(no content)</div>'}
+            <div class="item-foot">
+              <label>
+                <input type="checkbox" ${r.resolved ? 'checked' : ''} data-resolve="${r.id}" />
+                Resolved
+              </label>
+              <span class="ua" title="${escUA}">${escUA}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Wire resolved toggles
+      list.querySelectorAll('input[data-resolve]').forEach(cb => {
+        cb.addEventListener('change', async (e) => {
+          const id = cb.getAttribute('data-resolve');
+          const resolved = cb.checked;
+          const update = { resolved, resolved_at: resolved ? new Date().toISOString() : null };
+          const { error } = await supa.from('founders_feedback').update(update).eq('id', id);
+          if (error) {
+            alert('Save failed: ' + error.message);
+            cb.checked = !resolved;
+            return;
+          }
+          const row = allRows.find(r => r.id === id);
+          if (row) Object.assign(row, update);
+          renderFeedback();
+        });
+      });
+    }
+
+    // ── Tracker rendering ────────────────────────────────────────────────
+    const PRIORITY_ORDER = { high: 0, medium: 1, low: 2 };
+
+    function renderTracker() {
+      // Tab badge: count of open items
+      const openCount = trackerRows.filter(r => r.status === 'open').length;
+      $('trackerBadge').textContent = openCount;
+
+      const hideDone = $('hideDone').checked;
+      const filtered = trackerRows
+        .filter(r => {
+          if (hideDone && r.status === 'done') return false;
+          if (activeTrkPri !== 'all' && r.priority !== activeTrkPri) return false;
+          return true;
+        })
+        .sort((a, b) => {
+          // Open before done; then by priority; then newest first
+          if (a.status !== b.status) return a.status === 'open' ? -1 : 1;
+          const p = (PRIORITY_ORDER[a.priority] ?? 9) - (PRIORITY_ORDER[b.priority] ?? 9);
+          if (p !== 0) return p;
+          return new Date(b.created_at) - new Date(a.created_at);
+        });
+
+      $('trkCount').textContent = filtered.length === 1 ? '1 item' : `${filtered.length} items`;
+
+      const list = $('trkList');
+      if (filtered.length === 0) {
+        list.innerHTML = '<div class="empty">Nothing tracked yet — add the first one above.</div>';
+        return;
+      }
+
+      list.innerHTML = filtered.map(r => {
+        const when = new Date(r.created_at).toLocaleDateString();
+        const author = escape(r.added_by_name || 'Admin');
+        const title = escape(r.title);
+        const details = r.details ? `<div class="details">${escape(r.details)}</div>` : '';
+        const priOptions = ['high','medium','low'].map(p =>
+          `<option value="${p}" ${p === r.priority ? 'selected' : ''}>${p.charAt(0).toUpperCase()+p.slice(1)}</option>`
+        ).join('');
+        return `
+          <div class="item tracker ${r.status === 'done' ? 'done' : ''}" data-id="${r.id}">
+            <div class="title-row">
+              <span class="pri-badge ${r.priority}">${r.priority}</span>
+              <span class="title">${title}</span>
+            </div>
+            ${details}
+            <div class="meta">
+              <span class="who-badge">${author}</span>
+              <span>${when}</span>
+              <span class="spacer" style="flex:1;"></span>
+              <select class="pri-select" data-trk-pri="${r.id}" aria-label="Change priority">${priOptions}</select>
+              <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                <input type="checkbox" ${r.status === 'done' ? 'checked' : ''} data-trk-done="${r.id}" />
+                Done
+              </label>
+              <button data-trk-del="${r.id}" style="background:transparent;border:0;color:var(--ink-soft);cursor:pointer;font-size:13px;text-decoration:underline;">delete</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Wire done toggles
+      list.querySelectorAll('input[data-trk-done]').forEach(cb => {
+        cb.addEventListener('change', async () => {
+          const id = cb.getAttribute('data-trk-done');
+          const status = cb.checked ? 'done' : 'open';
+          const update = { status, done_at: cb.checked ? new Date().toISOString() : null };
+          const { error } = await supa.from('launch_tracker').update(update).eq('id', id);
+          if (error) { alert('Save failed: ' + error.message); cb.checked = !cb.checked; return; }
+          const row = trackerRows.find(r => r.id === id);
+          if (row) Object.assign(row, update);
+          renderTracker();
+        });
+      });
+
+      // Wire priority selects
+      list.querySelectorAll('select[data-trk-pri]').forEach(sel => {
+        sel.addEventListener('change', async () => {
+          const id = sel.getAttribute('data-trk-pri');
+          const priority = sel.value;
+          const { error } = await supa.from('launch_tracker').update({ priority }).eq('id', id);
+          if (error) { alert('Save failed: ' + error.message); return; }
+          const row = trackerRows.find(r => r.id === id);
+          if (row) row.priority = priority;
+          renderTracker();
+        });
+      });
+
+      // Wire delete buttons
+      list.querySelectorAll('button[data-trk-del]').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const id = btn.getAttribute('data-trk-del');
+          if (!confirm('Delete this tracker item?')) return;
+          const { error } = await supa.from('launch_tracker').delete().eq('id', id);
+          if (error) { alert('Delete failed: ' + error.message); return; }
+          trackerRows = trackerRows.filter(r => r.id !== id);
+          renderTracker();
+        });
+      });
+    }
+
+    // ── Tab switching ────────────────────────────────────────────────────
+    function switchTab(tab) {
+      document.querySelectorAll('.tab-btn').forEach(b => {
+        b.classList.toggle('active', b.getAttribute('data-tab') === tab);
+      });
+      $('panelFeedback').hidden = (tab !== 'feedback');
+      $('panelTracker').hidden  = (tab !== 'tracker');
+      localStorage.setItem('mnc_admin_tab', tab);
+    }
+
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => switchTab(btn.getAttribute('data-tab')));
+    });
+
+    // ── Tracker add form ─────────────────────────────────────────────────
+    $('trackerForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      $('trkErr').textContent = '';
+      const title = $('trk-title').value.trim();
+      const details = $('trk-details').value.trim() || null;
+      const priority = $('trk-priority').value;
+      if (!title) { $('trkErr').textContent = 'Title is required.'; return; }
+
+      $('trkAddBtn').disabled = true;
+      $('trkAddBtn').textContent = 'Adding...';
+
+      const payload = {
+        title, details, priority, status: 'open',
+        added_by_user_id: me.id, added_by_name: me.name
+      };
+      const { data, error } = await supa.from('launch_tracker').insert(payload).select().single();
+
+      $('trkAddBtn').disabled = false;
+      $('trkAddBtn').textContent = 'Add';
+
+      if (error) {
+        $('trkErr').textContent = 'Save failed: ' + error.message;
+        return;
+      }
+
+      trackerRows = [data, ...trackerRows];
+      $('trk-title').value = '';
+      $('trk-details').value = '';
+      renderTracker();
+    });
+
+    // Tracker filter buttons
+    document.querySelectorAll('.trk-filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.trk-filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        activeTrkPri = btn.getAttribute('data-pri');
+        renderTracker();
+      });
+    });
+
+    $('hideDone').addEventListener('change', renderTracker);
+
+    function escape(s) {
+      return String(s ?? '').replace(/[&<>"']/g, m => ({
+        '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+      }[m]));
+    }
+
+    // Feedback filter buttons (only the ones in #panelFeedback toolbar, not tracker)
+    document.querySelectorAll('#panelFeedback .filters .filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#panelFeedback .filters .filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        activeCat = btn.getAttribute('data-cat');
+        renderFeedback();
+      });
+    });
+
+    // Hide-resolved toggle
+    $('hideResolved').addEventListener('change', renderFeedback);
+
+    // Sign-in form
+    $('signinForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      $('signinErr').textContent = '';
+      $('signinBtn').disabled = true;
+      $('signinBtn').textContent = 'Signing in…';
+
+      const email = $('signin-email').value.trim();
+      const password = $('signin-pass').value;
+      const { error } = await supa.auth.signInWithPassword({ email, password });
+
+      if (error) {
+        $('signinErr').textContent = error.message || 'Sign-in failed.';
+        $('signinBtn').disabled = false;
+        $('signinBtn').textContent = 'Sign in';
+        return;
+      }
+
+      $('signin-pass').value = '';
+      $('signinBtn').disabled = false;
+      $('signinBtn').textContent = 'Sign in';
+      showOnly('loading');
+      await loadFeedback();
+    });
+
+    // Sign-out (used from forbidden + signed-in views)
+    async function signOut(e) {
+      if (e) e.preventDefault();
+      await supa.auth.signOut();
+      allRows = [];
+      showOnly('signin');
+    }
+    $('signOutBtn').addEventListener('click', signOut);
+    $('signOutLink').addEventListener('click', signOut);
+
+    init();
+  </script>
+
+</body>
+</html>

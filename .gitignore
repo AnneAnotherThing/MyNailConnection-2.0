@@ -58,3 +58,5 @@ signing/
 
 # Local sentinel for sync.sh's auto-build-bump (per-machine, not shared)
 .last-build-bump
+/og17-launch
+/og17-launch
