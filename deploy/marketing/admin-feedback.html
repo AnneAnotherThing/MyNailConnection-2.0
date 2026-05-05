@@ -771,7 +771,7 @@
       $('signinBtn').disabled = false;
       $('signinBtn').textContent = 'Sign in';
       showOnly('loading');
-      await loadFeedback();
+      await loadAll();
     });
 
     // Sign-out (used from forbidden + signed-in views)
