@@ -75,4 +75,13 @@
          requestPermissions() will resolve 'denied' silently on
          Android 13+. — 2026-04-23 -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <!-- Geolocation. Required by @capacitor/geolocation for the Near Me
+         map, feed distance filter, and signup ZIP autofill. iOS Info.plist
+         already had NSLocationWhenInUseUsageDescription; Android was the
+         missing half — without these two perms, the bare WebView silently
+         denies navigator.geolocation and the plugin's requestPermissions()
+         resolves 'denied'. — 2026-05-06 -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 </manifest>

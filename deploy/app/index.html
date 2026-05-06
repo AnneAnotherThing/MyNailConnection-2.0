@@ -5171,8 +5171,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.1',     /* __APP_BUILD_NAME__   */
-  android: 288,         /* __APP_BUILD_ANDROID__ */
-  ios:     93,          /* __APP_BUILD_IOS__     */
+  android: 290,         /* __APP_BUILD_ANDROID__ */
+  ios:     95,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -8386,6 +8386,72 @@ function _updateRadiusCircle() {
   }).addTo(_leafletMap);
 }
 
+// ─────────────────────────────────────────────────────────────────────
+// getCurrentPositionSafe — drop-in replacement for
+// navigator.geolocation.getCurrentPosition(success, error, options).
+//
+// On Capacitor native (installed iOS/Android app), the bare WebView
+// silently denies the standard navigator.geolocation API — every call
+// hits the error callback with no permission prompt. The fix is to
+// route native calls through @capacitor/geolocation, which surfaces
+// the system permission prompt and returns real coordinates. On the
+// web, we keep using navigator.geolocation directly (it works fine
+// in browsers when the user grants permission).
+//
+// Signature matches the standard browser API exactly so call sites
+// don't change shape — the same (success, error, options) callback
+// pattern works in both paths. — 2026-05-06
+// ─────────────────────────────────────────────────────────────────────
+function getCurrentPositionSafe(success, error, options) {
+  options = options || { enableHighAccuracy: false, timeout: 15000, maximumAge: 60000 };
+  var Cap = window.Capacitor;
+  var Plugins = Cap && Cap.Plugins;
+  var GeoPlugin = Plugins && Plugins.Geolocation;
+  var isNative = Cap && typeof Cap.isNativePlatform === 'function' && Cap.isNativePlatform();
+
+  if (isNative && GeoPlugin) {
+    (async function() {
+      try {
+        var perm = null;
+        try { perm = await GeoPlugin.checkPermissions(); } catch (_) {}
+        if (!perm || perm.location !== 'granted') {
+          try {
+            var req = await GeoPlugin.requestPermissions();
+            if (!req || req.location !== 'granted') {
+              if (typeof error === 'function') error({ code: 1, message: 'Permission denied' });
+              return;
+            }
+          } catch (e) {
+            if (typeof error === 'function') error({ code: 1, message: 'Permission denied' });
+            return;
+          }
+        }
+        var pos = await GeoPlugin.getCurrentPosition(options);
+        // Capacitor's plugin already returns a Position-shaped object
+        // with .coords.latitude / .coords.longitude — drop straight in.
+        if (typeof success === 'function') success(pos);
+      } catch (e) {
+        if (typeof error === 'function') error(e || { code: 2, message: 'Location unavailable' });
+      }
+    })();
+    return;
+  }
+
+  // Web fallback. If we're in a Capacitor WebView WITHOUT the plugin
+  // (e.g. plugin not yet synced into the build), we still fall through
+  // to navigator.geolocation — which today errors silently in that env.
+  // Same behavior as before this wrapper existed: no regression.
+  if (!navigator.geolocation) {
+    if (typeof error === 'function') error({ code: 2, message: 'Geolocation not supported' });
+    return;
+  }
+  try {
+    navigator.geolocation.getCurrentPosition(success, error, options);
+  } catch (e) {
+    if (typeof error === 'function') error(e);
+  }
+}
+
 function requestLocation() {
   const statusMsg = document.getElementById('map-status-msg');
   const statusBar = document.getElementById('map-status-bar');
@@ -8394,7 +8460,7 @@ function requestLocation() {
     return;
   }
   statusMsg.textContent = 'Getting your location…';
-  navigator.geolocation.getCurrentPosition(
+  getCurrentPositionSafe(
     pos => {
       userLat = pos.coords.latitude;
       userLng = pos.coords.longitude;
@@ -10976,7 +11042,7 @@ function requestHomeGeolocation() {
   if (!navigator.geolocation) { _homeGeoAsked = true; return; }
   _homeGeoAsked = true;
   try {
-    navigator.geolocation.getCurrentPosition(
+    getCurrentPositionSafe(
       function(pos) {
         userLat = pos.coords.latitude;
         userLng = pos.coords.longitude;
@@ -12007,7 +12073,7 @@ function useMyLocation() {
   var locBtn = document.querySelector('[onclick="useMyLocation()"]');
   var locLabel = locBtn ? locBtn.querySelector('span:last-child') : null;
   if (locLabel) locLabel.textContent = 'Getting location…';
-  navigator.geolocation.getCurrentPosition(
+  getCurrentPositionSafe(
     function(pos) {
       var lat = pos.coords.latitude, lng = pos.coords.longitude;
       fetch('https://nominatim.openstreetmap.org/reverse?lat=' + lat + '&lon=' + lng + '&format=json&addressdetails=1&email=annewilson1021@gmail.com')
