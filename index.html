@@ -3220,6 +3220,40 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
         <div style="font-size:10.5px;color:var(--muted);text-align:center;font-style:italic;margin-top:10px;line-height:1.45;">Gross estimates do not subtract Stripe (~3%) or Apple/Google (15-30%) fees.</div>
       </div>
 
+      <!-- ░░░ Marketing site hit tracker ░░░
+           Per-session hits to the public marketing pages (root domain →
+           marketing.html, plus tech-guide.html). Each row in
+           public.marketing_hits is one session-per-page (30-min cooldown
+           enforced client-side; bots filtered by UA). RLS only lets
+           admins read this, so the load fails silently for non-admins.
+           Migration: sql/marketing-hits-tracker.sql -->
+      <div style="background:white;border:1px solid var(--border);border-radius:16px;padding:14px 16px;margin-bottom:14px;box-shadow:0 2px 10px rgba(44,36,32,0.04);">
+        <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:10px;">
+          <div style="font-size:11px;font-weight:600;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;">Marketing site hits</div>
+          <div style="font-size:10.5px;color:var(--muted);">unique 30-min sessions</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px;">
+          <div style="background:linear-gradient(135deg,#F5EDE8 0%,#E8D5CB 100%);border-radius:12px;padding:10px 12px;">
+            <div style="font-size:9.5px;letter-spacing:1.2px;font-weight:700;text-transform:uppercase;color:var(--rose-dark);opacity:0.8;">Today</div>
+            <div id="stat-mh-today" style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:var(--rose-dark);margin-top:2px;line-height:1;">—</div>
+          </div>
+          <div style="background:linear-gradient(135deg,#F5EDE8 0%,#E8D5CB 100%);border-radius:12px;padding:10px 12px;">
+            <div style="font-size:9.5px;letter-spacing:1.2px;font-weight:700;text-transform:uppercase;color:var(--rose-dark);opacity:0.8;">Last 7d</div>
+            <div id="stat-mh-week" style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:var(--rose-dark);margin-top:2px;line-height:1;">—</div>
+          </div>
+          <div style="background:linear-gradient(135deg,#F5EDE8 0%,#E8D5CB 100%);border-radius:12px;padding:10px 12px;">
+            <div style="font-size:9.5px;letter-spacing:1.2px;font-weight:700;text-transform:uppercase;color:var(--rose-dark);opacity:0.8;">All-time</div>
+            <div id="stat-mh-total" style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:var(--rose-dark);margin-top:2px;line-height:1;">—</div>
+          </div>
+        </div>
+        <div id="stat-mh-breakdown" style="display:flex;flex-wrap:wrap;gap:6px;font-size:11px;color:var(--muted);margin-bottom:10px;line-height:1.6;"></div>
+        <div style="font-size:11px;font-weight:600;color:var(--charcoal);margin-bottom:6px;">Recent visits</div>
+        <div id="stat-mh-recent" style="font-size:11.5px;color:var(--charcoal);max-height:240px;overflow-y:auto;border:1px solid var(--border);border-radius:10px;background:#FAF7F4;">
+          <div style="padding:10px 12px;color:var(--muted);font-style:italic;">Loading…</div>
+        </div>
+        <div style="font-size:10px;color:var(--muted);margin-top:8px;font-style:italic;line-height:1.45;">Tracker fires once per browser per page per 30 min. Obvious bots are filtered by user-agent. Non-admins cannot read this table (RLS).</div>
+      </div>
+
       <button onclick="loadAdminStats()" style="width:100%;padding:11px;border:none;border-radius:12px;background:white;color:var(--rose-dark);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;border:1px solid var(--border);">Refresh</button>
     </div>
 
@@ -5153,8 +5187,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.1',     /* __APP_BUILD_NAME__   */
-  android: 285,         /* __APP_BUILD_ANDROID__ */
-  ios:     90,          /* __APP_BUILD_IOS__     */
+  android: 286,         /* __APP_BUILD_ANDROID__ */
+  ios:     91,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -15490,10 +15524,120 @@ async function loadAdminStats() {
   // since the dataset is small (~hundreds of rows expected at most for
   // the foreseeable future); switch to an RPC if this ever gets slow.
   loadSubscriptionStats(h).catch(function(e){ try { console.warn('subscription stats:', e); } catch(_){} });
+  loadMarketingHitsStats(h).catch(function(e){ try { console.warn('marketing hits:', e); } catch(_){} });
 
   // ── Last-updated stamp ────────────────────────────────────────────────
   const pad2 = n => n < 10 ? '0' + n : '' + n;
   setTxt('stats-updated', pad2(now.getHours()) + ':' + pad2(now.getMinutes()));
+}
+
+// ── Marketing site hit tracker — fills the "Marketing site hits" card
+//    in the admin Stats tab. Reads public.marketing_hits, which only
+//    admins can SELECT (RLS) — for everyone else this fails silently.
+//    Migration: sql/marketing-hits-tracker.sql.
+async function loadMarketingHitsStats(h) {
+  const setTxt  = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+  const setHtml = (id, val) => { const el = document.getElementById(id); if (el) el.innerHTML = val; };
+
+  // Use start-of-today (LOCAL) as the cutoff so "today" matches the
+  // admin's wall clock, not UTC. Same approach for 7d-ago.
+  const todayStart = new Date(); todayStart.setHours(0,0,0,0);
+  const weekAgo    = new Date(Date.now() - 7 * 86400000);
+
+  async function countHits(filter) {
+    try {
+      const url = SUPABASE_URL + '/rest/v1/marketing_hits?select=*' + (filter ? '&' + filter : '');
+      const r = await fetch(url, {
+        method: 'HEAD',
+        headers: Object.assign({}, h, { 'Prefer': 'count=exact', 'Range-Unit': 'items', 'Range': '0-0' })
+      });
+      if (!r.ok) return null;
+      const cr = r.headers.get('content-range') || '';
+      const n = parseInt((cr.split('/')[1] || '0'), 10);
+      return isNaN(n) ? 0 : n;
+    } catch (e) { return null; }
+  }
+
+  // Recent ~150 rows in the last 7d — used both for the per-page/device
+  // breakdown and the recent-visits list. One query instead of three.
+  let recent = [];
+  let denied = false;
+  try {
+    const url = SUPABASE_URL + '/rest/v1/marketing_hits'
+              + '?select=created_at,page,referrer,device_type'
+              + '&created_at=gte.' + encodeURIComponent(weekAgo.toISOString())
+              + '&order=created_at.desc&limit=150';
+    const r = await fetch(url, { headers: h });
+    if (r.ok) recent = await r.json();
+    else if (r.status === 401 || r.status === 403) denied = true;
+  } catch (e) { /* fall through */ }
+  if (denied) return;
+
+  const [totalCount, weekCount, todayCount] = await Promise.all([
+    countHits(),
+    countHits('created_at=gte.' + encodeURIComponent(weekAgo.toISOString())),
+    countHits('created_at=gte.' + encodeURIComponent(todayStart.toISOString())),
+  ]);
+
+  setTxt('stat-mh-today', todayCount === null ? '—' : todayCount.toLocaleString());
+  setTxt('stat-mh-week',  weekCount  === null ? '—' : weekCount.toLocaleString());
+  setTxt('stat-mh-total', totalCount === null ? '—' : totalCount.toLocaleString());
+
+  // ── Per-page + device breakdown (last 7d) ─────────────────────────────
+  const byPage = {};
+  let mob = 0, desk = 0;
+  (recent || []).forEach(row => {
+    const p = row.page || 'unknown';
+    byPage[p] = (byPage[p] || 0) + 1;
+    if (row.device_type === 'mobile')      mob++;
+    else if (row.device_type === 'desktop') desk++;
+  });
+  const pretty = { 'marketing': 'Landing', 'tech-guide': 'Tech Guide' };
+  const chips = Object.keys(byPage).sort().map(p => {
+    const label = pretty[p] || p;
+    return '<span style="background:var(--rose-light);color:var(--rose-dark);padding:3px 10px;border-radius:999px;font-weight:600;">'
+         + label + ' · ' + byPage[p] + '</span>';
+  });
+  if (mob + desk > 0) {
+    chips.push('<span style="background:#F0EBE6;color:var(--charcoal);padding:3px 10px;border-radius:999px;">'
+             + '📱 ' + mob + ' · 💻 ' + desk + '</span>');
+  }
+  setHtml('stat-mh-breakdown', chips.join(''));
+
+  // ── Recent visits list (top 25) ───────────────────────────────────────
+  const rows = (recent || []).slice(0, 25);
+  if (!rows.length) {
+    setHtml('stat-mh-recent', '<div style="padding:10px 12px;color:var(--muted);font-style:italic;">No hits in the last 7 days yet.</div>');
+    return;
+  }
+  function relTime(iso) {
+    const t = new Date(iso).getTime();
+    const diff = Date.now() - t;
+    if (diff < 60000)     return Math.max(1, Math.floor(diff/1000)) + 's ago';
+    if (diff < 3600000)   return Math.floor(diff/60000) + 'm ago';
+    if (diff < 86400000)  return Math.floor(diff/3600000) + 'h ago';
+    return Math.floor(diff/86400000) + 'd ago';
+  }
+  function shortRef(r) {
+    if (!r) return 'direct';
+    try { const u = new URL(r); return u.hostname.replace(/^www\./, ''); } catch (e) { return (r || '').slice(0, 40); }
+  }
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
+  }
+  const html = rows.map(r => {
+    const label = pretty[r.page] || r.page || '?';
+    const dev = r.device_type === 'mobile' ? '📱' : (r.device_type === 'desktop' ? '💻' : '·');
+    return '<div style="display:flex;justify-content:space-between;gap:8px;padding:7px 12px;border-bottom:1px solid var(--border);">'
+         +   '<div style="display:flex;gap:8px;align-items:center;min-width:0;flex:1;">'
+         +     '<span style="font-size:13px;flex-shrink:0;">' + dev + '</span>'
+         +     '<span style="font-weight:600;color:var(--rose-dark);flex-shrink:0;">' + esc(label) + '</span>'
+         +     '<span style="color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">via ' + esc(shortRef(r.referrer)) + '</span>'
+         +   '</div>'
+         +   '<span style="color:var(--muted);flex-shrink:0;font-size:11px;">' + relTime(r.created_at) + '</span>'
+         + '</div>';
+  }).join('');
+  setHtml('stat-mh-recent', html);
 }
 
 // Subscription source breakdown + lifetime purchase totals. Pulls just

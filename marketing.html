@@ -2271,4 +2271,84 @@
   } catch(_) {}
 })();
 </script>
+<!-- ────────────────────────────────────────────────────────────────
+     Marketing site hit tracker → public.marketing_hits in Supabase.
+     One row per session per page (30-min cooldown via localStorage).
+     Admins read these in the in-app admin Stats tab. Bots are skipped.
+     Schema + RLS: sql/marketing-hits-tracker.sql
+     ──────────────────────────────────────────────────────────────── -->
+<script>
+(function () {
+  try {
+    var PAGE = 'marketing';
+    var SUPABASE_URL = 'https://ktiztunuifzbzwzyqrrq.supabase.co';
+    var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt0aXp0dW51aWZ6Ynp3enlxcnJxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3Njk3MDgsImV4cCI6MjA4OTM0NTcwOH0.QXhI1oO-v5Qs2XOlijjpRgM2pxDD6lkWxUQ6uW6HbtM';
+    var COOLDOWN_MS = 30 * 60 * 1000;
+
+    var ls = null; try { ls = window.localStorage; } catch (_) {}
+    var lastKey = 'mnc_mh_last:' + PAGE;
+    if (ls) {
+      var last = parseInt(ls.getItem(lastKey) || '0', 10);
+      if (last && (Date.now() - last) < COOLDOWN_MS) return;
+    }
+
+    function uuid() {
+      if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+        var r = (Math.random() * 16) | 0, v = c === 'x' ? r : ((r & 0x3) | 0x8);
+        return v.toString(16);
+      });
+    }
+    var sid = ls && ls.getItem('mnc_anon_sid');
+    if (!sid) { sid = uuid(); if (ls) try { ls.setItem('mnc_anon_sid', sid); } catch (_) {} }
+
+    var ua = (navigator && navigator.userAgent) || '';
+    if (/bot|crawl|spider|scrape|preview|prerender|monitor|lighthouse|headlesschrome/i.test(ua)) return;
+
+    var qs = {};
+    try {
+      var sp = new URLSearchParams(window.location.search || '');
+      sp.forEach(function (v, k) { qs[k] = v; });
+    } catch (_) {}
+
+    var isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(ua);
+
+    var body = {
+      session_id:   sid,
+      page:         PAGE,
+      referrer:     (document.referrer || '').slice(0, 500) || null,
+      device_type:  isMobile ? 'mobile' : 'desktop',
+      user_agent:   ua.slice(0, 500),
+      utm_source:   qs.utm_source   || null,
+      utm_medium:   qs.utm_medium   || null,
+      utm_campaign: qs.utm_campaign || null
+    };
+
+    function send() {
+      try {
+        fetch(SUPABASE_URL + '/rest/v1/marketing_hits', {
+          method: 'POST',
+          headers: {
+            'Content-Type':  'application/json',
+            'apikey':        SUPABASE_ANON_KEY,
+            'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+            'Prefer':        'return=minimal'
+          },
+          body: JSON.stringify(body),
+          keepalive: true
+        }).then(function (r) {
+          if (r && r.ok && ls) { try { ls.setItem(lastKey, String(Date.now())); } catch (_) {} }
+        }).catch(function () {});
+      } catch (_) {}
+    }
+
+    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+      setTimeout(send, 0);
+    } else {
+      window.addEventListener('DOMContentLoaded', function () { setTimeout(send, 0); });
+    }
+  } catch (_) {}
+})();
+</script>
+
 </body>
