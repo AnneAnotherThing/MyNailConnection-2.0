@@ -3127,13 +3127,6 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
           </div>
           <div id="stat-live" style="font-family:'Playfair Display',serif;font-size:26px;font-weight:700;color:#2D6A4F;line-height:1;">—</div>
         </div>
-        <div id="stat-stale-row" style="display:none;flex:1;background:linear-gradient(135deg,#FFF4E5 0%,#FFE4C4 100%);border:1px solid rgba(217,119,6,0.3);border-radius:14px;padding:10px 14px;align-items:center;justify-content:space-between;gap:10px;">
-          <div>
-            <div style="font-size:10px;font-weight:700;letter-spacing:1.2px;color:#8B4A40;text-transform:uppercase;">Techs to invite</div>
-            <div style="font-size:11px;color:#8B5A52;margin-top:1px;">Haven't accepted their invite yet</div>
-          </div>
-          <div id="stat-stale" style="font-family:'Playfair Display',serif;font-size:26px;font-weight:700;color:#D97706;line-height:1;">0</div>
-        </div>
       </div>
 
       <!-- 14-day signup trend -->
@@ -3148,15 +3141,6 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
         <div id="stat-spark-labels" style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:6px;">
           <span>14d ago</span><span>today</span>
         </div>
-      </div>
-
-      <!-- Waitlist — just the total count, no list or source breakdown -->
-      <div style="background:white;border:1px solid var(--border);border-radius:16px;padding:14px 16px;margin-bottom:14px;box-shadow:0 2px 10px rgba(44,36,32,0.04);display:flex;align-items:center;justify-content:space-between;gap:10px;">
-        <div>
-          <div style="font-size:11px;font-weight:600;letter-spacing:1.2px;color:var(--muted);text-transform:uppercase;">Waitlist</div>
-          <div style="font-size:11px;color:var(--muted);margin-top:2px;">People on the pre-launch list</div>
-        </div>
-        <div id="stat-waitlist-count" style="font-family:'Playfair Display',serif;font-size:30px;font-weight:700;color:var(--rose-dark);line-height:1;">—</div>
       </div>
 
       <!-- ░░░ Subscription source + lifetime purchase counts ░░░
@@ -3251,7 +3235,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
         <div id="stat-mh-recent" style="font-size:11.5px;color:var(--charcoal);max-height:240px;overflow-y:auto;border:1px solid var(--border);border-radius:10px;background:#FAF7F4;">
           <div style="padding:10px 12px;color:var(--muted);font-style:italic;">Loading…</div>
         </div>
-        <div style="font-size:10px;color:var(--muted);margin-top:8px;font-style:italic;line-height:1.45;">Tracker fires once per browser per page per 30 min. Obvious bots are filtered by user-agent. Non-admins cannot read this table (RLS).</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:8px;font-style:italic;line-height:1.45;">Counts each visitor once every 30 minutes. Search-engine bots are skipped. Only admins can see this data.</div>
       </div>
 
       <button onclick="loadAdminStats()" style="width:100%;padding:11px;border:none;border-radius:12px;background:white;color:var(--rose-dark);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;border:1px solid var(--border);">Refresh</button>
@@ -5187,8 +5171,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.1',     /* __APP_BUILD_NAME__   */
-  android: 286,         /* __APP_BUILD_ANDROID__ */
-  ios:     91,          /* __APP_BUILD_IOS__     */
+  android: 288,         /* __APP_BUILD_ANDROID__ */
+  ios:     93,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -15420,8 +15404,8 @@ async function loadAdminStats() {
 
   const [
     clientsTotal, clientsWeek, techCount, photoCount,
-    liveCount, staleTechCount,
-    clientsRecent, waitlistRecent
+    liveCount,
+    clientsRecent
   ] = await Promise.all([
     countTable('users', 'role=eq.client'),
     countTable('users', 'role=eq.client&joined=gte.' + sevenDaysAgoDate),
@@ -15436,24 +15420,10 @@ async function loadAdminStats() {
       } catch (e) { return 0; }
     })(),
     countTable('techs', 'is_available=eq.true'),
-    // "Awaiting password" = techs who were invited but haven't completed
-    // the reset-password flow yet (last_password_change stamp is null).
-    // Intentionally excludes public.users rows — those are mostly
-    // self-signup clients whose column is null by default, which would
-    // inflate the count with legitimate users.
-    countTable('techs', 'last_password_change=is.null'),
     (async () => {
       try {
         const url = SUPABASE_URL + '/rest/v1/users?select=joined&role=eq.client&joined=gte.'
                     + fourteenDaysAgoDate + '&order=joined.asc&limit=2000';
-        const r = await fetch(url, { headers: h });
-        if (!r.ok) return [];
-        return await r.json();
-      } catch (e) { return []; }
-    })(),
-    (async () => {
-      try {
-        const url = SUPABASE_URL + '/rest/v1/launch_waitlist?select=email,source,created_at&order=created_at.desc&limit=2000';
         const r = await fetch(url, { headers: h });
         if (!r.ok) return [];
         return await r.json();
@@ -15468,11 +15438,8 @@ async function loadAdminStats() {
   setTxt('stat-photos',        photoCount.toLocaleString());
   setTxt('stat-clients-delta', clientsWeek > 0 ? ('+' + clientsWeek + ' this week 🎉') : 'accounts');
 
-  // ── Pulse strip: Live + Stale ──────────────────────────────────────────
+  // ── Pulse strip: Live now ─────────────────────────────────────────────
   setTxt('stat-live', liveCount.toLocaleString());
-  const staleRow = document.getElementById('stat-stale-row');
-  if (staleRow) staleRow.style.display = staleTechCount > 0 ? 'flex' : 'none';
-  setTxt('stat-stale', staleTechCount.toLocaleString());
 
   // ── Signup sparkline (14 days, bucketed by `joined`) ──────────────────
   const buckets = {};
@@ -15513,9 +15480,6 @@ async function loadAdminStats() {
   }
   const total14 = vals.reduce((a,b) => a+b, 0);
   setTxt('stat-trend-total', total14 + ' signups in 14d');
-
-  // ── Waitlist total (just the count, no list or source breakdown) ─────
-  setTxt('stat-waitlist-count', ((waitlistRecent || []).length).toLocaleString());
 
   // ── Subscription source + lifetime purchase stats ────────────────────
   // Fires in parallel; doesn't block the rest of the dashboard from
