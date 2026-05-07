@@ -5171,8 +5171,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.3',     /* __APP_BUILD_NAME__   */
-  android: 295,         /* __APP_BUILD_ANDROID__ */
-  ios:     100,          /* __APP_BUILD_IOS__     */
+  android: 296,         /* __APP_BUILD_ANDROID__ */
+  ios:     101,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -11249,6 +11249,22 @@ async function pollHomeFeedForNew() {
 function prependHomeFeedCards(newPosts) {
   var list = document.getElementById('home-feed-list');
   if (!list) return;
+  // If adding these posts would cross the doubling threshold (sparse → dense)
+  // OR the list is currently single-rendered, defer to a full re-render so
+  // the doubled/single state stays consistent. Loses scroll position, but
+  // the threshold transition is rare and the alternative (mixed half-doubled
+  // state) is way worse. — 2026-05-06
+  var totalAfter = (_homeFeedPosts || []).length;
+  var listLen = list.children.length;
+  var alreadyDoubled = listLen >= 2 && listLen >= 2 * Math.max(1, totalAfter - newPosts.length);
+  if (totalAfter >= FEED_DOUBLE_THRESHOLD && !alreadyDoubled) {
+    return renderHomeFeedFromCache();
+  }
+  if (totalAfter < FEED_DOUBLE_THRESHOLD) {
+    // Sparse feed — single-render path. Just prepend to the top, no copy.
+    return renderHomeFeedFromCache();
+  }
+
   var nowMs = Date.now();
   var userLatF = (typeof userLat !== 'undefined') ? userLat : null;
   var userLngF = (typeof userLng !== 'undefined') ? userLng : null;
@@ -11311,21 +11327,33 @@ function renderHomeFeedFromCache() {
     pairs.push([p, tech]);
   });
 
-  // Seamless-loop trick: render the filtered set TWICE. When the
-  // auto-scroll wraps at the halfway point, the content at scrollTop=0
-  // is byte-identical to the content at scrollTop=halfHeight, so the
-  // user never sees the jump. Feels like an endless feed.
+  // Seamless-loop trick: render the filtered set TWICE so the auto-scroll
+  // can wrap at the halfway point without a visible jump. BUT: the doubling
+  // only helps when the feed is dense enough to scroll past the halfway
+  // point. With <4 posts, both copies sit on-screen at the same time and
+  // look like duplicate posts (Anne hit this 2026-05-06 on a 1-post feed
+  // pre-launch — visually indistinguishable from the actual double-insert
+  // bug fixed in submitPost the same day). So below the threshold, render
+  // once. Above it, double for the loop. — 2026-05-06
+  //
   // Reset photo-alternation counter so both passes assign the same
   // L/R pattern — otherwise the halfway wrap-point would visibly flip
   // cards from left to right and break the seamless illusion.
   _feedPhotoIndex = 0;
-  for (var pass = 0; pass < 2; pass++) {
+  var passes = pairs.length >= FEED_DOUBLE_THRESHOLD ? 2 : 1;
+  for (var pass = 0; pass < passes; pass++) {
     _feedPhotoIndex = 0; // reset per pass so both passes are identical
     pairs.forEach(function(pair) {
       list.appendChild(buildFeedCard(pair[0], pair[1]));
     });
   }
 }
+
+// Below this many posts, don't double-render the feed for the seamless
+// auto-scroll loop. Both copies would be visible at once and look like
+// duplicate-post bugs. Above the threshold, the loop's wrap point lives
+// off-screen and the user just experiences endless scroll.
+var FEED_DOUBLE_THRESHOLD = 4;
 
 // Counter for zebra-striping photo cards L/R. Reset at the start of
 // each render pass above. 1st photo → photo-left (default). 2nd photo
