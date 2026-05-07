@@ -5186,8 +5186,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.3',     /* __APP_BUILD_NAME__   */
-  android: 298,         /* __APP_BUILD_ANDROID__ */
-  ios:     103,          /* __APP_BUILD_IOS__     */
+  android: 300,         /* __APP_BUILD_ANDROID__ */
+  ios:     105,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -16978,20 +16978,20 @@ function renderReleaseWizardStep() {
   const err = document.getElementById('rw-error');
   if (err) { err.style.display = 'none'; err.textContent = ''; }
 
-  // Feed-vs-portfolio hint + button label. 'credit' slot_type means
-  // this upload goes to portfolio only — reword the CTA so the tech
-  // isn't misled by "Release to feed." 2026-04-23 split.
-  const slotType = st.slotTypes[url] || null;
-  const goesToFeed = (slotType !== 'credit');
+  // Feed access for everyone — 2026-05-06 product pivot. Previously
+  // 'credit' slot_type uploads were portfolio-only and 'weekly'/'free'
+  // hit the feed. Anne dropped that split: every release lives on the
+  // feed regardless of which slot it consumed. Glow Up's value prop is
+  // now volume (40/mo) rather than feed-exclusivity. The slot_type field
+  // is still tracked for billing/quota accounting; only the feed gate
+  // changed.
   const hint = document.getElementById('rw-destination-hint');
   if (hint) {
-    hint.textContent = goesToFeed
-      ? 'This release lives in the bulletin feed + your portfolio.'
-      : 'This photo lives in your portfolio. Glow Up releases add feed exposure too.';
-    hint.style.color = goesToFeed ? 'var(--sage, #6B8E7B)' : 'var(--muted)';
+    hint.textContent = 'This release lives in the bulletin feed + your portfolio.';
+    hint.style.color = 'var(--sage, #6B8E7B)';
   }
   const releaseBtn = document.getElementById('rw-release-btn');
-  if (releaseBtn) releaseBtn.textContent = goesToFeed ? 'Release to feed →' : 'Add to portfolio →';
+  if (releaseBtn) releaseBtn.textContent = 'Release to feed →';
 
   // Build chips grouped by category. Uses the same PHOTO_TAG_TAXONOMY
   // that the my-photos tag sheet uses, so the gate and the later edit
@@ -17031,6 +17031,13 @@ function toggleReleaseWizardTag(tag) {
   if (!st) return;
   const url = st.urls[st.idx];
   if (!url) return;
+  // Persist any in-progress caption text BEFORE re-rendering — otherwise
+  // renderReleaseWizardStep() resets cap.value to st.captions[url] (which
+  // is still empty, since captions only get committed in releaseCurrentWizardPhoto)
+  // and the tech loses what they just typed. Anne hit this 2026-05-06:
+  // type caption → tap tag → caption gone → release blocked on missing caption.
+  const capEl = document.getElementById('rw-caption');
+  if (capEl) st.captions[url] = capEl.value || '';
   if (!st.tags[url]) st.tags[url] = [];
   const arr = st.tags[url];
   const pos = arr.indexOf(tag);
@@ -17128,21 +17135,12 @@ async function releaseCurrentWizardPhoto() {
     return;
   }
 
-  // Feed eligibility gate (2026-04-23 portfolio/feed split):
-  //   slot_type 'credit'           → pay-per-photo → PORTFOLIO ONLY, skip feed
-  //   slot_type 'weekly' or 'free' → subscriber / welcome → feed post
-  //   slot_type null (legacy)      → feed post (preserves pre-split behavior)
-  // For credit uploads we only persisted tags+caption above; no
-  // board_posts insert, no stagger counter bump.
-  const slotType = st.slotTypes[url] || null;
-  const feedEligible = (slotType !== 'credit');
-
-  if (feedEligible) {
-    // Insert board_posts row with staggered publish_at. First eligible
-    // release (releasedCount === 0) is live immediately; each subsequent
-    // feed-eligible release adds +1hr to keep the feed from flooding
-    // with one tech's batch. Portfolio-only releases don't count toward
-    // the stagger.
+  // Every release goes to the feed — 2026-05-06 pivot. The earlier
+  // portfolio/feed split (credit → portfolio only) is gone; all tiers
+  // now post to board_posts. Stagger logic still applies so a bulk
+  // batch of 10 photos doesn't dump on the feed at once. slot_type is
+  // still tracked elsewhere for quota accounting.
+  {
     const HOUR_MS = 3600000;
     const publishAt = new Date(Date.now() + st.releasedCount * HOUR_MS).toISOString();
     try {
