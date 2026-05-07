@@ -147,8 +147,15 @@ body{font-family:'DM Sans',sans-serif;background:#FAF5F7;display:flex;justify-co
   display: none;
 }
 .feed-card.has-photo .board-post-img {
-  flex: 0 0 44%;
-  max-height: 170px;
+  /* Photo gets ~35% of card width and caps at 150px tall. Earlier this
+     afternoon the cap was 220px to give body text more vertical room, but
+     that made photo cards visually dominant — Anne wanted them smaller so
+     the card feels more text-driven and more cards fit per scroll. With
+     11px body text the body column still gets ~5 lines in 150px. The
+     narrower 35% width also gives the caption more horizontal room.
+     — 2026-05-06 */
+  flex: 0 0 35%;
+  max-height: 150px;
   margin: 0;
   object-fit: cover;
   align-self: stretch;
@@ -184,7 +191,11 @@ body{font-family:'DM Sans',sans-serif;background:#FAF5F7;display:flex;justify-co
   font-family:'Playfair Display',serif;
   font-size:13.5px;font-weight:600;
   color:var(--charcoal);
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  /* Wrap instead of truncating. Long tech names like "Stephanie Rodriguez-
+     Martinez" + a pill + time used to ellipsis to "Stepha…" — useless on a
+     who-posted-this surface. Now the name takes as many lines as it needs;
+     pill and time stay vertically centered in the flex row. — 2026-05-06 */
+  white-space:normal;overflow-wrap:anywhere;
   letter-spacing:0.1px;
   line-height:1.25;
   flex:1;min-width:0;
@@ -210,7 +221,11 @@ body{font-family:'DM Sans',sans-serif;background:#FAF5F7;display:flex;justify-co
 }
 .feed-card-type svg{width:9px;height:9px;}
 .feed-card-text{
-  font-size:12.5px;color:var(--charcoal);line-height:1.42;  /* tighter line-height = biggest win */
+  font-size:11px;color:var(--charcoal);line-height:1.5;
+  /* Smaller body font lets ~30% more characters fit in the same card
+     height, so techs see 4–5 lines of detail before the photo cap clips
+     the rest. Slightly looser line-height keeps readability honest at the
+     smaller size. — 2026-05-06 */
   white-space:pre-wrap;word-break:break-word;
 }
 
@@ -5171,8 +5186,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.3',     /* __APP_BUILD_NAME__   */
-  android: 296,         /* __APP_BUILD_ANDROID__ */
-  ios:     101,          /* __APP_BUILD_IOS__     */
+  android: 298,         /* __APP_BUILD_ANDROID__ */
+  ios:     103,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
