@@ -94,6 +94,41 @@ workaround, which we can't reasonably ask end-users to do. Bumping
 The bump only fires when a source HTML actually changed, so repeated
 idempotent syncs (no edits) don't churn the version number.
 
+### "Train is closed" — bump MARKETING_VERSION when this happens
+
+Hit this 3+ times during the OG launch (2.0.1 → 2.0.2 → 2.0.3 → 2.0.4).
+Pattern: after Apple **approves** a build at MARKETING_VERSION X.Y.Z, that
+pre-release train is locked. The next Capawesome iOS deploy at the same
+X.Y.Z fails with:
+
+> Invalid Pre-Release Train. The train version 'X.Y.Z' is closed
+> CFBundleShortVersionString must contain a higher version
+
+`sync.sh` only auto-bumps build numbers (CFBundleVersion + Android
+versionCode). It does NOT auto-bump MARKETING_VERSION because that's
+user-facing and shouldn't churn on every ephemeral edit.
+
+**Fix:** run `bash deploy/bump-marketing.sh` (default = patch bump,
+2.0.3 → 2.0.4). The script edits all four required spots in lockstep
+(iOS pbxproj Debug + Release configs, Android `versionName`, and
+`index.html` `APP_BUILD.name`), then runs `sync.sh` to propagate to
+the deploy bundles. Use `bump-marketing.sh minor` or `major` for those
+flavors of bump.
+
+**Recognize the signal early.** When the user says any of:
+- "App Store / Apple build failed"
+- "uploading rejected"
+- a Capawesome log mentions `STATE_ERROR.VALIDATION_ERROR` and
+  `cfBundleVersion` or `train version`
+
+→ check the log for "train is closed" before doing anything else. If
+present, run `deploy/bump-marketing.sh` and re-deploy. If absent, it's
+a different validation issue (icon dims, missing privacy string, etc.).
+
+After the bump, in App Store Connect, **create a new version row** at
+the new MARKETING_VERSION — the prior version's listing is locked once
+its build was approved, so you can't reuse it.
+
 ## When editing
 
 - "Forgot password?" link, splash, sign-in, tech dashboard, Contact

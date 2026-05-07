@@ -5186,8 +5186,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.4',     /* __APP_BUILD_NAME__   */
-  android: 301,         /* __APP_BUILD_ANDROID__ */
-  ios:     106,          /* __APP_BUILD_IOS__     */
+  android: 302,         /* __APP_BUILD_ANDROID__ */
+  ios:     107,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -9045,6 +9045,7 @@ async function techEditAddPhotos(input) {
   const techSlug = (currentEditTech.name || 'new-tech').toLowerCase().replace(/[^a-z0-9]/g, '-') || 'tech';
   showToast('Adding ' + files.length + ' photo(s)…');
   let added = 0;
+  const _newlyUploadedUrls = [];
 
   for (const file of files) {
     // AI nail photo validation before anything else
@@ -9089,6 +9090,7 @@ async function techEditAddPhotos(input) {
     const _publicUrl = SUPABASE_URL + '/storage/v1/object/public/tech-photos/' + _fileName;
     // Persist immediately — race-free against Cancel.
     try { appendTechPhoto({ url: _publicUrl, tags: [], slot_type: _slotType }); } catch(_){}
+    _newlyUploadedUrls.push(_publicUrl);
     await new Promise(resolve => {
       const reader = new FileReader();
       reader.onload = async function(e) {
@@ -9127,6 +9129,9 @@ async function techEditAddPhotos(input) {
   }
   showToast('' + added + ' photo' + (added !== 1 ? 's' : '') + ' added');
   renderTePhotoGrid(edit.photos);
+  // Launch the Release Wizard for the just-uploaded URLs. No more waiting
+  // for Save Changes — the tech naturally expects tagging next. — 2026-05-07
+  _launchReleaseWizardForNewlyUploaded(_newlyUploadedUrls);
 }
 
 // ── Bulk file drop upload ─────────────────────────────────────────────────
@@ -9233,6 +9238,8 @@ async function techBulkDropFiles(fileList) {
     const _fileName = 'gallery/' + techSlug + '/' + Date.now() + '-' + Math.random().toString(36).slice(2,7) + '.' + _ext;
     const _publicUrl = SUPABASE_URL + '/storage/v1/object/public/tech-photos/' + _fileName;
     try { appendTechPhoto({ url: _publicUrl, tags: [], slot_type: _slotType }); } catch(_){}
+    if (!Array.isArray(window._bulkDropNewUrls)) window._bulkDropNewUrls = [];
+    window._bulkDropNewUrls.push(_publicUrl);
     const photoEntry = { url: _publicUrl, _previewSrc: b64data.preview, tags: [], slot_type: _slotType };
     edit.photos.push(photoEntry);
     renderTePhotoGrid(edit.photos);
@@ -9274,8 +9281,16 @@ async function techBulkDropFiles(fileList) {
   const uploadedCount = done - skipped;
   label.textContent = `✓ Done! ${uploadedCount} photo${uploadedCount !== 1 ? 's' : ''} added${skipped ? `, ${skipped} skipped (not nail photos)` : ''}`;
   count.textContent = '';
-  showToast(`${uploadedCount} photo${uploadedCount !== 1 ? 's' : ''} added — tap Save Changes!`);
+  showToast(`${uploadedCount} photo${uploadedCount !== 1 ? 's' : ''} added`);
   setTimeout(() => { wrap.style.display = 'none'; bar.style.background = 'var(--rose)'; bar.style.width = '0%'; }, 5000);
+  // Launch Release Wizard immediately for the just-uploaded URLs so the
+  // tech goes straight to tagging without hunting for Save Changes.
+  // window._bulkDropNewUrls was populated inside the loop. — 2026-05-07
+  try {
+    var __wizUrls = (window._bulkDropNewUrls || []).slice();
+    window._bulkDropNewUrls = [];
+    _launchReleaseWizardForNewlyUploaded(__wizUrls);
+  } catch(_) {}
 
   // If the batch was trimmed because it exceeded remaining slots, prompt
   // for an upgrade now (after the success toast so messages don't stomp
@@ -10651,7 +10666,7 @@ async function saveTechEdit() {
         );
         const newUrls = safePhotos
           .map(p => (typeof p === 'string' ? p : p && p.url) || '')
-          .filter(u => u && !oldUrls.has(u));
+          .filter(u => u && !oldUrls.has(u) && !(window._mncWizardedUrls && window._mncWizardedUrls.has(u)));
         if (newUrls.length && edit.email) {
           setTimeout(function() {
             try { startReleaseWizard(newUrls, edit.email); } catch(_) {}
@@ -16915,6 +16930,30 @@ function stripeWelcomePrimary() {
 // If the tech closes/skips, photos stay pending_feed:true in techs.photos
 // and are surfaced by the tech-home "needs tagging" nudge. 2026-04-23.
 window._mncReleaseWizard = { urls: [], idx: 0, techEmail: null, tags: {}, captions: {}, slotTypes: {}, releasedCount: 0 };
+
+// Tracks URLs we've already shown in the wizard this session, so we don't
+// double-launch when both the upload-time path AND the save-time fallback
+// path see the same fresh URL. Cleared on sign-out by clearAuthState().
+window._mncWizardedUrls = window._mncWizardedUrls || new Set();
+
+// Common entry point: launches the wizard for newly-uploaded URLs IF we
+// have an email to attach posts to (existing tech editing their own profile).
+// New-tech case (email empty until save) falls through to the save-flow
+// launch in saveTechEdit. Filters out URLs we've already wizarded this
+// session so closing the wizard and re-opening the editor doesn't replay.
+// — 2026-05-07: was post-save-only; Anne kept losing the wizard step
+// because she'd upload, expect tagging to come up, not click Save Changes,
+// and the photos would sit pending_feed:true until the next session.
+function _launchReleaseWizardForNewlyUploaded(urls) {
+  if (!Array.isArray(urls) || !urls.length) return;
+  if (!currentEditTech || !currentEditTech.email) return;  // new-tech: defer to save
+  var fresh = urls.filter(function(u) { return u && !window._mncWizardedUrls.has(u); });
+  if (!fresh.length) return;
+  fresh.forEach(function(u) { window._mncWizardedUrls.add(u); });
+  setTimeout(function() {
+    try { startReleaseWizard(fresh, currentEditTech.email); } catch(_) {}
+  }, 400);
+}
 
 function startReleaseWizard(newUrls, techEmail) {
   if (!newUrls || !newUrls.length || !techEmail) return;
