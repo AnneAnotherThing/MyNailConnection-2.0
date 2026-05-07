@@ -5170,9 +5170,9 @@ function maybeShowTutorial(role) {
 // __APP_BUILD_*__ below are how sync.sh finds and rewrites the values.
 // Don't reorder or rename them.
 const APP_BUILD = {
-  name:    '2.0.2',     /* __APP_BUILD_NAME__   */
-  android: 293,         /* __APP_BUILD_ANDROID__ */
-  ios:     98,          /* __APP_BUILD_IOS__     */
+  name:    '2.0.3',     /* __APP_BUILD_NAME__   */
+  android: 295,         /* __APP_BUILD_ANDROID__ */
+  ios:     100,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -12914,62 +12914,87 @@ function selectPostType(el) {
   selectedPostType = el.dataset.type;
 }
 async function submitPost() {
+  // Double-tap guard. Without this, a fast second tap slips past the
+  // rate-limit check below — that check queries the DB for recent posts,
+  // but the FIRST insert hasn't committed yet when the second submitPost()
+  // runs the query, so it sees no recent post and proceeds. Result: two
+  // identical board_posts rows. Same fix shape as the IAP init race
+  // (in-flight flag, reset in finally). — 2026-05-06
+  if (window._postSubmitInFlight) return;
   const body = document.getElementById('new-post-body').value.trim();
   if (!body) { showToast('Please write something!'); return; }
   const techId = currentUserEmail;
   if (!techId) return;
 
-  // Rate limit: one post per tech per hour. Client-side check — the real
-  // guard long-term would be a DB trigger or RLS rule, but this is enough
-  // to stop accidental double-posts and casual spamming.
-  try {
-    const hourAgo = new Date(Date.now() - 3600000).toISOString();
-    const rl = await fetch(
-      `${SUPABASE_URL}/rest/v1/board_posts?tech_id=eq.${encodeURIComponent(techId)}&created_at=gte.${encodeURIComponent(hourAgo)}&select=created_at&order=created_at.desc&limit=1`,
-      { headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + (window._mncAccessToken || SUPABASE_ANON_KEY) } }
-    );
-    if (rl.ok) {
-      const recent = await rl.json();
-      if (recent && recent.length) {
-        const lastAt = new Date(recent[0].created_at).getTime();
-        const msLeft = Math.max(0, 3600000 - (Date.now() - lastAt));
-        const minLeft = Math.max(1, Math.ceil(msLeft / 60000));
-        showToast('You can post once per hour — try again in ~' + minLeft + ' min', 4500);
-        return;
-      }
-    }
-  } catch (_) { /* non-fatal — if the check fails, let the insert through */ }
+  window._postSubmitInFlight = true;
+  const submitBtn = document.querySelector('#new-post-modal .btn-rose');
+  const submitOriginalLabel = submitBtn ? submitBtn.textContent : null;
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.style.opacity = '0.55';
+    submitBtn.textContent = 'Posting…';
+  }
 
   try {
-    // Text posts live in the feed for 24 hours (typical window for
-    // "got a cancel at 2pm" type info). Photo posts auto-created from
-    // portfolio uploads use a tighter 1-hour lifetime — see saveTechEdit.
-    const textExpiresAt = new Date(Date.now() + 24 * 3600000).toISOString();
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/board_posts`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'apikey': SUPABASE_ANON_KEY,
-        // Must be the user's access token — board_insert_self RLS policy
-        // only permits authenticated requests whose lower(tech_id) matches
-        // public.current_email(). Anon key would be silently rejected.
-        'Authorization': `Bearer ${window._mncAccessToken || SUPABASE_ANON_KEY}`,
-        'Prefer': 'return=minimal'
-      },
-      body: JSON.stringify({ tech_id: techId, type: selectedPostType, body, expires_at: textExpiresAt })
-    });
-    if (!res.ok) {
-      let msg = 'Could not post — please try again';
-      try {
-        const data = await res.json();
-        if (data && (data.message || data.msg)) msg = data.message || data.msg;
-      } catch(_) {}
-      showToast(msg, 4000);
-      return;
+    // Rate limit: one post per tech per hour. Client-side check — the real
+    // guard long-term would be a DB trigger or RLS rule, but this is enough
+    // to stop accidental double-posts and casual spamming.
+    try {
+      const hourAgo = new Date(Date.now() - 3600000).toISOString();
+      const rl = await fetch(
+        `${SUPABASE_URL}/rest/v1/board_posts?tech_id=eq.${encodeURIComponent(techId)}&created_at=gte.${encodeURIComponent(hourAgo)}&select=created_at&order=created_at.desc&limit=1`,
+        { headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + (window._mncAccessToken || SUPABASE_ANON_KEY) } }
+      );
+      if (rl.ok) {
+        const recent = await rl.json();
+        if (recent && recent.length) {
+          const lastAt = new Date(recent[0].created_at).getTime();
+          const msLeft = Math.max(0, 3600000 - (Date.now() - lastAt));
+          const minLeft = Math.max(1, Math.ceil(msLeft / 60000));
+          showToast('You can post once per hour — try again in ~' + minLeft + ' min', 4500);
+          return;
+        }
+      }
+    } catch (_) { /* non-fatal — if the check fails, let the insert through */ }
+
+    try {
+      // Text posts live in the feed for 24 hours (typical window for
+      // "got a cancel at 2pm" type info). Photo posts auto-created from
+      // portfolio uploads use a tighter 1-hour lifetime — see saveTechEdit.
+      const textExpiresAt = new Date(Date.now() + 24 * 3600000).toISOString();
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/board_posts`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_ANON_KEY,
+          // Must be the user's access token — board_insert_self RLS policy
+          // only permits authenticated requests whose lower(tech_id) matches
+          // public.current_email(). Anon key would be silently rejected.
+          'Authorization': `Bearer ${window._mncAccessToken || SUPABASE_ANON_KEY}`,
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify({ tech_id: techId, type: selectedPostType, body, expires_at: textExpiresAt })
+      });
+      if (!res.ok) {
+        let msg = 'Could not post — please try again';
+        try {
+          const data = await res.json();
+          if (data && (data.message || data.msg)) msg = data.message || data.msg;
+        } catch(_) {}
+        showToast(msg, 4000);
+        return;
+      }
+      closeNewPostModal();
+      loadMyBoardPosts();
+    } catch(e) { showToast('Could not post — please try again'); }
+  } finally {
+    window._postSubmitInFlight = false;
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.style.opacity = '';
+      submitBtn.textContent = submitOriginalLabel || 'Post';
     }
-    closeNewPostModal();
-    loadMyBoardPosts();
-  } catch(e) { showToast('Could not post — please try again'); }
+  }
 }
 
 
