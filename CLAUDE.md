@@ -94,40 +94,60 @@ workaround, which we can't reasonably ask end-users to do. Bumping
 The bump only fires when a source HTML actually changed, so repeated
 idempotent syncs (no edits) don't churn the version number.
 
-### "Train is closed" — bump MARKETING_VERSION when this happens
+### iOS deploys: PROACTIVELY bump MARKETING_VERSION before each one
 
-Hit this 3+ times during the OG launch (2.0.1 → 2.0.2 → 2.0.3 → 2.0.4).
-Pattern: after Apple **approves** a build at MARKETING_VERSION X.Y.Z, that
-pre-release train is locked. The next Capawesome iOS deploy at the same
-X.Y.Z fails with:
+Hit this 5+ times during the OG launch (2.0.1 → 2.0.2 → 2.0.3 → 2.0.4
+→ 2.0.5). Pattern: after Apple **approves** a build at MARKETING_VERSION
+X.Y.Z, that pre-release train is locked. The next Capawesome iOS deploy
+at the same X.Y.Z fails 5–10 minutes into the build with:
 
 > Invalid Pre-Release Train. The train version 'X.Y.Z' is closed
 > CFBundleShortVersionString must contain a higher version
 
-`sync.sh` only auto-bumps build numbers (CFBundleVersion + Android
+There's no programmatic way to know whether Apple approved the prior
+build without an App Store Connect API call we don't have wired up. So
+the only safe assumption when shipping a follow-up iOS build is: **the
+prior train is closed, bump before deploying.** The cost of an
+unnecessary bump (a slightly higher version number nobody will care
+about) is trivially smaller than another 10-minute failed-deploy cycle.
+
+**Default behavior — DO THIS proactively, don't wait for the failure:**
+
+When the user is about to push for a new iOS App Store submission AND
+the previous Capawesome iOS deploy succeeded (i.e., reached App Store
+Connect), run `bash deploy/bump-marketing.sh` BEFORE telling them to
+push. The script edits all four required spots in lockstep (iOS pbxproj
+Debug + Release configs, Android `versionName`, and `index.html`
+`APP_BUILD.name`), then runs `sync.sh` to propagate to the deploy
+bundles + auto-bump build numbers.
+
+Skip the bump only when:
+- The prior iOS deploy FAILED (any reason — train, icon, privacy,
+  whatever). The train stays open on a failed deploy, so reusing the
+  same MARKETING_VERSION is fine. Use the existing build number bump.
+- The user explicitly says "no version bump."
+- This is the very first iOS deploy of a new MARKETING_VERSION (e.g.,
+  intentionally going from 2.x to 3.0).
+
+`sync.sh` alone only auto-bumps build numbers (CFBundleVersion + Android
 versionCode). It does NOT auto-bump MARKETING_VERSION because that's
-user-facing and shouldn't churn on every ephemeral edit.
+user-facing — and the right cadence is "once per iOS deploy attempt,"
+not "every edit."
 
-**Fix:** run `bash deploy/bump-marketing.sh` (default = patch bump,
-2.0.3 → 2.0.4). The script edits all four required spots in lockstep
-(iOS pbxproj Debug + Release configs, Android `versionName`, and
-`index.html` `APP_BUILD.name`), then runs `sync.sh` to propagate to
-the deploy bundles. Use `bump-marketing.sh minor` or `major` for those
-flavors of bump.
-
-**Recognize the signal early.** When the user says any of:
-- "App Store / Apple build failed"
-- "uploading rejected"
-- a Capawesome log mentions `STATE_ERROR.VALIDATION_ERROR` and
-  `cfBundleVersion` or `train version`
-
-→ check the log for "train is closed" before doing anything else. If
-present, run `deploy/bump-marketing.sh` and re-deploy. If absent, it's
-a different validation issue (icon dims, missing privacy string, etc.).
+**Reactive fallback** (if we forget and the deploy fails anyway): the
+log will show `STATE_ERROR.VALIDATION_ERROR` and either "train is
+closed" or "must contain a higher version." Run
+`bash deploy/bump-marketing.sh` and have the user re-deploy. If the
+error mentions something else (icon dims, missing privacy string), it's
+a different validation issue — don't bump for those.
 
 After the bump, in App Store Connect, **create a new version row** at
 the new MARKETING_VERSION — the prior version's listing is locked once
 its build was approved, so you can't reuse it.
+
+Android Play Store doesn't have this trap — `versionName` can repeat
+across builds, only `versionCode` (which `sync.sh` auto-bumps) needs
+to be monotonic. So Android-only deploys never need this script.
 
 ## When editing
 
