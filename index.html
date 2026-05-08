@@ -168,6 +168,26 @@ body{font-family:'DM Sans',sans-serif;background:#FAF5F7;display:flex;justify-co
   flex-direction: column;
   justify-content: center;
 }
+/* Landscape (wide) photos. JS adds .wide-photo after the image loads if
+   naturalWidth > naturalHeight * 1.15. Without this, a wide shot gets
+   cropped to a narrow center sliver in the 35%-wide column AND the body
+   column ends up cramped, which can wrap longer names in weird places.
+   Stacked layout: photo full-width on top, body full-width below. */
+.feed-card.has-photo.wide-photo,
+.feed-card.has-photo.wide-photo.photo-flip {
+  flex-direction: column;
+  gap: 8px;
+  align-items: stretch;
+}
+.feed-card.has-photo.wide-photo .board-post-img {
+  flex: 0 0 auto;
+  width: 100%;
+  max-height: 220px;
+  align-self: auto;
+}
+.feed-card.has-photo.wide-photo .feed-card-body {
+  justify-content: flex-start;
+}
 .feed-card:hover{
   border-color:var(--rose-mid);
   border-left-color:var(--feed-accent,var(--rose-mid));
@@ -5190,8 +5210,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.6',     /* __APP_BUILD_NAME__   */
-  android: 308,         /* __APP_BUILD_ANDROID__ */
-  ios:     113,          /* __APP_BUILD_IOS__     */
+  android: 310,         /* __APP_BUILD_ANDROID__ */
+  ios:     115,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -11152,17 +11172,15 @@ async function loadHomeFeed() {
   if (!list) return;
   list.innerHTML = '';
   try {
-    // Filter out expired posts. Photo posts live 1 hour, text posts live
-    // 24 hours; legacy rows with NULL expires_at show until manually deleted.
+    // Count-based retention only: 100 most-recent published posts.
+    // We deliberately do NOT filter on expires_at — Anne wants the feed
+    // to stay full whenever there are <100 posts, so it shouldn't go
+    // dry just because nobody happened to post in the last day. Legacy
+    // rows with expires_at set are still shown until pushed off by
+    // newer posts. — 2026-05-08
     var nowIso = new Date().toISOString();
-    // 2026-04-22 staggered pivot: sort by publish_at desc, filter to
-    // the window where publish_at <= now so pending releases stay
-    // hidden. Rolling 100-post cap keeps the feed visually full at
-    // sparse launch scale. expires_at filter preserved for legacy
-    // manual posts that still set it.
     var url = SUPABASE_URL + '/rest/v1/board_posts?select=*'
       + '&publish_at=lte.' + encodeURIComponent(nowIso)
-      + '&or=(expires_at.is.null,expires_at.gt.' + encodeURIComponent(nowIso) + ')'
       + '&order=publish_at.desc&limit=100';
     var r = await fetch(url, { headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + (window._mncAccessToken || SUPABASE_ANON_KEY) } });
     _homeFeedPosts = r.ok ? await r.json() : [];
@@ -11343,7 +11361,6 @@ function prependHomeFeedCards(newPosts) {
   // stays symmetric — otherwise the wrap would skip one "set" of the new
   // content.
   newPosts.forEach(function(p) {
-    if (p.expires_at && new Date(p.expires_at).getTime() < nowMs) return;
     var tech = techs.find(function(t) {
       return t && t.email && t.email.toLowerCase() === String(p.tech_id || '').toLowerCase();
     });
@@ -11379,7 +11396,6 @@ function renderHomeFeedFromCache() {
   // them twice (for the seamless auto-scroll loop) without re-filtering.
   var pairs = [];
   (_homeFeedPosts || []).forEach(function(p) {
-    if (p.expires_at && new Date(p.expires_at).getTime() < nowMs) return;
     // Look up tech by email (tech_id is the tech's email).
     // ALL_TECHS is declared `const` at module scope — reference directly.
     var tech = (typeof ALL_TECHS !== 'undefined' ? ALL_TECHS : []).find(function(t) {
@@ -11501,9 +11517,19 @@ function buildFeedCard(post, tech) {
   if (post.image_url) {
     var imgEl = document.createElement('img');
     imgEl.className = 'board-post-img';
-    imgEl.src = post.image_url;
     imgEl.loading = 'lazy';
     imgEl.alt = '';
+    // Detect landscape shots after load and switch to stacked layout — wide
+    // photos get cropped to a tiny sliver in the 35%-wide side-by-side column
+    // AND cramp the body column, which can wrap longer names funny. The
+    // .wide-photo class (CSS above) puts the photo full-width on top instead.
+    imgEl.onload = function() {
+      if (imgEl.naturalWidth && imgEl.naturalHeight &&
+          imgEl.naturalWidth > imgEl.naturalHeight * 1.15) {
+        card.classList.add('wide-photo');
+      }
+    };
+    imgEl.src = post.image_url;
     imgEl.onclick = function(ev) {
       ev.stopPropagation(); // don't also trigger the card's openTechDetail
       if (typeof openGalleryPhoto === 'function') openGalleryPhoto(post.image_url);
@@ -13054,10 +13080,9 @@ async function submitPost() {
     } catch (_) { /* non-fatal — if the check fails, let the insert through */ }
 
     try {
-      // Text posts live in the feed for 24 hours (typical window for
-      // "got a cancel at 2pm" type info). Photo posts auto-created from
-      // portfolio uploads use a tighter 1-hour lifetime — see saveTechEdit.
-      const textExpiresAt = new Date(Date.now() + 24 * 3600000).toISOString();
+      // Posts no longer expire by time — feed retention is count-based
+      // (100-post rolling cap), so the feed stays full whenever there are
+      // <100 posts and never goes dry between busy stretches. — 2026-05-08
       const res = await fetch(`${SUPABASE_URL}/rest/v1/board_posts`, {
         method: 'POST',
         headers: {
@@ -13069,7 +13094,7 @@ async function submitPost() {
           'Authorization': `Bearer ${window._mncAccessToken || SUPABASE_ANON_KEY}`,
           'Prefer': 'return=minimal'
         },
-        body: JSON.stringify({ tech_id: techId, type: selectedPostType, body, expires_at: textExpiresAt })
+        body: JSON.stringify({ tech_id: techId, type: selectedPostType, body })
       });
       if (!res.ok) {
         let msg = 'Could not post — please try again';
