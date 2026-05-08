@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>MNC at a glance — Admin Stats</title>
+<meta name="description" content="Live MNC operations dashboard for the admin team."/>
+<meta name="robots" content="noindex, nofollow, noarchive"/>
+<link rel="icon" href="favicon.ico" sizes="any"/>
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png"/>
+<link rel="apple-touch-icon" href="apple-touch-icon.png"/>
+<meta name="theme-color" content="#C4786A"/>
+
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+
+<style>
+  :root {
+    --rose: #C4786A;
+    --rose-dark: #8B4A40;
+    --rose-light: #FDF0EE;
+    --rose-mid: #E0A898;
+    --cream: #FAF7F4;
+    --charcoal: #2C2420;
+    --muted: #8A7A74;
+    --white: #fff;
+    --border: rgba(196,120,106,0.18);
+    --green: #4A7A5A;
+    --green-soft: #CFE7D4;
+  }
+  *,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { min-height: 100%; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background:
+      radial-gradient(900px 380px at 50% -120px, rgba(224,168,152,0.32), transparent 60%),
+      linear-gradient(180deg, #FDF0EE 0%, var(--cream) 380px, var(--cream) 100%);
+    color: var(--charcoal);
+    padding: 38px 18px 80px;
+    line-height: 1.5;
+  }
+  .wrap { max-width: 880px; margin: 0 auto; }
+
+  /* ── Hero ─────────────────────────────────────────────────────── */
+  header.hero { text-align: center; margin-bottom: 28px; position: relative; }
+  .hero-bloom {
+    font-size: 38px; margin-bottom: 4px;
+    display: inline-block;
+    animation: sway 6s ease-in-out infinite;
+  }
+  @keyframes sway {
+    0%, 100% { transform: rotate(-4deg); }
+    50%      { transform: rotate(6deg); }
+  }
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(28px, 5vw, 40px);
+    font-weight: 700; color: var(--rose-dark);
+    letter-spacing: -0.5px; line-height: 1.1;
+    margin: 0 0 6px;
+  }
+  h1 em { color: var(--rose); font-style: italic; font-weight: 600; }
+  .sub { color: var(--muted); font-size: 14px; }
+
+  .updated-chip {
+    display: none; align-items: center; gap: 6px;
+    font-size: 12px; color: var(--muted);
+    margin-top: 8px; justify-content: center;
+  }
+  .updated-chip::before {
+    content: ''; width: 8px; height: 8px; border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 0 rgba(74,122,90,0.5);
+    animation: pulse 2s ease-out infinite;
+  }
+  @keyframes pulse {
+    0%   { box-shadow: 0 0 0 0 rgba(74,122,90,0.5); }
+    70%  { box-shadow: 0 0 0 10px rgba(74,122,90,0); }
+    100% { box-shadow: 0 0 0 0 rgba(74,122,90,0); }
+  }
+
+  /* ── Sign-in card ─────────────────────────────────────────────── */
+  #auth-card {
+    background: white; border: 1px solid var(--border);
+    border-radius: 20px; padding: 28px 26px; max-width: 380px;
+    margin: 24px auto 0; box-shadow: 0 4px 28px rgba(196,120,106,0.12);
+  }
+  #auth-card h2 {
+    font-family: 'Playfair Display', serif; font-weight: 700;
+    font-size: 22px; color: var(--charcoal); margin-bottom: 4px;
+  }
+  #auth-card .hint { font-size: 13px; color: var(--muted); margin-bottom: 18px; }
+  #auth-card label {
+    display: block; font-size: 11px; letter-spacing: 1.2px;
+    text-transform: uppercase; color: var(--muted);
+    margin: 12px 0 5px; font-weight: 600;
+  }
+  #auth-card input {
+    width: 100%; padding: 11px 14px;
+    border: 1.5px solid var(--border); border-radius: 10px;
+    font-family: 'DM Sans', sans-serif; font-size: 14px;
+    background: var(--cream); transition: border 0.15s, background 0.15s;
+  }
+  #auth-card input:focus {
+    outline: none; border-color: var(--rose); background: white;
+  }
+  #auth-card button {
+    width: 100%; padding: 12px; margin-top: 18px;
+    background: linear-gradient(160deg, #D4908A 0%, #A9665D 100%);
+    color: white; font-family: 'DM Sans', sans-serif;
+    font-size: 14px; font-weight: 600; border: none;
+    border-radius: 10px; cursor: pointer;
+    box-shadow: 0 3px 12px rgba(169,102,93,0.32);
+    transition: transform 0.12s;
+  }
+  #auth-card button:hover { transform: translateY(-1px); }
+  #auth-card button:disabled { opacity: 0.6; cursor: wait; transform: none; }
+  #auth-error {
+    background: rgba(192,57,43,0.08); color: #c0392b;
+    font-size: 12px; padding: 10px 12px; border-radius: 8px;
+    margin-top: 12px; display: none;
+  }
+  #auth-error.visible { display: block; }
+
+  /* ── Dashboard ────────────────────────────────────────────────── */
+  #dash { display: none; }
+  #dash.visible { display: block; }
+
+  /* Headline cards */
+  .cards-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+    margin-bottom: 14px;
+  }
+  @media (min-width: 640px) {
+    .cards-grid { grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  }
+  .stat-card {
+    background: white; border: 1px solid var(--border);
+    border-radius: 18px; padding: 16px 14px 14px;
+    box-shadow: 0 2px 14px rgba(44,36,32,0.05);
+    position: relative; overflow: hidden;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 22px rgba(44,36,32,0.09);
+  }
+  .stat-card.featured {
+    background: linear-gradient(160deg, #C4786A 0%, #8B4A40 100%);
+    color: white; border: none;
+    box-shadow: 0 6px 20px rgba(139,74,64,0.28);
+  }
+  .stat-card.featured::after {
+    content: '🌸'; position: absolute;
+    top: -22px; right: -16px; font-size: 86px; opacity: 0.14;
+  }
+  .stat-label {
+    font-size: 10px; letter-spacing: 1.6px;
+    font-weight: 700; text-transform: uppercase;
+    color: var(--muted);
+  }
+  .stat-card.featured .stat-label { color: rgba(255,255,255,0.85); }
+  .stat-value {
+    font-family: 'Playfair Display', serif;
+    font-size: 36px; font-weight: 700;
+    color: var(--charcoal); line-height: 1.05;
+    margin-top: 5px;
+  }
+  .stat-card.featured .stat-value { color: white; }
+  .stat-sub {
+    font-size: 11px; color: var(--muted); margin-top: 3px;
+  }
+  .stat-card.featured .stat-sub { color: rgba(255,255,255,0.88); }
+
+  /* Pulse strip */
+  .pulse-strip {
+    background: linear-gradient(135deg, #EAF3EC 0%, #CFE7D4 100%);
+    border: 1px solid rgba(156,175,136,0.35);
+    border-radius: 14px; padding: 12px 16px;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; margin-bottom: 16px;
+  }
+  .pulse-strip .live-label {
+    font-size: 10px; font-weight: 700; letter-spacing: 1.4px;
+    color: #2D6A4F; text-transform: uppercase;
+  }
+  .pulse-strip .live-sub {
+    font-size: 11.5px; color: #4A7A5A; margin-top: 2px;
+  }
+  .pulse-strip .live-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 30px; font-weight: 700;
+    color: #2D6A4F; line-height: 1;
+  }
+  .live-dot {
+    display: inline-block; width: 8px; height: 8px;
+    border-radius: 50%; background: var(--green);
+    margin-right: 6px; vertical-align: middle;
+    animation: pulse 2s ease-out infinite;
+  }
+
+  /* Panels */
+  .panel {
+    background: white; border: 1px solid var(--border);
+    border-radius: 18px; padding: 18px;
+    margin-bottom: 14px;
+    box-shadow: 0 2px 14px rgba(44,36,32,0.04);
+  }
+  .panel-head {
+    display: flex; align-items: baseline; justify-content: space-between;
+    margin-bottom: 14px; gap: 12px; flex-wrap: wrap;
+  }
+  .panel-title {
+    font-size: 11px; font-weight: 700; letter-spacing: 1.4px;
+    text-transform: uppercase; color: var(--muted);
+  }
+  .panel-meta { font-size: 11px; color: var(--muted); }
+
+  /* Sparkline */
+  #stat-spark { width: 100%; height: 92px; display: block; }
+  .spark-axis {
+    display: flex; justify-content: space-between;
+    font-size: 10px; color: var(--muted); margin-top: 6px;
+  }
+
+  /* Subscription source grid */
+  .src-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+    margin-bottom: 12px;
+  }
+  @media (min-width: 540px) {
+    .src-grid { grid-template-columns: repeat(4, 1fr); }
+  }
+  .src-card {
+    border-radius: 12px; padding: 12px 14px; color: white;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+  .src-card.stripe { background: linear-gradient(135deg, #635BFF 0%, #4D45D9 100%); }
+  .src-card.apple  { background: linear-gradient(135deg, #1D1D1F 0%, #000 100%); }
+  .src-card.google { background: linear-gradient(135deg, #34A853 0%, #1B7430 100%); }
+  .src-card.comp   { background: linear-gradient(135deg, #E8C890 0%, #D4A060 100%); color: #3D2508; }
+  .src-card .src-label {
+    font-size: 9.5px; letter-spacing: 1.2px;
+    font-weight: 700; text-transform: uppercase; opacity: 0.85;
+  }
+  .src-card .src-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 26px; font-weight: 700;
+    margin-top: 3px; line-height: 1;
+  }
+  .sub-total-line {
+    font-size: 12.5px; color: var(--muted); text-align: center;
+    padding-top: 10px; border-top: 1px solid var(--border);
+    margin-top: 4px;
+  }
+  .sub-total-line b { color: var(--rose-dark); }
+
+  /* Lifetime purchases */
+  .pur-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 11px 14px; border-radius: 12px; margin-bottom: 8px;
+    transition: transform 0.15s;
+  }
+  .pur-row:hover { transform: translateX(2px); }
+  .pur-row:last-child { margin-bottom: 0; }
+  .pur-row.glow { background: var(--rose-light); }
+  .pur-row.spot { background: #F5EDE8; }
+  .pur-title {
+    font-size: 13.5px; font-weight: 600; color: var(--charcoal);
+  }
+  .pur-row.glow .pur-title { color: var(--rose-dark); }
+  .pur-meta {
+    font-size: 11px; color: var(--muted); margin-top: 2px;
+  }
+  .pur-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 24px; font-weight: 700;
+    color: var(--charcoal); line-height: 1;
+  }
+  .pur-row.glow .pur-num { color: var(--rose-dark); }
+  .pur-disclaimer {
+    font-size: 10.5px; color: var(--muted);
+    text-align: center; font-style: italic;
+    margin-top: 12px; line-height: 1.5;
+  }
+
+  /* Marketing hits */
+  .mh-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px;
+    margin-bottom: 12px;
+  }
+  .mh-card {
+    background: linear-gradient(135deg, #F5EDE8 0%, #E8D5CB 100%);
+    border-radius: 12px; padding: 11px 13px;
+  }
+  .mh-card .mh-label {
+    font-size: 9.5px; letter-spacing: 1.2px;
+    font-weight: 700; text-transform: uppercase;
+    color: var(--rose-dark); opacity: 0.78;
+  }
+  .mh-card .mh-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 24px; font-weight: 700;
+    color: var(--rose-dark); margin-top: 2px; line-height: 1;
+  }
+  .mh-chips {
+    display: flex; flex-wrap: wrap; gap: 6px;
+    font-size: 11px; margin-bottom: 12px; line-height: 1.5;
+  }
+  .mh-chips span {
+    padding: 3px 10px; border-radius: 999px; font-weight: 600;
+  }
+  .mh-recent-head {
+    font-size: 11px; font-weight: 700; letter-spacing: 1.2px;
+    text-transform: uppercase; color: var(--muted); margin-bottom: 6px;
+  }
+  .mh-recent {
+    font-size: 11.5px; color: var(--charcoal);
+    max-height: 260px; overflow-y: auto;
+    border: 1px solid var(--border); border-radius: 10px;
+    background: #FAF7F4;
+  }
+  .mh-recent::-webkit-scrollbar { width: 6px; }
+  .mh-recent::-webkit-scrollbar-thumb { background: var(--rose-mid); border-radius: 3px; }
+  .mh-row {
+    display: flex; justify-content: space-between; gap: 8px;
+    padding: 8px 12px; border-bottom: 1px solid var(--border);
+  }
+  .mh-row:last-child { border-bottom: none; }
+  .mh-row .mh-left {
+    display: flex; gap: 8px; align-items: center;
+    min-width: 0; flex: 1;
+  }
+  .mh-row .mh-page {
+    font-weight: 600; color: var(--rose-dark); flex-shrink: 0;
+  }
+  .mh-row .mh-ref {
+    color: var(--muted);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .mh-row .mh-when { color: var(--muted); flex-shrink: 0; font-size: 11px; }
+  .mh-disclaimer {
+    font-size: 10px; color: var(--muted);
+    margin-top: 8px; font-style: italic; line-height: 1.5;
+  }
+
+  /* Empty state */
+  .empty {
+    padding: 14px; text-align: center;
+    color: var(--muted); font-style: italic;
+    font-size: 13px;
+  }
+
+  /* Loading skeleton state */
+  .loading-tag {
+    color: var(--muted); font-size: 12px; padding: 6px 0;
+  }
+
+  /* Bottom buttons */
+  .bottom-row {
+    display: flex; gap: 10px; align-items: center;
+    margin-top: 20px;
+  }
+  .bottom-row button {
+    flex: 1; padding: 12px;
+    background: white; border: 1px solid var(--border);
+    color: var(--rose-dark); font-family: 'DM Sans', sans-serif;
+    font-size: 13px; font-weight: 600; border-radius: 12px;
+    cursor: pointer; transition: background 0.15s;
+  }
+  .bottom-row button:hover { background: var(--rose-light); }
+  .bottom-row .signout {
+    flex: 0 0 auto; padding: 12px 16px;
+    color: var(--muted); background: transparent;
+    border-color: transparent;
+  }
+  .bottom-row .signout:hover {
+    background: rgba(0,0,0,0.04); color: var(--charcoal);
+  }
+
+  /* Footer cross-links */
+  .nav-links {
+    text-align: center; font-size: 12px; color: var(--muted);
+    margin-top: 24px;
+  }
+  .nav-links a {
+    color: var(--rose-dark); text-decoration: none;
+    font-weight: 500; margin: 0 8px;
+  }
+  .nav-links a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <div class="hero-bloom" aria-hidden="true">🌸</div>
+    <h1>MNC <em>at a glance</em></h1>
+    <div class="sub">The state of the salon — live from the server.</div>
+    <div id="updated-line" class="updated-chip">Updated <span id="stats-updated">just now</span></div>
+  </header>
+
+  <!-- ── Auth gate ───────────────────────────────────────────────────── -->
+  <div id="auth-card">
+    <h2>Admin sign-in</h2>
+    <p class="hint">Pour a coffee. The numbers are right past this door.</p>
+    <form id="auth-form" autocomplete="on">
+      <label for="auth-email">Email</label>
+      <input id="auth-email" type="email" placeholder="you@mynailconnection.com" required autocomplete="email"/>
+      <label for="auth-password">Password</label>
+      <input id="auth-password" type="password" placeholder="••••••••" required autocomplete="current-password"/>
+      <button id="auth-btn" type="submit">Sign in</button>
+    </form>
+    <div id="auth-error"></div>
+  </div>
+
+  <!-- ── Dashboard ─────────────────────────────────────────────────── -->
+  <div id="dash">
+
+    <!-- Headline cards -->
+    <div class="cards-grid">
+      <div class="stat-card featured">
+        <div class="stat-label">Clients</div>
+        <div class="stat-value" id="stat-clients-total">—</div>
+        <div class="stat-sub" id="stat-clients-delta">accounts</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">This week</div>
+        <div class="stat-value" id="stat-clients-week">—</div>
+        <div class="stat-sub">new clients · 7d</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Techs</div>
+        <div class="stat-value" id="stat-techs">—</div>
+        <div class="stat-sub">profiles in the book</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Photos</div>
+        <div class="stat-value" id="stat-photos">—</div>
+        <div class="stat-sub">portfolio uploads</div>
+      </div>
+    </div>
+
+    <!-- Live now pulse -->
+    <div class="pulse-strip">
+      <div>
+        <div class="live-label"><span class="live-dot"></span>Live now</div>
+        <div class="live-sub">Techs available right this minute</div>
+      </div>
+      <div class="live-num" id="stat-live">—</div>
+    </div>
+
+    <!-- 14d signup trend -->
+    <div class="panel">
+      <div class="panel-head">
+        <div class="panel-title">New signups · last 14 days</div>
+        <div class="panel-meta" id="stat-trend-total">—</div>
+      </div>
+      <svg id="stat-spark" viewBox="0 0 600 92" preserveAspectRatio="none" aria-hidden="true"></svg>
+      <div class="spark-axis"><span>14d ago</span><span>today</span></div>
+    </div>
+
+    <!-- Subscriptions by source -->
+    <div class="panel">
+      <div class="panel-head">
+        <div class="panel-title">Subscriptions by source</div>
+        <div class="panel-meta">where the Glow Ups come from</div>
+      </div>
+      <div class="src-grid">
+        <div class="src-card stripe">
+          <div class="src-label">Stripe (web/Android)</div>
+          <div class="src-num" id="stat-sub-stripe">—</div>
+        </div>
+        <div class="src-card apple">
+          <div class="src-label">Apple IAP</div>
+          <div class="src-num" id="stat-sub-apple">—</div>
+        </div>
+        <div class="src-card google">
+          <div class="src-label">Google Play</div>
+          <div class="src-num" id="stat-sub-google">—</div>
+        </div>
+        <div class="src-card comp">
+          <div class="src-label">Comped</div>
+          <div class="src-num" id="stat-sub-comp">—</div>
+        </div>
+      </div>
+      <div class="sub-total-line" id="stat-sub-total"><b>—</b> active Glow Up subscribers total</div>
+    </div>
+
+    <!-- Lifetime purchases -->
+    <div class="panel">
+      <div class="panel-head">
+        <div class="panel-title">Lifetime purchases</div>
+        <div class="panel-meta">all-time, all sources</div>
+      </div>
+      <div class="pur-row glow">
+        <div>
+          <div class="pur-title">Glow Up months billed</div>
+          <div class="pur-meta">est. <span id="stat-glow-up-revenue">$—</span> gross</div>
+        </div>
+        <div class="pur-num" id="stat-glow-up-months">—</div>
+      </div>
+      <div class="pur-row spot">
+        <div>
+          <div class="pur-title">Spotlight: 1 Photo</div>
+          <div class="pur-meta">$0.99 each · est. <span id="stat-spot1-revenue">$—</span> gross</div>
+        </div>
+        <div class="pur-num" id="stat-spot1-count">—</div>
+      </div>
+      <div class="pur-row spot">
+        <div>
+          <div class="pur-title">Spotlight: 10 Photos</div>
+          <div class="pur-meta">$4.99 each · est. <span id="stat-spot10-revenue">$—</span> gross</div>
+        </div>
+        <div class="pur-num" id="stat-spot10-count">—</div>
+      </div>
+      <div class="pur-disclaimer">Gross estimates do not subtract Stripe (~3%) or Apple/Google (15–30%) fees.</div>
+    </div>
+
+    <!-- Marketing site hits -->
+    <div class="panel">
+      <div class="panel-head">
+        <div class="panel-title">Marketing site hits</div>
+        <div class="panel-meta">unique 30-min sessions</div>
+      </div>
+      <div class="mh-grid">
+        <div class="mh-card">
+          <div class="mh-label">Today</div>
+          <div class="mh-num" id="stat-mh-today">—</div>
+        </div>
+        <div class="mh-card">
+          <div class="mh-label">Last 7d</div>
+          <div class="mh-num" id="stat-mh-week">—</div>
+        </div>
+        <div class="mh-card">
+          <div class="mh-label">All-time</div>
+          <div class="mh-num" id="stat-mh-total">—</div>
+        </div>
+      </div>
+      <div id="stat-mh-breakdown" class="mh-chips"></div>
+      <div class="mh-recent-head">Recent visits</div>
+      <div id="stat-mh-recent" class="mh-recent">
+        <div class="empty">Loading recent visits…</div>
+      </div>
+      <div class="mh-disclaimer">Counts each visitor once every 30 minutes. Search-engine bots are skipped. Only admins can read this table.</div>
+    </div>
+
+    <!-- Buttons -->
+    <div class="bottom-row">
+      <button id="refresh-btn" type="button">↻ Refresh</button>
+      <button id="signout-btn" class="signout" type="button">Sign out</button>
+    </div>
+
+    <!-- Cross-links -->
+    <div class="nav-links">
+      <a href="/admin-feedback.html">Founder feedback &amp; tracker →</a>
+      <a href="/punch-list.html">Punch list →</a>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  // ── Config ─────────────────────────────────────────────────────────
+  const SUPABASE_URL = 'https://ktiztunuifzbzwzyqrrq.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt0aXp0dW51aWZ6Ynp3enlxcnJxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3Njk3MDgsImV4cCI6MjA4OTM0NTcwOH0.QXhI1oO-v5Qs2XOlijjpRgM2pxDD6lkWxUQ6uW6HbtM';
+  const TOKEN_KEY = 'mnc_admin_stats_token';
+
+  // Pricing constants — keep in sync with index.html loadSubscriptionStats()
+  const GLOW_UP_PRICE = 10.99;
+  const SPOT1_PRICE   = 0.99;
+  const SPOT10_PRICE  = 4.99;
+
+  // ── State ──────────────────────────────────────────────────────────
+  let token = null;
+  try { token = localStorage.getItem(TOKEN_KEY); } catch(_){}
+
+  // ── DOM helpers ────────────────────────────────────────────────────
+  const $ = id => document.getElementById(id);
+  const setTxt  = (id, v) => { const el = $(id); if (el) el.textContent = v; };
+  const setHtml = (id, v) => { const el = $(id); if (el) el.innerHTML = v; };
+  function fmt(n) {
+    if (n === null || n === undefined || Number.isNaN(n)) return '—';
+    return Number(n).toLocaleString();
+  }
+  function showDash(yes) {
+    $('auth-card').style.display = yes ? 'none' : 'block';
+    $('dash').classList.toggle('visible', yes);
+    $('dash').style.display = yes ? 'block' : 'none';
+    $('updated-line').style.display = yes ? 'inline-flex' : 'none';
+  }
+  function showAuthError(msg) {
+    const el = $('auth-error');
+    el.textContent = msg;
+    el.classList.add('visible');
+  }
+  function clearAuthError() { $('auth-error').classList.remove('visible'); }
+
+  // ── Auth ───────────────────────────────────────────────────────────
+  async function signIn(email, password) {
+    const r = await fetch(SUPABASE_URL + '/auth/v1/token?grant_type=password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY },
+      body: JSON.stringify({ email: email, password: password })
+    });
+    const data = await r.json();
+    if (!r.ok || !data.access_token) {
+      const err = (data && (data.error_description || data.msg || data.message)) || 'Sign-in failed.';
+      throw new Error(err);
+    }
+    return data.access_token;
+  }
+
+  $('auth-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    clearAuthError();
+    const email = $('auth-email').value.trim();
+    const password = $('auth-password').value;
+    const btn = $('auth-btn');
+    btn.disabled = true; btn.textContent = 'Signing in…';
+    try {
+      token = await signIn(email, password);
+      try { localStorage.setItem(TOKEN_KEY, token); } catch(_){}
+      showDash(true);
+      await renderStats();
+    } catch (err) {
+      showAuthError(err.message || 'Sign-in failed. Check the email + password.');
+    } finally {
+      btn.disabled = false; btn.textContent = 'Sign in';
+    }
+  });
+
+  $('signout-btn').addEventListener('click', function() {
+    token = null;
+    try { localStorage.removeItem(TOKEN_KEY); } catch(_){}
+    showDash(false);
+    $('auth-password').value = '';
+  });
+
+  $('refresh-btn').addEventListener('click', renderStats);
+
+  // ── Stats queries ──────────────────────────────────────────────────
+  function authHeaders() {
+    return {
+      'apikey': SUPABASE_ANON_KEY,
+      'Authorization': 'Bearer ' + (token || SUPABASE_ANON_KEY),
+      'Content-Type': 'application/json'
+    };
+  }
+
+  async function countTable(table, filter) {
+    try {
+      const url = SUPABASE_URL + '/rest/v1/' + table + '?select=*' + (filter ? '&' + filter : '');
+      const r = await fetch(url, {
+        method: 'HEAD',
+        headers: Object.assign({}, authHeaders(), {
+          'Prefer': 'count=exact', 'Range-Unit': 'items', 'Range': '0-0'
+        })
+      });
+      if (!r.ok) {
+        // Bounce session if forbidden
+        if (r.status === 401 || r.status === 403) handleAuthExpired();
+        return null;
+      }
+      const cr = r.headers.get('content-range') || '';
+      const n = parseInt((cr.split('/')[1] || '0'), 10);
+      return isNaN(n) ? 0 : n;
+    } catch (e) { return null; }
+  }
+
+  function handleAuthExpired() {
+    showAuthError('Session expired or this account isn’t flagged as admin. Sign in again.');
+    showDash(false);
+    try { localStorage.removeItem(TOKEN_KEY); } catch(_){}
+    token = null;
+  }
+
+  // ── Headline cards + sparkline ─────────────────────────────────────
+  async function loadHeadline() {
+    const sevenDaysAgoDate    = new Date(Date.now() -  7 * 86400000).toISOString().slice(0, 10);
+    const fourteenDaysAgoDate = new Date(Date.now() - 14 * 86400000).toISOString().slice(0, 10);
+
+    const [
+      clientsTotal, clientsWeek, techCount, photoCount,
+      liveCount, clientsRecent
+    ] = await Promise.all([
+      countTable('users', 'role=eq.client'),
+      countTable('users', 'role=eq.client&joined=gte.' + sevenDaysAgoDate),
+      countTable('techs'),
+      // Photos are a JSONB array on public.techs — sum lengths client-side.
+      (async () => {
+        try {
+          const r = await fetch(SUPABASE_URL + '/rest/v1/techs?select=photos', { headers: authHeaders() });
+          if (!r.ok) return null;
+          const rows = await r.json();
+          return (rows || []).reduce((sum, t) => sum + (Array.isArray(t.photos) ? t.photos.length : 0), 0);
+        } catch (e) { return null; }
+      })(),
+      countTable('techs', 'is_available=eq.true'),
+      (async () => {
+        try {
+          const url = SUPABASE_URL + '/rest/v1/users?select=joined&role=eq.client&joined=gte.'
+                    + fourteenDaysAgoDate + '&order=joined.asc&limit=2000';
+          const r = await fetch(url, { headers: authHeaders() });
+          if (!r.ok) return [];
+          return await r.json();
+        } catch (e) { return []; }
+      })()
+    ]);
+
+    if (!token) return;  // bail if auth expired during these calls
+
+    setTxt('stat-clients-total', fmt(clientsTotal));
+    setTxt('stat-clients-week',  fmt(clientsWeek));
+    setTxt('stat-techs',         fmt(techCount));
+    setTxt('stat-photos',        fmt(photoCount));
+    setTxt('stat-live',          fmt(liveCount));
+    setTxt('stat-clients-delta',
+      (clientsWeek && clientsWeek > 0) ? ('+' + clientsWeek + ' this week 🎉') : 'accounts');
+
+    // ── Sparkline (14 days, bucketed by `joined`) ────────────────────
+    const buckets = {};
+    for (let i = 0; i < 14; i++) {
+      const d = new Date(Date.now() - (13 - i) * 86400000);
+      buckets[d.toISOString().slice(0,10)] = 0;
+    }
+    (clientsRecent || []).forEach(row => {
+      const k = (row.joined || '').slice(0,10);
+      if (k in buckets) buckets[k]++;
+    });
+    const days = Object.keys(buckets).sort();
+    const vals = days.map(k => buckets[k]);
+    const maxV = Math.max(1, ...vals);
+    const W = 600, H = 92, pad = 6;
+    const stepX = (W - pad * 2) / Math.max(1, (days.length - 1));
+    const yFor = v => H - pad - (v / maxV) * (H - pad * 2);
+    let path = '', area = '';
+    days.forEach((d, i) => {
+      const x = pad + i * stepX;
+      const y = yFor(vals[i]);
+      path += (i === 0 ? 'M' : 'L') + x.toFixed(1) + ',' + y.toFixed(1) + ' ';
+      area += (i === 0 ? 'M' : 'L') + x.toFixed(1) + ',' + y.toFixed(1) + ' ';
+    });
+    area += 'L' + (pad + (days.length-1) * stepX).toFixed(1) + ',' + (H-pad) + ' L' + pad + ',' + (H-pad) + ' Z';
+    $('stat-spark').innerHTML =
+      '<defs><linearGradient id="sparkFill" x1="0" x2="0" y1="0" y2="1">' +
+        '<stop offset="0%" stop-color="#C4786A" stop-opacity="0.32"/>' +
+        '<stop offset="100%" stop-color="#C4786A" stop-opacity="0"/>' +
+      '</linearGradient></defs>' +
+      '<path d="' + area + '" fill="url(#sparkFill)"/>' +
+      '<path d="' + path + '" fill="none" stroke="#C4786A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>' +
+      vals.map((v, i) => v > 0
+        ? ('<circle cx="' + (pad + i*stepX).toFixed(1) + '" cy="' + yFor(v).toFixed(1) + '" r="3" fill="#8B4A40"/>')
+        : ''
+      ).join('');
+    const total14 = vals.reduce((a,b) => a+b, 0);
+    setTxt('stat-trend-total', total14 + (total14 === 1 ? ' signup in 14d' : ' signups in 14d'));
+  }
+
+  // ── Subscription source + lifetime purchases ───────────────────────
+  async function loadSubscriptions() {
+    try {
+      const url = SUPABASE_URL + '/rest/v1/techs'
+                + '?select=subscription_source,subscription_tier,glow_up_months_purchased,'
+                + 'spotlight_1_purchased_count,spotlight_10_purchased_count';
+      const r = await fetch(url, { headers: authHeaders() });
+      if (!r.ok) {
+        if (r.status === 401 || r.status === 403) { handleAuthExpired(); return; }
+        setTxt('stat-sub-total', 'Run sql/subscription-source-tracking-migration.sql to enable');
+        return;
+      }
+      const techs = await r.json();
+      const sources = { stripe: 0, apple_iap: 0, google_play: 0, comp: 0 };
+      let glowMonths = 0, spot1 = 0, spot10 = 0, paidTotal = 0;
+      (techs || []).forEach(t => {
+        if (t.subscription_tier === 'paid') {
+          paidTotal++;
+          const src = (t.subscription_source || '').toLowerCase();
+          if (sources.hasOwnProperty(src)) sources[src]++;
+        }
+        glowMonths += (t.glow_up_months_purchased || 0);
+        spot1      += (t.spotlight_1_purchased_count || 0);
+        spot10     += (t.spotlight_10_purchased_count || 0);
+      });
+      setTxt('stat-sub-stripe', fmt(sources.stripe));
+      setTxt('stat-sub-apple',  fmt(sources.apple_iap));
+      setTxt('stat-sub-google', fmt(sources.google_play));
+      setTxt('stat-sub-comp',   fmt(sources.comp));
+      setHtml('stat-sub-total', '<b>' + fmt(paidTotal) + '</b> active Glow Up subscribers total');
+      setTxt('stat-glow-up-months', fmt(glowMonths));
+      setTxt('stat-spot1-count',    fmt(spot1));
+      setTxt('stat-spot10-count',   fmt(spot10));
+      setTxt('stat-glow-up-revenue', '$' + (glowMonths * GLOW_UP_PRICE).toFixed(2));
+      setTxt('stat-spot1-revenue',   '$' + (spot1      * SPOT1_PRICE  ).toFixed(2));
+      setTxt('stat-spot10-revenue',  '$' + (spot10     * SPOT10_PRICE ).toFixed(2));
+    } catch (e) {
+      setTxt('stat-sub-total', 'Could not load subscription stats');
+    }
+  }
+
+  // ── Marketing site hits ────────────────────────────────────────────
+  async function loadMarketingHits() {
+    const todayStart = new Date(); todayStart.setHours(0,0,0,0);
+    const weekAgo    = new Date(Date.now() - 7 * 86400000);
+
+    async function countHits(filter) {
+      try {
+        const url = SUPABASE_URL + '/rest/v1/marketing_hits?select=*' + (filter ? '&' + filter : '');
+        const r = await fetch(url, {
+          method: 'HEAD',
+          headers: Object.assign({}, authHeaders(), {
+            'Prefer': 'count=exact', 'Range-Unit': 'items', 'Range': '0-0'
+          })
+        });
+        if (!r.ok) return null;
+        const cr = r.headers.get('content-range') || '';
+        const n = parseInt((cr.split('/')[1] || '0'), 10);
+        return isNaN(n) ? 0 : n;
+      } catch (e) { return null; }
+    }
+
+    let recent = [];
+    let denied = false;
+    try {
+      const url = SUPABASE_URL + '/rest/v1/marketing_hits'
+                + '?select=created_at,page,referrer,device_type'
+                + '&created_at=gte.' + encodeURIComponent(weekAgo.toISOString())
+                + '&order=created_at.desc&limit=150';
+      const r = await fetch(url, { headers: authHeaders() });
+      if (r.ok) recent = await r.json();
+      else if (r.status === 401 || r.status === 403) denied = true;
+    } catch (e) { /* fall through */ }
+    if (denied) {
+      setHtml('stat-mh-recent', '<div class="empty">Marketing hits table not readable on this account.</div>');
+      return;
+    }
+
+    const [totalCount, weekCount, todayCount] = await Promise.all([
+      countHits(),
+      countHits('created_at=gte.' + encodeURIComponent(weekAgo.toISOString())),
+      countHits('created_at=gte.' + encodeURIComponent(todayStart.toISOString())),
+    ]);
+
+    setTxt('stat-mh-today', todayCount === null ? '—' : fmt(todayCount));
+    setTxt('stat-mh-week',  weekCount  === null ? '—' : fmt(weekCount));
+    setTxt('stat-mh-total', totalCount === null ? '—' : fmt(totalCount));
+
+    // Per-page + device breakdown (last 7d window of "recent")
+    const byPage = {};
+    let mob = 0, desk = 0;
+    (recent || []).forEach(row => {
+      const p = row.page || 'unknown';
+      byPage[p] = (byPage[p] || 0) + 1;
+      if (row.device_type === 'mobile')      mob++;
+      else if (row.device_type === 'desktop') desk++;
+    });
+    const pretty = { 'marketing': 'Landing', 'tech-guide': 'Tech Guide' };
+    const chips = Object.keys(byPage).sort().map(p => {
+      const label = pretty[p] || p;
+      return '<span style="background:var(--rose-light);color:var(--rose-dark);">'
+           + label + ' · ' + byPage[p] + '</span>';
+    });
+    if (mob + desk > 0) {
+      chips.push('<span style="background:#F0EBE6;color:var(--charcoal);">📱 ' + mob + ' · 💻 ' + desk + '</span>');
+    }
+    setHtml('stat-mh-breakdown', chips.join(''));
+
+    // Recent visits stream
+    const rows = (recent || []).slice(0, 25);
+    if (!rows.length) {
+      setHtml('stat-mh-recent', '<div class="empty">Quiet day at the salon — no hits in the last 7 days yet.</div>');
+      return;
+    }
+    function relTime(iso) {
+      const t = new Date(iso).getTime();
+      const diff = Date.now() - t;
+      if (diff < 60000)    return Math.max(1, Math.floor(diff/1000)) + 's ago';
+      if (diff < 3600000)  return Math.floor(diff/60000) + 'm ago';
+      if (diff < 86400000) return Math.floor(diff/3600000) + 'h ago';
+      return Math.floor(diff/86400000) + 'd ago';
+    }
+    function shortRef(r) {
+      if (!r) return 'direct';
+      try { const u = new URL(r); return u.hostname.replace(/^www\./, ''); }
+      catch (e) { return (r || '').slice(0, 40); }
+    }
+    function esc(s) {
+      return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
+    }
+    const html = rows.map(r => {
+      const label = pretty[r.page] || r.page || '?';
+      const dev = r.device_type === 'mobile' ? '📱' : (r.device_type === 'desktop' ? '💻' : '·');
+      return '<div class="mh-row">'
+           +   '<div class="mh-left">'
+           +     '<span style="flex-shrink:0;">' + dev + '</span>'
+           +     '<span class="mh-page">' + esc(label) + '</span>'
+           +     '<span class="mh-ref">via ' + esc(shortRef(r.referrer)) + '</span>'
+           +   '</div>'
+           +   '<span class="mh-when">' + relTime(r.created_at) + '</span>'
+           + '</div>';
+    }).join('');
+    setHtml('stat-mh-recent', html);
+  }
+
+  // ── Top-level renderer ─────────────────────────────────────────────
+  async function renderStats() {
+    if (!token) return;
+    // Fan out — each panel is independent so a slow query doesn't block others.
+    await loadHeadline();
+    if (!token) return;  // headline may have triggered auth-expired
+    loadSubscriptions().catch(e => console.warn('subscriptions:', e));
+    loadMarketingHits().catch(e => console.warn('marketing hits:', e));
+
+    const now = new Date();
+    const pad2 = n => n < 10 ? '0' + n : '' + n;
+    setTxt('stats-updated', pad2(now.getHours()) + ':' + pad2(now.getMinutes()));
+  }
+
+  // ── Bootstrap ──────────────────────────────────────────────────────
+  if (token) {
+    showDash(true);
+    renderStats();
+  } else {
+    showDash(false);
+  }
+
+  // Auto-refresh every 60s while the tab is visible and user is signed in
+  setInterval(function() {
+    if (token && document.visibilityState === 'visible') renderStats();
+  }, 60000);
+})();
+</script>
+</body>
+</html>

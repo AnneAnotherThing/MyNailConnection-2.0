@@ -1534,8 +1534,8 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
 <div class="screen" id="change-password-screen">
   <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;background:linear-gradient(160deg,#F7EDEF 0%,#FAF7F4 50%,#F5EDE0 100%);">
     <div style="margin-bottom:16px;display:flex;justify-content:center;"><img src="mncLogo-transparent.png" class="mnc-logo" style="width:64px;height:64px;object-fit:contain;filter:drop-shadow(0 4px 14px rgba(139,94,107,0.4));" alt="My Nail Connection"/></div>
-    <div style="font-family:'Playfair Display',serif;font-size:24px;font-weight:600;color:var(--rose-dark);margin-bottom:6px;text-align:center;">Welcome</div>
-    <div style="font-size:13px;color:var(--muted);margin-bottom:24px;text-align:center;line-height:1.6;">For your security, please set a new password<br>before continuing.</div>
+    <div data-cp-title style="font-family:'Playfair Display',serif;font-size:24px;font-weight:600;color:var(--rose-dark);margin-bottom:6px;text-align:center;">Welcome</div>
+    <div data-cp-sub style="font-size:13px;color:var(--muted);margin-bottom:24px;text-align:center;line-height:1.6;">For your security, please set a new password<br>before continuing.</div>
     <div style="background:white;border-radius:20px;padding:22px;width:100%;box-shadow:0 4px 24px rgba(139,94,107,0.12);">
       <div style="font-size:11px;font-weight:500;color:var(--muted);margin-bottom:4px;">New password</div>
       <input id="cp-new" type="password" placeholder="At least 8 characters" style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:12px;font-family:'DM Sans',sans-serif;font-size:14px;margin-bottom:14px;box-sizing:border-box;outline:none;background:var(--cream);"/>
@@ -2282,6 +2282,8 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       <span style="margin:0 8px;opacity:0.5;">·</span>
       <a onclick="replayTutorial()" style="color:var(--muted);text-decoration:underline;cursor:pointer;text-underline-offset:3px;">Replay tutorial</a>
       <span style="margin:0 8px;opacity:0.5;">·</span>
+      <a onclick="openChangePasswordFromSettings()" style="color:var(--muted);text-decoration:underline;cursor:pointer;text-underline-offset:3px;">Change password</a>
+      <span style="margin:0 8px;opacity:0.5;">·</span>
       <span style="font-style:italic;">App acting up? <a onclick="openContactAnne()" style="color:var(--rose);text-decoration:underline;cursor:pointer;text-underline-offset:3px;font-style:normal;font-weight:500;">Nudge support</a>.</span>
     </div>
 
@@ -2941,6 +2943,8 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
          underlined links instead of big bordered buttons. -->
     <div style="text-align:center;margin:28px 20px 8px;font-size:11.5px;color:var(--muted);line-height:1.7;">
       <a onclick="replayTutorial()" style="color:var(--muted);text-decoration:underline;cursor:pointer;text-underline-offset:3px;">Replay tutorial</a>
+      <span style="margin:0 8px;opacity:0.5;">·</span>
+      <a onclick="openChangePasswordFromSettings()" style="color:var(--muted);text-decoration:underline;cursor:pointer;text-underline-offset:3px;">Change password</a>
       <span style="margin:0 8px;opacity:0.5;">·</span>
       <a onclick="show('find-us')" style="color:var(--muted);text-decoration:underline;cursor:pointer;text-underline-offset:3px;">Find us on social</a>
       <span style="margin:0 8px;opacity:0.5;">·</span>
@@ -5185,9 +5189,9 @@ function maybeShowTutorial(role) {
 // __APP_BUILD_*__ below are how sync.sh finds and rewrites the values.
 // Don't reorder or rename them.
 const APP_BUILD = {
-  name:    '2.0.5',     /* __APP_BUILD_NAME__   */
-  android: 303,         /* __APP_BUILD_ANDROID__ */
-  ios:     108,          /* __APP_BUILD_IOS__     */
+  name:    '2.0.6',     /* __APP_BUILD_NAME__   */
+  android: 307,         /* __APP_BUILD_ANDROID__ */
+  ios:     112,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -5896,6 +5900,40 @@ async function checkFirstLogin(email) {
     }
   } catch(e) {}
   return false;
+}
+
+// Settings-driven entry to change-password-screen. The screen's submit
+// handler (doChangePassword) routes back to home on success.
+function openChangePasswordFromSettings() {
+  try { _setChangePasswordCopy('settings'); } catch(_) {}
+  show('change-password-screen');
+}
+
+// Swap change-password-screen copy based on how the user got here.
+// Three contexts: 'first-login' (existing behavior — temp/default password
+// from onboarding), 'recovery' (just clicked a reset link), 'settings'
+// (signed-in user proactively changing). Keeps one screen reusable.
+// Added 2026-05-08.
+function _setChangePasswordCopy(ctx) {
+  try {
+    var titleEl    = document.querySelector('#change-password-screen [data-cp-title]');
+    var subEl      = document.querySelector('#change-password-screen [data-cp-sub]');
+    var btnEl      = document.getElementById('cp-btn');
+    if (ctx === 'recovery') {
+      if (titleEl) titleEl.textContent = 'Set Your Password';
+      if (subEl)   subEl.innerHTML     = "You're signed in via your reset link.<br>Choose a password to finish setting up.";
+      if (btnEl)   btnEl.textContent   = 'Set Password';
+    } else if (ctx === 'settings') {
+      if (titleEl) titleEl.textContent = 'Change Password';
+      if (subEl)   subEl.innerHTML     = 'Choose a new password.<br>You\'ll use it next time you sign in.';
+      if (btnEl)   btnEl.textContent   = 'Save New Password';
+    } else {
+      // first-login — original copy
+      if (titleEl) titleEl.textContent = 'Welcome';
+      if (subEl)   subEl.innerHTML     = 'For your security, please set a new password<br>before continuing.';
+      if (btnEl)   btnEl.textContent   = 'Set New Password';
+    }
+  } catch(_) {}
 }
 
 async function doChangePassword() {
@@ -14474,6 +14512,19 @@ async function consumeMagicLinkVerifyIfPresent() {
       expires_in:    body.expires_in || 3600,
       user:          body.user || null
     });
+    // Recovery-link sessions: the user clicked "reset password" and we
+    // just signed them in via the recovery JWT. The session is real and
+    // can call updateUser, but the WHOLE point of a reset is they need
+    // to set a new password. Without this flag the boot flow drops them
+    // on home, signed in via a session that quietly expires later — at
+    // which point they're locked out again because they never set a
+    // password. Honored in restorePersistedSession() below: if the flag
+    // is set we route to change-password-screen instead of home.
+    // Added 2026-05-08 after Anne's OG-17 launch resets — at least one
+    // user hit this trap during testing. — issue: silent recovery sign-in
+    if (type === 'recovery') {
+      try { window._mncForcePasswordChange = true; } catch(_) {}
+    }
     // Strip token_hash + type from the address bar — replaceState
     // (not pushState) so the user can't back-nav to a one-time token.
     try { history.replaceState(null, '', window.location.pathname); } catch(_) {}
@@ -14572,6 +14623,17 @@ async function restorePersistedSession() {
       } catch(e) { /* non-fatal */ }
     }
 
+    // If a recovery-link verify just landed us here (consumeMagicLink…
+    // set the flag), force-route to the password-change screen instead
+    // of the user's normal home. This screen's submit handler calls
+    // sbClient.auth.updateUser({password}) — works fine with the
+    // recovery JWT — and routes to showCorrectHome() on success.
+    if (window._mncForcePasswordChange) {
+      try { window._mncForcePasswordChange = false; } catch(_) {}
+      try { _setChangePasswordCopy('recovery'); } catch(_) {}
+      show('change-password-screen');
+      return true;
+    }
     await showCorrectHome();
     return true;
   } catch(e) {
