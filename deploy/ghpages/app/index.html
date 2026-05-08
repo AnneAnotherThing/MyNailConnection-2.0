@@ -5190,8 +5190,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.6',     /* __APP_BUILD_NAME__   */
-  android: 307,         /* __APP_BUILD_ANDROID__ */
-  ios:     112,          /* __APP_BUILD_IOS__     */
+  android: 308,         /* __APP_BUILD_ANDROID__ */
+  ios:     113,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -11048,7 +11048,7 @@ async function updateHomeFaveCounts() {
 // client-side whenever the radius chip changes. Radius persisted in
 // localStorage under 'mnc_feed_radius' (0 = Anywhere).
 var _homeFeedPosts = [];
-var _homeFeedRadius = 50;
+var _homeFeedRadius = 0;
 
 (function initFeedRadiusFromStorage() {
   try {
@@ -18063,3 +18063,4 @@ function closeLegalModal() {
 
 </body>
 </html>
+ 
