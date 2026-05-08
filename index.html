@@ -5210,8 +5210,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.6',     /* __APP_BUILD_NAME__   */
-  android: 310,         /* __APP_BUILD_ANDROID__ */
-  ios:     115,          /* __APP_BUILD_IOS__     */
+  android: 311,         /* __APP_BUILD_ANDROID__ */
+  ios:     116,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -11658,7 +11658,12 @@ function renderStyleGrid() {
     (tech.photos || []).forEach(function(p) {
       var url = p.url || p;
       if (url && url.startsWith('http')) {
-        photos.push({ url: url, tech: tech, tags: p.tags || tech.tags || [] });
+        // Use the photo's own tags only — falling back to tech.tags here
+        // makes the inspo filter overmatch (chip says "French (1)" but selecting
+        // it shows every photo from any tech tagged French, including untagged
+        // ones). The chip count is photos-with-this-tag, so the filter should
+        // match the same way. — 2026-05-08
+        photos.push({ url: url, tech: tech, tags: p.tags || [] });
       }
     });
   });
@@ -11674,7 +11679,9 @@ function renderStyleGrid() {
   var hasFilter = styleActiveFilters.shape || styleActiveFilters.type || styleActiveFilters.style;
   if (hasFilter) {
     photos = photos.filter(function(p) {
-      var allTags = ((p.tags || []).concat(p.tech.tags || [])).map(function(t){ return t.toLowerCase(); });
+      // Photo-tags only (no tech.tags fallback) — see comment in the
+      // photos.push above. Keeps chip count in lockstep with filter result.
+      var allTags = (p.tags || []).map(function(t){ return t.toLowerCase(); });
       if (styleActiveFilters.shape && !allTags.some(function(t){ return t === styleActiveFilters.shape.toLowerCase(); })) return false;
       if (styleActiveFilters.type  && !allTags.some(function(t){ return t === styleActiveFilters.type.toLowerCase(); }))  return false;
       if (styleActiveFilters.style && !allTags.some(function(t){ return t === styleActiveFilters.style.toLowerCase(); })) return false;
