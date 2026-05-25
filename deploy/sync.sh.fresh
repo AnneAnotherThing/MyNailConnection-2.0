@@ -274,16 +274,6 @@ copy_if_exists robots.txt              "$GH/robots.txt"
 [ -d images ]      && rsync -a --delete images/      "$GH/images/"
 [ -d app-screens ] && rsync -a --delete app-screens/ "$GH/app-screens/"
 
-# ── Google Search Console verification ──────────────────────────────────
-# google3d630386db4a7faa.html is an ownership-verification token Google
-# generates for the mynailconnection.com property. Must be served at
-# https://www.mynailconnection.com/google3d630386db4a7faa.html — i.e. the
-# root of the marketing bundle. Per Google's docs ("To stay verified,
-# don't remove the file"), this stays in the bundle indefinitely. Added
-# 2026-05-25 so Search Console can verify the property and start
-# returning indexing data.
-copy_if_exists google3d630386db4a7faa.html "$GH/google3d630386db4a7faa.html"
-
 # ── .well-known/ — Android App Links + iOS Universal Links ──────────────
 # assetlinks.json is served from https://mynailconnection.com/.well-known/
 # so Android can auto-verify this domain belongs to our app package. When
