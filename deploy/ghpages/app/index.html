@@ -3168,114 +3168,18 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
         </div>
       </div>
 
-      <!-- 14-day signup trend -->
-      <div style="background:white;border:1px solid var(--border);border-radius:16px;padding:14px 14px 10px;margin-bottom:14px;box-shadow:0 2px 10px rgba(44,36,32,0.04);">
-        <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:10px;">
-          <div style="font-size:13px;font-weight:600;color:var(--charcoal);">Signups · last 14 days</div>
-          <div id="stat-trend-total" style="font-size:11px;color:var(--muted);">—</div>
-        </div>
-        <svg id="stat-spark" viewBox="0 0 280 70" style="width:100%;height:70px;display:block;">
-          <!-- Filled in by renderStatsSparkline() -->
-        </svg>
-        <div id="stat-spark-labels" style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:6px;">
-          <span>14d ago</span><span>today</span>
-        </div>
-      </div>
-
-      <!-- ░░░ Subscription source + lifetime purchase counts ░░░
-           Reads from techs.subscription_source + techs.glow_up_months_purchased
-           + techs.spotlight_*_purchased_count (added in subscription-source-
-           tracking-migration.sql). Updated by webhooks: stripe-webhook for
-           Stripe + revenuecat-webhook for Apple/Google IAP. Lets Anne see
-           at a glance which platform is driving subscriptions and what the
-           lifetime purchase mix looks like. -->
-      <div style="background:white;border:1px solid var(--border);border-radius:16px;padding:14px 16px;margin-bottom:14px;box-shadow:0 2px 10px rgba(44,36,32,0.04);">
-        <div style="font-size:11px;font-weight:600;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:12px;">Subscriptions by source</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;">
-          <div style="background:linear-gradient(135deg,#635BFF 0%,#4D45D9 100%);border-radius:12px;padding:10px 12px;color:white;">
-            <div style="font-size:9.5px;letter-spacing:1.2px;font-weight:700;text-transform:uppercase;opacity:0.85;">Stripe (web/Android)</div>
-            <div id="stat-sub-stripe" style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700;margin-top:2px;line-height:1;">—</div>
-          </div>
-          <div style="background:linear-gradient(135deg,#1D1D1F 0%,#000 100%);border-radius:12px;padding:10px 12px;color:white;">
-            <div style="font-size:9.5px;letter-spacing:1.2px;font-weight:700;text-transform:uppercase;opacity:0.85;">Apple IAP</div>
-            <div id="stat-sub-apple" style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700;margin-top:2px;line-height:1;">—</div>
-          </div>
-          <div style="background:linear-gradient(135deg,#34A853 0%,#1B7430 100%);border-radius:12px;padding:10px 12px;color:white;">
-            <div style="font-size:9.5px;letter-spacing:1.2px;font-weight:700;text-transform:uppercase;opacity:0.85;">Google Play</div>
-            <div id="stat-sub-google" style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700;margin-top:2px;line-height:1;">—</div>
-          </div>
-          <div style="background:linear-gradient(135deg,#E8C890 0%,#D4A060 100%);border-radius:12px;padding:10px 12px;color:#3D2508;">
-            <div style="font-size:9.5px;letter-spacing:1.2px;font-weight:700;text-transform:uppercase;opacity:0.85;">Comped</div>
-            <div id="stat-sub-comp" style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700;margin-top:2px;line-height:1;">—</div>
-          </div>
-        </div>
-        <div id="stat-sub-total" style="font-size:12px;color:var(--muted);text-align:center;padding-top:4px;border-top:1px solid var(--border);"><b style="color:var(--rose-dark);">—</b> active Glow Up subscribers total</div>
-      </div>
-
-      <!-- Lifetime purchase counts — totals only go up. Glow Up months
-           accumulate one per subscriber per month; Spotlight bundles
-           accumulate one per purchase. Useful for revenue-back-of-napkin. -->
-      <div style="background:white;border:1px solid var(--border);border-radius:16px;padding:14px 16px;margin-bottom:14px;box-shadow:0 2px 10px rgba(44,36,32,0.04);">
-        <div style="font-size:11px;font-weight:600;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:12px;">Lifetime purchases</div>
-        <div style="display:flex;flex-direction:column;gap:8px;">
-          <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--rose-light);border-radius:10px;">
-            <div>
-              <div style="font-size:13px;font-weight:600;color:var(--rose-dark);">Glow Up months billed</div>
-              <div style="font-size:11px;color:var(--muted);margin-top:1px;">All-time, all sources · est. <span id="stat-glow-up-revenue">$—</span> gross</div>
-            </div>
-            <div id="stat-glow-up-months" style="font-family:'Playfair Display',serif;font-size:26px;font-weight:700;color:var(--rose-dark);line-height:1;">—</div>
-          </div>
-          <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:#F5EDE8;border-radius:10px;">
-            <div>
-              <div style="font-size:13px;font-weight:600;color:var(--charcoal);">Spotlight: 1 Photo</div>
-              <div style="font-size:11px;color:var(--muted);margin-top:1px;">$0.99 each · est. <span id="stat-spot1-revenue">$—</span> gross</div>
-            </div>
-            <div id="stat-spot1-count" style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--charcoal);line-height:1;">—</div>
-          </div>
-          <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:#F5EDE8;border-radius:10px;">
-            <div>
-              <div style="font-size:13px;font-weight:600;color:var(--charcoal);">Spotlight: 10 Photos</div>
-              <div style="font-size:11px;color:var(--muted);margin-top:1px;">$4.99 each · est. <span id="stat-spot10-revenue">$—</span> gross</div>
-            </div>
-            <div id="stat-spot10-count" style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--charcoal);line-height:1;">—</div>
-          </div>
-        </div>
-        <div style="font-size:10.5px;color:var(--muted);text-align:center;font-style:italic;margin-top:10px;line-height:1.45;">Gross estimates do not subtract Stripe (~3%) or Apple/Google (15-30%) fees.</div>
-      </div>
-
-      <!-- ░░░ Marketing site hit tracker ░░░
-           Per-session hits to the public marketing pages (root domain →
-           marketing.html, plus tech-guide.html). Each row in
-           public.marketing_hits is one session-per-page (30-min cooldown
-           enforced client-side; bots filtered by UA). RLS only lets
-           admins read this, so the load fails silently for non-admins.
-           Migration: sql/marketing-hits-tracker.sql -->
-      <div style="background:white;border:1px solid var(--border);border-radius:16px;padding:14px 16px;margin-bottom:14px;box-shadow:0 2px 10px rgba(44,36,32,0.04);">
-        <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:10px;">
-          <div style="font-size:11px;font-weight:600;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;">Marketing site hits</div>
-          <div style="font-size:10.5px;color:var(--muted);">unique 30-min sessions</div>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px;">
-          <div style="background:linear-gradient(135deg,#F5EDE8 0%,#E8D5CB 100%);border-radius:12px;padding:10px 12px;">
-            <div style="font-size:9.5px;letter-spacing:1.2px;font-weight:700;text-transform:uppercase;color:var(--rose-dark);opacity:0.8;">Today</div>
-            <div id="stat-mh-today" style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:var(--rose-dark);margin-top:2px;line-height:1;">—</div>
-          </div>
-          <div style="background:linear-gradient(135deg,#F5EDE8 0%,#E8D5CB 100%);border-radius:12px;padding:10px 12px;">
-            <div style="font-size:9.5px;letter-spacing:1.2px;font-weight:700;text-transform:uppercase;color:var(--rose-dark);opacity:0.8;">Last 7d</div>
-            <div id="stat-mh-week" style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:var(--rose-dark);margin-top:2px;line-height:1;">—</div>
-          </div>
-          <div style="background:linear-gradient(135deg,#F5EDE8 0%,#E8D5CB 100%);border-radius:12px;padding:10px 12px;">
-            <div style="font-size:9.5px;letter-spacing:1.2px;font-weight:700;text-transform:uppercase;color:var(--rose-dark);opacity:0.8;">All-time</div>
-            <div id="stat-mh-total" style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:var(--rose-dark);margin-top:2px;line-height:1;">—</div>
-          </div>
-        </div>
-        <div id="stat-mh-breakdown" style="display:flex;flex-wrap:wrap;gap:6px;font-size:11px;color:var(--muted);margin-bottom:10px;line-height:1.6;"></div>
-        <div style="font-size:11px;font-weight:600;color:var(--charcoal);margin-bottom:6px;">Recent visits</div>
-        <div id="stat-mh-recent" style="font-size:11.5px;color:var(--charcoal);max-height:240px;overflow-y:auto;border:1px solid var(--border);border-radius:10px;background:#FAF7F4;">
-          <div style="padding:10px 12px;color:var(--muted);font-style:italic;">Loading…</div>
-        </div>
-        <div style="font-size:10px;color:var(--muted);margin-top:8px;font-style:italic;line-height:1.45;">Counts each visitor once every 30 minutes. Search-engine bots are skipped. Only admins can see this data.</div>
-      </div>
+      <!-- Full stats now live on the web (admin-stats.html), kept as the
+           single source of truth. This in-app tab is just the at-a-glance
+           headline + a launcher into the complete dashboard: signup trend,
+           subscriptions by source, lifetime purchases, marketing-site hits,
+           how-visitors-arrive (QR / phone / web), store taps, and true
+           Apple / Android download counts. -->
+      <a href="https://mynailconnection.com/admin-stats.html" target="_blank" rel="noopener"
+         style="display:block;text-decoration:none;background:linear-gradient(160deg,#C4786A 0%,#8B4A40 100%);border-radius:16px;padding:18px;margin-bottom:14px;box-shadow:0 6px 20px rgba(139,74,64,0.28);color:white;">
+        <div style="font-size:10px;letter-spacing:1.5px;font-weight:700;text-transform:uppercase;opacity:0.85;">Full dashboard</div>
+        <div style="font-family:'Playfair Display',serif;font-size:19px;font-weight:700;margin-top:4px;line-height:1.2;">Open the complete stats dashboard ↗</div>
+        <div style="font-size:12px;opacity:0.92;margin-top:6px;line-height:1.45;">Signup trends, subscriptions by source, lifetime purchases, marketing-site hits, how visitors arrive (QR · phone · web), store taps, and true Apple / Android download counts.</div>
+      </a>
 
       <button onclick="loadAdminStats()" style="width:100%;padding:11px;border:none;border-radius:12px;background:white;color:var(--rose-dark);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;border:1px solid var(--border);">Refresh</button>
     </div>
@@ -3527,6 +3431,14 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
             <input id="te-booking-link" type="url" placeholder="https://vagaro.com/yourname or your website…" style="width:100%;padding:10px 12px 10px 34px;border:1.5px solid var(--border);border-radius:10px;font-size:13px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;box-sizing:border-box;"/>
           </div>
           <div style="font-size:11px;color:var(--muted);margin-top:4px;">✨ Clients can book directly from your profile! Vagaro, StyleSeat, Square, Fresha, or your own site — anything works.</div>
+        </div>
+        <div>
+          <label style="font-size:10px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px;letter-spacing:0.8px;">INSTAGRAM / SOCIAL</label>
+          <div style="position:relative;">
+            <div style="position:absolute;left:12px;top:50%;transform:translateY(-50%);pointer-events:none;"><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:var(--muted);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg></div>
+            <input id="te-gallery-link" type="url" placeholder="https://instagram.com/yourhandle" style="width:100%;padding:10px 12px 10px 34px;border:1.5px solid var(--border);border-radius:10px;font-size:13px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;box-sizing:border-box;"/>
+          </div>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px;">📸 Link your Instagram, TikTok, or other gallery so clients can see more of your work.</div>
         </div>
       </div>
 
@@ -5210,8 +5122,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.6',     /* __APP_BUILD_NAME__   */
-  android: 315,         /* __APP_BUILD_ANDROID__ */
-  ios:     120,          /* __APP_BUILD_IOS__     */
+  android: 317,         /* __APP_BUILD_ANDROID__ */
+  ios:     122,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -6887,9 +6799,27 @@ function renderTechContactFooter(tech) {
     </a>`;
   }
 
-  const allBtns = `${bookingBtn}<div style="display:flex;gap:8px;">${btns}</div>`;
+  // Gallery / social link button (secondary style, sits below booking)
+  const galleryLink = tech.gallery_link || tech.gallery_url || '';
+  let galleryBtn = '';
+  if (galleryLink) {
+    const gl = galleryLink.toLowerCase();
+    const glabel = gl.includes('instagram') ? 'View on Instagram' :
+                   gl.includes('tiktok') ? 'View on TikTok' :
+                   (gl.includes('facebook') || gl.includes('fb.com')) ? 'View on Facebook' :
+                   gl.includes('pinterest') ? 'View on Pinterest' :
+                   (gl.includes('youtube') || gl.includes('youtu.be')) ? 'View on YouTube' :
+                   'View Gallery';
+    galleryBtn = `<a href="${galleryLink}" target="_blank" rel="noopener"
+      style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:13px;border-radius:12px;background:var(--cream);border:1.5px solid var(--rose-mid);color:var(--rose-dark);font-size:14px;font-weight:600;text-decoration:none;font-family:'DM Sans',sans-serif;margin-bottom:8px;box-sizing:border-box;">
+      <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+      ${glabel}
+    </a>`;
+  }
+
+  const allBtns = `${bookingBtn}${galleryBtn}<div style="display:flex;gap:8px;">${btns}</div>`;
   footer.innerHTML = allBtns;
-  footer.style.display = (btns || bookingBtn) ? '' : 'none';
+  footer.style.display = (btns || bookingBtn || galleryBtn) ? '' : 'none';
 }
 
 function showAdminToast(){
@@ -7581,12 +7511,13 @@ async function handlePhoto(input) {
     const email = currentUserEmail || 'user';
     const slug = email.replace(/[^a-z0-9]/gi,'-').toLowerCase() + '-' + Date.now();
     const fileName = 'profiles/' + slug + '.' + file.name.split('.').pop();
+    const _upBlob = await compressForUpload(file, 900, 0.85);
     try {
       const res = await fetch(SUPABASE_URL + '/storage/v1/object/tech-photos/' + fileName, {
         method: 'POST',
         headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
-                   'Content-Type': file.type, 'x-upsert': 'true' },
-        body: file
+                   'Content-Type': (_upBlob.type || file.type || 'image/jpeg'), 'x-upsert': 'true' },
+        body: _upBlob
       });
       if (res.ok) {
         currentUserPhoto = SUPABASE_URL + '/storage/v1/object/public/tech-photos/' + fileName;
@@ -8278,6 +8209,7 @@ function openTechDetail(tech) {
       var img = document.createElement('img');
       img.src = photoUrl;
       img.loading = 'lazy';
+      img.decoding = 'async';
       img.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block;';
       div.appendChild(img);
 
@@ -8903,6 +8835,7 @@ function openTechEdit(tech) {
   document.getElementById('te-zip').value     = edit.zip;
   document.getElementById('te-bio').value     = edit.bio;
   document.getElementById('te-booking-link').value = edit.booking_link || tech.booking_link || '';
+  document.getElementById('te-gallery-link').value = edit.gallery_link || tech.gallery_link || '';
   // Tags
   document.querySelectorAll('#te-tags input[type=checkbox]').forEach(cb => {
     cb.checked = edit.tags.includes(cb.value);
@@ -9068,11 +9001,12 @@ async function techEditProfilePhoto(input) {
       const techSlug = (currentEditTech.name || 'new-tech').toLowerCase().replace(/[^a-z0-9]/g, '-') || 'tech';
       const ext = file.name.split('.').pop() || 'jpg';
       const fileName = 'profile/' + techSlug + '-' + Date.now() + '.' + ext;
+      const _upBlob = await compressForUpload(file, 900, 0.85);
       const res = await fetch(SUPABASE_URL + '/storage/v1/object/tech-photos/' + fileName, {
         method: 'POST',
         headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
-                   'Content-Type': file.type, 'x-upsert': 'true' },
-        body: file
+                   'Content-Type': (_upBlob.type || file.type || 'image/jpeg'), 'x-upsert': 'true' },
+        body: _upBlob
       });
       if (res.ok) {
         const publicUrl = SUPABASE_URL + '/storage/v1/object/public/tech-photos/' + fileName;
@@ -9089,6 +9023,38 @@ async function techEditProfilePhoto(input) {
     }
   };
   reader.readAsDataURL(file);
+}
+
+// ── Client-side image compression before Storage upload ───────────────
+// Phone photos arrive as 3–8MB full-res originals; uploaded raw they made
+// galleries crawl (every thumbnail downloaded megabytes). Downscale to a
+// sane max dimension and re-encode JPEG before upload. Returns a Blob, or
+// the original file if anything fails (compression must never block upload).
+async function compressForUpload(file, maxDim, quality) {
+  maxDim = maxDim || 1400; quality = quality || 0.82;
+  try {
+    if (!file || !file.type || file.type.indexOf('image/') !== 0) return file;
+    if (file.type === 'image/gif') return file; // don't flatten animations
+    if (file.size && file.size < 200 * 1024) return file; // already small
+    const dataUrl = await new Promise(function(res, rej) {
+      const r = new FileReader(); r.onload = function(e){res(e.target.result);}; r.onerror = rej; r.readAsDataURL(file);
+    });
+    const img = await new Promise(function(res, rej) {
+      const im = new Image(); im.onload = function(){res(im);}; im.onerror = rej; im.src = dataUrl;
+    });
+    var w = img.naturalWidth || img.width, h = img.naturalHeight || img.height;
+    if (!w || !h) return file;
+    if (w > maxDim || h > maxDim) {
+      if (w >= h) { h = Math.round(h * maxDim / w); w = maxDim; }
+      else { w = Math.round(w * maxDim / h); h = maxDim; }
+    }
+    const canvas = document.createElement('canvas');
+    canvas.width = w; canvas.height = h;
+    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+    const blob = await new Promise(function(res){ canvas.toBlob(res, 'image/jpeg', quality); });
+    if (!blob) return file;
+    return (blob.size < file.size) ? blob : file; // keep whichever is smaller
+  } catch (_) { return file; }
 }
 
 async function techEditAddPhotos(input) {
@@ -9168,11 +9134,12 @@ async function techEditAddPhotos(input) {
         // Background storage upload. On failure, yank from both DB and
         // local buffer so the publicUrl doesn't sit forever as a 404.
         try {
+          const _upBlob = await compressForUpload(file);
           const res = await fetch(SUPABASE_URL + '/storage/v1/object/tech-photos/' + _fileName, {
             method: 'POST',
             headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
-                       'Content-Type': file.type, 'x-upsert': 'true' },
-            body: file
+                       'Content-Type': (_upBlob.type || file.type || 'image/jpeg'), 'x-upsert': 'true' },
+            body: _upBlob
           });
           if (!res.ok) throw new Error('upload-failed-' + res.status);
           // Storage upload succeeded — clear the _previewSrc so subsequent
@@ -10580,6 +10547,7 @@ async function saveTechEdit() {
   edit.zip   = document.getElementById('te-zip').value.trim();
   edit.bio   = document.getElementById('te-bio').value.trim();
   edit.booking_link = document.getElementById('te-booking-link').value.trim();
+  edit.gallery_link = document.getElementById('te-gallery-link').value.trim();
   edit.tags  = Array.from(document.querySelectorAll('#te-tags input:checked')).map(c => c.value);
   edit.contact_methods = {
     call: document.getElementById('te-contact-call')?.checked || false,
@@ -10627,6 +10595,8 @@ async function saveTechEdit() {
       state: edit.state || '',
       zip: edit.zip || '',
       bio: edit.bio || '',
+      booking_link: edit.booking_link || '',
+      gallery_link: edit.gallery_link || '',
       tags: edit.tags || [],
       lat: edit.lat || null,
       lng: edit.lng || null,
@@ -14058,7 +14028,7 @@ function openNewTechModal() {
   av.style.background = currentEditTech.bg;
   av.style.color = currentEditTech.color;
   av.innerHTML = '+';
-  ['te-name','te-shop','te-email','te-phone','te-address','te-city','te-state','te-zip','te-bio','te-booking-link'].forEach(id => {
+  ['te-name','te-shop','te-email','te-phone','te-address','te-city','te-state','te-zip','te-bio','te-booking-link','te-gallery-link'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.value = '';
   });
@@ -15188,15 +15158,16 @@ async function ueUploadPhoto(input) {
 
   showToast('Uploading photo…');
   try {
+    const _upBlob = await compressForUpload(file, 900, 0.85);
     const res = await fetch(SUPABASE_URL + '/storage/v1/object/tech-photos/' + fileName, {
       method: 'POST',
       headers: {
         'apikey': SUPABASE_ANON_KEY,
         'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
-        'Content-Type': file.type,
+        'Content-Type': (_upBlob.type || file.type || 'image/jpeg'),
         'x-upsert': 'true'
       },
-      body: file
+      body: _upBlob
     });
     if (res.ok) {
       const publicUrl = SUPABASE_URL + '/storage/v1/object/public/tech-photos/' + fileName;
@@ -15252,12 +15223,13 @@ async function ueAddGalleryPhotos(input) {
   showToast('Uploading ' + files.length + ' photo(s)…');
   for (const file of files) {
     const fileName = 'gallery/' + slug + '/' + Date.now() + '-' + Math.random().toString(36).slice(2,6) + '.' + file.name.split('.').pop();
+    const _upBlob = await compressForUpload(file);
     try {
       const res = await fetch(SUPABASE_URL + '/storage/v1/object/tech-photos/' + fileName, {
         method: 'POST',
         headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
-                   'Content-Type': file.type, 'x-upsert': 'true' },
-        body: file
+                   'Content-Type': (_upBlob.type || file.type || 'image/jpeg'), 'x-upsert': 'true' },
+        body: _upBlob
       });
       if (res.ok) { ueGalleryPhotos.push(SUPABASE_URL + '/storage/v1/object/public/tech-photos/' + fileName); continue; }
     } catch(e) {}
@@ -15735,8 +15707,10 @@ async function loadAdminStats() {
   // subscription-source-tracking-migration.sql. Aggregates client-side
   // since the dataset is small (~hundreds of rows expected at most for
   // the foreseeable future); switch to an RPC if this ever gets slow.
-  loadSubscriptionStats(h).catch(function(e){ try { console.warn('subscription stats:', e); } catch(_){} });
-  loadMarketingHitsStats(h).catch(function(e){ try { console.warn('marketing hits:', e); } catch(_){} });
+  // Subscriptions-by-source + marketing-hits panels were retired from the
+  // in-app Stats tab on 2026-06-04 — they live on admin-stats.html now, so
+  // we no longer fetch them here. (Functions kept below for reference / reuse.)
+  // loadSubscriptionStats(h)...; loadMarketingHitsStats(h)...;
 
   // ── Last-updated stamp ────────────────────────────────────────────────
   const pad2 = n => n < 10 ? '0' + n : '' + n;
@@ -16250,11 +16224,12 @@ async function uploadRegPhoto() {
   const slug = (regData.first || 'tech').toLowerCase().replace(/\s+/g,'-') + '-' + Date.now();
   const fileName = 'profiles/' + slug + '.' + file.name.split('.').pop();
   try {
+    const _upBlob = await compressForUpload(file, 900, 0.85);
     const res = await fetch(SUPABASE_URL + '/storage/v1/object/tech-photos/' + fileName, {
       method: 'POST',
       headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
-                 'Content-Type': file.type, 'x-upsert': 'true' },
-      body: file
+                 'Content-Type': (_upBlob.type || file.type || 'image/jpeg'), 'x-upsert': 'true' },
+      body: _upBlob
     });
     if (res.ok) {
       regData.photoUrl = SUPABASE_URL + '/storage/v1/object/public/tech-photos/' + fileName;
@@ -16438,6 +16413,7 @@ async function loadTechsFromSupabase() {
         hide_address_public: !!t.hide_address_public,
         contact_methods: t.contact_methods || { call: true, text: true },
         booking_link: t.booking_link || '',
+        gallery_link: t.gallery_link || '',
         // Subscriber flag drives the Glow Up badge on cards / tech
         // detail header. True for both Stripe-paid (active sub) AND
         // comped techs (the tech_comps INSERT trigger writes

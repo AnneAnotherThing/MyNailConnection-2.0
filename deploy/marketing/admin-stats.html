@@ -546,6 +546,88 @@
       <div class="mh-disclaimer">Counts each visitor once every 30 minutes. Search-engine bots are skipped. Only admins can read this table.</div>
     </div>
 
+    <!-- How marketing visitors arrive: channel + device -->
+    <div class="panel">
+      <div class="panel-head">
+        <div class="panel-title">How visitors arrive</div>
+        <div class="panel-meta">marketing pages · last 30 days</div>
+      </div>
+      <div id="stat-arrive-channels"><div class="empty">Loading…</div></div>
+      <div style="display:flex;gap:10px;margin-top:12px;">
+        <div class="mh-card" style="flex:1;text-align:center;">
+          <div class="mh-label">📱 Phone</div>
+          <div class="mh-num" id="stat-arrive-mobile">—</div>
+        </div>
+        <div class="mh-card" style="flex:1;text-align:center;">
+          <div class="mh-label">💻 Web / desktop</div>
+          <div class="mh-num" id="stat-arrive-desktop">—</div>
+        </div>
+      </div>
+      <div class="mh-disclaimer">QR = arrived from a tagged QR link (mynailconnection.com/?src=qr-…). Channel is best-effort from the QR tag, campaign (UTM) tags, and the referring site.</div>
+    </div>
+
+    <!-- Store badge taps — download intent (NOT installs) -->
+    <div class="panel">
+      <div class="panel-head">
+        <div class="panel-title">Store taps · download intent</div>
+        <div class="panel-meta">badge taps, not installs</div>
+      </div>
+      <div class="src-grid" style="grid-template-columns:1fr 1fr;">
+        <div class="src-card apple">
+          <div class="src-label">Apple — App Store</div>
+          <div class="src-num" id="stat-sc-apple-total">—</div>
+          <div style="font-size:10.5px;opacity:0.88;margin-top:4px;" id="stat-sc-apple-recent">—</div>
+        </div>
+        <div class="src-card google">
+          <div class="src-label">Android — Google Play</div>
+          <div class="src-num" id="stat-sc-google-total">—</div>
+          <div style="font-size:10.5px;opacity:0.88;margin-top:4px;" id="stat-sc-google-recent">—</div>
+        </div>
+      </div>
+      <div class="mh-disclaimer">Counts taps on the App Store / Google Play buttons on the marketing site — a proxy for interest. Real installs are recorded below.</div>
+    </div>
+
+    <!-- App downloads — true installs (manual ledger from the consoles) -->
+    <div class="panel">
+      <div class="panel-head">
+        <div class="panel-title">App downloads · true installs</div>
+        <div class="panel-meta">from App Store Connect &amp; Play Console</div>
+      </div>
+      <div class="src-grid" style="grid-template-columns:1fr 1fr;">
+        <div class="src-card apple">
+          <div class="src-label">Apple</div>
+          <div class="src-num" id="stat-dl-apple">—</div>
+          <div style="font-size:10.5px;opacity:0.88;margin-top:4px;" id="stat-dl-apple-meta">no entry yet</div>
+        </div>
+        <div class="src-card google">
+          <div class="src-label">Android</div>
+          <div class="src-num" id="stat-dl-google">—</div>
+          <div style="font-size:10.5px;opacity:0.88;margin-top:4px;" id="stat-dl-google-meta">no entry yet</div>
+        </div>
+      </div>
+      <details style="margin-top:10px;">
+        <summary style="cursor:pointer;font-size:12.5px;font-weight:600;color:var(--rose-dark);">+ Record a new number</summary>
+        <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:12px;align-items:flex-end;">
+          <label style="font-size:11px;color:var(--muted);font-weight:600;">Platform
+            <select id="dl-platform" style="display:block;margin-top:4px;padding:9px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;background:white;">
+              <option value="apple">Apple</option>
+              <option value="google">Android</option>
+            </select>
+          </label>
+          <label style="font-size:11px;color:var(--muted);font-weight:600;">Total installs
+            <input id="dl-total" type="number" min="0" inputmode="numeric" placeholder="e.g. 1240" style="display:block;margin-top:4px;padding:9px;border:1.5px solid var(--border);border-radius:8px;width:120px;font-family:inherit;"/>
+          </label>
+          <label style="font-size:11px;color:var(--muted);font-weight:600;">Period label
+            <input id="dl-period" type="text" placeholder="All-time" style="display:block;margin-top:4px;padding:9px;border:1.5px solid var(--border);border-radius:8px;width:150px;font-family:inherit;"/>
+          </label>
+          <button id="dl-save" type="button" style="padding:10px 18px;border:none;border-radius:8px;background:linear-gradient(160deg,#D4908A 0%,#A9665D 100%);color:white;font-weight:600;font-family:inherit;cursor:pointer;box-shadow:0 3px 10px rgba(169,102,93,0.3);">Save</button>
+        </div>
+        <div id="dl-save-msg" style="font-size:11.5px;margin-top:10px;"></div>
+        <div id="stat-dl-history" style="margin-top:12px;"></div>
+      </details>
+      <div class="mh-disclaimer">Apple: App Store Connect → Analytics → Total Downloads. Android: Play Console → Statistics → Acquisition (or Users acquired). Enter a running total or a period whenever you check — the latest number per platform shows above.</div>
+    </div>
+
     <!-- Buttons -->
     <div class="bottom-row">
       <button id="refresh-btn" type="button">↻ Refresh</button>
@@ -639,6 +721,7 @@
   });
 
   $('refresh-btn').addEventListener('click', renderStats);
+  (function(){ var b = document.getElementById('dl-save'); if (b) b.addEventListener('click', saveDownload); })();
 
   // ── Stats queries ──────────────────────────────────────────────────
   function authHeaders() {
@@ -903,6 +986,167 @@
     setHtml('stat-mh-recent', html);
   }
 
+  // ── Shared escape helper ───────────────────────────────────────────
+  function escHtml(str) {
+    return String(str == null ? '' : str)
+      .replace(/[&<>"']/g, function (c) {
+        return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+      });
+  }
+
+  // ── How visitors arrive: channel + device (marketing_hits, 30d) ────
+  async function loadArrivals() {
+    const since = new Date(Date.now() - 30 * 86400000).toISOString();
+    let rows = [];
+    try {
+      const url = SUPABASE_URL + '/rest/v1/marketing_hits'
+                + '?select=entry_channel,device_type&created_at=gte.'
+                + encodeURIComponent(since) + '&limit=5000';
+      const r = await fetch(url, { headers: authHeaders() });
+      if (!r.ok) { if (r.status === 401 || r.status === 403) handleAuthExpired(); return; }
+      rows = await r.json();
+    } catch (e) { return; }
+
+    const ch = {}; let mob = 0, desk = 0;
+    (rows || []).forEach(function (row) {
+      const c = row.entry_channel || 'direct';
+      ch[c] = (ch[c] || 0) + 1;
+      if (row.device_type === 'mobile') mob++;
+      else if (row.device_type === 'desktop') desk++;
+    });
+    setTxt('stat-arrive-mobile',  fmt(mob));
+    setTxt('stat-arrive-desktop', fmt(desk));
+
+    const order  = ['qr','social','search','referral','campaign','direct'];
+    const labels = { qr:'QR code', social:'Social', search:'Search', referral:'Referral', campaign:'Campaign / UTM', direct:'Direct' };
+    const icons  = { qr:'🔳', social:'💬', search:'🔍', referral:'🔗', campaign:'🏷️', direct:'➡️' };
+    const keys = order.filter(function (k) { return ch[k]; })
+      .concat(Object.keys(ch).filter(function (k) { return order.indexOf(k) < 0; }));
+    if (!keys.length) {
+      setHtml('stat-arrive-channels', '<div class="empty">No marketing visits in the last 30 days yet.</div>');
+      return;
+    }
+    const max = Math.max.apply(null, [1].concat(keys.map(function (k) { return ch[k]; })));
+    const total = keys.reduce(function (a, k) { return a + ch[k]; }, 0);
+    setHtml('stat-arrive-channels', keys.map(function (k) {
+      const pct   = Math.round((ch[k] / max) * 100);
+      const share = total ? Math.round((ch[k] / total) * 100) : 0;
+      return '<div style="margin-bottom:11px;">'
+        +   '<div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;">'
+        +     '<span>' + (icons[k] || '•') + ' ' + escHtml(labels[k] || k) + '</span>'
+        +     '<strong>' + ch[k] + ' <span style="color:var(--muted);font-weight:400;">(' + share + '%)</span></strong>'
+        +   '</div>'
+        +   '<div style="height:8px;border-radius:4px;background:rgba(196,120,106,0.12);overflow:hidden;">'
+        +     '<div style="height:100%;width:' + pct + '%;background:linear-gradient(90deg,var(--rose),var(--rose-dark));border-radius:4px;"></div>'
+        +   '</div>'
+        + '</div>';
+    }).join(''));
+  }
+
+  // ── Store badge taps (store_clicks) — download intent, split by OS ─
+  async function loadStoreClicks() {
+    const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
+    const weekAgo = new Date(Date.now() - 7 * 86400000);
+    async function cnt(filter) {
+      try {
+        const url = SUPABASE_URL + '/rest/v1/store_clicks?select=*' + (filter ? '&' + filter : '');
+        const r = await fetch(url, {
+          method: 'HEAD',
+          headers: Object.assign({}, authHeaders(), { 'Prefer': 'count=exact', 'Range-Unit': 'items', 'Range': '0-0' })
+        });
+        if (!r.ok) { if (r.status === 401 || r.status === 403) handleAuthExpired(); return null; }
+        const cr = r.headers.get('content-range') || '';
+        const n = parseInt((cr.split('/')[1] || '0'), 10);
+        return isNaN(n) ? 0 : n;
+      } catch (e) { return null; }
+    }
+    const wk = encodeURIComponent(weekAgo.toISOString());
+    const td = encodeURIComponent(todayStart.toISOString());
+    const [aT, a7, aTd, gT, g7, gTd] = await Promise.all([
+      cnt('platform=eq.apple'),
+      cnt('platform=eq.apple&created_at=gte.' + wk),
+      cnt('platform=eq.apple&created_at=gte.' + td),
+      cnt('platform=eq.google'),
+      cnt('platform=eq.google&created_at=gte.' + wk),
+      cnt('platform=eq.google&created_at=gte.' + td)
+    ]);
+    setTxt('stat-sc-apple-total',  aT === null ? '—' : fmt(aT));
+    setTxt('stat-sc-google-total', gT === null ? '—' : fmt(gT));
+    setTxt('stat-sc-apple-recent',
+      (aTd == null ? '—' : aTd) + ' today · ' + (a7 == null ? '—' : a7) + ' this week');
+    setTxt('stat-sc-google-recent',
+      (gTd == null ? '—' : gTd) + ' today · ' + (g7 == null ? '—' : g7) + ' this week');
+  }
+
+  // ── App downloads — true installs (manual app_downloads ledger) ────
+  async function loadAppDownloads() {
+    let rows = [];
+    try {
+      const url = SUPABASE_URL + '/rest/v1/app_downloads'
+                + '?select=*&order=recorded_for.desc,created_at.desc&limit=50';
+      const r = await fetch(url, { headers: authHeaders() });
+      if (!r.ok) {
+        if (r.status === 401 || r.status === 403) handleAuthExpired();
+        else if (r.status === 404) setTxt('stat-dl-apple-meta', 'run granular-analytics-migration.sql');
+        return;
+      }
+      rows = await r.json();
+    } catch (e) { return; }
+
+    const latest = {};
+    (rows || []).forEach(function (row) { if (!latest[row.platform]) latest[row.platform] = row; });
+    function fill(p, idNum, idMeta) {
+      const row = latest[p];
+      if (!row) { setTxt(idNum, '—'); setTxt(idMeta, 'no entry yet'); return; }
+      setTxt(idNum, fmt(row.total_installs));
+      setTxt(idMeta, (row.period_label || 'recorded') + ' · ' + (row.recorded_for || '').slice(0, 10));
+    }
+    fill('apple',  'stat-dl-apple',  'stat-dl-apple-meta');
+    fill('google', 'stat-dl-google', 'stat-dl-google-meta');
+
+    const hist = (rows || []).slice(0, 12).map(function (row) {
+      const dev = row.platform === 'apple' ? 'Apple' : 'Android';
+      return '<div class="mh-row">'
+        +   '<div class="mh-left"><span class="mh-page">' + dev + '</span>'
+        +     '<span class="mh-ref">' + escHtml(row.period_label || '') + '</span></div>'
+        +   '<span class="mh-when">' + fmt(row.total_installs) + ' · ' + (row.recorded_for || '').slice(0, 10) + '</span>'
+        + '</div>';
+    }).join('');
+    setHtml('stat-dl-history', hist ? '<div class="mh-recent" style="max-height:190px;">' + hist + '</div>' : '');
+  }
+
+  // ── Save a manual download number ──────────────────────────────────
+  async function saveDownload() {
+    const btn = $('dl-save'), msg = $('dl-save-msg');
+    if (!btn) return;
+    const platform = $('dl-platform').value;
+    const total    = parseInt($('dl-total').value, 10);
+    const period   = ($('dl-period').value || '').trim() || 'All-time';
+    if (isNaN(total) || total < 0) { msg.style.color = '#c0392b'; msg.textContent = 'Enter a valid number.'; return; }
+    btn.disabled = true; const old = btn.textContent; btn.textContent = 'Saving…';
+    try {
+      const r = await fetch(SUPABASE_URL + '/rest/v1/app_downloads', {
+        method: 'POST',
+        headers: Object.assign({}, authHeaders(), { 'Prefer': 'return=minimal' }),
+        body: JSON.stringify({ platform: platform, total_installs: total, period_label: period })
+      });
+      if (!r.ok) {
+        msg.style.color = '#c0392b';
+        msg.textContent = (r.status === 401 || r.status === 403)
+          ? 'Only admins can save (and run granular-analytics-migration.sql first).'
+          : 'Save failed (' + r.status + ').';
+      } else {
+        msg.style.color = '#2D6A4F'; msg.textContent = 'Saved ✓';
+        $('dl-total').value = '';
+        loadAppDownloads();
+      }
+    } catch (e) {
+      msg.style.color = '#c0392b'; msg.textContent = 'Save failed — check your connection.';
+    } finally {
+      btn.disabled = false; btn.textContent = old;
+    }
+  }
+
   // ── Top-level renderer ─────────────────────────────────────────────
   async function renderStats() {
     if (!token) return;
@@ -911,6 +1155,9 @@
     if (!token) return;  // headline may have triggered auth-expired
     loadSubscriptions().catch(e => console.warn('subscriptions:', e));
     loadMarketingHits().catch(e => console.warn('marketing hits:', e));
+    loadArrivals().catch(e => console.warn('arrivals:', e));
+    loadStoreClicks().catch(e => console.warn('store clicks:', e));
+    loadAppDownloads().catch(e => console.warn('app downloads:', e));
 
     const now = new Date();
     const pad2 = n => n < 10 ? '0' + n : '' + n;

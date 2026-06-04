@@ -1423,15 +1423,33 @@
 
     var isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(ua);
 
+    // Acquisition channel: qr / social / search / referral / campaign / direct.
+    function classifyChannel(q, ref) {
+      var src = (q.src || q.utm_source || '').toLowerCase();
+      var med = (q.utm_medium || '').toLowerCase();
+      if (/qr/.test(src) || /qr/.test(med)) return 'qr';
+      var host = '';
+      try { host = ref ? new URL(ref).hostname.replace(/^www\./, '').toLowerCase() : ''; } catch (_) {}
+      var selfHost = (location.hostname || '').replace(/^www\./, '').toLowerCase();
+      if (/(facebook|instagram|tiktok|pinterest|snapchat|twitter|linkedin|youtube|\bfb\b|\big\b)/.test(src)
+          || /social/.test(med)) return 'social';
+      if (src || med) return 'campaign';
+      if (/(google|bing|duckduckgo|yahoo|ecosia|brave|baidu|yandex)\./.test(host)) return 'search';
+      if (/(facebook|instagram|t\.co|tiktok|pinterest|lnkd\.in|youtube|reddit)/.test(host)) return 'social';
+      if (host && host !== selfHost) return 'referral';
+      return 'direct';
+    }
+
     var body = {
-      session_id:   sid,
-      page:         PAGE,
-      referrer:     (document.referrer || '').slice(0, 500) || null,
-      device_type:  isMobile ? 'mobile' : 'desktop',
-      user_agent:   ua.slice(0, 500),
-      utm_source:   qs.utm_source   || null,
-      utm_medium:   qs.utm_medium   || null,
-      utm_campaign: qs.utm_campaign || null
+      session_id:    sid,
+      page:          PAGE,
+      referrer:      (document.referrer || '').slice(0, 500) || null,
+      device_type:   isMobile ? 'mobile' : 'desktop',
+      entry_channel: classifyChannel(qs, document.referrer || ''),
+      user_agent:    ua.slice(0, 500),
+      utm_source:    qs.utm_source || qs.src || null,
+      utm_medium:    qs.utm_medium || null,
+      utm_campaign:  qs.utm_campaign || null
     };
 
     function send() {

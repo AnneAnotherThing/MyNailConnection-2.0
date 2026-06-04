@@ -2279,6 +2279,13 @@
      Admins read these in the in-app admin Stats tab. Bots are skipped.
      Schema + RLS: sql/marketing-hits-tracker.sql
      ──────────────────────────────────────────────────────────────── -->
+<!-- ────────────────────────────────────────────────────────────────
+     Marketing site hit tracker  → public.marketing_hits  (one row / session
+       / page, 30-min cooldown) AND store-badge click tracker → store_clicks
+       (download-intent proxy). Both read by the web admin dashboard
+       (admin-stats.html); only admins can SELECT them (RLS). Bots skipped.
+     Schema + RLS: sql/marketing-hits-tracker.sql + granular-analytics-migration.sql
+     ──────────────────────────────────────────────────────────────── -->
 <script>
 (function () {
   try {
@@ -2288,11 +2295,6 @@
     var COOLDOWN_MS = 30 * 60 * 1000;
 
     var ls = null; try { ls = window.localStorage; } catch (_) {}
-    var lastKey = 'mnc_mh_last:' + PAGE;
-    if (ls) {
-      var last = parseInt(ls.getItem(lastKey) || '0', 10);
-      if (last && (Date.now() - last) < COOLDOWN_MS) return;
-    }
 
     function uuid() {
       if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
@@ -2305,7 +2307,7 @@
     if (!sid) { sid = uuid(); if (ls) try { ls.setItem('mnc_anon_sid', sid); } catch (_) {} }
 
     var ua = (navigator && navigator.userAgent) || '';
-    if (/bot|crawl|spider|scrape|preview|prerender|monitor|lighthouse|headlesschrome/i.test(ua)) return;
+    var isBot = /bot|crawl|spider|scrape|preview|prerender|monitor|lighthouse|headlesschrome/i.test(ua);
 
     var qs = {};
     try {
@@ -2315,15 +2317,58 @@
 
     var isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(ua);
 
-    var body = {
-      session_id:   sid,
+    // ── Acquisition channel ──────────────────────────────────────────
+    // Coarse "how did they get here" bucket: qr / social / search /
+    // referral / campaign / direct. Computed from the QR tag (?src=qr-…),
+    // UTM params, and the referrer. Independent of device (mobile/desktop).
+    function classifyChannel(q, ref) {
+      var src = (q.src || q.utm_source || '').toLowerCase();
+      var med = (q.utm_medium || '').toLowerCase();
+      if (/qr/.test(src) || /qr/.test(med)) return 'qr';
+      var host = '';
+      try { host = ref ? new URL(ref).hostname.replace(/^www\./, '').toLowerCase() : ''; } catch (_) {}
+      var selfHost = (location.hostname || '').replace(/^www\./, '').toLowerCase();
+      if (/(facebook|instagram|tiktok|pinterest|snapchat|twitter|linkedin|youtube|\bfb\b|\big\b)/.test(src)
+          || /social/.test(med)) return 'social';
+      if (src || med) return 'campaign';
+      if (/(google|bing|duckduckgo|yahoo|ecosia|brave|baidu|yandex)\./.test(host)) return 'search';
+      if (/(facebook|instagram|t\.co|tiktok|pinterest|lnkd\.in|youtube|reddit)/.test(host)) return 'social';
+      if (host && host !== selfHost) return 'referral';
+      return 'direct';
+    }
+    var entryChannel = classifyChannel(qs, document.referrer || '');
+
+    // Stash attribution for the store-click tracker below (set BEFORE any
+    // cooldown bail-out so badge clicks stay attributed even on repeat visits).
+    window.__mncAttr = {
+      sid:          sid,
       page:         PAGE,
+      channel:      entryChannel,
+      device:       isMobile ? 'mobile' : 'desktop',
       referrer:     (document.referrer || '').slice(0, 500) || null,
-      device_type:  isMobile ? 'mobile' : 'desktop',
-      user_agent:   ua.slice(0, 500),
-      utm_source:   qs.utm_source   || null,
-      utm_medium:   qs.utm_medium   || null,
+      utm_source:   qs.utm_source || qs.src || null,
+      utm_medium:   qs.utm_medium || null,
       utm_campaign: qs.utm_campaign || null
+    };
+
+    if (isBot) return;
+
+    var lastKey = 'mnc_mh_last:' + PAGE;
+    if (ls) {
+      var last = parseInt(ls.getItem(lastKey) || '0', 10);
+      if (last && (Date.now() - last) < COOLDOWN_MS) return;
+    }
+
+    var body = {
+      session_id:    sid,
+      page:          PAGE,
+      referrer:      (document.referrer || '').slice(0, 500) || null,
+      device_type:   isMobile ? 'mobile' : 'desktop',
+      entry_channel: entryChannel,
+      user_agent:    ua.slice(0, 500),
+      utm_source:    qs.utm_source || qs.src || null,
+      utm_medium:    qs.utm_medium || null,
+      utm_campaign:  qs.utm_campaign || null
     };
 
     function send() {
@@ -2349,6 +2394,57 @@
     } else {
       window.addEventListener('DOMContentLoaded', function () { setTimeout(send, 0); });
     }
+  } catch (_) {}
+})();
+</script>
+
+<!-- Store badge click tracker → public.store_clicks (download-intent proxy).
+     Fires when a visitor taps an App Store / Google Play badge. This is NOT
+     a literal install count — true installs live in App Store Connect / Play
+     Console and are recorded manually in app_downloads. -->
+<script>
+(function () {
+  try {
+    var SUPABASE_URL = 'https://ktiztunuifzbzwzyqrrq.supabase.co';
+    var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt0aXp0dW51aWZ6Ynp3enlxcnJxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3Njk3MDgsImV4cCI6MjA4OTM0NTcwOH0.QXhI1oO-v5Qs2XOlijjpRgM2pxDD6lkWxUQ6uW6HbtM';
+    function platformFor(href) {
+      if (/apps\.apple\.com/i.test(href)) return 'apple';
+      if (/play\.google\.com/i.test(href)) return 'google';
+      return null;
+    }
+    var fired = {};
+    document.addEventListener('click', function (e) {
+      var a = e.target && e.target.closest && e.target.closest('a[href]');
+      if (!a) return;
+      var platform = platformFor(a.getAttribute('href') || '');
+      if (!platform || fired[platform]) return;
+      fired[platform] = true;
+      var attr = window.__mncAttr || {};
+      var body = {
+        session_id:    attr.sid || null,
+        platform:      platform,
+        page:          attr.page || 'marketing',
+        entry_channel: attr.channel || null,
+        device_type:   attr.device || null,
+        referrer:      attr.referrer || null,
+        utm_source:    attr.utm_source || null,
+        utm_medium:    attr.utm_medium || null,
+        utm_campaign:  attr.utm_campaign || null
+      };
+      try {
+        fetch(SUPABASE_URL + '/rest/v1/store_clicks', {
+          method: 'POST',
+          headers: {
+            'Content-Type':  'application/json',
+            'apikey':        SUPABASE_ANON_KEY,
+            'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+            'Prefer':        'return=minimal'
+          },
+          body: JSON.stringify(body),
+          keepalive: true
+        }).catch(function () {});
+      } catch (_) {}
+    }, true);
   } catch (_) {}
 })();
 </script>
