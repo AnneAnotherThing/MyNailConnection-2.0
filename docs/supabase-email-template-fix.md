@@ -23,13 +23,23 @@
 
    | Template | Replacement URL |
    |---|---|
-   | Confirm signup | `https://mynailconnection.com/app/?token_hash={{ .TokenHash }}&type=signup` |
+   | Confirm signup | `https://mynailconnection.com/app/?token_hash={{ .TokenHash }}&type=email` |
    | Magic Link | `https://mynailconnection.com/app/?token_hash={{ .TokenHash }}&type=magiclink` |
    | Reset Password | `https://mynailconnection.com/app/?token_hash={{ .TokenHash }}&type=recovery` |
    | Invite User | `https://mynailconnection.com/app/?token_hash={{ .TokenHash }}&type=invite` |
    | Change Email Address | `https://mynailconnection.com/app/?token_hash={{ .TokenHash }}&type=email_change` |
 
    *(Note: `{{ .EmailActionType }}` is NOT a valid Supabase template variable, hardcode the `type=` per template instead.)*
+
+   **CRITICAL, Confirm signup uses `type=email`, NOT `type=signup`.** The
+   `token_hash` verify endpoint treats `signup` as the 6-digit-OTP path and
+   rejects a confirmation link with it (`otp_expired`), which dumps the new
+   user on the sign-in screen. Proven 2026-06-14: the same token returns a
+   valid session with `type=email` and `otp_expired` with `type=signup`. The
+   original version of this doc said `type=signup`, which caused exactly that
+   bug. `index.html` now also maps `signup -> email` in
+   `consumeMagicLinkVerifyIfPresent()` as a safety net, but the template
+   should still say `type=email`.
 
 3. Save each template.
 

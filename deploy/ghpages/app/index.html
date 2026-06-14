@@ -5060,8 +5060,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.6',     /* __APP_BUILD_NAME__   */
-  android: 319,         /* __APP_BUILD_ANDROID__ */
-  ios:     124,          /* __APP_BUILD_IOS__     */
+  android: 320,         /* __APP_BUILD_ANDROID__ */
+  ios:     125,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -14416,6 +14416,17 @@ async function consumeMagicLinkVerifyIfPresent() {
   var validTypes = ['signup', 'recovery', 'invite', 'email_change', 'magiclink', 'email'];
   if (validTypes.indexOf(type) === -1) return false;
 
+  // Supabase's token_hash verify endpoint wants type=email for a SIGNUP
+  // confirmation link, NOT type=signup (that value is only for the 6-digit
+  // OTP path). Our Confirm-signup email template hardcoded type=signup, so
+  // every confirmation verify came back otp_expired and the user got dumped
+  // on the sign-in screen, the "create a new user, click the email, land on
+  // login" bug. Map it here so the flow works even if the template still
+  // says signup. Proven 2026-06-14: the SAME token returns a valid session
+  // with type=email and otp_expired with type=signup. We keep `type` as-is
+  // for branching below (the recovery check), only the verify call is mapped.
+  var verifyType = (type === 'signup') ? 'email' : type;
+
   try {
     var r = await fetch(SUPABASE_URL + '/auth/v1/verify', {
       method: 'POST',
@@ -14423,7 +14434,7 @@ async function consumeMagicLinkVerifyIfPresent() {
         'Content-Type': 'application/json',
         'apikey': SUPABASE_ANON_KEY
       },
-      body: JSON.stringify({ token_hash: tokenHash, type: type })
+      body: JSON.stringify({ token_hash: tokenHash, type: verifyType })
     });
     if (!r.ok) {
       // Strip the params either way so a back-nav doesn't replay the
