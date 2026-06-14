@@ -5060,8 +5060,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.6',     /* __APP_BUILD_NAME__   */
-  android: 320,         /* __APP_BUILD_ANDROID__ */
-  ios:     125,          /* __APP_BUILD_IOS__     */
+  android: 321,         /* __APP_BUILD_ANDROID__ */
+  ios:     126,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -14416,71 +14416,75 @@ async function consumeMagicLinkVerifyIfPresent() {
   var validTypes = ['signup', 'recovery', 'invite', 'email_change', 'magiclink', 'email'];
   if (validTypes.indexOf(type) === -1) return false;
 
-  // Supabase's token_hash verify endpoint wants type=email for a SIGNUP
-  // confirmation link, NOT type=signup (that value is only for the 6-digit
-  // OTP path). Our Confirm-signup email template hardcoded type=signup, so
-  // every confirmation verify came back otp_expired and the user got dumped
-  // on the sign-in screen, the "create a new user, click the email, land on
-  // login" bug. Map it here so the flow works even if the template still
-  // says signup. Proven 2026-06-14: the SAME token returns a valid session
-  // with type=email and otp_expired with type=signup. We keep `type` as-is
-  // for branching below (the recovery check), only the verify call is mapped.
-  var verifyType = (type === 'signup') ? 'email' : type;
+  // Self-healing type resolution. Our email templates have TWICE shipped the
+  // wrong type= on the link: both signup confirmations AND password resets
+  // went out as type=signup. The token_hash verify endpoint rejects a
+  // mismatched type with otp_expired, which dumped the user on the sign-in
+  // screen, the "click the email, land on login" bug for both new signups
+  // (needs type=email) and password resets (needs type=recovery). Proven
+  // 2026-06-14: the SAME reset token returns a session with type=recovery and
+  // otp_expired with type=signup/email.
+  //
+  // A wrong-type verify does NOT consume the one-time token, so we can try the
+  // link's declared type first, then fall back through the other email types
+  // until one succeeds, and route based on whichever type ACTUALLY verified
+  // (not the link's possibly-wrong label). This makes the app immune to
+  // template type typos. The templates should still be corrected (existing
+  // native installs run the old single-type handler), but this stops a typo
+  // from locking anyone out on web/PWA. 2026-06-14.
+  var declared = (type === 'signup') ? 'email' : type; // signup links mean email
+  var candidates = [declared];
+  ['recovery', 'email', 'magiclink', 'invite', 'email_change'].forEach(function(t) {
+    if (candidates.indexOf(t) === -1) candidates.push(t);
+  });
 
-  try {
-    var r = await fetch(SUPABASE_URL + '/auth/v1/verify', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'apikey': SUPABASE_ANON_KEY
-      },
-      body: JSON.stringify({ token_hash: tokenHash, type: verifyType })
-    });
-    if (!r.ok) {
-      // Strip the params either way so a back-nav doesn't replay the
-      // failed verify. Surface a soft toast so the user knows why
-      // they're staring at the sign-in screen.
-      try { history.replaceState(null, '', window.location.pathname); } catch(_) {}
-      try { showToast('That confirmation link has expired. Please sign in or request a new one.'); } catch(_) {}
-      try { console.warn('magic-link verify failed:', r.status); } catch(_) {}
-      return false;
+  var body = null, okType = null;
+  for (var ci = 0; ci < candidates.length; ci++) {
+    try {
+      var r = await fetch(SUPABASE_URL + '/auth/v1/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY },
+        body: JSON.stringify({ token_hash: tokenHash, type: candidates[ci] })
+      });
+      if (r.ok) {
+        var j = await r.json().catch(function() { return null; });
+        if (j && j.access_token) { body = j; okType = candidates[ci]; break; }
+      }
+    } catch(e) {
+      try { console.warn('verify attempt threw (' + candidates[ci] + '):', e); } catch(_) {}
     }
-    var body = await r.json();
-    if (!body || !body.access_token) {
-      try { history.replaceState(null, '', window.location.pathname); } catch(_) {}
-      return false;
-    }
-    // Persist via the same shape consumeRedirectTokensIfPresent uses,
-    // so the rest of the app sees a normal resumed session and the
-    // sign-in routing fires identically.
-    saveSession({
-      access_token:  body.access_token,
-      refresh_token: body.refresh_token,
-      expires_in:    body.expires_in || 3600,
-      user:          body.user || null
-    });
-    // Recovery-link sessions: the user clicked "reset password" and we
-    // just signed them in via the recovery JWT. The session is real and
-    // can call updateUser, but the WHOLE point of a reset is they need
-    // to set a new password. Without this flag the boot flow drops them
-    // on home, signed in via a session that quietly expires later, at
-    // which point they're locked out again because they never set a
-    // password. Honored in restorePersistedSession() below: if the flag
-    // is set we route to change-password-screen instead of home.
-    // Added 2026-05-08 after Anne's OG-17 launch resets, at least one
-    // user hit this trap during testing. issue: silent recovery sign-in
-    if (type === 'recovery') {
-      try { window._mncForcePasswordChange = true; } catch(_) {}
-    }
-    // Strip token_hash + type from the address bar, replaceState
-    // (not pushState) so the user can't back-nav to a one-time token.
-    try { history.replaceState(null, '', window.location.pathname); } catch(_) {}
-    return true;
-  } catch(e) {
-    try { console.warn('magic-link verify threw:', e); } catch(_) {}
-    try { history.replaceState(null, '', window.location.pathname); } catch(_) {}
+  }
+
+  // Strip token_hash + type from the address bar regardless of outcome,
+  // replaceState (not pushState) so the user can't back-nav to a one-time
+  // token and so a failed attempt can't replay on reload.
+  try { history.replaceState(null, '', window.location.pathname); } catch(_) {}
+
+  if (!body) {
+    try { showToast('That link has expired. Please sign in or request a new one.'); } catch(_) {}
+    try { console.warn('magic-link verify failed for all candidate types'); } catch(_) {}
     return false;
   }
+
+  // Persist via the same shape consumeRedirectTokensIfPresent uses, so the
+  // rest of the app sees a normal resumed session and routing fires the same.
+  saveSession({
+    access_token:  body.access_token,
+    refresh_token: body.refresh_token,
+    expires_in:    body.expires_in || 3600,
+    user:          body.user || null
+  });
+  // Recovery-link sessions: the user clicked "reset password" and we just
+  // signed them in via the recovery JWT. The session is real and can call
+  // updateUser, but the WHOLE point of a reset is to set a new password.
+  // Without this flag the boot flow drops them on home, signed in via a
+  // session that quietly expires later, locking them out again. Honored in
+  // restorePersistedSession(): if set, route to change-password-screen.
+  // Key it off the type that ACTUALLY verified, not the link's label.
+  if (okType === 'recovery') {
+    try { window._mncForcePasswordChange = true; } catch(_) {}
+  }
+  return true;
 }
 
 async function consumeRedirectTokensIfPresent() {
