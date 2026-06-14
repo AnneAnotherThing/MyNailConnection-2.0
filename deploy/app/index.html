@@ -5059,9 +5059,9 @@ function maybeShowTutorial(role) {
 // __APP_BUILD_*__ below are how sync.sh finds and rewrites the values.
 // Don't reorder or rename them.
 const APP_BUILD = {
-  name:    '2.0.7',     /* __APP_BUILD_NAME__   */
-  android: 323,         /* __APP_BUILD_ANDROID__ */
-  ios:     128,          /* __APP_BUILD_IOS__     */
+  name:    '2.0.8',     /* __APP_BUILD_NAME__   */
+  android: 325,         /* __APP_BUILD_ANDROID__ */
+  ios:     130,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -5301,13 +5301,23 @@ try {
         return { data: { user: data.user, session: data }, error: null };
       },
       async updateUser({ password }) {
-        if (!_authToken) return { error: { message: 'Not signed in' } };
+        // Fall back to the session token persisted on boot. The recovery
+        // (password reset) flow never runs signInWithPassword, so _authToken
+        // stays null there, without this fallback the user types a new
+        // password on the reset screen and gets "Not signed in" and sticks.
+        // window._mncAccessToken is set from the saved session by
+        // restorePersistedSession() on both the web boot and the native
+        // deep-link path. 2026-06-14.
+        var tok = _authToken || (typeof window !== 'undefined' ? window._mncAccessToken : null);
+        if (!tok) return { error: { message: 'Not signed in' } };
         const res = await fetch(SUPABASE_URL + '/auth/v1/user', {
           method: 'PUT',
-          headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + _authToken },
+          headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + tok },
           body: JSON.stringify({ password })
         });
         const data = await res.json();
+        // Adopt the token so later authed calls in this session have one too.
+        if (res.ok && !_authToken) _authToken = tok;
         return res.ok ? { error: null } : { error: { message: data.msg || 'Update failed' } };
       },
       signOut() { _authToken = null; }
