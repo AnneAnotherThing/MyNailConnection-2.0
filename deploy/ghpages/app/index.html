@@ -5059,9 +5059,9 @@ function maybeShowTutorial(role) {
 // __APP_BUILD_*__ below are how sync.sh finds and rewrites the values.
 // Don't reorder or rename them.
 const APP_BUILD = {
-  name:    '2.0.6',     /* __APP_BUILD_NAME__   */
-  android: 321,         /* __APP_BUILD_ANDROID__ */
-  ios:     126,          /* __APP_BUILD_IOS__     */
+  name:    '2.0.7',     /* __APP_BUILD_NAME__   */
+  android: 323,         /* __APP_BUILD_ANDROID__ */
+  ios:     128,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -5542,6 +5542,58 @@ async function initCapacitorBackButton() {
       if (App.exitApp) App.exitApp();
     }
   });
+}
+
+// ── Capacitor deep links (iOS Universal Links / Android App Links) ───────────
+// Our .well-known files claim mynailconnection.com/app/* (iOS) and all URLs
+// (Android) for the installed app, so a tapped auth email link (password
+// reset / signup confirm) opens the APP, not the browser. But the WebView
+// loads the bundled app at localhost, the email URL's token_hash never lands
+// in window.location, so the web handler (consumeMagicLinkVerifyIfPresent)
+// can't see it. Capacitor delivers the tapped URL through the appUrlOpen
+// event instead. Without this listener the token is silently dropped and the
+// user lands on the sign-in screen, the "reset link opens the app, bounces to
+// login" bug for native installs. Feeds the same verify core as the web path,
+// then routes via restorePersistedSession() so warm and cold starts land the
+// same place. Added 2026-06-14.
+async function initCapacitorDeepLinks() {
+  if (!window.Capacitor || !window.Capacitor.isNativePlatform()) return;
+  const { App } = window.Capacitor.Plugins;
+  if (!App || !App.addListener) return;
+
+  async function handleDeepLink(rawUrl) {
+    if (!rawUrl) return;
+    var qs;
+    try { qs = new URL(rawUrl).searchParams; } catch(_) { return; }
+    var tokenHash = qs.get('token_hash');
+    var type      = qs.get('type');
+    if (!tokenHash || !type) return; // not an auth link, leave other deep links alone
+
+    var okType = await verifyEmailTokenHash(tokenHash, type);
+    if (!okType) {
+      try { showToast('That link has expired. Please sign in or request a new one.'); } catch(_) {}
+      return;
+    }
+    // Route through the same path the web boot uses: set the recovery flag,
+    // then let restorePersistedSession() hydrate the just-saved session and
+    // choose the screen (change-password for recovery, correct home else).
+    // The app is usually already warm here, so we drive routing rather than
+    // waiting on DOMContentLoaded, which only fires on a cold start.
+    try { window._mncForcePasswordChange = (okType === 'recovery'); } catch(_) {}
+    try { await restorePersistedSession(); } catch(_) {}
+  }
+
+  App.addListener('appUrlOpen', function(ev) { handleDeepLink(ev && ev.url); });
+
+  // Cold start: when the link launches the app from closed, that initial URL
+  // isn't delivered to the appUrlOpen listener (nothing was running yet to
+  // receive it), so pull it explicitly once on init.
+  try {
+    if (App.getLaunchUrl) {
+      var launch = await App.getLaunchUrl();
+      if (launch && launch.url) await handleDeepLink(launch.url);
+    }
+  } catch(_) {}
 }
 
 // ── Capacitor native push (used when running as iOS/Android app) ─────────────
@@ -14404,41 +14456,28 @@ function clearSplashWelcoming() {
 //
 // 2026-04-27. Fixes: "verify email link opens browser instead of app
 // in TestFlight."
-async function consumeMagicLinkVerifyIfPresent() {
-  var qs;
-  try { qs = new URLSearchParams(window.location.search); } catch(_) { return false; }
-  var tokenHash = qs.get('token_hash');
-  var type      = qs.get('type');
-  if (!tokenHash || !type) return false;
-
-  // Whitelist supported email types so a malformed link can't drive us
-  // into an unknown verify branch. Mirrors Supabase's GoTrue enum.
+// Shared verify core. Given a token_hash and the type the email link declared,
+// verify it against /auth/v1/verify and persist the resulting session.
+//
+// Self-healing type resolution: our email templates have TWICE shipped the
+// wrong type= on the link (both signup confirmations AND password resets went
+// out as type=signup). The verify endpoint rejects a mismatched type with
+// otp_expired, which is what dumped users on the sign-in screen. A wrong-type
+// verify does NOT consume the one-time token, so we try the declared type
+// first (mapping signup->email, the correct value for a real signup confirm)
+// then fall back through the other types until one works. Returns the type
+// that ACTUALLY verified (so the caller can tell a recovery from a plain
+// confirm), or null on failure. Does not route. Proven 2026-06-14: the same
+// reset token returns a session with type=recovery and otp_expired with
+// type=signup/email.
+async function verifyEmailTokenHash(tokenHash, declaredType) {
   var validTypes = ['signup', 'recovery', 'invite', 'email_change', 'magiclink', 'email'];
-  if (validTypes.indexOf(type) === -1) return false;
-
-  // Self-healing type resolution. Our email templates have TWICE shipped the
-  // wrong type= on the link: both signup confirmations AND password resets
-  // went out as type=signup. The token_hash verify endpoint rejects a
-  // mismatched type with otp_expired, which dumped the user on the sign-in
-  // screen, the "click the email, land on login" bug for both new signups
-  // (needs type=email) and password resets (needs type=recovery). Proven
-  // 2026-06-14: the SAME reset token returns a session with type=recovery and
-  // otp_expired with type=signup/email.
-  //
-  // A wrong-type verify does NOT consume the one-time token, so we can try the
-  // link's declared type first, then fall back through the other email types
-  // until one succeeds, and route based on whichever type ACTUALLY verified
-  // (not the link's possibly-wrong label). This makes the app immune to
-  // template type typos. The templates should still be corrected (existing
-  // native installs run the old single-type handler), but this stops a typo
-  // from locking anyone out on web/PWA. 2026-06-14.
-  var declared = (type === 'signup') ? 'email' : type; // signup links mean email
+  if (!tokenHash || validTypes.indexOf(declaredType) === -1) return null;
+  var declared = (declaredType === 'signup') ? 'email' : declaredType;
   var candidates = [declared];
   ['recovery', 'email', 'magiclink', 'invite', 'email_change'].forEach(function(t) {
     if (candidates.indexOf(t) === -1) candidates.push(t);
   });
-
-  var body = null, okType = null;
   for (var ci = 0; ci < candidates.length; ci++) {
     try {
       var r = await fetch(SUPABASE_URL + '/auth/v1/verify', {
@@ -14448,39 +14487,52 @@ async function consumeMagicLinkVerifyIfPresent() {
       });
       if (r.ok) {
         var j = await r.json().catch(function() { return null; });
-        if (j && j.access_token) { body = j; okType = candidates[ci]; break; }
+        if (j && j.access_token) {
+          // Persist via the same shape consumeRedirectTokensIfPresent uses so
+          // the rest of the app sees a normal resumed session.
+          saveSession({
+            access_token:  j.access_token,
+            refresh_token: j.refresh_token,
+            expires_in:    j.expires_in || 3600,
+            user:          j.user || null
+          });
+          return candidates[ci];
+        }
       }
     } catch(e) {
       try { console.warn('verify attempt threw (' + candidates[ci] + '):', e); } catch(_) {}
     }
   }
+  return null;
+}
+
+// Web path: read token_hash+type from the page URL. Browsers / PWAs hit the
+// real mynailconnection.com/app/?token_hash=... URL, so the params are right
+// here in window.location. (The NATIVE app never sees them this way, the OS
+// hands the tapped link to the app via Capacitor's appUrlOpen event instead,
+// handled by initCapacitorDeepLinks() below.)
+async function consumeMagicLinkVerifyIfPresent() {
+  var qs;
+  try { qs = new URLSearchParams(window.location.search); } catch(_) { return false; }
+  var tokenHash = qs.get('token_hash');
+  var type      = qs.get('type');
+  if (!tokenHash || !type) return false;
+
+  var okType = await verifyEmailTokenHash(tokenHash, type);
 
   // Strip token_hash + type from the address bar regardless of outcome,
-  // replaceState (not pushState) so the user can't back-nav to a one-time
-  // token and so a failed attempt can't replay on reload.
+  // replaceState (not pushState) so a one-time token can't replay on reload
+  // or leak via back-nav / share.
   try { history.replaceState(null, '', window.location.pathname); } catch(_) {}
 
-  if (!body) {
+  if (!okType) {
     try { showToast('That link has expired. Please sign in or request a new one.'); } catch(_) {}
     try { console.warn('magic-link verify failed for all candidate types'); } catch(_) {}
     return false;
   }
-
-  // Persist via the same shape consumeRedirectTokensIfPresent uses, so the
-  // rest of the app sees a normal resumed session and routing fires the same.
-  saveSession({
-    access_token:  body.access_token,
-    refresh_token: body.refresh_token,
-    expires_in:    body.expires_in || 3600,
-    user:          body.user || null
-  });
-  // Recovery-link sessions: the user clicked "reset password" and we just
-  // signed them in via the recovery JWT. The session is real and can call
-  // updateUser, but the WHOLE point of a reset is to set a new password.
-  // Without this flag the boot flow drops them on home, signed in via a
-  // session that quietly expires later, locking them out again. Honored in
-  // restorePersistedSession(): if set, route to change-password-screen.
-  // Key it off the type that ACTUALLY verified, not the link's label.
+  // Recovery-link sessions: flag so restorePersistedSession() routes to the
+  // change-password screen instead of home (the whole point of a reset is to
+  // set a new password). Key off the type that ACTUALLY verified.
   if (okType === 'recovery') {
     try { window._mncForcePasswordChange = true; } catch(_) {}
   }
@@ -14653,6 +14705,11 @@ document.addEventListener('DOMContentLoaded', async function() {
   // needs _currentScreen + show() + _prevScreen to exist already, and
   // those are defined at module scope above, so order is fine.
   try { initCapacitorBackButton(); } catch(e) { /* fall through, non-fatal */ }
+
+  // Register the deep-link handler so a tapped auth email link (reset /
+  // confirm) that opens the installed app actually gets processed instead of
+  // dropping the user on sign-in. No-op on web. 2026-06-14.
+  try { initCapacitorDeepLinks(); } catch(e) { /* fall through, non-fatal */ }
 
   // Direct-link email verify (?token_hash=...&type=signup), pairs with
   // a custom Supabase email template that links straight to our domain
