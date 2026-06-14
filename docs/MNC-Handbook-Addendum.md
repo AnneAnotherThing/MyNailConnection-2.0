@@ -1,10 +1,10 @@
-# MNC Co-Admin Handbook — Addendum v2
+# MNC Co-Admin Handbook, Addendum v2
 
 *For Leslie · by Anne · April 2026 (post-launch-push)*
 
 ---
 
-Hey Les — the original handbook from April is still the canon reference for how MNC fundamentally works. Nothing in it is wrong. But we made a bunch of changes in the last round of work that sharpen (and in a few places, simplify) what you see in the admin console and how techs experience the app. This addendum is what to read on top of the original. Stick it in front of the printed handbook or tuck it in at chapter 6 — it mostly touches what's there.
+Hey Les, the original handbook from April is still the canon reference for how MNC fundamentally works. Nothing in it is wrong. But we made a bunch of changes in the last round of work that sharpen (and in a few places, simplify) what you see in the admin console and how techs experience the app. This addendum is what to read on top of the original. Stick it in front of the printed handbook or tuck it in at chapter 6, it mostly touches what's there.
 
 ---
 
@@ -18,26 +18,26 @@ If you haven't signed in since launch week, you'll notice the tab bar at the top
 
 Two new tabs:
 
-- **Inbox** — where "Nudge support" messages from techs land.
-- **📢 Push** — where you broadcast a push notification to all / techs / clients / admins.
+- **Inbox**, where "Nudge support" messages from techs land.
+- **📢 Push**, where you broadcast a push notification to all / techs / clients / admins.
 
 Same three tabs as before (Techs, Clients, Settings) sit in the same spots, with Inbox + Push slipped in between Clients and Settings.
 
-### Stats tab — what's there now
+### Stats tab, what's there now
 
 Cleaner, fewer widgets, everything in one panel:
 
-1. **Four headline cards** — Clients (total) · This Week (new clients in 7d) · Techs · Photos (total across every tech's portfolio)
-2. **Pulse strip** — a two-tile row showing:
-   - **Live Now** — how many techs have "Available now" toggled on right this minute
-   - **Techs to invite** — techs whose password hasn't been set yet (haven't completed their invite flow). This one auto-hides when it's zero — so the day all 17 are in, you won't see it.
-3. **Signups sparkline** — 14-day trend of new client signups, rendered as a little chart
-4. **Waitlist** — single card showing the number of people on the pre-launch waitlist
+1. **Four headline cards**, Clients (total) · This Week (new clients in 7d) · Techs · Photos (total across every tech's portfolio)
+2. **Pulse strip**, a two-tile row showing:
+   - **Live Now**, how many techs have "Available now" toggled on right this minute
+   - **Techs to invite**, techs whose password hasn't been set yet (haven't completed their invite flow). This one auto-hides when it's zero, so the day all 17 are in, you won't see it.
+3. **Signups sparkline**, 14-day trend of new client signups, rendered as a little chart
+4. **Waitlist**, single card showing the number of people on the pre-launch waitlist
 5. **Refresh** button at the bottom
 
 **What I removed from this tab:**
 
-- The duplicate stat-strip that used to live in the admin header. Stats only live in the Stats tab now — less duplication.
+- The duplicate stat-strip that used to live in the admin header. Stats only live in the Stats tab now, less duplication.
 - The per-source breakdown chart ("where signups came from"). Too granular for day-to-day. If we need source data we can pull it straight from Supabase.
 - The detailed waitlist email list. Too noisy. If you need emails, pull them from Supabase SQL Editor:
   ```sql
@@ -45,7 +45,7 @@ Cleaner, fewer widgets, everything in one panel:
   ```
 - The "Dig Deeper" link box (Google Analytics / Supabase / etc.). Open those from bookmarks.
 
-### Inbox tab — "Nudge support" messages
+### Inbox tab, "Nudge support" messages
 
 Every time a tech or client taps the **"App acting up? Nudge support"** link (see below), their note lands in the Inbox as a card showing:
 
@@ -53,22 +53,22 @@ Every time a tech or client taps the **"App acting up? Nudge support"** link (se
 - Their phone number (captured at send time)
 - A timestamp
 - The body of their message
-- Three buttons: **📱 Text back** (opens your phone's SMS app with their number and a "Hi [name], this is MNC support —" greeting pre-filled), **Mark read** (tints the card green, drops the "unread" badge), and **Delete** (with a confirm).
+- Three buttons: **📱 Text back** (opens your phone's SMS app with their number and a "Hi [name], this is MNC support, " greeting pre-filled), **Mark read** (tints the card green, drops the "unread" badge), and **Delete** (with a confirm).
 
 A small red badge on the Inbox tab shows the unread count without you having to open it. You'll see it from any tab.
 
-**Why I built it:** the old "Contact Anne" flow fired a push notification at my phone and that was it — no record, no delegation path. If my phone was off, the message evaporated. Now every message persists in the DB. You and I both see the full queue regardless of who responds.
+**Why I built it:** the old "Contact Anne" flow fired a push notification at my phone and that was it, no record, no delegation path. If my phone was off, the message evaporated. Now every message persists in the DB. You and I both see the full queue regardless of who responds.
 
 **Who sees the Inbox:** any account with `role='admin'` in `public.users`. That's you and me today. If we add another admin later, they'll see it automatically.
 
-### 📢 Push tab — broadcasting
+### 📢 Push tab, broadcasting
 
 A new form for blasting out a push notification:
 
-- **Audience** picker — Everyone, Techs only, Clients only, or Admins only
+- **Audience** picker, Everyone, Techs only, Clients only, or Admins only
 - **Title** (60 char max)
 - **Body** (180 char max)
-- **Open URL** — optional, where tapping the push opens in the app (default `/`)
+- **Open URL**, optional, where tapping the push opens in the app (default `/`)
 - A confirmation prompt before it fires (no undo on a sent push)
 - A status message showing "Delivered to N device(s)" after
 
@@ -80,7 +80,7 @@ A new form for blasting out a push notification:
 
 **What it won't do:** go to users who haven't subscribed to push notifications. If someone never granted notification permission on their device, they aren't reachable this way. The broadcast returns "Delivered to N device(s)" where N is however many subscriptions exist for the chosen audience.
 
-### Settings tab — trimmed
+### Settings tab, trimmed
 
 Pre-launch cleanup tools are gone:
 - **Data Cleanup** (remove techs with no data)
@@ -90,7 +90,7 @@ Pre-launch cleanup tools are gone:
 …removed. We don't need them post-launch and they were surface area for an accidental click. What stays:
 - **Admins** list + "add admin by email"
 - **Search** defaults (default + max radius settings)
-- **Help** — Admin Tutorial replay button
+- **Help**, Admin Tutorial replay button
 
 ---
 
@@ -102,9 +102,9 @@ You probably won't field many questions about these, but it helps to know them s
 
 Before: close the browser tab, come back, sign in again. Every single time.
 
-After: sign-ins now persist. A tech who signs in once stays signed in across reloads, tab closures, even restarts — until they explicitly sign out or 30 days pass. Token refreshes automatically in the background.
+After: sign-ins now persist. A tech who signs in once stays signed in across reloads, tab closures, even restarts, until they explicitly sign out or 30 days pass. Token refreshes automatically in the background.
 
-If a tech tells you "I can't sign in" — first ask if they've tried refreshing. The old behavior was weirdly aggressive about kicking people out.
+If a tech tells you "I can't sign in", first ask if they've tried refreshing. The old behavior was weirdly aggressive about kicking people out.
 
 ### The invite flow works end-to-end
 
@@ -113,7 +113,7 @@ When I invite a new tech from Supabase Dashboard → Authentication → Users �
 1. They get an email
 2. Click the link
 3. Set a password on a branded welcome screen
-4. Redirect to the app — **already signed in** (no second sign-in step)
+4. Redirect to the app, **already signed in** (no second sign-in step)
 5. Land on their tech dashboard
 
 Same for clients going through the signup confirm flow.
@@ -122,7 +122,7 @@ Same for clients going through the signup confirm flow.
 
 Bottom of the tech home dashboard, as a subtle italicized link. Tap it → modal opens → they type what's broken → Send. Message lands in your/my Inbox.
 
-Copy used to say "Contact Anne" — now says "Nudge support" and references "an admin" because both of us handle them.
+Copy used to say "Contact Anne", now says "Nudge support" and references "an admin" because both of us handle them.
 
 ### Home feed of recent tech posts
 
@@ -142,10 +142,10 @@ This replaces the old "Your Faves" shortcut cards that were on home. The Faves a
 ### Other small polish
 
 - **Profile screen's Portfolio tab** now actually shows the tech's existing photos (before it was upload-only, which was confusing)
-- **Tag My Photos** — tapping tags no longer collapses the photo card; you can tag multiple in a row without it slamming shut
+- **Tag My Photos**, tapping tags no longer collapses the photo card; you can tag multiple in a row without it slamming shut
 - **Map** removed from the bottom nav (clients can still get to the map via "Browse by Location" on home)
 - **Availability section** on profile + tech home is compact now, with a "What do these mean?" link that expands full descriptions
-- **Edit Profile modal** on profile screen now actually opens (structural bug fix — modal was trapped inside a hidden screen)
+- **Edit Profile modal** on profile screen now actually opens (structural bug fix, modal was trapped inside a hidden screen)
 
 ---
 
@@ -153,7 +153,7 @@ This replaces the old "Your Faves" shortcut cards that were on home. The Faves a
 
 ### Adding an admin
 
-SQL (preferred — not in the UI):
+SQL (preferred, not in the UI):
 
 ```sql
 -- Replace public.is_admin() with an allowlist update
@@ -203,7 +203,7 @@ Used to fire on first sign-in for new clients: a modal asking "Look / Availabili
 
 ### The dev login bar
 
-The sign-in screen used to show three "Sign in as X" bypass buttons in dev mode. Removed entirely — all testing now goes through real Supabase auth. No more test-state weirdness where dev login skipped the session-persistence code path.
+The sign-in screen used to show three "Sign in as X" bypass buttons in dev mode. Removed entirely, all testing now goes through real Supabase auth. No more test-state weirdness where dev login skipped the session-persistence code path.
 
 ### The `window.__MNC_DEV__` flag survives
 
@@ -224,11 +224,11 @@ These are on the punch-list but not launch-blocking:
 
 ## Questions I want you to ask me
 
-- "How do I see a tech's full post history?" — Currently: SQL. The app doesn't expose it in the admin UI yet. If you find yourself needing this often, tell me and I'll add it to the Techs tab.
-- "How do I know a tech hasn't completed their invite yet?" — Stats tab → "Techs to invite" card shows the count. For individual names: `select name, email from public.techs where last_password_change is null;`
-- "What happens if I delete a message from the Inbox?" — Gone forever. There's no soft-delete / archive. If you think you might want to refer back to it, copy the body first.
-- "Can I test Push without spamming everyone?" — Pick audience "Admins only" when you're experimenting. Goes to you + me only.
+- "How do I see a tech's full post history?", Currently: SQL. The app doesn't expose it in the admin UI yet. If you find yourself needing this often, tell me and I'll add it to the Techs tab.
+- "How do I know a tech hasn't completed their invite yet?", Stats tab → "Techs to invite" card shows the count. For individual names: `select name, email from public.techs where last_password_change is null;`
+- "What happens if I delete a message from the Inbox?", Gone forever. There's no soft-delete / archive. If you think you might want to refer back to it, copy the body first.
+- "Can I test Push without spamming everyone?", Pick audience "Admins only" when you're experimenting. Goes to you + me only.
 
 ---
 
-*Last updated: April 19, 2026 — reflects the launch-prep work session.*
+*Last updated: April 19, 2026, reflects the launch-prep work session.*

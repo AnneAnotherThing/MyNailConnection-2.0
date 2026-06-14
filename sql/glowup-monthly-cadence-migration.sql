@@ -5,13 +5,13 @@
 --
 --   * $10/mo Glow Up → 40 credits refilled monthly on the anniversary
 --     of the last refill (rolling 30-day window, not a fixed calendar
---     day). No rollover — 40 fresh every refill.
+--     day). No rollover, 40 fresh every refill.
 --   * Subscriber + free-tier uploads hit the bulletin-board feed.
---     Pay-per-photo uploads (credits) stay portfolio-only — the
+--     Pay-per-photo uploads (credits) stay portfolio-only, the
 --     release wizard skips the board_posts insert when slot_type='credit'.
 --   * $5 = 10-credit bundle as the standalone pay-per-photo price.
 --   * Free: first 5 lifetime uploads still go to the feed as a new-tech
---     welcome boost — first impression of "being seen."
+--     welcome boost, first impression of "being seen."
 --
 -- This migration renames the old `weekly_*` columns to `period_*` so the
 -- schema reads honestly at the monthly cadence, updates the
@@ -19,7 +19,7 @@
 -- reset interval (+1 month), and migrates any existing subscribers onto
 -- the new cadence (reset clock = now + 1 month, count = 0).
 --
--- Idempotent — safe to re-run. Rename is no-op if already done.
+-- Idempotent, safe to re-run. Rename is no-op if already done.
 -- Apply via Supabase SQL editor. 2026-04-23.
 
 -- ── Rename columns: weekly_* → period_* ──────────────────────────────────
@@ -66,7 +66,7 @@ update public.techs
 -- code can keep using slot_type to decide feed eligibility.
 --
 -- NB: we keep 'weekly' as the slot_type label even though the cadence
--- is monthly — renaming that enum-like value requires a lockstep client
+-- is monthly, renaming that enum-like value requires a lockstep client
 -- deploy, and the label is internal anyway. "Subscription slot" is what
 -- it really means. If later cleanup matters, swap it in a follow-up.
 create or replace function public.consume_upload_slot(p_email text)
@@ -232,7 +232,7 @@ $$;
 grant execute on function public.peek_upload_slots(text) to authenticated;
 
 comment on function public.peek_upload_slots(text) is
-  'Read-only peek at remaining upload slots. UI-only — not an authoritative gate. Use consume_upload_slot() to actually reserve.';
+  'Read-only peek at remaining upload slots. UI-only, not an authoritative gate. Use consume_upload_slot() to actually reserve.';
 
 -- ── next_sunday_utc_midnight is no longer called anywhere ────────────────
 -- Kept in place (not dropped) so any third-party SQL still referencing

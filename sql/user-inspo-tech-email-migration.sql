@@ -2,7 +2,7 @@
 -- MNC user_inspo tech_email migration  (2026-04-21)
 -- ========================================================================
 -- Adds public.user_inspo.tech_email so aggregate heart-counts-per-tech
--- join on email (unique-enforced) instead of name (not unique — two techs
+-- join on email (unique-enforced) instead of name (not unique, two techs
 -- named "Sarah" would conflate their save counts). Backfills via
 -- photo_url match because photo URLs are authoritative: each URL lives in
 -- exactly one tech's photos[] array.
@@ -11,12 +11,12 @@
 -- write both tech_email (source of truth for aggregates) AND tech_name
 -- (display convenience cache) on every new save going forward.
 --
--- Safe to re-run — all blocks are idempotent.
+-- Safe to re-run, all blocks are idempotent.
 -- ========================================================================
 
 
 -- ========================================================================
--- BLOCK 1 — ADD COLUMN
+-- BLOCK 1, ADD COLUMN
 -- Nullable for now; Block 2 fills it. Keeping it nullable permanently so
 -- orphaned saves (photo deleted / tech deleted) don't block DELETEs on
 -- the parent row.
@@ -27,13 +27,13 @@ alter table public.user_inspo
 
 
 -- ========================================================================
--- BLOCK 2 — BACKFILL
+-- BLOCK 2, BACKFILL
 -- photo_url is the source of truth. Each URL appears in exactly one
 -- tech's photos[] array, so this resolves ambiguity that name-matching
 -- would create (two "Sarah" techs → impossible to disambiguate by name).
 --
 -- techs.photos is jsonb, and each element is an OBJECT of shape
--- {"url": "...", "tags": [...]} — not a plain string. So we use the
+-- {"url": "...", "tags": [...]}, not a plain string. So we use the
 -- jsonb containment operator @> to ask "does any element in
 -- t.photos contain at least {url: ui.photo_url}?" Extra fields like
 -- `tags` in the stored objects don't disrupt the match.
@@ -41,7 +41,7 @@ alter table public.user_inspo
 -- Note: some legacy rows point to URLs from old data sources (e.g.
 -- buildfire-proxy.imgix.net) that are not in any current tech's
 -- photos[]. Those remain tech_email = null and are surfaced by
--- Block 4's 'orphaned' count — harmless, ignored by aggregate queries.
+-- Block 4's 'orphaned' count, harmless, ignored by aggregate queries.
 -- ========================================================================
 
 update public.user_inspo ui
@@ -52,7 +52,7 @@ update public.user_inspo ui
 
 
 -- ========================================================================
--- BLOCK 3 — INDEX
+-- BLOCK 3, INDEX
 -- Aggregate queries (count hearts per tech) scan by tech_email. Without
 -- an index, that's a full-table scan on every tech-profile load.
 -- ========================================================================
@@ -62,10 +62,10 @@ create index if not exists user_inspo_tech_email_idx
 
 
 -- ========================================================================
--- BLOCK 4 — DIAGNOSTIC
+-- BLOCK 4, DIAGNOSTIC
 -- Run this last to confirm the backfill worked. 'orphaned' rows are saves
 -- pointing to photos no longer in any tech's portfolio (tech deleted,
--- photo replaced, etc.). Not fatal — aggregate queries ignore them.
+-- photo replaced, etc.). Not fatal, aggregate queries ignore them.
 -- ========================================================================
 
 select

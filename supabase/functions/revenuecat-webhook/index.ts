@@ -49,7 +49,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 // truth for what each Apple/Google product translates to internally.
 const PRODUCT_MAP: Record<string, { kind: 'subscription' | 'photos1' | 'photos10' }> = {
   // Glow Up was originally provisioned as 'glow_up_monthly' but had to be
-  // recreated as 'pro_glow_up' on 2026-04-30 — the original ID was
+  // recreated as 'pro_glow_up' on 2026-04-30, the original ID was
   // accidentally created in App Store Connect's "In-App Purchases"
   // section as a non-renewing subscription instead of the "Subscriptions"
   // section as auto-renewable. Apple doesn't allow type changes after
@@ -83,7 +83,7 @@ serve(async (req) => {
 
   const event = payload && payload.event;
   if (!event) {
-    console.warn('webhook no event in payload — top-level keys:', Object.keys(payload || {}));
+    console.warn('webhook no event in payload, top-level keys:', Object.keys(payload || {}));
     return new Response('no event', { status: 400 });
   }
 
@@ -98,7 +98,7 @@ serve(async (req) => {
   // Log every incoming event with key fields so we can see the shape
   // RevenueCat is actually sending. Critical when a webhook returns 400
   // and we can't tell from the dashboard alone which validation failed.
-  // — 2026-04-30 instrumentation; remove once IAP is stable.
+  //, 2026-04-30 instrumentation; remove once IAP is stable.
   console.log('webhook event received', JSON.stringify({
     type: eventType,
     product_id: productId || '(missing)',
@@ -109,7 +109,7 @@ serve(async (req) => {
   }));
 
   if (!appUserId || !productId) {
-    // Some RC event types legitimately don't carry product_id — e.g. TRANSFER
+    // Some RC event types legitimately don't carry product_id, e.g. TRANSFER
     // (when purchases move between app_user_ids) and SUBSCRIBER_ALIAS.
     // Returning 200 with "ignored" so RC doesn't endlessly retry, but log so
     // we know it happened and can decide later whether to wire up handling.
@@ -124,7 +124,7 @@ serve(async (req) => {
   const sourceLabel = store === 'play_store' ? 'google_play' : 'apple_iap';
   const product = PRODUCT_MAP[productId];
   if (!product) {
-    // Unknown product — log and 200 so RevenueCat doesn't endlessly retry.
+    // Unknown product, log and 200 so RevenueCat doesn't endlessly retry.
     console.warn('Unknown product_id in webhook:', productId);
     return new Response('ok (unknown product, ignored)', { status: 200 });
   }
@@ -161,11 +161,11 @@ serve(async (req) => {
 
   // Fallback 2a: app_user_id sometimes IS an email when initRevenueCat() ran
   // before currentUser.id was populated (race during sign-in or session
-  // restore — the JS code falls back from currentUser.id to currentUserEmail).
+  // restore, the JS code falls back from currentUser.id to currentUserEmail).
   // Once RC is configured with an email as the App User ID, all that user's
   // future events carry that email instead of the auth UUID. So before doing
   // the UUID-based auth.users lookup, sniff the format and use email path
-  // directly if it looks like an email. — added 2026-04-30 after seeing
+  // directly if it looks like an email. added 2026-04-30 after seeing
   // testuserbob@gmail.com hit this exact pattern in webhook logs.
   const looksLikeEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(appUserId);
   if (!techEmail && looksLikeEmail) {
@@ -192,7 +192,7 @@ serve(async (req) => {
     return new Response('ok (no matching tech)', { status: 200 });
   }
 
-  // Stamp the source identifiers on every event — keeps the row queryable
+  // Stamp the source identifiers on every event, keeps the row queryable
   // even for events that don't mutate tier (BILLING_ISSUE, etc).
   const sourceUpdate: Record<string, any> = {
     subscription_source: sourceLabel,
@@ -208,7 +208,7 @@ serve(async (req) => {
   // Branch on event type. Subscription lifecycle events vs. consumables
   // are very different shapes.
   if (product.kind === 'subscription') {
-    // Glow Up subscription — manage subscription_tier + period_reset_at
+    // Glow Up subscription, manage subscription_tier + period_reset_at
     if (eventType === 'INITIAL_PURCHASE' || eventType === 'RENEWAL' || eventType === 'PRODUCT_CHANGE' || eventType === 'UNCANCELLATION') {
       const expiresAtMs = event.expiration_at_ms || event.expires_date_ms;
       const expiresAt = expiresAtMs ? new Date(expiresAtMs).toISOString() : null;
@@ -221,26 +221,26 @@ serve(async (req) => {
       }).eq('email', techEmail);
     } else if (eventType === 'CANCELLATION') {
       // User canceled but sub still active until period_reset_at. Don't
-      // flip tier to 'free' yet — let EXPIRATION handle that.
+      // flip tier to 'free' yet, let EXPIRATION handle that.
       await admin.from('techs').update(sourceUpdate).eq('email', techEmail);
     } else if (eventType === 'EXPIRATION') {
-      // Subscription period ended without renewal — flip to free.
+      // Subscription period ended without renewal, flip to free.
       await admin.from('techs').update({
         ...sourceUpdate,
         subscription_tier: 'free',
       }).eq('email', techEmail);
     } else if (eventType === 'BILLING_ISSUE') {
-      // Apple/Google is retrying billing — leave tier alone, just stamp source
+      // Apple/Google is retrying billing, leave tier alone, just stamp source
       await admin.from('techs').update(sourceUpdate).eq('email', techEmail);
     } else if (eventType === 'REFUND') {
-      // Apple refunded a Glow Up charge — revoke tier
+      // Apple refunded a Glow Up charge, revoke tier
       await admin.from('techs').update({
         ...sourceUpdate,
         subscription_tier: 'free',
       }).eq('email', techEmail);
     }
   } else {
-    // Consumable: photos1 / photos10 — increment photo_credits + counter
+    // Consumable: photos1 / photos10, increment photo_credits + counter
     const creditsToAdd = product.kind === 'photos1' ? 1 : 10;
     const counterCol = product.kind === 'photos1'
       ? 'spotlight_1_purchased_count'
@@ -255,7 +255,7 @@ serve(async (req) => {
         [counterCol]: currentCounter + 1,
       }).eq('email', techEmail);
     } else if (eventType === 'REFUND') {
-      // Apple refunded a consumable — best-effort deduct (don't go negative).
+      // Apple refunded a consumable, best-effort deduct (don't go negative).
       const currentCredits = (await getCurrentCount(admin, techEmail, 'photo_credits')) || 0;
       await admin.from('techs').update({
         ...sourceUpdate,

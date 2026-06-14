@@ -1,4 +1,4 @@
-# Android build audit — 2026-04-23
+# Android build audit, 2026-04-23
 
 Refresh + audit pass on the Capacitor Android project ahead of the first
 Play Store submission. Leslie is testing today; this doc captures what
@@ -14,12 +14,12 @@ MNC repo root than in `www/` and in the Android bundle. I copied source
 Android Studio builds picks up today's code (including the 2026-04-23
 post-confirmation routing fix in `index.html`).
 
-I did this by hand with `cp`/`rsync` — `npx cap sync android` failed in
+I did this by hand with `cp`/`rsync`-`npx cap sync android` failed in
 the session sandbox with a permission error on `unlink`. The end state
 is the same; next time you run `npx cap sync android` yourself it'll
 work normally.
 
-### 2. AndroidManifest.xml — App Links intent-filter added
+### 2. AndroidManifest.xml, App Links intent-filter added
 
 This was the file-level piece missing for "email-confirmation links open
 the app, not the browser." Added to `<activity android:name=".MainActivity">`:
@@ -40,10 +40,10 @@ Also added a fallback custom-scheme filter bound to the
 (`com.mynailconnection.app://…`), in case we ever want a non-HTTPS
 callback.
 
-### 3. AndroidManifest.xml — POST_NOTIFICATIONS permission added
+### 3. AndroidManifest.xml, POST_NOTIFICATIONS permission added
 
 Android 13+ requires an app-declared runtime permission for push to
-work. The Capacitor push plugin doesn't declare it — the host app must.
+work. The Capacitor push plugin doesn't declare it, the host app must.
 Without this, `PushNotifications.requestPermissions()` silently resolves
 `denied` on Android 13+ phones, which is most of the fleet now.
 
@@ -64,11 +64,11 @@ now. Next push to `main` ships it.
 
 ## What Anne has to do in Android Studio
 
-This is the human-only slice. Capacitor/Claude can't do these — they
+This is the human-only slice. Capacitor/Claude can't do these, they
 need your Play Console account, your keystore decisions, and your Firebase
 project.
 
-### Step 1 — Get `google-services.json` from Firebase
+### Step 1, Get `google-services.json` from Firebase
 
 Required for FCM push. The `android/app/build.gradle` already has the
 conditional `apply plugin: 'com.google.gms.google-services'` wrapped in
@@ -81,7 +81,7 @@ missing. **Missing = push is broken in the release build.**
 4. Drop into `android/app/google-services.json` (same folder as
    `build.gradle`)
 
-### Step 2 — Decide on signing: Play App Signing (recommended)
+### Step 2, Decide on signing: Play App Signing (recommended)
 
 Don't hand-manage the release keystore. Let Google hold the release key
 via Play App Signing and upload a signed bundle using a lightweight
@@ -92,7 +92,7 @@ you're locked out of updates forever.
 Flow inside Android Studio:
 
 1. Build → Generate Signed Bundle / APK → **Android App Bundle**
-2. "Create new…" keystore — save the `.jks` somewhere safe and back it
+2. "Create new…" keystore, save the `.jks` somewhere safe and back it
    up (1Password vault is fine). This is your *upload* key, not the
    signing key.
 3. Enter a strong password for both the keystore and the key alias.
@@ -101,7 +101,7 @@ Flow inside Android Studio:
 4. Build variant: `release`
 5. Android Studio produces `app/build/outputs/bundle/release/app-release.aab`
 
-### Step 3 — After first upload, fill in `assetlinks.json`
+### Step 3, After first upload, fill in `assetlinks.json`
 
 Play App Signing means **Google** decides the production signing SHA-256.
 The fingerprint in `assetlinks.json` must match Google's release key,
@@ -119,7 +119,7 @@ not your upload key. After your first AAB upload:
    should return `200 OK` and
    `content-type: application/json` (GH Pages handles this automatically).
 
-### Step 4 — Verify App Links work
+### Step 4, Verify App Links work
 
 After the AAB is live in internal testing and `assetlinks.json` is
 deployed, install the app on a test device and run from a dev shell:
@@ -134,7 +134,7 @@ Should open MNC directly, no browser intermediate. If it opens the
 browser, run `adb shell pm get-app-links com.mynailconnection.app` and
 check for `verified` on the mynailconnection.com entry.
 
-### Step 5 — JS-side URL handler (heads up, NOT required for Play review)
+### Step 5, JS-side URL handler (heads up, NOT required for Play review)
 
 The App Links plumbing will *open* the app when a Supabase email link is
 tapped, but nothing in `index.html` currently listens for the incoming
@@ -168,16 +168,16 @@ I didn't patch this in because:
 
 ## What's already fine
 
-- `capacitor.config.json` — appId, splash (2s, `#FAF5F7`), status bar
+- `capacitor.config.json`, appId, splash (2s, `#FAF5F7`), status bar
   (`#C4786A`), push presentation options all set.
-- `variables.gradle` — `targetSdkVersion 35` / `compileSdkVersion 35`.
+- `variables.gradle`-`targetSdkVersion 35` / `compileSdkVersion 35`.
   Google's requirement for new app submissions is API 34 since August
   2025, so this is a safe margin.
-- `minSdkVersion 23` — Android 6.0+. Covers ~99% of active devices per
+- `minSdkVersion 23`, Android 6.0+. Covers ~99% of active devices per
   Android distribution numbers; no reason to raise it.
-- `build.gradle` — `versionCode 1`, `versionName "1.0"`. Fine for the
+- `build.gradle`-`versionCode 1`, `versionName "1.0"`. Fine for the
   first submission. **Remember:** every subsequent upload has to bump
-  `versionCode` by at least 1 — Play will reject a duplicate code even
+  `versionCode` by at least 1, Play will reject a duplicate code even
   if `versionName` changes.
 - Launcher icons at all mipmap densities (mdpi through xxxhdpi) plus
   adaptive icon (`mipmap-anydpi-v26`). Already generated.
@@ -187,7 +187,7 @@ I didn't patch this in because:
 
 - [ ] `google-services.json` in `android/app/`
 - [ ] `npx cap sync android` from your machine (not the session) runs
-      clean — confirms the Node-side sync works and isn't papering over
+      clean, confirms the Node-side sync works and isn't papering over
       a dependency issue
 - [ ] Android Studio: Build → Clean Project → Rebuild
 - [ ] Generate Signed Bundle → AAB → upload key created and backed up
@@ -196,7 +196,7 @@ I didn't patch this in because:
 - [ ] Pull the signing-key SHA-256 from Play App Signing, plug into
       `assetlinks.json`, redeploy, verify with `curl`
 - [ ] Tap a real Supabase confirmation email on a device with the app
-      installed — confirm it opens MNC, not the browser
+      installed, confirm it opens MNC, not the browser
 
 ## Risk I want to flag
 
@@ -213,5 +213,5 @@ production key. That means your first build cycle is:
 5. *Now* tapping an email link opens the app
 
 If Leslie confirms the email in the first 24-48 hours after upload, it
-may still open in the browser. Not a bug — just the bootstrap window.
+may still open in the browser. Not a bug, just the bootstrap window.
 Worth telling her up front so she doesn't report it.

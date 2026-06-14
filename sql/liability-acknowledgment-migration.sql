@@ -6,11 +6,11 @@
 -- the fields from the INSERT (so signups still work, but the audit
 -- trail is lost).
 --
--- liability_version       — which version of the agreement they accepted
+-- liability_version, which version of the agreement they accepted
 --                           ('tech-v1' for techs, 'client-v1' for clients).
 --                           Lets you know which wording was in effect when
 --                           they agreed, in case you revise later.
--- liability_accepted_at   — exact UTC timestamp they ticked the box.
+-- liability_accepted_at, exact UTC timestamp they ticked the box.
 --                           Immutable audit record.
 --
 -- Safe to re-run. Nullable so existing rows (the 17 techs + admins) remain

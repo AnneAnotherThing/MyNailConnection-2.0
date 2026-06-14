@@ -6,7 +6,7 @@
 // Deploy with:
 //   supabase functions deploy admin-reset-passwords
 //
-// No extra secrets needed — SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY
+// No extra secrets needed, SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY
 // are auto-populated by the Supabase runtime.
 
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts';

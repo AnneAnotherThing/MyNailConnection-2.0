@@ -21,7 +21,7 @@
 
 
 -- ----------------------------------------------------------------------------
--- STEP 1 — PREVIEW (read-only)
+-- STEP 1, PREVIEW (read-only)
 -- ----------------------------------------------------------------------------
 -- Tags every comp row as KEEP or DELETE so you can eyeball it before nuking.
 -- ----------------------------------------------------------------------------
@@ -31,16 +31,16 @@ select
   tc.note,
   case
     when t.email is not null then
-      'KEEP — active tech (in public.techs)'
+      'KEEP, active tech (in public.techs)'
     when lower(tc.email) = any (array[
       -- ALLOW_LIST: emails to KEEP even without a public.techs row.
       -- Add Leslie's email here if she should retain her comp.
       'leslie@example.com'
       -- , 'another@example.com'
     ]::text[]) then
-      'KEEP — explicit allow-list'
+      'KEEP, explicit allow-list'
     else
-      'DELETE — archived (no public.techs row)'
+      'DELETE, archived (no public.techs row)'
   end as plan
 from public.tech_comps tc
 left join public.techs t on lower(t.email) = lower(tc.email)
@@ -48,7 +48,7 @@ order by plan, tc.email;
 
 
 -- ----------------------------------------------------------------------------
--- STEP 2 — DELETE (run after STEP 1)
+-- STEP 2, DELETE (run after STEP 1)
 -- ----------------------------------------------------------------------------
 -- IMPORTANT: keep the ALLOW_LIST array here in sync with STEP 1.
 -- ----------------------------------------------------------------------------
@@ -64,7 +64,7 @@ and lower(tc.email) <> all (array[
 
 
 -- ----------------------------------------------------------------------------
--- STEP 3 — VERIFY
+-- STEP 3, VERIFY
 -- ----------------------------------------------------------------------------
 -- (a) Count what's left.
 -- (b) Should return zero rows OTHER than your allow-listed emails.

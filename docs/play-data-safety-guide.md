@@ -1,4 +1,4 @@
-# Google Play Data Safety Form — MNC
+# Google Play Data Safety Form, MNC
 
 Drafted 2026-04-28 from a code audit of the MNC repo. Each section maps to the
 exact wording in Play Console → Policy → App Content → Data Safety.
@@ -9,28 +9,28 @@ and **Data types** (the long checklist). I'll walk through them in order.
 
 ---
 
-## SECTION 1 — Does your app collect or share any of the required user data types?
+## SECTION 1, Does your app collect or share any of the required user data types?
 
 Answer: **Yes**
 
 (Selecting "No" requires the app to truly send nothing off-device. MNC sends
 auth, photos, location queries, and push subscriptions to Supabase / Stripe /
-Google / OSM — so it's "Yes".)
+Google / OSM, so it's "Yes".)
 
 ---
 
-## SECTION 2 — Is all of the user data collected by your app encrypted in transit?
+## SECTION 2, Is all of the user data collected by your app encrypted in transit?
 
 Answer: **Yes**
 
-All external endpoints are HTTPS — Supabase, Stripe, Google Maps, OpenStreetMap
+All external endpoints are HTTPS, Supabase, Stripe, Google Maps, OpenStreetMap
 Nominatim, Cloudflare. The codebase has zero plain-`http://` API calls (audit
 confirmed 24+ HTTPS calls, no HTTP ones). Capacitor's `androidScheme` is also
 configured to `https`.
 
 ---
 
-## SECTION 3 — Do you provide a way for users to request that their data be deleted?
+## SECTION 3, Do you provide a way for users to request that their data be deleted?
 
 Answer: **Yes**
 
@@ -50,7 +50,7 @@ Method: **Outside-the-app request.** Users can email support or use the
 
 ---
 
-## SECTION 4 — Data types collected or shared
+## SECTION 4, Data types collected or shared
 
 For each row below, the form asks four questions per type:
 
@@ -93,7 +93,7 @@ Play's definition reminder:
 - **Required:** No (only collected if user subscribes / buys photo bundles via Stripe)
 - **Purposes:** App functionality, Account management
 - **Ephemeral:** No
-- *(MNC stores subscription state and purchase records in Supabase. The card itself never touches MNC's servers — Stripe Payment Links handle that.)*
+- *(MNC stores subscription state and purchase records in Supabase. The card itself never touches MNC's servers, Stripe Payment Links handle that.)*
 
 ### Financial → User payment info, Credit score, Other financial info
 - **Collected:** No
@@ -113,7 +113,7 @@ Play's definition reminder:
 
 ### Messages → Emails, SMS or MMS, Other in-app messages
 - **Collected:** No
-- *(MNC has admin-broadcast notifications and the "Contact Anne" form — neither is peer-to-peer messaging. The form text gets sent via push/email to Anne but isn't stored as a "message" between users.)*
+- *(MNC has admin-broadcast notifications and the "Contact Anne" form, neither is peer-to-peer messaging. The form text gets sent via push/email to Anne but isn't stored as a "message" between users.)*
 
 ### Photos and videos → Photos
 - **Collected:** Yes
@@ -140,7 +140,7 @@ Play's definition reminder:
 
 ### App activity → App interactions, In-app search history, Installed apps, Other user-generated content, Other actions
 - **Collected:** No
-- *(No analytics SDK — no Google Analytics, Firebase Analytics, Sentry, PostHog, Mixpanel. Audit found zero telemetry hooks.)*
+- *(No analytics SDK, no Google Analytics, Firebase Analytics, Sentry, PostHog, Mixpanel. Audit found zero telemetry hooks.)*
 
 ### Web browsing → Web browsing history
 - **Collected:** No
@@ -173,14 +173,14 @@ your push lands.
 
 ---
 
-## Privacy policy patch — required additions
+## Privacy policy patch, required additions
 
 Before you submit the Data Safety form, your `privacy.html` should contain
 clear sections covering:
 
 1. **What data we collect** (matches the rows above: email, name, photos, approximate location, push subscription, purchase history)
 2. **Why we collect it** (account, app functionality, push notifications, billing)
-3. **Who we share it with** (Supabase as our database provider, Stripe for billing, Google/OpenStreetMap for location lookup — all as service providers, not third-party data sharing)
+3. **Who we share it with** (Supabase as our database provider, Stripe for billing, Google/OpenStreetMap for location lookup, all as service providers, not third-party data sharing)
 4. **How long we keep it** (until account deletion)
 5. **How users can request deletion** ← Play specifically checks for this
 6. **Contact info** (your email, the Contact Anne form)
@@ -206,5 +206,5 @@ current `privacy.html` and patch in whatever's missing.
 ## Items that will need updating later (not blocking ship)
 
 - **If you add iOS in-app purchases via Apple IAP** for Glow Up subscription on iOS: that becomes a "Financial info / Purchase history" entry in App Store Connect's similar privacy form, with "Apple" as the third-party processor.
-- **If you add a real DM feature** ("Direct messages between users" was in your earlier Play listing copy — currently MNC doesn't actually have peer-to-peer DMs, only an admin inbox): you'll need to flip the "Messages → Other in-app messages" row to Yes.
+- **If you add a real DM feature** ("Direct messages between users" was in your earlier Play listing copy, currently MNC doesn't actually have peer-to-peer DMs, only an admin inbox): you'll need to flip the "Messages → Other in-app messages" row to Yes.
 - **If you add any analytics SDK**: App activity flips to Yes, plus a new third-party recipient.

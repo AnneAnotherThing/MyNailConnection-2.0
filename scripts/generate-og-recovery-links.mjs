@@ -10,7 +10,7 @@
 // USAGE
 //   1) Bump recovery token lifespan in Supabase first (Auth → Email Templates
 //      → Recovery → token expiry, OR Auth Settings → mailer_otp_exp). Default
-//      is 3600 (1h) — set to 86400 (24h) or higher for launch so links don't
+//      is 3600 (1h), set to 86400 (24h) or higher for launch so links don't
 //      die between generation and tech click.
 //
 //   2) Set env vars and run:
@@ -102,7 +102,7 @@ for (const row of comps) {
   let link = null;
   let note = '';
 
-  // Try recovery first — works if the auth user already exists.
+  // Try recovery first, works if the auth user already exists.
   const { data: rec, error: recErr } = await supabase.auth.admin.generateLink({
     type: 'recovery',
     email,
@@ -113,7 +113,7 @@ for (const row of comps) {
     link = rec.properties.action_link;
     note = 'recovery';
   } else if (recErr && /not\s*found|user\s*not\s*found|no user/i.test(recErr.message || '')) {
-    // Fallback: invite — creates the auth user AND returns the link in one call.
+    // Fallback: invite, creates the auth user AND returns the link in one call.
     const { data: inv, error: invErr } = await supabase.auth.admin.generateLink({
       type: 'invite',
       email,
@@ -123,7 +123,7 @@ for (const row of comps) {
       link = inv.properties.action_link;
       note = 'invite (new auth user created)';
     } else {
-      note = `error: invite also failed — ${invErr?.message || 'unknown'}`;
+      note = `error: invite also failed, ${invErr?.message || 'unknown'}`;
     }
   } else if (recErr) {
     note = `error: ${recErr.message}`;

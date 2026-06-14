@@ -4,7 +4,7 @@
 - Free tier: 5 photos per tech
 - Add-on: $1 per photo (one-time)
 - Pack: 5 photos for $4 (one-time)
-- All-time portfolio: $9/month subscription ("Glow Up") — every set preserved while the subscription is active; paused (not deleted) on cancellation
+- All-time portfolio: $9/month subscription ("Glow Up"), every set preserved while the subscription is active; paused (not deleted) on cancellation
 
 ---
 
@@ -17,7 +17,7 @@ Run `sql/stripe-billing-migration.sql` in Supabase → SQL Editor. This adds:
   match later subscription events back to the tech row)
 - `stripe_events` table for webhook deduplication
 
-The migration is idempotent — safe to re-run.
+The migration is idempotent, safe to re-run.
 
 ---
 
@@ -25,11 +25,11 @@ The migration is idempotent — safe to re-run.
 
 In Stripe Dashboard → Products → + Add Product:
 
-1. **1 Photo Credit** — $1.00 one-time
-2. **5 Photo Credits** — $4.00 one-time
-3. **Glow Up** — $9.00/month recurring (your all-time portfolio)
+1. **1 Photo Credit**, $1.00 one-time
+2. **5 Photo Credits**, $4.00 one-time
+3. **Glow Up**, $9.00/month recurring (your all-time portfolio)
 
-**Add a `credits` metadata field on each of the one-time Prices** (not products —
+**Add a `credits` metadata field on each of the one-time Prices** (not products,
 prices). In the Stripe Dashboard, open the Price, scroll to Metadata:
 
 - 1 Photo Credit price → metadata: `credits = 1`
@@ -37,8 +37,8 @@ prices). In the Stripe Dashboard, open the Price, scroll to Metadata:
 
 This is the most durable way to signal credit amounts. If the metadata is
 missing, the webhook falls back to matching the product name ("1 Photo Credit"
-or "1 Photo Slot" — both work) and then to amount-based inference ($1 → 1,
-$4 → 5). But metadata is the belt-and-suspenders option — use it.
+or "1 Photo Slot", both work) and then to amount-based inference ($1 → 1,
+$4 → 5). But metadata is the belt-and-suspenders option, use it.
 
 ---
 
@@ -64,7 +64,7 @@ const STRIPE_CONFIG = {
 
 The app passes `client_reference_id = techs.id` (a UUID) on each checkout so
 the webhook knows which tech to credit. **Don't** configure the Payment Link
-to pre-fill `client_reference_id` with a template — the app sets it dynamically.
+to pre-fill `client_reference_id` with a template, the app sets it dynamically.
 
 ---
 
@@ -89,16 +89,16 @@ Stripe Dashboard → Developers → Webhooks → + Add Endpoint:
   - `customer.subscription.updated`
   - `customer.subscription.deleted`
 
-**Do NOT register `invoice.payment_succeeded`** — `customer.subscription.updated`
+**Do NOT register `invoice.payment_succeeded`**, `customer.subscription.updated`
 fires on monthly renewals and gives us the real `current_period_end` to use as
 `subscription_expires_at`. Cleaner and more accurate.
 
-Copy the **Signing Secret** (starts with `whsec_`) — you'll use it in Step 6.
+Copy the **Signing Secret** (starts with `whsec_`), you'll use it in Step 6.
 
 ### A note on customer-facing emails
 
 Whether Stripe sends techs a receipt email on every charge/renewal is
-controlled separately in **Stripe → Settings → Emails** — it has nothing to do
+controlled separately in **Stripe → Settings → Emails**, it has nothing to do
 with which webhook events you register here. If you don't want techs getting
 monthly invoice emails, disable "Successful payments" under Customer emails.
 That's independent of whether our webhook runs.
@@ -132,10 +132,10 @@ Developers → API keys.
      stores `stripe_customer_id`, and sets `subscription_expires_at` from
      the subscription's `current_period_end`.
 5. Every month thereafter, Stripe fires `customer.subscription.updated`
-   when the renewal charge clears — webhook pushes `subscription_expires_at`
+   when the renewal charge clears, webhook pushes `subscription_expires_at`
    forward.
 6. When the tech cancels (or card fails past the grace window), Stripe fires
-   `customer.subscription.deleted` — webhook flips them back to `free`.
+   `customer.subscription.deleted`, webhook flips them back to `free`.
 7. Meanwhile, back in the app: a one-shot `visibilitychange` listener fires
    when the tech returns to the tab, re-fetches `techs` state, and updates
    the UI with a "credits added" / "Glow Up unlocked" toast.
@@ -148,7 +148,7 @@ are expected; the unique-violation on `event_id` causes us to short-circuit
 and return `{ received: true, duplicate: true }` without re-applying the
 effect.
 
-## Testing — dual-mode setup (added 2026-04-22)
+## Testing, dual-mode setup (added 2026-04-22)
 
 The webhook verifies signatures against **both** live and test signing
 secrets and uses the matching API key to retrieve event-referenced
@@ -160,9 +160,9 @@ the Payment Link URLs.
 
 1. Stripe Dashboard → flip the **"Test mode"** toggle (top-left).
 2. Products → recreate:
-   - **1 Photo Credit** — $1.00 one-time (add Price metadata `credits = 1`)
-   - **10 Photo Credits** — $5.00 one-time (add Price metadata `credits = 10`)
-   - **Glow Up** — $9.00/month recurring
+   - **1 Photo Credit**, $1.00 one-time (add Price metadata `credits = 1`)
+   - **10 Photo Credits**, $5.00 one-time (add Price metadata `credits = 10`)
+   - **Glow Up**, $9.00/month recurring
 3. Payment Links → recreate each, enable "Collect client reference ID".
    Copy each test URL (`https://buy.stripe.com/test_...`) into
    `STRIPE_CONFIG.link_*_test` in `index.html`.
@@ -183,9 +183,9 @@ the Payment Link URLs.
 ### Running tests
 
 1. Flip `STRIPE_CONFIG.test_mode = true` in `index.html` (locally or on a
-   preview build — DO NOT ship `true` to production).
+   preview build, DO NOT ship `true` to production).
 2. Use a throwaway tech row as your test account (any real row in
-   `public.techs` — its `id` gets passed as `client_reference_id`).
+   `public.techs`, its `id` gets passed as `client_reference_id`).
 3. Hit the upgrade flow in the app, pay with `4242 4242 4242 4242` any
    exp / any CVC.
 4. Verify:
@@ -195,7 +195,7 @@ the Payment Link URLs.
    - Simulate a renewal: Stripe → Customers → your test sub → "Advance
      test clock" one month → `subscription_expires_at` moves forward.
    - Cancel the sub → tier flips back to `free`.
-5. Check Supabase function logs — test events are logged with a `[TEST]`
+5. Check Supabase function logs, test events are logged with a `[TEST]`
    prefix so they're easy to tell apart from live traffic.
 6. Clean up the test tech row's `photo_credits` / `subscription_tier` /
    `stripe_customer_id` back to defaults when you're done.

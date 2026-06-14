@@ -21,7 +21,7 @@ const VAPID_SUBJECT     = Deno.env.get('VAPID_SUBJECT') || 'mailto:admin@mynailc
 
 webpush.setVapidDetails(VAPID_SUBJECT, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
 
-// Service-role client — reads across auth.users + public.users +
+// Service-role client, reads across auth.users + public.users +
 // push_subscriptions without RLS friction.
 const supabase = createClient(
   Deno.env.get('SUPABASE_URL')!,
@@ -43,7 +43,7 @@ function jsonResponse(body: unknown, status = 200) {
 
 // Verify the caller is an admin. Expects a Bearer JWT from the signed-in
 // user. We decode the email claim and check public.users for role='admin'.
-// If this check fails, return 403 — never deliver a broadcast to an
+// If this check fails, return 403, never deliver a broadcast to an
 // unauthenticated / non-admin caller.
 async function callerIsAdmin(req: Request): Promise<boolean> {
   try {
@@ -70,7 +70,7 @@ serve(async (req) => {
     return new Response(null, { headers: CORS_HEADERS });
   }
 
-  // Admin gate — non-admins never reach the push loop.
+  // Admin gate, non-admins never reach the push loop.
   if (!(await callerIsAdmin(req))) {
     return jsonResponse({ error: 'admin access required' }, 403);
   }

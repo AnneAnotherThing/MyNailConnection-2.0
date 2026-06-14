@@ -5,7 +5,7 @@
 -- archived techs you want to invite back. Everyone goes into the
 -- public.tech_comps table; the sync trigger does the rest.
 --
--- No copy-pasting emails into placeholder rows — the active 17 already
+-- No copy-pasting emails into placeholder rows, the active 17 already
 -- live in public.techs, so we INSERT ... SELECT directly. The archived
 -- ones come from public.archived_techs the same way.
 --
@@ -13,19 +13,19 @@
 -- public.tech_comps and the sync triggers).
 --
 -- Three groups of comps, each with the same pattern:
---   STEP A — review who'd be comped
---   STEP B — comp ALL of them (uncomment to run)
---   STEP C — comp specific people (uncomment + paste IDs to run)
---   STEP D — verify
+--   STEP A, review who'd be comped
+--   STEP B, comp ALL of them (uncomment to run)
+--   STEP C, comp specific people (uncomment + paste IDs to run)
+--   STEP D, verify
 -- ========================================================================
 
 
 -- ════════════════════════════════════════════════════════════════════════
--- GROUP 1 — Active techs (everyone in public.techs)
+-- GROUP 1, Active techs (everyone in public.techs)
 -- ════════════════════════════════════════════════════════════════════════
 
 -- ────────────────────────────────────────────────────────────────────────
--- STEP A.1 — Review the active tech list. The `already_comped` column
+-- STEP A.1, Review the active tech list. The `already_comped` column
 -- tells you who's already in tech_comps so re-running won't surprise.
 -- The `joined` date is your sanity-check for "is this an OG founder vs
 -- a test account I made yesterday?"
@@ -44,7 +44,7 @@ select t.id,
 
 
 -- ────────────────────────────────────────────────────────────────────────
--- STEP B.1 — Comp ALL active techs. One statement, idempotent.
+-- STEP B.1, Comp ALL active techs. One statement, idempotent.
 -- on conflict do nothing protects re-runs and prevents clobbering any
 -- comps you've already manually added with custom notes / limits.
 -- ────────────────────────────────────────────────────────────────────────
@@ -54,7 +54,7 @@ select t.id,
 -- insert into public.tech_comps (email, granted_by, note, monthly_limit)
 -- select lower(btrim(t.email)),
 --        'anne@mynailconnection.com',
---        'MNC 1.0 founder — comped Glow Up',
+--        'MNC 1.0 founder, comped Glow Up',
 --        40
 --   from public.techs t
 --  where t.email is not null
@@ -63,7 +63,7 @@ select t.id,
 
 
 -- ────────────────────────────────────────────────────────────────────────
--- STEP C.1 — Comp ONLY specific active techs. Use this if STEP A.1
+-- STEP C.1, Comp ONLY specific active techs. Use this if STEP A.1
 -- shows test accounts mixed in with the 17 OGs and you want to skip
 -- them. Paste the IDs from STEP A.1's output.
 -- ────────────────────────────────────────────────────────────────────────
@@ -73,7 +73,7 @@ select t.id,
 -- insert into public.tech_comps (email, granted_by, note, monthly_limit)
 -- select lower(btrim(t.email)),
 --        'anne@mynailconnection.com',
---        'MNC 1.0 founder — comped Glow Up',
+--        'MNC 1.0 founder, comped Glow Up',
 --        40
 --   from public.techs t
 --  where t.id in (
@@ -87,9 +87,9 @@ select t.id,
 
 
 -- ════════════════════════════════════════════════════════════════════════
--- GROUP 2 — Leslie (explicit, since she's an admin not in techs)
+-- GROUP 2, Leslie (explicit, since she's an admin not in techs)
 -- ════════════════════════════════════════════════════════════════════════
--- This INSERT is unconditional — Leslie should always have the comp on
+-- This INSERT is unconditional, Leslie should always have the comp on
 -- the comps table whether or not she's in public.techs. Idempotent via
 -- on conflict do nothing.
 
@@ -103,7 +103,7 @@ on conflict (email) do nothing;
 
 
 -- ════════════════════════════════════════════════════════════════════════
--- GROUP 3 — Archived techs (in public.archived_techs)
+-- GROUP 3, Archived techs (in public.archived_techs)
 -- ════════════════════════════════════════════════════════════════════════
 -- Archived techs have no public.techs row right now. Adding them to
 -- tech_comps records the comp; when they re-sign-up via the regular
@@ -114,7 +114,7 @@ on conflict (email) do nothing;
 -- show up as Glow Up members with the gold badge.
 
 -- ────────────────────────────────────────────────────────────────────────
--- STEP A.3 — Review the archived list.
+-- STEP A.3, Review the archived list.
 -- ────────────────────────────────────────────────────────────────────────
 
 select at.id,
@@ -129,7 +129,7 @@ select at.id,
 
 
 -- ────────────────────────────────────────────────────────────────────────
--- STEP B.3 — Comp ALL archived techs (the easy path).
+-- STEP B.3, Comp ALL archived techs (the easy path).
 -- ────────────────────────────────────────────────────────────────────────
 
 -- Uncomment to run:
@@ -137,7 +137,7 @@ select at.id,
 -- insert into public.tech_comps (email, granted_by, note, monthly_limit)
 -- select lower(btrim(at.email)),
 --        'anne@mynailconnection.com',
---        'MNC 1.0 archived founder — comped Glow Up',
+--        'MNC 1.0 archived founder, comped Glow Up',
 --        40
 --   from public.archived_techs at
 --  where at.email is not null
@@ -146,7 +146,7 @@ select at.id,
 
 
 -- ────────────────────────────────────────────────────────────────────────
--- STEP C.3 — Comp ONLY specific archived techs (the picky path).
+-- STEP C.3, Comp ONLY specific archived techs (the picky path).
 -- ────────────────────────────────────────────────────────────────────────
 
 -- Uncomment to run:
@@ -154,7 +154,7 @@ select at.id,
 -- insert into public.tech_comps (email, granted_by, note, monthly_limit)
 -- select lower(btrim(at.email)),
 --        'anne@mynailconnection.com',
---        'MNC 1.0 archived founder — comped Glow Up',
+--        'MNC 1.0 archived founder, comped Glow Up',
 --        40
 --   from public.archived_techs at
 --  where at.id in (
@@ -168,11 +168,11 @@ select at.id,
 
 
 -- ════════════════════════════════════════════════════════════════════════
--- VERIFY — final state of the comps table
+-- VERIFY, final state of the comps table
 -- ════════════════════════════════════════════════════════════════════════
 -- Shows everyone in tech_comps with two flags:
---   has_techs_row — false = waiting for them to re-onboard
---   from_archive  — true  = they came from the archived list
+--   has_techs_row, false = waiting for them to re-onboard
+--   from_archive, true  = they came from the archived list
 -- ════════════════════════════════════════════════════════════════════════
 
 select c.email,
@@ -190,7 +190,7 @@ select c.email,
 --   insert into public.tech_comps (email, granted_by, note, monthly_limit)
 --   values (lower(btrim('newperson@example.com')),
 --           'anne@mynailconnection.com',
---           'Personal grant — friend of the platform',
+--           'Personal grant, friend of the platform',
 --           40)
 --   on conflict (email) do nothing;
 --

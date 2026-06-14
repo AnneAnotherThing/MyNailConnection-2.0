@@ -6,9 +6,9 @@
 -- correctly because the auth side and the profile side are out of sync.
 --
 -- The two failure modes you've actually hit:
---   1. "Orphan auth" — auth user with NO matching public.techs / public.users
+--   1. "Orphan auth", auth user with NO matching public.techs / public.users
 --      row. App PATCHes silently match 0 rows; UI claims success.
---   2. "ID mismatch" — auth.users.id is supposed to equal public.users.id
+--   2. "ID mismatch", auth.users.id is supposed to equal public.users.id
 --      (and likely public.techs.id). When they drift, RLS that keys off
 --      auth.uid() blocks users from their own row.
 --
@@ -17,7 +17,7 @@
 
 
 -- ----------------------------------------------------------------------------
--- BUCKET A — ORPHAN AUTH  (auth user with NO profile in techs OR users)
+-- BUCKET A, ORPHAN AUTH  (auth user with NO profile in techs OR users)
 -- These accounts can sign in but have nothing in the app tables.
 -- This is the silent-PATCH-no-op failure mode.
 -- ----------------------------------------------------------------------------
@@ -36,9 +36,9 @@ order by au.created_at desc;
 
 
 -- ----------------------------------------------------------------------------
--- BUCKET B — IN BOTH  (auth user matched to BOTH techs and users by email)
+-- BUCKET B, IN BOTH  (auth user matched to BOTH techs and users by email)
 -- techs/users are meant to be mutually exclusive. A row in both means
--- ambiguous identity at sign-in — app might pick the wrong profile.
+-- ambiguous identity at sign-in, app might pick the wrong profile.
 -- ----------------------------------------------------------------------------
 select
   au.id    as auth_id,
@@ -52,7 +52,7 @@ order by au.email;
 
 
 -- ----------------------------------------------------------------------------
--- BUCKET C — ID MISMATCH on public.users
+-- BUCKET C, ID MISMATCH on public.users
 -- Convention: public.users.id == auth.users.id for the same email.
 -- If they drift, RLS policies keyed on auth.uid() will hide the user's
 -- own row from them.
@@ -69,7 +69,7 @@ order by au.email;
 
 
 -- ----------------------------------------------------------------------------
--- BUCKET D — ID MISMATCH on public.techs
+-- BUCKET D, ID MISMATCH on public.techs
 -- Same idea. Comment out if your public.techs uses a different id scheme
 -- (e.g., a separate uuid joined via auth_user_id instead of id).
 -- ----------------------------------------------------------------------------
@@ -85,7 +85,7 @@ order by au.email;
 
 
 -- ----------------------------------------------------------------------------
--- BUCKET E — DUPLICATE AUTH on the same email (case-insensitive)
+-- BUCKET E, DUPLICATE AUTH on the same email (case-insensitive)
 -- Two auth.users rows sharing a normalized email. Sign-in becomes
 -- non-deterministic and one row will become unreachable.
 -- ----------------------------------------------------------------------------
@@ -101,9 +101,9 @@ order by auth_rows desc, email_norm;
 
 
 -- ----------------------------------------------------------------------------
--- BUCKET F — UNCONFIRMED AUTH USERS
+-- BUCKET F, UNCONFIRMED AUTH USERS
 -- Per your launch config (Confirm-email OFF as of 2026-04-28) this should
--- be a small set — anything created before that date that never confirmed,
+-- be a small set, anything created before that date that never confirmed,
 -- plus anyone created via flows that didn't pre-stamp email_confirmed_at.
 -- These users may hit "email not confirmed" if the project setting flips back.
 -- ----------------------------------------------------------------------------
@@ -124,7 +124,7 @@ order by au.created_at desc;
 
 
 -- ----------------------------------------------------------------------------
--- BUCKET G — PROFILE ROWS WITH NO AUTH  (informational, often intentional)
+-- BUCKET G, PROFILE ROWS WITH NO AUTH  (informational, often intentional)
 -- public.techs / public.users rows that have no matching auth.users row.
 -- Often by design (archived techs awaiting re-onboarding). Listed here so
 -- you can verify which are intentional vs accidental.
@@ -145,7 +145,7 @@ order by table_name, email;
 
 
 -- ----------------------------------------------------------------------------
--- ROLLUP — counts only, for an at-a-glance health check
+-- ROLLUP, counts only, for an at-a-glance health check
 -- ----------------------------------------------------------------------------
 select 'A: orphan auth (no profile)'           as bucket, count(*) from auth.users au
   left join public.techs t on lower(t.email) = lower(au.email)

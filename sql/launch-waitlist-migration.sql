@@ -33,7 +33,7 @@ create policy "public_can_insert"
   with check (true);
 
 -- Required: explicit table grant. RLS policies are necessary but not
--- sufficient — the anon role also needs the underlying INSERT privilege.
+-- sufficient, the anon role also needs the underlying INSERT privilege.
 grant usage on schema public to anon, authenticated;
 grant insert on public.launch_waitlist to anon, authenticated;
 

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Launch Dashboard — My Nail Connection</title>
+<title>Launch Dashboard - My Nail Connection</title>
 <meta name="description" content="Private launch dashboard for the My Nail Connection team."/>
 <meta name="robots" content="noindex, nofollow, noarchive"/>
 <link rel="icon" href="favicon.ico" sizes="any"/>
@@ -252,22 +252,22 @@
     <div class="cards-grid">
       <div class="stat-card featured">
         <div class="stat-label">Waitlist</div>
-        <div class="stat-value" id="stat-waitlist-total">—</div>
+        <div class="stat-value" id="stat-waitlist-total">-</div>
         <div class="stat-sub" id="stat-waitlist-delta">signups so far</div>
       </div>
       <div class="stat-card">
         <div class="stat-label">Today</div>
-        <div class="stat-value" id="stat-today">—</div>
+        <div class="stat-value" id="stat-today">-</div>
         <div class="stat-sub">new signups today</div>
       </div>
       <div class="stat-card">
         <div class="stat-label">This week</div>
-        <div class="stat-value" id="stat-week">—</div>
+        <div class="stat-value" id="stat-week">-</div>
         <div class="stat-sub">last 7 days</div>
       </div>
       <div class="stat-card">
         <div class="stat-label">Tech profiles</div>
-        <div class="stat-value" id="stat-techs">—</div>
+        <div class="stat-value" id="stat-techs">-</div>
         <div class="stat-sub">ready at launch</div>
       </div>
     </div>
@@ -275,7 +275,7 @@
     <div class="panel">
       <div class="panel-head">
         <div class="panel-title">Signups · last 14 days</div>
-        <div class="panel-meta" id="stat-trend-total">—</div>
+        <div class="panel-meta" id="stat-trend-total">-</div>
       </div>
       <svg id="stat-spark" viewBox="0 0 600 88" preserveAspectRatio="none" aria-hidden="true">
         <!-- rendered by renderStats() -->
@@ -297,7 +297,7 @@
       <div class="dd-label">Dig deeper</div>
       <a href="https://analytics.google.com" target="_blank" rel="noopener">→ Google Analytics (full traffic picture)</a>
       <a href="https://supabase.com/dashboard" target="_blank" rel="noopener">→ Supabase (raw data + CSV export)</a>
-      <div class="note">Once the app ships, more signals drop in here — new profiles, bookings, App Store &amp; Play Store installs.</div>
+      <div class="note">Once the app ships, more signals drop in here, new profiles, bookings, App Store &amp; Play Store installs.</div>
     </div>
 
     <div class="bottom-row">
@@ -492,7 +492,7 @@
       'unknown':   'Unknown / other'
     };
     if (srcArr.length === 0) {
-      setHtml('stat-sources', '<div class="loading">No signups yet — check back once the waitlist warms up 🌸</div>');
+      setHtml('stat-sources', '<div class="loading">No signups yet, check back once the waitlist warms up 🌸</div>');
     } else {
       setHtml('stat-sources', srcArr.map(s => {
         const pct = Math.round((s.n / srcMax) * 100);

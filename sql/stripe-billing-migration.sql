@@ -6,11 +6,11 @@
 --   1. Billing columns on public.techs (subscription_tier, photo_credits,
 --      subscription_expires_at). The README previously listed these as a
 --      copy-paste block; this formalizes them.
---   2. stripe_customer_id on public.techs — set on first checkout, then
+--   2. stripe_customer_id on public.techs, set on first checkout, then
 --      used by customer.subscription.updated / .deleted events so the
 --      webhook can find the right tech row without an extra Stripe API
 --      call.
---   3. public.stripe_events — dedupe table, primary key on event.id.
+--   3. public.stripe_events, dedupe table, primary key on event.id.
 --      The webhook inserts every event's id before processing; if insert
 --      fails with unique_violation, we know it's a retry and skip it.
 --      Prevents double-crediting on Stripe retries.
@@ -19,7 +19,7 @@
 -- ============================================================================
 
 
--- ── BLOCK 1 — Billing columns on techs ───────────────────────────────────────
+-- ── BLOCK 1, Billing columns on techs ───────────────────────────────────────
 alter table public.techs
   add column if not exists subscription_tier       text default 'free',
   add column if not exists photo_credits           int  default 0,
@@ -31,7 +31,7 @@ create index if not exists techs_stripe_customer_idx
   where stripe_customer_id is not null;
 
 
--- ── BLOCK 2 — Webhook idempotency table ─────────────────────────────────────
+-- ── BLOCK 2, Webhook idempotency table ─────────────────────────────────────
 -- stripe_events exists purely to dedupe webhook deliveries. We insert
 -- event.id before processing; duplicates fail with unique_violation and
 -- the webhook short-circuits. 90-day TTL is managed by the cleanup job
@@ -53,7 +53,7 @@ create policy stripe_events_noread on public.stripe_events
 -- insert/read. This policy just blocks anon/authenticated callers.
 
 
--- ── BLOCK 3 — (Optional) cleanup of old event records ───────────────────────
+-- ── BLOCK 3, (Optional) cleanup of old event records ───────────────────────
 -- Keep ~90 days of dedupe history. Stripe's automatic retry window is
 -- well under that. Run this ad-hoc in SQL Editor occasionally, or wire
 -- it into pg_cron if you want it automatic.

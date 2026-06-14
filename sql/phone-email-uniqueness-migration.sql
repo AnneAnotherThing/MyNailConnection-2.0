@@ -1,9 +1,9 @@
 -- ────────────────────────────────────────────────────────────────────────
--- MNC phone + email uniqueness migration  (v2 — phone REQUIRED)
+-- MNC phone + email uniqueness migration  (v2, phone REQUIRED)
 -- ────────────────────────────────────────────────────────────────────────
 -- Purpose: prevent one person from creating multiple accounts to game the
 -- "5 free photos" benefit. Enforces uniqueness at the DATABASE level, not
--- just in JS — so no client-side bypass is possible.
+-- just in JS, so no client-side bypass is possible.
 --
 -- Policy:
 --   • Phone is REQUIRED and UNIQUE on both users + techs.
@@ -22,7 +22,7 @@
 
 
 -- ========================================================================
--- BLOCK 0 — ADD MISSING COLUMNS
+-- BLOCK 0, ADD MISSING COLUMNS
 -- public.users didn't have a phone column (unlike public.techs). Add it
 -- now so the rest of the migration works. Nullable for now; Block 3 will
 -- enforce NOT NULL once data's clean. Also add other profile columns the
@@ -42,12 +42,12 @@ alter table public.users
 
 
 -- ========================================================================
--- BLOCK 1 — DIAGNOSTIC
+-- BLOCK 1, DIAGNOSTIC
 -- Run this after Block 0. If any of the four queries return rows, resolve
 -- those before running Block 3. Block 2 helps with the first two.
 -- ========================================================================
 
--- 1a. Users with missing phone — these will block NOT NULL if left alone.
+-- 1a. Users with missing phone, these will block NOT NULL if left alone.
 -- select email, name, phone from public.users
 --  where phone is null or phone = '' order by email;
 
@@ -67,11 +67,11 @@ alter table public.users
 
 
 -- ========================================================================
--- BLOCK 2 — NORMALIZE + BACKFILL
+-- BLOCK 2, NORMALIZE + BACKFILL
 -- Normalizes all phones to digits-only, then copies techs.phone into the
 -- matching public.users row for any user whose phone is still null
 -- (typically the 17 techs who were backfilled into users earlier without
---  phones). Idempotent — safe to re-run.
+--  phones). Idempotent, safe to re-run.
 -- ========================================================================
 
 -- Normalize phones to digits-only in BOTH tables.
@@ -100,7 +100,7 @@ update public.users u
 
 
 -- ========================================================================
--- BLOCK 3 — CONSTRAINTS
+-- BLOCK 3, CONSTRAINTS
 -- Only run this once Block 1 returns zero rows for 1a–1d. These changes
 -- are hard to reverse and will fail noisily if your data isn't clean.
 -- ========================================================================

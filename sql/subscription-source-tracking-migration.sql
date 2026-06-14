@@ -20,7 +20,7 @@
 --     of a Postgres ENUM, so we can add new sources later (e.g.
 --     'paddle', 'razorpay') without doing a type migration.
 --   - apple_original_transaction_id is Apple's stable subscription ID
---     (originalTransactionId) — survives renewals and re-subscriptions,
+--     (originalTransactionId), survives renewals and re-subscriptions,
 --     and is what RevenueCat keys off internally.
 --   - google_purchase_token is the Play Billing purchase token, used to
 --     query the Play Developer API for subscription state.
@@ -58,13 +58,13 @@ COMMENT ON COLUMN public.techs.subscription_source IS
   'Where this subscription was purchased. NULL for free-tier techs. Set by webhook (stripe-webhook for stripe; revenuecat-webhook for apple_iap and google_play) or by tech_comps trigger (comp). Used for revenue attribution, cancellation routing, and analytics splits.';
 
 COMMENT ON COLUMN public.techs.apple_original_transaction_id IS
-  'Apple StoreKit originalTransactionId — stable across renewals. Set by RevenueCat receipt validation. Use this (NOT the per-renewal transaction_id) when reconciling with App Store Connect or RevenueCat APIs.';
+  'Apple StoreKit originalTransactionId, stable across renewals. Set by RevenueCat receipt validation. Use this (NOT the per-renewal transaction_id) when reconciling with App Store Connect or RevenueCat APIs.';
 
 COMMENT ON COLUMN public.techs.google_purchase_token IS
   'Google Play Billing purchase token. Set by RevenueCat receipt validation when the subscriber came from Google Play. Use to query Play Developer API for subscription state.';
 
 COMMENT ON COLUMN public.techs.revenuecat_app_user_id IS
-  'RevenueCat App User ID — the identifier RevenueCat uses to track this customer across their lifetime. We pass our own user ID (Supabase auth.users.id) as the App User ID, so this column should equal the techs.email-derived user_id in normal cases. Diverges only if a re-attribution happened.';
+  'RevenueCat App User ID, the identifier RevenueCat uses to track this customer across their lifetime. We pass our own user ID (Supabase auth.users.id) as the App User ID, so this column should equal the techs.email-derived user_id in normal cases. Diverges only if a re-attribution happened.';
 
 -- ── Indexes for lookups ─────────────────────────────────────────────────
 -- Partial indexes (WHERE not null) keep the index small since most rows
@@ -94,7 +94,7 @@ UPDATE public.techs t
  WHERE t.subscription_source IS NULL
    AND t.stripe_customer_id IS NOT NULL;
 
--- Comped techs — anyone whose lowercase email appears in tech_comps gets
+-- Comped techs, anyone whose lowercase email appears in tech_comps gets
 -- 'comp' as their source. The tech_comps table is the source of truth for
 -- grandfathered grants per project_mnc_comps_system memory.
 UPDATE public.techs t
@@ -110,7 +110,7 @@ UPDATE public.techs t
 --
 -- Updated by webhooks (stripe-webhook for Stripe, revenuecat-webhook for
 -- Apple/Google) on every successful purchase event. NOT tied to current
--- credit balance — these are LIFETIME counts that only go up.
+-- credit balance, these are LIFETIME counts that only go up.
 --   - glow_up_months_purchased increments on each successful renewal
 --   - spotlight_*_purchased_count increments on each one-time purchase
 --
@@ -131,7 +131,7 @@ ALTER TABLE public.techs
   ADD COLUMN IF NOT EXISTS spotlight_10_purchased_count INT NOT NULL DEFAULT 0;
 
 COMMENT ON COLUMN public.techs.glow_up_months_purchased IS
-  'Lifetime count of Glow Up subscription months billed. Increments by 1 on every successful renewal (initial purchase = 1, every monthly renewal adds 1). Independent of subscription_source — tallies Stripe + Apple + Google together. Use to compute lifetime sub revenue per tech.';
+  'Lifetime count of Glow Up subscription months billed. Increments by 1 on every successful renewal (initial purchase = 1, every monthly renewal adds 1). Independent of subscription_source, tallies Stripe + Apple + Google together. Use to compute lifetime sub revenue per tech.';
 
 COMMENT ON COLUMN public.techs.spotlight_1_purchased_count IS
   'Lifetime count of Spotlight 1 Photo one-time bundles purchased. Increments by 1 on each successful purchase regardless of source.';
@@ -141,7 +141,7 @@ COMMENT ON COLUMN public.techs.spotlight_10_purchased_count IS
 
 -- Backfill: techs who have an active Stripe sub today have presumably
 -- been billed at least once. Best we can do without an audit log is set
--- the counter to 1 for currently-paid techs as a starting point — true
+-- the counter to 1 for currently-paid techs as a starting point, true
 -- counts will be exact going forward as webhooks fire.
 UPDATE public.techs
    SET glow_up_months_purchased = 1
@@ -149,7 +149,7 @@ UPDATE public.techs
    AND subscription_source = 'stripe'
    AND glow_up_months_purchased = 0;
 
--- ── Sanity reports — uncomment to see the breakdown after running ──────
+-- ── Sanity reports, uncomment to see the breakdown after running ──────
 -- SELECT subscription_source, count(*) FROM public.techs GROUP BY 1 ORDER BY 2 DESC;
 -- SELECT count(*) FILTER (WHERE glow_up_months_purchased > 0)  AS glow_up_subs,
 --        sum(glow_up_months_purchased)                          AS total_glow_up_months,

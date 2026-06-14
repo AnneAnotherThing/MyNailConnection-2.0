@@ -14,7 +14,7 @@ update public.techs
  where 'Mobile' = any(tags)
    and hide_address_public = false;
 
--- Verify — should list every Mobile tech with hide_address_public = true
+-- Verify, should list every Mobile tech with hide_address_public = true
 select name, email, hide_address_public, tags
   from public.techs
  where 'Mobile' = any(tags)

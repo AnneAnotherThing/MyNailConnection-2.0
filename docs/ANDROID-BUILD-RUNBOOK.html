@@ -35,7 +35,7 @@
 </head>
 <body>
 
-<h1>My Nail Connection &mdash; Android Build Runbook</h1>
+<h1>My Nail Connection, Android Build Runbook</h1>
 <p class="subtitle">Capacitor 6 &bull; Bundled hosting &bull; App ID: <code>com.mynailconnection.app</code></p>
 
 <!-- ───────────────── PREREQUISITES ───────────────── -->
@@ -131,8 +131,8 @@ MNC/<br>
 <!-- ───────────────── STEP 8 ───────────────── -->
 <h2><span class="step-num">8</span> Build a Release AAB (for Google Play)</h2>
 <p>Google Play requires an <strong>Android App Bundle (.aab)</strong>, not a plain APK.</p>
-<h3>8a &mdash; Create a Signing Key (one time)</h3>
-<pre><span class="comment"># Run in terminal &mdash; remember this password!</span>
+<h3>8a, Create a Signing Key (one time)</h3>
+<pre><span class="comment"># Run in terminal, remember this password!</span>
 keytool -genkey -v \
   -keystore mnc-release-key.jks \
   -keyalg RSA -keysize 2048 \
@@ -140,7 +140,7 @@ keytool -genkey -v \
   -alias mnc</pre>
 <p>Store <code>mnc-release-key.jks</code> somewhere safe (not in the repo). You&rsquo;ll need it for every future release.</p>
 
-<h3>8b &mdash; Configure Signing in Gradle</h3>
+<h3>8b, Configure Signing in Gradle</h3>
 <p>Open <code>android/app/build.gradle</code> and add inside <code>android { }</code>:</p>
 <pre>signingConfigs {
     release {
@@ -163,7 +163,7 @@ buildTypes {
   <strong>Security tip:</strong> For production, move passwords to <code>local.properties</code> or environment variables instead of hard-coding them in build.gradle.
 </div>
 
-<h3>8c &mdash; Build the AAB</h3>
+<h3>8c, Build the AAB</h3>
 <p>In Android Studio: <em>Build &rarr; Generate Signed Bundle / APK &rarr; Android App Bundle &rarr; Next</em>. Select your keystore, enter passwords, pick <strong>release</strong>, and finish.</p>
 <p>Or from the terminal:</p>
 <pre>cd android
@@ -180,7 +180,7 @@ buildTypes {
   <li>Submit for review.</li>
 </ol>
 <div class="callout callout-green">
-  <strong>Pro tip:</strong> Start with <strong>Internal Testing</strong> track first. You can add up to 100 testers by email &mdash; no review wait, instant installs via a link.
+  <strong>Pro tip:</strong> Start with <strong>Internal Testing</strong> track first. You can add up to 100 testers by email, no review wait, instant installs via a link.
 </div>
 
 <!-- ───────────────── EVERYDAY WORKFLOW ───────────────── -->
@@ -199,7 +199,7 @@ npx cap open android</pre>
 <p>Usually means web files didn&rsquo;t sync. Run <code>npx cap sync android</code> again and check that <code>android/app/src/main/assets/public/index.html</code> exists.</p>
 
 <h3>Gradle sync fails</h3>
-<p>Make sure Android Studio has SDK 34 installed. <em>File &rarr; Settings &rarr; Languages &amp; Frameworks &rarr; Android SDK &rarr; SDK Platforms</em> &mdash; check Android 14 (API 34).</p>
+<p>Make sure Android Studio has SDK 34 installed. <em>File &rarr; Settings &rarr; Languages &amp; Frameworks &rarr; Android SDK &rarr; SDK Platforms</em>, check Android 14 (API 34).</p>
 
 <h3>&ldquo;App not installed&rdquo; on device</h3>
 <p>Usually a signing conflict. Uninstall the old version from the device first, then install fresh.</p>

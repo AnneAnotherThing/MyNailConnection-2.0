@@ -3,12 +3,12 @@
 -- ============================================================================
 -- Test account got tangled from toggling free/paid/comp states during
 -- store-listing testing. App crashes post-login on this account, but session
--- persists and reopen succeeds — classic poisoned-account-data symptom.
+-- persists and reopen succeeds, classic poisoned-account-data symptom.
 -- This script obliterates every DB row tied to test1@gmail.com (case-
 -- insensitive) so a fresh signup via the app starts from zero.
 --
 -- Tables hit (matches canonical wipe-test-accounts.sql, plus three the
--- canonical script is missing — flagged at the bottom for backport):
+-- canonical script is missing, flagged at the bottom for backport):
 --   * auth.users
 --   * public.users
 --   * public.techs
@@ -23,24 +23,24 @@
 --   * public.launch_waitlist         ← NOT in wipe-test-accounts.sql
 --
 -- NOT touched (intentional, not bugs):
---   * storage.objects in tech-photos bucket — protect_delete trigger blocks
+--   * storage.objects in tech-photos bucket, protect_delete trigger blocks
 --     SQL deletes. If you want test1's photo files gone, clean them via the
 --     Supabase dashboard → Storage → tech-photos. They're orphaned and
 --     harmless otherwise.
---   * Stripe customers — if test1 ever did a test-mode subscribe, delete the
+--   * Stripe customers, if test1 ever did a test-mode subscribe, delete the
 --     Stripe customer in Stripe Dashboard (Test Data) before re-signing up
 --     or RevenueCat may re-attach a tier on the new account. For free-tier
 --     testing this is usually a no-op.
 --
 -- After running: on the device, hit "Create a Free Account" in the app and
 -- sign up with test1@gmail.com / TestUser1. Free tier with 5 free post slots
--- is the default — don't toggle anything afterward, that's the whole point.
+-- is the default, don't toggle anything afterward, that's the whole point.
 --
 -- Run blocks 1, 2, 3 in order in the Supabase SQL editor.
 -- ============================================================================
 
 
--- ── 1. BEFORE — show what's there ───────────────────────────────────────────
+-- ── 1. BEFORE, show what's there ───────────────────────────────────────────
 select 'auth.users'                    as table_name, count(*) as rows from auth.users                  where lower(email) = 'test1@gmail.com'
 union all
 select 'public.users',                 count(*)              from public.users                 where lower(email) = 'test1@gmail.com'
@@ -70,7 +70,7 @@ select 'public.launch_waitlist',       count(*)              from public.launch_
 ;
 
 
--- ── 2. DELETE — single WITH so all FK checks happen at end-of-statement ─────
+-- ── 2. DELETE, single WITH so all FK checks happen at end-of-statement ─────
 with email_set (e) as (values ('test1@gmail.com'))
 , del_favs_user as (
   delete from public.user_favorites
@@ -159,7 +159,7 @@ select
 ;
 
 
--- ── 3. AFTER — re-run block 1 above to confirm every row count is 0. ────────
+-- ── 3. AFTER, re-run block 1 above to confirm every row count is 0. ────────
 
 
 -- ── BACKLOG ─────────────────────────────────────────────────────────────────

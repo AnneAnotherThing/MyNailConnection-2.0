@@ -1,27 +1,27 @@
 -- ─────────────────────────────────────────────────────────────────────────
--- MNC — Granular analytics migration
+-- MNC, Granular analytics migration
 --
 -- Run once in Supabase → SQL Editor. Idempotent / safe to re-run.
 --
 -- Background:
 --   The in-app admin "Stats" tab is being retired in favour of the single
 --   web dashboard (admin-stats.html). To make that dashboard answer the
---   questions Anne actually asks — "how did people get to the page: QR,
---   phone, or web?" and "how many downloads on Apple vs Android?" — we add
+--   questions Anne actually asks, "how did people get to the page: QR,
+--   phone, or web?" and "how many downloads on Apple vs Android?", we add
 --   three things:
 --
---     1. marketing_hits.entry_channel  — coarse acquisition channel computed
+--     1. marketing_hits.entry_channel, coarse acquisition channel computed
 --        in the browser at hit time (qr / social / search / referral /
 --        campaign / direct). Lets us split traffic by how it arrived,
 --        independent of the device_type (mobile/desktop) we already store.
 --
---     2. public.store_clicks            — one row every time a marketing
+--     2. public.store_clicks, one row every time a marketing
 --        visitor taps the App Store or Google Play badge. This is a
 --        first-party *download-intent* proxy split by platform. It is NOT a
 --        literal install count (people tap and don't always install), but it
 --        shows the Apple-vs-Android split and trend for free, today.
 --
---     3. public.app_downloads           — manual ledger for the TRUE install
+--     3. public.app_downloads, manual ledger for the TRUE install
 --        totals you read out of App Store Connect / Play Console. Admins type
 --        in the number for a period; the dashboard shows the latest per
 --        platform. This is the source of truth for real downloads until/unless
@@ -84,7 +84,7 @@ create policy store_clicks_select_admin
 --   One row per (platform, period) snapshot you key in from the consoles.
 --   `total_installs` is the headline number; `period_label` is free text
 --   (e.g. 'All-time', 'Week of Jun 1', 'May 2026') so you can record either
---   running totals or per-period deltas — whatever the console gives you.
+--   running totals or per-period deltas, whatever the console gives you.
 create table if not exists public.app_downloads (
   id             bigserial primary key,
   created_at     timestamptz not null default now(),

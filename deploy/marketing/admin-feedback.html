@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Founder Feedback — Admin</title>
+  <title>Founder Feedback - Admin</title>
   <meta name="robots" content="noindex" />
   <link rel="icon" href="/favicon.ico" />
   <style>
@@ -210,7 +210,7 @@
     }
     .me-name strong { color: var(--ink); }
 
-    /* Tracker — add form */
+    /* Tracker, add form */
     .tracker-add {
       background: #FFFBF9;
       border: 1px solid var(--border);
@@ -249,7 +249,7 @@
     .tracker-add button[disabled] { opacity: .6; cursor: not-allowed; }
     .tracker-add .err { color: var(--bug); font-size: 13px; margin-top: 8px; min-height: 1em; }
 
-    /* Tracker — items */
+    /* Tracker, items */
     .pri-badge {
       font-size: 11px;
       letter-spacing: 1px;
@@ -322,14 +322,14 @@
         <p><a href="#" id="signOutLink">Sign out</a></p>
       </div>
 
-      <!-- AUTHED — tabs + both panels -->
+      <!-- AUTHED, tabs + both panels -->
       <div id="authed" hidden>
 
         <div class="tabs" role="tablist">
           <button class="tab-btn active" data-tab="feedback" role="tab">Feedback <span class="tab-badge" id="feedbackBadge">0</span></button>
           <button class="tab-btn" data-tab="tracker" role="tab">Tracker <span class="tab-badge" id="trackerBadge">0</span></button>
           <span class="spacer"></span>
-          <span class="me-name" id="meName">—</span>
+          <span class="me-name" id="meName">-</span>
           <a href="#" id="signOutBtn" style="font-size:13px; color:var(--ink-soft); margin-left:8px;">Sign out</a>
         </div>
 
@@ -346,7 +346,7 @@
             <label class="show-resolved">
               <input type="checkbox" id="hideResolved" checked /> Hide resolved
             </label>
-            <span class="count" id="count">—</span>
+            <span class="count" id="count">-</span>
           </div>
           <div class="list" id="list"></div>
         </div>
@@ -358,7 +358,7 @@
             <h3>Add to the tracker</h3>
             <form id="trackerForm">
               <div class="row">
-                <input type="text" id="trk-title" placeholder="Short title — what needs doing?" required />
+                <input type="text" id="trk-title" placeholder="Short title, what needs doing?" required />
                 <select id="trk-priority" aria-label="Priority">
                   <option value="high">High</option>
                   <option value="medium" selected>Medium</option>
@@ -366,7 +366,7 @@
                 </select>
                 <button type="submit" id="trkAddBtn">Add</button>
               </div>
-              <textarea id="trk-details" placeholder="Optional — context, repro steps, who reported it, etc."></textarea>
+              <textarea id="trk-details" placeholder="Optional, context, repro steps, who reported it, etc."></textarea>
               <p class="err" id="trkErr" aria-live="polite"></p>
             </form>
           </div>
@@ -382,7 +382,7 @@
             <label class="show-resolved">
               <input type="checkbox" id="hideDone" checked /> Hide done
             </label>
-            <span class="count" id="trkCount">—</span>
+            <span class="count" id="trkCount">-</span>
           </div>
 
           <div class="list" id="trkList"></div>
@@ -436,7 +436,7 @@
           displayName = profile.first_name || profile.name || profile.display_name
                      || profile.full_name || null;
         }
-      } catch (_) { /* table or column missing — fall through */ }
+      } catch (_) { /* table or column missing, fall through */ }
       if (!displayName) {
         const meta = user.user_metadata || {};
         displayName = meta.full_name || meta.name || meta.first_name || null;
@@ -450,7 +450,7 @@
     }
 
     async function loadAll() {
-      // Try feedback first — its RLS gates everything else (admin role check)
+      // Try feedback first, its RLS gates everything else (admin role check)
       const { data: feedback, error: fbErr } = await supa
         .from('founders_feedback')
         .select('*')
@@ -598,7 +598,7 @@
 
       const list = $('trkList');
       if (filtered.length === 0) {
-        list.innerHTML = '<div class="empty">Nothing tracked yet — add the first one above.</div>';
+        list.innerHTML = '<div class="empty">Nothing tracked yet, add the first one above.</div>';
         return;
       }
 

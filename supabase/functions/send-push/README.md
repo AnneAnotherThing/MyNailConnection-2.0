@@ -13,7 +13,7 @@ In Supabase Dashboard → Settings → Edge Functions → Secrets, add:
 | Secret | Value |
 |--------|-------|
 | VAPID_PUBLIC_KEY | BINTHftWbkLsZZkNn0tafTXmhmgV6gvk46zmMeAC7wmJl5HWeUeWgGSoMDX9DRu7drBtS5XruZVPvduhoH4gSO4 |
-| VAPID_PRIVATE_KEY | (the private key PEM from key generation — keep this secret!) |
+| VAPID_PRIVATE_KEY | (the private key PEM from key generation, keep this secret!) |
 | VAPID_SUBJECT | mailto:admin@mynailconnection.com |
 
 ## 3. Create push_subscriptions table in Supabase
@@ -46,6 +46,6 @@ create policy "Users can manage own subscriptions"
 - The service worker shows the notification even when the app is closed
 
 ## Notes
-- Push only works on https:// — NOT on localhost
+- Push only works on https://, NOT on localhost
 - iOS Safari requires iOS 16.4+ and the app must be installed as a PWA (Add to Home Screen)
-- The VAPID private key must stay secret — never put it in the HTML
+- The VAPID private key must stay secret, never put it in the HTML

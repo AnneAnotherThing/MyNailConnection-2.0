@@ -6,11 +6,11 @@
 -- read/write via RLS.
 --
 -- Each item:
---   title          — short label
---   details        — optional longer description
---   priority       — high | medium | low
---   status         — open | done
---   added_by_*     — denormalized author info (so the UI can show
+--   title, short label
+--   details, optional longer description
+--   priority, high | medium | low
+--   status, open | done
+--   added_by_*, denormalized author info (so the UI can show
 --                    "Added by Anne" without a join on every render)
 --
 -- ASSUMPTION: public.users has a `role` column where admins are 'admin'.
@@ -50,7 +50,7 @@ create trigger trg_touch_launch_tracker_updated
 
 
 -- ----------------------------------------------------------------------------
--- RLS — admins only, full read/write
+-- RLS, admins only, full read/write
 -- ----------------------------------------------------------------------------
 alter table public.launch_tracker enable row level security;
 

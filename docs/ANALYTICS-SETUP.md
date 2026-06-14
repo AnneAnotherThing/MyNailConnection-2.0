@@ -1,4 +1,4 @@
-# MNC granular analytics — setup & how it works
+# MNC granular analytics, setup & how it works
 
 _Added 2026-06-04. Retires the in-app Stats tab; the web dashboard
 (`admin-stats.html`) is now the single source of truth._
@@ -19,12 +19,12 @@ empty (the rest of the dashboard keeps working).
   removed from the app so there’s only one place to maintain.
 
 - **Web dashboard** (`admin-stats.html`) gained three panels:
-  1. **How visitors arrive** — channel breakdown (QR / Social / Search /
+  1. **How visitors arrive**, channel breakdown (QR / Social / Search /
      Referral / Campaign / Direct) over the last 30 days, plus a 📱 phone vs
      💻 desktop split.
-  2. **Store taps · download intent** — Apple vs Android badge taps
+  2. **Store taps · download intent**, Apple vs Android badge taps
      (today / 7d / all-time). A proxy for interest, **not** installs.
-  3. **App downloads · true installs** — the real numbers, entered by hand.
+  3. **App downloads · true installs**, the real numbers, entered by hand.
 
 ## How each question gets answered
 
@@ -37,11 +37,11 @@ empty (the rest of the dashboard keeps working).
     `qr-social-bio.png` → the landing page, tagged per use.
   - `qr-techguide.png` → the Tech Guide (for recruiting techs).
   - `qr-plain.png` → untagged, general use.
-  Make more anytime by linking to `?src=qr-<whatever>` — any `src` starting
+  Make more anytime by linking to `?src=qr-<whatever>`, any `src` starting
   with `qr` classifies as QR.
 
 ### “How many downloads on Apple vs Android?”
-True install counts **only** live in App Store Connect and Play Console —
+True install counts **only** live in App Store Connect and Play Console,
 they can’t be read from the web or Supabase. So:
 - **Now:** the dashboard shows **store-tap intent** automatically, and an
   **“App downloads”** panel where you paste the real totals (~2 min):
@@ -56,16 +56,16 @@ they can’t be read from the web or Supabase. So:
 
 ## Privacy / access
 - `store_clicks`: anon can INSERT (marketing pages are public); only admins
-  (`is_admin()`) can SELECT. No IPs, no precise geo — same model as
+  (`is_admin()`) can SELECT. No IPs, no precise geo, same model as
   `marketing_hits`.
 - `app_downloads`: admin read/write only.
 
 ## Files touched
-- `sql/granular-analytics-migration.sql` (new — **run it**)
-- `marketing.html` — channel tagging + store-badge click tracker
-- `tech-guide.html` — channel tagging
-- `admin-stats.html` — three new panels + loaders + manual-entry form
-- `index.html` — Stats tab slimmed to mini-summary + launcher
-- `qr/` (new) — printable tagged QR codes
+- `sql/granular-analytics-migration.sql` (new, **run it**)
+- `marketing.html`, channel tagging + store-badge click tracker
+- `tech-guide.html`, channel tagging
+- `admin-stats.html`, three new panels + loaders + manual-entry form
+- `index.html`, Stats tab slimmed to mini-summary + launcher
+- `qr/` (new), printable tagged QR codes
 
 Deploy bundle re-synced via `deploy/sync.sh`; push `main` to ship.

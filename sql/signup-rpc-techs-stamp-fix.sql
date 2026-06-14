@@ -1,5 +1,5 @@
 -- ============================================================================
--- MNC Signup RPC — Techs Stamp Fix  (2026-04-21)
+-- MNC Signup RPC, Techs Stamp Fix  (2026-04-21)
 -- ============================================================================
 -- Patches public.create_signup_profile() to also stamp last_password_change
 -- on public.techs when a new tech signs up.
@@ -13,7 +13,7 @@
 --
 -- checkFirstLogin() in the app queries users first with the anon key. RLS on
 -- public.users blocks anon reads, so the query returns empty and the function
--- falls through to the techs check — which is anon-readable (public
+-- falls through to the techs check, which is anon-readable (public
 -- directory policy). It finds the null stamp and triggers the force-change
 -- screen that was meant ONLY for temp-password recipients. So every brand-new
 -- tech signup was getting unexpectedly force-changed.
@@ -116,7 +116,7 @@ $$;
 
 -- ── One-time backfill: stamp admin + test tech account ──────────────────────
 -- Only run the line below that matches your current situation. Do NOT stamp
--- the 15 pre-populated techs whose auth_created is null — they'll get
+-- the 15 pre-populated techs whose auth_created is null, they'll get
 -- stamped naturally when they go through the reset/invite flow to create
 -- their Supabase login (reset-password.html stamps both tables).
 

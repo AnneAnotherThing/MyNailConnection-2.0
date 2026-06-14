@@ -2,7 +2,7 @@
 -- MNC Email-Casing Fix  (2026-04-27)
 -- ========================================================================
 -- Symptom: a fresh tech signup landed on the client home with no
--- "Tech Portal" pill — even though public.users.role was 'tech' and
+-- "Tech Portal" pill, even though public.users.role was 'tech' and
 -- the public.techs row existed.
 --
 -- Root cause: Supabase auto-lowercases auth.users.email on signup. The
@@ -11,11 +11,11 @@
 -- auto-capitalize the first letter of the email field by default, so
 -- the public rows ended up with a capital first letter while auth.users
 -- stayed lowercase. PostgREST `eq.` is case-sensitive, so showCorrectHome
--- in the app —
+-- in the app,
 --
 --   /rest/v1/users?email=eq.sonoran…@gmail.com  (lowercased from auth)
 --
--- — never matched the row stored as `Sonoran…@gmail.com`. The role
+--, never matched the row stored as `Sonoran…@gmail.com`. The role
 -- lookup returned zero rows, _mncCurrentRole stayed empty, and the
 -- home view defaulted to client. Hit by Anne's Sonoran-Sun test
 -- account on 2026-04-27.
@@ -32,7 +32,7 @@
 
 
 -- ========================================================================
--- BLOCK 1 — Patched RPC (now writes lower-cased email everywhere)
+-- BLOCK 1, Patched RPC (now writes lower-cased email everywhere)
 -- ========================================================================
 
 create or replace function public.create_signup_profile(
@@ -150,10 +150,10 @@ grant execute on function public.create_signup_profile(
 
 
 -- ========================================================================
--- BLOCK 2 — Backfill: lowercase any existing mixed-case emails
+-- BLOCK 2, Backfill: lowercase any existing mixed-case emails
 -- ========================================================================
 -- Run this once. The `where email <> lower(email)` guard makes it
--- idempotent — re-running after the data is clean is a no-op. If a
+-- idempotent, re-running after the data is clean is a no-op. If a
 -- row collides on the lower-case form (would violate a unique
 -- constraint), the UPDATE will raise `23505 unique_violation` so we
 -- can investigate the collision rather than silently dropping data.
@@ -166,6 +166,6 @@ update public.techs
    set email = lower(btrim(email))
  where email <> lower(btrim(email));
 
--- Optional sanity check — should both return 0 after the updates above.
+-- Optional sanity check, should both return 0 after the updates above.
 -- select count(*) as users_still_mixed  from public.users where email <> lower(btrim(email));
 -- select count(*) as techs_still_mixed  from public.techs where email <> lower(btrim(email));

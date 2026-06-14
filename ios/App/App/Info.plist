@@ -43,11 +43,11 @@
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>My Nail Connection uses your location to show nail techs near you and filter the home feed by distance.</string>
 	<!-- Required for App Store submission even though we don't use background
-	     location — @capacitor/geolocation's IONGeolocationLib references the
+	     location, @capacitor/geolocation's IONGeolocationLib references the
 	     "always" API surface, so Apple's static analysis (warning 90683)
 	     demands a purpose string. The app only ever requests foreground
-	     ("when in use") location via Geolocation.getCurrentPosition() — no
-	     background tracking, no watchPosition. — 2026-05-06 -->
+	     ("when in use") location via Geolocation.getCurrentPosition(), no
+	     background tracking, no watchPosition. 2026-05-06 -->
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>My Nail Connection only uses your location while you are using the app, to show nail techs near you and filter the home feed by distance.</string>
 	<key>UISupportedInterfaceOrientations</key>
@@ -65,7 +65,7 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
-	<!-- Encryption export compliance — declares that MNC uses no
+	<!-- Encryption export compliance, declares that MNC uses no
 	     non-exempt encryption. The app uses only HTTPS (TLS) which is
 	     exempt under US export regulations §740.17(b)(3)(i). Setting
 	     this to <false/> bypasses Apple's per-build export-compliance

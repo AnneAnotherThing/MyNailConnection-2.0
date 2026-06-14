@@ -10,8 +10,8 @@
 -- cancel, leaving a permanent unlimited portfolio for $9.
 --
 -- Data model:
---   public.techs.photos         — active photos (publicly visible)
---   public.techs.paused_photos  — photos hidden on cancellation (new column)
+--   public.techs.photos, active photos (publicly visible)
+--   public.techs.paused_photos, photos hidden on cancellation (new column)
 --
 --   A photo object is shaped { url, tags, [paused_at] }. The paused_at
 --   timestamp is stamped when an item is moved from photos → paused_photos
@@ -22,12 +22,12 @@
 -- ============================================================================
 
 
--- ── BLOCK 1 — Schema ────────────────────────────────────────────────────────
+-- ── BLOCK 1, Schema ────────────────────────────────────────────────────────
 alter table public.techs
   add column if not exists paused_photos jsonb not null default '[]'::jsonb;
 
 
--- ── BLOCK 2 — Pause photos beyond free limit ────────────────────────────────
+-- ── BLOCK 2, Pause photos beyond free limit ────────────────────────────────
 -- Moves photos[free_limit..end] from public.techs.photos into
 -- public.techs.paused_photos for every tech matching the given
 -- stripe_customer_id. Stamps paused_at on newly paused items. Normalizes
@@ -100,7 +100,7 @@ end;
 $$;
 
 
--- ── BLOCK 3 — Restore paused photos ─────────────────────────────────────────
+-- ── BLOCK 3, Restore paused photos ─────────────────────────────────────────
 -- Appends all paused_photos back into photos (in the order they were paused)
 -- and clears paused_photos. Strips paused_at from each restored item. Safe
 -- no-op if nothing paused.
@@ -154,7 +154,7 @@ end;
 $$;
 
 
--- ── BLOCK 4 — Grants ────────────────────────────────────────────────────────
+-- ── BLOCK 4, Grants ────────────────────────────────────────────────────────
 -- The edge function hits these via the service role, which bypasses RLS.
 -- Lock EXECUTE so anon/authenticated can't call them directly.
 revoke all on function public.pause_photos_beyond_free_limit(text, int) from public;

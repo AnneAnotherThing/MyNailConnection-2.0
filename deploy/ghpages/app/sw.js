@@ -1,9 +1,9 @@
-// My Nail Connection — Service Worker
+// My Nail Connection, Service Worker
 // Handles push notifications and basic caching
 
 // IMPORTANT: bump this string every release so returning users get the
 // new build instead of a stale cached copy. Old caches are deleted on activate.
-const CACHE_NAME = 'mnc-v311';
+const CACHE_NAME = 'mnc-v313';
 const STATIC_ASSETS = ['/', '/index.html', '/manifest.json'];
 
 // ── Install ───────────────────────────────────────────────────────────────────
@@ -24,7 +24,7 @@ self.addEventListener('activate', event => {
   self.clients.claim();
 });
 
-// ── Fetch — network first, cache fallback ─────────────────────────────────────
+// ── Fetch, network first, cache fallback ─────────────────────────────────────
 self.addEventListener('fetch', event => {
   // Only cache same-origin GET requests
   if (event.request.method !== 'GET') return;

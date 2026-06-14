@@ -18,19 +18,19 @@
 --        - leslie@mynailconnection.com
 --        - appleuser1@gmail.com
 --
--- IMPORTANT — auth.users prerequisite
+-- IMPORTANT, auth.users prerequisite
 --   Restoring an archived tech only fully works if there's already an
 --   auth.users row for that email. Section 1 reports anyone missing an
 --   auth row so you can decide how to onboard them (invite email via
---   Supabase admin, or hand-create — the latter is risky from raw SQL).
+--   Supabase admin, or hand-create, the latter is risky from raw SQL).
 --   Section 2 STILL inserts public.users / public.techs / tech_comps for
 --   them so the moment their auth row appears, they're ready to roll.
 --
 -- ORDER OF OPERATIONS (run sections in order)
---   SECTION 1 — Discovery (read-only — run first to see scope)
---   SECTION 2 — Restore archived techs (public.users / techs / comps)
---   SECTION 3 — Set passwords (archived techs + bulk reset, all in one)
---   SECTION 4 — Verification
+--   SECTION 1, Discovery (read-only, run first to see scope)
+--   SECTION 2, Restore archived techs (public.users / techs / comps)
+--   SECTION 3, Set passwords (archived techs + bulk reset, all in one)
+--   SECTION 4, Verification
 --
 -- Safe to re-run. All inserts use ON CONFLICT DO NOTHING / NOT EXISTS
 -- guards. Password updates are idempotent (re-running just re-sets the
@@ -39,7 +39,7 @@
 
 
 -- ========================================================================
--- SECTION 1 — DISCOVERY (read-only)
+-- SECTION 1, DISCOVERY (read-only)
 -- ========================================================================
 -- Run these first. Don't proceed to Section 2 until the numbers look
 -- right. If anything surprises you (an Android tester showing up in the
@@ -79,7 +79,7 @@ select
 
 
 -- ========================================================================
--- SECTION 2 — RESTORE ARCHIVED TECHS
+-- SECTION 2, RESTORE ARCHIVED TECHS
 -- ========================================================================
 -- Mirrors orphan-rescue-amwhite1971.sql pattern but loops over every
 -- archived_techs row. Inserts public.users + public.techs + tech_comps
@@ -117,7 +117,7 @@ begin
     -- public.techs
     -- The before-insert trigger apply_pending_comp_on_tech_insert will
     -- check tech_comps and stamp subscription_tier='paid' if a comp
-    -- already exists. We insert the tech row FIRST, then comp — the
+    -- already exists. We insert the tech row FIRST, then comp, the
     -- after-insert trigger sync_tech_comp_to_techs will sync paid status
     -- on the comp insert.
     if not exists (select 1 from public.techs where lower(email) = lower(r.email)) then
@@ -132,7 +132,7 @@ begin
       values (
         lower(btrim(r.email)),
         'anne@mynailconnection.com',
-        'MNC 1.0 archived founder — restored 2026-05-02, comped Glow Up',
+        'MNC 1.0 archived founder, restored 2026-05-02, comped Glow Up',
         40
       );
       v_comps_inserted := v_comps_inserted + 1;
@@ -147,7 +147,7 @@ end $$;
 
 
 -- ========================================================================
--- SECTION 3 — SET PASSWORDS (one bulk update covers everyone)
+-- SECTION 3, SET PASSWORDS (one bulk update covers everyone)
 -- ========================================================================
 -- Single UPDATE handles both:
 --   (a) archived techs that have an auth row → password becomes MNC2026
@@ -185,7 +185,7 @@ update public.users
 
 
 -- ========================================================================
--- SECTION 4 — VERIFICATION
+-- SECTION 4, VERIFICATION
 -- ========================================================================
 
 -- 4A. Confirm exclusions were preserved (their updated_at should NOT be ~now)
@@ -212,7 +212,7 @@ select count(*) as users_recently_password_reset
 
 -- 4C. Confirm every archived tech now shows up correctly
 select at.email,
-       case when au.id is not null then 'YES' else 'no auth — needs invite' end as has_auth,
+       case when au.id is not null then 'YES' else 'no auth, needs invite' end as has_auth,
        (exists (select 1 from public.users      u where lower(u.email) = lower(btrim(at.email)))) as has_users_row,
        (exists (select 1 from public.techs      t where lower(t.email) = lower(btrim(at.email)))) as has_techs_row,
        (exists (select 1 from public.tech_comps c where c.email        = lower(btrim(at.email)))) as has_comp,

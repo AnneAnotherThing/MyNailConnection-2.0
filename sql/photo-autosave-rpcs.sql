@@ -2,15 +2,15 @@
 -- MNC Photo Autosave RPCs  (2026-04-27)
 -- ========================================================================
 -- Two SECURITY DEFINER RPCs the client calls so each photo upload (and
--- each delete) persists immediately to public.techs.photos — no waiting
+-- each delete) persists immediately to public.techs.photos, no waiting
 -- for the user to tap Save. Eliminates the "tech uploaded 8 photos, hit
 -- back, lost everything" UX trap that just bit Anne.
 --
 -- Why RPCs instead of REST PATCH:
---   * Atomic JSONB array append/filter — no read-modify-write race when
+--   * Atomic JSONB array append/filter, no read-modify-write race when
 --     two uploads complete near-simultaneously (which the bulk handler
 --     does on every batch).
---   * Single trip — REST PATCH on a JSONB column requires the client
+--   * Single trip, REST PATCH on a JSONB column requires the client
 --     to first GET the current array, modify locally, then PATCH back.
 --     Two round-trips per photo, with a race window in between.
 --   * Email match is case-insensitive so this works regardless of the
@@ -23,9 +23,9 @@
 
 
 -- ────────────────────────────────────────────────────────────────────────
--- append_tech_photo — atomic JSONB array append.
+-- append_tech_photo, atomic JSONB array append.
 -- Called after a storage upload returns the publicUrl. Idempotent on
--- duplicate URLs by checking before append (defensive — the upload-
+-- duplicate URLs by checking before append (defensive, the upload-
 -- and-append pair is short, but background uploads in the bulk handler
 -- can race).
 -- ────────────────────────────────────────────────────────────────────────
@@ -68,7 +68,7 @@ comment on function public.append_tech_photo(text, jsonb) is
 
 
 -- ────────────────────────────────────────────────────────────────────────
--- remove_tech_photo_by_url — atomic JSONB array filter by URL.
+-- remove_tech_photo_by_url, atomic JSONB array filter by URL.
 -- Called from the in-modal "remove" button (removeTePhoto) so deletes
 -- match the same write-through semantics as appends. Without this,
 -- a tech could remove a photo locally, leave the modal, and find it
@@ -112,7 +112,7 @@ begin
    where lower(email) = v_email;
 
   -- Returns count of photos removed (usually 1; 0 means "URL not in
-  -- array", which is fine — the in-modal preview was the only state).
+  -- array", which is fine, the in-modal preview was the only state).
   return greatest(0, coalesce(v_before, 0) - coalesce(v_after, 0));
 end;
 $$;

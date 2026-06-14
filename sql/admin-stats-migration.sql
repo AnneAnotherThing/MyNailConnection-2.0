@@ -1,17 +1,17 @@
 -- ─────────────────────────────────────────────────────────────────────────
--- MNC — Admin Stats dashboard migration
+-- MNC, Admin Stats dashboard migration
 --
 -- Run this once in Supabase → SQL Editor. Safe to re-run (idempotent).
 --
 -- What it does:
 --   1. Adds Leslie's email to the is_admin() allowlist so she can read stats
---      (EDIT the email below before running — defaults to a placeholder).
+--      (EDIT the email below before running, defaults to a placeholder).
 --   2. Grants admin-only SELECT on the launch_waitlist table so the stats
 --      dashboard in the app can read totals / trends / sources.
 --   3. Grants admin-only SELECT on tech_photos so the "photos uploaded"
 --      count works (only if the table exists).
 --   4. Creates a generic `events` table for future first-party event
---      logging — profile_created, photo_uploaded, booking_clicked, etc.
+--      logging, profile_created, photo_uploaded, booking_clicked, etc.
 --      INSERT is open (so the app / marketing site can log events),
 --      SELECT is admin-only.
 -- ─────────────────────────────────────────────────────────────────────────
@@ -20,7 +20,7 @@
 -- ⚠️  EDIT this email before running: swap 'leslie@mynailconnection.com'
 -- for Leslie's actual email address. She needs a Supabase Auth account
 -- under that email (if she doesn't have one yet, have her sign up through
--- the app first — password reset works fine).
+-- the app first, password reset works fine).
 create or replace function public.is_admin() returns boolean
 language sql stable security definer as $$
   select coalesce(
@@ -47,7 +47,7 @@ create policy waitlist_select_admin
 grant select on public.launch_waitlist to authenticated;
 
 
--- ── 3. Photo count (optional — only run if tech_photos exists) ────────────
+-- ── 3. Photo count (optional, only run if tech_photos exists) ────────────
 do $$
 begin
   if exists (select 1 from pg_tables where schemaname = 'public' and tablename = 'tech_photos') then

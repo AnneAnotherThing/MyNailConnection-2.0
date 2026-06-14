@@ -5,9 +5,9 @@
 -- Anyone hitting the page can submit; only admins can read.
 --
 -- Form prompts (any one is enough; all three is a gift):
---   wish_to_add  — "Something you'd add?"
---   annoyance    — "Something annoying?"
---   message      — "Anything else?"
+--   wish_to_add, "Something you'd add?"
+--   annoyance, "Something annoying?"
+--   message, "Anything else?"
 --
 -- The referral column ("Anyone we should reach out to?") was removed
 -- from the form on 2026-05-04. The column is dropped below if present.
@@ -21,7 +21,7 @@
 
 
 -- ----------------------------------------------------------------------------
--- TABLE — fresh install
+-- TABLE, fresh install
 -- ----------------------------------------------------------------------------
 create table if not exists public.founders_feedback (
   id uuid primary key default gen_random_uuid(),
@@ -43,7 +43,7 @@ create table if not exists public.founders_feedback (
 
 
 -- ----------------------------------------------------------------------------
--- MIGRATE — bring an older table up to the new shape (no-op on fresh installs)
+-- MIGRATE, bring an older table up to the new shape (no-op on fresh installs)
 -- ----------------------------------------------------------------------------
 -- Add the prompt columns if missing.
 alter table public.founders_feedback add column if not exists wish_to_add text;
@@ -52,7 +52,7 @@ alter table public.founders_feedback add column if not exists annoyance   text;
 -- Drop the referral column if it was previously created (form prompt removed 2026-05-04).
 alter table public.founders_feedback drop column if exists referral;
 
--- message used to be NOT NULL — relax it now that it's a catch-all field.
+-- message used to be NOT NULL, relax it now that it's a catch-all field.
 do $$
 begin
   if exists (

@@ -10,30 +10,30 @@
 -- can sign in.
 --
 -- WHAT THIS DOES
---   PART A — Rollback
+--   PART A, Rollback
 --     Deletes the rows we added in the previous script. Identified by:
 --       - public.tech_comps:  the specific note string we set
 --       - public.techs:       placeholder phone pattern (0000 + digits)
 --                             AND email exists in public.archived_techs
 --       - public.users:       same dual filter as techs
 --     The dual "placeholder phone" + "in archived_techs" filter is
---     belt-and-suspenders — protects any real tech that happens to be
+--     belt-and-suspenders, protects any real tech that happens to be
 --     in archived_techs from being accidentally deleted.
 --
---   PART B — Create auth for OG 17
+--   PART B, Create auth for OG 17
 --     For every tech in public.techs without an auth.users row, creates:
 --       - auth.users        with password = 'MNC2026', email_confirmed
 --       - auth.identities   with provider='email' (required for sign-in
---                           on modern Supabase — without it, the user
+--                           on modern Supabase, without it, the user
 --                           exists but can't authenticate)
 --     Excludes anne@mynailconnection.com, leslie@mynailconnection.com,
 --     appleuser1@gmail.com.
 --
 -- ORDER (run sections in order)
---   SECTION 1 — Discovery: preview what'll be deleted + who needs auth
---   SECTION 2 — Rollback (DELETEs)
---   SECTION 3 — Create auth.users + auth.identities for OG 17
---   SECTION 4 — Verification
+--   SECTION 1, Discovery: preview what'll be deleted + who needs auth
+--   SECTION 2, Rollback (DELETEs)
+--   SECTION 3, Create auth.users + auth.identities for OG 17
+--   SECTION 4, Verification
 --
 -- Safe to re-run. Section 2 deletes are filtered to be precise; Section 3
 -- skips anyone who already has an auth row.
@@ -41,13 +41,13 @@
 
 
 -- ========================================================================
--- SECTION 1 — DISCOVERY (read-only)
+-- SECTION 1, DISCOVERY (read-only)
 -- ========================================================================
 
 -- 1A. What would be deleted from tech_comps?
 select email, granted_at::date as granted, note
   from public.tech_comps
- where note = 'MNC 1.0 archived founder — restored 2026-05-02, comped Glow Up'
+ where note = 'MNC 1.0 archived founder, restored 2026-05-02, comped Glow Up'
  order by email;
 
 -- 1B. What would be deleted from techs? (placeholder phone pattern)
@@ -94,7 +94,7 @@ select t.email,
 
 
 -- ========================================================================
--- SECTION 2 — ROLLBACK (deletes the archived-tech additions)
+-- SECTION 2, ROLLBACK (deletes the archived-tech additions)
 -- ========================================================================
 -- Order: tech_comps first → techs → users.
 -- Deleting tech_comps first triggers sync_tech_comp_to_techs DELETE which
@@ -103,7 +103,7 @@ select t.email,
 
 -- 2A. tech_comps rows we created (matched by exact note string)
 delete from public.tech_comps
- where note = 'MNC 1.0 archived founder — restored 2026-05-02, comped Glow Up'
+ where note = 'MNC 1.0 archived founder, restored 2026-05-02, comped Glow Up'
    and email in (
      select lower(btrim(email)) from public.archived_techs where email is not null
    );
@@ -128,12 +128,12 @@ delete from public.users
 
 
 -- ========================================================================
--- SECTION 3 — CREATE auth.users + auth.identities FOR THE OG 17
+-- SECTION 3, CREATE auth.users + auth.identities FOR THE OG 17
 -- ========================================================================
 -- For each tech in public.techs without an auth row, hand-create both
 -- the auth.users row AND the auth.identities row. Modern Supabase (post
 -- mid-2023) requires the auth.identities row for email/password sign-in
--- to function — without it, the user exists in auth.users but can't sign
+-- to function, without it, the user exists in auth.users but can't sign
 -- in via password.
 --
 -- Pattern matches what supabase.auth.admin.createUser() does internally:
@@ -259,14 +259,14 @@ update public.users u
 
 
 -- ========================================================================
--- SECTION 4 — VERIFICATION
+-- SECTION 4, VERIFICATION
 -- ========================================================================
 
 -- 4A. Confirm the rollback removed everything (these should all be 0)
 select 'tech_comps with our note' as what,
        count(*) as remaining
   from public.tech_comps
- where note = 'MNC 1.0 archived founder — restored 2026-05-02, comped Glow Up'
+ where note = 'MNC 1.0 archived founder, restored 2026-05-02, comped Glow Up'
 union all
 select 'techs with placeholder phone' as what,
        count(*) as remaining

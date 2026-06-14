@@ -17,7 +17,7 @@
 --
 -- After running: have amwhite1971 sign in and finish her profile from
 -- the tech dashboard (name, bio, photos, etc.). The display name below
--- is a placeholder — she can overwrite it via the app.
+-- is a placeholder, she can overwrite it via the app.
 -- ========================================================================
 
 do $$
@@ -37,7 +37,7 @@ begin
    limit 1;
 
   if v_auth_id is null then
-    raise exception 'No auth.users row for % — nothing to rescue. Check the email spelling or the Supabase Auth dashboard.', v_email;
+    raise exception 'No auth.users row for %, nothing to rescue. Check the email spelling or the Supabase Auth dashboard.', v_email;
   end if;
 
   raise notice 'Found auth.users id = % (created %)', v_auth_id, v_auth_created;

@@ -1,10 +1,10 @@
--- feedback table — user-submitted bug reports, ideas, questions
+-- feedback table, user-submitted bug reports, ideas, questions
 --
 -- Captured from the floating "Send feedback" button on every signed-in
 -- screen. RLS: anyone signed in can INSERT, only admins can SELECT. This
 -- lets us gather reports without exposing one user's feedback to another.
 --
--- Apply by pasting into Supabase → SQL Editor and running. Idempotent —
+-- Apply by pasting into Supabase → SQL Editor and running. Idempotent,
 -- the create/policy statements each guard for existence.
 -- 2026-04-22.
 
@@ -34,7 +34,7 @@ create index if not exists feedback_status_created_idx
 create index if not exists feedback_created_idx
   on public.feedback (created_at desc);
 
--- RLS — lock down by default, then open narrow lanes.
+-- RLS, lock down by default, then open narrow lanes.
 alter table public.feedback enable row level security;
 
 -- Anyone authenticated can submit. Admin-only SELECT means one tech

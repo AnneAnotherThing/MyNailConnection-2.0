@@ -4,7 +4,7 @@
 -- Run AFTER rollback-archived-and-create-og17-auth.sql.
 --
 -- WHAT THIS DOES
---   PART A — Delete techs with NULL/empty address.
+--   PART A, Delete techs with NULL/empty address.
 --            Cascades the delete across the tech's full footprint so we
 --            don't create new orphans:
 --              - public.tech_comps (by email)
@@ -13,15 +13,15 @@
 --              - auth.users        (by email; auth.identities cascades
 --                                   automatically via FK)
 --
---   PART B — Show every category of orphan so you can pick which to nuke.
+--   PART B, Show every category of orphan so you can pick which to nuke.
 --            Each orphan category has a discovery query and a DELETE that
 --            is COMMENTED OUT. Uncomment the ones you want to run.
 --
 -- ORDER (run sections in order)
---   SECTION 1 — Discovery: preview NULL-address techs + every orphan type
---   SECTION 2 — Delete NULL-address techs (cascading cleanup)
---   SECTION 3 — Orphan deletes (commented; uncomment per category)
---   SECTION 4 — Verification
+--   SECTION 1, Discovery: preview NULL-address techs + every orphan type
+--   SECTION 2, Delete NULL-address techs (cascading cleanup)
+--   SECTION 3, Orphan deletes (commented; uncomment per category)
+--   SECTION 4, Verification
 --
 -- Exclusions honored throughout: anne@mynailconnection.com,
 -- leslie@mynailconnection.com, appleuser1@gmail.com.
@@ -29,7 +29,7 @@
 
 
 -- ========================================================================
--- SECTION 1 — DISCOVERY (read-only)
+-- SECTION 1, DISCOVERY (read-only)
 -- ========================================================================
 
 -- 1A. Techs with NULL/empty address (will be deleted in Section 2)
@@ -50,7 +50,7 @@ select t.id,
    )
  order by t.name;
 
--- 1B. Orphan type 1 — public.techs rows with NO matching public.users row
+-- 1B. Orphan type 1, public.techs rows with NO matching public.users row
 select t.id, t.email, t.name, 'techs without users row' as orphan_type
   from public.techs t
   left join public.users u on lower(u.email) = lower(btrim(t.email))
@@ -61,7 +61,7 @@ select t.id, t.email, t.name, 'techs without users row' as orphan_type
      'appleuser1@gmail.com'
    );
 
--- 1C. Orphan type 2 — public.users with role='tech' but NO public.techs row
+-- 1C. Orphan type 2, public.users with role='tech' but NO public.techs row
 select u.id, u.email, u.name, u.role, 'users(role=tech) without techs row' as orphan_type
   from public.users u
   left join public.techs t on lower(t.email) = lower(btrim(u.email))
@@ -73,7 +73,7 @@ select u.id, u.email, u.name, u.role, 'users(role=tech) without techs row' as or
      'appleuser1@gmail.com'
    );
 
--- 1D. Orphan type 3 — public.users with NO auth.users row (can't sign in)
+-- 1D. Orphan type 3, public.users with NO auth.users row (can't sign in)
 select u.id, u.email, u.name, u.role, 'users without auth row' as orphan_type
   from public.users u
   left join auth.users au on lower(au.email) = lower(btrim(u.email))
@@ -84,7 +84,7 @@ select u.id, u.email, u.name, u.role, 'users without auth row' as orphan_type
      'appleuser1@gmail.com'
    );
 
--- 1E. Orphan type 4 — auth.users with NO public.users row (auth-only accounts)
+-- 1E. Orphan type 4, auth.users with NO public.users row (auth-only accounts)
 select au.id, au.email, au.created_at, 'auth without users row' as orphan_type
   from auth.users au
   left join public.users u on lower(u.email) = lower(btrim(au.email))
@@ -95,7 +95,7 @@ select au.id, au.email, au.created_at, 'auth without users row' as orphan_type
      'appleuser1@gmail.com'
    );
 
--- 1F. Orphan type 5 — tech_comps for emails that exist nowhere else
+-- 1F. Orphan type 5, tech_comps for emails that exist nowhere else
 select c.email, c.note, c.granted_at::date as granted, 'comp with no tech anywhere' as orphan_type
   from public.tech_comps c
  where not exists (select 1 from public.techs t          where lower(t.email)  = c.email)
@@ -104,7 +104,7 @@ select c.email, c.note, c.granted_at::date as granted, 'comp with no tech anywhe
 
 
 -- ========================================================================
--- SECTION 2 — DELETE NULL-ADDRESS TECHS (full cascade)
+-- SECTION 2, DELETE NULL-ADDRESS TECHS (full cascade)
 -- ========================================================================
 -- Build the target email set ONCE in a CTE so all four deletes target the
 -- same emails (otherwise the techs delete could remove a row and the
@@ -149,7 +149,7 @@ select
 
 
 -- ========================================================================
--- SECTION 3 — ORPHAN DELETES (commented out — uncomment per category)
+-- SECTION 3, ORPHAN DELETES (commented out, uncomment per category)
 -- ========================================================================
 -- After Section 2 runs, re-run Section 1's queries to see which orphans
 -- remain. Then uncomment the ones below that match what you want to nuke.
@@ -231,7 +231,7 @@ select
 
 
 -- ========================================================================
--- SECTION 4 — VERIFICATION
+-- SECTION 4, VERIFICATION
 -- ========================================================================
 
 -- 4A. No techs left with NULL address

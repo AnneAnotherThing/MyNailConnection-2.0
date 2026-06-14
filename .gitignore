@@ -1,13 +1,13 @@
 # ---- MNC .gitignore ----
-# Keep the repo focused on source — skip derived, regenerated, and local-only stuff.
+# Keep the repo focused on source, skip derived, regenerated, and local-only stuff.
 
 # npm dependencies (reinstallable from package.json)
 node_modules/
 
-# Capacitor's sync target — regenerated from the web source on every build
+# Capacitor's sync target, regenerated from the web source on every build
 www/
 
-# Android build artifacts — regenerated
+# Android build artifacts, regenerated
 android/build/
 android/app/build/
 android/.gradle/
@@ -16,7 +16,7 @@ android/app/release/
 *.apk
 *.aab
 
-# Old deploy zips + scratch files — keep on disk, don't version
+# Old deploy zips + scratch files, keep on disk, don't version
 archive/
 
 # macOS / Windows junk
@@ -29,7 +29,7 @@ Thumbs.db
 *.swp
 *.swo
 
-# Env files — if you ever add any, don't ship secrets to git
+# Env files, if you ever add any, don't ship secrets to git
 .env
 .env.local
 .env.*.local
@@ -38,7 +38,7 @@ Thumbs.db
 *.log
 npm-debug.log*
 
-# Android signing — NEVER commit. Keystore = private signing key. Loss = compromised app identity.
+# Android signing, NEVER commit. Keystore = private signing key. Loss = compromised app identity.
 *.jks
 *.keystore
 upload_certificate.pem
@@ -46,7 +46,7 @@ upload_certificate.crt
 *.p8
 *.p12
 
-# iOS code-signing intermediates — never commit
+# iOS code-signing intermediates, never commit
 *.csr
 *.key
 *.cer

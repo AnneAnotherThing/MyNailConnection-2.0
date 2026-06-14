@@ -7,11 +7,11 @@
  * originals (3–8MB). The app now compresses on upload, but photos that
  * were already in storage stay huge until re-processed. Since the MNC
  * Supabase project is NOT on the Pro plan, the on-the-fly image-resize
- * endpoint isn't available — so the only way to speed up EXISTING photos
+ * endpoint isn't available, so the only way to speed up EXISTING photos
  * is to download, downscale, and overwrite them in place. That's what
  * this does.
  *
- * It overwrites objects via upsert (no DELETE — the bucket's
+ * It overwrites objects via upsert (no DELETE, the bucket's
  * protect_delete() trigger blocks SQL deletes, but upsert upload is fine).
  * Public URLs are preserved exactly, so nothing in the DB needs to change.
  *
@@ -20,7 +20,7 @@
  *   npm install @supabase/supabase-js sharp
  *
  * ── RUN ──────────────────────────────────────────────────────────────
- *   # 1) DRY RUN first — reports what WOULD change, touches nothing:
+ *   # 1) DRY RUN first, reports what WOULD change, touches nothing:
  *   SUPABASE_URL="https://ktiztunuifzbzwzyqrrq.supabase.co" \
  *   SERVICE_ROLE_KEY="<service_role key from Supabase > Settings > API>" \
  *   node migrate-compress-photos.mjs
@@ -42,7 +42,7 @@
  *
  * Note: backups roughly double storage use for the migrated photos until
  * you delete `_originals/` (do that from the Supabase dashboard once
- * you're confident — SQL deletes are blocked by a bucket trigger).
+ * you're confident, SQL deletes are blocked by a bucket trigger).
  *
  * SAFETY: uses the SERVICE ROLE key (admin). Keep it out of git. The
  * script only ever re-uploads a SMALLER version of an existing image and
@@ -87,7 +87,7 @@ async function listAll(prefix = '') {
     for (const entry of data) {
       const path = prefix ? `${prefix}/${entry.name}` : entry.name;
       if (entry.id === null) {
-        // folder — recurse
+        // folder, recurse
         const nested = await listAll(path);
         out.push(...nested);
       } else {
@@ -135,7 +135,7 @@ async function run() {
       if (APPLY) {
         // Back up the untouched original FIRST. copy() duplicates the
         // current (still-original) bytes server-side. If a backup already
-        // exists (prior run), copy errors — that's fine, we keep the
+        // exists (prior run), copy errors, that's fine, we keep the
         // first/true original and don't clobber it.
         if (KEEP_ORIGINALS) {
           const { error: cpErr } = await sb.storage.from(BUCKET).copy(path, `${BACKUP_PREFIX}/${path}`);

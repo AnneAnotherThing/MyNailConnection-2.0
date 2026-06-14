@@ -11,7 +11,7 @@
 --   * public.board_posts (feed posts; tech_id is the lower-cased email)
 --   * public.push_subscriptions (FK on public.users.id)
 --
--- Email match is case-insensitive on every table — catches rows left
+-- Email match is case-insensitive on every table, catches rows left
 -- behind from the email-casing bug where techs/users had capital-S
 -- emails while auth.users was lowercase.
 --
@@ -19,12 +19,12 @@
 -- public.techs/users, then auth.users last.
 --
 -- NOT cleaned up by this script:
---   * Storage objects in the `tech-photos` bucket — Supabase blocks
+--   * Storage objects in the `tech-photos` bucket, Supabase blocks
 --     DELETE on storage.objects from SQL (the protect_delete trigger).
 --     Clean those via the Supabase dashboard's Storage tab, or by
 --     calling the storage REST API. The orphaned files are harmless
 --     for the re-test, just unsightly.
---   * Stripe customers / subscriptions — those live in Stripe, not
+--   * Stripe customers / subscriptions, those live in Stripe, not
 --     Supabase. If you've test-subscribed with one of these emails in
 --     test mode, delete the customer in the Stripe Dashboard (Test
 --     Data) or it'll resurface on next subscribe.
@@ -48,7 +48,7 @@ with emails (e) as (values
   ('sonoransunappliancerepair@gmail.com')
 )
 -- ────────────────────────────────────────────────────────────────────────
--- BEFORE — show what exists across every relevant table.
+-- BEFORE, show what exists across every relevant table.
 -- Run this CTE+SELECT first as a dry-run; it doesn't change anything.
 -- ────────────────────────────────────────────────────────────────────────
 select 'auth.users'           as table_name, count(*) as rows from auth.users           where lower(email) in (select lower(btrim(e)) from emails)
@@ -77,7 +77,7 @@ select 'public.push_subscriptions', count(*) from public.push_subscriptions
 
 
 -- ════════════════════════════════════════════════════════════════════════
--- DELETES — comment the BEFORE select above out, uncomment this whole
+-- DELETES, comment the BEFORE select above out, uncomment this whole
 -- block, run. Order is child → parent → auth so FKs don't trip.
 -- ════════════════════════════════════════════════════════════════════════
 
@@ -143,7 +143,7 @@ select 'public.push_subscriptions', count(*) from public.push_subscriptions
 --   returning 1
 -- )
 -- -- Auth last so FK references from public.* don't fight us. Requires
--- -- service-role / SQL editor (which runs as postgres) — won't work
+-- -- service-role / SQL editor (which runs as postgres), won't work
 -- -- from a normal app session. That's intentional.
 -- , del_auth as (
 --   delete from auth.users
@@ -164,5 +164,5 @@ select 'public.push_subscriptions', count(*) from public.push_subscriptions
 
 
 -- ════════════════════════════════════════════════════════════════════════
--- AFTER — re-run the BEFORE block to confirm everything zeroed out.
+-- AFTER, re-run the BEFORE block to confirm everything zeroed out.
 -- ════════════════════════════════════════════════════════════════════════

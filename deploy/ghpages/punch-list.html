@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <meta name="robots" content="noindex, nofollow, noarchive"/>
-<title>MNC v54 — Pre-Production Punch List</title>
+<title>MNC v54 - Pre-Production Punch List</title>
 <style>
   :root {
     --rose: #C4786A;
@@ -124,7 +124,7 @@
   .bucket-done h2     { color: var(--done); }
   .bucket-done        { border-left: 3px solid var(--done); }
 
-  /* Hidden source pool — keeps sections as data, moved into buckets on load */
+  /* Hidden source pool, keeps sections as data, moved into buckets on load */
   #task-source { display: none; }
   section {
     margin-bottom: 28px;
@@ -280,7 +280,7 @@
 <div class="container">
 
   <header>
-    <h1>MNC v54 — Pre-Production Punch List</h1>
+    <h1>MNC v54, Pre-Production Punch List</h1>
     <p class="subtitle">Tap anywhere on a row to check it off. Progress saves automatically on this device.</p>
     <div class="progress-wrap">
       <div class="progress-seg done" id="progress-seg-done"></div>
@@ -294,7 +294,7 @@
     <div class="progress-total"><strong id="stat-total">0</strong> launch items &nbsp;·&nbsp; <span id="stat-future">0</span> future (not counted)</div>
   </header>
 
-  <!-- Bucket containers — populated by the script at the bottom from #task-source -->
+  <!-- Bucket containers, populated by the script at the bottom from #task-source -->
   <section class="bucket bucket-critical" id="bucket-critical" style="display:none;">
     <h2>🔴 Critical <span class="bucket-count"><span class="c-count">0</span></span></h2>
   </section>
@@ -323,7 +323,7 @@
     <h2>✅ Done <span class="bucket-count"><span class="c-count">0</span></span></h2>
   </section>
 
-  <!-- Source pool — existing sections retained as data. Hidden via CSS; script moves tasks into buckets above. -->
+  <!-- Source pool, existing sections retained as data. Hidden via CSS; script moves tasks into buckets above. -->
   <div id="task-source">
 
 
@@ -336,7 +336,7 @@
       <span class="checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
       <span class="task-body">
         <div class="title">Weekly-slot schema for Glow Up subscribers <span class="prio-pill prio-crit">Critical</span></div>
-        <div class="desc">Add <code>weekly_upload_count integer default 0</code> + <code>weekly_reset_at timestamptz</code> to <code>public.techs</code> (or a separate <code>weekly_uploads</code> audit table if we want per-week history). This is the keystone for the pivot — blocks the upload flow rewrite and the webhook semantic change. Design question still open: columns-on-techs (faster to ship, no audit trail) vs separate table (cleaner audit, trivial reset logic). Sunday midnight reset in tech's local timezone or UTC — decide at schema time.</div>
+        <div class="desc">Add <code>weekly_upload_count integer default 0</code> + <code>weekly_reset_at timestamptz</code> to <code>public.techs</code> (or a separate <code>weekly_uploads</code> audit table if we want per-week history). This is the keystone for the pivot, blocks the upload flow rewrite and the webhook semantic change. Design question still open: columns-on-techs (faster to ship, no audit trail) vs separate table (cleaner audit, trivial reset logic). Sunday midnight reset in tech's local timezone or UTC, decide at schema time.</div>
       </span>
     </label>
 
@@ -344,8 +344,8 @@
     <label class="task" for="t_upload_flow_rewrite">
       <span class="checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
       <span class="task-body">
-        <div class="title">Upload flow rewrite — pre-check messaging + credit enforcement <span class="prio-pill prio-crit">Critical</span></div>
-        <div class="desc">Before the picker opens, pre-check state and show exactly one of: "You have X free slots remaining" / "Next photo: $1. (You've added Y paid photos.)" / "Next 10 photos: $5 bundle — save $5" (auto-offer after 4 single purchases) / "You have X of 5 weekly slots remaining. Resets Sunday." (subscribers only) / "Weekly limit reached. New slots Sunday at midnight." (subscribers only). Per-file credit enforcement so bulk uploads can't bypass. Credits are pure top-up — weekly cap only applies to subscription slots, not credit purchases (model 1, locked 2026-04-22).</div>
+        <div class="title">Upload flow rewrite, pre-check messaging + credit enforcement <span class="prio-pill prio-crit">Critical</span></div>
+        <div class="desc">Before the picker opens, pre-check state and show exactly one of: "You have X free slots remaining" / "Next photo: $1. (You've added Y paid photos.)" / "Next 10 photos: $5 bundle, save $5" (auto-offer after 4 single purchases) / "You have X of 5 weekly slots remaining. Resets Sunday." (subscribers only) / "Weekly limit reached. New slots Sunday at midnight." (subscribers only). Per-file credit enforcement so bulk uploads can't bypass. Credits are pure top-up, weekly cap only applies to subscription slots, not credit purchases (model 1, locked 2026-04-22).</div>
       </span>
     </label>
 
@@ -355,7 +355,7 @@
       <span class="title-spacer" style="display:none"></span>
       <span class="task-body">
         <div class="title">Webhook semantic change: sub grants 5 weekly slots, not unlimited <span class="prio-pill prio-crit">Critical</span></div>
-        <div class="desc">Rewrite <code>customer.subscription.updated</code> / <code>created</code> handlers in the Supabase <code>stripe-webhook</code> edge function so activating Glow Up grants 5 weekly slots via the new schema instead of flipping an unconstrained <code>subscription_active</code> flag. <code>customer.subscription.deleted</code> should stop refilling weekly slots on Sunday (pause-on-cancel already handles the photo-visibility side). Also add server-side guard against bulk-upload bypass — even if the client is lying about credits, the webhook / upload RPC enforces the count.</div>
+        <div class="desc">Rewrite <code>customer.subscription.updated</code> / <code>created</code> handlers in the Supabase <code>stripe-webhook</code> edge function so activating Glow Up grants 5 weekly slots via the new schema instead of flipping an unconstrained <code>subscription_active</code> flag. <code>customer.subscription.deleted</code> should stop refilling weekly slots on Sunday (pause-on-cancel already handles the photo-visibility side). Also add server-side guard against bulk-upload bypass, even if the client is lying about credits, the webhook / upload RPC enforces the count.</div>
       </span>
     </label>
 
@@ -363,8 +363,8 @@
     <label class="task" for="t_marketing_rhythm_copy">
       <span class="checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
       <span class="task-body">
-        <div class="title">Marketing + tutorial copy refresh — lean into weekly rhythm <span class="prio-pill prio-high">High</span></div>
-        <div class="desc">Full copy pass across <code>marketing.html</code>, <code>tech-guide.html</code>, the upgrade modal, and the pricing card to match the locked pricing ladder ($1 / $5-for-10 / $9-mo Glow Up) and the rhythm positioning. Kill any "unlimited" or "most photos per dollar" language — Glow Up sells on <em>"5 new every Sunday, no thinking required"</em> not volume (at $0.50/photo credits vs $0.42/photo sub, the sub doesn't win on math). Soften tutorial card 06 per the pivot note. Anne flagged this as an area where "everything can get THAT much better" once the new model is clear.</div>
+        <div class="title">Marketing + tutorial copy refresh, lean into weekly rhythm <span class="prio-pill prio-high">High</span></div>
+        <div class="desc">Full copy pass across <code>marketing.html</code>, <code>tech-guide.html</code>, the upgrade modal, and the pricing card to match the locked pricing ladder ($1 / $5-for-10 / $9-mo Glow Up) and the rhythm positioning. Kill any "unlimited" or "most photos per dollar" language, Glow Up sells on <em>"5 new every Sunday, no thinking required"</em> not volume (at $0.50/photo credits vs $0.42/photo sub, the sub doesn't win on math). Soften tutorial card 06 per the pivot note. Anne flagged this as an area where "everything can get THAT much better" once the new model is clear.</div>
       </span>
     </label>
 
@@ -373,7 +373,7 @@
       <span class="checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
       <span class="task-body">
         <div class="title">Replace stub <code>privacy.html</code> + <code>terms.html</code> with counsel-reviewed versions</div>
-        <div class="desc"><strong>Partial — substantive drafts in place, counsel review still required.</strong> Updated 2026-04-22 from the earlier "pre-launch placeholder" stubs to full drafts covering the standard ground: data collection, Supabase/Stripe sub-processors, GDPR/CCPA rights, 30-day deletion, 7-year retention for payment records, breach notification, age restrictions (13+ clients, 18+ techs), payment terms, subscription cancellation with no partial-period refunds, Texas governing law, and the full liability stack the pivot requires — Independent Contractors, Not a Licensing Authority, Assumption of Risk, Indemnification, Disclaimer of Warranties, Limitation of Liability capped at greater of ($100 or trailing-12-mo payments). Both pages carry a prominent "Draft pending legal review" banner so users and courts can see the status. <strong>Still blocking heavy promotion / paid ads / EU-UK traffic:</strong> counsel review in applicable jurisdictions. Good to hand to a lawyer as a starting point rather than pay them to write from scratch. When the reviewed versions land, remove the draft banner, bump <code>Version 2026-04</code>, and fire a one-time "accept updated terms" modal for pre-launch users (not yet built — track as separate task).</div>
+        <div class="desc"><strong>Partial, substantive drafts in place, counsel review still required.</strong> Updated 2026-04-22 from the earlier "pre-launch placeholder" stubs to full drafts covering the standard ground: data collection, Supabase/Stripe sub-processors, GDPR/CCPA rights, 30-day deletion, 7-year retention for payment records, breach notification, age restrictions (13+ clients, 18+ techs), payment terms, subscription cancellation with no partial-period refunds, Texas governing law, and the full liability stack the pivot requires, Independent Contractors, Not a Licensing Authority, Assumption of Risk, Indemnification, Disclaimer of Warranties, Limitation of Liability capped at greater of ($100 or trailing-12-mo payments). Both pages carry a prominent "Draft pending legal review" banner so users and courts can see the status. <strong>Still blocking heavy promotion / paid ads / EU-UK traffic:</strong> counsel review in applicable jurisdictions. Good to hand to a lawyer as a starting point rather than pay them to write from scratch. When the reviewed versions land, remove the draft banner, bump <code>Version 2026-04</code>, and fire a one-time "accept updated terms" modal for pre-launch users (not yet built, track as separate task).</div>
       </span>
     </label>
 
@@ -393,10 +393,10 @@
         <div class="title">Dev contact + in-app feedback button</div>
         <div class="desc">When something breaks for a tech or a client, they need a path to <em>you</em> that isn't "file a GitHub issue." Two pieces:
           <ul style="margin:8px 0 0 18px;padding:0;line-height:1.55;">
-            <li><strong>Persistent "Send feedback" button</strong> — small floating chip (bottom-right, above any nav), visible on every screen once signed in. Tap opens a modal with: category dropdown (Bug / Idea / Question / Payment issue / Other), a free-text area, optional screenshot upload, and a Send button. Auto-captures the user's email, role, current screen/route, app version, device/OS, and last ~20 console errors for you — nobody wants to file a ticket AND recite every detail.</li>
-            <li><strong>Visible dev contact</strong> — in the Help section (or Settings footer): "Something broken? Text Anne directly" with your phone number or email. The feedback button is the 95% path; direct contact is the emergency path.</li>
+            <li><strong>Persistent "Send feedback" button</strong>, small floating chip (bottom-right, above any nav), visible on every screen once signed in. Tap opens a modal with: category dropdown (Bug / Idea / Question / Payment issue / Other), a free-text area, optional screenshot upload, and a Send button. Auto-captures the user's email, role, current screen/route, app version, device/OS, and last ~20 console errors for you, nobody wants to file a ticket AND recite every detail.</li>
+            <li><strong>Visible dev contact</strong>, in the Help section (or Settings footer): "Something broken? Text Anne directly" with your phone number or email. The feedback button is the 95% path; direct contact is the emergency path.</li>
           </ul>
-          Backend: new <code>feedback</code> table in Supabase (<code>id, created_at, user_email, user_role, category, message, current_screen, user_agent, app_version, console_snapshot jsonb, screenshot_url, status</code>), RLS open for INSERT (any signed-in user can file), SELECT admin-only. Bonus: a webhook / email trigger that pings you the moment a new row lands so you don't have to poll. Even better long-term: pipe new feedback into a Slack or Discord channel so you and Leslie see it in real time. This is launch-critical quality-of-life — the alternative is angry DMs to your personal instagram.
+          Backend: new <code>feedback</code> table in Supabase (<code>id, created_at, user_email, user_role, category, message, current_screen, user_agent, app_version, console_snapshot jsonb, screenshot_url, status</code>), RLS open for INSERT (any signed-in user can file), SELECT admin-only. Bonus: a webhook / email trigger that pings you the moment a new row lands so you don't have to poll. Even better long-term: pipe new feedback into a Slack or Discord channel so you and Leslie see it in real time. This is launch-critical quality-of-life, the alternative is angry DMs to your personal instagram.
         </div>
       </span>
     </label>
@@ -408,14 +408,14 @@
         <div class="title">Confirm international + at-volume readiness</div>
         <div class="desc">Before we open the gates, sanity-check that the stack holds up if (a) users come from outside the US and (b) signups/traffic hit the numbers we're hoping for. Walk through each:
           <ul style="margin:8px 0 0 18px;padding:0;line-height:1.55;">
-            <li><strong>Supabase tier &amp; region</strong> — current plan's limits on DB rows, storage, egress, monthly active users, and auth requests. Is the project in a region that serves EU/UK/AU acceptably, or do we need read replicas / edge functions?</li>
-            <li><strong>Rate limits</strong> — Supabase auth (signups/resets per hour), Nominatim geocoding (1 req/sec hard cap — do we need a paid geocoder like Mapbox/Google once volume picks up?), Supabase realtime connection cap.</li>
-            <li><strong>Storage &amp; image delivery</strong> — portfolio photo bucket size trajectory at N techs × M photos, bandwidth cost, whether we need a CDN (Cloudflare/Bunny) in front of Supabase Storage for global latency.</li>
-            <li><strong>Stripe international</strong> — confirm Stripe account is enabled for the countries we'll accept, that Payment Links support local payment methods (SEPA, iDEAL, etc.), tax handling (Stripe Tax?), and currency display.</li>
-            <li><strong>Email deliverability</strong> — Supabase default SMTP is fine for low volume; at scale switch to Resend/Postmark with SPF/DKIM/DMARC on <code>mynailconnection.com</code> so reset &amp; waitlist emails don't land in spam internationally.</li>
-            <li><strong>Legal / privacy</strong> — if EU/UK users can sign up, we need a real privacy policy, cookie notice (if analytics load), and a data-deletion path (GDPR Art. 17). Same for CCPA in California.</li>
-            <li><strong>i18n</strong> — currently English-only &amp; USD. Decide: restrict signups to US-only at launch, or accept international signups with English UI + note localization as fast-follow.</li>
-            <li><strong>Load test</strong> — fire off a scripted burst (e.g. 500 concurrent waitlist signups, 200 concurrent profile views) against staging to see where it breaks before real traffic does.</li>
+            <li><strong>Supabase tier &amp; region</strong>, current plan's limits on DB rows, storage, egress, monthly active users, and auth requests. Is the project in a region that serves EU/UK/AU acceptably, or do we need read replicas / edge functions?</li>
+            <li><strong>Rate limits</strong>, Supabase auth (signups/resets per hour), Nominatim geocoding (1 req/sec hard cap, do we need a paid geocoder like Mapbox/Google once volume picks up?), Supabase realtime connection cap.</li>
+            <li><strong>Storage &amp; image delivery</strong>, portfolio photo bucket size trajectory at N techs × M photos, bandwidth cost, whether we need a CDN (Cloudflare/Bunny) in front of Supabase Storage for global latency.</li>
+            <li><strong>Stripe international</strong>, confirm Stripe account is enabled for the countries we'll accept, that Payment Links support local payment methods (SEPA, iDEAL, etc.), tax handling (Stripe Tax?), and currency display.</li>
+            <li><strong>Email deliverability</strong>, Supabase default SMTP is fine for low volume; at scale switch to Resend/Postmark with SPF/DKIM/DMARC on <code>mynailconnection.com</code> so reset &amp; waitlist emails don't land in spam internationally.</li>
+            <li><strong>Legal / privacy</strong>, if EU/UK users can sign up, we need a real privacy policy, cookie notice (if analytics load), and a data-deletion path (GDPR Art. 17). Same for CCPA in California.</li>
+            <li><strong>i18n</strong>, currently English-only &amp; USD. Decide: restrict signups to US-only at launch, or accept international signups with English UI + note localization as fast-follow.</li>
+            <li><strong>Load test</strong>, fire off a scripted burst (e.g. 500 concurrent waitlist signups, 200 concurrent profile views) against staging to see where it breaks before real traffic does.</li>
           </ul>
           Outcome: a short "we're good to <em>X</em> MAUs / <em>Y</em> countries on the current plan; upgrade trigger is <em>Z</em>" memo pinned somewhere we'll see it.
         </div>
@@ -432,7 +432,7 @@
       <span class="checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
       <span class="task-body">
         <div class="title">Tech self-tagging dashboard <span style="color:var(--sage);font-weight:700;font-size:11px;letter-spacing:1px;">· READY TO TEST</span></div>
-        <div class="desc">New "Tag My Photos" screen accessible from the tech home dashboard. Untagged photos show large with category-grouped tag chips (Shape / Type / Style); tagged photos collapse into a "Tagged (N)" disclosure below. Auto-saves 700ms after last tag tap. Tap a tagged thumbnail to re-edit. Independent of Stripe — pure metadata. <strong>Code complete; needs deploy + smoke test.</strong> Tech-guide and marketing copy describing this dashboard also landed this session — see the ✅ section up top.</div>
+        <div class="desc">New "Tag My Photos" screen accessible from the tech home dashboard. Untagged photos show large with category-grouped tag chips (Shape / Type / Style); tagged photos collapse into a "Tagged (N)" disclosure below. Auto-saves 700ms after last tag tap. Tap a tagged thumbnail to re-edit. Independent of Stripe, pure metadata. <strong>Code complete; needs deploy + smoke test.</strong> Tech-guide and marketing copy describing this dashboard also landed this session, see the ✅ section up top.</div>
       </span>
     </label>
 
@@ -459,7 +459,7 @@
       <span class="checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
       <span class="task-body">
         <div class="title">Claim Google Search Console + Bing Webmaster, submit sitemap</div>
-        <div class="desc">After the site is live at <code>mynailconnection.com</code>: create a Search Console property (Domain option is easiest — needs a DNS TXT record) and a Bing Webmaster property (can import directly from Search Console). Submit <code>https://mynailconnection.com/sitemap.xml</code> in both. Request indexing on the homepage URL so it doesn't sit in the crawl queue for weeks. Paste the verification meta tokens into the <em>Search engine verification</em> block near the top of <code>marketing.html</code> (the commented <code>PASTE_..._HERE</code> slots). Bonus: add the same meta tokens for Facebook Business (domain verification) and Pinterest (nail content ranks hard on Pinterest — don't skip).</div>
+        <div class="desc">After the site is live at <code>mynailconnection.com</code>: create a Search Console property (Domain option is easiest, needs a DNS TXT record) and a Bing Webmaster property (can import directly from Search Console). Submit <code>https://mynailconnection.com/sitemap.xml</code> in both. Request indexing on the homepage URL so it doesn't sit in the crawl queue for weeks. Paste the verification meta tokens into the <em>Search engine verification</em> block near the top of <code>marketing.html</code> (the commented <code>PASTE_..._HERE</code> slots). Bonus: add the same meta tokens for Facebook Business (domain verification) and Pinterest (nail content ranks hard on Pinterest, don't skip).</div>
       </span>
     </label>
 
@@ -468,7 +468,7 @@
       <span class="checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
       <span class="task-body">
         <div class="title">Turn on GA4 analytics</div>
-        <div class="desc">Create a GA4 property in Google Analytics, grab the <code>G-XXXXXXXXXX</code> measurement ID, paste it into the <code>GA4_ID</code> constant in the analytics block in <code>marketing.html</code> (currently commented out), and uncomment the init lines. Test that pageviews appear in GA4's Realtime report before touching paid marketing. Also mark key events — <em>waitlist_signup</em>, <em>pricing_open</em>, <em>tech_guide_view</em> — so you have something to measure against once ads start.</div>
+        <div class="desc">Create a GA4 property in Google Analytics, grab the <code>G-XXXXXXXXXX</code> measurement ID, paste it into the <code>GA4_ID</code> constant in the analytics block in <code>marketing.html</code> (currently commented out), and uncomment the init lines. Test that pageviews appear in GA4's Realtime report before touching paid marketing. Also mark key events, <em>waitlist_signup</em>, <em>pricing_open</em>, <em>tech_guide_view</em>, so you have something to measure against once ads start.</div>
       </span>
     </label>
 
@@ -477,7 +477,7 @@
       <span class="checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
       <span class="task-body">
         <div class="title">Cookie / consent banner for EU / UK / California</div>
-        <div class="desc">GDPR + CCPA require opt-in before non-essential tracking. The scaffolding already treats <code>window.mncConsent</code> as the toggle (defaults to denied) — you just need a banner that flips it on Accept. Cheapest path: <a href="https://cookieconsent.orestbida.com/" target="_blank" rel="noopener">vanilla-cookieconsent</a> (MIT, zero deps) or Klaro. Heavier path: Cookiebot / Iubenda / OneTrust. Configure to fire <code>window.mncConsent = true</code> and call <code>gtag('consent', 'update', { analytics_storage: 'granted' })</code> on accept. Also add a "Manage cookies" link in the footer of <code>marketing.html</code> that reopens the banner.</div>
+        <div class="desc">GDPR + CCPA require opt-in before non-essential tracking. The scaffolding already treats <code>window.mncConsent</code> as the toggle (defaults to denied), you just need a banner that flips it on Accept. Cheapest path: <a href="https://cookieconsent.orestbida.com/" target="_blank" rel="noopener">vanilla-cookieconsent</a> (MIT, zero deps) or Klaro. Heavier path: Cookiebot / Iubenda / OneTrust. Configure to fire <code>window.mncConsent = true</code> and call <code>gtag('consent', 'update', { analytics_storage: 'granted' })</code> on accept. Also add a "Manage cookies" link in the footer of <code>marketing.html</code> that reopens the banner.</div>
       </span>
     </label>
 
@@ -486,7 +486,7 @@
       <span class="checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
       <span class="task-body">
         <div class="title">"Open this week" availability chip doesn't filter the map view</div>
-        <div class="desc">Tapping the "Open this week" availability chip on the browse screen navigates to the map view but does not apply the availability filter — techs not marked Available This Week still render. The filter state is getting dropped during the hand-off between the chip tap and the map screen. Repro: from client home, tap the "Open this week" chip; observe that the map shows every tech regardless of availability. Fix target: ensure the filter state persists into <code>show('browse-location')</code> / <code>renderLocTechCards()</code>.</div>
+        <div class="desc">Tapping the "Open this week" availability chip on the browse screen navigates to the map view but does not apply the availability filter, techs not marked Available This Week still render. The filter state is getting dropped during the hand-off between the chip tap and the map screen. Repro: from client home, tap the "Open this week" chip; observe that the map shows every tech regardless of availability. Fix target: ensure the filter state persists into <code>show('browse-location')</code> / <code>renderLocTechCards()</code>.</div>
       </span>
     </label>
 
@@ -495,7 +495,7 @@
       <span class="checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
       <span class="task-body">
         <div class="title">Audit all <code>Bearer ${SUPABASE_ANON_KEY}</code> fetch sites for missing user token</div>
-        <div class="desc">Grep on <code>index.html</code> shows ~40 fetch sites using <code>'Authorization': 'Bearer ' + SUPABASE_ANON_KEY</code> (anon, unauthenticated). Most are legitimate public reads (tech-directory browse, board posts). But some read from tables whose RLS policies require the authenticated role — those requests silently return empty, breaking the feature in subtle ways. One such bug already burned us: <code>initProfileScreen()</code> was labeling techs as "Client" because the role fetch from <code>public.users</code> was blocked by RLS. Fixed in-session (line 6931 + 3096), but the pattern likely exists elsewhere. <strong>Walk through each site</strong> and replace with <code>'Bearer ' + (window._mncAccessToken || SUPABASE_ANON_KEY)</code> if the target table has authenticated-only RLS; leave as anon where the data is genuinely public. Separate pass, not launch-blocking, but worth doing before broader rollout so we don't trip another one live.</div>
+        <div class="desc">Grep on <code>index.html</code> shows ~40 fetch sites using <code>'Authorization': 'Bearer ' + SUPABASE_ANON_KEY</code> (anon, unauthenticated). Most are legitimate public reads (tech-directory browse, board posts). But some read from tables whose RLS policies require the authenticated role, those requests silently return empty, breaking the feature in subtle ways. One such bug already burned us: <code>initProfileScreen()</code> was labeling techs as "Client" because the role fetch from <code>public.users</code> was blocked by RLS. Fixed in-session (line 6931 + 3096), but the pattern likely exists elsewhere. <strong>Walk through each site</strong> and replace with <code>'Bearer ' + (window._mncAccessToken || SUPABASE_ANON_KEY)</code> if the target table has authenticated-only RLS; leave as anon where the data is genuinely public. Separate pass, not launch-blocking, but worth doing before broader rollout so we don't trip another one live.</div>
       </span>
     </label>
 
@@ -504,7 +504,7 @@
       <span class="checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
       <span class="task-body">
         <div class="title">Enforce email normalization on write (DB-side trigger)</div>
-        <div class="desc">Whitespace and case gremlins in email values silently break the app's email-join RLS and the <code>?email=eq.&lt;value&gt;</code> queries. Just bit us in testing: a trailing newline on <code>public.techs.email</code> made a real tech row invisible to the signed-in account even though the browse screen found it by name. Fix: add a BEFORE INSERT / UPDATE trigger on <code>public.users</code> and <code>public.techs</code> that sets <code>NEW.email = lower(btrim(NEW.email))</code>. Belt-and-suspenders: pair with a CHECK constraint <code>email = lower(btrim(email))</code> so any bypass raises loudly. Same treatment worth considering for <code>phone</code> (the existing phone-email migration does it at backfill time but not on future writes). Not launch-blocking — the 17 migrated techs are already normalized — but adds a guardrail that prevents every future test-data or admin-edit session from accidentally creating an invisible row. Pairs with a universal cleanup pass: <code>update public.users set email = lower(btrim(email)) where email &lt;&gt; lower(btrim(email));</code> and same on <code>techs</code>.</div>
+        <div class="desc">Whitespace and case gremlins in email values silently break the app's email-join RLS and the <code>?email=eq.&lt;value&gt;</code> queries. Just bit us in testing: a trailing newline on <code>public.techs.email</code> made a real tech row invisible to the signed-in account even though the browse screen found it by name. Fix: add a BEFORE INSERT / UPDATE trigger on <code>public.users</code> and <code>public.techs</code> that sets <code>NEW.email = lower(btrim(NEW.email))</code>. Belt-and-suspenders: pair with a CHECK constraint <code>email = lower(btrim(email))</code> so any bypass raises loudly. Same treatment worth considering for <code>phone</code> (the existing phone-email migration does it at backfill time but not on future writes). Not launch-blocking, the 17 migrated techs are already normalized, but adds a guardrail that prevents every future test-data or admin-edit session from accidentally creating an invisible row. Pairs with a universal cleanup pass: <code>update public.users set email = lower(btrim(email)) where email &lt;&gt; lower(btrim(email));</code> and same on <code>techs</code>.</div>
       </span>
     </label>
 
@@ -518,14 +518,14 @@
       <span class="checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
       <span class="task-body">
         <div class="title">Consolidate <code>users</code> + <code>techs</code> schema to end sync bugs <span class="prio-pill prio-med">Medium</span></div>
-        <div class="desc">Today a tech needs rows in <strong>both</strong> <code>public.users</code> (identity + role) AND <code>public.techs</code> (portfolio). This already caused one outage — 17 techs had <code>techs</code> rows but no <code>users</code> rows, so every role check returned null. We backfilled + wired <code>saveSignupProfile()</code> to write both tables on signup, but the underlying dual-table design keeps creating opportunity for drift. <strong>Post-launch</strong> (once the 17 techs are stable and we've watched a few real signups), refactor to one of:
+        <div class="desc">Today a tech needs rows in <strong>both</strong> <code>public.users</code> (identity + role) AND <code>public.techs</code> (portfolio). This already caused one outage, 17 techs had <code>techs</code> rows but no <code>users</code> rows, so every role check returned null. We backfilled + wired <code>saveSignupProfile()</code> to write both tables on signup, but the underlying dual-table design keeps creating opportunity for drift. <strong>Post-launch</strong> (once the 17 techs are stable and we've watched a few real signups), refactor to one of:
           <ul style="margin:8px 0 0 18px;padding:0;line-height:1.55;">
             <li><strong>Option A:</strong> single <code>users</code> table with an optional <code>tech_profile</code> JSONB column for techs' portfolio data. Simplest; loses SQL-queryability on tech fields.</li>
             <li><strong>Option B:</strong> keep <code>users</code> + separate <code>tech_profiles</code> table with <code>user_id</code> FK (1:1 optional). Cleanest relational design; needs FK constraints + cascade deletes.</li>
           </ul>
-          Migration plan: design new schema on a branch, write migration SQL, update every query that reads/writes <code>public.techs</code> or <code>public.users</code> (browse screen, tech dashboard, photo load, favorites, availability, admin filters, role checks, merge function, stats queries, reset, Contact Anne — dozens of spots), test against staging with real data, then cut over. Approx half-day of code + testing.
+          Migration plan: design new schema on a branch, write migration SQL, update every query that reads/writes <code>public.techs</code> or <code>public.users</code> (browse screen, tech dashboard, photo load, favorites, availability, admin filters, role checks, merge function, stats queries, reset, Contact Anne, dozens of spots), test against staging with real data, then cut over. Approx half-day of code + testing.
           <br><br>
-          <strong>Don't rush this</strong> mid-launch — it's low priority precisely because the double-insert fix is reliable. Queue for 2-4 weeks post-launch.
+          <strong>Don't rush this</strong> mid-launch, it's low priority precisely because the double-insert fix is reliable. Queue for 2-4 weeks post-launch.
         </div>
       </span>
     </label>
@@ -544,7 +544,7 @@
       <span class="checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
       <span class="task-body">
         <div class="title">Send password-reset emails to all 17 techs</div>
-        <div class="desc">Supabase Dashboard → Authentication → Users → click each tech → "Send password reset email". They click the link, set their own password, sign in. No temp passwords to communicate. A heads-up text or email first ("Hi! You'll get a reset link from <em>noreply@supabase.io</em> — click it to claim your MNC account") prevents it landing in spam or looking suspicious.</div>
+        <div class="desc">Supabase Dashboard → Authentication → Users → click each tech → "Send password reset email". They click the link, set their own password, sign in. No temp passwords to communicate. A heads-up text or email first ("Hi! You'll get a reset link from <em>noreply@supabase.io</em>, click it to claim your MNC account") prevents it landing in spam or looking suspicious.</div>
       </span>
     </label>
 
@@ -553,7 +553,7 @@
       <span class="checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
       <span class="task-body">
         <div class="title">Send reset emails to users &amp; techs with incomplete profiles</div>
-        <div class="desc">Beyond the 19 complete tech profiles, there are accounts in Supabase Auth for users (clients) and techs who signed up but never built out their profile. Same process — find them in Supabase Dashboard → Authentication → Users and send each a password-reset email so they can sign in and finish onboarding. A short welcome note explaining they can now complete their profile at <code>mynailconnection.com</code> wouldn't hurt.</div>
+        <div class="desc">Beyond the 19 complete tech profiles, there are accounts in Supabase Auth for users (clients) and techs who signed up but never built out their profile. Same process, find them in Supabase Dashboard → Authentication → Users and send each a password-reset email so they can sign in and finish onboarding. A short welcome note explaining they can now complete their profile at <code>mynailconnection.com</code> wouldn't hurt.</div>
       </span>
     </label>
 
@@ -571,7 +571,7 @@
       <span class="checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
       <span class="task-body">
         <div class="title">Claim social handles + wire them into site metadata</div>
-        <div class="desc">Lock down <code>@mynailconnection</code> (or agreed variant) on Instagram, TikTok, Pinterest, X/Twitter, YouTube, Threads before someone else grabs them. Then: (1) uncomment the <code>twitter:site</code> / <code>twitter:creator</code> lines near the top of <code>marketing.html</code> with the real handle, (2) add the profile URLs to the empty <code>sameAs</code> array in the Organization JSON-LD block further down — this lets Google link your social profiles to the brand knowledge panel. (3) Add visible footer icons if you want — small lift, good for trust.</div>
+        <div class="desc">Lock down <code>@mynailconnection</code> (or agreed variant) on Instagram, TikTok, Pinterest, X/Twitter, YouTube, Threads before someone else grabs them. Then: (1) uncomment the <code>twitter:site</code> / <code>twitter:creator</code> lines near the top of <code>marketing.html</code> with the real handle, (2) add the profile URLs to the empty <code>sameAs</code> array in the Organization JSON-LD block further down, this lets Google link your social profiles to the brand knowledge panel. (3) Add visible footer icons if you want, small lift, good for trust.</div>
       </span>
     </label>
 
@@ -580,7 +580,7 @@
       <span class="checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
       <span class="task-body">
         <div class="title">Wire launch-ad pixels: Meta + TikTok + Pinterest</div>
-        <div class="desc">If you'll run paid ads at launch (even just a small Meta/TikTok test), you want these pixels firing <em>before</em> the first ad dollar so the algorithms can learn. Loaders are already scaffolded in the analytics block of <code>marketing.html</code> — just paste each pixel ID and uncomment. Don't forget the <code>fbq('track','Lead')</code> equivalent on successful waitlist signup so "Lead" becomes an optimizable event. For nail content, Pinterest and TikTok over-index vs. Meta — prioritize those if budget is tight.</div>
+        <div class="desc">If you'll run paid ads at launch (even just a small Meta/TikTok test), you want these pixels firing <em>before</em> the first ad dollar so the algorithms can learn. Loaders are already scaffolded in the analytics block of <code>marketing.html</code>, just paste each pixel ID and uncomment. Don't forget the <code>fbq('track','Lead')</code> equivalent on successful waitlist signup so "Lead" becomes an optimizable event. For nail content, Pinterest and TikTok over-index vs. Meta, prioritize those if budget is tight.</div>
       </span>
     </label>
 
@@ -589,7 +589,7 @@
       <span class="checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
       <span class="task-body">
         <div class="title">Designer-polished OG / social share image</div>
-        <div class="desc">The current <code>og-image.png</code> (1200×630, logo + tagline on brand rose gradient) is perfectly serviceable but generated, not designed. For launch comms — especially if you'll share in press or paid ads — commission a real 1200×630 that incorporates actual nail art photography from the portfolio. Replace at the same filename and paste the URL into Facebook's <a href="https://developers.facebook.com/tools/debug/" target="_blank" rel="noopener">Sharing Debugger</a> + LinkedIn <a href="https://www.linkedin.com/post-inspector/" target="_blank" rel="noopener">Post Inspector</a> with "Scrape Again" to bust their caches.</div>
+        <div class="desc">The current <code>og-image.png</code> (1200×630, logo + tagline on brand rose gradient) is perfectly serviceable but generated, not designed. For launch comms, especially if you'll share in press or paid ads, commission a real 1200×630 that incorporates actual nail art photography from the portfolio. Replace at the same filename and paste the URL into Facebook's <a href="https://developers.facebook.com/tools/debug/" target="_blank" rel="noopener">Sharing Debugger</a> + LinkedIn <a href="https://www.linkedin.com/post-inspector/" target="_blank" rel="noopener">Post Inspector</a> with "Scrape Again" to bust their caches.</div>
       </span>
     </label>
 
@@ -598,7 +598,7 @@
       <span class="checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
       <span class="task-body">
         <div class="title">Audit manifest screenshot dimensions (installable PWA polish)</div>
-        <div class="desc"><code>manifest.json</code> now lists the 4 PNGs in <code>/screenshots/</code> as install-prompt previews with <code>sizes="1284x2778"</code>. Open each one and confirm the actual dimensions match — if not, either resize the files to 1284×2778 (iPhone 14 Pro Max portrait) or update the <code>sizes</code> attributes in the manifest. Wrong dimensions make Android silently skip the screenshots in the install prompt. Optional: add a 2–3 wide-format screenshot (<code>form_factor: "wide"</code>, ~1920×1080) for desktop install UX.</div>
+        <div class="desc"><code>manifest.json</code> now lists the 4 PNGs in <code>/screenshots/</code> as install-prompt previews with <code>sizes="1284x2778"</code>. Open each one and confirm the actual dimensions match, if not, either resize the files to 1284×2778 (iPhone 14 Pro Max portrait) or update the <code>sizes</code> attributes in the manifest. Wrong dimensions make Android silently skip the screenshots in the install prompt. Optional: add a 2–3 wide-format screenshot (<code>form_factor: "wide"</code>, ~1920×1080) for desktop install UX.</div>
       </span>
     </label>
   </section>
@@ -611,7 +611,7 @@
       <span class="checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
       <span class="task-body">
         <div class="title">Build a shared workspace for Anne + Leslie (marketing / content collab)</div>
-        <div class="desc">A private, always-on scratchpad where Anne and Leslie (and later, the wider team) can drop images, videos, links, marketing ideas, post drafts, screenshot critiques — and <em>see each other's stuff in real-time</em>. Not a one-off review page, more like a rolling shared canvas. MVP bones: single HTML page + Supabase tables (<code>collab_posts</code>, <code>collab_media</code>) with anonymous-auth or a shared passphrase; drag-and-drop upload to a Supabase Storage bucket; live updates via Supabase Realtime; each post shows who added it + timestamp + reactions (🌸 / 🔥 / 💭). Can reuse the Hive-Rise review-page skill as a starting point, then extend for media uploads + persistent threads. Separate deploy target — probably a subdomain like <code>collab.mynailconnection.com</code> or a hidden path — not part of the public marketing site.</div>
+        <div class="desc">A private, always-on scratchpad where Anne and Leslie (and later, the wider team) can drop images, videos, links, marketing ideas, post drafts, screenshot critiques, and <em>see each other's stuff in real-time</em>. Not a one-off review page, more like a rolling shared canvas. MVP bones: single HTML page + Supabase tables (<code>collab_posts</code>, <code>collab_media</code>) with anonymous-auth or a shared passphrase; drag-and-drop upload to a Supabase Storage bucket; live updates via Supabase Realtime; each post shows who added it + timestamp + reactions (🌸 / 🔥 / 💭). Can reuse the Hive-Rise review-page skill as a starting point, then extend for media uploads + persistent threads. Separate deploy target, probably a subdomain like <code>collab.mynailconnection.com</code> or a hidden path, not part of the public marketing site.</div>
       </span>
     </label>
 
@@ -620,22 +620,22 @@
       <span class="checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
       <span class="task-body">
         <div class="title">Techs can post updates to their personal exposure page</div>
-        <div class="desc">Give every tech a Twitter-lite / Instagram-Stories-lite surface on their profile where they can post short updates that clients see. Infrastructure is partially there already — <code>openNewPostModal()</code> is wired to a <code>board_posts</code> table (<code>index.html</code> ~6742 / ~6759), and the "Post an Update" buttons on tech-home and the profile exist — but the post-type pills need firming up, the client-facing render on the tech profile needs design, and the lifecycle (expiry, edit/delete) isn't defined.
+        <div class="desc">Give every tech a Twitter-lite / Instagram-Stories-lite surface on their profile where they can post short updates that clients see. Infrastructure is partially there already, <code>openNewPostModal()</code> is wired to a <code>board_posts</code> table (<code>index.html</code> ~6742 / ~6759), and the "Post an Update" buttons on tech-home and the profile exist, but the post-type pills need firming up, the client-facing render on the tech profile needs design, and the lifecycle (expiry, edit/delete) isn't defined.
           <br><br>
           <strong>Suggested strategy (build in this order):</strong>
           <ul style="margin:8px 0 0 18px;padding:0;line-height:1.55;">
             <li><strong>Finalize <code>board_posts</code> schema</strong>: <code>id, tech_email, type, body, image_url, expires_at, created_at</code>. Short text + one optional photo.</li>
             <li><strong>Post types with personality</strong>:
               <ul style="margin:4px 0 0 18px;padding:0;">
-                <li><em>Openings</em> — "Got a cancel at 2pm today" (auto-expires end of day)</li>
-                <li><em>Showcase</em> — "New set I did this week" with photo (persistent)</li>
-                <li><em>Announcement</em> — "Back from vacation" / "Booking for prom" (7-day default)</li>
-                <li><em>Deal</em> — "50% off next week" (custom expiry)</li>
+                <li><em>Openings</em>-"Got a cancel at 2pm today" (auto-expires end of day)</li>
+                <li><em>Showcase</em>-"New set I did this week" with photo (persistent)</li>
+                <li><em>Announcement</em>-"Back from vacation" / "Booking for prom" (7-day default)</li>
+                <li><em>Deal</em>-"50% off next week" (custom expiry)</li>
               </ul>
             </li>
             <li><strong>Render on tech profile</strong>: reverse-chronological list below the photo portfolio. Expired posts hidden. Each post shows its type pill, body, optional photo, and "posted 2h ago."</li>
             <li><strong>Tech edit/delete</strong>: techs can edit / delete their own posts only (RLS: <code>auth.email() = tech_email</code>).</li>
-            <li><strong>Wire into the global feed</strong>: every <code>board_posts</code> INSERT also writes to <code>feed_items</code> (trigger or app-side double-write) so the "What's happening" feed picks it up — see the item below.</li>
+            <li><strong>Wire into the global feed</strong>: every <code>board_posts</code> INSERT also writes to <code>feed_items</code> (trigger or app-side double-write) so the "What's happening" feed picks it up, see the item below.</li>
             <li><strong>Push on new post (optional)</strong>: favorites get a push when a tech they follow posts a new opening / showcase. Gentle re-engagement loop. Gated behind the existing PUSH_ENABLED flag.</li>
           </ul>
           <strong>Open questions:</strong> Character limit? (suggest 280, Twitter-style.) Photo count per post? (suggest 1 to keep composition simple.) Should posts show inside search/browse results, or only on the tech's profile + the global feed?
@@ -647,20 +647,20 @@
     <label class="task" for="t_future_whats_happening_feed">
       <span class="checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
       <span class="task-body">
-        <div class="title">"What's happening" feed — scrolling 100-item activity stream</div>
-        <div class="desc">A home-screen feed that shows real-time activity across MNC, so a client's first instinct becomes "scroll the feed" instead of bouncing between browse tabs. Pairs tightly with the tech-posts item above — tech posts are the flagship feed content.
+        <div class="title">"What's happening" feed, scrolling 100-item activity stream</div>
+        <div class="desc">A home-screen feed that shows real-time activity across MNC, so a client's first instinct becomes "scroll the feed" instead of bouncing between browse tabs. Pairs tightly with the tech-posts item above, tech posts are the flagship feed content.
           <br><br>
           <strong>Candidate ingredients:</strong>
           <ul style="margin:8px 0 0 18px;padding:0;line-height:1.55;">
-            <li><strong>Tech posts</strong> (feeds from <code>board_posts</code>) — new photos, announcements, deals, openings</li>
-            <li><strong>Availability pulses</strong> — "Sarah just flipped on 'available right now'" (auto-generated, expires same-day)</li>
-            <li><strong>New tech joined</strong> — "Welcome Maria in Phoenix" (one-time card, lives 7d)</li>
-            <li><strong>Social proof (optional)</strong> — "3 clients saved this look" — opt-in only, later phase</li>
+            <li><strong>Tech posts</strong> (feeds from <code>board_posts</code>), new photos, announcements, deals, openings</li>
+            <li><strong>Availability pulses</strong>-"Sarah just flipped on 'available right now'" (auto-generated, expires same-day)</li>
+            <li><strong>New tech joined</strong>-"Welcome Maria in Phoenix" (one-time card, lives 7d)</li>
+            <li><strong>Social proof (optional)</strong>-"3 clients saved this look", opt-in only, later phase</li>
           </ul>
           <strong>Suggested strategy (start simple):</strong>
           <ul style="margin:8px 0 0 18px;padding:0;line-height:1.55;">
             <li>Single <code>feed_items</code> table: <code>id, type, actor_email, body, image_url, link_url, created_at, expires_at</code>. Chronological by <code>created_at</code>; ignore expired rows.</li>
-            <li>Row per event — <code>board_posts</code> INSERT triggers a feed row; availability toggles insert one when flipped on with <code>expires_at = tonight</code>; new-tech row on signup.</li>
+            <li>Row per event, <code>board_posts</code> INSERT triggers a feed row; availability toggles insert one when flipped on with <code>expires_at = tonight</code>; new-tech row on signup.</li>
             <li>Client feed query: <code>select * from feed_items where expires_at is null or expires_at &gt; now() order by created_at desc limit 100</code>.</li>
             <li>Supabase Realtime subscription so new items pop in without a refresh.</li>
             <li>Infinite-scroll / pagination once volume &gt;100 items flowing daily.</li>
@@ -677,7 +677,7 @@
       <span class="checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
       <span class="task-body">
         <div class="title">Native camera for photo uploads (Android)</div>
-        <div class="desc">Add <code>@capacitor/camera</code> and swap the web file-picker flow for the native camera when <code>Capacitor.isNativePlatform()</code> is true. Big UX upgrade for techs shooting fresh sets — one tap to camera, auto-rotation handled, can preview and retake before upload. Works the same on the web (falls back to file input). Clean one-afternoon job once the Capacitor shell is live.</div>
+        <div class="desc">Add <code>@capacitor/camera</code> and swap the web file-picker flow for the native camera when <code>Capacitor.isNativePlatform()</code> is true. Big UX upgrade for techs shooting fresh sets, one tap to camera, auto-rotation handled, can preview and retake before upload. Works the same on the web (falls back to file input). Clean one-afternoon job once the Capacitor shell is live.</div>
       </span>
     </label>
 
@@ -685,8 +685,8 @@
     <label class="task" for="t_future_push">
       <span class="checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
       <span class="task-body">
-        <div class="title">Push notifications — plumbed but dormant</div>
-        <div class="desc">Gated behind <code>PUSH_ENABLED = false</code> in <code>index.html</code>. The in-app "Enable notifications" banner, the Capacitor native register, and the web-push subscribe are all no-ops until the flag is flipped. Send-push Edge Function + VAPID key + subscriptions table are all deployed — nothing thrown away. Unblock when we have a real trigger (e.g. "your favorite tech just posted an opening," "tech went Available Now," "new post from a tech you favorited").</div>
+        <div class="title">Push notifications, plumbed but dormant</div>
+        <div class="desc">Gated behind <code>PUSH_ENABLED = false</code> in <code>index.html</code>. The in-app "Enable notifications" banner, the Capacitor native register, and the web-push subscribe are all no-ops until the flag is flipped. Send-push Edge Function + VAPID key + subscriptions table are all deployed, nothing thrown away. Unblock when we have a real trigger (e.g. "your favorite tech just posted an opening," "tech went Available Now," "new post from a tech you favorited").</div>
       </span>
     </label>
 
@@ -695,7 +695,7 @@
       <span class="checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
       <span class="task-body">
         <div class="title">Swap geocoding to Google / Mapbox</div>
-        <div class="desc">Nominatim is ToS-compliant but capped at 25/click. When the directory grows past ~100 techs, move geocoding server-side with a keyed provider — no throttle, no per-click chunking, and better address resolution on edge cases.</div>
+        <div class="desc">Nominatim is ToS-compliant but capped at 25/click. When the directory grows past ~100 techs, move geocoding server-side with a keyed provider, no throttle, no per-click chunking, and better address resolution on edge cases.</div>
       </span>
     </label>
 
@@ -704,7 +704,7 @@
       <span class="checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
       <span class="task-body">
         <div class="title">"New from your favorites" feed</div>
-        <div class="desc">A thin section on the client home that shows recent posts + new photos + freshly-flipped availability, but only from techs the user has favorited. Cheap to build (filter existing queries by the user's fav list) and the most obvious reason a client would ever want push — pairs nicely with flipping <code>PUSH_ENABLED</code> on.</div>
+        <div class="desc">A thin section on the client home that shows recent posts + new photos + freshly-flipped availability, but only from techs the user has favorited. Cheap to build (filter existing queries by the user's fav list) and the most obvious reason a client would ever want push, pairs nicely with flipping <code>PUSH_ENABLED</code> on.</div>
       </span>
     </label>
 
@@ -731,7 +731,7 @@
       <span class="checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
       <span class="task-body">
         <div class="title">"Save this look" → client inspo board</div>
-        <div class="desc">Clients can already favorite a tech — extend that to favoriting individual photos into a personal inspo board. Doubles as a "show this to my tech" screenshot folder inside the app, and gives techs a new metric (how often their photos are saved).</div>
+        <div class="desc">Clients can already favorite a tech, extend that to favoriting individual photos into a personal inspo board. Doubles as a "show this to my tech" screenshot folder inside the app, and gives techs a new metric (how often their photos are saved).</div>
       </span>
     </label>
 
@@ -767,7 +767,7 @@
       <span class="checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
       <span class="task-body">
         <div class="title">Color-based photo discovery</div>
-        <div class="desc">Extract a dominant color palette from each uploaded photo (server-side or via canvas on upload) and let clients filter by color — "show me everything in nude / chrome / red." Orthogonal to Shape/Material/Style and matches how people actually shop for nails.</div>
+        <div class="desc">Extract a dominant color palette from each uploaded photo (server-side or via canvas on upload) and let clients filter by color, "show me everything in nude / chrome / red." Orthogonal to Shape/Material/Style and matches how people actually shop for nails.</div>
       </span>
     </label>
 
@@ -790,8 +790,8 @@
     <label class="task" for="t7">
       <span class="checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
       <span class="task-body">
-        <div class="title">Stripe end-to-end live — full loop verified <span class="prio-pill prio-crit">Critical</span></div>
-        <div class="desc">Closed 2026-04-22 with a real $1 test purchase on Anne's own tech account. Verified: Stripe payment → <code>checkout.session.completed</code> webhook fired → Supabase edge function processed → <code>techs.photo_credits</code> incremented → app UI reflected the new credit. Setup inventory: 3 live-mode products (<em>1 Photo Credit $1</em>, <em>10 Photo Credits $5</em>, <em>Glow Up $9/mo</em>) with <code>credits</code> price metadata; 3 Payment Links pasted into <code>STRIPE_CONFIG</code> at <code>index.html:3343</code> with renamed keys (<code>link_10_photos</code>, <code>link_glow_up</code>, <code>plan_glow_up</code>); upgrade modal copy updated to match ($5 / 10 photos / Save $5); webhook endpoint registered at <code>https://ktiztunuifzbzwzyqrrq.supabase.co/functions/v1/stripe-webhook</code> subscribed to <code>checkout.session.completed</code>, <code>customer.subscription.updated</code>, <code>customer.subscription.deleted</code>; <code>STRIPE_WEBHOOK_SECRET</code> set in Supabase edge function secrets; webhook fallback maps updated with legacy pre-pivot entries retained for event replay. <strong>Note:</strong> the <em>semantics</em> of Glow Up still need the weekly-slots rewrite (separate task) — this item confirms the payment plumbing, not the subscription behavior.</div>
+        <div class="title">Stripe end-to-end live, full loop verified <span class="prio-pill prio-crit">Critical</span></div>
+        <div class="desc">Closed 2026-04-22 with a real $1 test purchase on Anne's own tech account. Verified: Stripe payment → <code>checkout.session.completed</code> webhook fired → Supabase edge function processed → <code>techs.photo_credits</code> incremented → app UI reflected the new credit. Setup inventory: 3 live-mode products (<em>1 Photo Credit $1</em>, <em>10 Photo Credits $5</em>, <em>Glow Up $9/mo</em>) with <code>credits</code> price metadata; 3 Payment Links pasted into <code>STRIPE_CONFIG</code> at <code>index.html:3343</code> with renamed keys (<code>link_10_photos</code>, <code>link_glow_up</code>, <code>plan_glow_up</code>); upgrade modal copy updated to match ($5 / 10 photos / Save $5); webhook endpoint registered at <code>https://ktiztunuifzbzwzyqrrq.supabase.co/functions/v1/stripe-webhook</code> subscribed to <code>checkout.session.completed</code>, <code>customer.subscription.updated</code>, <code>customer.subscription.deleted</code>; <code>STRIPE_WEBHOOK_SECRET</code> set in Supabase edge function secrets; webhook fallback maps updated with legacy pre-pivot entries retained for event replay. <strong>Note:</strong> the <em>semantics</em> of Glow Up still need the weekly-slots rewrite (separate task), this item confirms the payment plumbing, not the subscription behavior.</div>
       </span>
     </label>
 
@@ -800,7 +800,7 @@
       <span class="checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
       <span class="task-body">
         <div class="title">Marketing + app unified under one GitHub Pages repo <span class="prio-pill prio-high">High</span></div>
-        <div class="desc">Revised 2026-04-23 — moving off Netlify to GitHub Pages. Marketing site (<code>marketing.html</code>, renamed to <code>index.html</code> at the bundle root) now serves <code>https://mynailconnection.com/</code>. The PWA app (<code>index.html</code>) lives at <code>https://mynailconnection.com/app/</code> — same host, different subpath. <code>reset-password.html</code> sits alongside the app at <code>https://mynailconnection.com/app/reset-password.html</code>. Both sites published from a single <code>deploy/ghpages/</code> bundle pushed to the <code>anneanotherthing.github.io</code> user-site repo. <strong>Before re-testing password reset:</strong> update Supabase Auth → URL Configuration → Site URL to the new <code>/app/</code> path and add it to the Redirect URLs allowlist.</div>
+        <div class="desc">Revised 2026-04-23, moving off Netlify to GitHub Pages. Marketing site (<code>marketing.html</code>, renamed to <code>index.html</code> at the bundle root) now serves <code>https://mynailconnection.com/</code>. The PWA app (<code>index.html</code>) lives at <code>https://mynailconnection.com/app/</code>, same host, different subpath. <code>reset-password.html</code> sits alongside the app at <code>https://mynailconnection.com/app/reset-password.html</code>. Both sites published from a single <code>deploy/ghpages/</code> bundle pushed to the <code>anneanotherthing.github.io</code> user-site repo. <strong>Before re-testing password reset:</strong> update Supabase Auth → URL Configuration → Site URL to the new <code>/app/</code> path and add it to the Redirect URLs allowlist.</div>
       </span>
     </label>
 
@@ -810,8 +810,8 @@
     <label class="task" for="t_confirm_session_persistence">
       <span class="checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
       <span class="task-body">
-        <div class="title">Session persistence — users stay signed in across reloads <span class="prio-pill prio-crit">Critical</span><span class="needs-confirm">Confirm</span></div>
-        <div class="desc">The app had zero session persistence — every reload kicked users back to sign-in. Rebuilt with <code>saveSession/loadSession/clearSession/refreshSession</code> helpers writing to <code>localStorage['mnc_session']</code>, a <code>restorePersistedSession()</code> on page load that hydrates state before the splash renders, and a proactive refresh timer that renews the access token ~5 min before expiry. All three auth flows (sign-up confirm, invite accept, password reset) now write the session into localStorage from <code>reset-password.html</code>, so users land in the app already signed in with no second sign-in step. Sign-out clears persisted tokens. <strong>Confirm by:</strong> sign in → reload → you stay signed in. Sign out → reload → splash. Invite a tech → they land on tech-home after setting password, no second sign-in.</div>
+        <div class="title">Session persistence, users stay signed in across reloads <span class="prio-pill prio-crit">Critical</span><span class="needs-confirm">Confirm</span></div>
+        <div class="desc">The app had zero session persistence, every reload kicked users back to sign-in. Rebuilt with <code>saveSession/loadSession/clearSession/refreshSession</code> helpers writing to <code>localStorage['mnc_session']</code>, a <code>restorePersistedSession()</code> on page load that hydrates state before the splash renders, and a proactive refresh timer that renews the access token ~5 min before expiry. All three auth flows (sign-up confirm, invite accept, password reset) now write the session into localStorage from <code>reset-password.html</code>, so users land in the app already signed in with no second sign-in step. Sign-out clears persisted tokens. <strong>Confirm by:</strong> sign in → reload → you stay signed in. Sign out → reload → splash. Invite a tech → they land on tech-home after setting password, no second sign-in.</div>
       </span>
     </label>
 
@@ -819,8 +819,8 @@
     <label class="task" for="t_confirm_admin_console_rebuild">
       <span class="checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
       <span class="task-body">
-        <div class="title">Admin console rebuild — Inbox + Push tabs, Stats consolidated <span class="prio-pill prio-high">High</span><span class="needs-confirm">Confirm</span></div>
-        <div class="desc">Six tabs now: Stats · Techs · Clients · Inbox · 📢 Push · Settings. <strong>Inbox</strong> is a new DB-persisted surface for "Nudge support" messages — each card shows sender, phone, role, timestamp, body, with Text-back (opens SMS app pre-filled), Mark read, and Delete buttons; unread count badged on the tab. Backed by new <code>contact_anne_messages</code> table + RLS (admins only). <strong>📢 Push</strong> is a broadcast form — pick audience (All/Techs/Clients/Admins), title, body, optional URL, confirms before firing. Backed by new <code>broadcast-push</code> edge function that admin-gates server-side and resolves audience via join. <strong>Stats tab</strong> consolidated: 4 headline cards, Live Now + Techs-to-invite pulse strip, 14-day sparkline, single Waitlist count; removed the duplicate header stats row (which had ID collisions) and the per-source breakdown chart and Dig Deeper block. <strong>Settings</strong> trimmed of pre-launch-only Data Cleanup/Database/Geocode sections. <strong>Confirm by:</strong> (1) every Stats card shows a real number, (2) Inbox shows any test "Nudge support" messages, (3) send a test Push to Admins-only and see "Delivered to N device(s)".</div>
+        <div class="title">Admin console rebuild, Inbox + Push tabs, Stats consolidated <span class="prio-pill prio-high">High</span><span class="needs-confirm">Confirm</span></div>
+        <div class="desc">Six tabs now: Stats · Techs · Clients · Inbox · 📢 Push · Settings. <strong>Inbox</strong> is a new DB-persisted surface for "Nudge support" messages, each card shows sender, phone, role, timestamp, body, with Text-back (opens SMS app pre-filled), Mark read, and Delete buttons; unread count badged on the tab. Backed by new <code>contact_anne_messages</code> table + RLS (admins only). <strong>📢 Push</strong> is a broadcast form, pick audience (All/Techs/Clients/Admins), title, body, optional URL, confirms before firing. Backed by new <code>broadcast-push</code> edge function that admin-gates server-side and resolves audience via join. <strong>Stats tab</strong> consolidated: 4 headline cards, Live Now + Techs-to-invite pulse strip, 14-day sparkline, single Waitlist count; removed the duplicate header stats row (which had ID collisions) and the per-source breakdown chart and Dig Deeper block. <strong>Settings</strong> trimmed of pre-launch-only Data Cleanup/Database/Geocode sections. <strong>Confirm by:</strong> (1) every Stats card shows a real number, (2) Inbox shows any test "Nudge support" messages, (3) send a test Push to Admins-only and see "Delivered to N device(s)".</div>
       </span>
     </label>
 
@@ -828,7 +828,7 @@
     <label class="task" for="t_confirm_home_feed">
       <span class="checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
       <span class="task-body">
-        <div class="title">Client home feed — 100 posts, live poll, auto-scroll, radius chips <span class="prio-pill prio-high">High</span><span class="needs-confirm">Confirm</span></div>
+        <div class="title">Client home feed, 100 posts, live poll, auto-scroll, radius chips <span class="prio-pill prio-high">High</span><span class="needs-confirm">Confirm</span></div>
         <div class="desc">Replaced the old Faves shortcut cards on the client home with a live feed of recent tech <code>board_posts</code>. Features: 100 most recent posts rendered newest-first; radius chips (25/50/100mi/Anywhere) persisted in localStorage; fixed-height 520px box with slow auto-scroll (~17px/sec) that pauses on user touch and resumes after 4s idle; wraps back to top on reaching bottom for infinite loop feel; polls every 15s for newer posts (prepend + trim to 100); skips polling on background tabs / off-home screens to save battery; requests geolocation once per session so radius chips become meaningful; lenient when user coords unavailable (shows everything instead of silently hiding). <strong>Confirm by:</strong> seed 10 test posts → visible on home → chips filter when geolocation granted → leave tab open 15s with a test post inserted from another session → new post prepends at top.</div>
       </span>
     </label>
@@ -837,8 +837,8 @@
     <label class="task" for="t_confirm_contact_anne_fixed">
       <span class="checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
       <span class="task-body">
-        <div class="title">"Couldn't reach Anne" modal error — fully fixed <span class="prio-pill prio-high">High</span><span class="needs-confirm">Confirm</span></div>
-        <div class="desc">Root cause was CORS: the <code>send-push</code> edge function only attached CORS headers on the success path; the "no subscriptions found" 200 and 400/500 responses returned without them, so browsers blocked the reply and <code>fetch</code> threw — client showed "Couldn't reach Anne" even though the server logic was fine. Fixed by adding a shared <code>CORS_HEADERS</code> constant applied to every response path. Also reworked the flow so the message <strong>always persists to <code>contact_anne_messages</code></strong> first (no data loss if push fails), then fires push as best-effort. User-facing copy now says "Nudge support" instead of "Contact Anne" and routes to all admins via the Inbox tab. <strong>Confirm by:</strong> tap "Nudge support" on tech home → write a note → Send → toast says "Note sent — an admin will text you back" → Inbox shows the message.</div>
+        <div class="title">"Couldn't reach Anne" modal error, fully fixed <span class="prio-pill prio-high">High</span><span class="needs-confirm">Confirm</span></div>
+        <div class="desc">Root cause was CORS: the <code>send-push</code> edge function only attached CORS headers on the success path; the "no subscriptions found" 200 and 400/500 responses returned without them, so browsers blocked the reply and <code>fetch</code> threw, client showed "Couldn't reach Anne" even though the server logic was fine. Fixed by adding a shared <code>CORS_HEADERS</code> constant applied to every response path. Also reworked the flow so the message <strong>always persists to <code>contact_anne_messages</code></strong> first (no data loss if push fails), then fires push as best-effort. User-facing copy now says "Nudge support" instead of "Contact Anne" and routes to all admins via the Inbox tab. <strong>Confirm by:</strong> tap "Nudge support" on tech home → write a note → Send → toast says "Note sent, an admin will text you back" → Inbox shows the message.</div>
       </span>
     </label>
 
@@ -847,7 +847,7 @@
       <span class="checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
       <span class="task-body">
         <div class="title">Admin stats migration run + <code>is_admin()</code> allowlist includes Anne + Leslie <span class="prio-pill prio-high">High</span><span class="needs-confirm">Confirm</span></div>
-        <div class="desc">Ran <code>admin-stats-migration.sql</code> which grants admin-only SELECT on <code>launch_waitlist</code>, updates the <code>is_admin()</code> function's email allowlist, and creates the <code>events</code> table for first-party event logging. Also discovered mid-session that Anne signs in as <code>anne@mynailconnection.com</code> (branded), not <code>annewilson1021@gmail.com</code> — so the original allowlist didn't recognize her. Updated <code>is_admin()</code> to include both of Anne's emails + Leslie's, and made the comparison case/whitespace-tolerant via <code>lower(btrim(...))</code> so future admin additions don't hit the same trap. <strong>Confirm by:</strong> signed in as Anne → Admin → Stats tab → all cards show real numbers (not zeros).</div>
+        <div class="desc">Ran <code>admin-stats-migration.sql</code> which grants admin-only SELECT on <code>launch_waitlist</code>, updates the <code>is_admin()</code> function's email allowlist, and creates the <code>events</code> table for first-party event logging. Also discovered mid-session that Anne signs in as <code>anne@mynailconnection.com</code> (branded), not <code>annewilson1021@gmail.com</code>, so the original allowlist didn't recognize her. Updated <code>is_admin()</code> to include both of Anne's emails + Leslie's, and made the comparison case/whitespace-tolerant via <code>lower(btrim(...))</code> so future admin additions don't hit the same trap. <strong>Confirm by:</strong> signed in as Anne → Admin → Stats tab → all cards show real numbers (not zeros).</div>
       </span>
     </label>
 
@@ -855,8 +855,8 @@
     <label class="task" for="t_confirm_rls_audit">
       <span class="checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
       <span class="task-body">
-        <div class="title">RLS / auth token audit — known broken paths fixed <span class="prio-pill prio-med">Medium</span><span class="needs-confirm">Confirm</span></div>
-        <div class="desc">Found and fixed a class of bugs where fetches to RLS-gated tables used <code>SUPABASE_ANON_KEY</code> as the Bearer token instead of the user's JWT, causing RLS to silently return empty and features to silently break. Fixed sites: <code>initProfileScreen()</code> role fetch (was showing "Client" for every tech), <code>signInWithPassword()</code>'s name/role refresh, <code>submitPost()</code> board_posts insert, <code>deletePost()</code>, <code>loadAdminStats()</code> multi-query pass. There's still a broader audit item open for the ~30 remaining fetch sites — see Medium section. <strong>Confirm by:</strong> tech's profile shows "Nail Tech" not "Client"; posting from tech dashboard succeeds and appears on feed; deleting own post works.</div>
+        <div class="title">RLS / auth token audit, known broken paths fixed <span class="prio-pill prio-med">Medium</span><span class="needs-confirm">Confirm</span></div>
+        <div class="desc">Found and fixed a class of bugs where fetches to RLS-gated tables used <code>SUPABASE_ANON_KEY</code> as the Bearer token instead of the user's JWT, causing RLS to silently return empty and features to silently break. Fixed sites: <code>initProfileScreen()</code> role fetch (was showing "Client" for every tech), <code>signInWithPassword()</code>'s name/role refresh, <code>submitPost()</code> board_posts insert, <code>deletePost()</code>, <code>loadAdminStats()</code> multi-query pass. There's still a broader audit item open for the ~30 remaining fetch sites, see Medium section. <strong>Confirm by:</strong> tech's profile shows "Nail Tech" not "Client"; posting from tech dashboard succeeds and appears on feed; deleting own post works.</div>
       </span>
     </label>
 
@@ -865,7 +865,7 @@
       <span class="checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
       <span class="task-body">
         <div class="title">Tech posts rate-limited to 1 per hour <span class="prio-pill prio-low">Low</span><span class="needs-confirm">Confirm</span></div>
-        <div class="desc">Client-side guard in <code>submitPost()</code> queries <code>board_posts</code> for recent tech activity; if one exists within the last hour, blocks with "You can post once per hour. Try again in about N min." A determined user could bypass by hitting REST directly — for a harder guard, punch-list a BEFORE INSERT trigger. Stops the accidental double-post and casual spam cases. <strong>Confirm by:</strong> post an update → immediately try again → see the rate-limit message.</div>
+        <div class="desc">Client-side guard in <code>submitPost()</code> queries <code>board_posts</code> for recent tech activity; if one exists within the last hour, blocks with "You can post once per hour. Try again in about N min." A determined user could bypass by hitting REST directly, for a harder guard, punch-list a BEFORE INSERT trigger. Stops the accidental double-post and casual spam cases. <strong>Confirm by:</strong> post an update → immediately try again → see the rate-limit message.</div>
       </span>
     </label>
 
@@ -873,8 +873,8 @@
     <label class="task" for="t_confirm_tagging_ui">
       <span class="checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
       <span class="task-body">
-        <div class="title">Tag-My-Photos — card stays open during multi-tagging <span class="prio-pill prio-med">Medium</span><span class="needs-confirm">Confirm</span></div>
-        <div class="desc">Each tap on a tag chip used to re-render the whole screen, which moved the photo from "needs tagging" to "tagged" and slammed the tag-chip card shut — forcing techs to re-open after every single tap. Rewrote <code>toggleMyPhotoTag()</code> to update the chip's visual state in place without re-rendering; photos get re-categorized on next screen entry instead. Portfolio tab on profile screen also now actually loads existing photos (was upload-only before). <strong>Confirm by:</strong> open Tag My Photos → tap 3 tags in a row on one photo → card should stay open; leave and come back → photo moves to tagged section.</div>
+        <div class="title">Tag-My-Photos, card stays open during multi-tagging <span class="prio-pill prio-med">Medium</span><span class="needs-confirm">Confirm</span></div>
+        <div class="desc">Each tap on a tag chip used to re-render the whole screen, which moved the photo from "needs tagging" to "tagged" and slammed the tag-chip card shut, forcing techs to re-open after every single tap. Rewrote <code>toggleMyPhotoTag()</code> to update the chip's visual state in place without re-rendering; photos get re-categorized on next screen entry instead. Portfolio tab on profile screen also now actually loads existing photos (was upload-only before). <strong>Confirm by:</strong> open Tag My Photos → tap 3 tags in a row on one photo → card should stay open; leave and come back → photo moves to tagged section.</div>
       </span>
     </label>
 
@@ -883,7 +883,7 @@
       <span class="checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
       <span class="task-body">
         <div class="title">Edit Profile button works from profile screen <span class="prio-pill prio-med">Medium</span><span class="needs-confirm">Confirm</span></div>
-        <div class="desc">The <code>tech-edit-modal</code> was physically nested inside <code>&lt;div class="screen" id="admin"&gt;</code>, so when the admin screen was inactive (<code>display:none</code>), the modal inherited display:none from its parent and never appeared. Added <code>class="modal-overlay"</code> so the DOMContentLoaded hoisting code relocates it to <code>.device</code> root — now opens from any screen. Also fixed <code>closeModal()</code> to clear both the <code>.open</code> class AND inline <code>style.display</code> so Cancel buttons reliably close modals regardless of which pattern opened them. <strong>Confirm by:</strong> sign in as tech → Profile → Edit Profile → modal opens → Cancel closes it.</div>
+        <div class="desc">The <code>tech-edit-modal</code> was physically nested inside <code>&lt;div class="screen" id="admin"&gt;</code>, so when the admin screen was inactive (<code>display:none</code>), the modal inherited display:none from its parent and never appeared. Added <code>class="modal-overlay"</code> so the DOMContentLoaded hoisting code relocates it to <code>.device</code> root, now opens from any screen. Also fixed <code>closeModal()</code> to clear both the <code>.open</code> class AND inline <code>style.display</code> so Cancel buttons reliably close modals regardless of which pattern opened them. <strong>Confirm by:</strong> sign in as tech → Profile → Edit Profile → modal opens → Cancel closes it.</div>
       </span>
     </label>
 
@@ -891,8 +891,8 @@
     <label class="task" for="t_confirm_ui_polish_pass">
       <span class="checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
       <span class="task-body">
-        <div class="title">UI polish pass — Map nav removed, availability shrunk, browse-pref modal gone <span class="prio-pill prio-low">Low</span><span class="needs-confirm">Confirm</span></div>
-        <div class="desc">Grab-bag of polish: (a) all 7 Map bottom-nav items removed (browse-location still reachable via Home card); (b) availability sections on profile + tech-home collapsed from verbose per-toggle descriptions to single-line labels with "What do these mean?" expandable info panel; (c) "how do you want to shop?" modal that fired on first sign-in for clients — removed entirely, since the same choices exist as tappable cards on home AND clients were skipping the feed by choosing something in the modal; (d) Mode-switch scroll "catch-up" regression (Inspo ↔ Find) fixed with scroll-reset-before-render; (e) "Contact Anne" card on tech-home replaced with subtle footer link "App acting up? Nudge support"; (f) dev login bar + <code>devLogin()</code> function removed entirely — all testing now hits real Supabase auth. <strong>Confirm by:</strong> eyeball each surface — no Map in bottom nav, availability card is compact with info link, no modal on client first sign-in.</div>
+        <div class="title">UI polish pass, Map nav removed, availability shrunk, browse-pref modal gone <span class="prio-pill prio-low">Low</span><span class="needs-confirm">Confirm</span></div>
+        <div class="desc">Grab-bag of polish: (a) all 7 Map bottom-nav items removed (browse-location still reachable via Home card); (b) availability sections on profile + tech-home collapsed from verbose per-toggle descriptions to single-line labels with "What do these mean?" expandable info panel; (c) "how do you want to shop?" modal that fired on first sign-in for clients, removed entirely, since the same choices exist as tappable cards on home AND clients were skipping the feed by choosing something in the modal; (d) Mode-switch scroll "catch-up" regression (Inspo ↔ Find) fixed with scroll-reset-before-render; (e) "Contact Anne" card on tech-home replaced with subtle footer link "App acting up? Nudge support"; (f) dev login bar + <code>devLogin()</code> function removed entirely, all testing now hits real Supabase auth. <strong>Confirm by:</strong> eyeball each surface, no Map in bottom nav, availability card is compact with info link, no modal on client first sign-in.</div>
       </span>
     </label>
 
@@ -900,8 +900,8 @@
     <label class="task" for="t_confirm_data_hygiene">
       <span class="checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
       <span class="task-body">
-        <div class="title">Data hygiene — trailing newlines cleaned, <code>ALL_TECHS</code> const bug fixed <span class="prio-pill prio-med">Medium</span><span class="needs-confirm">Confirm</span></div>
-        <div class="desc">Hunted and fixed two silent-data bugs. (1) Laura Ortega's <code>public.techs.email</code> had a trailing <code>\n</code> appended during test-setup pasting, which broke every email-join query against her row including the RLS email match. Cleanup SQL: <code>update public.techs set email = btrim(email) where email &lt;&gt; btrim(email);</code> (also applied to users). (2) Home feed was referencing <code>window.ALL_TECHS</code> — but <code>const ALL_TECHS</code> at module scope doesn't attach to <code>window</code>, so every feed lookup silently failed and feed was always empty. Now references <code>ALL_TECHS</code> directly. Related: "Techs to invite" stat now counts only techs (was inflated by all self-signup users with null <code>last_password_change</code>). <strong>Confirm by:</strong> feed shows recent posts; Stats tab "Techs to invite" number is realistic (close to 17 or dropping as techs accept invites).</div>
+        <div class="title">Data hygiene, trailing newlines cleaned, <code>ALL_TECHS</code> const bug fixed <span class="prio-pill prio-med">Medium</span><span class="needs-confirm">Confirm</span></div>
+        <div class="desc">Hunted and fixed two silent-data bugs. (1) Laura Ortega's <code>public.techs.email</code> had a trailing <code>\n</code> appended during test-setup pasting, which broke every email-join query against her row including the RLS email match. Cleanup SQL: <code>update public.techs set email = btrim(email) where email &lt;&gt; btrim(email);</code> (also applied to users). (2) Home feed was referencing <code>window.ALL_TECHS</code>, but <code>const ALL_TECHS</code> at module scope doesn't attach to <code>window</code>, so every feed lookup silently failed and feed was always empty. Now references <code>ALL_TECHS</code> directly. Related: "Techs to invite" stat now counts only techs (was inflated by all self-signup users with null <code>last_password_change</code>). <strong>Confirm by:</strong> feed shows recent posts; Stats tab "Techs to invite" number is realistic (close to 17 or dropping as techs accept invites).</div>
       </span>
     </label>
 
@@ -919,7 +919,7 @@
       <span class="checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
       <span class="task-body">
         <div class="title">App role strings normalized to lowercase, matching DB constraint <span class="prio-pill prio-high">High</span><span class="needs-confirm">Confirm</span></div>
-        <div class="desc">The DB <code>users_role_check</code> constraint only allows <code>'client' | 'tech' | 'admin'</code> (lowercase), but the JS in <code>index.html</code> was using capitalized <code>'Admin'</code>, <code>'Nail Tech'</code>, <code>'User'</code>, <code>'Both'</code> — so every signup through the client path was silently rejected by the constraint, and every <code>role === 'X'</code> gate returned false for real users. Normalized ~35 occurrences across signup, admin management, the tutorial router, <code>isCurrentUserAdmin</code>, <code>isTechUser</code>, <code>showCorrectHome</code>, the merge/loader, filters, stat queries (<code>role=eq.User</code> → <code>role=eq.client</code>), and the user-edit modal. Display text ("Nail Tech" on profile, "Admin" nav label) kept as UI copy. The <code>'Both'</code> concept dropped entirely — rolled into <code>'tech'</code>. <strong>Confirm by:</strong> (1) sign up a new client and check a row lands in <code>users</code> with <code>role='client'</code>; (2) promote another account to admin via the admin UI and verify the PATCH succeeds; (3) verify the "Nail Tech" role badge still displays in admin member list.</div>
+        <div class="desc">The DB <code>users_role_check</code> constraint only allows <code>'client' | 'tech' | 'admin'</code> (lowercase), but the JS in <code>index.html</code> was using capitalized <code>'Admin'</code>, <code>'Nail Tech'</code>, <code>'User'</code>, <code>'Both'</code>, so every signup through the client path was silently rejected by the constraint, and every <code>role === 'X'</code> gate returned false for real users. Normalized ~35 occurrences across signup, admin management, the tutorial router, <code>isCurrentUserAdmin</code>, <code>isTechUser</code>, <code>showCorrectHome</code>, the merge/loader, filters, stat queries (<code>role=eq.User</code> → <code>role=eq.client</code>), and the user-edit modal. Display text ("Nail Tech" on profile, "Admin" nav label) kept as UI copy. The <code>'Both'</code> concept dropped entirely, rolled into <code>'tech'</code>. <strong>Confirm by:</strong> (1) sign up a new client and check a row lands in <code>users</code> with <code>role='client'</code>; (2) promote another account to admin via the admin UI and verify the PATCH succeeds; (3) verify the "Nail Tech" role badge still displays in admin member list.</div>
       </span>
     </label>
 
@@ -928,7 +928,7 @@
       <span class="checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
       <span class="task-body">
         <div class="title">Avatar photo no longer overwritten by initials on the tech dashboard <span class="prio-pill prio-med">Medium</span><span class="needs-confirm">Confirm</span></div>
-        <div class="desc"><code>loadTechDashBookings()</code> had an inline <code>av.textContent = initials</code> that ran after <code>updateAvatar()</code>, blowing away the user's photo with initials on every tech-dash render. Swapped it to call <code>updateAvatar()</code> so the photo-vs-initials decision lives in one place. The user-edit modal's <code>ue-avatar</code> is a separate code path (admin editing someone else's profile) and is intentionally initials-only until <code>ueSetAvatar(url)</code> is called — left alone. <strong>Confirm by:</strong> sign in as a tech who has a profile photo; the avatar circle in the tech dashboard header should show the photo, not initials.</div>
+        <div class="desc"><code>loadTechDashBookings()</code> had an inline <code>av.textContent = initials</code> that ran after <code>updateAvatar()</code>, blowing away the user's photo with initials on every tech-dash render. Swapped it to call <code>updateAvatar()</code> so the photo-vs-initials decision lives in one place. The user-edit modal's <code>ue-avatar</code> is a separate code path (admin editing someone else's profile) and is intentionally initials-only until <code>ueSetAvatar(url)</code> is called, left alone. <strong>Confirm by:</strong> sign in as a tech who has a profile photo; the avatar circle in the tech dashboard header should show the photo, not initials.</div>
       </span>
     </label>
 
@@ -936,8 +936,8 @@
     <label class="task" for="t_confirm_mobile_privacy_select">
       <span class="checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
       <span class="task-body">
-        <div class="title">Mobile privacy — finished the SELECT column <span class="prio-pill prio-crit">Critical</span><span class="needs-confirm">Confirm</span></div>
-        <div class="desc">Added <code>hide_address_public</code> to the <code>updateAvailCounts()</code> fetch at <code>index.html:3473</code>. The UI already read <code>t.hide_address_public</code> to toggle the <em>td-t-hideaddr</em> button, but the column wasn't being requested — so the button state never matched the DB. <strong>Confirm by:</strong> signing in as a Mobile tech, opening the tech dashboard, toggling <em>Address privacy</em>, reloading, and checking the toggle's on/off state survives.</div>
+        <div class="title">Mobile privacy, finished the SELECT column <span class="prio-pill prio-crit">Critical</span><span class="needs-confirm">Confirm</span></div>
+        <div class="desc">Added <code>hide_address_public</code> to the <code>updateAvailCounts()</code> fetch at <code>index.html:3473</code>. The UI already read <code>t.hide_address_public</code> to toggle the <em>td-t-hideaddr</em> button, but the column wasn't being requested, so the button state never matched the DB. <strong>Confirm by:</strong> signing in as a Mobile tech, opening the tech dashboard, toggling <em>Address privacy</em>, reloading, and checking the toggle's on/off state survives.</div>
       </span>
     </label>
 
@@ -945,7 +945,7 @@
     <label class="task" for="t_confirm_techguide_update">
       <span class="checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
       <span class="task-body">
-        <div class="title">tech-guide.html updated — 4 additions <span class="prio-pill prio-med">Medium</span><span class="needs-confirm">Confirm</span></div>
+        <div class="title">tech-guide.html updated, 4 additions <span class="prio-pill prio-med">Medium</span><span class="needs-confirm">Confirm</span></div>
         <div class="desc">Added: (1) mobile-privacy tip in the address step, (2) phone-uniqueness tip in the phone step (explains the "phone already in use" error), (3) Tag My Photos dashboard callout after the tagging step (auto-save ~1s, untagged-first layout, tap to re-edit), (4) one-way board callout in the posts step. <strong>Confirm by:</strong> opening <code>tech-guide.html</code> and skimming steps 01, 03, and 06 to make sure the new copy reads the way you want.</div>
       </span>
     </label>
@@ -964,7 +964,7 @@
       <span class="checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
       <span class="task-body">
         <div class="title">Global <code>unhandledrejection</code> + <code>error</code> handlers added <span class="prio-pill prio-high">High</span><span class="needs-confirm">Confirm</span></div>
-        <div class="desc">Any fetch / async that throws without a <code>.catch()</code> now gets swallowed silently in production and logged in dev. No more blank screens when Supabase / Nominatim / Stripe hiccup. Installed in <code>index.html</code> right next to the dev-login gate script. <strong>Confirm by:</strong> nothing to see — if the app still works normally, this is a win.</div>
+        <div class="desc">Any fetch / async that throws without a <code>.catch()</code> now gets swallowed silently in production and logged in dev. No more blank screens when Supabase / Nominatim / Stripe hiccup. Installed in <code>index.html</code> right next to the dev-login gate script. <strong>Confirm by:</strong> nothing to see, if the app still works normally, this is a win.</div>
       </span>
     </label>
 
@@ -982,7 +982,7 @@
       <span class="checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
       <span class="task-body">
         <div class="title">Push notifications made dormant via feature flag <span class="prio-pill prio-low">Low</span><span class="needs-confirm">Confirm</span></div>
-        <div class="desc">Added <code>PUSH_ENABLED = false</code> at the top of the push section in <code>index.html</code>. The in-app "Enable notifications" banner (<code>showPushPrompt</code>), the Capacitor native register (<code>initCapacitorPush</code>), and the web-push subscribe (<code>subscribeToPush</code>) all short-circuit out. Send-push Edge Function and subscription table stay untouched. Nothing prompts the user for notification permission. Re-enable in one line when a real push trigger exists. Moved the old "E2E test push" task to the new 💡 Future Enhancements section. <strong>Confirm by:</strong> sign in on web or native — no notification banner, no permission popup.</div>
+        <div class="desc">Added <code>PUSH_ENABLED = false</code> at the top of the push section in <code>index.html</code>. The in-app "Enable notifications" banner (<code>showPushPrompt</code>), the Capacitor native register (<code>initCapacitorPush</code>), and the web-push subscribe (<code>subscribeToPush</code>) all short-circuit out. Send-push Edge Function and subscription table stay untouched. Nothing prompts the user for notification permission. Re-enable in one line when a real push trigger exists. Moved the old "E2E test push" task to the new 💡 Future Enhancements section. <strong>Confirm by:</strong> sign in on web or native, no notification banner, no permission popup.</div>
       </span>
     </label>
 
@@ -990,8 +990,8 @@
     <label class="task" for="t_confirm_innerhtml_sweep">
       <span class="checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
       <span class="task-body">
-        <div class="title">innerHTML sweep — all user-controlled data escaped <span class="prio-pill prio-med">Medium</span><span class="needs-confirm">Confirm</span></div>
-        <div class="desc">Added a tiny <code>esc()</code> helper at the top of the script block and wrapped every interpolation of user/DB-controlled fields (tech name, bio, email, city/state, initials, post body, user name, admin list, Nominatim address results, greeting). Twelve spots in <code>index.html</code> patched. The three originally flagged XSS spots were already fixed; this closes the rest of the surface. <strong>Confirm by:</strong> sign in, browse techs, view board posts — UI looks identical. For paranoid verification, create a test tech whose name contains <code>&lt;script&gt;alert(1)&lt;/script&gt;</code> — the raw tags should now render as text, not execute.</div>
+        <div class="title">innerHTML sweep, all user-controlled data escaped <span class="prio-pill prio-med">Medium</span><span class="needs-confirm">Confirm</span></div>
+        <div class="desc">Added a tiny <code>esc()</code> helper at the top of the script block and wrapped every interpolation of user/DB-controlled fields (tech name, bio, email, city/state, initials, post body, user name, admin list, Nominatim address results, greeting). Twelve spots in <code>index.html</code> patched. The three originally flagged XSS spots were already fixed; this closes the rest of the surface. <strong>Confirm by:</strong> sign in, browse techs, view board posts, UI looks identical. For paranoid verification, create a test tech whose name contains <code>&lt;script&gt;alert(1)&lt;/script&gt;</code>, the raw tags should now render as text, not execute.</div>
       </span>
     </label>
 
@@ -1000,7 +1000,7 @@
       <span class="checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
       <span class="task-body">
         <div class="title">Admin-nav gate hardened (belt + suspenders with RLS) <span class="prio-pill prio-med">Medium</span><span class="needs-confirm">Confirm</span></div>
-        <div class="desc">Added three things: (1) <code>isCurrentUserAdmin()</code> helper that reads a cached server role, (2) <code>refreshAdminNav()</code> that toggles every "Admin" nav chip based on that role — called after sign-in, sign-out, and dev-login, (3) <code>show()</code> now bounces any non-admin who tries to reach the admin screen back to their home with an "Admin access only" toast. DevTools-unhiding the chip no longer reaches the admin UI. The real lock is still Supabase RLS (already done earlier this session) — even if someone bypasses this, the admin tables return empty. <strong>Confirm by:</strong> sign in as a client, open DevTools, flip <code>display:none</code> off the Admin chip, click it — should see the toast and bounce home.</div>
+        <div class="desc">Added three things: (1) <code>isCurrentUserAdmin()</code> helper that reads a cached server role, (2) <code>refreshAdminNav()</code> that toggles every "Admin" nav chip based on that role, called after sign-in, sign-out, and dev-login, (3) <code>show()</code> now bounces any non-admin who tries to reach the admin screen back to their home with an "Admin access only" toast. DevTools-unhiding the chip no longer reaches the admin UI. The real lock is still Supabase RLS (already done earlier this session), even if someone bypasses this, the admin tables return empty. <strong>Confirm by:</strong> sign in as a client, open DevTools, flip <code>display:none</code> off the Admin chip, click it, should see the toast and bounce home.</div>
       </span>
     </label>
 
@@ -1009,7 +1009,7 @@
       <span class="checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
       <span class="task-body">
         <div class="title">Bulk geocode hardened for Nominatim ToS <span class="prio-pill prio-high">High</span><span class="needs-confirm">Confirm</span></div>
-        <div class="desc">Now: (1) hard-capped at 25 techs per click with a "N more remaining — click again" note, (2) 1.5s delay + jitter between requests (was 1.1s flat), (3) detects 429/403 rate-limit responses and stops cleanly with a clear message, (4) button disables while running to prevent double-clicks, (5) passes a contact email per Nominatim's usage policy. For higher volume, still plan to swap to Google/Mapbox — but the public path is now ToS-compliant and safe to run. <strong>Confirm by:</strong> Admin panel → Settings → Geocode Tech Addresses, and verifying the new behavior (batch size, cleaner status messages).</div>
+        <div class="desc">Now: (1) hard-capped at 25 techs per click with a "N more remaining, click again" note, (2) 1.5s delay + jitter between requests (was 1.1s flat), (3) detects 429/403 rate-limit responses and stops cleanly with a clear message, (4) button disables while running to prevent double-clicks, (5) passes a contact email per Nominatim's usage policy. For higher volume, still plan to swap to Google/Mapbox, but the public path is now ToS-compliant and safe to run. <strong>Confirm by:</strong> Admin panel → Settings → Geocode Tech Addresses, and verifying the new behavior (batch size, cleaner status messages).</div>
       </span>
     </label>
 
@@ -1017,7 +1017,7 @@
     <label class="task" for="t_confirm_welcome_removed">
       <span class="checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
       <span class="task-body">
-        <div class="title">Welcome screen removed — straight to browse preference <span class="prio-pill prio-med">Medium</span><span class="needs-confirm">Confirm</span></div>
+        <div class="title">Welcome screen removed, straight to browse preference <span class="prio-pill prio-med">Medium</span><span class="needs-confirm">Confirm</span></div>
         <div class="desc">Removed the post-signup welcome screen (old logo with square background). After signup, clients now land directly on the "What matters most to you?" browse-preference picker (Look / Availability / Distance). Techs go straight to their dashboard. <strong>Confirm by:</strong> create a test account and verify you skip to the browse picker, not a welcome splash.</div>
       </span>
     </label>
@@ -1036,7 +1036,7 @@
       <span class="checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
       <span class="task-body">
         <div class="title">Stripe billing wired up with placeholder links <span class="prio-pill prio-high">High</span><span class="needs-confirm">Confirm</span></div>
-        <div class="desc">Pricing: 5 free photos (permanent, can't be removed), $1/photo, $5 for 10, $9/mo Glow Up (5 new photo slots per week, Sunday reset, no rollover). Upgrade modal updated. Webhook handles renewals via <code>customer.subscription.updated</code> and pauses photos beyond free limit on cancellation (via <code>pause_photos_beyond_free_limit</code> RPC). First 5 photos locked from deletion. CREDIT_MAP aligned to "1 Photo Credit" / "10 Photo Credits" + price-metadata fallback. Only missing piece: real Stripe payment links (currently placeholder URLs). <strong>Confirm by:</strong> upload 6 photos as a test tech — the 6th should trigger the upgrade modal with correct pricing.</div>
+        <div class="desc">Pricing: 5 free photos (permanent, can't be removed), $1/photo, $5 for 10, $9/mo Glow Up (5 new photo slots per week, Sunday reset, no rollover). Upgrade modal updated. Webhook handles renewals via <code>customer.subscription.updated</code> and pauses photos beyond free limit on cancellation (via <code>pause_photos_beyond_free_limit</code> RPC). First 5 photos locked from deletion. CREDIT_MAP aligned to "1 Photo Credit" / "10 Photo Credits" + price-metadata fallback. Only missing piece: real Stripe payment links (currently placeholder URLs). <strong>Confirm by:</strong> upload 6 photos as a test tech, the 6th should trigger the upgrade modal with correct pricing.</div>
       </span>
     </label>
 
@@ -1054,7 +1054,7 @@
       <span class="checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
       <span class="task-body">
         <div class="title">Capacitor project scaffolded for Android <span class="prio-pill prio-med">Medium</span><span class="needs-confirm">Confirm</span></div>
-        <div class="desc">Created <code>capacitor.config.json</code> (app ID <code>com.mynailconnection.app</code>, bundled hosting, splash #FAF5F7, status bar #C4786A, push plugin config ready but dormant) and <code>package.json</code> with Capacitor 6 deps. Also generated <code>ANDROID-BUILD-RUNBOOK.html</code> — a step-by-step guide covering install, sync, Android Studio build, signing key, AAB generation, and Google Play upload. <strong>Confirm by:</strong> open <code>ANDROID-BUILD-RUNBOOK.html</code> in a browser, skim through, and run the first three commands.</div>
+        <div class="desc">Created <code>capacitor.config.json</code> (app ID <code>com.mynailconnection.app</code>, bundled hosting, splash #FAF5F7, status bar #C4786A, push plugin config ready but dormant) and <code>package.json</code> with Capacitor 6 deps. Also generated <code>ANDROID-BUILD-RUNBOOK.html</code>, a step-by-step guide covering install, sync, Android Studio build, signing key, AAB generation, and Google Play upload. <strong>Confirm by:</strong> open <code>ANDROID-BUILD-RUNBOOK.html</code> in a browser, skim through, and run the first three commands.</div>
       </span>
     </label>
 
@@ -1062,8 +1062,8 @@
     <label class="task" for="t_confirm_titles">
       <span class="checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
       <span class="task-body">
-        <div class="title">Title tags checked — no stale version numbers <span class="prio-pill prio-low">Low</span></div>
-        <div class="desc">index.html, marketing.html, and tech-guide.html all have clean, version-free <code>&lt;title&gt;</code> tags. Nothing to change. <strong>Confirm by:</strong> nothing to do — this one's just ticked off.</div>
+        <div class="title">Title tags checked, no stale version numbers <span class="prio-pill prio-low">Low</span></div>
+        <div class="desc">index.html, marketing.html, and tech-guide.html all have clean, version-free <code>&lt;title&gt;</code> tags. Nothing to change. <strong>Confirm by:</strong> nothing to do, this one's just ticked off.</div>
       </span>
     </label>
 
@@ -1071,7 +1071,7 @@
     <label class="task" for="t_confirm_marketing_update">
       <span class="checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
       <span class="task-body">
-        <div class="title">marketing.html updated — 4 "For Techs" cards tightened <span class="prio-pill prio-med">Medium</span><span class="needs-confirm">Confirm</span></div>
+        <div class="title">marketing.html updated, 4 "For Techs" cards tightened <span class="prio-pill prio-med">Medium</span><span class="needs-confirm">Confirm</span></div>
         <div class="desc">Card 01 (Profile) now mentions mobile-privacy. Card 02 (Tag Every Photo) mentions the Tag My Photos dashboard. Card 04 (Connect Your Way) notes one phone per account. Card 05 (Post Updates) calls out the board being one-way by design. <strong>Confirm by:</strong> opening <code>marketing.html</code>, scrolling to the "For Nail Techs" section, and checking the four cards read right.</div>
       </span>
     </label>
@@ -1089,7 +1089,7 @@
     <label class="task" for="t2">
       <span class="checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
       <span class="task-body">
-        <div class="title">XSS fixes — tech name, avatar, error message <span class="prio-pill prio-crit">Critical</span></div>
+        <div class="title">XSS fixes, tech name, avatar, error message <span class="prio-pill prio-crit">Critical</span></div>
         <div class="desc">The three flagged <code>innerHTML</code> spots (lines ~2929, ~4130, ~4639) now use <code>textContent</code>.</div>
       </span>
     </label>
@@ -1108,7 +1108,7 @@
       <span class="checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
       <span class="task-body">
         <div class="title">Admin password reset risk eliminated <span class="prio-pill prio-crit">Critical</span></div>
-        <div class="desc">Bulk reset UI removed from admin panel — for 17 techs it was overkill. Per-user resets now happen via Supabase Dashboard → Authentication → Users. Edge Function stays deployed as a fallback if you ever need bulk reset back.</div>
+        <div class="desc">Bulk reset UI removed from admin panel, for 17 techs it was overkill. Per-user resets now happen via Supabase Dashboard → Authentication → Users. Edge Function stays deployed as a fallback if you ever need bulk reset back.</div>
       </span>
     </label>
 

@@ -1,17 +1,17 @@
-MNC Deploy Bundle — Marketing + App (separated)
+MNC Deploy Bundle, Marketing + App (separated)
 ================================================
 
 This bundle has two folders. Deploy them to two different places (or two
-different paths) — they should stay separate.
+different paths), they should stay separate.
 
-/marketing  — the public-facing www.mynailconnection.com landing page
+/marketing, the public-facing www.mynailconnection.com landing page
               (index.html, screenshots, brand images, SEO files).
               Note: this file is called "marketing.html" in the source
               repo to distinguish it from the app's index.html, but is
               shipped here as index.html so it serves at the domain root
               with no rename step.
 
-/app        — the My Nail Connection web app itself (index.html, the
+/app, the My Nail Connection web app itself (index.html, the
               branded password-reset page, and the logo/icons it uses).
 
 
@@ -34,13 +34,13 @@ Deploying marketing
 Just drag the contents of /marketing/ to your marketing host. The file
 is already named index.html, so it'll serve at https://mynailconnection.com/
 with no further renames. Keep the subfolders (images/, app-screens/)
-intact — they're referenced by relative paths.
+intact, they're referenced by relative paths.
 
 
 /app contents
 -------------
 index.html            The single-page MNC app (splash, sign-in, tech
-                      dashboard, client browse, etc.) — UPDATED in this
+                      dashboard, client browse, etc.), UPDATED in this
                       pass. See "What changed in the app" below.
 reset-password.html   Branded password-reset landing page.
 mncLogo-transparent.png   Transparent logo used by the reset page.
@@ -50,7 +50,7 @@ privacy.html, terms.html   Duplicated here so the app can link to them
 
 Deploying the app
 -----------------
-Deploy /app to wherever your app lives — for example:
+Deploy /app to wherever your app lives, for example:
   https://app.mynailconnection.com/
   or  https://mynailconnection.com/app/
 Keep index.html as the root file of whichever location you pick.

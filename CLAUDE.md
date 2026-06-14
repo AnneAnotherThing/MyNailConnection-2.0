@@ -1,11 +1,11 @@
-# MNC — Notes for Claude (and future-Anne)
+# MNC, Notes for Claude (and future-Anne)
 
 This folder contains **two separate web properties** that share a domain
 and some assets but are not the same thing. Do not mix them up.
 
 ## The two sites
 
-### 1. Marketing site — `marketing.html`
+### 1. Marketing site, `marketing.html`
 - Public-facing landing page for **https://mynailconnection.com/**.
 - Static, SEO-oriented, for visitors who've never heard of MNC.
 - Links out to `tech-guide.html`, `privacy.html`, `terms.html`.
@@ -13,7 +13,7 @@ and some assets but are not the same thing. Do not mix them up.
   `app-screens/` (phone screenshots).
 - Has its own `manifest.json` and sitemap/robots for SEO.
 
-### 2. The app — `index.html`
+### 2. The app, `index.html`
 - The signed-in product: splash → sign in → client browse / tech
   dashboard / admin. One huge single-page app (~9,200 lines).
 - Talks to Supabase (project `ktiztunuifzbzwzyqrrq`) for auth, data, push.
@@ -31,8 +31,8 @@ and some assets but are not the same thing. Do not mix them up.
   the contents of `deploy/ghpages/` to Pages on every push to `main`.
 - **Pages source MUST be set to "GitHub Actions"** (not "Deploy from a
   branch") in the repo Settings → Pages. If someone sets it back to
-  "branch / main", Pages will serve the raw repo root — which is the
-  app's `index.html` plus everything else — and marketing breaks.
+  "branch / main", Pages will serve the raw repo root, which is the
+  app's `index.html` plus everything else, and marketing breaks.
 - Migration rationale: Anne moved off Netlify on 2026-04-23 to stop
   burning build credits. The two Netlify bundles under `deploy/app/`
   and `deploy/marketing/` are retained as a rollback option and will
@@ -53,20 +53,20 @@ IS the published site. Its structure (built by `deploy/sync.sh`):
   `mynailconnection.com` (required by GH Pages to serve the site under
   the custom domain instead of `anneanotherthing.github.io/...`).
 
-## Keep `deploy/` synced with source — run `deploy/sync.sh`
+## Keep `deploy/` synced with source, run `deploy/sync.sh`
 
 **RULE:** after any edit to `index.html`, `marketing.html`, `tech-guide.html`,
 or any of the shared source files (`privacy.html`, `terms.html`, favicons,
 `manifest.json`, `sw.js`, `sitemap.xml`, `robots.txt`, `images/`, `app-screens/`),
 run `deploy/sync.sh` so `deploy/ghpages/` always matches the latest source.
 Without this, a commit + push won't actually ship any changes because the
-Action publishes `deploy/ghpages/` — whatever state that folder is in.
+Action publishes `deploy/ghpages/`, whatever state that folder is in.
 
 The script copies `marketing.html` → `deploy/ghpages/index.html` with the
 rename baked in, copies the real `index.html` (app) to `deploy/ghpages/app/`,
 duplicates shared files into both root and `/app/`, rsyncs `images/` and
 `app-screens/` into the bundle root, and writes the `CNAME` file. It's
-idempotent — safe to run repeatedly.
+idempotent, safe to run repeatedly.
 
 Anne does **not** need to run the script herself. As long as Claude edits
 source files via tools, Claude should run `deploy/sync.sh` at the end of
@@ -74,7 +74,7 @@ each edit batch (or after any single meaningful edit) so the bundle stays
 current. Then Anne pushes `main` via GitHub Desktop and the Action ships it.
 
 If Anne edits a source file directly (in her own editor), `deploy/ghpages/`
-will drift until someone runs the script — and the next deploy will ship
+will drift until someone runs the script, and the next deploy will ship
 stale content. For now, Claude treats sync as a post-edit habit.
 
 ### sync.sh auto-bumps the service worker cache
@@ -85,7 +85,7 @@ script increments `CACHE_NAME` in `sw.js` (`mnc-vN` → `mnc-v(N+1)`) and
 then copies the updated `sw.js` into both deploy bundles.
 
 This exists because on 2026-04-21 Anne pushed a build to GitHub Pages
-and returning visitors kept seeing old code — the PWA service worker
+and returning visitors kept seeing old code, the PWA service worker
 had `index.html` cached under the old name and never re-fetched. Manual
 "unregister + clear site data" from DevTools is the only client-side
 workaround, which we can't reasonably ask end-users to do. Bumping
@@ -111,7 +111,7 @@ prior train is closed, bump before deploying.** The cost of an
 unnecessary bump (a slightly higher version number nobody will care
 about) is trivially smaller than another 10-minute failed-deploy cycle.
 
-**Default behavior — DO THIS proactively, don't wait for the failure:**
+**Default behavior, DO THIS proactively, don't wait for the failure:**
 
 When the user is about to push for a new iOS App Store submission AND
 the previous Capawesome iOS deploy succeeded (i.e., reached App Store
@@ -122,7 +122,7 @@ Debug + Release configs, Android `versionName`, and `index.html`
 bundles + auto-bump build numbers.
 
 Skip the bump only when:
-- The prior iOS deploy FAILED (any reason — train, icon, privacy,
+- The prior iOS deploy FAILED (any reason, train, icon, privacy,
   whatever). The train stays open on a failed deploy, so reusing the
   same MARKETING_VERSION is fine. Use the existing build number bump.
 - The user explicitly says "no version bump."
@@ -131,7 +131,7 @@ Skip the bump only when:
 
 `sync.sh` alone only auto-bumps build numbers (CFBundleVersion + Android
 versionCode). It does NOT auto-bump MARKETING_VERSION because that's
-user-facing — and the right cadence is "once per iOS deploy attempt,"
+user-facing, and the right cadence is "once per iOS deploy attempt,"
 not "every edit."
 
 **Reactive fallback** (if we forget and the deploy fails anyway): the
@@ -139,13 +139,13 @@ log will show `STATE_ERROR.VALIDATION_ERROR` and either "train is
 closed" or "must contain a higher version." Run
 `bash deploy/bump-marketing.sh` and have the user re-deploy. If the
 error mentions something else (icon dims, missing privacy string), it's
-a different validation issue — don't bump for those.
+a different validation issue, don't bump for those.
 
 After the bump, in App Store Connect, **create a new version row** at
-the new MARKETING_VERSION — the prior version's listing is locked once
+the new MARKETING_VERSION, the prior version's listing is locked once
 its build was approved, so you can't reuse it.
 
-Android Play Store doesn't have this trap — `versionName` can repeat
+Android Play Store doesn't have this trap, `versionName` can repeat
 across builds, only `versionCode` (which `sync.sh` auto-bumps) needs
 to be monotonic. So Android-only deploys never need this script.
 
@@ -155,17 +155,17 @@ to be monotonic. So Android-only deploys never need this script.
   Anne modal, profile screens → **`index.html` (app)**.
 - "For Clients / For Techs" marketing sections, hero screenshots, SEO
   schema → **`marketing.html`**.
-- Legal pages (`privacy.html`, `terms.html`) are shared — edit once,
+- Legal pages (`privacy.html`, `terms.html`) are shared, edit once,
   re-ship to both bundles.
 
-## Editing HTML files safely — Edit/Write truncation issue
+## Editing HTML files safely, Edit/Write truncation issue
 
 The Edit/Write tools have repeatedly truncated MNC HTML files mid-edit,
 silently dropping the closing `<script>` blocks and `</body></html>`.
 Confirmed cases: `index.html` (1.3MB+, multiple times), `marketing.html`
 (107KB, 2026-05-05), `founders.html` (9KB, found in working copy
 2026-05-05). Trigger appears to be a large `new_string` (~30+ lines)
-replacing content near the END of the file — **not pure file size**.
+replacing content near the END of the file, **not pure file size**.
 
 **Default to bash** (`sed -i`, `python3` + heredoc, `cat`-splice) for any
 non-trivial HTML edit. After every edit, sanity-check:
@@ -173,13 +173,13 @@ non-trivial HTML edit. After every edit, sanity-check:
 
 `deploy/sync.sh` has a guard (`validate_html`) that aborts if any source
 HTML is missing `</body>` or has dropped >10% in line count vs git HEAD.
-Trust the guard — it's the deterministic safety net behind the heuristic.
+Trust the guard, it's the deterministic safety net behind the heuristic.
 Bypass with `MNC_SKIP_HTML_GUARD=1` only for genuinely intentional huge
 deletions.
 
 ## What goes in each deploy folder
 
-Most files need to ship to BOTH deploys — the folders are not mutually
+Most files need to ship to BOTH deploys, the folders are not mutually
 exclusive, they just represent the two URLs each deploy target serves.
 
 **`/marketing/`** (serves the root domain, `mynailconnection.com/`)
@@ -192,11 +192,11 @@ exclusive, they just represent the two URLs each deploy target serves.
 - `sitemap.xml`, `robots.txt`
 - `images/` (logo sizes), `app-screens/` (phone screenshots)
 
-**`/app/`** (serves wherever the app is deployed — subdomain or subpath)
+**`/app/`** (serves wherever the app is deployed, subdomain or subpath)
 - `index.html` ← the app (DO NOT overwrite marketing's index.html)
 - `reset-password.html` ← lives ONLY here. Supabase Site URL should
   point at `<app-deploy-url>/reset-password.html`. Do not duplicate
-  to marketing — reset is part of the app auth flow, not the public site.
+  to marketing, reset is part of the app auth flow, not the public site.
 - `privacy.html`, `terms.html`
 - `mncLogo-transparent.png` ← used by reset-password.html
 - `favicon.ico`, `favicon-32.png`, `apple-touch-icon.png`
@@ -234,7 +234,7 @@ exclusive, they just represent the two URLs each deploy target serves.
       failure-path one is genuinely useful and safe to leave on during
       active App Review iteration.
 
-## Folder layout (as of 2026-04-18 — after organizing)
+## Folder layout (as of 2026-04-18, after organizing)
 
 ```
 MNC/
@@ -249,11 +249,11 @@ MNC/
 │   CLAUDE.md
 │
 ├── sql/           ← Supabase migrations + RLS scripts (hand-run in SQL editor)
-├── docs/          ← internal docs — ANDROID-BUILD-RUNBOOK.html, SEO-AUDIT.md
+├── docs/          ← internal docs, ANDROID-BUILD-RUNBOOK.html, SEO-AUDIT.md
 ├── archive/       ← old deploy zips + temp junk; safe to ignore or delete
 ├── deploy/        ← drag-ready output: /marketing/ and /app/ folders plus
 │                    a README. Rebuild these when shipping changes rather
-│                    than making zips — Anne drags folders to Netlify.
+│                    than making zips, Anne drags folders to Netlify.
 │
 ├── images/        ← marketing logos in various sizes (.webp)
 ├── app-screens/   ← phone screenshots used by marketing.html

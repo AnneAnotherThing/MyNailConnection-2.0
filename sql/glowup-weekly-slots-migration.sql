@@ -3,23 +3,23 @@
 -- Implements the 2026-04-22 subscription pivot: Glow Up ($9/mo) grants
 -- 5 new portfolio-photo uploads per week with a Sunday 00:00 UTC reset,
 -- no rollover. Credits bought separately ($1/photo, $5/10-photo bundle)
--- stack with the weekly allowance as overflow — a subscriber who hits
+-- stack with the weekly allowance as overflow, a subscriber who hits
 -- their 5/week can burn a credit to upload more that week.
 --
 -- Design notes:
 -- * Reset is LAZY (not a cron job): consume_upload_slot checks if
 --   weekly_reset_at has passed and resets inline before enforcing the
 --   cap. No cron dependency, no sweep worker.
--- * Sunday midnight UTC (not tech-local timezone) — one absolute
+-- * Sunday midnight UTC (not tech-local timezone), one absolute
 --   timestamp keeps the "when does my week reset?" UX answerable in one
 --   line and debugging simple. 4-hour grace for west-coast techs.
--- * The RPC is the SINGLE gate — client-side canUploadPhoto is advisory
+-- * The RPC is the SINGLE gate, client-side canUploadPhoto is advisory
 --   (for UI only); actual enforcement happens here with row-level locks
 --   so parallel uploads from two devices can't both race past the cap.
 -- * SECURITY DEFINER so the function can mutate techs rows under RLS;
 --   we authenticate by email match against auth.jwt().
 --
--- Apply by pasting into Supabase → SQL Editor. Idempotent — every
+-- Apply by pasting into Supabase → SQL Editor. Idempotent, every
 -- statement uses create-or-replace / if-not-exists.
 -- 2026-04-22.
 
@@ -59,7 +59,7 @@ comment on function public.next_sunday_utc_midnight(timestamptz) is
 
 -- ── RPC: consume_upload_slot ─────────────────────────────────────────────
 -- Atomic slot-consumption gate for portfolio photo uploads. The ONE
--- source of truth — client calls this before each upload; if ok=false,
+-- source of truth, client calls this before each upload; if ok=false,
 -- block. If ok=true, proceed.
 --
 -- Resolution order when a subscriber uploads:
@@ -68,7 +68,7 @@ comment on function public.next_sunday_utc_midnight(timestamptz) is
 --   3. Otherwise block.
 --
 -- Resolution order for a non-subscriber:
---   1. If array_length(photos) < free_limit: 'free' (no mutation —
+--   1. If array_length(photos) < free_limit: 'free' (no mutation,
 --      portfolio array growth is the counter).
 --   2. If photo_credits > 0: decrement credit, 'credit'.
 --   3. Otherwise block.
@@ -154,7 +154,7 @@ begin
     v_ok := true;
     v_reason := null;
   elsif (not v_is_subscriber) and v_photos_len < v_free_limit then
-    -- Non-subscriber, within lifetime free allowance. No mutation —
+    -- Non-subscriber, within lifetime free allowance. No mutation,
     -- portfolio array growth is the de-facto counter.
     v_slot_type := 'free';
     v_ok := true;
@@ -250,4 +250,4 @@ $$;
 grant execute on function public.peek_upload_slots(text) to authenticated;
 
 comment on function public.peek_upload_slots(text) is
-  'Read-only peek at remaining upload slots for a tech. UI-only — not an authoritative gate. Use consume_upload_slot() to actually reserve a slot.';
+  'Read-only peek at remaining upload slots for a tech. UI-only, not an authoritative gate. Use consume_upload_slot() to actually reserve a slot.';

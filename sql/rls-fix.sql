@@ -1,5 +1,5 @@
 -- ============================================================================
--- MNC v53 — RLS FIX: nuke all existing policies, then install correct ones
+-- MNC v53, RLS FIX: nuke all existing policies, then install correct ones
 -- ============================================================================
 -- The first pass left pre-existing permissive policies in place, which were
 -- overriding the new restrictive ones. This script:
@@ -53,7 +53,7 @@ end $$;
 -- LIVE / ACTIVE TABLES
 -- ============================================================================
 
--- TECHS — public SELECT, tech updates own row, admin all
+-- TECHS, public SELECT, tech updates own row, admin all
 alter table public.techs enable row level security;
 create policy techs_select_all   on public.techs for select using (true);
 create policy techs_update_self  on public.techs for update to authenticated
@@ -66,7 +66,7 @@ create policy techs_insert_admin on public.techs for insert to authenticated
 create policy techs_delete_admin on public.techs for delete to authenticated
   using (public.is_admin());
 
--- BOARD_POSTS — public SELECT, tech inserts/updates/deletes own posts
+-- BOARD_POSTS, public SELECT, tech inserts/updates/deletes own posts
 alter table public.board_posts enable row level security;
 create policy board_select_all  on public.board_posts for select using (true);
 create policy board_insert_self on public.board_posts for insert to authenticated
@@ -77,7 +77,7 @@ create policy board_update_self on public.board_posts for update to authenticate
 create policy board_delete_self on public.board_posts for delete to authenticated
   using (lower(tech_id) = public.current_email() or public.is_admin());
 
--- BOOKINGS — UUID client_id / tech_id
+-- BOOKINGS, UUID client_id / tech_id
 alter table public.bookings enable row level security;
 create policy bookings_select_involved on public.bookings for select to authenticated
   using (
@@ -105,7 +105,7 @@ create policy bookings_delete_involved on public.bookings for delete to authenti
     or public.is_admin()
   );
 
--- PUSH_SUBSCRIPTIONS — user_id is text (email)
+-- PUSH_SUBSCRIPTIONS, user_id is text (email)
 alter table public.push_subscriptions enable row level security;
 create policy push_select_self on public.push_subscriptions for select to authenticated
   using (lower(user_id) = public.current_email() or public.is_admin());
@@ -117,7 +117,7 @@ create policy push_update_self on public.push_subscriptions for update to authen
 create policy push_delete_self on public.push_subscriptions for delete to authenticated
   using (lower(user_id) = public.current_email() or public.is_admin());
 
--- USER_INSPO — owner only (user_email column)
+-- USER_INSPO, owner only (user_email column)
 alter table public.user_inspo enable row level security;
 create policy inspo_select_self on public.user_inspo for select to authenticated
   using (lower(user_email) = public.current_email() or public.is_admin());
@@ -129,7 +129,7 @@ create policy inspo_update_self on public.user_inspo for update to authenticated
 create policy inspo_delete_self on public.user_inspo for delete to authenticated
   using (lower(user_email) = public.current_email() or public.is_admin());
 
--- USER_FAVORITES — ASSUMING user_email column; edit if different
+-- USER_FAVORITES, ASSUMING user_email column; edit if different
 alter table public.user_favorites enable row level security;
 create policy fav_select_self on public.user_favorites for select to authenticated
   using (lower(user_email) = public.current_email() or public.is_admin());
@@ -138,7 +138,7 @@ create policy fav_insert_self on public.user_favorites for insert to authenticat
 create policy fav_delete_self on public.user_favorites for delete to authenticated
   using (lower(user_email) = public.current_email() or public.is_admin());
 
--- USERS — assuming 'email' column
+-- USERS, assuming 'email' column
 alter table public.users enable row level security;
 create policy users_select_self on public.users for select to authenticated
   using (lower(email) = public.current_email() or public.is_admin());
@@ -160,7 +160,7 @@ create policy settings_admin_all on public.app_settings for all to authenticated
   using (public.is_admin()) with check (public.is_admin());
 
 -- ============================================================================
--- LEGACY / DEPRECATED — admin-only lockdown
+-- LEGACY / DEPRECATED, admin-only lockdown
 -- ============================================================================
 alter table public.nail_techs enable row level security;
 create policy nt_admin_all on public.nail_techs for all to authenticated
@@ -179,7 +179,7 @@ create policy msg_admin_all on public.messages for all to authenticated
   using (public.is_admin()) with check (public.is_admin());
 
 -- ============================================================================
--- VERIFICATION — should show only the policies named above
+-- VERIFICATION, should show only the policies named above
 -- ============================================================================
 -- select c.relname as table_name, p.polname as policy_name
 -- from pg_policy p join pg_class c on c.oid = p.polrelid

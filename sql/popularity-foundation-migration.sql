@@ -2,32 +2,32 @@
 -- MNC Popularity Foundation  (2026-04-21)
 -- ========================================================================
 -- Schema + helper functions that power the popularity surfaces:
---   • ⭐ Tech favorite count   — on tech profile header + browse cards
---   • ♥ Tech heart-total count — same (sum of hearts across all their photos)
---   • ♥ Per-photo heart count  — on each inspo feed card
---   • Profile views this week  — on tech's own dashboard (retention hook)
---   • 🌸 "New on MNC" decay    — uses users.joined, no schema change
+--   • ⭐ Tech favorite count, on tech profile header + browse cards
+--   • ♥ Tech heart-total count, same (sum of hearts across all their photos)
+--   • ♥ Per-photo heart count, on each inspo feed card
+--   • Profile views this week, on tech's own dashboard (retention hook)
+--   • 🌸 "New on MNC" decay, uses users.joined, no schema change
 --
 -- Design notes:
 --   • Aggregate queries use SECURITY DEFINER RPC functions so anonymous
 --     browsers can see counts without needing SELECT access on the
 --     underlying tables (which have row-level RLS). The functions return
---     only scalar counts or (url, count) pairs — never individual
+--     only scalar counts or (url, count) pairs, never individual
 --     user saves, which would be a privacy leak.
 --   • Batch variants (tech_fav_counts, tech_heart_counts, photo_heart_counts)
 --     take an array of ids so the browse grid can fetch N cards' counts
 --     in ONE request, not N.
---   • tech_events is private — admin-only SELECT, plus a private RPC
+--   • tech_events is private, admin-only SELECT, plus a private RPC
 --     (tech_events_count) that only the tech themselves or an admin can
 --     invoke meaningfully. Prevents competing techs from spying on each
 --     other's view counts.
 --
--- Safe to re-run — all DDL is idempotent; functions use CREATE OR REPLACE.
+-- Safe to re-run, all DDL is idempotent; functions use CREATE OR REPLACE.
 -- ========================================================================
 
 
 -- ========================================================================
--- BLOCK 1 — tech_events table
+-- BLOCK 1, tech_events table
 -- ========================================================================
 -- Event log for techs. Every meaningful interaction (profile open,
 -- Book Now tap, anything we add later) gets a row here. The client
@@ -53,7 +53,7 @@ create index if not exists tech_events_event_type_idx
 
 
 -- ========================================================================
--- BLOCK 2 — tech_events RLS
+-- BLOCK 2, tech_events RLS
 -- ========================================================================
 -- • Authenticated users can INSERT any event (needed for anonymous-ish
 --   profile-view logging). Intentionally permissive; worst abuse is a
@@ -76,10 +76,10 @@ create policy tech_events_select_admin on public.tech_events
 
 
 -- ========================================================================
--- BLOCK 3 — Public popularity count RPCs (safe to expose broadly)
+-- BLOCK 3, Public popularity count RPCs (safe to expose broadly)
 -- ========================================================================
 -- Scalar counts for a single tech / photo, and batch variants for browse
--- grids. SECURITY DEFINER so they work for anon visitors — only scalar
+-- grids. SECURITY DEFINER so they work for anon visitors, only scalar
 -- counts leave the function, never individual save rows.
 -- ========================================================================
 
@@ -171,10 +171,10 @@ grant execute on function public.photo_heart_counts(text[])    to anon, authenti
 
 
 -- ========================================================================
--- BLOCK 4 — Private tech_events count RPC (tech-only / admin-only)
+-- BLOCK 4, Private tech_events count RPC (tech-only / admin-only)
 -- ========================================================================
 -- Unlike popularity counts (which are social proof visible to everyone),
--- profile-view counts are private to the tech themselves — no other tech
+-- profile-view counts are private to the tech themselves, no other tech
 -- should see "how many people viewed Leslie's profile this week." This
 -- function enforces that rule inside the function body so the public
 -- anon role can't bypass it.
@@ -205,7 +205,7 @@ grant execute on function public.tech_events_count(text, text, timestamptz)
 
 
 -- ========================================================================
--- BLOCK 5 — SMOKE TEST (optional)
+-- BLOCK 5, SMOKE TEST (optional)
 -- ========================================================================
 -- Run after the DDL above. These should all return counts, not errors.
 -- ========================================================================

@@ -1,7 +1,7 @@
 {
   "name": "my-nail-connection",
   "version": "1.0.0",
-  "description": "My Nail Connection — find, book, and connect with nail techs near you.",
+  "description": "My Nail Connection, find, book, and connect with nail techs near you.",
   "private": true,
   "dependencies": {
     "@capacitor/android": "^7.0.0",

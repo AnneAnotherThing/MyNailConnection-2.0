@@ -1,14 +1,14 @@
 -- ============================================================================
--- MNC v53 — Row-Level Security Starter Policies (REAL SCHEMA VERSION)
+-- MNC v53, Row-Level Security Starter Policies (REAL SCHEMA VERSION)
 -- ============================================================================
--- Run this in Supabase → SQL Editor. Safe to re-run — all policies use
+-- Run this in Supabase → SQL Editor. Safe to re-run, all policies use
 -- DROP IF EXISTS before CREATE.
 --
 -- Admin is currently hardcoded to annewilson1021@gmail.com. Edit IS_ADMIN()
 -- to add more admins later.
 --
 -- Legacy / deprecated tables (nail_techs, tech_photos, conversations,
--- messages) are locked down — only admin can touch them. If you're sure you
+-- messages) are locked down, only admin can touch them. If you're sure you
 -- don't need them anymore, you can DROP them in a separate cleanup step.
 -- ============================================================================
 
@@ -34,7 +34,7 @@ $$;
 -- LIVE / ACTIVE TABLES
 -- ============================================================================
 
--- ── TECHS — public directory ────────────────────────────────────────────────
+-- ── TECHS, public directory ────────────────────────────────────────────────
 alter table public.techs enable row level security;
 
 drop policy if exists techs_select_all    on public.techs;
@@ -67,7 +67,7 @@ create policy techs_delete_admin on public.techs
   for delete to authenticated
   using (public.is_admin());
 
--- ── BOARD_POSTS — tech posts, public read ───────────────────────────────────
+-- ── BOARD_POSTS, tech posts, public read ───────────────────────────────────
 -- Replaces two-way conversations: techs post updates, users read.
 -- tech_id is stored as text (email).
 alter table public.board_posts enable row level security;
@@ -94,7 +94,7 @@ create policy board_delete_self on public.board_posts
   for delete to authenticated
   using (lower(tech_id) = public.current_email() or public.is_admin());
 
--- ── BOOKINGS — client_id / tech_id are UUIDs ────────────────────────────────
+-- ── BOOKINGS, client_id / tech_id are UUIDs ────────────────────────────────
 -- client_id = auth.uid() of the client account.
 -- tech_id = techs.id, and the tech account's email matches that techs row.
 alter table public.bookings enable row level security;
@@ -140,7 +140,7 @@ create policy bookings_delete_involved on public.bookings
     or public.is_admin()
   );
 
--- ── PUSH_SUBSCRIPTIONS — user_id is text (email) ───────────────────────────
+-- ── PUSH_SUBSCRIPTIONS, user_id is text (email) ───────────────────────────
 alter table public.push_subscriptions enable row level security;
 
 drop policy if exists push_select_self on public.push_subscriptions;
@@ -165,7 +165,7 @@ create policy push_delete_self on public.push_subscriptions
   for delete to authenticated
   using (lower(user_id) = public.current_email() or public.is_admin());
 
--- ── USER_INSPO — saved inspiration photos ──────────────────────────────────
+-- ── USER_INSPO, saved inspiration photos ──────────────────────────────────
 -- Columns: id, user_email, photo_url, tech_name, created_at
 alter table public.user_inspo enable row level security;
 
@@ -192,7 +192,7 @@ create policy inspo_delete_self on public.user_inspo
   using (lower(user_email) = public.current_email() or public.is_admin());
 
 -- ── USER_FAVORITES ──────────────────────────────────────────────────────────
--- I don't have the column names yet — ASSUMING user_email column. If your
+-- I don't have the column names yet, ASSUMING user_email column. If your
 -- favorites table uses user_id (uuid) or something else, edit the policies
 -- below. Alternatively drop and recreate this block after you confirm columns.
 alter table public.user_favorites enable row level security;
@@ -215,7 +215,7 @@ create policy fav_delete_self on public.user_favorites
   using (lower(user_email) = public.current_email() or public.is_admin());
 
 -- ── USERS ───────────────────────────────────────────────────────────────────
--- Columns unknown — assuming an 'email' column. Edit if different.
+-- Columns unknown, assuming an 'email' column. Edit if different.
 alter table public.users enable row level security;
 
 drop policy if exists users_select_self on public.users;
@@ -239,7 +239,7 @@ create policy users_update_self on public.users
 -- ADMIN-ONLY TABLES
 -- ============================================================================
 
--- ── ARCHIVED_TECHS — admin only (113 rows, was UNRESTRICTED!) ──────────────
+-- ── ARCHIVED_TECHS, admin only (113 rows, was UNRESTRICTED!) ──────────────
 alter table public.archived_techs enable row level security;
 
 drop policy if exists arch_admin_all on public.archived_techs;
@@ -249,7 +249,7 @@ create policy arch_admin_all on public.archived_techs
   using (public.is_admin())
   with check (public.is_admin());
 
--- ── APP_SETTINGS — admin only ───────────────────────────────────────────────
+-- ── APP_SETTINGS, admin only ───────────────────────────────────────────────
 alter table public.app_settings enable row level security;
 
 drop policy if exists settings_admin_all on public.app_settings;
@@ -260,39 +260,39 @@ create policy settings_admin_all on public.app_settings
   with check (public.is_admin());
 
 -- ============================================================================
--- LEGACY / DEPRECATED TABLES — locked down to admin only
+-- LEGACY / DEPRECATED TABLES, locked down to admin only
 -- ============================================================================
 -- These tables are no longer used by the app but still contain (or could
 -- contain) data. Locking down so anon can't read or write. You can DROP
 -- them entirely later once you confirm nothing references them.
 -- ============================================================================
 
--- nail_techs — legacy duplicate of techs
+-- nail_techs, legacy duplicate of techs
 alter table public.nail_techs enable row level security;
 drop policy if exists nt_admin_all on public.nail_techs;
 create policy nt_admin_all on public.nail_techs
   for all to authenticated using (public.is_admin()) with check (public.is_admin());
 
--- tech_photos — legacy, photos now live as JSONB on techs.photos
+-- tech_photos, legacy, photos now live as JSONB on techs.photos
 alter table public.tech_photos enable row level security;
 drop policy if exists tp_admin_all on public.tech_photos;
 create policy tp_admin_all on public.tech_photos
   for all to authenticated using (public.is_admin()) with check (public.is_admin());
 
--- conversations — feature pulled (replaced by board_posts)
+-- conversations, feature pulled (replaced by board_posts)
 alter table public.conversations enable row level security;
 drop policy if exists conv_admin_all on public.conversations;
 create policy conv_admin_all on public.conversations
   for all to authenticated using (public.is_admin()) with check (public.is_admin());
 
--- messages — feature pulled (replaced by board_posts)
+-- messages, feature pulled (replaced by board_posts)
 alter table public.messages enable row level security;
 drop policy if exists msg_admin_all on public.messages;
 create policy msg_admin_all on public.messages
   for all to authenticated using (public.is_admin()) with check (public.is_admin());
 
 -- ============================================================================
--- VERIFICATION — run this after to confirm RLS is on everywhere
+-- VERIFICATION, run this after to confirm RLS is on everywhere
 -- ============================================================================
 -- select tablename, rowsecurity from pg_tables
 -- where schemaname = 'public' order by tablename;

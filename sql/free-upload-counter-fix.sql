@@ -6,7 +6,7 @@
 -- table needs to be checked inside the same RPC. Single CREATE OR REPLACE
 -- on consume_upload_slot is cleaner than two sequential ones.
 --
--- ── Part 1 — Free-upload counter ────────────────────────────────────────
+-- ── Part 1, Free-upload counter ────────────────────────────────────────
 -- The old free-tier branch of consume_upload_slot used
 -- jsonb_array_length(techs.photos) as its counter:
 --
@@ -14,7 +14,7 @@
 --         -- "Portfolio growth is the de-facto counter"
 --         v_slot_type := 'free'; v_ok := true;
 --
--- That assumes photos hit techs.photos immediately. They don't — the
+-- That assumes photos hit techs.photos immediately. They don't, the
 -- tech-edit screen accumulates uploads in a local edit buffer and only
 -- writes to techs.photos on Save. Within a single edit session a tech
 -- could blast past the 5-free cap because the counter never advanced.
@@ -22,10 +22,10 @@
 -- Fix: real `lifetime_free_used` integer column on techs. RPC mutates it
 -- on every free grant. Atomic, mid-session correct.
 --
--- ── Part 2 — Comps system ───────────────────────────────────────────────
+-- ── Part 2, Comps system ───────────────────────────────────────────────
 -- A separate `public.tech_comps` table is the source of truth for who
 -- gets a permanent comp (free Glow Up, no Stripe sub). Anne can manage
--- this table independently of public.techs — add/remove rows whenever,
+-- this table independently of public.techs, add/remove rows whenever,
 -- without re-running migrations. The RPC checks tech_comps FIRST, before
 -- the Stripe-based subscription logic, so a comped tech is a subscriber
 -- regardless of what subscription_tier or subscription_expires_at say
@@ -41,7 +41,7 @@
 --   • Per-person customization without schema changes. monthly_limit
 --     defaults to 40 but Anne can set 20 for one person, 80 for another.
 --
--- ── Part 3 — Email casing in the RPC ───────────────────────────────────
+-- ── Part 3, Email casing in the RPC ───────────────────────────────────
 -- The previous RPC used `where t.email = p_email` (case-sensitive). Most
 -- callers pass auth-lowercased emails, but it's a footgun. Now does
 -- `where lower(t.email) = lower(btrim(p_email))` everywhere.
@@ -52,7 +52,7 @@
 
 
 -- ========================================================================
--- BLOCK 1 — Add lifetime_free_used counter to techs
+-- BLOCK 1, Add lifetime_free_used counter to techs
 -- ========================================================================
 
 alter table public.techs
@@ -76,7 +76,7 @@ update public.techs t
 
 
 -- ========================================================================
--- BLOCK 2 — Create the comps table
+-- BLOCK 2, Create the comps table
 -- ========================================================================
 
 create table if not exists public.tech_comps (
@@ -90,15 +90,15 @@ create table if not exists public.tech_comps (
 );
 
 comment on table public.tech_comps is
-  'Permanent free-Glow-Up grants. A row here means the email gets subscriber treatment from consume_upload_slot regardless of the techs.subscription_tier value. Decoupled from Stripe — webhook events cannot affect rows here. Email is enforced lowercase by CHECK constraint so case-insensitive lookups always match.';
+  'Permanent free-Glow-Up grants. A row here means the email gets subscriber treatment from consume_upload_slot regardless of the techs.subscription_tier value. Decoupled from Stripe, webhook events cannot affect rows here. Email is enforced lowercase by CHECK constraint so case-insensitive lookups always match.';
 comment on column public.tech_comps.note is
   'Free-text reason for the grant (e.g. "MNC 1.0 founder", "Beta tester", "Personal grant from Anne"). Audit trail.';
 comment on column public.tech_comps.monthly_limit is
   'Override for the standard 40/month allowance. Lets Anne grant smaller (e.g. 20/mo trial) or larger comps without schema changes.';
 
--- RLS — admin can read/write all rows; the owner can read their own
+-- RLS, admin can read/write all rows; the owner can read their own
 -- (so the client UI can detect comp status and tailor copy). Browse
--- lists / cards do NOT need to read this table directly — the trigger
+-- lists / cards do NOT need to read this table directly, the trigger
 -- below syncs subscription_tier onto techs, so the standard
 -- 'tier === paid' check already lights up comped techs in lists.
 alter table public.tech_comps enable row level security;
@@ -124,7 +124,7 @@ create policy tech_comps_admin_all on public.tech_comps
 -- profile header, upgrade-modal eyebrow, etc.) can keep using the
 -- existing `subscription_tier === 'paid'` check without learning about
 -- the new table. Comped techs end up looking identical to Stripe
--- subscribers in the UI (which is the goal — they ARE Glow Up members).
+-- subscribers in the UI (which is the goal, they ARE Glow Up members).
 --
 -- Webhook safety: the deleted/updated subscription webhooks key off
 -- stripe_customer_id. Comped techs have stripe_customer_id = null, so
@@ -149,7 +149,7 @@ begin
     return new;
   elsif tg_op = 'DELETE' then
     -- Revert to 'free' only if no Stripe subscription is backing the
-    -- row. If a Stripe sub IS active, leave the tier alone — the webhook
+    -- row. If a Stripe sub IS active, leave the tier alone, the webhook
     -- is the authority for that lifecycle.
     update public.techs
        set subscription_tier       = 'free',
@@ -191,7 +191,7 @@ update public.techs t
 
 -- Reverse trigger: when a public.techs row is created for an email that
 -- already has a comp on file, auto-apply the paid tier. This is what
--- makes archived-tech re-onboarding work — Anne adds an archived email
+-- makes archived-tech re-onboarding work, Anne adds an archived email
 -- to tech_comps NOW, the person eventually re-signs-up via the regular
 -- signup flow, and the moment their techs row lands, this trigger marks
 -- them paid. No manual reconciliation pass required. 2026-04-27.
@@ -221,7 +221,7 @@ create trigger apply_pending_comp_on_tech_insert_trg
 
 
 -- ========================================================================
--- BLOCK 3 — Patched consume_upload_slot
+-- BLOCK 3, Patched consume_upload_slot
 -- Comp check first, then standard tier logic. lifetime_free_used drives
 -- the free branch. Email match case-insensitive.
 -- ========================================================================
@@ -292,7 +292,7 @@ begin
 
   -- Lazy reset: month rolled over → zero the counter, advance the
   -- marker by another month. Same logic for both Stripe-paid and comped
-  -- subscribers — they both use period_upload_count / period_reset_at.
+  -- subscribers, they both use period_upload_count / period_reset_at.
   if v_is_subscriber and (v_period_reset is null or v_period_reset <= now()) then
     v_period_count := 0;
     v_period_reset := now() + interval '1 month';
@@ -347,10 +347,10 @@ grant execute on function public.consume_upload_slot(text) to authenticated;
 
 
 -- ========================================================================
--- BLOCK 4 — Patched peek_upload_slots (read-only sibling)
+-- BLOCK 4, Patched peek_upload_slots (read-only sibling)
 -- ========================================================================
 -- The existing function's return columns differ (added `tier` +
--- `is_subscriber`), so Postgres requires an explicit DROP — CREATE OR
+-- `is_subscriber`), so Postgres requires an explicit DROP, CREATE OR
 -- REPLACE alone errors with "cannot change return type of existing
 -- function." Drop is idempotent thanks to IF EXISTS.
 

@@ -1,5 +1,5 @@
 -- ─────────────────────────────────────────────────────────────────────────
--- MNC — Admin management refactor
+-- MNC, Admin management refactor
 --
 -- Moves is_admin() off the hardcoded SQL email list onto the existing
 -- public.users.role column, so the Admin Settings screen (the "Admins"

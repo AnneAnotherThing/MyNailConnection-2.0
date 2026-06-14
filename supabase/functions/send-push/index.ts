@@ -24,7 +24,7 @@ const supabase = createClient(
   Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 );
 
-// Shared CORS headers — included on EVERY response so the browser never
+// Shared CORS headers, included on EVERY response so the browser never
 // blocks the reply. Previous version only set these on the success path,
 // which made 400 / no-subscriptions / 500 look like network failures on
 // the client and produced a misleading "Couldn't reach Anne" error even

@@ -6,7 +6,7 @@
 #
 #   deploy/app/        ← Netlify-style app bundle (legacy, safety net)
 #   deploy/marketing/  ← Netlify-style marketing bundle (legacy, safety net)
-#   deploy/ghpages/    ← GitHub Pages bundle — the real publish target.
+#   deploy/ghpages/    ← GitHub Pages bundle, the real publish target.
 #                         Marketing at root, app under /app/, CNAME pinned
 #                         to mynailconnection.com. Push the contents of
 #                         this folder to the anneanotherthing.github.io
@@ -29,7 +29,7 @@ cd "$(dirname "$0")/.."  # cd to MNC repo root
 # ── HTML truncation guard ───────────────────────────────────────────────
 # After the Edit/Write tool silently truncated marketing.html on 2026-05-05
 # during a launch-fanfare edit (and the same thing has bitten index.html
-# repeatedly — see CLAUDE.md), we never want a truncated source to reach
+# repeatedly, see CLAUDE.md), we never want a truncated source to reach
 # the deploy bundle. This guard aborts sync if any critical HTML source:
 #   (a) doesn't end with </body>, or
 #   (b) has dropped more than 10% in line count vs its committed git HEAD.
@@ -44,7 +44,7 @@ validate_html() {
   local f="$1"
   if [ ! -f "$f" ]; then return 0; fi
 
-  # Closing-tag check — </body> must be in the last few hundred bytes
+  # Closing-tag check, </body> must be in the last few hundred bytes
   if ! tail -c 400 "$f" | grep -q "</body>"; then
     echo "✗ ABORT: $f is missing </body> at end of file. Looks truncated." >&2
     echo "  Recover with: git checkout $f  (or merge the missing tail back manually)" >&2
@@ -86,9 +86,28 @@ copy_if_exists() {
   if [ -f "$src" ]; then cp -f "$src" "$dst"; fi
 }
 
+# Mirror a directory's contents into a destination. Prefers rsync (with
+# --delete so files removed from source also vanish from the bundle), but
+# falls back to cp -rf when rsync is missing. Windows / Git-Bash has no
+# rsync, and set -e was aborting the whole sync at the first rsync line,
+# so the app bundle never got rebuilt. The cp fallback loses --delete
+# semantics (stale files linger), acceptable for the asset folders this
+# handles since they rarely drop files. Pass source WITHOUT a trailing
+# slash; we add the contents-glob ourselves. 2026-06-13.
+sync_dir() {
+  local src="$1" dst="$2"
+  [ -d "$src" ] || return 0
+  mkdir -p "$dst"
+  if command -v rsync >/dev/null 2>&1; then
+    rsync -a --delete "$src/" "$dst/"
+  else
+    cp -rf "$src/." "$dst/"
+  fi
+}
+
 # ── Auto-bump service worker cache version ──────────────────────────────
 # Problem this solves: on 2026-04-21 Anne pushed a fresh build to GitHub
-# Pages and testers (including her) kept seeing the OLD code — the PWA
+# Pages and testers (including her) kept seeing the OLD code, the PWA
 # service worker had index.html cached under mnc-vN and never re-fetched.
 # Manual fix was "DevTools → Application → Unregister + Clear storage",
 # which isn't something we can ask end-users to do.
@@ -126,7 +145,7 @@ fi
 # uploaded. Forgetting to bump = upload fails with
 # "ENTITY_ERROR.ATTRIBUTE.INVALID.DUPLICATE / The bundle version must be
 # higher than the previously uploaded version" (iOS) or "Version code N has
-# already been used" (Android). Anne kept hitting this — 2026-04-28.
+# already been used" (Android). Anne kept hitting this, 2026-04-28.
 #
 # Fix: same trigger pattern as the sw.js cache bump above. When any source
 # HTML (or capacitor.config.json / AndroidManifest.xml) is newer than the
@@ -134,7 +153,7 @@ fi
 # configs in project.pbxproj) and Android versionCode (build.gradle), each
 # by +1, and touch the marker. Repeated syncs without HTML edits stay no-op.
 #
-# .last-build-bump is gitignored — per-machine sentinel, never shared.
+# .last-build-bump is gitignored, per-machine sentinel, never shared.
 # First-ever run (no marker on disk) initializes the marker without bumping
 # so wiring this up doesn't fire a stray bump on the next sync.
 if [ ! -f .last-build-bump ]; then
@@ -150,11 +169,11 @@ else
     fi
   done
   if [ "$needs_build_bump" = "1" ]; then
-    # iOS — CURRENT_PROJECT_VERSION appears twice in project.pbxproj (Debug
+    # iOS, CURRENT_PROJECT_VERSION appears twice in project.pbxproj (Debug
     # + Release configs). Same number in both is the standard Capacitor
     # default and what App Store Connect treats as a single build.
     #
-    # First strip any trailing NUL bytes from prior cross-platform writes —
+    # First strip any trailing NUL bytes from prior cross-platform writes,
     # build #12 (2026-04-28) failed at pod install because 4 trailing NULs
     # at end-of-file made CocoaPods' Nanaimo plist parser reject the file.
     # tr is binary-safe and self-heals on every run regardless of how the
@@ -177,7 +196,7 @@ else
         echo "  bumped iOS CFBundleVersion: ${ios_current} → ${ios_next}"
       fi
     fi
-    # Android — versionCode is a single integer line in build.gradle.
+    # Android, versionCode is a single integer line in build.gradle.
     # versionName ("2.0.0") is the user-facing version and stays untouched.
     if [ -f android/app/build.gradle ]; then
       android_current=$(grep -E "^[[:space:]]*versionCode[[:space:]]+[0-9]+" android/app/build.gradle \
@@ -235,9 +254,9 @@ copy_if_exists sitemap.xml             "$MKT/sitemap.xml"
 copy_if_exists robots.txt              "$MKT/robots.txt"
 
 # ── Marketing assets (folders) ──────────────────────────────────────────
-# Use rsync --delete so removed source files are removed from the bundle.
-[ -d images ]      && rsync -a --delete images/      "$MKT/images/"
-[ -d app-screens ] && rsync -a --delete app-screens/ "$MKT/app-screens/"
+# Mirror asset folders (rsync when available, cp fallback otherwise).
+sync_dir images      "$MKT/images"
+sync_dir app-screens "$MKT/app-screens"
 
 # ── GitHub Pages bundle (deploy/ghpages/) ───────────────────────────────
 # Single-tree layout served by one repo:
@@ -245,7 +264,7 @@ copy_if_exists robots.txt              "$MKT/robots.txt"
 #   /app/index.html        ← the real app
 #   /app/reset-password.html
 #   /CNAME                 ← pins custom domain to mynailconnection.com
-#   (favicons, manifest, sw.js, images/, app-screens/ at root — shared)
+#   (favicons, manifest, sw.js, images/, app-screens/ at root, shared)
 #   (privacy.html + terms.html duplicated to /app/ so the app's relative
 #    links resolve whether or not the marketing ones are still there)
 mkdir -p "$GH" "$GH/app"
@@ -271,27 +290,27 @@ copy_if_exists manifest.json           "$GH/manifest.json"
 copy_if_exists sw.js                   "$GH/sw.js"
 copy_if_exists sitemap.xml             "$GH/sitemap.xml"
 copy_if_exists robots.txt              "$GH/robots.txt"
-[ -d images ]      && rsync -a --delete images/      "$GH/images/"
-[ -d app-screens ] && rsync -a --delete app-screens/ "$GH/app-screens/"
+sync_dir images      "$GH/images"
+sync_dir app-screens "$GH/app-screens"
 
 # ── Google Search Console verification ──────────────────────────────────
 # google3d630386db4a7faa.html is an ownership-verification token Google
 # generates for the mynailconnection.com property. Must be served at
-# https://www.mynailconnection.com/google3d630386db4a7faa.html — i.e. the
+# https://www.mynailconnection.com/google3d630386db4a7faa.html, i.e. the
 # root of the marketing bundle. Per Google's docs ("To stay verified,
 # don't remove the file"), this stays in the bundle indefinitely. Added
 # 2026-05-25 so Search Console can verify the property and start
 # returning indexing data.
 copy_if_exists google3d630386db4a7faa.html "$GH/google3d630386db4a7faa.html"
 
-# ── .well-known/ — Android App Links + iOS Universal Links ──────────────
+# ── .well-known/, Android App Links + iOS Universal Links ──────────────
 # assetlinks.json is served from https://mynailconnection.com/.well-known/
 # so Android can auto-verify this domain belongs to our app package. When
 # iOS ships, apple-app-site-association will live alongside it (no file
 # extension, served as application/json). Without this directory in the
 # publish root, tapping a Supabase auth-email link opens a browser tab
-# instead of deep-linking into the installed app. — 2026-04-23
-[ -d .well-known ] && rsync -a --delete .well-known/ "$GH/.well-known/"
+# instead of deep-linking into the installed app. 2026-04-23
+sync_dir .well-known "$GH/.well-known"
 
 # App under /app/
 copy_if_exists index.html              "$GH/app/index.html"
@@ -305,4 +324,8 @@ copy_if_exists apple-touch-icon.png    "$GH/app/apple-touch-icon.png"
 copy_if_exists manifest.json           "$GH/app/manifest.json"
 copy_if_exists sw.js                   "$GH/app/sw.js"
 
-# Custom domain pin for GitHub Pages. This file
+# Custom domain pin for GitHub Pages. This file must sit at the publish
+# root so Pages serves the site under mynailconnection.com instead of the
+# anneanotherthing.github.io subpath. Restored 2026-06-13 after the script
+# was found truncated mid-line here (no CNAME copy was running).
+copy_if_exists CNAME "$GH/CNAME"

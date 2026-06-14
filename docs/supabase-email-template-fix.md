@@ -1,10 +1,10 @@
-# Supabase email-template fix — direct-link verify
+# Supabase email-template fix, direct-link verify
 
 **What:** swap each auth email template's confirmation link from the default `{{ .ConfirmationURL }}` (which 302s through `supabase.co`) to a direct link to `mynailconnection.com/app/`. Pairs with the `consumeMagicLinkVerifyIfPresent()` handler in `index.html` that converts the `token_hash` query param into a session on load.
 
-**Why:** the default link goes to `https://<project>.supabase.co/auth/v1/verify?token=...` which redirects to your Site URL. iOS Universal Links only fire on a *direct* tap to a domain in the AASA file, never on a redirect — so the email link opens Safari instead of the installed app every time. Anne hit this in TestFlight on 2026-04-27.
+**Why:** the default link goes to `https://<project>.supabase.co/auth/v1/verify?token=...` which redirects to your Site URL. iOS Universal Links only fire on a *direct* tap to a domain in the AASA file, never on a redirect, so the email link opens Safari instead of the installed app every time. Anne hit this in TestFlight on 2026-04-27.
 
-**Prerequisite:** the `consumeMagicLinkVerifyIfPresent` handler must already be deployed to `mynailconnection.com/app/`. Check by viewing the deployed `index.html` source and searching for `consumeMagicLinkVerifyIfPresent` — if it's there, you're good.
+**Prerequisite:** the `consumeMagicLinkVerifyIfPresent` handler must already be deployed to `mynailconnection.com/app/`. Check by viewing the deployed `index.html` source and searching for `consumeMagicLinkVerifyIfPresent`, if it's there, you're good.
 
 ---
 
@@ -19,7 +19,7 @@
    - **Invite User**
    - **Change Email Address**
 
-   Search the template HTML for **every** occurrence of `{{ .ConfirmationURL }}` (typically the main CTA button's `href`, plus a fallback "copy this link" footer that has it in both the `href` and the visible link text). Replace each one with the direct-link URL — using a hardcoded `type=` value that matches the template:
+   Search the template HTML for **every** occurrence of `{{ .ConfirmationURL }}` (typically the main CTA button's `href`, plus a fallback "copy this link" footer that has it in both the `href` and the visible link text). Replace each one with the direct-link URL, using a hardcoded `type=` value that matches the template:
 
    | Template | Replacement URL |
    |---|---|
@@ -29,7 +29,7 @@
    | Invite User | `https://mynailconnection.com/app/?token_hash={{ .TokenHash }}&type=invite` |
    | Change Email Address | `https://mynailconnection.com/app/?token_hash={{ .TokenHash }}&type=email_change` |
 
-   *(Note: `{{ .EmailActionType }}` is NOT a valid Supabase template variable — hardcode the `type=` per template instead.)*
+   *(Note: `{{ .EmailActionType }}` is NOT a valid Supabase template variable, hardcode the `type=` per template instead.)*
 
 3. Save each template.
 
@@ -37,7 +37,7 @@
    - Sign up in TestFlight on iPad.
    - Tap the link in the verification email.
    - Expected: the **app** opens (not Safari), you arrive on tech home (or client home, depending on your role).
-   - On a desktop browser without the app, same link works — just lands in the browser version of `/app/`.
+   - On a desktop browser without the app, same link works, just lands in the browser version of `/app/`.
 
 5. If something goes wrong and the link errors out, the `consumeMagicLinkVerifyIfPresent` handler shows a soft toast: `"That confirmation link has expired. Please sign in or request a new one."` Re-send the verify from the sign-in screen.
 
@@ -51,6 +51,6 @@ If anything goes sideways, revert each template to `{{ .ConfirmationURL }}`. Use
 
 ## Notes
 
-- The `consumeMagicLinkVerifyIfPresent` handler also runs on **web** clients (anyone hitting the URL in a desktop browser without the app), so this template change is universal — no separate handling needed for web vs native.
+- The `consumeMagicLinkVerifyIfPresent` handler also runs on **web** clients (anyone hitting the URL in a desktop browser without the app), so this template change is universal, no separate handling needed for web vs native.
 - Tokens are one-time and short-lived. The handler strips them from the URL via `history.replaceState` immediately after consuming, so a back-nav can't replay a failed verify.
-- The legacy `consumeRedirectTokensIfPresent` (which handles `#access_token=...` hash fragments from OAuth) is still wired in — Google / Apple sign-in keeps working unchanged.
+- The legacy `consumeRedirectTokensIfPresent` (which handles `#access_token=...` hash fragments from OAuth) is still wired in, Google / Apple sign-in keeps working unchanged.

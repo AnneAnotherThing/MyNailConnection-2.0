@@ -41,7 +41,7 @@ case "$mode" in
   *) echo "Usage: $0 [patch|minor|major]   (default: patch)"; exit 1 ;;
 esac
 
-# Read current MARKETING_VERSION from the iOS project — single source of truth.
+# Read current MARKETING_VERSION from the iOS project, single source of truth.
 current=$(grep -m1 -oE "MARKETING_VERSION = [0-9]+\.[0-9]+\.[0-9]+" \
             ios/App/App.xcodeproj/project.pbxproj 2>/dev/null \
             | grep -oE "[0-9]+\.[0-9]+\.[0-9]+")
@@ -59,7 +59,7 @@ esac
 next="${maj}.${min}.${pat}"
 
 # Sanity: refuse to clobber if any of the three sources don't currently
-# show $current — means they're already out of sync and the bump might
+# show $current, means they're already out of sync and the bump might
 # silently no-op somewhere.
 ios_count=$(grep -c "MARKETING_VERSION = ${current};" ios/App/App.xcodeproj/project.pbxproj || true)
 android_match=$(grep -c "versionName \"${current}\"" android/app/build.gradle || true)
@@ -76,19 +76,19 @@ fi
 
 echo "Bumping MARKETING_VERSION: ${current} → ${next}"
 
-# 1. iOS pbxproj — Debug + Release configs (appears twice)
+# 1. iOS pbxproj, Debug + Release configs (appears twice)
 sed "s/MARKETING_VERSION = ${current};/MARKETING_VERSION = ${next};/g" \
   ios/App/App.xcodeproj/project.pbxproj > ios/App/App.xcodeproj/project.pbxproj.tmp \
   && mv ios/App/App.xcodeproj/project.pbxproj.tmp ios/App/App.xcodeproj/project.pbxproj
 echo "  ✓ iOS pbxproj"
 
-# 2. Android build.gradle versionName — parity with iOS
+# 2. Android build.gradle versionName, parity with iOS
 sed "s/versionName \"${current}\"/versionName \"${next}\"/" \
   android/app/build.gradle > android/app/build.gradle.tmp \
   && mv android/app/build.gradle.tmp android/app/build.gradle
 echo "  ✓ Android build.gradle"
 
-# 3. index.html APP_BUILD.name — drives the in-app build tag on sign-in
+# 3. index.html APP_BUILD.name, drives the in-app build tag on sign-in
 esc_current=$(printf '%s' "$current" | sed 's/\./\\./g')
 sed -E "s|name:    '${esc_current}',([[:space:]]*/\* __APP_BUILD_NAME__)|name:    '${next}',\1|" \
   index.html > index.html.tmp \

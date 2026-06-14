@@ -4,7 +4,7 @@
 # On every push to main, publishes the contents of deploy/ghpages/ to the
 # GitHub Pages site at mynailconnection.com. Nothing else in the repo
 # (sql/, supabase/, node_modules/, android/, CLAUDE.md, etc.) gets served
-# publicly — only the curated deploy/ghpages/ tree goes up.
+# publicly, only the curated deploy/ghpages/ tree goes up.
 #
 # Context: Anne moved off Netlify on 2026-04-23 to stop burning build
 # credits. This Action replaces the old "drag the zip into Netlify" step.

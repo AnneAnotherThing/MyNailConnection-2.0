@@ -15,7 +15,7 @@
 
 
 -- ----------------------------------------------------------------------------
--- STEP 1 — PREVIEW (read-only, run first)
+-- STEP 1, PREVIEW (read-only, run first)
 -- ----------------------------------------------------------------------------
 -- Lists every tech_comps email and whether an auth.users row already exists.
 -- 'will create' rows are what the DO block will insert.
@@ -23,9 +23,9 @@
 select
   lower(tc.email) as email,
   case
-    when au.id is not null then 'skip — auth row exists'
-    when t.email is null   then 'will create — ARCHIVED (no public.techs row, will be orphan-auth until they re-onboard)'
-    else                        'will create — active tech'
+    when au.id is not null then 'skip, auth row exists'
+    when t.email is null   then 'will create, ARCHIVED (no public.techs row, will be orphan-auth until they re-onboard)'
+    else                        'will create, active tech'
   end as plan,
   t.email is not null as has_techs_row
 from public.tech_comps tc
@@ -35,7 +35,7 @@ order by plan, email;
 
 
 -- ----------------------------------------------------------------------------
--- STEP 2 — CREATE auth.users + auth.identities for missing emails
+-- STEP 2, CREATE auth.users + auth.identities for missing emails
 -- ----------------------------------------------------------------------------
 -- Run AFTER you've reviewed STEP 1 and are happy with the plan.
 --
@@ -123,10 +123,10 @@ end $$;
 
 
 -- ----------------------------------------------------------------------------
--- STEP 3 — VERIFY (run after STEP 2)
+-- STEP 3, VERIFY (run after STEP 2)
 -- ----------------------------------------------------------------------------
 -- Should return zero rows. Any row here is a tech_comps email that didn't
--- get an auth row — investigate.
+-- get an auth row, investigate.
 -- ----------------------------------------------------------------------------
 select tc.email
 from public.tech_comps tc
@@ -135,7 +135,7 @@ where au.id is null;
 
 
 -- ----------------------------------------------------------------------------
--- ROLLBACK (only if something is clearly wrong — DESTRUCTIVE)
+-- ROLLBACK (only if something is clearly wrong, DESTRUCTIVE)
 -- ----------------------------------------------------------------------------
 -- Deletes auth.users + auth.identities rows for tech_comps emails that
 -- were created TODAY. Filters by created_at::date = current_date so it

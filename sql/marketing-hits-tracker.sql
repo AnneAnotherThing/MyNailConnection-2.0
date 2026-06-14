@@ -1,5 +1,5 @@
 -- ─────────────────────────────────────────────────────────────────────────
--- MNC — Marketing site hit tracker
+-- MNC, Marketing site hit tracker
 --
 -- Run this once in Supabase → SQL Editor. Safe to re-run (idempotent).
 --
@@ -11,7 +11,7 @@
 --   can see them right next to all the other admin metrics.
 --
 -- What this migration does:
---   1. Creates public.marketing_hits — one row per "session" (per-page,
+--   1. Creates public.marketing_hits, one row per "session" (per-page,
 --      30-minute cooldown enforced client-side via localStorage).
 --   2. Sets up RLS so anonymous visitors can INSERT (the marketing pages
 --      are unauthenticated), and only admins can SELECT (relies on the
@@ -22,7 +22,7 @@
 --     v4 UUID generated in the browser; it's not tied to any account.
 --   - user_agent is captured raw mainly so we can spot obvious bot
 --     patterns later, and so we can debug "why is the count weird".
---     If you'd rather not keep raw UA, drop the column — the device_type
+--     If you'd rather not keep raw UA, drop the column, the device_type
 --     summary (mobile/desktop) is enough for the dashboard.
 -- ─────────────────────────────────────────────────────────────────────────
 
