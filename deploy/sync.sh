@@ -258,6 +258,10 @@ copy_if_exists robots.txt              "$MKT/robots.txt"
 sync_dir images      "$MKT/images"
 sync_dir app-screens "$MKT/app-screens"
 
+# ── Leslie campaign page + downloadable campaign assets ──────────────────
+copy_if_exists no-Download-Campaign.html "$MKT/no-Download-Campaign.html"
+sync_dir campaign-assets "$MKT/campaign-assets"
+
 # ── GitHub Pages bundle (deploy/ghpages/) ───────────────────────────────
 # Single-tree layout served by one repo:
 #   /index.html            ← marketing.html renamed to root index
@@ -292,6 +296,10 @@ copy_if_exists sitemap.xml             "$GH/sitemap.xml"
 copy_if_exists robots.txt              "$GH/robots.txt"
 sync_dir images      "$GH/images"
 sync_dir app-screens "$GH/app-screens"
+
+# ── Leslie campaign page + downloadable campaign assets ──────────────────
+copy_if_exists no-Download-Campaign.html "$GH/no-Download-Campaign.html"
+sync_dir campaign-assets "$GH/campaign-assets"
 
 # ── Google Search Console verification ──────────────────────────────────
 # google3d630386db4a7faa.html is an ownership-verification token Google
