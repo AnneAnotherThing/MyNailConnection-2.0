@@ -81,7 +81,7 @@ def standard(active, headline, sub):
 slides = {}
 slides[1] = standard(0, 'Download <em>fatigue</em><br>is real.', 'Your phone is already full. We get it.')
 slides[2] = standard(1, 'So,<br><em>good news.</em>', 'My Nail Connection doesn’t need a download.')
-slides[3] = standard(2, 'It lives in<br>your <em>browser.</em>', 'Your feed, your saved looks, and booking, all in one place.')
+slides[3] = standard(2, 'It lives in<br>your <em>browser.</em>', 'Your feed, your saved looks, and your next favorite tech, all in one place.')
 slides[4] = standard(3, 'Add it to your<br><em>home screen.</em>', 'It opens just like an app. Nothing to install, no updates to chase.')
 slides[5] = page(4, (f'{SPARK}<h1>Here’s <em>how.</em></h1>'
     '<div class="cards">'
