@@ -5060,8 +5060,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 328,         /* __APP_BUILD_ANDROID__ */
-  ios:     133,          /* __APP_BUILD_IOS__     */
+  android: 330,         /* __APP_BUILD_ANDROID__ */
+  ios:     135,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -15763,7 +15763,7 @@ async function loadMarketingHitsStats(h) {
 
   async function countHits(filter) {
     try {
-      const url = SUPABASE_URL + '/rest/v1/marketing_hits?select=*' + (filter ? '&' + filter : '');
+      const url = SUPABASE_URL + '/rest/v1/marketing_hits?select=*&page=neq.app' + (filter ? '&' + filter : '');
       const r = await fetch(url, {
         method: 'HEAD',
         headers: Object.assign({}, h, { 'Prefer': 'count=exact', 'Range-Unit': 'items', 'Range': '0-0' })
@@ -15781,7 +15781,7 @@ async function loadMarketingHitsStats(h) {
   let denied = false;
   try {
     const url = SUPABASE_URL + '/rest/v1/marketing_hits'
-              + '?select=created_at,page,referrer,device_type'
+              + '?select=created_at,page,referrer,device_type&page=neq.app'
               + '&created_at=gte.' + encodeURIComponent(weekAgo.toISOString())
               + '&order=created_at.desc&limit=150';
     const r = await fetch(url, { headers: h });
@@ -18103,6 +18103,130 @@ function closeLegalModal() {
   document.getElementById('legal-modal').style.display = 'none';
   document.getElementById('legal-iframe').src = '';
 }
+</script>
+
+<!-- ────────────────────────────────────────────────────────────────
+     /app page-hit tracker → public.marketing_hits (page='app').
+     Logs ONE row when a visitor lands on mynailconnection.com/app from
+     OUTSIDE the site (external referrer, search, QR, social, or a
+     typed/bookmarked URL). Internal navigation from our own marketing
+     pages and native-app (Capacitor) opens are skipped, so this counts
+     genuine outside entrances to the web app. 30-min cooldown per
+     browser; bots skipped. Read by admin-stats.html ("App page hits").
+     No migration needed, reuses the existing marketing_hits table + RLS
+     (sql/marketing-hits-tracker.sql + granular-analytics-migration.sql).
+     ──────────────────────────────────────────────────────────────── -->
+<script>
+(function () {
+  try {
+    var PAGE = 'app';
+    var SUPABASE_URL = 'https://ktiztunuifzbzwzyqrrq.supabase.co';
+    var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt0aXp0dW51aWZ6Ynp3enlxcnJxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3Njk3MDgsImV4cCI6MjA4OTM0NTcwOH0.QXhI1oO-v5Qs2XOlijjpRgM2pxDD6lkWxUQ6uW6HbtM';
+    var COOLDOWN_MS = 30 * 60 * 1000;
+
+    // Native shell (Capacitor) opens are not "navigating to /app", skip them.
+    try {
+      if (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) return;
+    } catch (_) {}
+
+    // Installed-PWA launches (home-screen icon, standalone display) are
+    // returning users opening the app, not an arrival from outside, skip too.
+    try {
+      if ((window.matchMedia && (window.matchMedia('(display-mode: standalone)').matches
+            || window.matchMedia('(display-mode: fullscreen)').matches))
+          || window.navigator.standalone === true) return;
+    } catch (_) {}
+
+    var ua = (navigator && navigator.userAgent) || '';
+    if (/bot|crawl|spider|scrape|preview|prerender|monitor|lighthouse|headlesschrome/i.test(ua)) return;
+
+    // "From outside" only: skip arrivals referred by our own site (internal
+    // clicks from marketing.html / tech-guide.html). Empty referrer (direct,
+    // bookmark, typed, email) counts as an outside entrance.
+    var selfHost = (location.hostname || '').replace(/^www\./, '').toLowerCase();
+    var refHost = '';
+    try { refHost = document.referrer ? new URL(document.referrer).hostname.replace(/^www\./, '').toLowerCase() : ''; } catch (_) {}
+    if (refHost && refHost === selfHost) return;
+
+    var ls = null; try { ls = window.localStorage; } catch (_) {}
+    function uuid() {
+      if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+        var r = (Math.random() * 16) | 0, v = c === 'x' ? r : ((r & 0x3) | 0x8);
+        return v.toString(16);
+      });
+    }
+    var sid = ls && ls.getItem('mnc_anon_sid');
+    if (!sid) { sid = uuid(); if (ls) try { ls.setItem('mnc_anon_sid', sid); } catch (_) {} }
+
+    var qs = {};
+    try {
+      var sp = new URLSearchParams(window.location.search || '');
+      sp.forEach(function (v, k) { qs[k] = v; });
+    } catch (_) {}
+
+    var isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(ua);
+
+    // Coarse acquisition channel, same vocab/logic as the marketing tracker.
+    function classifyChannel(q, ref) {
+      var src = (q.src || q.utm_source || '').toLowerCase();
+      var med = (q.utm_medium || '').toLowerCase();
+      if (/qr/.test(src) || /qr/.test(med)) return 'qr';
+      var host = '';
+      try { host = ref ? new URL(ref).hostname.replace(/^www\./, '').toLowerCase() : ''; } catch (_) {}
+      if (/(facebook|instagram|tiktok|pinterest|snapchat|twitter|linkedin|youtube|\bfb\b|\big\b)/.test(src)
+          || /social/.test(med)) return 'social';
+      if (src || med) return 'campaign';
+      if (/(google|bing|duckduckgo|yahoo|ecosia|brave|baidu|yandex)\./.test(host)) return 'search';
+      if (/(facebook|instagram|t\.co|tiktok|pinterest|lnkd\.in|youtube|reddit)/.test(host)) return 'social';
+      if (host) return 'referral';
+      return 'direct';
+    }
+    var entryChannel = classifyChannel(qs, document.referrer || '');
+
+    var lastKey = 'mnc_mh_last:app';
+    if (ls) {
+      var last = parseInt(ls.getItem(lastKey) || '0', 10);
+      if (last && (Date.now() - last) < COOLDOWN_MS) return;
+    }
+
+    var body = {
+      session_id:    sid,
+      page:          PAGE,
+      referrer:      (document.referrer || '').slice(0, 500) || null,
+      device_type:   isMobile ? 'mobile' : 'desktop',
+      entry_channel: entryChannel,
+      user_agent:    ua.slice(0, 500),
+      utm_source:    qs.utm_source || qs.src || null,
+      utm_medium:    qs.utm_medium || null,
+      utm_campaign:  qs.utm_campaign || null
+    };
+
+    function send() {
+      try {
+        fetch(SUPABASE_URL + '/rest/v1/marketing_hits', {
+          method: 'POST',
+          headers: {
+            'Content-Type':  'application/json',
+            'apikey':        SUPABASE_ANON_KEY,
+            'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+            'Prefer':        'return=minimal'
+          },
+          body: JSON.stringify(body),
+          keepalive: true
+        }).then(function (r) {
+          if (r && r.ok && ls) { try { ls.setItem(lastKey, String(Date.now())); } catch (_) {} }
+        }).catch(function () {});
+      } catch (_) {}
+    }
+
+    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+      setTimeout(send, 0);
+    } else {
+      window.addEventListener('DOMContentLoaded', function () { setTimeout(send, 0); });
+    }
+  } catch (_) {}
+})();
 </script>
 
 </body>

@@ -357,6 +357,59 @@
     color: var(--muted); font-size: 12px; padding: 6px 0;
   }
 
+  /* People split, clients vs techs */
+  .people-split { display: flex; gap: 12px; }
+  .people-col {
+    flex: 1; border-radius: 14px; padding: 14px 16px;
+  }
+  .people-col.clients { background: var(--rose-light); }
+  .people-col.techs   { background: #EAF3EC; }
+  .people-k {
+    font-size: 10px; letter-spacing: 1.6px; font-weight: 700;
+    text-transform: uppercase; color: var(--muted);
+  }
+  .people-v {
+    font-family: 'Playfair Display', serif; font-size: 34px;
+    font-weight: 700; line-height: 1.05; margin-top: 4px;
+  }
+  .people-col.clients .people-v { color: var(--rose-dark); }
+  .people-col.techs   .people-v { color: #2D6A4F; }
+  .people-sub { font-size: 11.5px; color: var(--muted); margin-top: 3px; }
+  .people-bar {
+    display: flex; height: 12px; border-radius: 6px; overflow: hidden;
+    margin-top: 14px; background: rgba(0,0,0,0.05);
+  }
+  .people-bar i { display: block; height: 100%; }
+  .people-bar i.c { background: linear-gradient(90deg, var(--rose), var(--rose-dark)); }
+  .people-bar i.t { background: linear-gradient(90deg, #6FB287, #2D6A4F); }
+  .people-legend {
+    display: flex; gap: 16px; justify-content: center;
+    font-size: 11.5px; color: var(--muted); margin-top: 8px;
+  }
+  .people-legend .dot {
+    display: inline-block; width: 9px; height: 9px; border-radius: 50%;
+    margin-right: 5px; vertical-align: middle;
+  }
+  .people-legend .dot.c { background: var(--rose); }
+  .people-legend .dot.t { background: #2D6A4F; }
+  .people-legend b { color: var(--charcoal); font-weight: 700; }
+
+  /* Tech-photo roster rows */
+  .tp-row {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 8px; padding: 8px 12px; border-bottom: 1px solid var(--border);
+  }
+  .tp-row:last-child { border-bottom: none; }
+  .tp-row.none { background: rgba(192,57,43,0.05); }
+  .tp-name {
+    font-weight: 600; color: var(--charcoal);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0;
+  }
+  .tp-meta { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+  .tp-count { font-family: 'Playfair Display', serif; font-weight: 700; color: var(--rose-dark); }
+  .tp-av { font-size: 11px; }
+  .tp-zero { color: #c0392b; font-style: italic; font-size: 12px; }
+
   /* Bottom buttons */
   .bottom-row {
     display: flex; gap: 10px; align-items: center;
@@ -451,6 +504,56 @@
       <div class="live-num" id="stat-live">-</div>
     </div>
 
+    <!-- Who's in the book: clients vs techs -->
+    <div class="panel">
+      <div class="panel-head">
+        <div class="panel-title">Who's in the book</div>
+        <div class="panel-meta">clients vs techs</div>
+      </div>
+      <div class="people-split">
+        <div class="people-col clients">
+          <div class="people-k">Clients</div>
+          <div class="people-v" id="ppl-clients">-</div>
+          <div class="people-sub" id="ppl-clients-week">accounts</div>
+        </div>
+        <div class="people-col techs">
+          <div class="people-k">Techs</div>
+          <div class="people-v" id="ppl-techs">-</div>
+          <div class="people-sub" id="ppl-techs-sub">profiles</div>
+        </div>
+      </div>
+      <div class="people-bar" id="ppl-bar" aria-hidden="true"></div>
+      <div class="people-legend">
+        <span><i class="dot c"></i>Clients <b id="ppl-clients-pct">-</b></span>
+        <span><i class="dot t"></i>Techs <b id="ppl-techs-pct">-</b></span>
+      </div>
+    </div>
+
+    <!-- Techs & photos: who has pics and how many -->
+    <div class="panel">
+      <div class="panel-head">
+        <div class="panel-title">Techs &amp; photos</div>
+        <div class="panel-meta" id="tp-summary">who has pics</div>
+      </div>
+      <div class="mh-grid">
+        <div class="mh-card">
+          <div class="mh-label">With photos</div>
+          <div class="mh-num" id="tp-with">-</div>
+        </div>
+        <div class="mh-card">
+          <div class="mh-label">No photos</div>
+          <div class="mh-num" id="tp-without">-</div>
+        </div>
+        <div class="mh-card">
+          <div class="mh-label">Profile pic set</div>
+          <div class="mh-num" id="tp-avatar">-</div>
+        </div>
+      </div>
+      <div class="mh-recent-head">Per tech · most photos first</div>
+      <div id="tp-list" class="mh-recent"><div class="empty">Loading techs…</div></div>
+      <div class="mh-disclaimer">“Photos” counts portfolio uploads on each tech profile. 🟢 = profile pic (avatar) set, ⚪ = none. Techs with no photos are flagged so they’re easy to follow up with.</div>
+    </div>
+
     <!-- 14d signup trend -->
     <div class="panel">
       <div class="panel-head">
@@ -516,6 +619,34 @@
         <div class="pur-num" id="stat-spot10-count">-</div>
       </div>
       <div class="pur-disclaimer">Gross estimates do not subtract Stripe (~3%) or Apple/Google (15–30%) fees.</div>
+    </div>
+
+    <!-- App page hits: external entrances to /app -->
+    <div class="panel">
+      <div class="panel-head">
+        <div class="panel-title">App page hits · from outside</div>
+        <div class="panel-meta">/app entrances, not internal clicks</div>
+      </div>
+      <div class="mh-grid">
+        <div class="mh-card">
+          <div class="mh-label">Today</div>
+          <div class="mh-num" id="stat-app-today">-</div>
+        </div>
+        <div class="mh-card">
+          <div class="mh-label">Last 7d</div>
+          <div class="mh-num" id="stat-app-week">-</div>
+        </div>
+        <div class="mh-card">
+          <div class="mh-label">All-time</div>
+          <div class="mh-num" id="stat-app-total">-</div>
+        </div>
+      </div>
+      <div id="stat-app-breakdown" class="mh-chips"></div>
+      <div class="mh-recent-head">Recent entrances</div>
+      <div id="stat-app-recent" class="mh-recent">
+        <div class="empty">Loading…</div>
+      </div>
+      <div class="mh-disclaimer">Counts visits that land on mynailconnection.com/app from <b>outside</b> the site, a link, search, QR, social, or a typed/bookmarked URL. Internal clicks from the marketing pages and native-app opens are not counted. One visitor per 30 minutes; bots skipped.</div>
     </div>
 
     <!-- Marketing site hits -->
@@ -765,22 +896,12 @@
     const fourteenDaysAgoDate = new Date(Date.now() - 14 * 86400000).toISOString().slice(0, 10);
 
     const [
-      clientsTotal, clientsWeek, techCount, photoCount,
-      liveCount, clientsRecent
+      clientsTotal, clientsWeek, clientsRecent
     ] = await Promise.all([
       countTable('users', 'role=eq.client'),
       countTable('users', 'role=eq.client&joined=gte.' + sevenDaysAgoDate),
-      countTable('techs'),
-      // Photos are a JSONB array on public.techs, sum lengths client-side.
-      (async () => {
-        try {
-          const r = await fetch(SUPABASE_URL + '/rest/v1/techs?select=photos', { headers: authHeaders() });
-          if (!r.ok) return null;
-          const rows = await r.json();
-          return (rows || []).reduce((sum, t) => sum + (Array.isArray(t.photos) ? t.photos.length : 0), 0);
-        } catch (e) { return null; }
-      })(),
-      countTable('techs', 'is_available=eq.true'),
+      // Techs, photos and "live now" are loaded by loadPeopleAndPhotos()
+      // from a single techs fetch, so they're not duplicated here.
       (async () => {
         try {
           const url = SUPABASE_URL + '/rest/v1/users?select=joined&role=eq.client&joined=gte.'
@@ -796,11 +917,15 @@
 
     setTxt('stat-clients-total', fmt(clientsTotal));
     setTxt('stat-clients-week',  fmt(clientsWeek));
-    setTxt('stat-techs',         fmt(techCount));
-    setTxt('stat-photos',        fmt(photoCount));
-    setTxt('stat-live',          fmt(liveCount));
     setTxt('stat-clients-delta',
       (clientsWeek && clientsWeek > 0) ? ('+' + clientsWeek + ' this week 🎉') : 'accounts');
+
+    // People panel, clients side (techs side filled by loadPeopleAndPhotos)
+    setTxt('ppl-clients', fmt(clientsTotal));
+    setTxt('ppl-clients-week',
+      (clientsWeek && clientsWeek > 0) ? ('+' + clientsWeek + ' new this week') : 'accounts');
+    window.__pplClients = (typeof clientsTotal === 'number') ? clientsTotal : null;
+    drawPeopleBar();
 
     // ── Sparkline (14 days, bucketed by `joined`) ────────────────────
     const buckets = {};
@@ -839,6 +964,164 @@
       ).join('');
     const total14 = vals.reduce((a,b) => a+b, 0);
     setTxt('stat-trend-total', total14 + (total14 === 1 ? ' signup in 14d' : ' signups in 14d'));
+  }
+
+  // ── People split bar (drawn once both client + tech counts are in) ──
+  function drawPeopleBar() {
+    const c = window.__pplClients, t = window.__pplTechs;
+    if (c == null || t == null) return;
+    const total = c + t;
+    const cPct = total ? Math.round((c / total) * 100) : 50;
+    const tPct = 100 - cPct;
+    setHtml('ppl-bar', '<i class="c" style="width:' + cPct + '%"></i><i class="t" style="width:' + tPct + '%"></i>');
+    setTxt('ppl-clients-pct', cPct + '%');
+    setTxt('ppl-techs-pct',   tPct + '%');
+  }
+
+  // ── Techs roster: one fetch powers the Techs/Photos/Live headline
+  //    cards, the clients-vs-techs split, and the per-tech photo list. ─
+  async function loadPeopleAndPhotos() {
+    let techs = [];
+    try {
+      const url = SUPABASE_URL + '/rest/v1/techs'
+                + '?select=id,name,image_url,photos,is_available&limit=5000';
+      const r = await fetch(url, { headers: authHeaders() });
+      if (!r.ok) { if (r.status === 401 || r.status === 403) handleAuthExpired(); return; }
+      techs = await r.json();
+    } catch (e) { return; }
+
+    const techCount = (techs || []).length;
+    let photoTotal = 0, withPhotos = 0, avatars = 0, live = 0;
+    const roster = (techs || []).map(function (t) {
+      const n = Array.isArray(t.photos) ? t.photos.length : 0;
+      photoTotal += n;
+      if (n > 0) withPhotos++;
+      if (t.image_url) avatars++;
+      if (t.is_available === true) live++;
+      return { name: (t.name || 'Unnamed tech'), count: n, avatar: !!t.image_url };
+    }).sort(function (a, b) { return (b.count - a.count) || a.name.localeCompare(b.name); });
+
+    // Headline cards
+    setTxt('stat-techs',  fmt(techCount));
+    setTxt('stat-photos', fmt(photoTotal));
+    setTxt('stat-live',   fmt(live));
+
+    // People panel, techs side
+    setTxt('ppl-techs', fmt(techCount));
+    setHtml('ppl-techs-sub', live + ' active now · ' + withPhotos + ' with photos');
+    window.__pplTechs = techCount;
+    drawPeopleBar();
+
+    // Techs & photos panel
+    setTxt('tp-with',    fmt(withPhotos));
+    setTxt('tp-without', fmt(techCount - withPhotos));
+    setTxt('tp-avatar',  fmt(avatars));
+    setHtml('tp-summary', withPhotos + ' of ' + techCount + ' have photos · ' + photoTotal + ' total');
+    if (!roster.length) {
+      setHtml('tp-list', '<div class="empty">No techs in the book yet.</div>');
+      return;
+    }
+    setHtml('tp-list', roster.map(function (t) {
+      const none = t.count === 0;
+      return '<div class="tp-row' + (none ? ' none' : '') + '">'
+        +   '<span class="tp-name">' + escHtml(t.name) + '</span>'
+        +   '<span class="tp-meta">'
+        +     '<span class="tp-av" title="' + (t.avatar ? 'profile pic set' : 'no profile pic') + '">' + (t.avatar ? '🟢' : '⚪') + '</span>'
+        +     (none ? '<span class="tp-zero">no pics</span>'
+                    : '<span class="tp-count">' + t.count + ' 📷</span>')
+        +   '</span>'
+        + '</div>';
+    }).join(''));
+  }
+
+  // ── App page hits, external entrances to /app (marketing_hits, page=app) ─
+  async function loadAppHits() {
+    const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
+    const weekAgo    = new Date(Date.now() - 7 * 86400000);
+
+    async function cnt(extra) {
+      try {
+        const url = SUPABASE_URL + '/rest/v1/marketing_hits?select=*&page=eq.app'
+                  + (extra ? '&' + extra : '');
+        const r = await fetch(url, {
+          method: 'HEAD',
+          headers: Object.assign({}, authHeaders(), {
+            'Prefer': 'count=exact', 'Range-Unit': 'items', 'Range': '0-0'
+          })
+        });
+        if (!r.ok) return null;
+        const cr = r.headers.get('content-range') || '';
+        const n = parseInt((cr.split('/')[1] || '0'), 10);
+        return isNaN(n) ? 0 : n;
+      } catch (e) { return null; }
+    }
+
+    let recent = [];
+    try {
+      const url = SUPABASE_URL + '/rest/v1/marketing_hits'
+                + '?select=created_at,referrer,device_type,entry_channel&page=eq.app'
+                + '&created_at=gte.' + encodeURIComponent(weekAgo.toISOString())
+                + '&order=created_at.desc&limit=150';
+      const r = await fetch(url, { headers: authHeaders() });
+      if (r.ok) recent = await r.json();
+      else if (r.status === 401 || r.status === 403) { handleAuthExpired(); return; }
+    } catch (e) { /* fall through */ }
+
+    const [total, week, today] = await Promise.all([
+      cnt(),
+      cnt('created_at=gte.' + encodeURIComponent(weekAgo.toISOString())),
+      cnt('created_at=gte.' + encodeURIComponent(todayStart.toISOString()))
+    ]);
+    setTxt('stat-app-today', today === null ? '-' : fmt(today));
+    setTxt('stat-app-week',  week  === null ? '-' : fmt(week));
+    setTxt('stat-app-total', total === null ? '-' : fmt(total));
+
+    const labels = { qr:'QR code', social:'Social', search:'Search', referral:'Referral', campaign:'Campaign', direct:'Direct' };
+    const ch = {}; let mob = 0, desk = 0;
+    (recent || []).forEach(function (row) {
+      const c = row.entry_channel || 'direct';
+      ch[c] = (ch[c] || 0) + 1;
+      if (row.device_type === 'mobile') mob++;
+      else if (row.device_type === 'desktop') desk++;
+    });
+    const chips = Object.keys(ch).sort(function (a, b) { return ch[b] - ch[a]; }).map(function (k) {
+      return '<span style="background:var(--rose-light);color:var(--rose-dark);">'
+           + escHtml(labels[k] || k) + ' · ' + ch[k] + '</span>';
+    });
+    if (mob + desk > 0) {
+      chips.push('<span style="background:#F0EBE6;color:var(--charcoal);">📱 ' + mob + ' · 💻 ' + desk + '</span>');
+    }
+    setHtml('stat-app-breakdown', chips.join(''));
+
+    const rows = (recent || []).slice(0, 25);
+    if (!rows.length) {
+      setHtml('stat-app-recent', '<div class="empty">No outside entrances to /app in the last 7 days yet.</div>');
+      return;
+    }
+    function relTime(iso) {
+      const diff = Date.now() - new Date(iso).getTime();
+      if (diff < 60000)    return Math.max(1, Math.floor(diff/1000)) + 's ago';
+      if (diff < 3600000)  return Math.floor(diff/60000) + 'm ago';
+      if (diff < 86400000) return Math.floor(diff/3600000) + 'h ago';
+      return Math.floor(diff/86400000) + 'd ago';
+    }
+    function shortRef(r) {
+      if (!r) return 'direct';
+      try { return new URL(r).hostname.replace(/^www\./, ''); }
+      catch (e) { return (r || '').slice(0, 40); }
+    }
+    setHtml('stat-app-recent', rows.map(function (r) {
+      const dev  = r.device_type === 'mobile' ? '📱' : (r.device_type === 'desktop' ? '💻' : '·');
+      const chan = labels[r.entry_channel] || r.entry_channel || 'direct';
+      return '<div class="mh-row">'
+           +   '<div class="mh-left">'
+           +     '<span style="flex-shrink:0;">' + dev + '</span>'
+           +     '<span class="mh-page">' + escHtml(chan) + '</span>'
+           +     '<span class="mh-ref">via ' + escHtml(shortRef(r.referrer)) + '</span>'
+           +   '</div>'
+           +   '<span class="mh-when">' + relTime(r.created_at) + '</span>'
+           + '</div>';
+    }).join(''));
   }
 
   // ── Subscription source + lifetime purchases ───────────────────────
@@ -889,7 +1172,7 @@
 
     async function countHits(filter) {
       try {
-        const url = SUPABASE_URL + '/rest/v1/marketing_hits?select=*' + (filter ? '&' + filter : '');
+        const url = SUPABASE_URL + '/rest/v1/marketing_hits?select=*&page=neq.app' + (filter ? '&' + filter : '');
         const r = await fetch(url, {
           method: 'HEAD',
           headers: Object.assign({}, authHeaders(), {
@@ -907,7 +1190,7 @@
     let denied = false;
     try {
       const url = SUPABASE_URL + '/rest/v1/marketing_hits'
-                + '?select=created_at,page,referrer,device_type'
+                + '?select=created_at,page,referrer,device_type&page=neq.app'
                 + '&created_at=gte.' + encodeURIComponent(weekAgo.toISOString())
                 + '&order=created_at.desc&limit=150';
       const r = await fetch(url, { headers: authHeaders() });
@@ -1000,7 +1283,7 @@
     let rows = [];
     try {
       const url = SUPABASE_URL + '/rest/v1/marketing_hits'
-                + '?select=entry_channel,device_type&created_at=gte.'
+                + '?select=entry_channel,device_type&page=neq.app&created_at=gte.'
                 + encodeURIComponent(since) + '&limit=5000';
       const r = await fetch(url, { headers: authHeaders() });
       if (!r.ok) { if (r.status === 401 || r.status === 403) handleAuthExpired(); return; }
@@ -1153,7 +1436,9 @@
     // Fan out, each panel is independent so a slow query doesn't block others.
     await loadHeadline();
     if (!token) return;  // headline may have triggered auth-expired
+    loadPeopleAndPhotos().catch(e => console.warn('people/photos:', e));
     loadSubscriptions().catch(e => console.warn('subscriptions:', e));
+    loadAppHits().catch(e => console.warn('app hits:', e));
     loadMarketingHits().catch(e => console.warn('marketing hits:', e));
     loadArrivals().catch(e => console.warn('arrivals:', e));
     loadStoreClicks().catch(e => console.warn('store clicks:', e));
