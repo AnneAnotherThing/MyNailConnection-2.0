@@ -160,6 +160,31 @@ alter table public.bookings add column if not exists client_note   text;
 alter table public.bookings add column if not exists cancel_reason text;
 alter table public.bookings add column if not exists created_at    timestamptz not null default now();
 
+-- 2.0 leftovers: the original hand-made bookings table has NOT NULL
+-- booking_date / booking_time columns (discovered by the 2026-07-05
+-- end-to-end test, insert failed on booking_date). create_booking now
+-- fills both for continuity, and the NOT NULLs are dropped so the
+-- legacy columns can retire gracefully.
+alter table public.bookings alter column booking_date drop not null;
+alter table public.bookings alter column booking_time drop not null;
+
+-- Second 2.0 landmine (same e2e test): client_id had a foreign key to
+-- public.users(id), but the RLS policies compare client_id to auth.uid().
+-- Those are different id spaces, so inserts that satisfied the policy
+-- violated the FK. Repoint the FK at auth.users. NOT VALID so any stray
+-- legacy rows don't block the constraint; new rows are fully checked.
+alter table public.bookings drop constraint if exists bookings_client_id_fkey;
+alter table public.bookings add constraint bookings_client_id_fkey
+  foreign key (client_id) references auth.users(id) on delete cascade
+  not valid;
+
+-- Third landmine: tech_id's FK pointed at nail_techs, the LEGACY table
+-- that public.techs replaced. Repoint at techs.
+alter table public.bookings drop constraint if exists bookings_tech_id_fkey;
+alter table public.bookings add constraint bookings_tech_id_fkey
+  foreign key (tech_id) references public.techs(id) on delete cascade
+  not valid;
+
 -- Status check constraint, added via DO block so re-runs don't error.
 do $$
 begin
@@ -310,10 +335,15 @@ begin
 
   insert into bookings
     (client_id, tech_id, service_id, starts_at, ends_at, status,
-     client_name, client_email, client_note)
+     client_name, client_email, client_note,
+     -- legacy 2.0 columns, filled for continuity with anything that
+     -- still reads them (local wall-clock in the tech's timezone)
+     booking_date, booking_time)
   values
     (v_client, p_tech_id, p_service_id, p_starts_at, v_ends, v_status,
-     nullif(trim(p_client_name), ''), nullif(v_email, ''), nullif(trim(p_note), ''))
+     nullif(trim(p_client_name), ''), nullif(v_email, ''), nullif(trim(p_note), ''),
+     (p_starts_at at time zone v_tz)::date,
+     to_char(p_starts_at at time zone v_tz, 'HH24:MI'))
   returning id into v_id;
 
   return jsonb_build_object(
