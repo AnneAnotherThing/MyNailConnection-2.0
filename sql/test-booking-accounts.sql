@@ -25,9 +25,11 @@ declare
 begin
   for rec in
     select * from (values
-      ('annewilson1021+booktech@gmail.com',   'tech'),
-      ('annewilson1021+bookclient@gmail.com', 'client')
-    ) as t(email, role)
+      -- 555 numbers are fake by definition; users.phone is NOT NULL and
+      -- unique, so each test account gets its own.
+      ('annewilson1021+booktech@gmail.com',   'tech',   '6025550101'),
+      ('annewilson1021+bookclient@gmail.com', 'client', '6025550102')
+    ) as t(email, role, phone)
   loop
     -- auth.users + auth.identities (same idiom as og-auth-bulk-create.sql)
     if not exists (select 1 from auth.users where lower(email) = rec.email) then
@@ -61,10 +63,10 @@ begin
 
     -- public.users profile row (columns per create_signup_profile)
     if not exists (select 1 from public.users where lower(email) = rec.email) then
-      insert into public.users (name, email, role, joined, last_password_change)
+      insert into public.users (name, email, role, phone, joined, last_password_change)
       values (
         case when rec.role = 'tech' then 'Booking Test Tech' else 'Booking Test Client' end,
-        rec.email, rec.role, current_date, now()
+        rec.email, rec.role, rec.phone, current_date, now()
       );
       raise notice 'Created users row: %', rec.email;
     end if;
@@ -72,10 +74,11 @@ begin
 
   -- public.techs row for the tech (named so no real client books it)
   if not exists (select 1 from public.techs where lower(email) = 'annewilson1021+booktech@gmail.com') then
-    insert into public.techs (name, email, bio, shop_name, city, state, tags)
+    insert into public.techs (name, email, phone, bio, shop_name, city, state, tags)
     values (
       'ZZ TEST, do not book',
       'annewilson1021+booktech@gmail.com',
+      '6025550101',
       'Internal test account for the new booking system. Please ignore!',
       'MNC Test Studio', 'Phoenix', 'AZ', '[]'::jsonb
     );
