@@ -64,10 +64,26 @@ Pricing detail:
   HTML edits, run `deploy/sync.sh` after source edits, tail-check for
   `</body>`.
 
+## Photo permanence (decided 2026-07-05)
+
+Every paid photo is a PERMANENT ad. Subscription lapse never hides
+photos (pause-on-cancel removed from stripe-webhook on v3; the pause
+RPC stays in the DB, uncalled, for rollback). The ONLY thing that
+takes photos down is the tech no longer wanting new clients. The
+self-serve mechanism for that ("Not taking new clients" switch that
+hides photos + booking + contact, without deleting the account) is a
+small follow-up, build with workstream 3's onboarding work. Never
+write copy implying photos can expire. Forever means forever.
+
 ## Before cutover
 
 - Set `PHOTO_FREE_CUTOVER` in index.html to the launch date (it's
   parked at 2099-01-01 so everyone stays grandfathered until then).
+- Deploy the updated stripe-webhook (`supabase functions deploy
+  stripe-webhook`). Until deployed, live 2.0 cancellations still
+  pause photos, that's intended, the change ships WITH 3.0.
+- Run sql/restore-paused-photos.sql, the relaunch gift: every tech
+  gets their paused photos back, permanently.
 - Remove the dev quick-login block (`devLogin` / `devQuickLoginInit`)
   from index.html.
 - Run the CLEANUP block in sql/test-booking-accounts.sql to delete the

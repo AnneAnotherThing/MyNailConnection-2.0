@@ -293,10 +293,13 @@ serve(async (req) => {
   }
 
   // ── Subscription cancelled ───────────────────────────────────────────────
-  // Flip tier back to free AND pause any photos beyond free_limit. This
-  // closes the "pay once, upload-everything, cancel" abuse vector: the
-  // tech's work isn't deleted, but it's hidden from public view until they
-  // re-subscribe (or buy specific photos out with Spotlight credits).
+  // Flip tier back to free. Photos are NOT paused (3.0 model, 2026-07-05):
+  // every paid photo is a permanent ad. A tech who subscribes for a month,
+  // uploads 40 photos, and cancels bought 40 ads at the bulk price, that's
+  // the product, not an abuse vector. The only thing that removes photos
+  // is the tech no longer wanting new clients (account deactivation).
+  // The old pause_photos_beyond_free_limit RPC stays in the database for
+  // rollback, but nothing calls it anymore.
   if (event.type === 'customer.subscription.deleted') {
     const sub = event.data.object as Stripe.Subscription;
     const customerId = sub.customer as string;
@@ -307,14 +310,7 @@ serve(async (req) => {
     }).eq('stripe_customer_id', customerId);
 
     if (error) console.error(`techs.update failed for customer ${customerId}:`, error);
-    else console.log(`Reverted customer ${customerId} to free tier`);
-
-    const { data: pauseResult, error: rpcErr } = await supabase.rpc(
-      'pause_photos_beyond_free_limit',
-      { p_customer_id: customerId, p_free_limit: 5 },
-    );
-    if (rpcErr) console.error(`pause_photos_beyond_free_limit failed:`, rpcErr);
-    else console.log(`Paused photos for ${customerId}:`, pauseResult);
+    else console.log(`Reverted customer ${customerId} to free tier (photos stay up, 3.0 permanence)`);
   }
 
   return new Response(JSON.stringify({ received: true }), {
