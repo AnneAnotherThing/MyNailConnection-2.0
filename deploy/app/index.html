@@ -5175,8 +5175,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 330,         /* __APP_BUILD_ANDROID__ */
-  ios:     135,          /* __APP_BUILD_IOS__     */
+  android: 331,         /* __APP_BUILD_ANDROID__ */
+  ios:     136,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -6026,6 +6026,38 @@ async function doChangePassword() {
   }
   btn.textContent = 'Set New Password'; btn.disabled = false;
 }
+
+// ── Dev quick-login (localhost ONLY) ────────────────────────────────────────
+// One-tap sign-in as the booking test accounts from
+// sql/test-booking-accounts.sql. The buttons mount only when the app is
+// served from localhost, so they never render on the live site. Still:
+// REMOVE this block before the 3.0 cutover (listed in docs/V3-PLAN.md),
+// index.html ships publicly and test creds don't belong in it long-term.
+async function devLogin(kind) {
+  var email = kind === 'tech'
+    ? 'annewilson1021+booktech@gmail.com'
+    : 'annewilson1021+bookclient@gmail.com';
+  showToast('Signing in as test ' + kind + '...');
+  try { await signInWithEmail(email, 'MNC2026'); }
+  catch(e) { showToast('Dev login failed: ' + ((e && e.message) || 'unknown')); }
+}
+(function devQuickLoginInit() {
+  function mount() {
+    if (!/^(localhost|127\.0\.0\.1)$/.test(location.hostname)) return;
+    var anchor = document.getElementById('auth-build-tag');
+    if (!anchor || document.getElementById('dev-quick-login')) return;
+    var wrap = document.createElement('div');
+    wrap.id = 'dev-quick-login';
+    wrap.style.cssText = 'display:flex;gap:8px;justify-content:center;margin-top:14px;';
+    var bs = 'padding:8px 14px;border-radius:10px;border:1.5px dashed var(--rose-mid);background:rgba(255,255,255,0.7);color:var(--rose-dark);font-size:12px;font-weight:700;cursor:pointer;font-family:monospace;';
+    wrap.innerHTML =
+      '<button style="' + bs + '" onclick="devLogin(\'tech\')">DEV &middot; Tech</button>' +
+      '<button style="' + bs + '" onclick="devLogin(\'client\')">DEV &middot; Client</button>';
+    anchor.parentNode.insertBefore(wrap, anchor);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mount);
+  else mount();
+})();
 
 async function signInWithEmail(email, password) {
   if (!email || !email.includes('@')) { showAuthError('Please enter a valid email address.'); return; }

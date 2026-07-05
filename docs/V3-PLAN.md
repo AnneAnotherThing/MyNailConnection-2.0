@@ -53,6 +53,14 @@ with a countdown campaign.
   HTML edits, run `deploy/sync.sh` after source edits, tail-check for
   `</body>`.
 
+## Before cutover
+
+- Remove the dev quick-login block (`devLogin` / `devQuickLoginInit`)
+  from index.html. It only mounts on localhost, but test creds should
+  not ship in a public file.
+- Run the CLEANUP block in sql/test-booking-accounts.sql to delete the
+  ZZ TEST accounts.
+
 ## Open decisions
 
 - Deposits / no-show protection: techs want it, it means Stripe fees.
