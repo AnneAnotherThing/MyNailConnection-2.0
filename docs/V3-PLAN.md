@@ -22,6 +22,10 @@ with a countdown campaign.
 ## Workstreams, in build order
 
 1. **Booking system** (the big one, everything else waits on it)
+   STATUS 2026-07-04: v1 code complete in index.html + sql migration.
+   NOT yet run against Supabase, run sql/booking-system-migration.sql
+   in the SQL editor before testing. Deferred: day-before reminders
+   (needs pg_cron), deposits/Stripe, tech blocked-dates/time-off.
    - Tech side: services + durations + prices, weekly availability,
      calendar view, manage/cancel appointments.
    - Client side: pick a tech, pick a service, pick a slot, book.

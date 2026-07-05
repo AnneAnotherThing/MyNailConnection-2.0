@@ -2199,6 +2199,19 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       </div>
     </div>
 
+    <!-- Bookings entry (3.0). Always visible for techs, the sub-line and
+         pending badge are filled by tbLoadDashBadge() from loadTechDashboard(). -->
+    <div onclick="show('tech-bookings')"
+         style="margin:16px 20px 0;padding:14px 16px;border-radius:14px;background:white;border:1px solid var(--border);cursor:pointer;display:flex;align-items:center;gap:12px;box-shadow:var(--shadow);">
+      <svg viewBox="0 0 24 24" style="width:22px;height:22px;stroke:var(--rose-dark);fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0;"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:14px;font-weight:600;color:var(--charcoal);">Bookings</div>
+        <div style="font-size:12px;color:var(--muted);" id="td-bookings-sub">Set up free booking</div>
+      </div>
+      <span id="td-bookings-pending" style="display:none;background:var(--rose);color:white;font-size:12px;font-weight:700;border-radius:100px;padding:3px 9px;">0</span>
+      <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:var(--muted);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg>
+    </div>
+
     <!-- Needs-tagging nudge, appears only when the tech has untagged photos.
          Soft pulse draws the eye; tap routes to my-photos to tag them.
          Populated by loadTechHomeStats() (count + show/hide). -->
@@ -2473,6 +2486,101 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
     <div class="nav-item active"><span class="nav-icon"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></span><span class="nav-label" style="color:var(--rose);">My Photos</span></div>
     <!-- Profile removed, tech-home IS the tech's profile; Dashboard above
          already covers "back to your portal." -->
+  </div>
+</div>
+
+<!-- BOOKINGS, tech booking management (3.0 free-booking pivot) -->
+<div class="screen" id="tech-bookings">
+  <div class="header">
+    <button class="back-btn" onclick="show('tech-home')">←</button>
+    <div style="flex:1;text-align:center;">
+      <div class="logo-mark" style="font-size:18px;">Bookings</div>
+      <div class="logo-sub">Free booking, right here on MNC</div>
+    </div>
+    <div style="width:32px;"></div>
+  </div>
+  <div class="scroll-content" style="padding-bottom:80px;" id="tb-body">
+
+    <div id="tb-migration-note" style="display:none;margin:16px 20px 0;padding:12px 14px;background:#FDE8EC;border:1px solid #F0B0BC;border-radius:12px;font-size:13px;color:#8B2035;">
+      Booking isn't installed on the database yet. Run <b>sql/booking-system-migration.sql</b> in the Supabase SQL editor, then reopen this screen.
+    </div>
+
+    <!-- Settings -->
+    <div style="margin:16px 20px 0;background:white;border:1px solid var(--border);border-radius:16px;padding:16px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:15px;font-weight:600;color:var(--charcoal);">Take bookings on MNC</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px;">Free, always. Clients book you right from your profile.</div>
+        </div>
+        <button id="tb-enabled-btn" onclick="tbToggleEnabled()" style="min-width:56px;padding:8px 14px;border-radius:100px;font-size:13px;font-weight:700;cursor:pointer;border:1.5px solid var(--border);background:white;color:var(--muted);">Off</button>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;margin-top:14px;padding-top:14px;border-top:1px solid var(--border);">
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:14px;font-weight:600;color:var(--charcoal);">Auto-confirm requests</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px;">Off = you approve each request before it's locked in.</div>
+        </div>
+        <button id="tb-autoconfirm-btn" onclick="tbToggleAutoConfirm()" style="min-width:56px;padding:8px 14px;border-radius:100px;font-size:13px;font-weight:700;cursor:pointer;border:1.5px solid var(--border);background:white;color:var(--muted);">Off</button>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;margin-top:14px;padding-top:14px;border-top:1px solid var(--border);">
+        <div style="flex:1;font-size:14px;font-weight:600;color:var(--charcoal);">Your timezone</div>
+        <select id="tb-tz" onchange="tbSetTimezone(this.value)" style="padding:8px 10px;border:1px solid var(--border);border-radius:10px;font-size:13px;color:var(--charcoal);background:white;">
+          <option value="America/Phoenix">Arizona</option>
+          <option value="America/Los_Angeles">Pacific</option>
+          <option value="America/Denver">Mountain</option>
+          <option value="America/Chicago">Central</option>
+          <option value="America/New_York">Eastern</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Appointments -->
+    <div style="margin:20px 20px 0;">
+      <div style="font-family:'Playfair Display',serif;font-size:18px;color:var(--charcoal);margin-bottom:8px;">Appointments</div>
+      <div id="tb-appts"></div>
+    </div>
+
+    <!-- Services -->
+    <div style="margin:20px 20px 0;background:white;border:1px solid var(--border);border-radius:16px;padding:16px;">
+      <div style="font-size:15px;font-weight:600;color:var(--charcoal);">Services</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:2px;">What clients can book, how long it takes, what it costs.</div>
+      <div id="tb-svc-list" style="margin-top:12px;"></div>
+      <div style="display:grid;grid-template-columns:1fr;gap:8px;margin-top:10px;">
+        <input id="tb-svc-name" placeholder="e.g. Gel full set" style="padding:10px;border:1px solid var(--border);border-radius:10px;font-size:14px;box-sizing:border-box;width:100%;background:white;color:var(--charcoal);">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <select id="tb-svc-dur" style="padding:10px;border:1px solid var(--border);border-radius:10px;font-size:14px;box-sizing:border-box;width:100%;background:white;color:var(--charcoal);">
+            <option value="30">30 min</option><option value="45">45 min</option>
+            <option value="60" selected>1 hr</option><option value="75">1 hr 15</option>
+            <option value="90">1 hr 30</option><option value="120">2 hr</option>
+            <option value="150">2 hr 30</option><option value="180">3 hr</option>
+            <option value="240">4 hr</option>
+          </select>
+          <input id="tb-svc-price" placeholder="Price, e.g. 55" inputmode="decimal" style="padding:10px;border:1px solid var(--border);border-radius:10px;font-size:14px;box-sizing:border-box;width:100%;background:white;color:var(--charcoal);">
+        </div>
+      </div>
+      <button class="btn btn-rose" style="margin-top:10px;" onclick="tbAddService()">Add Service</button>
+    </div>
+
+    <!-- Weekly hours -->
+    <div style="margin:20px 20px 24px;background:white;border:1px solid var(--border);border-radius:16px;padding:16px;">
+      <div style="font-size:15px;font-weight:600;color:var(--charcoal);">Weekly hours</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:2px;">When clients can book you. Add two windows on a day for a split shift.</div>
+      <div id="tb-avail-list" style="margin-top:6px;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MY APPOINTMENTS, the client's bookings (3.0 free-booking pivot) -->
+<div class="screen" id="my-appts">
+  <div class="header">
+    <button class="back-btn" onclick="backSmart()">←</button>
+    <div style="flex:1;text-align:center;">
+      <div class="logo-mark" style="font-size:18px;">My Appointments</div>
+      <div class="logo-sub">Booked through MNC</div>
+    </div>
+    <div style="width:32px;"></div>
+  </div>
+  <div class="scroll-content" style="padding-bottom:80px;">
+    <div id="ma-list" style="margin:16px 20px 0;"></div>
   </div>
 </div>
 
@@ -2865,6 +2973,13 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
          td-t-new) still exist on the tech-home screen, and all the sync /
          load / save code continues to work without the t-now / t-today /
          t-new profile buttons (every reference is null-safe). -->
+
+    <!-- My Appointments entry (3.0 booking). -->
+    <div onclick="show('my-appts')" style="margin:14px 20px 0;padding:13px 16px;border-radius:14px;background:white;border:1px solid var(--border);cursor:pointer;display:flex;align-items:center;gap:12px;box-shadow:var(--shadow);">
+      <svg viewBox="0 0 24 24" style="width:20px;height:20px;stroke:var(--rose-dark);fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0;"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <div style="flex:1;font-size:14px;font-weight:600;color:var(--charcoal);">My Appointments</div>
+      <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:var(--muted);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg>
+    </div>
 
     <!-- Tabs, different for tech vs client -->
     <div style="display:flex;border-bottom:1px solid var(--border);" id="profile-tabs">
@@ -6777,6 +6892,19 @@ function renderTechContactFooter(tech) {
     </a>`;
   }
 
+  // MNC native booking (3.0): if the tech takes bookings in-app, the
+  // primary CTA books right here, no external platform needed. An external
+  // booking_link can coexist while a tech transitions over.
+  let nativeBookBtn = '';
+  if (tech.booking_enabled) {
+    const bkFirst = ((tech.name || '').trim().split(/\s+/)[0]) || 'Now';
+    nativeBookBtn = `<button onclick="openBookModal()"
+      style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px;border-radius:12px;background:linear-gradient(160deg,#D4908A 0%,#A9665D 100%);border:1px solid rgba(139,80,65,0.3);border-bottom:3px solid rgba(100,45,38,0.5);box-shadow:0 3px 12px rgba(169,102,93,0.35);color:white;font-size:14px;font-weight:600;font-family:'DM Sans',sans-serif;margin-bottom:8px;box-sizing:border-box;cursor:pointer;">
+      <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:white;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Book ${bkFirst}
+    </button>`;
+  }
+
   // Booking link button (full width, rose, above the row)
   const bookingLink = tech.booking_link || tech.booking_url || '';
   let bookingBtn = '';
@@ -6817,9 +6945,9 @@ function renderTechContactFooter(tech) {
     </a>`;
   }
 
-  const allBtns = `${bookingBtn}${galleryBtn}<div style="display:flex;gap:8px;">${btns}</div>`;
+  const allBtns = `${nativeBookBtn}${bookingBtn}${galleryBtn}<div style="display:flex;gap:8px;">${btns}</div>`;
   footer.innerHTML = allBtns;
-  footer.style.display = (btns || bookingBtn || galleryBtn) ? '' : 'none';
+  footer.style.display = (btns || nativeBookBtn || bookingBtn || galleryBtn) ? '' : 'none';
 }
 
 function showAdminToast(){
@@ -12849,14 +12977,674 @@ function profileTab(tab) {
 // ── Appointments ──────────────────────────────────────────────────────────────
 
 
-async function confirmAppointment(id) {
+// ══════════════════════════════════════════════════════════════════════════
+// BOOKINGS MODULE (3.0), free in-app booking.
+// Tables: tech_services, tech_availability, bookings (see
+// sql/booking-system-migration.sql). Slot math lives server-side in the
+// get_open_slots() RPC; create_booking() is the atomic write path (advisory
+// lock per tech, so two clients tapping the same slot can't double-book).
+// All signed-in calls ride the user's access token so RLS applies. The old
+// 2.0 confirmAppointment/declineBooking leftovers (anon-key, no UI) were
+// replaced by this module.
+// ══════════════════════════════════════════════════════════════════════════
+
+function bkHeaders(extra) {
+  const h = {
+    'apikey': SUPABASE_ANON_KEY,
+    'Authorization': 'Bearer ' + (window._mncAccessToken || SUPABASE_ANON_KEY)
+  };
+  return Object.assign(h, extra || {});
+}
+
+const BK_DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const BK_STATUS_CHIP = {
+  pending:             ['#FFF6E5', '#8A6A2F', 'Pending'],
+  confirmed:           ['#EAF3EC', '#2D6A4F', 'Confirmed'],
+  declined:            ['#F5F0EE', '#8A7A74', 'Declined'],
+  cancelled_by_client: ['#FDE8EC', '#8B2035', 'Client cancelled'],
+  cancelled_by_tech:   ['#FDE8EC', '#8B2035', 'Cancelled'],
+  completed:           ['#E8EEF2', '#4A6274', 'Done']
+};
+
+function bkEsc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, function(c) {
+    return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c];
+  });
+}
+function bkFmtTime(t) { // '09:00:00' -> '9:00 AM'
+  const parts = String(t).split(':');
+  const h = parseInt(parts[0], 10), m = parseInt(parts[1] || '0', 10);
+  const ap = h >= 12 ? 'PM' : 'AM';
+  return (h % 12 || 12) + ':' + String(m).padStart(2, '0') + ' ' + ap;
+}
+function bkFmtStamp(iso, tz) {
   try {
-    await fetch(`${SUPABASE_URL}/rest/v1/bookings?id=eq.${id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type':'application/json','apikey':SUPABASE_ANON_KEY,'Authorization':`Bearer ${SUPABASE_ANON_KEY}`,'Prefer':'return=minimal' },
-      body: JSON.stringify({ status: 'confirmed' })
+    return new Date(iso).toLocaleString('en-US', {
+      weekday: 'short', month: 'short', day: 'numeric',
+      hour: 'numeric', minute: '2-digit', timeZone: tz || undefined
+    });
+  } catch(e) { return new Date(iso).toLocaleString(); }
+}
+function bkFmtSlot(iso, tz) {
+  try {
+    return new Date(iso).toLocaleTimeString('en-US', {
+      hour: 'numeric', minute: '2-digit', timeZone: tz || undefined
+    });
+  } catch(e) { return new Date(iso).toLocaleTimeString(); }
+}
+function bkDur(m) {
+  m = Number(m) || 0;
+  if (m % 60 === 0) return (m / 60) + (m === 60 ? ' hr' : ' hrs');
+  if (m > 60) return Math.floor(m / 60) + ' hr ' + (m % 60) + ' min';
+  return m + ' min';
+}
+function bkPrice(p) {
+  if (p === null || p === undefined || p === '') return '';
+  const n = Number(p);
+  if (isNaN(n)) return '';
+  return '$' + (n % 1 ? n.toFixed(2) : n.toFixed(0));
+}
+function bkStatusChip(status) {
+  const c = BK_STATUS_CHIP[status] || BK_STATUS_CHIP.pending;
+  return '<span style="background:' + c[0] + ';color:' + c[1] +
+         ';font-size:11px;font-weight:700;border-radius:100px;padding:3px 9px;white-space:nowrap;">' + c[2] + '</span>';
+}
+
+// ── Tech side: the Bookings screen ─────────────────────────────────────────
+
+let _bkMyTech = null;   // signed-in tech's row (id + booking settings)
+let _bkSvcs   = [];
+let _bkAvail  = [];
+let _bkAppts  = [];
+
+async function loadTechBookings() {
+  if (!currentUserEmail) { show('auth'); return; }
+  const note = document.getElementById('tb-migration-note');
+  try {
+    const r = await fetch(SUPABASE_URL +
+      '/rest/v1/techs?select=id,name,email,booking_enabled,booking_auto_confirm,booking_timezone&email=eq.' +
+      encodeURIComponent(currentUserEmail), { headers: bkHeaders() });
+    if (!r.ok) {
+      // Almost always means the migration hasn't been run (unknown column).
+      if (note) note.style.display = 'block';
+      return;
+    }
+    if (note) note.style.display = 'none';
+    const rows = await r.json();
+    _bkMyTech = rows[0] || null;
+    if (!_bkMyTech) { showToast('No tech profile found for this account'); show('tech-home'); return; }
+
+    const since = new Date(Date.now() - 86400000).toISOString();
+    const results = await Promise.all([
+      fetch(SUPABASE_URL + '/rest/v1/tech_services?tech_id=eq.' + _bkMyTech.id +
+            '&order=sort_order.asc,created_at.asc', { headers: bkHeaders() }),
+      fetch(SUPABASE_URL + '/rest/v1/tech_availability?tech_id=eq.' + _bkMyTech.id +
+            '&order=day_of_week.asc,start_time.asc', { headers: bkHeaders() }),
+      fetch(SUPABASE_URL + '/rest/v1/bookings?tech_id=eq.' + _bkMyTech.id +
+            '&starts_at=gte.' + encodeURIComponent(since) +
+            '&order=starts_at.asc&select=*,tech_services(name,duration_minutes,price)',
+            { headers: bkHeaders() })
+    ]);
+    _bkSvcs  = results[0].ok ? await results[0].json() : [];
+    _bkAvail = results[1].ok ? await results[1].json() : [];
+    _bkAppts = results[2].ok ? await results[2].json() : [];
+    tbRenderSettings();
+    tbRenderServices();
+    tbRenderAvail();
+    tbRenderAppts();
+  } catch(e) { console.warn('loadTechBookings', e); }
+}
+
+function tbPill(id, on) {
+  const b = document.getElementById(id);
+  if (!b) return;
+  b.textContent = on ? 'On' : 'Off';
+  b.style.background = on ? 'var(--rose)' : 'white';
+  b.style.color = on ? 'white' : 'var(--muted)';
+  b.style.borderColor = on ? 'var(--rose)' : 'var(--border)';
+}
+
+function tbRenderSettings() {
+  if (!_bkMyTech) return;
+  tbPill('tb-enabled-btn', !!_bkMyTech.booking_enabled);
+  tbPill('tb-autoconfirm-btn', !!_bkMyTech.booking_auto_confirm);
+  const tz = document.getElementById('tb-tz');
+  if (tz) tz.value = _bkMyTech.booking_timezone || 'America/Phoenix';
+}
+
+async function tbPatchTech(patch) {
+  const r = await fetch(SUPABASE_URL + '/rest/v1/techs?email=eq.' + encodeURIComponent(currentUserEmail), {
+    method: 'PATCH',
+    headers: bkHeaders({ 'Content-Type': 'application/json', 'Prefer': 'return=minimal' }),
+    body: JSON.stringify(patch)
+  });
+  if (!r.ok) { showToast('Could not save, try again'); return false; }
+  Object.assign(_bkMyTech, patch);
+  // Keep the browse cache in step so tech-detail reflects it immediately.
+  try {
+    (window.ALL_TECHS || []).forEach(function(t) {
+      if ((t.email || '').toLowerCase() === currentUserEmail) Object.assign(t, patch);
     });
   } catch(e) {}
+  return true;
+}
+
+async function tbToggleEnabled() {
+  if (!_bkMyTech) return;
+  const next = !_bkMyTech.booking_enabled;
+  if (!(await tbPatchTech({ booking_enabled: next }))) return;
+  tbRenderSettings();
+  tbLoadDashBadge();
+  if (next && (!_bkSvcs.length || !_bkAvail.length)) {
+    showToast('Add services and weekly hours so clients can book you');
+  } else {
+    showToast(next ? 'Booking is live on your profile ✨' : 'Booking turned off');
+  }
+}
+
+async function tbToggleAutoConfirm() {
+  if (!_bkMyTech) return;
+  if (!(await tbPatchTech({ booking_auto_confirm: !_bkMyTech.booking_auto_confirm }))) return;
+  tbRenderSettings();
+  showToast(_bkMyTech.booking_auto_confirm
+    ? 'Requests will confirm instantly'
+    : 'You approve each request before it books');
+}
+
+async function tbSetTimezone(v) {
+  if (!_bkMyTech) return;
+  if (await tbPatchTech({ booking_timezone: v })) showToast('Timezone saved');
+}
+
+// Services
+function tbRenderServices() {
+  const wrap = document.getElementById('tb-svc-list');
+  if (!wrap) return;
+  if (!_bkSvcs.length) {
+    wrap.innerHTML = '<div style="font-size:13px;color:var(--muted);padding:8px 0;">No services yet. Your first one takes ten seconds.</div>';
+    return;
+  }
+  wrap.innerHTML = _bkSvcs.map(function(s) {
+    const meta = [bkDur(s.duration_minutes), bkPrice(s.price)].filter(Boolean).join(' · ');
+    return '<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);">' +
+      '<div style="flex:1;min-width:0;">' +
+        '<div style="font-size:14px;font-weight:600;color:var(--charcoal);">' + bkEsc(s.name) + '</div>' +
+        '<div style="font-size:12px;color:var(--muted);margin-top:1px;">' + meta + '</div>' +
+      '</div>' +
+      '<button onclick="tbDeleteService(\'' + s.id + '\')" style="border:none;background:none;color:var(--muted);font-size:18px;cursor:pointer;padding:4px 8px;" aria-label="Remove service">×</button>' +
+    '</div>';
+  }).join('');
+}
+
+async function tbAddService() {
+  if (!_bkMyTech) return;
+  const nameEl = document.getElementById('tb-svc-name');
+  const durEl  = document.getElementById('tb-svc-dur');
+  const prEl   = document.getElementById('tb-svc-price');
+  const name = (nameEl.value || '').trim();
+  if (!name) { showToast('Give the service a name'); return; }
+  const priceRaw = (prEl.value || '').replace(/[^0-9.]/g, '');
+  const body = {
+    tech_id: _bkMyTech.id,
+    name: name,
+    duration_minutes: parseInt(durEl.value, 10) || 60,
+    price: priceRaw === '' ? null : Number(priceRaw),
+    sort_order: _bkSvcs.length
+  };
+  const r = await fetch(SUPABASE_URL + '/rest/v1/tech_services', {
+    method: 'POST',
+    headers: bkHeaders({ 'Content-Type': 'application/json', 'Prefer': 'return=representation' }),
+    body: JSON.stringify(body)
+  });
+  if (!r.ok) { showToast('Could not add that service, try again'); return; }
+  const rows = await r.json();
+  if (rows[0]) _bkSvcs.push(rows[0]);
+  nameEl.value = ''; prEl.value = '';
+  tbRenderServices();
+  showToast('Service added ✓');
+}
+
+async function tbDeleteService(id) {
+  if (!(await showConfirm('Remove this service?', { body: 'Existing appointments keep their details.', okLabel: 'Remove' }))) return;
+  const r = await fetch(SUPABASE_URL + '/rest/v1/tech_services?id=eq.' + id, {
+    method: 'DELETE', headers: bkHeaders({ 'Prefer': 'return=minimal' })
+  });
+  if (!r.ok) { showToast('Could not remove, try again'); return; }
+  _bkSvcs = _bkSvcs.filter(function(s) { return s.id !== id; });
+  tbRenderServices();
+}
+
+// Weekly hours
+function tbRenderAvail() {
+  const wrap = document.getElementById('tb-avail-list');
+  if (!wrap) return;
+  const inp = 'padding:7px 8px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:white;color:var(--charcoal);';
+  wrap.innerHTML = BK_DAYS.map(function(day, d) {
+    const wins = _bkAvail.filter(function(a) { return a.day_of_week === d; });
+    const chips = wins.length
+      ? wins.map(function(w) {
+          return '<span style="display:inline-flex;align-items:center;gap:6px;background:var(--rose-light);border:1px solid var(--rose-mid);color:var(--rose-dark);font-size:12px;font-weight:600;border-radius:100px;padding:4px 10px;margin:2px 4px 2px 0;">' +
+            bkFmtTime(w.start_time) + ' - ' + bkFmtTime(w.end_time) +
+            '<span onclick="tbDeleteWindow(\'' + w.id + '\')" style="cursor:pointer;font-size:14px;line-height:1;">×</span>' +
+          '</span>';
+        }).join('')
+      : '<span style="font-size:12px;color:var(--muted);">Closed</span>';
+    return '<div style="padding:10px 0;border-bottom:1px solid var(--border);">' +
+      '<div style="font-size:13px;font-weight:700;color:var(--charcoal);margin-bottom:4px;">' + day + '</div>' +
+      '<div>' + chips + '</div>' +
+      '<div style="display:flex;gap:6px;margin-top:6px;align-items:center;">' +
+        '<input type="time" id="tb-av-s-' + d + '" value="09:00" style="' + inp + '">' +
+        '<span style="font-size:12px;color:var(--muted);">to</span>' +
+        '<input type="time" id="tb-av-e-' + d + '" value="17:00" style="' + inp + '">' +
+        '<button onclick="tbAddWindow(' + d + ')" style="padding:7px 12px;border-radius:8px;border:1.5px solid var(--rose-mid);background:white;color:var(--rose-dark);font-size:12px;font-weight:700;cursor:pointer;">Add</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+async function tbAddWindow(d) {
+  if (!_bkMyTech) return;
+  const s = document.getElementById('tb-av-s-' + d).value;
+  const e = document.getElementById('tb-av-e-' + d).value;
+  if (!s || !e || e <= s) { showToast('End time needs to be after start time'); return; }
+  const r = await fetch(SUPABASE_URL + '/rest/v1/tech_availability', {
+    method: 'POST',
+    headers: bkHeaders({ 'Content-Type': 'application/json', 'Prefer': 'return=representation' }),
+    body: JSON.stringify({ tech_id: _bkMyTech.id, day_of_week: d, start_time: s, end_time: e })
+  });
+  if (!r.ok) { showToast('Could not save those hours, try again'); return; }
+  const rows = await r.json();
+  if (rows[0]) _bkAvail.push(rows[0]);
+  tbRenderAvail();
+}
+
+async function tbDeleteWindow(id) {
+  const r = await fetch(SUPABASE_URL + '/rest/v1/tech_availability?id=eq.' + id, {
+    method: 'DELETE', headers: bkHeaders({ 'Prefer': 'return=minimal' })
+  });
+  if (!r.ok) { showToast('Could not remove, try again'); return; }
+  _bkAvail = _bkAvail.filter(function(a) { return a.id !== id; });
+  tbRenderAvail();
+}
+
+// Tech's appointment list
+function tbApptCard(b, buttons) {
+  const tz  = _bkMyTech && _bkMyTech.booking_timezone;
+  const svc = (b.tech_services && b.tech_services.name) || 'Appointment';
+  const who = bkEsc(b.client_name || b.client_email || 'Client');
+  const note = b.client_note
+    ? '<div style="font-size:12px;color:var(--muted);margin-top:5px;font-style:italic;">&ldquo;' + bkEsc(b.client_note) + '&rdquo;</div>' : '';
+  return '<div style="background:white;border:1px solid var(--border);border-radius:14px;padding:13px 14px;margin-bottom:8px;box-shadow:var(--shadow);">' +
+    '<div style="display:flex;align-items:center;gap:8px;">' +
+      '<div style="flex:1;min-width:0;">' +
+        '<div style="font-size:14px;font-weight:700;color:var(--charcoal);">' + bkFmtStamp(b.starts_at, tz) + '</div>' +
+        '<div style="font-size:12.5px;color:var(--charcoal);margin-top:2px;">' + bkEsc(svc) + ' · ' + who + '</div>' +
+      '</div>' + bkStatusChip(b.status) +
+    '</div>' + note +
+    (buttons ? '<div style="display:flex;gap:8px;margin-top:10px;">' + buttons + '</div>' : '') +
+  '</div>';
+}
+
+function tbRenderAppts() {
+  const wrap = document.getElementById('tb-appts');
+  if (!wrap) return;
+  const btn = function(label, fn, primary) {
+    return '<button onclick="' + fn + '" style="flex:1;padding:9px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;' +
+      (primary
+        ? 'border:none;background:linear-gradient(160deg,#D4908A 0%,#A9665D 100%);color:white;'
+        : 'border:1.5px solid var(--border);background:white;color:var(--muted);') +
+      '">' + label + '</button>';
+  };
+  const pending  = _bkAppts.filter(function(b) { return b.status === 'pending'; });
+  const upcoming = _bkAppts.filter(function(b) { return b.status === 'confirmed'; });
+  const rest     = _bkAppts.filter(function(b) { return b.status !== 'pending' && b.status !== 'confirmed'; }).slice(-5);
+  let html = '';
+  if (pending.length) {
+    html += '<div style="font-size:12px;font-weight:700;color:var(--rose-dark);letter-spacing:0.4px;text-transform:uppercase;margin:2px 0 6px;">New requests</div>';
+    html += pending.map(function(b) {
+      return tbApptCard(b,
+        btn('Confirm', "tbSetStatus('" + b.id + "','confirmed')", true) +
+        btn('Decline', "tbSetStatus('" + b.id + "','declined')", false));
+    }).join('');
+  }
+  if (upcoming.length) {
+    html += '<div style="font-size:12px;font-weight:700;color:var(--charcoal);letter-spacing:0.4px;text-transform:uppercase;margin:10px 0 6px;">Upcoming</div>';
+    html += upcoming.map(function(b) {
+      return tbApptCard(b, btn('Cancel appointment', "tbSetStatus('" + b.id + "','cancelled_by_tech')", false));
+    }).join('');
+  }
+  if (rest.length) {
+    html += '<div style="font-size:12px;font-weight:700;color:var(--muted);letter-spacing:0.4px;text-transform:uppercase;margin:10px 0 6px;">Recent</div>';
+    html += rest.map(function(b) { return tbApptCard(b, ''); }).join('');
+  }
+  if (!html) {
+    html = '<div style="background:white;border:1px dashed var(--border);border-radius:14px;padding:18px;text-align:center;font-size:13px;color:var(--muted);">' +
+      (_bkMyTech && _bkMyTech.booking_enabled
+        ? 'No appointments yet. Share your profile so clients can book you.'
+        : 'Turn on booking above and your calendar starts here.') + '</div>';
+  }
+  wrap.innerHTML = html;
+}
+
+async function tbSetStatus(id, status) {
+  const q = {
+    confirmed: ['Confirm this appointment?', 'Confirm'],
+    declined: ['Decline this request?', 'Decline'],
+    cancelled_by_tech: ['Cancel this appointment?', 'Cancel it']
+  }[status] || ['Update this appointment?', 'Yes'];
+  if (!(await showConfirm(q[0], { body: 'The client will be notified.', okLabel: q[1] }))) return;
+  const r = await fetch(SUPABASE_URL + '/rest/v1/bookings?id=eq.' + id, {
+    method: 'PATCH',
+    headers: bkHeaders({ 'Content-Type': 'application/json', 'Prefer': 'return=minimal' }),
+    body: JSON.stringify({ status: status })
+  });
+  if (!r.ok) { showToast('Could not update, try again'); return; }
+  const b = _bkAppts.find(function(x) { return x.id === id; });
+  if (b) b.status = status;
+  tbRenderAppts();
+  tbLoadDashBadge();
+  if (b && b.client_email) {
+    const techName = (_bkMyTech && _bkMyTech.name) || 'Your tech';
+    const when = bkFmtStamp(b.starts_at, _bkMyTech && _bkMyTech.booking_timezone);
+    const msgs = {
+      confirmed: { title: "You're booked! 💅", body: techName + ' confirmed your appointment for ' + when + '.' },
+      declined: { title: 'Booking update', body: techName + " couldn't take " + when + '. Tap to pick another time.' },
+      cancelled_by_tech: { title: 'Appointment cancelled', body: techName + ' cancelled your appointment on ' + when + '.' }
+    };
+    const m = msgs[status];
+    if (m) sendPushToUser(b.client_email, { title: m.title, body: m.body, url: '/app/', tag: 'booking-' + id });
+  }
+  showToast('Updated ✓');
+}
+
+// Dashboard card sub-line + pending badge
+async function tbLoadDashBadge() {
+  if (!currentUserEmail) return;
+  const sub = document.getElementById('td-bookings-sub');
+  const badge = document.getElementById('td-bookings-pending');
+  try {
+    const r = await fetch(SUPABASE_URL + '/rest/v1/techs?select=id,booking_enabled&email=eq.' +
+      encodeURIComponent(currentUserEmail), { headers: bkHeaders() });
+    if (!r.ok) return; // migration not run yet, leave the default copy
+    const t = (await r.json())[0];
+    if (!t) return;
+    if (!t.booking_enabled) {
+      if (sub) sub.textContent = 'Set up free booking';
+      if (badge) badge.style.display = 'none';
+      return;
+    }
+    if (sub) sub.textContent = 'Your calendar and requests';
+    const cr = await fetch(SUPABASE_URL + '/rest/v1/bookings?tech_id=eq.' + t.id +
+      '&status=eq.pending&starts_at=gte.' + encodeURIComponent(new Date().toISOString()) + '&select=id',
+      { headers: bkHeaders({ 'Prefer': 'count=exact', 'Range': '0-0' }) });
+    const total = parseInt((cr.headers.get('content-range') || '').split('/')[1], 10) || 0;
+    if (badge) { badge.textContent = total; badge.style.display = total ? '' : 'none'; }
+    if (sub && total) sub.textContent = total + ' new request' + (total > 1 ? 's' : '') + ' waiting';
+  } catch(e) {}
+}
+
+// ── Client side: the Book flow ──────────────────────────────────────────────
+
+let _bkFlow = null;
+
+function openBookModal() {
+  const tech = currentTech;
+  if (!tech || !tech.id) { showToast('Could not load this tech'); return; }
+  if (!currentUser || !currentUserEmail) { showToast('Sign in to book'); return; }
+  _bkFlow = { tech: tech, tz: tech.booking_timezone || 'America/Phoenix', svcs: [], dows: {}, svc: null, day: null, slot: null };
+  const m = document.getElementById('book-modal');
+  m.style.display = 'flex';
+  m.classList.add('open');
+  bkStepServices();
+}
+function closeBookModal() {
+  const m = document.getElementById('book-modal');
+  if (m) { m.classList.remove('open'); m.style.display = 'none'; }
+  _bkFlow = null;
+}
+function bkBody(html) {
+  const el = document.getElementById('book-modal-body');
+  if (el) el.innerHTML = html;
+}
+function bkHeader(title, backFn) {
+  return '<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">' +
+    (backFn ? '<button onclick="' + backFn + '" style="border:none;background:none;font-size:20px;color:var(--muted);cursor:pointer;padding:0 6px 0 0;">‹</button>' : '') +
+    '<div style="flex:1;font-family:\'Playfair Display\',serif;font-size:20px;color:var(--charcoal);">' + title + '</div>' +
+    '<button onclick="closeBookModal()" style="border:none;background:none;font-size:20px;color:var(--muted);cursor:pointer;">×</button>' +
+  '</div>';
+}
+function bkLoadingBody(title) {
+  bkBody(bkHeader(title, '') +
+    '<div style="text-align:center;padding:28px 0;">' +
+    '<div style="width:28px;height:28px;border:3px solid var(--border);border-top-color:var(--rose);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto;"></div></div>');
+}
+
+async function bkStepServices() {
+  const first = bkEsc(((_bkFlow.tech.name || '').trim().split(/\s+/)[0]) || 'this tech');
+  bkLoadingBody('Book ' + first);
+  try {
+    const results = await Promise.all([
+      fetch(SUPABASE_URL + '/rest/v1/tech_services?tech_id=eq.' + _bkFlow.tech.id +
+            '&active=is.true&order=sort_order.asc,created_at.asc', { headers: bkHeaders() }),
+      fetch(SUPABASE_URL + '/rest/v1/tech_availability?tech_id=eq.' + _bkFlow.tech.id +
+            '&select=day_of_week', { headers: bkHeaders() })
+    ]);
+    _bkFlow.svcs = results[0].ok ? await results[0].json() : [];
+    _bkFlow.dows = {};
+    (results[1].ok ? await results[1].json() : []).forEach(function(a) { _bkFlow.dows[a.day_of_week] = true; });
+  } catch(e) { _bkFlow.svcs = []; }
+  if (!_bkFlow.svcs.length) {
+    bkBody(bkHeader('Book ' + first, '') +
+      '<div style="font-size:14px;color:var(--muted);line-height:1.6;padding:6px 0 14px;">No bookable services are set up yet. Reach out directly and they can get you in.</div>' +
+      '<button class="btn btn-outline" onclick="closeBookModal()">Close</button>');
+    return;
+  }
+  bkBody(bkHeader('Book ' + first, '') +
+    '<div style="font-size:13px;color:var(--muted);margin-bottom:10px;">Pick a service</div>' +
+    _bkFlow.svcs.map(function(s, i) {
+      const meta = [bkDur(s.duration_minutes), bkPrice(s.price)].filter(Boolean).join(' · ');
+      return '<div onclick="bkPickService(' + i + ')" style="display:flex;align-items:center;gap:10px;padding:13px 14px;border:1px solid var(--border);border-radius:12px;margin-bottom:8px;cursor:pointer;background:white;">' +
+        '<div style="flex:1;min-width:0;">' +
+          '<div style="font-size:14px;font-weight:600;color:var(--charcoal);">' + bkEsc(s.name) + '</div>' +
+          '<div style="font-size:12px;color:var(--muted);margin-top:1px;">' + meta + '</div>' +
+        '</div>' +
+        '<svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:var(--muted);fill:none;stroke-width:2.5;stroke-linecap:round;"><path d="M9 18l6-6-6-6"/></svg>' +
+      '</div>';
+    }).join(''));
+}
+
+function bkLocalDateISO(offsetDays, tz) {
+  const d = new Date(Date.now() + offsetDays * 86400000);
+  try { return d.toLocaleDateString('en-CA', { timeZone: tz }); }
+  catch(e) { return d.toISOString().slice(0, 10); }
+}
+
+function bkPickService(i) {
+  _bkFlow.svc = _bkFlow.svcs[i];
+  bkStepDays();
+}
+
+function bkStepDays() {
+  let chips = '';
+  for (let n = 0; n < 14; n++) {
+    const iso = bkLocalDateISO(n, _bkFlow.tz);
+    const dow = new Date(iso + 'T12:00:00Z').getUTCDay();
+    const open = !!_bkFlow.dows[dow];
+    const label = new Date(iso + 'T12:00:00Z').toLocaleDateString('en-US', { weekday: 'short', month: 'numeric', day: 'numeric', timeZone: 'UTC' });
+    chips += open
+      ? '<button onclick="bkPickDay(\'' + iso + '\')" style="padding:9px 6px;border-radius:10px;border:1.5px solid var(--rose-mid);background:white;color:var(--rose-dark);font-size:12.5px;font-weight:600;cursor:pointer;">' + label + '</button>'
+      : '<button disabled style="padding:9px 6px;border-radius:10px;border:1.5px solid var(--border);background:var(--cream);color:var(--muted);font-size:12.5px;opacity:0.55;">' + label + '</button>';
+  }
+  bkBody(bkHeader(bkEsc(_bkFlow.svc.name), 'bkStepServices()') +
+    '<div style="font-size:13px;color:var(--muted);margin-bottom:10px;">Pick a day</div>' +
+    '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">' + chips + '</div>');
+}
+
+async function bkPickDay(iso) {
+  _bkFlow.day = iso;
+  bkLoadingBody('Open times');
+  let slots = [];
+  try {
+    const r = await fetch(SUPABASE_URL + '/rest/v1/rpc/get_open_slots', {
+      method: 'POST',
+      headers: bkHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ p_tech_id: _bkFlow.tech.id, p_service_id: _bkFlow.svc.id, p_day: iso })
+    });
+    if (r.ok) slots = await r.json();
+  } catch(e) {}
+  const label = new Date(iso + 'T12:00:00Z').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', timeZone: 'UTC' });
+  if (!slots.length) {
+    bkBody(bkHeader(label, 'bkStepDays()') +
+      '<div style="font-size:14px;color:var(--muted);padding:10px 0 16px;">No openings this day. Try another one?</div>' +
+      '<button class="btn btn-outline" onclick="bkStepDays()">Back to days</button>');
+    return;
+  }
+  bkBody(bkHeader(label, 'bkStepDays()') +
+    '<div style="font-size:13px;color:var(--muted);margin-bottom:10px;">Pick a time</div>' +
+    '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">' +
+    slots.map(function(s) {
+      const ts = s.slot_start || s;
+      return '<button onclick="bkPickSlot(\'' + ts + '\')" style="padding:10px 6px;border-radius:10px;border:1.5px solid var(--rose-mid);background:white;color:var(--rose-dark);font-size:13px;font-weight:600;cursor:pointer;">' +
+        bkFmtSlot(ts, _bkFlow.tz) + '</button>';
+    }).join('') + '</div>');
+}
+
+function bkPickSlot(ts) {
+  _bkFlow.slot = ts;
+  const s = _bkFlow.svc;
+  const meta = [bkDur(s.duration_minutes), bkPrice(s.price)].filter(Boolean).join(' · ');
+  bkBody(bkHeader('Confirm', "bkPickDay('" + _bkFlow.day + "')") +
+    '<div style="background:var(--cream);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:12px;">' +
+      '<div style="font-size:15px;font-weight:700;color:var(--charcoal);">' + bkEsc(s.name) + '</div>' +
+      '<div style="font-size:13px;color:var(--muted);margin-top:3px;">' + meta + '</div>' +
+      '<div style="font-size:14px;font-weight:600;color:var(--rose-dark);margin-top:8px;">' + bkFmtStamp(_bkFlow.slot, _bkFlow.tz) + '</div>' +
+    '</div>' +
+    '<div class="input-group"><label>Anything they should know? (optional)</label>' +
+    '<textarea id="bk-note" rows="2" placeholder="Inspo, allergies, running late..." style="width:100%;padding:10px;border:1px solid var(--border);border-radius:10px;font-size:14px;font-family:inherit;box-sizing:border-box;resize:vertical;"></textarea></div>' +
+    '<button class="btn btn-rose" id="bk-confirm-btn" onclick="bkConfirm()" style="margin-top:6px;">Request Appointment</button>');
+}
+
+async function bkConfirm() {
+  const btn = document.getElementById('bk-confirm-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Booking...'; }
+  const note = (document.getElementById('bk-note') || {}).value || '';
+  const clientName = ((currentUserName.first || '') + ' ' + (currentUserName.last || '')).trim();
+  try {
+    const r = await fetch(SUPABASE_URL + '/rest/v1/rpc/create_booking', {
+      method: 'POST',
+      headers: bkHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({
+        p_tech_id: _bkFlow.tech.id,
+        p_service_id: _bkFlow.svc.id,
+        p_starts_at: _bkFlow.slot,
+        p_client_name: clientName || null,
+        p_note: note.trim() || null
+      })
+    });
+    const data = await r.json().catch(function() { return {}; });
+    if (!r.ok) {
+      const msg = data.message || 'Could not book, please try again';
+      showToast(msg);
+      if (/just taken/i.test(msg)) { bkPickDay(_bkFlow.day); }
+      else if (btn) { btn.disabled = false; btn.textContent = 'Request Appointment'; }
+      return;
+    }
+    const confirmed = data.status === 'confirmed';
+    const when = bkFmtStamp(_bkFlow.slot, _bkFlow.tz);
+    const techName = _bkFlow.tech.name || 'your tech';
+    // Tell the tech (their push subscription is keyed by email)
+    if (_bkFlow.tech.email) {
+      sendPushToUser(_bkFlow.tech.email, {
+        title: confirmed ? 'New booking 💅' : 'New booking request 💅',
+        body: (clientName || 'A client') + ' · ' + _bkFlow.svc.name + ' · ' + when +
+              (confirmed ? '' : '. Tap to confirm.'),
+        url: '/app/', tag: 'booking-new'
+      });
+    }
+    bkBody(
+      '<div style="text-align:center;padding:18px 4px 6px;">' +
+        '<div style="width:54px;height:54px;border-radius:50%;background:var(--green-light);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;">' +
+          '<svg viewBox="0 0 24 24" style="width:26px;height:26px;stroke:var(--green);fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;"><path d="M20 6L9 17l-5-5"/></svg>' +
+        '</div>' +
+        '<div style="font-family:\'Playfair Display\',serif;font-size:22px;color:var(--charcoal);margin-bottom:6px;">' +
+          (confirmed ? "You're booked!" : 'Request sent!') + '</div>' +
+        '<div style="font-size:14px;color:var(--muted);line-height:1.6;margin-bottom:18px;">' +
+          bkEsc(_bkFlow.svc.name) + ' with ' + bkEsc(techName) + '<br>' + when +
+          (confirmed ? '' : '<br>' + bkEsc(techName) + ' will confirm shortly.') + '</div>' +
+        '<button class="btn btn-rose" onclick="closeBookModal()">Done</button>' +
+        '<div onclick="closeBookModal();show(\'my-appts\')" style="margin-top:12px;font-size:13px;color:var(--rose-dark);font-weight:600;cursor:pointer;">View my appointments</div>' +
+      '</div>');
+  } catch(e) {
+    showToast('Network hiccup, please try again');
+    if (btn) { btn.disabled = false; btn.textContent = 'Request Appointment'; }
+  }
+}
+
+// ── Client side: My Appointments screen ─────────────────────────────────────
+
+let _maRows = [];
+
+async function loadMyAppointments() {
+  const wrap = document.getElementById('ma-list');
+  if (!wrap) return;
+  if (!currentUser || !currentUser.id) {
+    wrap.innerHTML = '<div style="text-align:center;padding:30px 10px;font-size:14px;color:var(--muted);">Sign in to see your appointments.</div>';
+    return;
+  }
+  wrap.innerHTML = '<div style="text-align:center;padding:24px;"><div style="width:28px;height:28px;border:3px solid var(--border);border-top-color:var(--rose);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto;"></div></div>';
+  try {
+    if (!window.ALL_TECHS || !window.ALL_TECHS.length) { try { await loadTechsFromSupabase(); } catch(e) {} }
+    const r = await fetch(SUPABASE_URL + '/rest/v1/bookings?client_id=eq.' + currentUser.id +
+      '&order=starts_at.desc&limit=50&select=*,tech_services(name,price)', { headers: bkHeaders() });
+    _maRows = r.ok ? await r.json() : [];
+  } catch(e) { _maRows = []; }
+  if (!_maRows.length) {
+    wrap.innerHTML = '<div style="background:white;border:1px dashed var(--border);border-radius:14px;padding:22px;text-align:center;font-size:13px;color:var(--muted);line-height:1.6;">Nothing booked yet.<br>Find a tech you love and tap <b>Book</b> on their profile.</div>';
+    return;
+  }
+  wrap.innerHTML = _maRows.map(function(b) {
+    const tech = (window.ALL_TECHS || []).find(function(t) { return t.id === b.tech_id; });
+    const techName = tech ? tech.name : 'Your tech';
+    const tz = tech && tech.booking_timezone;
+    const svc = (b.tech_services && b.tech_services.name) || 'Appointment';
+    const future = new Date(b.starts_at).getTime() > Date.now();
+    const cancellable = future && (b.status === 'pending' || b.status === 'confirmed');
+    return '<div style="background:white;border:1px solid var(--border);border-radius:14px;padding:13px 14px;margin-bottom:8px;box-shadow:var(--shadow);">' +
+      '<div style="display:flex;align-items:center;gap:8px;">' +
+        '<div style="flex:1;min-width:0;">' +
+          '<div style="font-size:14px;font-weight:700;color:var(--charcoal);">' + bkFmtStamp(b.starts_at, tz) + '</div>' +
+          '<div style="font-size:12.5px;color:var(--charcoal);margin-top:2px;">' + bkEsc(svc) + ' · ' + bkEsc(techName) + '</div>' +
+        '</div>' + bkStatusChip(b.status) +
+      '</div>' +
+      (cancellable
+        ? '<div style="display:flex;margin-top:10px;"><button onclick="bkCancelMine(\'' + b.id + '\')" style="flex:1;padding:9px;border-radius:10px;border:1.5px solid var(--border);background:white;color:var(--muted);font-size:13px;font-weight:700;cursor:pointer;">Cancel</button></div>'
+        : '') +
+    '</div>';
+  }).join('');
+}
+
+async function bkCancelMine(id) {
+  if (!(await showConfirm('Cancel this appointment?', { body: 'Your tech will be notified.', okLabel: 'Cancel it' }))) return;
+  const r = await fetch(SUPABASE_URL + '/rest/v1/bookings?id=eq.' + id, {
+    method: 'PATCH',
+    headers: bkHeaders({ 'Content-Type': 'application/json', 'Prefer': 'return=minimal' }),
+    body: JSON.stringify({ status: 'cancelled_by_client' })
+  });
+  if (!r.ok) { showToast('Could not cancel, try again'); return; }
+  const b = _maRows.find(function(x) { return x.id === id; });
+  if (b) {
+    const tech = (window.ALL_TECHS || []).find(function(t) { return t.id === b.tech_id; });
+    if (tech && tech.email) {
+      const who = ((currentUserName.first || '') + ' ' + (currentUserName.last || '')).trim() || 'A client';
+      sendPushToUser(tech.email, {
+        title: 'Appointment cancelled',
+        body: who + ' cancelled ' + bkFmtStamp(b.starts_at, tech.booking_timezone) + '.',
+        url: '/app/', tag: 'booking-' + id
+      });
+    }
+  }
+  showToast('Cancelled');
+  loadMyAppointments();
 }
 
 // ── My board posts ────────────────────────────────────────────────────────────
@@ -13334,6 +14122,7 @@ async function loadTechDashboard() {
   try { loadTechHomePortfolio(); } catch(e) {}
   try { loadMyBoardPosts(); } catch(e) {}
   try { syncHideAddressToggle(); } catch(e) {}
+  try { tbLoadDashBadge(); } catch(e) {}
 
   // Set a warmer subtitle based on time of day.
   var subtle = document.getElementById('tech-dash-subtle');
@@ -13345,17 +14134,7 @@ async function loadTechDashboard() {
   }
 }
 
-async function declineBooking(id, email) {
-  if (!(await showConfirm('Decline this booking request?', { body: 'The client will be notified.', okLabel: 'Decline' }))) return;
-  try {
-    await fetch(`${SUPABASE_URL}/rest/v1/bookings?id=eq.${id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type':'application/json','apikey':SUPABASE_ANON_KEY,'Authorization':`Bearer ${SUPABASE_ANON_KEY}`,'Prefer':'return=minimal' },
-      body: JSON.stringify({ status: 'cancelled' })
-    });
-    // (No bookings-list re-render needed, the list UI was removed.)
-  } catch(e) {}
-}
+// (2.0 declineBooking removed in 3.0, superseded by tbSetStatus in the Bookings module.)
 
 // Sync dashboard toggle with profile toggle
 function doToggleDash(dashId, profileId) {
@@ -14206,7 +14985,7 @@ const SCREEN_DEPTH = {
   'welcome-new':1, 'change-password-screen':1,
   home:2, admin:2, 'tech-home':2, 'how-it-works':3,
   'browse-style':3, 'browse-location':3, messages:3, 'profile-screen':3,
-  'tech-detail':4
+  'tech-detail':4, 'tech-bookings':3, 'my-appts':4
 };
 let _currentScreen = 'splash';
 let _prevScreen = 'home';
@@ -14367,6 +15146,8 @@ function show(id) {
   if (id === 'browse-location') { renderLocTechCards(); }
   if (id === 'tech-home') { loadTechDashboard(); }
   if (id === 'my-photos') { loadMyPhotosData(); }
+  if (id === 'tech-bookings') { loadTechBookings(); }
+  if (id === 'my-appts') { loadMyAppointments(); }
   if (id === 'profile-screen') { initProfileScreen(); }
   if (id === 'browse-style') {
     // Reset radius to Anywhere on every entry
@@ -17501,6 +18282,15 @@ function closeReleaseWizard() {
 </div><!-- end .device -->
 
 <!-- FORGOT PASSWORD MODAL -->
+<!-- BOOK MODAL (3.0), client booking flow: service -> day -> time -> confirm.
+     Steps render dynamically into #book-modal-body from the Bookings module. -->
+<div class="modal-overlay" id="book-modal" style="display:none;z-index:700;">
+  <div class="modal" style="max-height:88vh;overflow-y:auto;">
+    <div class="modal-handle"></div>
+    <div id="book-modal-body"></div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="forgot-modal" style="display:none;">
   <div class="modal">
     <div class="modal-handle"></div>
