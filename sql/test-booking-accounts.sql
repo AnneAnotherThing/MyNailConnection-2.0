@@ -80,7 +80,7 @@ begin
       'annewilson1021+booktech@gmail.com',
       '6025550101',
       'Internal test account for the new booking system. Please ignore!',
-      'MNC Test Studio', 'Phoenix', 'AZ', '[]'::jsonb
+      'MNC Test Studio', 'Phoenix', 'AZ', array[]::text[]
     );
     raise notice 'Created techs row';
   end if;
