@@ -1,13 +1,26 @@
 # MNC 3.0, Rebrand + Free Booking
 
-## What 3.0 is
+## What 3.0 is (model v2, locked with Anne 2026-07-05)
 
-Pivot from discovery-first ("be found") to one-stop shop: **free booking**
-plus post-your-photos-at-your-pace. Booking is the daily-use hook that
-works for a tech on day one with zero audience; photos become the
-self-paced marketing layer on top. Visual identity moves from rose gold
-and ivory ("In full bloom") to a **red and black** identity, launched
-with a countdown campaign.
+One-stop shop for nail techs. A tech's profile either links to their
+existing booking system or opens MNC's own, and MNC booking is **free
+and stays free**. Photos are the revenue: **paid from the first upload**
+(one free starter photo), and they double as the tech's advertising,
+every photo joins the ONE app Gallery that clients scroll and filter.
+No live feed, no posts feature, no ranking math: presence in the
+Gallery is exactly proportional to photo count, and techs who flip
+"Available now" glow in the grid. Visual identity moves from rose gold
+and ivory ("In full bloom") to the copper/charcoal/gold direction in
+`3.0.png` ("Rooted, Rebuilt, unstoppable."), launched with a countdown
+campaign.
+
+Pricing detail:
+- New techs (joined on/after `PHOTO_FREE_CUTOVER` in index.html): 1
+  free photo, then $1/photo, $5/10-pack, or Glow Up $10.99/mo (40/mo).
+- Grandfathered techs (joined before cutover): keep the original 5
+  free ("first five are free, always" was promised to them, it stays true).
+- Glow Up's pitch is now purely best-per-photo-price (the live feed
+  perk died with the feed).
 
 ## Where this lives
 
@@ -19,52 +32,53 @@ with a countdown campaign.
   `main`. Cutover = merge `v3` into `main`, run `deploy/sync.sh`, push.
   Rollback = revert the merge commit.
 
-## Workstreams, in build order
+## Workstreams
 
-1. **Booking system** (the big one, everything else waits on it)
-   STATUS 2026-07-04: v1 code complete in index.html + sql migration.
-   NOT yet run against Supabase, run sql/booking-system-migration.sql
-   in the SQL editor before testing. Deferred: day-before reminders
-   (needs pg_cron), deposits/Stripe, tech blocked-dates/time-off.
-   - Tech side: services + durations + prices, weekly availability,
-     calendar view, manage/cancel appointments.
-   - Client side: pick a tech, pick a service, pick a slot, book.
-   - Reminders: push + email in the free tier. NO SMS in free tier
-     (per-message cost scales with the least profitable users).
-   - Supabase: new tables + RLS in `sql/`, edge functions as needed.
-2. **Visual rebrand**: red/black palette, new logo treatment, CSS
-   variables throughout `index.html` and `marketing.html`. Keep one
-   thread of continuity (logo mark or name treatment) so existing
-   users recognize it.
-3. **Two-path onboarding**: quick question at tech signup routing to
-   the full one-stop pitch (booking + portfolio) or the lighter
-   discovery-only pitch (just post and be found).
-4. **Countdown component**: landing page or banner for the campaign.
-   Built last, launched last.
+1. **Booking system**, STATUS: BUILT + migrated (2026-07-05). Booking
+   tables live in Supabase, test accounts exist (ZZ TEST), dev
+   quick-login buttons on localhost. End-to-end run by Anne pending.
+   Deferred: day-before reminders (pg_cron), deposits/Stripe,
+   blocked-dates/time-off. NO SMS in free tier.
+2. **Model v2 mechanics + copy**, STATUS: BUILT (2026-07-05). Feed and
+   posts feature removed, one 3-col Gallery with linear weighting and
+   available-now glow, 1-free-photo billing with grandfathering
+   (`mncFreeLimit()`), tutorial/welcome/how-it-works rewritten.
+   NOT yet done: marketing.html + tech-guide.html still describe the
+   old model, they get rewritten with the rebrand (workstream 3).
+3. **Visual rebrand**: palette from 3.0.png (copper/charcoal/gold),
+   new logo treatment, CSS variables in `index.html` + full
+   `marketing.html` and `tech-guide.html` rewrite (copy AND look).
+   Keep one thread of continuity so existing users recognize it.
+4. **Two-path onboarding**: quick question at tech signup routing to
+   the full pitch (booking + gallery) or bring-your-own-booking pitch.
+5. **Countdown component**: built last, launched last.
 
 ## Hard rules
 
-- Countdown does not start until booking is built AND tested. Zero
-  risk of hitting day zero without a working product.
-- "Free booking" stays free. The boundary is what free includes
-  (push/email reminders yes, SMS and deposit-taking are later paid
-  add-ons), never a bait-and-switch on booking itself.
+- Countdown does not start until booking is built AND tested.
+- "Free booking" stays free, never a bait-and-switch.
+- Photo-model wording: mock says "Free Booking for New Techs";
+  campaign copy must make clear booking is free for EVERYONE, and
+  paid-photos applies to uploads, not photos already posted.
 - All the 2.0 house rules in CLAUDE.md still apply here: bash for big
   HTML edits, run `deploy/sync.sh` after source edits, tail-check for
   `</body>`.
 
 ## Before cutover
 
+- Set `PHOTO_FREE_CUTOVER` in index.html to the launch date (it's
+  parked at 2099-01-01 so everyone stays grandfathered until then).
 - Remove the dev quick-login block (`devLogin` / `devQuickLoginInit`)
-  from index.html. It only mounts on localhost, but test creds should
-  not ship in a public file.
+  from index.html.
 - Run the CLEANUP block in sql/test-booking-accounts.sql to delete the
   ZZ TEST accounts.
+- Dead-code sweep (optional): the feed/posts JS (loadHomeFeed,
+  loadMyBoardPosts, openNewPostModal, etc.) is unreachable but still
+  in the file. Safe to leave; nice to remove.
 
 ## Open decisions
 
 - Deposits / no-show protection: techs want it, it means Stripe fees.
   Scope and pricing TBD, not in the initial 3.0 cut.
-- Exact red/black palette values and logo treatment: TBD with Anne.
 - Whether the "MyNailConnection-2.0" GitHub repo gets renamed at
   cutover (cosmetic, GitHub redirects old URLs, no rush).

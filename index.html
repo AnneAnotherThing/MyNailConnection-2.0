@@ -1010,6 +1010,9 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
   100% { opacity: 1; transform: translateY(0) scale(1); }
 }
 .popularity-row .pop-chip { animation: popChipIn 0.35s cubic-bezier(0.22,1,0.36,1) both; }
+/* 3.0: available-now techs glow in the one-gallery grid */
+.avail-glow-tile::after { content:''; position:absolute; inset:0; pointer-events:none; border:2px solid rgba(74,122,90,0.8); animation: availTilePulse 2.4s ease-in-out infinite; }
+@keyframes availTilePulse { 0%,100% { opacity:0.4; } 50% { opacity:1; } }
 
 /* ── Browse-grid chip row, lives inside each .tech-card-body. Default
    hidden so cards that have nothing above threshold don't show an empty
@@ -1543,7 +1546,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       <div style="display:flex;flex-direction:column;gap:10px;text-align:left;">
         <div style="display:flex;align-items:center;gap:12px;"><span style="display:flex;"><div class="icon-glass" style="background:#E8EEF2;"><svg viewBox="0 0 24 24" style="width:26px;height:26px;stroke:#4A6274;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg></div></span><div><div style="font-size:13px;font-weight:500;">Find amazing techs near you</div><div style="font-size:11px;color:var(--muted);">Filter by style, availability, and vibe</div></div></div>
         
-        <div style="display:flex;align-items:center;gap:12px;"><span style="display:flex;"><div class="icon-glass" style="background:#F5EDE0;"><svg viewBox="0 0 24 24" style="width:26px;height:26px;stroke:#A07840;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div></span><div><div style="font-size:13px;font-weight:500;">Chat directly with your tech</div><div style="font-size:11px;color:var(--muted);">Share inspo, ask questions, feel at ease</div></div></div>
+        <div style="display:flex;align-items:center;gap:12px;"><span style="display:flex;"><div class="icon-glass" style="background:#F5EDE0;"><svg viewBox="0 0 24 24" style="width:26px;height:26px;stroke:#A07840;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div></span><div><div style="font-size:13px;font-weight:500;">Book your tech in a tap</div><div style="font-size:11px;color:var(--muted);">Free in-app booking, no DMs needed</div></div></div>
       </div>
     </div>
     <button class="btn btn-rose" onclick="showCorrectHome()" style="width:100%;font-size:16px;">Find a Nail Tech</button>
@@ -1642,27 +1645,6 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
         <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:#6BA06B;fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg>
       </div>
 
-      <!-- What's Happening, live activity feed, opens a dedicated screen.
-           Added 2026-04-22 per Anne's "three equal-billing browse buttons"
-           design: feed lives off-home now so it doesn't pull clients away
-           from browsing + booking. Gold-toned RSS/feed-style glyph, corner
-           dot + two arcs that pulse outward in a rolling wave to signal
-           liveness. 2026-04-24: swapped from speech-bubble + red indicator
-           dot; the arcs now carry the liveness cue themselves. -->
-      <div onclick="show('feed')" style="cursor:pointer;border-radius:12px;background:linear-gradient(160deg,#F5EDE8 0%,#EBD9D0 100%);border:1px solid rgba(139,80,65,0.22);border-bottom:3px solid rgba(120,60,48,0.35);box-shadow:0 2px 8px rgba(120,60,48,0.08);display:flex;align-items:center;gap:14px;padding:10px 14px;">
-        <div style="width:72px;height:72px;border-radius:14px;overflow:hidden;flex-shrink:0;background:linear-gradient(135deg,#E8C890 0%,#D4A060 55%,#B8853A 100%);display:flex;align-items:center;justify-content:center;position:relative;">
-          <svg viewBox="0 0 24 24" style="width:34px;height:34px;stroke:white;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;">
-            <circle cx="5.5" cy="18.5" r="1.7" fill="white" stroke="none"/>
-            <path d="M4 11a9 9 0 019 9" style="animation:broadcast-wave 1.8s ease-in-out infinite;"/>
-            <path d="M4 4a16 16 0 0116 16" style="animation:broadcast-wave 1.8s ease-in-out infinite;animation-delay:-0.9s;"/>
-          </svg>
-        </div>
-        <div style="flex:1;">
-          <div style="font-size:15px;font-weight:600;color:var(--charcoal);">What's Happening</div>
-          <div style="font-size:12px;color:var(--muted);margin-top:2px;">Live feed · see what techs are posting right now</div>
-        </div>
-        <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--gold);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg>
-      </div>
 
       <!-- Available Now / Within 24h, the dot + count are live via
            updateAvailCounts(). When nobody matches, the card flips to an
@@ -1829,51 +1811,13 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
      auto-scroll, 2-col grid, expiry filter) are intact, the element IDs
      below are the SAME ones the JS has always written to, so no logic
      changes were needed to relocate. -->
-<div class="screen" id="feed">
-  <div class="header" style="padding:10px 16px;display:flex;align-items:center;justify-content:space-between;">
-    <button class="back-btn" onclick="show('home')"><svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:#FAF0EB;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M15 18l-6-6 6-6"/></svg></button>
-    <div style="font-family:'Playfair Display',serif;font-size:17px;font-weight:600;color:#FAF0EB;">What's Happening</div>
-    <div style="width:32px;"></div>
-  </div>
-  <div class="scroll-content" style="padding:14px 20px 80px;">
-    <!-- Pre-launch "test posts, admin can clear" banner removed
-         2026-04-27 (test data wiped, real launch underway). The
-         updateTestBannerVisibility() helper still exists as a safe
-         no-op via its `if (!banner) return;` guard. -->
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;gap:10px;flex-wrap:wrap;">
-      <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;">Recent from techs near you</div>
-      <div id="feed-radius-chips" style="display:flex;gap:4px;">
-        <button class="feed-radius-chip" data-miles="25"  onclick="setFeedRadius(25)">25mi</button>
-        <button class="feed-radius-chip" data-miles="50"  onclick="setFeedRadius(50)">50mi</button>
-        <button class="feed-radius-chip" data-miles="100" onclick="setFeedRadius(100)">100mi</button>
-        <button class="feed-radius-chip" data-miles="0"   onclick="setFeedRadius(0)">Anywhere</button>
-      </div>
-    </div>
-    <div style="font-family:'Playfair Display',serif;font-style:italic;font-size:11px;color:var(--muted);opacity:0.7;margin-bottom:10px;letter-spacing:0.2px;">the last 100 posts · freshest on top 🌸</div>
-    <div id="home-feed-list" style="display:flex;flex-direction:column;gap:10px;max-height:calc(100vh - 220px);overflow-y:auto;padding-right:4px;-webkit-overflow-scrolling:touch;scrollbar-width:thin;"></div>
-  </div>
-  <div class="bottom-nav">
-    <div class="nav-item" onclick="show('home')"><span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg></span><span class="nav-label">Home</span></div>
-    <div class="nav-item" onclick="navToProfile()"><span class="nav-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></span><span class="nav-label">Profile</span></div>
-    <div class="nav-item" style="display:none;" onclick="show('admin')"><span class="nav-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg></span><span class="nav-label">Admin</span></div>
-    <div class="nav-item" onclick="doSignOut()" style="opacity:0.55;" title="Sign Out">
-      <span class="nav-icon"><svg viewBox="0 0 24 24" style="width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span>
-      <span class="nav-label">Sign Out</span>
-    </div>
-  </div>
-</div>
-
-<!-- BROWSE BY STYLE screen -->
+<!-- feed screen removed in 3.0: one-gallery consolidation, no live feed -->
 <div class="screen" id="browse-style">
   <div class="header" style="flex-direction:column;padding:10px 16px 0;gap:0;">
     <!-- Top row: back + title + filter -->
     <div style="display:flex;align-items:center;justify-content:space-between;width:100%;padding-bottom:8px;">
       <button class="back-btn" onclick="show('home')"><svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:#FAF0EB;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M15 18l-6-6 6-6"/></svg></button>
       <!-- Mode toggle pills -->
-      <div style="display:flex;background:rgba(0,0,0,0.2);border-radius:100px;padding:3px;gap:2px;">
-        <button id="mode-btn-find" onclick="setStyleMode('find')" style="padding:5px 12px;border-radius:100px;border:none;background:white;color:var(--rose-dark);font-size:11.5px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s;white-space:nowrap;">Find a Tech</button>
-        <button id="mode-btn-inspo" onclick="setStyleMode('inspo')" style="padding:5px 12px;border-radius:100px;border:none;background:transparent;color:rgba(255,255,255,0.75);font-size:11.5px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s;white-space:nowrap;">Get Inspo</button>
-      </div>
       <button onclick="openFiltersModal()" id="style-filter-btn" style="background:none;border:none;cursor:pointer;padding:6px;position:relative;">
         <svg viewBox="0 0 24 24" style="width:20px;height:20px;stroke:#FAF0EB;fill:none;stroke-width:2;stroke-linecap:round;"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
         <span id="style-filter-dot" style="display:none;position:absolute;top:4px;right:4px;width:8px;height:8px;background:var(--rose);border-radius:50%;"></span>
@@ -2081,21 +2025,6 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
     </div>
 
     <!-- Bulletin Board -->
-    <div style="padding:18px 20px 0;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-        <div style="font-family:'Playfair Display',serif;font-size:17px;font-weight:600;">From the Tech</div>
-        <span id="td-board-count" style="font-size:12px;color:var(--muted);"></span>
-      </div>
-      <div id="td-bulletin-board">
-        <div id="td-board-empty" class="empty-state">
-          <div class="empty-state-icon">
-            <svg viewBox="0 0 24 24"><path d="M4 5h16v10H4z"/><path d="M8 9h8M8 13h5"/><path d="M4 15l-1 4 4-1"/></svg>
-          </div>
-          <div class="empty-state-title">Nothing posted yet</div>
-          <div class="empty-state-sub">Updates and promos from this tech will show up here.</div>
-        </div>
-      </div>
-    </div>
 
 
 
@@ -2184,14 +2113,10 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
     </div>
 
     <!-- YOUR PRESENCE, small stats row, tappable -->
-    <div style="margin:16px 20px 0;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+    <div style="margin:16px 20px 0;display:grid;grid-template-columns:1fr 1fr;gap:8px;">
       <div class="presence-stat" onclick="openMyPhotos()">
         <div class="presence-stat-num" id="td-stat-photos">-</div>
         <div class="presence-stat-label">Looks</div>
-      </div>
-      <div class="presence-stat" onclick="window._pendingProfileTab='posts';show('profile-screen')">
-        <div class="presence-stat-num" id="td-stat-posts">-</div>
-        <div class="presence-stat-label">Notes</div>
       </div>
       <div class="presence-stat">
         <div class="presence-stat-num" id="td-stat-saves">-</div>
@@ -2241,7 +2166,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
                 border:1px solid var(--rose-mid);cursor:pointer;
                 box-shadow:0 2px 10px rgba(196,120,106,0.14);">
       <div style="font-family:'Playfair Display',serif;font-size:17px;font-weight:600;color:var(--rose-dark);margin-bottom:4px;">Post your first look 🌸</div>
-      <div style="font-size:12.5px;color:var(--charcoal);line-height:1.45;">Your first 5 are on us, they live in your portfolio forever <i>and</i> light up the live feed so clients discover your fresh work. After that, <b style="color:var(--rose-dark);">Glow Up</b> keeps your feed presence going (Spotlight credits grow your portfolio).</div>
+      <div style="font-size:12.5px;color:var(--charcoal);line-height:1.45;">Your first one is on us. Every photo after that is a little ad in the MNC Gallery, the more looks you post, the more often clients find you.</div>
     </div>
 
     <!-- PRIMARY ACTIONS, Post and Upload live side by side so the two
@@ -2252,10 +2177,6 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
          gate and the normal persistence path. -->
     <div style="margin:16px 20px 0;">
       <div style="display:flex;gap:8px;">
-        <button onclick="openNewPostModal()" class="btn btn-outline" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;font-size:13px;padding-left:8px;padding-right:8px;">
-          <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Post an Update
-        </button>
         <button onclick="openPhotoUploadFromHome()" class="btn btn-outline" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;font-size:13px;padding-left:8px;padding-right:8px;">
           <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
           Upload Photos
@@ -2297,17 +2218,6 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       </button>
     </div>
 
-    <!-- YOUR POSTS, recent bulletin-board posts with inline delete. Moved
-         from the old profile-screen Posts tab so techs manage their post
-         history without leaving their dashboard. Populated by
-         loadMyBoardPosts(); the id matches what that function writes to. -->
-    <div style="margin:26px 20px 0;">
-      <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:10px;">
-        <div style="font-size:14px;font-weight:600;color:var(--charcoal);letter-spacing:0.2px;">Your Posts</div>
-        <a onclick="openNewPostModal()" style="font-size:12px;color:var(--rose);cursor:pointer;font-weight:500;text-decoration:none;">+ New post</a>
-      </div>
-      <div id="my-board-posts"><div style="text-align:center;color:var(--muted);font-size:12px;padding:14px;">Loading your posts…</div></div>
-    </div>
 
     <!-- FOOTER: quiet links -->
     <div style="text-align:center;margin:32px 20px 4px;font-size:11.5px;color:var(--muted);line-height:1.7;">
@@ -2599,83 +2509,34 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       <div style="font-size:13px;color:var(--muted);line-height:1.6;">Everything you need to know about how My Nail Connection works and how to get the most out of your listing.</div>
     </div>
 
-    <!-- ── Section: The Feed ───────────────────────────────────────────── -->
+    <!-- ── Section: Bookings (3.0, the hook) ──────────────────────────── -->
     <div style="margin:20px 20px 0;background:white;border:1px solid var(--border);border-radius:18px;overflow:hidden;">
       <div style="background:linear-gradient(135deg,var(--rose-dark),var(--rose));padding:16px 20px;display:flex;align-items:center;gap:12px;">
-        <svg viewBox="0 0 24 24" style="width:22px;height:22px;stroke:white;fill:none;stroke-width:1.8;stroke-linecap:round;flex-shrink:0;"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>
-        <div style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:white;">How the Browse Feed Works</div>
+        <svg viewBox="0 0 24 24" style="width:22px;height:22px;stroke:white;fill:none;stroke-width:1.8;stroke-linecap:round;flex-shrink:0;"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <div style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:white;">Free Booking, the Heart of MNC</div>
       </div>
       <div style="padding:16px 20px;display:flex;flex-direction:column;gap:12px;">
-        <div style="font-size:13px;color:var(--charcoal);line-height:1.6;">When a client opens <b>Browse by Style</b>, they see a scrollable grid of real nail photos from techs across the app. This is your primary discovery surface, where a client falls in love with a set and taps through to your profile.</div>
-        <div style="font-size:13px;color:var(--charcoal);line-height:1.6;">The feed uses a <b>smart weighted rotation</b>:</div>
-        <div style="display:flex;flex-direction:column;gap:8px;">
-          <div style="display:flex;gap:10px;align-items:flex-start;">
-            <div style="width:6px;height:6px;border-radius:50%;background:var(--rose);margin-top:6px;flex-shrink:0;"></div>
-            <div style="font-size:13px;color:var(--charcoal);line-height:1.5;"><b>Every tech is included.</b> Even one great photo gets you into the feed.</div>
-          </div>
-          <div style="display:flex;gap:10px;align-items:flex-start;">
-            <div style="width:6px;height:6px;border-radius:50%;background:var(--rose);margin-top:6px;flex-shrink:0;"></div>
-            <div style="font-size:13px;color:var(--charcoal);line-height:1.5;"><b>More photos = more appearances.</b> The algorithm gives more rotation weight to techs with larger portfolios, but with diminishing returns so smaller techs still get seen.</div>
-          </div>
-          <div style="display:flex;gap:10px;align-items:flex-start;">
-            <div style="width:6px;height:6px;border-radius:50%;background:var(--rose);margin-top:6px;flex-shrink:0;"></div>
-            <div style="font-size:13px;color:var(--charcoal);line-height:1.5;"><b>No one dominates.</b> An interleave rule ensures at least 3 other photos show before yours repeats, so the feed always feels fresh to the client.</div>
-          </div>
-          <div style="display:flex;gap:10px;align-items:flex-start;">
-            <div style="width:6px;height:6px;border-radius:50%;background:var(--rose);margin-top:6px;flex-shrink:0;"></div>
-            <div style="font-size:13px;color:var(--charcoal);line-height:1.5;"><b>It reshuffles every visit.</b> Different photos surface each time a client opens the app, so your whole portfolio gets exposure over time.</div>
-          </div>
-        </div>
-
-        <!-- Frequency table -->
-        <div style="background:var(--cream);border-radius:12px;overflow:hidden;margin-top:4px;">
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;background:var(--rose-dark);">
-            <div style="padding:8px 10px;font-size:11px;font-weight:600;color:white;letter-spacing:0.5px;">PHOTOS</div>
-            <div style="padding:8px 10px;font-size:11px;font-weight:600;color:white;letter-spacing:0.5px;">FREQUENCY</div>
-            <div style="padding:8px 10px;font-size:11px;font-weight:600;color:white;letter-spacing:0.5px;">WHAT IT MEANS</div>
-          </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;border-bottom:1px solid var(--border);">
-            <div style="padding:8px 10px;font-size:12px;color:var(--charcoal);">1 photo</div>
-            <div style="padding:8px 10px;font-size:12px;font-weight:600;color:var(--muted);">Baseline</div>
-            <div style="padding:8px 10px;font-size:12px;color:var(--muted);">In the feed. Be seen.</div>
-          </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;background:var(--rose-light);border-bottom:1px solid var(--border);">
-            <div style="padding:8px 10px;font-size:12px;color:var(--charcoal);">5 photos</div>
-            <div style="padding:8px 10px;font-size:12px;font-weight:700;color:var(--rose-dark);">2.2× more</div>
-            <div style="padding:8px 10px;font-size:12px;color:var(--charcoal);">Starter max</div>
-          </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;border-bottom:1px solid var(--border);">
-            <div style="padding:8px 10px;font-size:12px;color:var(--charcoal);">10 photos</div>
-            <div style="padding:8px 10px;font-size:12px;font-weight:700;color:var(--rose-dark);">3.2× more</div>
-            <div style="padding:8px 10px;font-size:12px;color:var(--charcoal);">Spotlight range</div>
-          </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;background:var(--rose-light);">
-            <div style="padding:8px 10px;font-size:12px;color:var(--rose-dark);font-weight:600;">25+ photos</div>
-            <div style="padding:8px 10px;font-size:12px;font-weight:700;color:var(--rose);">5× more</div>
-            <div style="padding:8px 10px;font-size:12px;color:var(--rose-dark);">Glow Up max</div>
-          </div>
-        </div>
+        <div style="font-size:13px;color:var(--charcoal);line-height:1.6;">Every tech gets a <b>booking system, free, and it stays free</b>. Open <b>Bookings</b> on your Dashboard, add your services (name, time, price) and your weekly hours, and flip it on. A <b>Book</b> button appears on your profile.</div>
+        <div style="font-size:13px;color:var(--charcoal);line-height:1.6;">Clients pick a service, a day, and an open time. You <b>confirm or decline</b> every request (or turn on auto-confirm if you prefer), and you both get notified when anything changes. Your whole calendar lives on the Bookings screen.</div>
+        <div style="font-size:13px;color:var(--charcoal);line-height:1.6;">Already booking through Vagaro, StyleSeat, Square, or anywhere else? <b>Keep it.</b> Drop your link into your profile and clients get a <b>Book Now</b> button that goes straight there. MNC is your one home base either way.</div>
       </div>
     </div>
 
-
-    <!-- ── Section: Browse by Style Modes ──────────────────────────────── -->
-    <div style="margin:16px 20px 0;background:white;border:1px solid var(--border);border-radius:18px;overflow:hidden;">
-      <div style="background:linear-gradient(135deg,#A0606A,#C4948A);padding:16px 20px;display:flex;align-items:center;gap:12px;">
-        <svg viewBox="0 0 24 24" style="width:22px;height:22px;stroke:white;fill:none;stroke-width:1.8;stroke-linecap:round;flex-shrink:0;"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-        <div style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:white;">How Clients Browse by Style</div>
+    <!-- ── Section: The Gallery (3.0, one gallery, linear presence) ────── -->
+    <div style="margin:20px 20px 0;background:white;border:1px solid var(--border);border-radius:18px;overflow:hidden;">
+      <div style="background:linear-gradient(135deg,var(--rose-dark),var(--rose));padding:16px 20px;display:flex;align-items:center;gap:12px;">
+        <svg viewBox="0 0 24 24" style="width:22px;height:22px;stroke:white;fill:none;stroke-width:1.8;stroke-linecap:round;flex-shrink:0;"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+        <div style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:white;">How the Gallery Works</div>
       </div>
       <div style="padding:16px 20px;display:flex;flex-direction:column;gap:12px;">
-        <div style="font-size:13px;color:var(--charcoal);line-height:1.6;">Clients use Browse by Style in two ways, make sure your profile is ready for both.</div>
-        <div style="background:var(--rose-light);border-radius:12px;padding:14px;">
-          <div style="font-size:12px;font-weight:700;letter-spacing:0.8px;color:var(--rose-dark);margin-bottom:6px;">FIND A TECH MODE</div>
-          <div style="font-size:13px;color:var(--charcoal);line-height:1.6;">The default. Clients see a 2-column photo grid with your name on each photo. They can filter by distance (25, 50, 100, 250 miles), so photos from techs outside their range are hidden. <b>A complete address is critical here.</b> Tapping a photo goes directly to your profile.</div>
+        <div style="font-size:13px;color:var(--charcoal);line-height:1.6;">There is <b>one Gallery</b>, every nail photo on MNC in a single scrolling grid. Clients filter by shape, type, style, and distance, fall in love with a set, and tap through to the tech who made it. Your photos are your advertising here.</div>
+        <div style="font-size:13px;color:var(--charcoal);line-height:1.6;">No algorithm, no popularity contest. One honest rule:</div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <div style="font-size:13px;color:var(--charcoal);line-height:1.5;"><b>More photos = more presence.</b> Your share of the Gallery is exactly proportional to your photo count. Ten photos means twice the appearances of five. No caps, no damping, no mystery.</div>
+          <div style="font-size:13px;color:var(--charcoal);line-height:1.5;"><b>Every tech is included.</b> Even one great photo puts you in the rotation.</div>
+          <div style="font-size:13px;color:var(--charcoal);line-height:1.5;"><b>It reshuffles every visit.</b> Different photos surface each time a client opens the Gallery, so your whole portfolio gets seen over time, and photos from the same tech are spaced out so the scroll always feels fresh.</div>
+          <div style="font-size:13px;color:var(--charcoal);line-height:1.5;"><b>Available now = you glow.</b> While your Available Now toggle is on, every one of your photos wears a soft glowing ring and an &#x2728; Available now banner. Same-day clients head straight for the glow.</div>
         </div>
-        <div style="background:var(--cream);border-radius:12px;padding:14px;">
-          <div style="font-size:12px;font-weight:700;letter-spacing:0.8px;color:var(--rose-dark);margin-bottom:6px;">GET INSPO MODE</div>
-          <div style="font-size:13px;color:var(--charcoal);line-height:1.6;">A pure photo experience, 3-column tight grid, no names, no distance filter. Clients scroll for inspiration from anywhere in the country and save looks they love. Your work still appears here regardless of where the client is located.</div>
-        </div>
-        <div style="font-size:12px;color:var(--muted);line-height:1.5;">Both modes use the same smart feed rotation. More photos = more appearances in both modes.</div>
       </div>
     </div>
 
@@ -2693,7 +2554,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
             <div style="font-size:15px;font-weight:700;color:var(--charcoal);">Starter</div>
             <div style="font-size:13px;font-weight:600;color:var(--green);background:var(--green-light);padding:3px 10px;border-radius:100px;">Free forever</div>
           </div>
-          <div style="font-size:12px;color:var(--muted);line-height:1.5;">Profile · 5 portfolio photos · availability toggles · posts · Call &amp; Text contact. Everything you need to get started and start being found.</div>
+            <div style="font-size:12px;color:var(--muted);line-height:1.5;">Profile · <b>free booking system</b> · your first photo on us · availability toggles · Call &amp; Text contact. Everything you need to start being found and booked.</div>
         </div>
 
         <!-- Spotlight -->
@@ -2703,7 +2564,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
             <div style="font-size:13px;font-weight:600;color:var(--rose-dark);">$5 / 10 photos</div>
           </div>
           <div style="font-size:12px;color:var(--rose-dark);line-height:1.5;"><b>Build out your showcase, one pack at a time.</b> 10 photos for $5, half the per-photo cost. No subscription, no commitment. Perfect when business is steady and you want a clean, growing portfolio clients can browse.</div>
-          <div style="font-size:11px;color:var(--muted);margin-top:6px;">Your work lives in your portfolio. Glow Up adds the live feed on top.</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:6px;">Every photo is your advertising, each one grows your share of the Gallery.</div>
         </div>
 
         <!-- Glow Up -->
@@ -2712,11 +2573,11 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
             <div style="font-size:15px;font-weight:700;color:white;">Glow Up</div>
             <div style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.8);">$10.99 / month</div>
           </div>
-          <div style="font-size:12px;color:rgba(255,255,255,0.75);line-height:1.5;"><b style="color:white;">Keep the feed fresh all month long.</b> Up to 40 uploads a month, plenty for a new look every day, with room to spare for busy weeks. Every photo lands in front of clients browsing fresh work, and your portfolio grows with it. Refills on your monthly anniversary.</div>
+            <div style="font-size:12px;color:rgba(255,255,255,0.75);line-height:1.5;"><b style="color:white;">Keep your gallery growing all month.</b> Up to 40 uploads a month, plenty for a new look every day, with room to spare for busy weeks.</div>
           <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-top:6px;">Cancel any time</div>
         </div>
 
-        <div style="font-size:12px;color:var(--muted);text-align:center;padding-top:4px;line-height:1.5;">Every tier grows your portfolio. Glow Up uploads also land in the live feed, where clients discover fresh work.</div>
+        <div style="font-size:12px;color:var(--muted);text-align:center;padding-top:4px;line-height:1.5;">Booking is free on every plan, forever. Photos are the only thing you ever pay for, and Glow Up is simply the best price per photo.</div>
       </div>
     </div>
 
@@ -2755,7 +2616,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       <div style="padding:16px 20px;display:flex;flex-direction:column;gap:10px;">
         <div style="display:flex;gap:12px;align-items:flex-start;">
           <div style="width:28px;height:28px;border-radius:50%;background:var(--rose-light);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px;font-weight:700;color:var(--rose);">1</div>
-          <div><div style="font-size:13px;font-weight:600;color:var(--charcoal);margin-bottom:2px;">Start with your 5 best photos</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Quality over quantity on the free plan. Pick photos that show your strongest, most consistent work, the kind that makes a client say "I want that."</div></div>
+          <div><div style="font-size:13px;font-weight:600;color:var(--charcoal);margin-bottom:2px;">Lead with your best work</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Quality over quantity on the free plan. Pick photos that show your strongest, most consistent work, the kind that makes a client say "I want that."</div></div>
         </div>
         <div style="display:flex;gap:12px;align-items:flex-start;">
           <div style="width:28px;height:28px;border-radius:50%;background:var(--rose-light);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px;font-weight:700;color:var(--rose);">2</div>
@@ -2763,11 +2624,11 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
         </div>
         <div style="display:flex;gap:12px;align-items:flex-start;">
           <div style="width:28px;height:28px;border-radius:50%;background:var(--rose-light);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px;font-weight:700;color:var(--rose);">3</div>
-          <div><div style="font-size:13px;font-weight:600;color:var(--charcoal);margin-bottom:2px;">Post at least once a week</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Posts show on your profile and keep it looking active. Share a promo, a new set you are proud of, or just that you have openings this week.</div></div>
+          <div><div style="font-size:13px;font-weight:600;color:var(--charcoal);margin-bottom:2px;">Keep your booking hours current</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">A calendar that matches reality means every request is one you can say yes to. Update your weekly hours whenever your schedule shifts.</div></div>
         </div>
         <div style="display:flex;gap:12px;align-items:flex-start;">
           <div style="width:28px;height:28px;border-radius:50%;background:var(--rose-light);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px;font-weight:700;color:var(--rose);">4</div>
-          <div><div style="font-size:13px;font-weight:600;color:var(--charcoal);margin-bottom:2px;">Upgrade when it is paying for itself</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Glow Up unlocks the live feed, up to 40 uploads a month, enough for a new look every day with room for busy weeks. Every upload surfaces to clients browsing fresh work. If one new client from MNC covers the cost many times over, that is your moment. Let the results tell you when you are ready.</div></div>
+          <div><div style="font-size:13px;font-weight:600;color:var(--charcoal);margin-bottom:2px;">Upgrade when it is paying for itself</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Glow Up is the best per-photo price once you post a few looks a week. Until then, singles and 10-packs grow your gallery at your own pace.</div></div>
         </div>
       </div>
     </div>
@@ -2984,7 +2845,6 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
     <!-- Tabs, different for tech vs client -->
     <div style="display:flex;border-bottom:1px solid var(--border);" id="profile-tabs">
       <!-- Tech tabs -->
-      <div id="ptab-posts" onclick="profileTab('posts')" style="flex:1;text-align:center;padding:11px 0;font-size:13px;font-weight:500;color:var(--rose);border-bottom:2px solid var(--rose);cursor:pointer;display:none;">Posts</div>
       <div id="ptab-portfolio" onclick="profileTab('portfolio')" style="flex:1;text-align:center;padding:11px 0;font-size:13px;font-weight:500;color:var(--muted);border-bottom:2px solid transparent;cursor:pointer;display:none;">Portfolio</div>
       <!-- Client tabs -->
       <div id="ptab-favorites" onclick="profileTab('favorites')" style="flex:1;text-align:center;padding:10px 0;font-size:13px;font-weight:500;color:var(--rose);border-bottom:2px solid var(--rose);cursor:pointer;display:none;flex-direction:column;align-items:center;gap:4px;">
@@ -3002,18 +2862,6 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       
     </div>
 
-    <!-- POSTS TAB (tech), effectively dead code now that techs live on
-         tech-home and their Posts section is rendered there. Kept for
-         clients' shared profile-screen structure and as a belt-and-
-         suspenders fallback; id renamed to avoid duplicating the live
-         tech-home container. -->
-    <div id="profile-tab-posts" style="display:none;padding:16px 20px 0;">
-      <button onclick="openNewPostModal()" class="btn btn-rose" style="width:100%;margin-bottom:16px;display:flex;align-items:center;justify-content:center;gap:8px;">
-        <svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:white;fill:none;stroke-width:2.5;stroke-linecap:round;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        New Post
-      </button>
-      <div id="my-board-posts-legacy"><div style="text-align:center;color:var(--muted);font-size:13px;padding:20px;">(Visit your dashboard for your post list.)</div></div>
-    </div>
 
     <!-- PORTFOLIO TAB (tech) -->
     <!-- Both "+ Add" entry points now route to openTechEditFromProfile(),
@@ -3175,33 +3023,6 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
 </div>
 
 <!-- NEW POST MODAL -->
-<div class="modal-overlay" id="new-post-modal" style="display:none;align-items:flex-end;justify-content:center;">
-  <div class="modal" style="width:100%;max-width:420px;">
-    <div class="modal-handle"></div>
-    <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:600;margin-bottom:16px;">New Post</div>
-    <!-- Type selector -->
-    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;" id="post-type-pills">
-      <div class="post-type-pill active" data-type="availability" onclick="selectPostType(this)"><svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Availability</div>
-      <div class="post-type-pill" data-type="promo" onclick="selectPostType(this)"><svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Promo</div>
-      <!-- "Inspo" post-type removed 2026-04-22, under the portfolio→feed
-           pivot, photo-posts automatically become portfolio adds, making the
-           "Inspo" category redundant. Client-side inspo browse + favorite
-           + saved-inspo board all stay intact. CSS for .board-type-inspo
-           retained in case legacy rows exist. -->
-      <div class="post-type-pill" data-type="announcement" onclick="selectPostType(this)"><svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>Update</div>
-      <div class="post-type-pill" data-type="question" onclick="selectPostType(this)"><svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Question</div>
-    </div>
-    <!-- Post body, min-height sized so 280 chars fit without needing to
-         scroll inside the textarea (Anne's constraint: see the whole post
-         at once). Counter below turns rose as the tech nears the limit. -->
-    <textarea id="new-post-body" placeholder="What's on your mind?" maxlength="500" oninput="updateNewPostCounter(this)" style="width:100%;min-height:200px;padding:13px 16px;border:1.5px solid var(--border);border-radius:12px;font-family:'DM Sans',sans-serif;font-size:14px;background:var(--cream);outline:none;resize:none;box-sizing:border-box;margin-bottom:4px;"></textarea>
-    <div id="new-post-counter" style="text-align:right;font-size:11px;color:var(--muted);font-family:'DM Sans',sans-serif;margin-bottom:12px;letter-spacing:0.3px;">0 / 500</div>
-    <div style="display:flex;gap:10px;">
-      <button class="btn btn-outline" onclick="closeNewPostModal()" style="flex:1;">Cancel</button>
-      <button class="btn btn-rose" onclick="submitPost()" style="flex:2;">Post</button>
-    </div>
-  </div>
-</div>
 
 <!-- MESSAGES -->
 
@@ -3802,7 +3623,7 @@ function canUploadPhoto() {
   // jsonb_array_length(techs.photos), which lags behind the edit buffer
   // and let testers blast past the 5-free cap mid-session.
   const usedFree = _techTier.lifetime_free_used || 0;
-  const freeSlots = STRIPE_CONFIG.free_limit;
+  const freeSlots = mncFreeLimit();
   const credits = _techTier.photo_credits || 0;
   return usedFree < freeSlots || credits > 0;
 }
@@ -3819,7 +3640,7 @@ function photosRemaining() {
   }
   // 2026-04-27: see canUploadPhoto note, same lifetime_free_used switch.
   const usedFree = _techTier.lifetime_free_used || 0;
-  const freeSlots = STRIPE_CONFIG.free_limit;
+  const freeSlots = mncFreeLimit();
   const credits = _techTier.photo_credits || 0;
   const freeRemaining = Math.max(0, freeSlots - usedFree);
   return freeRemaining + credits;
@@ -3863,7 +3684,7 @@ function _slotsRemainingText() {
   // mid-session uploads display the right remaining count even before
   // the user taps Save.
   const usedFree = _techTier.lifetime_free_used || 0;
-  const freeSlots = STRIPE_CONFIG.free_limit;
+  const freeSlots = mncFreeLimit();
   const freeRemaining = Math.max(0, freeSlots - usedFree);
   const remaining = freeRemaining + credits;
   if (remaining === 0)                     return 'All ' + freeSlots + ' free slots used · add credits to keep going';
@@ -3923,7 +3744,7 @@ function _slotsRemainingParts() {
   // Free tier, gate on lifetime_free_used (real counter), not
   // total_photos (lags behind the unsaved edit buffer). 2026-04-27.
   const usedFree = _techTier.lifetime_free_used || 0;
-  const freeSlots = STRIPE_CONFIG.free_limit;
+  const freeSlots = mncFreeLimit();
   const freeRemaining = Math.max(0, freeSlots - usedFree);
   const remaining = freeRemaining + credits;
   if (remaining === 0) {
@@ -4241,7 +4062,7 @@ function showUpgradeModal() {
     bodyEl.innerHTML = 'You have used all <b id="upgrade-limit-text">'
       + STRIPE_CONFIG.free_limit
       + '</b> free photo slots. Grab a <b style="color:var(--rose-dark);">Spotlight pack</b> to keep adding to your portfolio, or step into '
-      + '<b style="color:var(--rose-dark);">Glow Up</b> to post daily, every upload goes to the feed.';
+      + '<b style="color:var(--rose-dark);">Glow Up</b> to post daily, the best per-photo price on MNC.';
   }
   // Respect the Glow Up feature flag on every open. Hiding both the card
   // itself AND allowing a reshow via flag flip means we don't need a
@@ -4454,7 +4275,7 @@ async function purchaseUnlimited() {
       const upgraded = await _waitForTierUpgrade();
       _hideCreditLoadingBanner();
       if (upgraded) {
-        showToast("You're on Glow Up, post a new look every day, every upload goes to the feed!");
+        showToast("You're on Glow Up, post a new look every day, your gallery keeps growing!");
       } else {
         showToast('Subscription received. Glow Up will activate shortly, pull down to refresh.');
       }
@@ -4508,7 +4329,7 @@ function _armTierRefreshOnReturn() {
     try { _hideCreditLoadingBanner(); } catch(_){}
     if (typeof updatePhotoLimitUI === 'function') updatePhotoLimitUI();
     if (detected === 'tier') {
-      showToast("You're on Glow Up, post a new look every day, every upload goes to the feed!");
+      showToast("You're on Glow Up, post a new look every day, your gallery keeps growing!");
     } else if (detected === 'credits') {
       const added = ((_techTier && _techTier.photo_credits) || 0) - beforeCredits;
       showToast(`Added ${added} photo credit${added !== 1 ? 's' : ''}, you're all set.`);
@@ -4522,7 +4343,33 @@ function _armTierRefreshOnReturn() {
 }
 
 // Call this when tech dashboard loads
+// ── 3.0 photo pricing: paid from the first upload ───────────────────────────
+// Photos are the ad budget. New techs get NEW_TECH_FREE_PHOTOS free (one,
+// so a fresh profile isn't bare), then every photo is paid. Techs who
+// joined before PHOTO_FREE_CUTOVER keep the original 5-free promise,
+// "your first five are free, always" was said to them, so it stays true.
+// PRE-CUTOVER CHECKLIST: set PHOTO_FREE_CUTOVER to the 3.0 launch date.
+// Until then it's parked in the future and everyone is grandfathered.
+const PHOTO_FREE_CUTOVER   = '2099-01-01';
+const NEW_TECH_FREE_PHOTOS = 1;
+function mncFreeLimit() {
+  var joined = window._mncTechJoined || '';
+  if (joined && joined >= PHOTO_FREE_CUTOVER) return NEW_TECH_FREE_PHOTOS;
+  return STRIPE_CONFIG.free_limit;
+}
+
 async function initBillingForTech() {
+  // 3.0: fetch join date once so mncFreeLimit() can grandfather
+  // pre-cutover techs. Best-effort; failure = grandfathered (never
+  // under-promise on a network hiccup).
+  if (!window._mncTechJoined && currentUserEmail) {
+    try {
+      const jr = await fetch(SUPABASE_URL + '/rest/v1/users?select=joined&email=eq.' + encodeURIComponent(currentUserEmail),
+        { headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + (window._mncAccessToken || SUPABASE_ANON_KEY) } });
+      const jrows = jr.ok ? await jr.json() : [];
+      if (jrows[0] && jrows[0].joined) window._mncTechJoined = String(jrows[0].joined).slice(0, 10);
+    } catch(e) {}
+  }
   if (!currentUserEmail) return;
   await loadTechTier(currentUserEmail);
   updatePhotoLimitUI();
@@ -4569,17 +4416,17 @@ const TUTORIALS = {
     {
       icon: '<svg viewBox="0 0 24 24" style="width:52px;height:52px;stroke:var(--rose);fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>',
       title: 'Welcome to My Nail Connection!',
-      body: 'Discover amazing nail techs near you, fall in love with their work, and connect directly, no middleman, no booking fees. Here\'s everything you need to know to get started.'
+      body: 'Find amazing nail techs near you, fall in love with their work, and book them right in the app, free for you, no booking fees ever. Here\'s everything you need to know to get started.'
     },
     {
       icon: '<svg viewBox="0 0 24 24" style="width:52px;height:52px;stroke:var(--rose);fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>',
-      title: 'Browse, Save & Find Your Tech',
-      body: 'Scroll an endless feed of real nail work, tap any photo to visit that tech\'s profile. Use <b>Find a Tech</b> to browse by location, or <b>Get Inspo</b> to save looks you love to your personal board.<br><br>Tap the <b>heart</b> on any photo to save it. Find saved looks anytime in <b>Profile → Inspo</b>. Tap the <b>star</b> on a tech\'s profile to add them to your Favorites.<br><br>Tap <b>Available Now</b> on the home screen to instantly see who\'s open today.'
+      title: 'One Gallery, Every Look',
+      body: 'The <b>Gallery</b> is every real nail photo on MNC in one place. Filter by shape, type, style, or distance, and tap any photo to visit that tech\'s profile.<br><br>Tap the <b>heart</b> on any photo to save it. Find saved looks anytime in <b>Profile \u2192 Inspo</b>. Tap the <b>star</b> on a tech\'s profile to add them to your Favorites.<br><br>Techs with open chair time <b>glow</b> in the Gallery with an \u2728 Available now banner, and <b>Available Now</b> on the home screen shows everyone open today.'
     },
     {
       icon: '<svg viewBox="0 0 24 24" style="width:52px;height:52px;stroke:var(--rose);fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>',
-      title: 'Connect Directly, It\'s That Simple',
-      body: 'Open any tech\'s profile and scroll to the bottom. Tap <b>Call</b> or <b>Text</b> to reach them directly from your phone. If they use an online booking platform like Vagaro or StyleSeat, tap the <b>Book Now</b> button to go straight to their booking page.<br><br>MNC doesn\'t handle bookings, we just make sure you find the right tech and get connected. You\'re all set!'
+      title: 'Book in a Tap',
+      body: 'Open any tech\'s profile and tap <b>Book</b>, pick a service, a day, and a time, and you\'re set, no calls, no DMs, no fees. Techs who use another booking site have a <b>Book Now</b> link instead, and <b>Call</b> and <b>Text</b> are always there too.<br><br>Track everything in <b>My Appointments</b> on your profile. You\'re all set!'
     }
   ],
 
@@ -4587,17 +4434,17 @@ const TUTORIALS = {
     {
       icon: '<svg viewBox="0 0 24 24" style="width:60px;height:60px;stroke:var(--rose);fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>',
       title: 'You\u2019re in, welcome.',
-      body: '<p style="margin:0 0 14px;">Taking your craft online is a big move, and we\u2019re so glad you made it with us. Nail techs are artists, and here you get to be seen like one.</p><p style="margin:0;">Clients in your area are already browsing. The next two screens walk you through the three things that matter most, your portfolio, your profile, and your availability. Takes about a minute.</p>'
+      body: '<p style="margin:0 0 14px;">Taking your craft online is a big move, and we\u2019re so glad you made it with us. Nail techs are artists, and here you get to be seen like one.</p><p style="margin:0;">MNC gives you two things: a <b>booking system that\u2019s free and stays free</b>, and a <b>Gallery</b> where your work is your advertising. The next two screens cover both. Takes about a minute.</p>'
     },
     {
       icon: '<svg viewBox="0 0 24 24" style="width:60px;height:60px;stroke:var(--rose);fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>',
       title: 'Your photos do the talking.',
-      body: '<p style="margin:0 0 14px;">Clients scroll a feed of real nail work, the better you look, the more they stop. From your Dashboard, tap <b>Manage</b> to upload. Your first <b>five photos are free, always.</b></p><p style="margin:0;">One quiet magic trick: tag every photo with its <b>Shape</b>, <b>Type</b>, and <b>Style</b>. Each tag is another path a client can take to find your work, whether they filter by <em>almond</em>, <em>gel</em>, <em>chrome</em>, or all three at once. More photos + more tags = more ways you surface in the feed = more bookings in your chair.</p>'
+      body: '<p style="margin:0 0 14px;">Every photo you post joins the one <b>Gallery</b> every client scrolls, and your share of it grows with every photo, post 10 and you\u2019re seen twice as often as 5. Your first photo is on us; after that photos are $1 each, $5 for a 10-pack, or Glow Up\u2019s monthly bundle. Your gallery is your ad budget, spend it at your pace.</p><p style="margin:0;">One quiet magic trick: tag every photo with its <b>Shape</b>, <b>Type</b>, and <b>Style</b>. Each tag is another path a client can take to find your work. More photos + more tags = more bookings in your chair.</p>'
     },
     {
       icon: '<svg viewBox="0 0 24 24" style="width:60px;height:60px;stroke:var(--rose);fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
       title: 'Show up. The rest follows.',
-      body: '<p style="margin:0 0 14px;">A filled-out profile makes clients feel like they already know you. Add your <b>bio</b>, <b>address</b>, and a <b>profile photo</b>. If you book through Vagaro, StyleSeat, or Square, drop in your link, a <b>Book Now</b> button appears automatically.</p><p style="margin:0 0 14px;">Flip <b>Available Now</b> or <b>Open This Week</b> whenever you\u2019ve got openings, clients looking for same-day see you first. Drop a <b>post</b> for promos or fresh sets you\u2019re proud of.</p><p style="margin:0;font-style:italic;color:var(--rose-dark);">That\u2019s it, go get found.</p>'
+      body: '<p style="margin:0 0 14px;">Open <b>Bookings</b> on your Dashboard, add your services and weekly hours, and flip it on, clients book you right from your profile and it\u2019s free, always. Already booking through Vagaro, StyleSeat, or Square? Drop in your link and a <b>Book Now</b> button appears instead.</p><p style="margin:0 0 14px;">Flip <b>Available Now</b> whenever you\u2019ve got openings, your photos <b>glow</b> in the Gallery until you turn it off, and same-day clients see you first.</p><p style="margin:0;font-style:italic;color:var(--rose-dark);">That\u2019s it, go get booked.</p>'
     }
   ],
 
@@ -5175,8 +5022,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 331,         /* __APP_BUILD_ANDROID__ */
-  ios:     136,          /* __APP_BUILD_IOS__     */
+  android: 332,         /* __APP_BUILD_ANDROID__ */
+  ios:     137,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -11687,41 +11534,16 @@ function feedTimeAgo(iso) {
 function toggleLookMode() { setStyleMode(window._lookModeOn ? 'find' : 'inspo'); }
 
 function setStyleMode(mode) {
-  window._lookModeOn = (mode === 'inspo');
-  const findBtn = document.getElementById('mode-btn-find');
-  const inspoBtn = document.getElementById('mode-btn-inspo');
-  const desc = document.getElementById('style-mode-desc');
-  const radiusStrip = document.getElementById('style-radius-strip');
-  const filtersPanel = document.getElementById('style-filters-panel');
-  if (findBtn) {
-    findBtn.style.background = mode === 'find' ? 'white' : 'transparent';
-    findBtn.style.color = mode === 'find' ? 'var(--rose-dark)' : 'rgba(255,255,255,0.75)';
-    findBtn.style.fontWeight = mode === 'find' ? '700' : '500';
-  }
-  if (inspoBtn) {
-    inspoBtn.style.background = mode === 'inspo' ? 'white' : 'transparent';
-    inspoBtn.style.color = mode === 'inspo' ? 'var(--rose-dark)' : 'rgba(255,255,255,0.75)';
-    inspoBtn.style.fontWeight = mode === 'inspo' ? '700' : '500';
-  }
-  if (desc) desc.textContent = mode === 'find'
-    ? "Browse nail photos · tap to visit the tech's profile"
-    : 'Pure inspiration · save looks you love · no distance filter';
-  if (radiusStrip) radiusStrip.style.display = mode === 'inspo' ? 'none' : 'flex';
-  if (filtersPanel) filtersPanel.style.display = mode === 'inspo' ? 'none' : 'block';
-
-  // Reset scroll BEFORE the re-render so the swap between 2-col (Find) and
-  // 3-col (Inspo) layouts doesn't produce a visible "catch-up" jump. The
-  // grid's row-height changes with column count, so any preserved scroll
-  // position maps to a different vertical location in the new layout, what
-  // the user perceives as the page "catching up" after the toggle.
-  var screen = document.getElementById('browse-style');
-  if (screen) {
-    screen.scrollTop = 0;
-    var sc = screen.querySelector('.scroll-content');
-    if (sc) sc.scrollTop = 0;
-  }
-  try { window.scrollTo({ top: 0, behavior: 'auto' }); } catch(_) { window.scrollTo(0, 0); }
-
+  // 3.0 one-gallery consolidation: the Find/Inspo split is gone. One
+  // 3-col gallery, every filter (chips + radius) applies to it. Kept as
+  // a function because old callers pass modes; every call lands here.
+  window._lookModeOn = true;
+  var radiusStrip  = document.getElementById('style-radius-strip');
+  var filtersPanel = document.getElementById('style-filters-panel');
+  if (radiusStrip)  radiusStrip.style.display  = 'flex';
+  if (filtersPanel) filtersPanel.style.display = 'block';
+  var desc = document.getElementById('style-mode-desc');
+  if (desc) desc.textContent = "Every look on MNC \u00b7 tap a photo to visit the tech \u00b7 save what you love";
   renderStyleGrid();
 }
 
@@ -11796,7 +11618,7 @@ function renderStyleGrid() {
     });
   });
 
-  if (styleRadius && userLat && userLng && !window._lookModeOn) {
+  if (styleRadius && userLat && userLng) {
     photos = photos.filter(function(p) {
       var t = p.tech;
       if (!t.lat || !t.lng) return true;
@@ -11857,7 +11679,10 @@ function renderStyleGrid() {
       byTech[key].photos.push(p);
     });
     Object.keys(byTech).forEach(function(k) {
-      byTech[k].weight = Math.sqrt(byTech[k].photos.length);
+      // 3.0: LINEAR weight. Photos are the ad budget, so presence is
+      // exactly proportional to photo count (sqrt used to dampen big
+      // uploaders, which taxed the best customers under the new model).
+      byTech[k].weight = byTech[k].photos.length;
       byTech[k].photos.sort(function() { return Math.random() - 0.5; });
       byTech[k].index = 0;
     });
@@ -11885,9 +11710,9 @@ function renderStyleGrid() {
   _feedPage   = 0;
   grid.innerHTML = '';
 
-  var lookMode = window._lookModeOn;
-  grid.style.gridTemplateColumns = lookMode ? 'repeat(3,1fr)' : '1fr 1fr';
-  grid.style.gap = lookMode ? '2px' : '3px';
+  // 3.0 one-gallery: always the 3-col grid, the Find/Inspo split is gone.
+  grid.style.gridTemplateColumns = 'repeat(3,1fr)';
+  grid.style.gap = '2px';
 
   var heartFilled = '<svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:var(--rose);fill:var(--rose);stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>';
   var heartEmpty  = '<svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:var(--charcoal);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>';
@@ -11905,8 +11730,13 @@ function renderStyleGrid() {
       div.style.cssText = 'cursor:pointer;position:relative;overflow:hidden;background:' + (p.tech.bg || '#F0E8E8') + ';transition:transform 0.15s cubic-bezier(0.34,1.4,0.64,1);';
       div.classList.add('tech-card-anim');
       div.dataset.photoUrl = p.url;
-      div.innerHTML = '<img src="' + p.url + '" style="width:100%;display:block;aspect-ratio:1;object-fit:cover;" loading="lazy" onerror="this.parentElement.style.display=\'none\'"/>'
-        + (!lookMode ? '<div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,0.55));padding:6px 8px;"><div style="font-size:11px;font-weight:500;color:white;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + esc(p.tech.name) + '</div></div>' : '');
+      // 3.0: available-now techs glow in the gallery, a soft pulsing ring
+      // plus a bottom banner. The daily reason to flip the toggle.
+      var availBanner = p.tech.is_available
+        ? '<div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(45,106,79,0.85));padding:14px 6px 5px;pointer-events:none;"><div style="font-size:10px;font-weight:700;color:white;text-align:center;letter-spacing:0.3px;">\u2728 Available now</div></div>'
+        : '';
+      div.innerHTML = '<img src="' + p.url + '" style="width:100%;display:block;aspect-ratio:1;object-fit:cover;" loading="lazy" onerror="this.parentElement.style.display=\'none\'">' + availBanner;
+      if (p.tech.is_available) div.classList.add('avail-glow-tile');
       div.onclick = function() { openTechDetail(p.tech); };
 
       var heart = document.createElement('button');
@@ -13003,7 +12833,6 @@ function profileTab(tab) {
 
 
 
-  if (tab === 'posts') loadMyBoardPosts();
 }
 
 // ── Appointments ──────────────────────────────────────────────────────────────
@@ -14152,7 +13981,6 @@ async function loadTechDashboard() {
   // query doesn't starve the others.
   try { loadTechHomeStats(); } catch(e) {}
   try { loadTechHomePortfolio(); } catch(e) {}
-  try { loadMyBoardPosts(); } catch(e) {}
   try { syncHideAddressToggle(); } catch(e) {}
   try { tbLoadDashBadge(); } catch(e) {}
 
@@ -15147,12 +14975,7 @@ function show(id) {
   // signed-in screen. Cheap per-transition so sign-in / sign-out /
   // back-navigation all resolve to the right state automatically.
   try { updateFeedbackButtonVisibility(); } catch(_) {}
-  if (id === 'feed') {
-    // Feed lives on its own screen as of 2026-04-22. loadTechsFromSupabase
-    // populates ALL_TECHS which the feed renderer needs to map tech_id to
-    // tech metadata. Chained so the feed render happens AFTER techs land.
-    loadTechsFromSupabase().then(function() { loadHomeFeed(); });
-  }
+  // (feed screen removed in 3.0, one-gallery consolidation)
   if (id === 'home') {
     updateGreeting(); loadTechsFromSupabase(); updateAvailCounts(); updateHomeFaveCounts();
     // Retrigger the flowy greeting-subline animation on every home landing,
@@ -17698,7 +17521,7 @@ function postUploadGoToTag() {
 
 function postUploadGoToFeed() {
   closePostUploadModal();
-  try { show('feed'); } catch(_) {}
+  try { show('browse-style'); } catch(_) {}
 }
 
 // ══════════════════════════════════════════════════════════════════════════
@@ -18185,7 +18008,7 @@ function closeReleaseWizard() {
   try {
     const st = window._mncReleaseWizard;
     if (st && st.releasedCount > 0 && typeof show === 'function') {
-      setTimeout(function() { try { show('feed'); } catch(_) {} }, 300);
+      setTimeout(function() { try { show('browse-style'); } catch(_) {} }, 300);
     }
   } catch(_) {}
 }
@@ -18216,7 +18039,7 @@ function closeReleaseWizard() {
       </div>
       <div id="upgrade-eyebrow" style="font-size:11px;font-weight:700;letter-spacing:2px;color:var(--rose);text-transform:uppercase;margin-bottom:6px;">You are on the Starter Plan</div>
       <div id="upgrade-headline" style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--charcoal);margin-bottom:6px;">Ready to Grow?</div>
-      <div id="upgrade-body" style="font-size:14px;color:var(--muted);line-height:1.5;">You have used all <b id="upgrade-limit-text">5</b> free photo slots. Grab a <b style="color:var(--rose-dark);">Spotlight pack</b> for your portfolio, or step into <b style="color:var(--rose-dark);">Glow Up</b> to post daily, every upload goes to the feed.</div>
+      <div id="upgrade-body" style="font-size:14px;color:var(--muted);line-height:1.5;">You have used all <b id="upgrade-limit-text">5</b> free photo slots. Grab a <b style="color:var(--rose-dark);">Spotlight pack</b> for your portfolio, or step into <b style="color:var(--rose-dark);">Glow Up</b> to post daily, the best per-photo price on MNC.</div>
     </div>
 
     <!-- Options -->
@@ -18270,10 +18093,10 @@ function closeReleaseWizard() {
               <div style="font-size:15.5px;font-weight:700;color:white;letter-spacing:0.2px;">Glow Up</div>
               <span style="font-size:13px;line-height:1;">&#10024;</span>
             </div>
-            <div style="font-family:'Playfair Display',serif;font-size:16px;font-weight:600;color:white;line-height:1.2;margin-top:6px;letter-spacing:0.1px;">Own the feed. Every&nbsp;day.</div>
+            <div style="font-family:'Playfair Display',serif;font-size:16px;font-weight:600;color:white;line-height:1.2;margin-top:6px;letter-spacing:0.1px;">Own the Gallery. Every&nbsp;day.</div>
             <div style="font-size:12px;color:rgba(255,255,255,0.94);line-height:1.55;margin-top:6px;">
               &#128247;&nbsp; Up to 40 uploads a month<br>
-              &#128640;&nbsp; Every post lands in the live feed<br>
+              &#128640;&nbsp; The best per-photo price on MNC<br>
               &#127800;&nbsp; Your portfolio grows with every photo
             </div>
             <div style="font-size:11px;color:rgba(255,255,255,0.72);margin-top:8px;">Refills on your monthly anniversary &middot; Cancel any time</div>
