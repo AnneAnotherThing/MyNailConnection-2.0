@@ -92,12 +92,18 @@ budget warning (July 5), then 47-second auth and fully timed-out REST
 queries during Supabase's platform-wide compute-capacity incident
 (ongoing since June 30). Yesterday's "don't upgrade" call was based on
 an idle DB; the new evidence flips it. AFTER the platform incident
-clears (status.supabase.com):
-1. Restart the project (Settings -> General). Do NOT restart or resize
-   during the incident, project status changes are the failing thing.
-2. Upgrade Postgres to 17.6.1.121+ (unlocks more machine types).
-3. Upgrade compute off nano before the 3.0 launch. A relaunch on an
-   instance that swaps under two test users is not a plan.
+clears (status.supabase.com), and in this order:
+1. TRANSFER the MNC project into Anne's existing Hive-Rise Pro org
+   (MNC project -> Settings -> General -> Transfer Project). Pro is
+   per-org, so this skips a second $25 base fee; MNC then costs only
+   its compute (~$10-15/mo) and gains daily backups + support access.
+2. Restart the project. Do NOT restart/resize/transfer during the
+   incident, project status changes are the failing operation.
+3. Upgrade Postgres to 17.6.1.121+ (unlocks more machine types).
+4. Compute add-on: Small preferred (4x nano memory) for launch.
+5. Monthly glance at org egress: MNC photos ship from Supabase
+   Storage and share the org's 250GB Pro allowance with the client
+   projects.
 
 ## Before cutover
 
