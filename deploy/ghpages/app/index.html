@@ -4340,9 +4340,22 @@ function _armTierRefreshOnReturn() {
 const PHOTO_FREE_CUTOVER   = '2099-01-01';
 const NEW_TECH_FREE_PHOTOS = 1;
 function mncFreeLimit() {
+  // Dev preview of post-cutover pricing (localhost-only chip on the
+  // auth screen toggles it; device-local, never affects real users).
+  try {
+    if (localStorage.getItem('mnc_force_new_pricing') === '1') return NEW_TECH_FREE_PHOTOS;
+  } catch(e) {}
   var joined = window._mncTechJoined || '';
   if (joined && joined >= PHOTO_FREE_CUTOVER) return NEW_TECH_FREE_PHOTOS;
   return STRIPE_CONFIG.free_limit;
+}
+
+function devToggleNewPricing() {
+  try {
+    var on = localStorage.getItem('mnc_force_new_pricing') === '1';
+    localStorage.setItem('mnc_force_new_pricing', on ? '0' : '1');
+  } catch(e) {}
+  location.reload();
 }
 
 async function initBillingForTech() {
@@ -5009,8 +5022,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 335,         /* __APP_BUILD_ANDROID__ */
-  ios:     140,          /* __APP_BUILD_IOS__     */
+  android: 337,         /* __APP_BUILD_ANDROID__ */
+  ios:     142,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -5886,7 +5899,13 @@ async function devLogin(kind) {
     var bs = 'padding:8px 14px;border-radius:10px;border:1.5px dashed var(--rose-mid);background:rgba(255,255,255,0.7);color:var(--rose-dark);font-size:12px;font-weight:700;cursor:pointer;font-family:monospace;';
     wrap.innerHTML =
       '<button style="' + bs + '" onclick="devLogin(\'tech\')">DEV &middot; Tech</button>' +
-      '<button style="' + bs + '" onclick="devLogin(\'client\')">DEV &middot; Client</button>';
+      '<button style="' + bs + '" onclick="devLogin(\'client\')">DEV &middot; Client</button>' +
+      (function() {
+        var on = false;
+        try { on = localStorage.getItem('mnc_force_new_pricing') === '1'; } catch(e) {}
+        return '<button style="' + bs + (on ? 'background:var(--rose);color:white;' : '') +
+               '" onclick="devToggleNewPricing()">DEV &middot; New pricing ' + (on ? 'ON' : 'off') + '</button>';
+      })();
     anchor.parentNode.insertBefore(wrap, anchor);
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mount);
