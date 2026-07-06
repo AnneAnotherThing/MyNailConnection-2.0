@@ -101,6 +101,16 @@ clears (status.supabase.com):
 
 ## Before cutover
 
+- Uptime monitoring (Anne confirmed 2026-07-06, do after the redesign):
+  free UptimeRobot account with two monitors, alerts to Anne's email:
+    1. https://mynailconnection.com (the site)
+    2. https://ktiztunuifzbzwzyqrrq.supabase.co/rest/v1/ (data layer;
+       expect HTTP 401 without a key, that still proves it's alive,
+       use keyword/status monitoring accordingly)
+  Rationale: the July 5-6 Supabase degradation (47-90s auth, timed-out
+  REST) hit live 2.0 users invisibly. With booking reminders firing
+  from this database, silent downtime is no longer acceptable.
+
 - Set `PHOTO_FREE_CUTOVER` in index.html to the launch date (it's
   parked at 2099-01-01 so everyone stays grandfathered until then).
 - Deploy the updated stripe-webhook (`supabase functions deploy
