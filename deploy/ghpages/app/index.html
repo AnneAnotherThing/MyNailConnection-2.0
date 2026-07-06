@@ -1350,7 +1350,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
     <div style="background:white;border-radius:24px;padding:28px 24px;box-shadow:0 4px 40px rgba(139,94,107,0.1);">
       <div style="font-family:'Playfair Display',serif;font-size:20px;margin-bottom:4px;" id="location-screen-title">Help us find techs near you</div>
       <div style="font-size:13px;color:var(--muted);margin-bottom:20px;" id="location-screen-sub">We'll show you the best nail techs right around you</div>
-      <div class="input-group"><label>ZIP Code</label><input type="text" id="reg-zip" placeholder="e.g. 90210" maxlength="5" inputmode="numeric"/></div>
+      <div class="input-group"><label>ZIP / Postal Code</label><input type="text" id="reg-zip" placeholder="e.g. 90210 or SW1A 1AA" maxlength="10"/></div>
       <input type="hidden" id="reg-city" value=""/>
       <!-- Or use location -->
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:18px;padding:12px;background:var(--cream);border-radius:12px;cursor:pointer;" onclick="useMyLocation()">
@@ -1398,59 +1398,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
 
       <!-- Address -->
       <div style="display:flex;gap:8px;margin-bottom:8px;align-items:center;">
-        <select id="reg-state-field" style="width:180px;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;color:var(--charcoal);" onchange="this.nextElementSibling && (this.nextElementSibling.style.display='')">
-          <option value="">State…</option>
-          <option value="AL">AL, Alabama</option>
-          <option value="AK">AK, Alaska</option>
-          <option value="AZ">AZ, Arizona</option>
-          <option value="AR">AR, Arkansas</option>
-          <option value="CA">CA, California</option>
-          <option value="CO">CO, Colorado</option>
-          <option value="CT">CT, Connecticut</option>
-          <option value="DE">DE, Delaware</option>
-          <option value="FL">FL, Florida</option>
-          <option value="GA">GA, Georgia</option>
-          <option value="HI">HI, Hawaii</option>
-          <option value="ID">ID, Idaho</option>
-          <option value="IL">IL, Illinois</option>
-          <option value="IN">IN, Indiana</option>
-          <option value="IA">IA, Iowa</option>
-          <option value="KS">KS, Kansas</option>
-          <option value="KY">KY, Kentucky</option>
-          <option value="LA">LA, Louisiana</option>
-          <option value="ME">ME, Maine</option>
-          <option value="MD">MD, Maryland</option>
-          <option value="MA">MA, Massachusetts</option>
-          <option value="MI">MI, Michigan</option>
-          <option value="MN">MN, Minnesota</option>
-          <option value="MS">MS, Mississippi</option>
-          <option value="MO">MO, Missouri</option>
-          <option value="MT">MT, Montana</option>
-          <option value="NE">NE, Nebraska</option>
-          <option value="NV">NV, Nevada</option>
-          <option value="NH">NH, New Hampshire</option>
-          <option value="NJ">NJ, New Jersey</option>
-          <option value="NM">NM, New Mexico</option>
-          <option value="NY">NY, New York</option>
-          <option value="NC">NC, North Carolina</option>
-          <option value="ND">ND, North Dakota</option>
-          <option value="OH">OH, Ohio</option>
-          <option value="OK">OK, Oklahoma</option>
-          <option value="OR">OR, Oregon</option>
-          <option value="PA">PA, Pennsylvania</option>
-          <option value="RI">RI, Rhode Island</option>
-          <option value="SC">SC, South Carolina</option>
-          <option value="SD">SD, South Dakota</option>
-          <option value="TN">TN, Tennessee</option>
-          <option value="TX">TX, Texas</option>
-          <option value="UT">UT, Utah</option>
-          <option value="VT">VT, Vermont</option>
-          <option value="VA">VA, Virginia</option>
-          <option value="WA">WA, Washington</option>
-          <option value="WV">WV, West Virginia</option>
-          <option value="WI">WI, Wisconsin</option>
-          <option value="WY">WY, Wyoming</option>
-        </select>
+        <input id="reg-state-field" placeholder="State / Region" style="width:180px;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;color:var(--charcoal);"/>
         <span style="font-size:12px;color:var(--muted);font-style:italic;">pick state first</span>
       </div>
       <input type="hidden" id="reg-city"/>
@@ -2433,6 +2381,13 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       </div>
       <div style="display:flex;align-items:center;gap:10px;margin-top:14px;padding-top:14px;border-top:1px solid var(--border);">
         <div style="flex:1;min-width:0;">
+          <div style="font-size:14px;font-weight:600;color:var(--charcoal);">Not taking new clients</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px;">Hides your photos from the Gallery and pauses booking and contact. Everything comes back when you flip it off.</div>
+        </div>
+        <button id="tb-paused-btn" onclick="tbTogglePaused()" style="min-width:56px;padding:8px 14px;border-radius:100px;font-size:13px;font-weight:700;cursor:pointer;border:1.5px solid var(--border);background:white;color:var(--muted);">Off</button>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;margin-top:14px;padding-top:14px;border-top:1px solid var(--border);">
+        <div style="flex:1;min-width:0;">
           <div style="font-size:14px;font-weight:600;color:var(--charcoal);">Buffer between appointments</div>
           <div style="font-size:12px;color:var(--muted);margin-top:2px;">Breathing room for cleanup and reset.</div>
         </div>
@@ -2444,13 +2399,10 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       </div>
       <div style="display:flex;align-items:center;gap:10px;margin-top:14px;padding-top:14px;border-top:1px solid var(--border);">
         <div style="flex:1;font-size:14px;font-weight:600;color:var(--charcoal);">Your timezone</div>
-        <select id="tb-tz" onchange="tbSetTimezone(this.value)" style="padding:8px 10px;border:1px solid var(--border);border-radius:10px;font-size:13px;color:var(--charcoal);background:white;">
-          <option value="America/Phoenix">Arizona</option>
-          <option value="America/Los_Angeles">Pacific</option>
-          <option value="America/Denver">Mountain</option>
-          <option value="America/Chicago">Central</option>
-          <option value="America/New_York">Eastern</option>
-        </select>
+        <div style="text-align:right;">
+          <div id="tb-tz-label" style="font-size:13px;color:var(--charcoal);font-weight:600;"></div>
+          <div onclick="tbUseDeviceTz()" style="font-size:11px;color:var(--rose-dark);cursor:pointer;font-weight:600;margin-top:2px;">Use my device timezone</div>
+        </div>
       </div>
     </div>
 
@@ -2498,6 +2450,17 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
         <span style="font-size:12px;color:var(--muted);">to</span>
         <input type="date" id="tb-toff-end" style="padding:8px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:white;color:var(--charcoal);">
         <button onclick="tbAddTimeOff()" style="padding:8px 14px;border-radius:8px;border:1.5px solid var(--rose-mid);background:white;color:var(--rose-dark);font-size:12px;font-weight:700;cursor:pointer;">Block</button>
+      </div>
+    </div>
+
+    <!-- Blocked clients (quiet blocklist) -->
+    <div style="margin:20px 20px 24px;background:white;border:1px solid var(--border);border-radius:16px;padding:16px;">
+      <div style="font-size:15px;font-weight:600;color:var(--charcoal);">Blocked clients</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:2px;">They're never told. They simply never see an opening with you again.</div>
+      <div id="tb-blocked-list" style="margin-top:10px;"></div>
+      <div style="display:flex;gap:6px;margin-top:8px;align-items:center;">
+        <input type="email" id="tb-block-email" placeholder="client@email.com" style="flex:1;padding:9px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:white;color:var(--charcoal);">
+        <button onclick="tbAddBlocked()" style="padding:9px 14px;border-radius:8px;border:1.5px solid var(--rose-mid);background:white;color:var(--rose-dark);font-size:12px;font-weight:700;cursor:pointer;">Block</button>
       </div>
     </div>
   </div>
@@ -5046,8 +5009,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 334,         /* __APP_BUILD_ANDROID__ */
-  ios:     139,          /* __APP_BUILD_IOS__     */
+  android: 335,         /* __APP_BUILD_ANDROID__ */
+  ios:     140,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -6772,6 +6735,13 @@ function refreshPhotoHeartBadgeDOM(photoUrl, count) {
 function renderTechContactFooter(tech) {
   const footer = document.getElementById('td-contact-footer');
   if (!footer) return;
+  // 3.0 pause switch: no contact, no booking, just a gentle note.
+  if (tech.listing_paused) {
+    footer.innerHTML = '<div style="text-align:center;padding:12px;background:var(--cream);border:1px solid var(--border);border-radius:12px;font-size:13px;color:var(--muted);">' +
+      bkEsc(((tech.name || 'This tech').trim().split(/\s+/)[0])) + ' is taking a break and not booking new clients right now.</div>';
+    footer.style.display = '';
+    return;
+  }
   const cm = tech.contact_methods || {};
   const phone = tech.phone || '';
   // If only 'message' was set true (old default), treat as if nothing was set
@@ -6783,13 +6753,13 @@ function renderTechContactFooter(tech) {
 
   let btns = '';
   if (showCall) {
-    btns += `<a href="tel:${phone.replace(/\D/g,'')}" style="${cardStyle}">
+    btns += `<a href="tel:${(phone.trim().charAt(0) === '+' ? '+' : '') + phone.replace(/\D/g,'')}" style="${cardStyle}">
       <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:white;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;vertical-align:middle;"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81a19.79 19.79 0 01-3.07-8.68A2 2 0 012 .9h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 8.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>
       Call
     </a>`;
   }
   if (showText) {
-    btns += `<a href="sms:${phone.replace(/\D/g,'')}" style="${cardStyle}">
+    btns += `<a href="sms:${(phone.trim().charAt(0) === '+' ? '+' : '') + phone.replace(/\D/g,'')}" style="${cardStyle}">
       <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:white;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;vertical-align:middle;"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/><line x1="9" y1="10" x2="15" y2="10"/><line x1="9" y1="14" x2="13" y2="14"/></svg>
       Text
     </a>`;
@@ -7672,7 +7642,7 @@ function distSliderChange(val) {
   const v = parseInt(val);
   ddSelections.dist = v === 0 ? 'all' : String(v);
   const label = document.getElementById('dist-slider-label');
-  if (label) label.textContent = v === 0 ? 'Any distance' : 'Within ' + v + ' mi';
+  if (label) label.textContent = v === 0 ? 'Any distance' : 'Within ' + mncFmtDist(v);
   updateDdLabel('dist');
   applyFilters();
 }
@@ -8395,7 +8365,7 @@ function updateMapRadius(val) {
     document.getElementById('map-rad-label').textContent = 'Anywhere';
   } else {
     mapRadius = v;
-    document.getElementById('map-rad-label').textContent = v + ' mi';
+    document.getElementById('map-rad-label').textContent = mncFmtDist(v);
   }
   if (userLat) {
     _refreshMapPins();
@@ -8584,7 +8554,7 @@ function _refreshMapPins() {
 
   // If no geocoded techs, show US default view
   if (!filtered.length && !userLat) {
-    _leafletMap.setView([39.8283, -98.5795], 4);
+    _leafletMap.setView([20, 0], 2); // 3.0: world view, not the middle of Kansas
   }
 }
 
@@ -11629,6 +11599,7 @@ function renderStyleGrid() {
 
   var photos = [];
   ALL_TECHS.forEach(function(tech) {
+    if (tech.listing_paused) return; // 3.0: paused = off the Gallery
     (tech.photos || []).forEach(function(p) {
       var url = p.url || p;
       if (url && url.startsWith('http')) {
@@ -12403,7 +12374,7 @@ async function completeSignup() {
   if (!regData.email || !regData.pass) { showSignupError("Hmm, your account details went missing. Tap Back and start again from step 1."); return; }
   const zipEl = document.getElementById('reg-zip');
   const zip = zipEl ? zipEl.value.trim() : '';
-  if (!zip || zip.length < 5) { showSignupError("Please enter your 5-digit ZIP code so we can set up your area."); return; }
+  if (!zip || zip.length < 3) { showSignupError("Please enter your ZIP or postal code so we can set up your area."); return; }
 
   // Client liability acknowledgment, only required for clients (techs already
   // signed off on the tech-specific version earlier).
@@ -12873,6 +12844,24 @@ function profileTab(tab) {
 // replaced by this module.
 // ══════════════════════════════════════════════════════════════════════════
 
+// 3.0 international: distances stay miles internally, display converts.
+// Miles for US/UK English, km for everyone else.
+function mncFmtDist(mi) {
+  var lang = (navigator.language || 'en-US');
+  var useMi = /^en(-(US|GB))?$/i.test(lang);
+  return useMi ? (Math.round(mi) + ' mi') : (Math.round(mi * 1.60934) + ' km');
+}
+(function relabelRadiusChips() {
+  function go() {
+    document.querySelectorAll('.style-radius-btn').forEach(function(b) {
+      var m = (b.getAttribute('onclick') || '').match(/setStyleRadius\((\d+)/);
+      if (m) b.textContent = mncFmtDist(parseInt(m[1], 10));
+    });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', go);
+  else go();
+})();
+
 function bkHeaders(extra) {
   const h = {
     'apikey': SUPABASE_ANON_KEY,
@@ -12943,13 +12932,14 @@ let _bkAvail  = [];
 let _bkAppts  = [];
 let _bkTimeOff = [];
 let _bkStanding = [];
+let _bkBlocked = [];
 
 async function loadTechBookings() {
   if (!currentUserEmail) { show('auth'); return; }
   const note = document.getElementById('tb-migration-note');
   try {
     const r = await fetch(SUPABASE_URL +
-      '/rest/v1/techs?select=id,name,email,booking_enabled,booking_auto_confirm,booking_timezone,booking_buffer_minutes&email=eq.' +
+      '/rest/v1/techs?select=id,name,email,booking_enabled,booking_auto_confirm,booking_timezone,booking_buffer_minutes,listing_paused&email=eq.' +
       encodeURIComponent(currentUserEmail), { headers: bkHeaders() });
     if (!r.ok) {
       // Almost always means the migration hasn't been run (unknown column).
@@ -12975,17 +12965,21 @@ async function loadTechBookings() {
             '&order=start_date.asc', { headers: bkHeaders() }),
       fetch(SUPABASE_URL + '/rest/v1/standing_appointments?tech_id=eq.' + _bkMyTech.id +
             '&active=is.true&select=*,tech_services(name)&order=created_at.desc',
-            { headers: bkHeaders() })
+            { headers: bkHeaders() }),
+      fetch(SUPABASE_URL + '/rest/v1/blocked_clients?tech_id=eq.' + _bkMyTech.id +
+            '&order=created_at.desc', { headers: bkHeaders() })
     ]);
     _bkSvcs  = results[0].ok ? await results[0].json() : [];
     _bkAvail = results[1].ok ? await results[1].json() : [];
     _bkAppts = results[2].ok ? await results[2].json() : [];
     _bkTimeOff = results[3].ok ? await results[3].json() : [];
     _bkStanding = results[4].ok ? await results[4].json() : [];
+    _bkBlocked = results[5].ok ? await results[5].json() : [];
     tbRenderSettings();
     tbRenderServices();
     tbRenderAvail();
     tbRenderTimeOff();
+    tbRenderBlocked();
     tbRenderAppts();
   } catch(e) { console.warn('loadTechBookings', e); }
 }
@@ -13003,8 +12997,9 @@ function tbRenderSettings() {
   if (!_bkMyTech) return;
   tbPill('tb-enabled-btn', !!_bkMyTech.booking_enabled);
   tbPill('tb-autoconfirm-btn', !!_bkMyTech.booking_auto_confirm);
-  const tz = document.getElementById('tb-tz');
-  if (tz) tz.value = _bkMyTech.booking_timezone || 'America/Phoenix';
+  tbPill('tb-paused-btn', !!_bkMyTech.listing_paused);
+  const tzl = document.getElementById('tb-tz-label');
+  if (tzl) tzl.textContent = _bkMyTech.booking_timezone || 'America/Phoenix';
   const buf = document.getElementById('tb-buffer');
   if (buf) buf.value = String(_bkMyTech.booking_buffer_minutes || 0);
 }
@@ -13050,7 +13045,18 @@ async function tbToggleAutoConfirm() {
 
 async function tbSetTimezone(v) {
   if (!_bkMyTech) return;
-  if (await tbPatchTech({ booking_timezone: v })) showToast('Timezone saved');
+  if (await tbPatchTech({ booking_timezone: v })) {
+    const tzl = document.getElementById('tb-tz-label');
+    if (tzl) tzl.textContent = v;
+    showToast('Timezone saved');
+  }
+}
+
+function tbUseDeviceTz() {
+  try {
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    if (tz) tbSetTimezone(tz);
+  } catch(e) { showToast('Could not read your device timezone'); }
 }
 
 // Services
@@ -13260,6 +13266,58 @@ async function tbEndStanding(id) {
   _bkStanding = _bkStanding.filter(function(s) { return s.id !== id; });
   tbRenderAppts();
   showToast('Series ended');
+}
+
+// Pause switch + quiet blocklist
+async function tbTogglePaused() {
+  if (!_bkMyTech) return;
+  const next = !_bkMyTech.listing_paused;
+  if (next && !(await showConfirm('Pause your listing?', {
+    body: 'Your photos leave the Gallery and clients can\u2019t book or contact you until you flip this back off. Your portfolio is safe.',
+    okLabel: 'Pause it' }))) return;
+  if (!(await tbPatchTech({ listing_paused: next }))) return;
+  tbRenderSettings();
+  showToast(next ? 'Listing paused. Enjoy the break \u2728' : 'Welcome back! Your photos are live again');
+}
+
+function tbRenderBlocked() {
+  const wrap = document.getElementById('tb-blocked-list');
+  if (!wrap) return;
+  if (!_bkBlocked.length) {
+    wrap.innerHTML = '<div style="font-size:12px;color:var(--muted);">No one blocked. Hopefully it stays that way.</div>';
+    return;
+  }
+  wrap.innerHTML = _bkBlocked.map(function(b) {
+    return '<span style="display:inline-flex;align-items:center;gap:6px;background:var(--cream);border:1px solid var(--border);color:var(--charcoal);font-size:12px;font-weight:600;border-radius:100px;padding:4px 10px;margin:2px 4px 2px 0;">' + bkEsc(b.client_email) +
+      '<span onclick="tbDeleteBlocked(\'' + b.id + '\')" style="cursor:pointer;font-size:14px;line-height:1;color:var(--muted);">&times;</span></span>';
+  }).join('');
+}
+
+async function tbAddBlocked() {
+  if (!_bkMyTech) return;
+  const el = document.getElementById('tb-block-email');
+  const email = (el.value || '').trim().toLowerCase();
+  if (!email || email.indexOf('@') < 1) { showToast('Enter the client\u2019s email address'); return; }
+  const r = await fetch(SUPABASE_URL + '/rest/v1/blocked_clients', {
+    method: 'POST',
+    headers: bkHeaders({ 'Content-Type': 'application/json', 'Prefer': 'return=representation' }),
+    body: JSON.stringify({ tech_id: _bkMyTech.id, client_email: email })
+  });
+  if (!r.ok) { showToast('Could not block, try again'); return; }
+  const rows = await r.json();
+  if (rows[0]) _bkBlocked.unshift(rows[0]);
+  el.value = '';
+  tbRenderBlocked();
+  showToast('Blocked. They won\u2019t be told.');
+}
+
+async function tbDeleteBlocked(id) {
+  const r = await fetch(SUPABASE_URL + '/rest/v1/blocked_clients?id=eq.' + id, {
+    method: 'DELETE', headers: bkHeaders({ 'Prefer': 'return=minimal' })
+  });
+  if (!r.ok) { showToast('Could not unblock, try again'); return; }
+  _bkBlocked = _bkBlocked.filter(function(b) { return b.id !== id; });
+  tbRenderBlocked();
 }
 
 // Tech's appointment list
@@ -14430,8 +14488,8 @@ function addrAutocomplete(input, listId, cityId, stateId, zipId) {
     // codes we don't have in the table (shouldn't hit for 50-state app).
     const syncBounds = currentState ? stateBoundsSync(currentState) : null;
     const acOpts = {
-      types: ['address'],
-      componentRestrictions: { country: 'us' }
+      types: ['address']
+      // 3.0 international: the old { country: 'us' } restriction is gone.
     };
     if (syncBounds) {
       acOpts.bounds = syncBounds;
@@ -18458,59 +18516,7 @@ function closeReleaseWizard() {
         </div>
         <input type="hidden" id="ue-address-full"/>
         <div style="display:flex;gap:8px;align-items:center;margin-top:6px;">
-          <select id="ue-state" style="width:180px;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:13px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;color:var(--charcoal);" onchange="this.nextElementSibling && (this.nextElementSibling.style.display='')">
-          <option value="">State…</option>
-          <option value="AL">AL, Alabama</option>
-          <option value="AK">AK, Alaska</option>
-          <option value="AZ">AZ, Arizona</option>
-          <option value="AR">AR, Arkansas</option>
-          <option value="CA">CA, California</option>
-          <option value="CO">CO, Colorado</option>
-          <option value="CT">CT, Connecticut</option>
-          <option value="DE">DE, Delaware</option>
-          <option value="FL">FL, Florida</option>
-          <option value="GA">GA, Georgia</option>
-          <option value="HI">HI, Hawaii</option>
-          <option value="ID">ID, Idaho</option>
-          <option value="IL">IL, Illinois</option>
-          <option value="IN">IN, Indiana</option>
-          <option value="IA">IA, Iowa</option>
-          <option value="KS">KS, Kansas</option>
-          <option value="KY">KY, Kentucky</option>
-          <option value="LA">LA, Louisiana</option>
-          <option value="ME">ME, Maine</option>
-          <option value="MD">MD, Maryland</option>
-          <option value="MA">MA, Massachusetts</option>
-          <option value="MI">MI, Michigan</option>
-          <option value="MN">MN, Minnesota</option>
-          <option value="MS">MS, Mississippi</option>
-          <option value="MO">MO, Missouri</option>
-          <option value="MT">MT, Montana</option>
-          <option value="NE">NE, Nebraska</option>
-          <option value="NV">NV, Nevada</option>
-          <option value="NH">NH, New Hampshire</option>
-          <option value="NJ">NJ, New Jersey</option>
-          <option value="NM">NM, New Mexico</option>
-          <option value="NY">NY, New York</option>
-          <option value="NC">NC, North Carolina</option>
-          <option value="ND">ND, North Dakota</option>
-          <option value="OH">OH, Ohio</option>
-          <option value="OK">OK, Oklahoma</option>
-          <option value="OR">OR, Oregon</option>
-          <option value="PA">PA, Pennsylvania</option>
-          <option value="RI">RI, Rhode Island</option>
-          <option value="SC">SC, South Carolina</option>
-          <option value="SD">SD, South Dakota</option>
-          <option value="TN">TN, Tennessee</option>
-          <option value="TX">TX, Texas</option>
-          <option value="UT">UT, Utah</option>
-          <option value="VT">VT, Vermont</option>
-          <option value="VA">VA, Virginia</option>
-          <option value="WA">WA, Washington</option>
-          <option value="WV">WV, West Virginia</option>
-          <option value="WI">WI, Wisconsin</option>
-          <option value="WY">WY, Wyoming</option>
-        </select>
+          <input id="ue-state" placeholder="State / Region" style="width:180px;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:13px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;color:var(--charcoal);"/>
           
         </div>
         <input type="hidden" id="ue-city"/>

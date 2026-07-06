@@ -37,11 +37,18 @@ Pricing detail:
 1. **Booking system**, STATUS: BUILT + migrated + e2e-tested 11/11
    (2026-07-05), including double-booking rejection and RLS. Three 2.0
    bookings-table landmines fixed (NOT NULL legacy cols, both FKs).
-   Tier 1 (time off, buffer, pg_cron push reminders) is BUILT; its
-   migration sql/booking-tier1-migration.sql is PENDING a run in the
-   SQL editor. Tier 2 roadmap: standing appointments (flagship),
-   waitlist, deposits (Venmo-note first, Stripe Connect later, 0% cut),
-   client history, ICS export. NO SMS in free tier.
+   Tier 1 (time off, buffer, pg_cron push reminders), STANDING
+   APPOINTMENTS, the quiet client BLOCKLIST, and the "Not taking new
+   clients" pause switch are all BUILT (app + SQL). PENDING: run these
+   in the SQL editor, in order:
+     1. sql/booking-tier1-migration.sql
+     2. sql/booking-standing-migration.sql
+     3. sql/blocklist-pause-migration.sql
+   Remaining tier 2: waitlist, deposits (Venmo-note first, Stripe
+   Connect later, 0% cut), client history, ICS export. NO SMS free.
+   INTERNATIONAL pass DONE (2026-07-05): postal code free text, state
+   dropdowns -> free text, Places worldwide, world-map default, mi/km
+   by locale, tel/sms keep +, booking timezone auto-detect.
 2. **Model v2 mechanics + copy**, STATUS: BUILT (2026-07-05). Feed and
    posts feature removed, one 3-col Gallery with linear weighting and
    available-now glow, 1-free-photo billing with grandfathering
