@@ -417,12 +417,7 @@ body{font-family:'DM Sans',sans-serif;background:#F7F5F8;display:flex;justify-co
 }
 
 .header{padding:16px 20px;display:flex;align-items:center;justify-content:space-between;background:rgba(20,19,23,0.88);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-bottom:1px solid rgba(191,166,187,0.25);box-shadow:0 4px 24px rgba(11,11,13,0.25),0 1px 0 rgba(191,166,187,0.12) inset;position:sticky;top:0;z-index:100;overflow:hidden;}
-.header::before{content:'';position:absolute;inset:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3C!-- centre flower --%3E%3Ccircle cx='30' cy='30' r='3.5' fill='none' stroke='%23BFA6BB' stroke-width='0.8'/%3E%3Ccircle cx='30' cy='30' r='1.2' fill='%23BFA6BB'/%3E%3Cellipse cx='30' cy='21' rx='2.2' ry='5' fill='none' stroke='%23BFA6BB' stroke-width='0.8'/%3E%3Cellipse cx='30' cy='39' rx='2.2' ry='5' fill='none' stroke='%23BFA6BB' stroke-width='0.8'/%3E%3Cellipse cx='21' cy='30' rx='5' ry='2.2' fill='none' stroke='%23BFA6BB' stroke-width='0.8'/%3E%3Cellipse cx='39' cy='30' rx='5' ry='2.2' fill='none' stroke='%23BFA6BB' stroke-width='0.8'/%3E%3Cellipse cx='23.5' cy='23.5' rx='2.2' ry='5' fill='none' stroke='%23BFA6BB' stroke-width='0.8' transform='rotate(-45 23.5 23.5)'/%3E%3Cellipse cx='36.5' cy='23.5' rx='2.2' ry='5' fill='none' stroke='%23BFA6BB' stroke-width='0.8' transform='rotate(45 36.5 23.5)'/%3E%3Cellipse cx='23.5' cy='36.5' rx='2.2' ry='5' fill='none' stroke='%23BFA6BB' stroke-width='0.8' transform='rotate(45 23.5 36.5)'/%3E%3Cellipse cx='36.5' cy='36.5' rx='2.2' ry='5' fill='none' stroke='%23BFA6BB' stroke-width='0.8' transform='rotate(-45 36.5 36.5)'/%3E%3C!-- corner quarter-circles lace detail --%3E%3Cpath d='M0 0 Q8 0 8 8' fill='none' stroke='%23BFA6BB' stroke-width='0.6'/%3E%3Cpath d='M60 0 Q52 0 52 8' fill='none' stroke='%23BFA6BB' stroke-width='0.6'/%3E%3Cpath d='M0 60 Q8 60 8 52' fill='none' stroke='%23BFA6BB' stroke-width='0.6'/%3E%3Cpath d='M60 60 Q52 60 52 52' fill='none' stroke='%23BFA6BB' stroke-width='0.6'/%3E%3C!-- corner dots --%3E%3Ccircle cx='0' cy='0' r='1.2' fill='%23BFA6BB'/%3E%3Ccircle cx='60' cy='0' r='1.2' fill='%23BFA6BB'/%3E%3Ccircle cx='0' cy='60' r='1.2' fill='%23BFA6BB'/%3E%3Ccircle cx='60' cy='60' r='1.2' fill='%23BFA6BB'/%3E%3C!-- mid-edge small buds --%3E%3Ccircle cx='30' cy='0' r='1.8' fill='none' stroke='%23BFA6BB' stroke-width='0.6'/%3E%3Ccircle cx='30' cy='60' r='1.8' fill='none' stroke='%23BFA6BB' stroke-width='0.6'/%3E%3Ccircle cx='0' cy='30' r='1.8' fill='none' stroke='%23BFA6BB' stroke-width='0.6'/%3E%3Ccircle cx='60' cy='30' r='1.8' fill='none' stroke='%23BFA6BB' stroke-width='0.6'/%3E%3C/svg%3E");
-  background-size:60px 60px;
-  background-repeat:repeat;
-  opacity:0.18;
-  pointer-events:none;
-  z-index:0;}
+/* (.header::before flower-lace pattern removed with the 3.0 rebrand, per Anne) */
 .header > *{position:relative;z-index:1;}
 .header .logo-mark, .header [class*="logo"]{color:#F7F2F6 !important;font-weight:700 !important;}
 .back-btn{width:36px;height:36px;border-radius:50%;border:1px solid rgba(255,240,230,0.3);background:transparent;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;color:#F7F2F6;}
@@ -1827,26 +1822,6 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
 <div class="screen" id="tech-home">
   <div class="header">
     <div id="tech-home-logo" style="display:flex;align-items:center;gap:10px;">
-      <!-- Small blooming magnolia, decorative header flourish -->
-      <svg viewBox="0 0 40 40" style="width:30px;height:30px;flex-shrink:0;filter:drop-shadow(0 1px 2px rgba(82,40,30,0.25));" aria-hidden="true">
-        <g transform="translate(20 20)">
-          <!-- outer petals (6) -->
-          <ellipse cx="0" cy="-11" rx="4" ry="10" fill="#E7D6E4" opacity="0.95"/>
-          <ellipse cx="0" cy="-11" rx="4" ry="10" fill="#DFC9DC" opacity="0.95" transform="rotate(60)"/>
-          <ellipse cx="0" cy="-11" rx="4" ry="10" fill="#E7D6E4" opacity="0.95" transform="rotate(120)"/>
-          <ellipse cx="0" cy="-11" rx="4" ry="10" fill="#D8C2D4" opacity="0.95" transform="rotate(180)"/>
-          <ellipse cx="0" cy="-11" rx="4" ry="10" fill="#E7D6E4" opacity="0.95" transform="rotate(240)"/>
-          <ellipse cx="0" cy="-11" rx="4" ry="10" fill="#DFC9DC" opacity="0.95" transform="rotate(300)"/>
-          <!-- inner petals (3) -->
-          <ellipse cx="0" cy="-6" rx="2.5" ry="6" fill="#F1E4EE" opacity="0.9" transform="rotate(30)"/>
-          <ellipse cx="0" cy="-6" rx="2.5" ry="6" fill="#EBDCE8" opacity="0.9" transform="rotate(150)"/>
-          <ellipse cx="0" cy="-6" rx="2.5" ry="6" fill="#F1E4EE" opacity="0.9" transform="rotate(270)"/>
-          <!-- gold stamen -->
-          <circle cx="0" cy="0" r="3.5" fill="#8A6E86"/>
-          <circle cx="0" cy="0" r="2" fill="#5E4A5A"/>
-          <circle cx="0" cy="0" r="0.8" fill="#5E4A5A"/>
-        </g>
-      </svg>
       <div><div class="logo-mark">My Nail Connection</div><div class="logo-sub" style="font-family:'Playfair Display',serif;font-style:italic;font-size:12px;font-weight:500;letter-spacing:0.3px;color:#8A6E86;margin-top:2px;text-transform:none;">Tech Portal</div></div>
     </div>
     <div style="display:flex;align-items:center;gap:8px;">
@@ -4857,8 +4832,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 344,         /* __APP_BUILD_ANDROID__ */
-  ios:     149,          /* __APP_BUILD_IOS__     */
+  android: 345,         /* __APP_BUILD_ANDROID__ */
+  ios:     150,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
