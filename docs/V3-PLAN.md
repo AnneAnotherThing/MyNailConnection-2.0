@@ -34,11 +34,14 @@ Pricing detail:
 
 ## Workstreams
 
-1. **Booking system**, STATUS: BUILT + migrated (2026-07-05). Booking
-   tables live in Supabase, test accounts exist (ZZ TEST), dev
-   quick-login buttons on localhost. End-to-end run by Anne pending.
-   Deferred: day-before reminders (pg_cron), deposits/Stripe,
-   blocked-dates/time-off. NO SMS in free tier.
+1. **Booking system**, STATUS: BUILT + migrated + e2e-tested 11/11
+   (2026-07-05), including double-booking rejection and RLS. Three 2.0
+   bookings-table landmines fixed (NOT NULL legacy cols, both FKs).
+   Tier 1 (time off, buffer, pg_cron push reminders) is BUILT; its
+   migration sql/booking-tier1-migration.sql is PENDING a run in the
+   SQL editor. Tier 2 roadmap: standing appointments (flagship),
+   waitlist, deposits (Venmo-note first, Stripe Connect later, 0% cut),
+   client history, ICS export. NO SMS in free tier.
 2. **Model v2 mechanics + copy**, STATUS: BUILT (2026-07-05). Feed and
    posts feature removed, one 3-col Gallery with linear weighting and
    available-now glow, 1-free-photo billing with grandfathering
