@@ -4852,8 +4852,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 340,         /* __APP_BUILD_ANDROID__ */
-  ios:     145,          /* __APP_BUILD_IOS__     */
+  android: 341,         /* __APP_BUILD_ANDROID__ */
+  ios:     146,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -5715,8 +5715,36 @@ async function devLogin(kind) {
     ? 'annewilson1021+booktech@gmail.com'
     : 'annewilson1021+bookclient@gmail.com';
   showToast('Signing in as test ' + kind + '...');
-  try { await signInWithEmail(email, 'MNC2026'); }
-  catch(e) { showToast('Dev login failed: ' + ((e && e.message) || 'unknown')); }
+  // Try the real sign-in, but don't let a struggling Supabase block a
+  // design-review session: 6s without a session = offline dev fallback.
+  try {
+    await Promise.race([
+      signInWithEmail(email, 'MNC2026'),
+      new Promise(function(res) { setTimeout(res, 6000); })
+    ]);
+  } catch(e) {}
+  if ((currentUserEmail || '').toLowerCase() === email) return; // real login won
+  devOfflineLogin(kind, email);
+}
+
+// Localhost-only fake session so every screen is reachable while the
+// backend is down. No token is set, so all data calls fail their normal
+// graceful paths (empty lists / demo techs), nothing fake gets written.
+function devOfflineLogin(kind, email) {
+  if (!/^(localhost|127\.0\.0\.1)$/.test(location.hostname)) return;
+  window._mncDevOffline = true;
+  currentUser = { id: (kind === 'tech'
+    ? '00000000-0000-4000-8000-0000000dev01'
+    : '00000000-0000-4000-8000-0000000dev02'), email: email };
+  currentUserEmail = email;
+  currentUserName = kind === 'tech'
+    ? { first: 'Dev', last: 'Tech' }
+    : { first: 'Demo', last: 'Client' };
+  window._mncCurrentRole = kind === 'tech' ? 'tech' : 'client';
+  window._mncIsTechTableUser = (kind === 'tech');
+  try { if (typeof styleNavForRole === 'function') styleNavForRole(); } catch(e) {}
+  showToast('OFFLINE DEV MODE, signed in as ' + kind + ' with no live data', 4200);
+  show(kind === 'tech' ? 'tech-home' : 'home');
 }
 (function devQuickLoginInit() {
   function mount() {
