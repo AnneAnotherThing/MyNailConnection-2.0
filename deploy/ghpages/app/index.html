@@ -5046,8 +5046,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 333,         /* __APP_BUILD_ANDROID__ */
-  ios:     138,          /* __APP_BUILD_IOS__     */
+  android: 334,         /* __APP_BUILD_ANDROID__ */
+  ios:     139,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -12942,6 +12942,7 @@ let _bkSvcs   = [];
 let _bkAvail  = [];
 let _bkAppts  = [];
 let _bkTimeOff = [];
+let _bkStanding = [];
 
 async function loadTechBookings() {
   if (!currentUserEmail) { show('auth'); return; }
@@ -12971,12 +12972,16 @@ async function loadTechBookings() {
             '&order=starts_at.asc&select=*,tech_services(name,duration_minutes,price)',
             { headers: bkHeaders() }),
       fetch(SUPABASE_URL + '/rest/v1/tech_time_off?tech_id=eq.' + _bkMyTech.id +
-            '&order=start_date.asc', { headers: bkHeaders() })
+            '&order=start_date.asc', { headers: bkHeaders() }),
+      fetch(SUPABASE_URL + '/rest/v1/standing_appointments?tech_id=eq.' + _bkMyTech.id +
+            '&active=is.true&select=*,tech_services(name)&order=created_at.desc',
+            { headers: bkHeaders() })
     ]);
     _bkSvcs  = results[0].ok ? await results[0].json() : [];
     _bkAvail = results[1].ok ? await results[1].json() : [];
     _bkAppts = results[2].ok ? await results[2].json() : [];
     _bkTimeOff = results[3].ok ? await results[3].json() : [];
+    _bkStanding = results[4].ok ? await results[4].json() : [];
     tbRenderSettings();
     tbRenderServices();
     tbRenderAvail();
@@ -13212,6 +13217,51 @@ async function tbSetBuffer(v) {
   if (await tbPatchTech({ booking_buffer_minutes: parseInt(v, 10) || 0 })) showToast('Buffer saved');
 }
 
+// Standing appointments (tier 2 flagship)
+function tbOpenStanding(id) {
+  const b = _bkAppts.find(function(x) { return x.id === id; });
+  if (!b) return;
+  const m = document.getElementById('book-modal');
+  m.style.display = 'flex'; m.classList.add('open');
+  const who = bkEsc(b.client_name || b.client_email || 'this client');
+  const opts = [1, 2, 3, 4].map(function(n) {
+    return '<button onclick="tbConvertStanding(\'' + id + '\',' + n + ')" style="padding:12px 6px;border-radius:10px;border:1.5px solid var(--rose-mid);background:white;color:var(--rose-dark);font-size:13px;font-weight:700;cursor:pointer;">' + (n === 1 ? 'Every week' : 'Every ' + n + ' weeks') + '</button>';
+  }).join('');
+  bkBody(bkHeader('Standing appointment', '') +
+    '<div style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:12px;">Repeat ' + who + ' at this same time, automatically. The next visits land on your calendar as confirmed, anything that collides with time off or another booking gets skipped, and the series keeps itself topped up.</div>' +
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">' + opts + '</div>');
+}
+
+async function tbConvertStanding(id, weeks) {
+  bkLoadingBody('Setting up...');
+  try {
+    const r = await fetch(SUPABASE_URL + '/rest/v1/rpc/convert_to_standing', {
+      method: 'POST',
+      headers: bkHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ p_booking_id: id, p_interval_weeks: weeks })
+    });
+    const data = await r.json().catch(function() { return {}; });
+    closeBookModal();
+    if (!r.ok) { showToast(data.message || 'Could not set that up, try again'); return; }
+    const skipped = data.skipped ? (', ' + data.skipped + ' skipped for conflicts') : '';
+    showToast('Standing! ' + (data.created || 0) + ' visits added' + skipped);
+    loadTechBookings();
+  } catch(e) { closeBookModal(); showToast('Network hiccup, try again'); }
+}
+
+async function tbEndStanding(id) {
+  if (!(await showConfirm('End this standing series?', { body: 'Visits already on the calendar stay. Nothing new gets added.', okLabel: 'End it' }))) return;
+  const r = await fetch(SUPABASE_URL + '/rest/v1/standing_appointments?id=eq.' + id, {
+    method: 'PATCH',
+    headers: bkHeaders({ 'Content-Type': 'application/json', 'Prefer': 'return=minimal' }),
+    body: JSON.stringify({ active: false })
+  });
+  if (!r.ok) { showToast('Could not end it, try again'); return; }
+  _bkStanding = _bkStanding.filter(function(s) { return s.id !== id; });
+  tbRenderAppts();
+  showToast('Series ended');
+}
+
 // Tech's appointment list
 function tbApptCard(b, buttons) {
   const tz  = _bkMyTech && _bkMyTech.booking_timezone;
@@ -13224,7 +13274,7 @@ function tbApptCard(b, buttons) {
       '<div style="flex:1;min-width:0;">' +
         '<div style="font-size:14px;font-weight:700;color:var(--charcoal);">' + bkFmtStamp(b.starts_at, tz) + '</div>' +
         '<div style="font-size:12.5px;color:var(--charcoal);margin-top:2px;">' + bkEsc(svc) + ' · ' + who + '</div>' +
-      '</div>' + bkStatusChip(b.status) +
+      '</div>' + (b.standing_id ? '<span style="background:var(--rose-light);color:var(--rose-dark);font-size:10px;font-weight:700;border-radius:100px;padding:3px 7px;margin-right:4px;white-space:nowrap;">&#8635; standing</span>' : '') + bkStatusChip(b.status) +
     '</div>' + note +
     (buttons ? '<div style="display:flex;gap:8px;margin-top:10px;">' + buttons + '</div>' : '') +
   '</div>';
@@ -13255,12 +13305,29 @@ function tbRenderAppts() {
   if (upcoming.length) {
     html += '<div style="font-size:12px;font-weight:700;color:var(--charcoal);letter-spacing:0.4px;text-transform:uppercase;margin:10px 0 6px;">Upcoming</div>';
     html += upcoming.map(function(b) {
-      return tbApptCard(b, btn('Cancel appointment', "tbSetStatus('" + b.id + "','cancelled_by_tech')", false));
+      var bs = '';
+      if (!b.standing_id) bs += btn('Make standing', "tbOpenStanding('" + b.id + "')", true);
+      bs += btn('Cancel', "tbSetStatus('" + b.id + "','cancelled_by_tech')", false);
+      return tbApptCard(b, bs);
     }).join('');
   }
   if (rest.length) {
     html += '<div style="font-size:12px;font-weight:700;color:var(--muted);letter-spacing:0.4px;text-transform:uppercase;margin:10px 0 6px;">Recent</div>';
     html += rest.map(function(b) { return tbApptCard(b, ''); }).join('');
+  }
+  if (_bkStanding.length) {
+    html += '<div style="font-size:12px;font-weight:700;color:var(--charcoal);letter-spacing:0.4px;text-transform:uppercase;margin:10px 0 6px;">Standing</div>';
+    html += _bkStanding.map(function(s) {
+      const svc = (s.tech_services && s.tech_services.name) || 'Appointment';
+      const when = bkFmtStamp(s.anchor_starts_at, _bkMyTech && _bkMyTech.booking_timezone);
+      return '<div style="background:white;border:1px solid var(--border);border-radius:14px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:8px;">' +
+        '<div style="flex:1;min-width:0;">' +
+          '<div style="font-size:13.5px;font-weight:700;color:var(--charcoal);">' + bkEsc(s.client_name || s.client_email || 'Client') + ' &middot; every ' + (s.interval_weeks === 1 ? 'week' : s.interval_weeks + ' weeks') + '</div>' +
+          '<div style="font-size:12px;color:var(--muted);margin-top:2px;">' + bkEsc(svc) + ' &middot; ' + when.replace(/,.*$/, '') + 's at ' + bkFmtSlot(s.anchor_starts_at, _bkMyTech && _bkMyTech.booking_timezone) + '</div>' +
+        '</div>' +
+        '<button onclick="tbEndStanding(\'' + s.id + '\')" style="padding:7px 12px;border-radius:8px;border:1.5px solid var(--border);background:white;color:var(--muted);font-size:12px;font-weight:700;cursor:pointer;">End</button>' +
+      '</div>';
+    }).join('');
   }
   if (!html) {
     html = '<div style="background:white;border:1px dashed var(--border);border-radius:14px;padding:18px;text-align:center;font-size:13px;color:var(--muted);">' +
@@ -13563,7 +13630,7 @@ async function loadMyAppointments() {
         '<div style="flex:1;min-width:0;">' +
           '<div style="font-size:14px;font-weight:700;color:var(--charcoal);">' + bkFmtStamp(b.starts_at, tz) + '</div>' +
           '<div style="font-size:12.5px;color:var(--charcoal);margin-top:2px;">' + bkEsc(svc) + ' · ' + bkEsc(techName) + '</div>' +
-        '</div>' + bkStatusChip(b.status) +
+        '</div>' + (b.standing_id ? '<span style="background:var(--rose-light);color:var(--rose-dark);font-size:10px;font-weight:700;border-radius:100px;padding:3px 7px;margin-right:4px;white-space:nowrap;">&#8635; standing</span>' : '') + bkStatusChip(b.status) +
       '</div>' +
       (cancellable
         ? '<div style="display:flex;margin-top:10px;"><button onclick="bkCancelMine(\'' + b.id + '\')" style="flex:1;padding:9px;border-radius:10px;border:1.5px solid var(--border);background:white;color:var(--muted);font-size:13px;font-weight:700;cursor:pointer;">Cancel</button></div>'
