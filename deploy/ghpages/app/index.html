@@ -2432,6 +2432,17 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
         <button id="tb-autoconfirm-btn" onclick="tbToggleAutoConfirm()" style="min-width:56px;padding:8px 14px;border-radius:100px;font-size:13px;font-weight:700;cursor:pointer;border:1.5px solid var(--border);background:white;color:var(--muted);">Off</button>
       </div>
       <div style="display:flex;align-items:center;gap:10px;margin-top:14px;padding-top:14px;border-top:1px solid var(--border);">
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:14px;font-weight:600;color:var(--charcoal);">Buffer between appointments</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px;">Breathing room for cleanup and reset.</div>
+        </div>
+        <select id="tb-buffer" onchange="tbSetBuffer(this.value)" style="padding:8px 10px;border:1px solid var(--border);border-radius:10px;font-size:13px;color:var(--charcoal);background:white;">
+          <option value="0">None</option><option value="10">10 min</option>
+          <option value="15">15 min</option><option value="20">20 min</option>
+          <option value="30">30 min</option>
+        </select>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;margin-top:14px;padding-top:14px;border-top:1px solid var(--border);">
         <div style="flex:1;font-size:14px;font-weight:600;color:var(--charcoal);">Your timezone</div>
         <select id="tb-tz" onchange="tbSetTimezone(this.value)" style="padding:8px 10px;border:1px solid var(--border);border-radius:10px;font-size:13px;color:var(--charcoal);background:white;">
           <option value="America/Phoenix">Arizona</option>
@@ -2475,6 +2486,19 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       <div style="font-size:15px;font-weight:600;color:var(--charcoal);">Weekly hours</div>
       <div style="font-size:12px;color:var(--muted);margin-top:2px;">When clients can book you. Add two windows on a day for a split shift.</div>
       <div id="tb-avail-list" style="margin-top:6px;"></div>
+    </div>
+
+    <!-- Time off (tier 1) -->
+    <div style="margin:20px 20px 24px;background:white;border:1px solid var(--border);border-radius:16px;padding:16px;">
+      <div style="font-size:15px;font-weight:600;color:var(--charcoal);">Time off</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:2px;">Block days you're away. Clients can't book them.</div>
+      <div id="tb-timeoff-list" style="margin-top:10px;"></div>
+      <div style="display:flex;gap:6px;margin-top:8px;align-items:center;flex-wrap:wrap;">
+        <input type="date" id="tb-toff-start" style="padding:8px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:white;color:var(--charcoal);">
+        <span style="font-size:12px;color:var(--muted);">to</span>
+        <input type="date" id="tb-toff-end" style="padding:8px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:white;color:var(--charcoal);">
+        <button onclick="tbAddTimeOff()" style="padding:8px 14px;border-radius:8px;border:1.5px solid var(--rose-mid);background:white;color:var(--rose-dark);font-size:12px;font-weight:700;cursor:pointer;">Block</button>
+      </div>
     </div>
   </div>
 </div>
@@ -5022,8 +5046,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 332,         /* __APP_BUILD_ANDROID__ */
-  ios:     137,          /* __APP_BUILD_IOS__     */
+  android: 333,         /* __APP_BUILD_ANDROID__ */
+  ios:     138,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -12917,13 +12941,14 @@ let _bkMyTech = null;   // signed-in tech's row (id + booking settings)
 let _bkSvcs   = [];
 let _bkAvail  = [];
 let _bkAppts  = [];
+let _bkTimeOff = [];
 
 async function loadTechBookings() {
   if (!currentUserEmail) { show('auth'); return; }
   const note = document.getElementById('tb-migration-note');
   try {
     const r = await fetch(SUPABASE_URL +
-      '/rest/v1/techs?select=id,name,email,booking_enabled,booking_auto_confirm,booking_timezone&email=eq.' +
+      '/rest/v1/techs?select=id,name,email,booking_enabled,booking_auto_confirm,booking_timezone,booking_buffer_minutes&email=eq.' +
       encodeURIComponent(currentUserEmail), { headers: bkHeaders() });
     if (!r.ok) {
       // Almost always means the migration hasn't been run (unknown column).
@@ -12944,14 +12969,18 @@ async function loadTechBookings() {
       fetch(SUPABASE_URL + '/rest/v1/bookings?tech_id=eq.' + _bkMyTech.id +
             '&starts_at=gte.' + encodeURIComponent(since) +
             '&order=starts_at.asc&select=*,tech_services(name,duration_minutes,price)',
-            { headers: bkHeaders() })
+            { headers: bkHeaders() }),
+      fetch(SUPABASE_URL + '/rest/v1/tech_time_off?tech_id=eq.' + _bkMyTech.id +
+            '&order=start_date.asc', { headers: bkHeaders() })
     ]);
     _bkSvcs  = results[0].ok ? await results[0].json() : [];
     _bkAvail = results[1].ok ? await results[1].json() : [];
     _bkAppts = results[2].ok ? await results[2].json() : [];
+    _bkTimeOff = results[3].ok ? await results[3].json() : [];
     tbRenderSettings();
     tbRenderServices();
     tbRenderAvail();
+    tbRenderTimeOff();
     tbRenderAppts();
   } catch(e) { console.warn('loadTechBookings', e); }
 }
@@ -12971,6 +13000,8 @@ function tbRenderSettings() {
   tbPill('tb-autoconfirm-btn', !!_bkMyTech.booking_auto_confirm);
   const tz = document.getElementById('tb-tz');
   if (tz) tz.value = _bkMyTech.booking_timezone || 'America/Phoenix';
+  const buf = document.getElementById('tb-buffer');
+  if (buf) buf.value = String(_bkMyTech.booking_buffer_minutes || 0);
 }
 
 async function tbPatchTech(patch) {
@@ -13128,6 +13159,59 @@ async function tbDeleteWindow(id) {
   tbRenderAvail();
 }
 
+// Time off (tier 1)
+function tbRenderTimeOff() {
+  const wrap = document.getElementById('tb-timeoff-list');
+  if (!wrap) return;
+  if (!_bkTimeOff.length) {
+    wrap.innerHTML = '<div style="font-size:12px;color:var(--muted);">No days blocked.</div>';
+    return;
+  }
+  const fmt = function(d) {
+    return new Date(d + 'T12:00:00Z').toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
+  };
+  wrap.innerHTML = _bkTimeOff.map(function(t) {
+    const label = t.start_date === t.end_date ? fmt(t.start_date) : fmt(t.start_date) + ' - ' + fmt(t.end_date);
+    return '<span style="display:inline-flex;align-items:center;gap:6px;background:var(--cream);border:1px solid var(--border);color:var(--charcoal);font-size:12px;font-weight:600;border-radius:100px;padding:4px 10px;margin:2px 4px 2px 0;">' + label +
+      '<span onclick="tbDeleteTimeOff(\'' + t.id + '\')" style="cursor:pointer;font-size:14px;line-height:1;color:var(--muted);">&times;</span></span>';
+  }).join('');
+}
+
+async function tbAddTimeOff() {
+  if (!_bkMyTech) return;
+  const s = document.getElementById('tb-toff-start').value;
+  const e = document.getElementById('tb-toff-end').value || s;
+  if (!s) { showToast('Pick a start date'); return; }
+  if (e < s) { showToast('End date is before start date'); return; }
+  const r = await fetch(SUPABASE_URL + '/rest/v1/tech_time_off', {
+    method: 'POST',
+    headers: bkHeaders({ 'Content-Type': 'application/json', 'Prefer': 'return=representation' }),
+    body: JSON.stringify({ tech_id: _bkMyTech.id, start_date: s, end_date: e })
+  });
+  if (!r.ok) { showToast('Could not block those dates, try again'); return; }
+  const rows = await r.json();
+  if (rows[0]) _bkTimeOff.push(rows[0]);
+  _bkTimeOff.sort(function(a, b) { return a.start_date < b.start_date ? -1 : 1; });
+  document.getElementById('tb-toff-start').value = '';
+  document.getElementById('tb-toff-end').value = '';
+  tbRenderTimeOff();
+  showToast('Blocked \u2713');
+}
+
+async function tbDeleteTimeOff(id) {
+  const r = await fetch(SUPABASE_URL + '/rest/v1/tech_time_off?id=eq.' + id, {
+    method: 'DELETE', headers: bkHeaders({ 'Prefer': 'return=minimal' })
+  });
+  if (!r.ok) { showToast('Could not remove, try again'); return; }
+  _bkTimeOff = _bkTimeOff.filter(function(t) { return t.id !== id; });
+  tbRenderTimeOff();
+}
+
+async function tbSetBuffer(v) {
+  if (!_bkMyTech) return;
+  if (await tbPatchTech({ booking_buffer_minutes: parseInt(v, 10) || 0 })) showToast('Buffer saved');
+}
+
 // Tech's appointment list
 function tbApptCard(b, buttons) {
   const tz  = _bkMyTech && _bkMyTech.booking_timezone;
@@ -13252,7 +13336,7 @@ function openBookModal() {
   const tech = currentTech;
   if (!tech || !tech.id) { showToast('Could not load this tech'); return; }
   if (!currentUser || !currentUserEmail) { showToast('Sign in to book'); return; }
-  _bkFlow = { tech: tech, tz: tech.booking_timezone || 'America/Phoenix', svcs: [], dows: {}, svc: null, day: null, slot: null };
+  _bkFlow = { tech: tech, tz: tech.booking_timezone || 'America/Phoenix', svcs: [], dows: {}, timeOff: [], svc: null, day: null, slot: null };
   const m = document.getElementById('book-modal');
   m.style.display = 'flex';
   m.classList.add('open');
@@ -13288,11 +13372,14 @@ async function bkStepServices() {
       fetch(SUPABASE_URL + '/rest/v1/tech_services?tech_id=eq.' + _bkFlow.tech.id +
             '&active=is.true&order=sort_order.asc,created_at.asc', { headers: bkHeaders() }),
       fetch(SUPABASE_URL + '/rest/v1/tech_availability?tech_id=eq.' + _bkFlow.tech.id +
-            '&select=day_of_week', { headers: bkHeaders() })
+            '&select=day_of_week', { headers: bkHeaders() }),
+      fetch(SUPABASE_URL + '/rest/v1/tech_time_off?tech_id=eq.' + _bkFlow.tech.id +
+            '&select=start_date,end_date', { headers: bkHeaders() })
     ]);
     _bkFlow.svcs = results[0].ok ? await results[0].json() : [];
     _bkFlow.dows = {};
     (results[1].ok ? await results[1].json() : []).forEach(function(a) { _bkFlow.dows[a.day_of_week] = true; });
+    _bkFlow.timeOff = results[2].ok ? await results[2].json() : [];
   } catch(e) { _bkFlow.svcs = []; }
   if (!_bkFlow.svcs.length) {
     bkBody(bkHeader('Book ' + first, '') +
@@ -13330,7 +13417,8 @@ function bkStepDays() {
   for (let n = 0; n < 14; n++) {
     const iso = bkLocalDateISO(n, _bkFlow.tz);
     const dow = new Date(iso + 'T12:00:00Z').getUTCDay();
-    const open = !!_bkFlow.dows[dow];
+    const blocked = (_bkFlow.timeOff || []).some(function(t) { return iso >= t.start_date && iso <= t.end_date; });
+    const open = !!_bkFlow.dows[dow] && !blocked;
     const label = new Date(iso + 'T12:00:00Z').toLocaleDateString('en-US', { weekday: 'short', month: 'numeric', day: 'numeric', timeZone: 'UTC' });
     chips += open
       ? '<button onclick="bkPickDay(\'' + iso + '\')" style="padding:9px 6px;border-radius:10px;border:1.5px solid var(--rose-mid);background:white;color:var(--rose-dark);font-size:12.5px;font-weight:600;cursor:pointer;">' + label + '</button>'
