@@ -85,6 +85,20 @@ hides photos + booking + contact, without deleting the account) is a
 small follow-up, build with workstream 3's onboarding work. Never
 write copy implying photos can expire. Forever means forever.
 
+## Supabase health (2026-07-06)
+
+The project's nano instance is struggling: swap in use, the disk IO
+budget warning (July 5), then 47-second auth and fully timed-out REST
+queries during Supabase's platform-wide compute-capacity incident
+(ongoing since June 30). Yesterday's "don't upgrade" call was based on
+an idle DB; the new evidence flips it. AFTER the platform incident
+clears (status.supabase.com):
+1. Restart the project (Settings -> General). Do NOT restart or resize
+   during the incident, project status changes are the failing thing.
+2. Upgrade Postgres to 17.6.1.121+ (unlocks more machine types).
+3. Upgrade compute off nano before the 3.0 launch. A relaunch on an
+   instance that swaps under two test users is not a plan.
+
 ## Before cutover
 
 - Set `PHOTO_FREE_CUTOVER` in index.html to the launch date (it's
