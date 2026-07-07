@@ -37,6 +37,48 @@ Do NOT restart/resize/change the old project until these finish.
    in techs.photos, paused_photos, user_inspo.photo_url, users.image_url,
    techs.image_url.
 
+## Phase 2.5, DO IT RIGHT (cleanups applied during import, Anne-approved)
+
+Leave behind (do NOT import; the local dump file is the archive):
+- nail_techs, tech_photos, conversations, messages (2.0-legacy, locked
+  admin-only, superseded years of features ago)
+- board_posts (the posts/feed feature is deleted in 3.0)
+- founders_feedback, launch_tracker, wipe/test leftovers
+- analytics history (events, marketing_hits, store_clicks,
+  app_downloads, tech_events): import structure + last 90 days only;
+  full history stays in the archive dump. These tables were the bulk
+  of row volume on an instance that died of resource starvation.
+- auth orphans: run the auth-orphan-audit logic against the dump and
+  skip auth.users rows with no profile (known 2.0 wart).
+
+Fix permanently during import:
+- EMAIL CASING: normalize every email column to lower(btrim()) once,
+  then add CHECK (email = lower(email)) on techs.email and
+  users.email. The casing bug family dies here.
+- BOOKINGS LEGACY COLUMNS: drop booking_date, booking_time, notes
+  after import; update create_booking to stop filling them (they were
+  2.0 leftovers we were feeding for compatibility that no longer
+  exists on a fresh project).
+- IDENTITY BRIDGE: add users.auth_id uuid + techs.auth_id uuid,
+  populated by joining auth.users on lower(email) during import. The
+  app keeps its email keys for now (rekeying is app-rewrite scope),
+  but every future feature can join on a real uuid, and the
+  public.users.id-vs-auth.uid confusion that caused the bookings FK
+  landmine can never bite again.
+- AUTH HARDENING (dashboard): enable leaked-password protection,
+  minimum password length 8+. Free wins on a fresh project.
+
+Known warts deliberately NOT fixed now (rewrite-scope, list for 3.1):
+- Email-as-identity throughout the app (hundreds of call sites)
+- techs.photos as a JSONB array instead of a photos table (the
+  autosave RPCs exist to paper over it)
+- techs RLS "select using(true)" exposes phone/street address columns
+  to anon API callers even when hide_address_public is on (the flag
+  is UI-only). Needs a public view or column split; note for 3.1.
+
+Born right on the new project (no action): Postgres 17, daily backups
+(Pro), micro compute, Data API on, same region as old.
+
 ## Phase 3, edge functions + secrets
 `supabase functions deploy` for: send-push, broadcast-push,
 admin-reset-passwords, delete-account, revenuecat-webhook,
