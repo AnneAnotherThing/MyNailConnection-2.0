@@ -96,13 +96,17 @@ Secrets to set on NEW:
   secret. Same for the RevenueCat webhook URL.
 
 ## Phase 4, auth configuration (see memory: mnc password reset quirks)
-- Confirm email: ON (deliberate, anti-sybil)
-- Site URL: https://mynailconnection.com/app/
-- Redirect URLs: app URL + reset-password.html
-- Email templates: links use /app/?token_hash=...&type=recovery (and
-  type=email for signup confirm), NOT redirect_to. Copy templates
-  from the old project if reachable, else rebuild from
-  sql/../memory notes.
+- DONE 2026-07-08 on new project: Site URL = https://mynailconnection.com/app/ ;
+  Redirect URLs = https://mynailconnection.com/app/** and
+  http://localhost:8123/** . (Mgmt API api.supabase.com was flaky during
+  the incident; the redirect save needed one retry. Re-verify these stuck
+  once the incident clears.)
+- STILL TODO (do in one clean pass after incident clears):
+  - Confirm email: verify ON (deliberate, anti-sybil)
+  - Password hardening: leaked-password protection ON, min length 8+
+  - Email templates: links use /app/?token_hash=...&type=recovery (and
+    type=email for signup confirm), NOT redirect_to. Copy templates
+    from the old project if reachable, else rebuild from memory notes.
 
 ## Phase 5, app swap (v3 branch first, main at cutover)
 New URL + anon key (Settings -> API on the new project) into:
