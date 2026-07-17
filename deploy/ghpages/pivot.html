@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>The 3.0 Pivot | MNC Internal</title>
+<meta name="robots" content="noindex, nofollow"/>
+<link rel="icon" href="favicon-32.png" type="image/png"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --rose:      #BFA6BB;
+    --rose-light:#F7E8EE;
+    --rose-mid:  #D9C6D6;
+    --rose-dark: #7D6478;
+    --cream:     #FBF8FA;
+    --charcoal:  #141317;
+    --muted:     #8B7F8A;
+    --border:    rgba(125,100,120,0.16);
+  }
+  body {
+    background:
+      radial-gradient(ellipse at 10% 0%, rgba(247,232,238,0.9) 0%, transparent 50%),
+      radial-gradient(ellipse at 90% 100%, rgba(191,166,187,0.22) 0%, transparent 55%),
+      #FBF8FA;
+    color: var(--charcoal);
+    font-family: 'DM Sans', sans-serif;
+    line-height: 1.7;
+  }
+  .page { max-width: 680px; margin: 0 auto; padding: 56px 24px 96px; }
+
+  .kicker {
+    font-size: 12px; font-weight: 600;
+    letter-spacing: 0.35em; text-transform: uppercase;
+    color: var(--rose-dark);
+    text-align: center;
+    margin-bottom: 14px;
+  }
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(34px, 7vw, 52px);
+    font-weight: 700; line-height: 1.15;
+    text-align: center;
+    text-shadow: 0 1px 0 rgba(255,255,255,0.85);
+    margin-bottom: 16px;
+  }
+  .lede {
+    font-size: 17px; color: var(--muted);
+    text-align: center;
+    max-width: 520px; margin: 0 auto 12px;
+  }
+  .lede b { color: var(--rose-dark); }
+  .just-us {
+    text-align: center;
+    font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: rgba(20,19,23,0.35);
+    margin-bottom: 56px;
+  }
+
+  h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(24px, 5vw, 32px);
+    font-weight: 700; line-height: 1.25;
+    margin: 56px 0 14px;
+  }
+  h2 .num {
+    display: inline-block;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px; font-weight: 600;
+    color: #FBF8FA; background: var(--rose-dark);
+    border-radius: 100px;
+    width: 28px; height: 28px; line-height: 28px;
+    text-align: center;
+    vertical-align: 6px;
+    margin-right: 10px;
+  }
+  p { margin-bottom: 14px; font-size: 15.5px; }
+  p b { color: var(--rose-dark); }
+
+  .pull {
+    margin: 26px 0;
+    padding: 22px 26px;
+    background: white;
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--rose);
+    border-radius: 14px;
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(19px, 4vw, 24px);
+    font-weight: 600; line-height: 1.4;
+    box-shadow: 0 4px 16px rgba(20,19,23,0.05);
+  }
+  .pull em { color: var(--rose-dark); font-style: italic; }
+
+  .cards { display: grid; gap: 12px; margin: 20px 0 8px; }
+  .card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px 20px;
+    box-shadow: 0 3px 12px rgba(20,19,23,0.04);
+  }
+  .card .who {
+    font-weight: 600; font-size: 15px;
+    margin-bottom: 4px;
+  }
+  .card .verdict {
+    display: inline-block;
+    font-size: 11px; font-weight: 600;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    border-radius: 100px;
+    padding: 3px 12px;
+    margin-bottom: 8px;
+  }
+  .card .verdict.skip { background: var(--rose-light); color: var(--rose-dark); }
+  .card .verdict.yes  { background: var(--rose-dark); color: #FBF8FA; }
+  .card p { font-size: 14px; color: var(--muted); margin: 0; }
+  .card.hero-card {
+    border: 1.5px solid var(--rose);
+    background: linear-gradient(180deg, #FFFFFF, var(--rose-light));
+  }
+  .card.hero-card p { color: var(--charcoal); }
+
+  ul.clean { list-style: none; margin: 6px 0 14px; }
+  ul.clean li {
+    padding: 10px 0 10px 30px;
+    position: relative;
+    font-size: 15px;
+    border-bottom: 1px solid var(--border);
+  }
+  ul.clean li:last-child { border-bottom: none; }
+  ul.clean li::before {
+    content: '🌸';
+    position: absolute; left: 0; top: 10px;
+    font-size: 13px;
+  }
+  ul.clean li b { color: var(--rose-dark); }
+
+  .statement {
+    margin: 60px 0 0;
+    padding: 30px 28px;
+    background: var(--charcoal);
+    border-radius: 18px;
+    color: var(--rose-light);
+    text-align: center;
+  }
+  .statement .label {
+    font-size: 11px; font-weight: 600;
+    letter-spacing: 0.3em; text-transform: uppercase;
+    color: var(--rose);
+    margin-bottom: 14px;
+  }
+  .statement p {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(17px, 3.6vw, 21px);
+    font-weight: 400; line-height: 1.6;
+    margin: 0;
+  }
+  .statement p b { color: white; }
+
+  .footer {
+    margin-top: 56px;
+    text-align: center;
+    font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: rgba(20,19,23,0.3);
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="kicker">MNC Internal · Anne + Leslie</div>
+  <h1>The 3.0 Pivot</h1>
+  <p class="lede">We're not selling a photo app. We're selling <b>the end of DM booking.</b> One page on what we learned, who we're for, and what we say now.</p>
+  <div class="just-us">🌸 just for us, not linked anywhere 🌸</div>
+
+  <h2><span class="num">1</span>What 2.0 taught us</h2>
+  <p>2.0 asked techs to post photos to a brand-new room. Instagram already has their followers; a new app starts empty. "Post here too" felt like extra work with no payoff, and that's not a caption problem, it's structural. Clients won't browse an empty gallery, and techs won't fill a gallery nobody browses.</p>
+  <div class="pull">2.0 asked for the audience before offering the tool. <em>3.0 leads with the tool.</em></div>
+
+  <h2><span class="num">2</span>Who we're actually for</h2>
+  <p>Not "all techs." Three kinds, one target:</p>
+  <div class="cards">
+    <div class="card">
+      <div class="who">Salon-employed techs</div>
+      <span class="verdict skip">Not our buyer</span>
+      <p>The front desk books for them. They don't choose the software.</p>
+    </div>
+    <div class="card">
+      <div class="who">Techs already on Vagaro, Booksy, GlossGenius</div>
+      <span class="verdict skip">Later, not first</span>
+      <p>Switching is painful and we don't need them to switch. The bring-your-own-booking-link path lets them join for the gallery whenever they're ready.</p>
+    </div>
+    <div class="card hero-card">
+      <div class="who">DM-book techs</div>
+      <span class="verdict yes">Our customer</span>
+      <p>Independents and home-based techs whose "booking system" is Instagram DMs, texts, and memory. They feel the pain every single day: the what-times-do-you-have back-and-forth, the no-shows, the double-books. This is who every post talks to.</p>
+    </div>
+  </div>
+
+  <h2><span class="num">3</span>The product, in one line</h2>
+  <div class="pull">"Still booking in your DMs?"</div>
+  <p>That's the pitch. Free is the price tag, not the value, Square has a free booking tier and these techs never adopted it, because those tools feel like salon enterprise software. What only we have is the whole stack together:</p>
+  <ul class="clean">
+    <li><b>Free forever.</b> Not a trial, not a tier. Booking never costs a tech anything.</li>
+    <li><b>Built only for nails.</b> No spa bloat, no front-desk features, nothing to configure that a nail tech doesn't need.</li>
+    <li><b>Her work IS her booking page.</b> A client taps the set she loves and books the woman who did it. Nobody else has this.</li>
+  </ul>
+
+  <h2><span class="num">4</span>The quietly brilliant part</h2>
+  <p>The booking tool works with zero other users. A tech sets up her book tonight and sends her own link to her own clients. And every client who books her <b>creates an account with us to do it.</b></p>
+  <div class="pull">Every tech who joins brings her own clients. <em>The audience 2.0 couldn't build gets built as a side effect.</em></div>
+
+  <h2><span class="num">5</span>So when do photos make money?</h2>
+  <p>Later, and that's fine, our costs are close to zero while the base grows. Two things make the $1 photo an easy yes when the time comes:</p>
+  <ul class="clean">
+    <li><b>The framing never changes:</b> a photo here is her storefront sign, permanent, working while she sleeps. An Instagram post dies in the feed. Ours never expires.</li>
+    <li><b>The magic moment:</b> the first time a stranger finds her in the Gallery, taps her photo, and books her. After that happens once, the photo stops being a cost and becomes the best ad money she's ever spent. Everything we do early should aim at making that moment happen for every new tech.</li>
+  </ul>
+
+  <h2><span class="num">6</span>What changes now</h2>
+  <ul class="clean">
+    <li><b>No countdown.</b> A tool doesn't need a premiere, it needs a drumbeat. The blunt posts we built ("Free booking? Fine.", "One app instead of three? Obviously.") become evergreen, posted on rhythm, no clock, no pressure.</li>
+    <li><b>The call to action becomes "set up your free book."</b> No waitlist, no list to join. When 3.0 is ready, techs go straight into signup.</li>
+    <li><b>New content that works:</b> DM-pain posts, 30-second demo reels (client taps photo, books, done), before-and-after of a chaotic DM thread next to a clean booking page.</li>
+  </ul>
+
+  <h2><span class="num">7</span>The one number we watch</h2>
+  <p>Not followers. Not signups. <b>Activated techs:</b> set up her services and hours, shared her link, took one real booking. That's a tech whose business now lives with us. We check it weekly and it tells us the truth.</p>
+
+  <h2><span class="num">8</span>Two things to stay ahead of</h2>
+  <ul class="clean">
+    <li><b>"Can I take a deposit?"</b> will be asked in week one, no-shows are a DM tech's biggest money pain. The answer for now: put your Venmo in the booking note. Real deposit support is on the roadmap and will be a big retention win when it lands.</li>
+    <li><b>"Free forever... sure."</b> This audience has been burned by creeping fees before. Our transparency page is a weapon: booking is free forever because photos are how we make money. We say the whole business model out loud, competitors can't.</li>
+  </ul>
+
+  <div class="statement">
+    <div class="label">Where we stand</div>
+    <p>For nail techs still booking through their DMs, MNC is the <b>free booking system built only for nails</b>, where your work is your booking page. Clients tap the set they love and book you. <b>Free forever</b>, because we make our money when you choose to show more work, not when you book it.</p>
+  </div>
+
+  <div class="footer">MNC 3.0 · Rooted in 2.0, ridiculously better 🌸</div>
+
+</div>
+</body>
+</html>

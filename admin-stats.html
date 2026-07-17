@@ -9,7 +9,7 @@
 <link rel="icon" href="favicon.ico" sizes="any"/>
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png"/>
 <link rel="apple-touch-icon" href="apple-touch-icon.png"/>
-<meta name="theme-color" content="#C4786A"/>
+<meta name="theme-color" content="#7D6478"/>
 
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
@@ -17,15 +17,15 @@
 
 <style>
   :root {
-    --rose: #C4786A;
-    --rose-dark: #8B4A40;
-    --rose-light: #FDF0EE;
-    --rose-mid: #E0A898;
-    --cream: #FAF7F4;
-    --charcoal: #2C2420;
-    --muted: #8A7A74;
+    --rose: #BFA6BB;
+    --rose-dark: #7D6478;
+    --rose-light: #F7E8EE;
+    --rose-mid: #D9C6D6;
+    --cream: #FBF8FA;
+    --charcoal: #141317;
+    --muted: #8B7F8A;
     --white: #fff;
-    --border: rgba(196,120,106,0.18);
+    --border: rgba(125,100,120,0.16);
     --green: #4A7A5A;
     --green-soft: #CFE7D4;
   }
@@ -34,8 +34,8 @@
   body {
     font-family: 'DM Sans', sans-serif;
     background:
-      radial-gradient(900px 380px at 50% -120px, rgba(224,168,152,0.32), transparent 60%),
-      linear-gradient(180deg, #FDF0EE 0%, var(--cream) 380px, var(--cream) 100%);
+      radial-gradient(900px 380px at 50% -120px, rgba(191,166,187,0.30), transparent 60%),
+      linear-gradient(180deg, #F7E8EE 0%, var(--cream) 380px, var(--cream) 100%);
     color: var(--charcoal);
     padding: 38px 18px 80px;
     line-height: 1.5;
@@ -52,6 +52,12 @@
   @keyframes sway {
     0%, 100% { transform: rotate(-4deg); }
     50%      { transform: rotate(6deg); }
+  }
+  .hero-logo {
+    width: 84px; height: 84px; object-fit: cover;
+    border-radius: 22px; display: block; margin: 0 auto 12px;
+    border: 1px solid var(--border);
+    box-shadow: 0 6px 20px rgba(125,100,120,0.22);
   }
   h1 {
     font-family: 'Playfair Display', serif;
@@ -84,7 +90,7 @@
   #auth-card {
     background: white; border: 1px solid var(--border);
     border-radius: 20px; padding: 28px 26px; max-width: 380px;
-    margin: 24px auto 0; box-shadow: 0 4px 28px rgba(196,120,106,0.12);
+    margin: 24px auto 0; box-shadow: 0 4px 28px rgba(125,100,120,0.14);
   }
   #auth-card h2 {
     font-family: 'Playfair Display', serif; font-weight: 700;
@@ -107,11 +113,11 @@
   }
   #auth-card button {
     width: 100%; padding: 12px; margin-top: 18px;
-    background: linear-gradient(160deg, #D4908A 0%, #A9665D 100%);
+    background: linear-gradient(160deg, #9E86A0 0%, #7D6478 100%);
     color: white; font-family: 'DM Sans', sans-serif;
     font-size: 14px; font-weight: 600; border: none;
     border-radius: 10px; cursor: pointer;
-    box-shadow: 0 3px 12px rgba(169,102,93,0.32);
+    box-shadow: 0 3px 12px rgba(125,100,120,0.32);
     transition: transform 0.12s;
   }
   #auth-card button:hover { transform: translateY(-1px); }
@@ -147,9 +153,9 @@
     box-shadow: 0 6px 22px rgba(44,36,32,0.09);
   }
   .stat-card.featured {
-    background: linear-gradient(160deg, #C4786A 0%, #8B4A40 100%);
+    background: linear-gradient(160deg, #9E86A0 0%, #7D6478 100%);
     color: white; border: none;
-    box-shadow: 0 6px 20px rgba(139,74,64,0.28);
+    box-shadow: 0 6px 20px rgba(125,100,120,0.28);
   }
   .stat-card.featured::after {
     content: '🌸'; position: absolute;
@@ -448,7 +454,7 @@
 <div class="wrap">
 
   <header class="hero">
-    <div class="hero-bloom" aria-hidden="true">🌸</div>
+    <img class="hero-logo" src="images/mnc-lady.png" alt="My Nail Connection" width="84" height="84"/>
     <h1>MNC <em>at a glance</em></h1>
     <div class="sub">The state of the salon, live from the server.</div>
     <div id="updated-line" class="updated-chip">Updated <span id="stats-updated">just now</span></div>
@@ -953,13 +959,13 @@
     area += 'L' + (pad + (days.length-1) * stepX).toFixed(1) + ',' + (H-pad) + ' L' + pad + ',' + (H-pad) + ' Z';
     $('stat-spark').innerHTML =
       '<defs><linearGradient id="sparkFill" x1="0" x2="0" y1="0" y2="1">' +
-        '<stop offset="0%" stop-color="#C4786A" stop-opacity="0.32"/>' +
-        '<stop offset="100%" stop-color="#C4786A" stop-opacity="0"/>' +
+        '<stop offset="0%" stop-color="#7D6478" stop-opacity="0.32"/>' +
+        '<stop offset="100%" stop-color="#7D6478" stop-opacity="0"/>' +
       '</linearGradient></defs>' +
       '<path d="' + area + '" fill="url(#sparkFill)"/>' +
-      '<path d="' + path + '" fill="none" stroke="#C4786A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>' +
+      '<path d="' + path + '" fill="none" stroke="#7D6478" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>' +
       vals.map((v, i) => v > 0
-        ? ('<circle cx="' + (pad + i*stepX).toFixed(1) + '" cy="' + yFor(v).toFixed(1) + '" r="3" fill="#8B4A40"/>')
+        ? ('<circle cx="' + (pad + i*stepX).toFixed(1) + '" cy="' + yFor(v).toFixed(1) + '" r="3" fill="#7D6478"/>')
         : ''
       ).join('');
     const total14 = vals.reduce((a,b) => a+b, 0);
