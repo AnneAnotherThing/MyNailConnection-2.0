@@ -521,6 +521,10 @@
   }
   .btn-outline:hover { background: linear-gradient(160deg, #D6C4D2 0%, #C9B2C5 60%, #BAA3B6 100%); transform: translateY(-4px); box-shadow: 0 12px 30px rgba(125,100,120,0.36), inset 0 1px 0 rgba(255,255,255,0.5); }
   .btn-outline:active { transform: translateY(1px); }
+  /* Store buttons (App Store / Google Play / Use on Web) hidden pre-launch
+     2026-07-17, Anne. Waitlist is the CTA until the app ships. Remove this
+     rule to bring them back. */
+  .store-btns, .footer-stores { display: none !important; }
   .store-btns {
     display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;
   }
@@ -1483,26 +1487,31 @@
   .hero-ping {
     display: none;
     position: absolute;
-    align-items: center; gap: 9px;
-    background: #fff;
-    border: 1px solid rgba(125,100,120,0.20);
-    border-radius: 100px;
-    padding: 9px 15px 9px 12px;
-    box-shadow: 0 12px 28px rgba(20,19,23,0.16), 0 2px 6px rgba(20,19,23,0.06);
-    font-size: 12.5px; font-weight: 600; color: #141317;
-    white-space: nowrap;
+    width: 250px;
+    align-items: flex-start; gap: 10px;
+    background: rgba(255,255,255,0.9);
+    -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.65);
+    border-radius: 17px;
+    padding: 11px 13px;
+    box-shadow: 0 18px 44px rgba(20,19,23,0.20), 0 2px 8px rgba(20,19,23,0.08);
     opacity: 0;
   }
-  .hero-ping i {
-    width: 20px; height: 20px; border-radius: 50%;
+  .hero-ping .ic {
+    width: 34px; height: 34px; border-radius: 9px;
     display: inline-flex; align-items: center; justify-content: center;
     background: linear-gradient(160deg, #CDB8C9, #7D6478);
-    flex-shrink: 0;
+    flex-shrink: 0; box-shadow: 0 2px 6px rgba(125,100,120,0.4);
   }
-  .hero-ping em { font-style: normal; color: #7A6E78; font-weight: 500; }
+  .hero-ping .body { flex: 1; min-width: 0; }
+  .hero-ping .prow { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+  .hero-ping .app { font-size: 10.5px; font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase; color: #7D6478; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .hero-ping .time { font-size: 10.5px; color: #A99DA8; font-weight: 500; white-space: nowrap; flex-shrink: 0; }
+  .hero-ping .msg { font-size: 13px; font-weight: 600; color: #141317; margin-top: 2px; line-height: 1.3; }
+  .hero-ping .msg em { font-style: normal; color: #7A6E78; font-weight: 500; }
   /* gate: a ping needs (text-card gap) > (overhang + margin). At 1160px the gap
      is only 26px and all three collided with the copy. Safe from ~1300px. */
-  @media (min-width: 1300px) { .hero-ping { display: inline-flex; } }
+  @media (min-width: 1360px) { .hero-ping { display: flex; } }
 
   /* They STACK: each lands, holds while the next arrives, so they pile up
      ("the bookings keep coming") rather than replacing each other. The pile
@@ -1703,7 +1712,7 @@
 <!-- NAV -->
 <nav>
   <div class="nav-brand">
-    <img src="images/mncLogo-64.webp" decoding="async" width="64" height="64" alt="My Nail Connection logo" style="width:32px;height:32px;border-radius:8px;"/>
+    <img src="images/mncLogo-round-256.webp" decoding="async" width="256" height="256" alt="My Nail Connection logo" style="width:40px;height:40px;border-radius:10px;"/>
     <span>My Nail Connection</span>
   </div>
   <div class="nav-links">
@@ -1717,12 +1726,12 @@
   <div class="hero-art" aria-hidden="true">
     <img src="images/lady-card.webp" width="900" height="900" alt="" decoding="async" fetchpriority="high"/>
     <div class="hero-pings" aria-hidden="true">
-      <span class="hero-ping p1"><i><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></i>New booking <em>&nbsp;·&nbsp; Thu 2:00</em></span>
-      <span class="hero-ping p2"><i><svg viewBox="0 0 24 24" width="11" height="11" fill="#fff"><circle cx="12" cy="12" r="6"/></svg></i>Available Today <em>&nbsp;·&nbsp; you're glowing</em></span>
-      <span class="hero-ping p3"><i><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></i>New booking <em>&nbsp;·&nbsp; Thu 4:30</em></span>
-      <span class="hero-ping p4"><i><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg></i>Standing appointment <em>&nbsp;·&nbsp; renewed</em></span>
-      <span class="hero-ping p5"><i><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></i>Fri 11:00 <em>&nbsp;·&nbsp; that cancelled slot, filled</em></span>
-      <span class="hero-ping p6"><i><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></i>New booking <em>&nbsp;·&nbsp; Sat 1:15</em></span>
+      <span class="hero-ping p1"><span class="ic"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span><span class="body"><span class="prow"><span class="app">My Nail Connection</span><span class="time">now</span></span><span class="msg">New booking <em>&nbsp;&middot; Thu 2:00</em></span></span></span>
+      <span class="hero-ping p2"><span class="ic"><svg viewBox="0 0 24 24" width="15" height="15" fill="#fff"><circle cx="12" cy="12" r="6"/></svg></span><span class="body"><span class="prow"><span class="app">My Nail Connection</span><span class="time">2m</span></span><span class="msg">You're glowing <em>&nbsp;&middot; Available today</em></span></span></span>
+      <span class="hero-ping p3"><span class="ic"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span><span class="body"><span class="prow"><span class="app">My Nail Connection</span><span class="time">6m</span></span><span class="msg">New booking <em>&nbsp;&middot; Thu 4:30</em></span></span></span>
+      <span class="hero-ping p4"><span class="ic"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg></span><span class="body"><span class="prow"><span class="app">My Nail Connection</span><span class="time">14m</span></span><span class="msg">Standing appointment <em>&nbsp;&middot; renewed</em></span></span></span>
+      <span class="hero-ping p5"><span class="ic"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span><span class="body"><span class="prow"><span class="app">My Nail Connection</span><span class="time">22m</span></span><span class="msg">Cancelled slot filled <em>&nbsp;&middot; Fri 11:00</em></span></span></span>
+      <span class="hero-ping p6"><span class="ic"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span><span class="body"><span class="prow"><span class="app">My Nail Connection</span><span class="time">1h</span></span><span class="msg">New booking <em>&nbsp;&middot; Sat 1:15</em></span></span></span>
     </div>
   </div>
   <div class="hero-inner">
