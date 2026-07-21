@@ -29,9 +29,9 @@
      in product). See the inline cleanup script near </body> for how
      returning visitors with a stale root-scoped service worker get
      unregistered. -->
-<meta name="theme-color" content="#BFA6BB"/>
+<meta name="theme-color" content="#DEB3B5"/>
 <meta name="application-name" content="My Nail Connection"/>
-<meta name="msapplication-TileColor" content="#BFA6BB"/>
+<meta name="msapplication-TileColor" content="#DEB3B5"/>
 <meta name="apple-itunes-app" content="app-id=6764125663"/>
 
 <!-- ─── Open Graph (Facebook, LinkedIn, iMessage, Slack) ─── -->
@@ -301,17 +301,17 @@
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --rose: #BFA6BB;
-    --rose-dark: #5C3D5E;
-    --rose-light: #F7EBEE;
-    --rose-mid: #C9A8C7;
-    --gold: #8A7880;
+    --rose: #DEB3B5;
+    --rose-dark: #A2636C;
+    --rose-light: #F7E2E3;
+    --rose-mid: #D0A3A5;
+    --gold: #8A7879;
     --gold-light: #EDE7E6;
-    --cream: #F7EBEE;
+    --cream: #F7E2E3;
     --charcoal: #0B0B0D;
     --muted: #7A6E78;
     --white: #ffffff;
-    --border: rgba(191,166,187,0.2);
+    --border: rgba(191,166,168,0.2);
   }
 
   html { scroll-behavior: smooth; }
@@ -370,7 +370,7 @@
   /* ── HERO ── */
   .hero {
     min-height: 100vh;
-    background: linear-gradient(160deg, #1A1520 0%, #241A2B 30%, #2E2040 60%, #241A2B 100%);
+    background: linear-gradient(160deg, #1C1A19 0%, #242221 30%, #32302E 60%, #242221 100%);
     display: flex; align-items: center; justify-content: center;
     text-align: center;
     padding: 156px 24px 80px;
@@ -379,7 +379,7 @@
   .hero::before {
     content: '';
     position: absolute; inset: 0;
-    background: radial-gradient(ellipse at 50% 0%, rgba(200,170,200,0.5) 0%, transparent 60%),
+    background: radial-gradient(ellipse at 50% 0%, rgba(200,170,172,0.5) 0%, transparent 60%),
                 radial-gradient(ellipse at 20% 80%, rgba(210,130,110,0.2) 0%, transparent 50%),
                 radial-gradient(ellipse at 80% 60%, rgba(180,110,90,0.15) 0%, transparent 40%);
   }
@@ -395,7 +395,7 @@
     margin: 0 auto 28px;
     display: block;
     object-fit: contain;
-    filter: drop-shadow(-8px 16px 32px rgba(0,0,0,0.5)) drop-shadow(0 4px 12px rgba(191,166,187,0.3)) brightness(1.05);
+    filter: drop-shadow(-8px 16px 32px rgba(0,0,0,0.5)) drop-shadow(0 4px 12px rgba(191,166,168,0.3)) brightness(1.05);
   }
   .hero-inner { position: relative; z-index: 1; max-width: 800px; }
 
@@ -410,26 +410,26 @@
   /* ── 2.0 BADGE ── */
   .hero-badge {
     display: inline-flex; align-items: center; gap: 10px;
-    background: linear-gradient(135deg, rgba(191,166,187,0.25), rgba(191,166,187,0.1));
-    border: 1px solid rgba(191,166,187,0.5);
+    background: linear-gradient(135deg, rgba(191,166,168,0.25), rgba(191,166,168,0.1));
+    border: 1px solid rgba(191,166,168,0.5);
     border-radius: 100px;
     padding: 8px 20px;
     font-size: 11px; font-weight: 700;
-    color: #BFA6BB;
+    color: #DEB3B5;
     letter-spacing: 2px; text-transform: uppercase;
     margin-bottom: 32px;
     backdrop-filter: blur(8px);
-    box-shadow: 0 0 24px rgba(191,166,187,0.2), inset 0 1px 0 rgba(255,255,255,0.1);
+    box-shadow: 0 0 24px rgba(191,166,168,0.2), inset 0 1px 0 rgba(255,255,255,0.1);
   }
   .hero-badge-dot {
     width: 6px; height: 6px; border-radius: 50%;
-    background: #BFA6BB;
-    box-shadow: 0 0 8px rgba(210,185,210,0.8);
+    background: #DEB3B5;
+    box-shadow: 0 0 8px rgba(210,185,187,0.8);
     animation: pulse-dot 2s ease-in-out infinite;
   }
   @keyframes pulse-dot {
-    0%, 100% { opacity: 1; box-shadow: 0 0 8px rgba(210,185,210,0.8); }
-    50% { opacity: 0.6; box-shadow: 0 0 16px rgba(210,185,210,0.4); }
+    0%, 100% { opacity: 1; box-shadow: 0 0 8px rgba(210,185,187,0.8); }
+    50% { opacity: 0.6; box-shadow: 0 0 16px rgba(210,185,187,0.4); }
   }
   /* Launch-day sparkle on the hero badge */
   .hero-badge-sparkle {
@@ -463,7 +463,7 @@
   }
   .hero h1 em {
     font-style: italic;
-    color: #BFA6BB;
+    color: #DEB3B5;
     text-shadow: 0 2px 10px rgba(0,0,0,0.30);
   }
   .hero-sub {
@@ -484,7 +484,7 @@
     display: inline-flex; align-items: center; gap: 10px;
     /* 3.0: black primary, convex by light (not keylines), on the ivory hero */
     background: linear-gradient(160deg, #34303A 0%, #141317 62%, #0B0B0D 100%);
-    color: #F7EBEE;
+    color: #F7E2E3;
     padding: 16px 36px;
     border-radius: 14px;
     font-size: 16px; font-weight: 600;
@@ -504,7 +504,7 @@
        only 1.03 against the ivory hero, i.e. the button shape was invisible even
        though its text was readable. Mauve is the brand accent and reads as a
        real button against ivory while staying subordinate to the black primary. */
-    background: linear-gradient(160deg, #CDB8C9 0%, #BFA6BB 60%, #B098AC 100%);
+    background: linear-gradient(160deg, #CDB8B9 0%, #DEB3B5 60%, #B0989A 100%);
     color: #141317;
     padding: 16px 36px;
     border-radius: 14px;
@@ -513,13 +513,13 @@
     /* solid deep-mauve keyline: the mauve FILL only scores ~1.6 against ivory
        (it reads by hue, not lightness), so the border carries the 3:1 boundary
        contrast WCAG wants for a control edge. */
-    border: 1.5px solid #7D6478;
-    border-bottom: 3.5px solid #5C3D5E;
-    box-shadow: 0 5px 18px rgba(125,100,120,0.30), inset 0 1px 0 rgba(255,255,255,0.5);
+    border: 1.5px solid #A2636C;
+    border-bottom: 3.5px solid #A2636C;
+    box-shadow: 0 5px 18px rgba(125,100,102,0.30), inset 0 1px 0 rgba(255,255,255,0.5);
     transition: transform 0.18s cubic-bezier(0.34,1.4,0.64,1), background 0.2s;
     cursor: pointer; backdrop-filter: blur(8px);
   }
-  .btn-outline:hover { background: linear-gradient(160deg, #D6C4D2 0%, #C9B2C5 60%, #BAA3B6 100%); transform: translateY(-4px); box-shadow: 0 12px 30px rgba(125,100,120,0.36), inset 0 1px 0 rgba(255,255,255,0.5); }
+  .btn-outline:hover { background: linear-gradient(160deg, #D6C4C5 0%, #C9B2B4 60%, #BAA3A5 100%); transform: translateY(-4px); box-shadow: 0 12px 30px rgba(125,100,102,0.36), inset 0 1px 0 rgba(255,255,255,0.5); }
   .btn-outline:active { transform: translateY(1px); }
   /* Store buttons (App Store / Google Play / Use on Web) hidden pre-launch
      2026-07-17, Anne. Waitlist is the CTA until the app ships. Remove this
@@ -556,8 +556,8 @@
        the hero is loud. Brand keeps its black primary. */
     background: rgba(255,255,255,0.55);
     color: #141317;
-    border: 1.5px solid rgba(125,100,120,0.34);
-    border-bottom: 2.5px solid rgba(125,100,120,0.34);
+    border: 1.5px solid rgba(125,100,102,0.34);
+    border-bottom: 2.5px solid rgba(125,100,102,0.34);
     box-shadow: 0 3px 12px rgba(20,19,23,0.07), inset 0 1px 0 rgba(255,255,255,0.9);
   }
   /* the Apple/Play marks are fill="white" attributes; on a light chip they'd vanish */
@@ -566,7 +566,7 @@
   .final-cta .store-btn:hover,
   .hero .store-btn:hover {
     background: #FFFFFF;
-    border-color: rgba(125,100,120,0.6);
+    border-color: rgba(125,100,102,0.6);
     box-shadow: 0 10px 24px rgba(20,19,23,0.12), inset 0 1px 0 rgba(255,255,255,0.95);
   }
   /* Disabled (pre-launch) state, inert, reads as "not live yet" */
@@ -580,8 +580,8 @@
     box-shadow: 0 6px 24px rgba(0,0,0,0.3);
   }
   .store-btn--disabled:hover .store-btn-ribbon {
-    background: linear-gradient(135deg, #BFA6BB, #8A7880);
-    color: #F7EBEE;
+    background: linear-gradient(135deg, #DEB3B5, #8A7879);
+    color: #F7E2E3;
   }
   .store-btn--disabled .store-btn-text { opacity: 0.82; }
   /* Coming Soon corner badge */
@@ -603,7 +603,7 @@
     text-align: center;
     font-size: 10px; font-weight: 700;
     letter-spacing: 1.5px; text-transform: uppercase;
-    color: #BFA6BB;
+    color: #DEB3B5;
     margin-top: 8px;
   }
   .store-btn svg { flex-shrink: 0; opacity: 0.9; }
@@ -635,17 +635,17 @@
     gap: 20px;
   }
   .tech-card {
-    background: linear-gradient(160deg, #FFFBF9 0%, #FBF6F8 100%);
+    background: linear-gradient(160deg, #FFFBF9 0%, #FBF6F6 100%);
     border-radius: 18px;
     padding: 28px 26px;
-    border: 1px solid rgba(191,166,187,0.18);
-    border-bottom: 3px solid rgba(191,166,187,0.22);
-    box-shadow: 0 2px 12px rgba(191,166,187,0.06), inset 0 1px 0 rgba(255,255,255,0.9);
+    border: 1px solid rgba(191,166,168,0.18);
+    border-bottom: 3px solid rgba(191,166,168,0.22);
+    box-shadow: 0 2px 12px rgba(191,166,168,0.06), inset 0 1px 0 rgba(255,255,255,0.9);
     opacity: 0; transform: translateY(20px);
     transition: opacity 0.5s ease, transform 0.5s ease, box-shadow 0.2s;
   }
   .tech-card.visible { opacity: 1; transform: translateY(0); }
-  .tech-card:hover { box-shadow: 0 8px 28px rgba(191,166,187,0.13), inset 0 1px 0 rgba(255,255,255,0.9); transform: translateY(-3px); }
+  .tech-card:hover { box-shadow: 0 8px 28px rgba(191,166,168,0.13), inset 0 1px 0 rgba(255,255,255,0.9); transform: translateY(-3px); }
   .tech-card-header {
     display: flex;
     align-items: center;
@@ -662,7 +662,7 @@
   .tech-card-num {
     font-family: 'Playfair Display', serif;
     font-size: 28px; font-weight: 700;
-    color: rgba(191,166,187,0.2);
+    color: rgba(191,166,168,0.2);
     line-height: 1;
   }
   .tech-card h3 {
@@ -711,12 +711,12 @@
     gap: 20px;
   }
   .feature-card {
-    background: linear-gradient(160deg, #FFFBF9 0%, #FBF6F8 100%);
+    background: linear-gradient(160deg, #FFFBF9 0%, #FBF6F6 100%);
     border-radius: 18px;
     padding: 32px 28px;
-    border: 1px solid rgba(191,166,187,0.18);
-    border-bottom: 3px solid rgba(191,166,187,0.22);
-    box-shadow: 0 2px 12px rgba(191,166,187,0.07), inset 0 1px 0 rgba(255,255,255,0.8);
+    border: 1px solid rgba(191,166,168,0.18);
+    border-bottom: 3px solid rgba(191,166,168,0.22);
+    box-shadow: 0 2px 12px rgba(191,166,168,0.07), inset 0 1px 0 rgba(255,255,255,0.8);
     opacity: 0; transform: translateY(24px);
     transition: opacity 0.5s ease, transform 0.5s ease, box-shadow 0.2s;
   }
@@ -724,7 +724,7 @@
     opacity: 1; transform: translateY(0);
   }
   .feature-card:hover {
-    box-shadow: 0 10px 32px rgba(191,166,187,0.14), inset 0 1px 0 rgba(255,255,255,0.8);
+    box-shadow: 0 10px 32px rgba(191,166,168,0.14), inset 0 1px 0 rgba(255,255,255,0.8);
     transform: translateY(-4px);
   }
   .feature-icon {
@@ -780,7 +780,7 @@
     line-height: 1.8;
   }
   .step-visual {
-    background: linear-gradient(160deg, #FBF6F8 0%, #F7EBEE 100%);
+    background: linear-gradient(160deg, #FBF6F6 0%, #F7E2E3 100%);
     border-radius: 16px;
     padding: 24px;
     display: flex; align-items: center; justify-content: center;
@@ -788,19 +788,19 @@
     max-width: 120px;
     width: 100%;
     margin: 0 auto;
-    border: 1px solid rgba(191,166,187,0.18);
-    border-bottom: 3px solid rgba(191,166,187,0.22);
-    box-shadow: 0 4px 20px rgba(191,166,187,0.07), inset 0 1px 0 rgba(255,255,255,0.8);
+    border: 1px solid rgba(191,166,168,0.18);
+    border-bottom: 3px solid rgba(191,166,168,0.22);
+    box-shadow: 0 4px 20px rgba(191,166,168,0.07), inset 0 1px 0 rgba(255,255,255,0.8);
     position: relative; overflow: hidden;
   }
   .step-visual::before {
     content: '';
     position: absolute; inset: 0;
-    background: radial-gradient(circle at 70% 30%, rgba(191,166,187,0.1), transparent 60%);
+    background: radial-gradient(circle at 70% 30%, rgba(191,166,168,0.1), transparent 60%);
   }
   .step-visual svg {
     position: relative; z-index: 1;
-    filter: drop-shadow(0 2px 8px rgba(191,166,187,0.2));
+    filter: drop-shadow(0 2px 8px rgba(191,166,168,0.2));
     width: 48px !important; height: 48px !important;
   }
 
@@ -816,7 +816,7 @@
     position: relative; overflow: hidden;
   }
   .audience-card.clients {
-    background: linear-gradient(135deg, #F7EBEE 0%, #EDEAE5 100%);
+    background: linear-gradient(135deg, #F7E2E3 0%, #EDEAE5 100%);
     border: 1.5px solid var(--border);
   }
   .audience-card.techs {
@@ -838,8 +838,8 @@
     border: 1px solid var(--rose-mid);
   }
   .audience-card.techs .audience-tag {
-    background: rgba(191,166,187,0.2); color: var(--rose-mid);
-    border: 1px solid rgba(191,166,187,0.3);
+    background: rgba(191,166,168,0.2); color: var(--rose-mid);
+    border: 1px solid rgba(191,166,168,0.3);
   }
   .audience-card h2 {
     font-family: 'Playfair Display', serif;
@@ -870,7 +870,7 @@
     flex-shrink: 0;
   }
   .audience-card.clients .check { background: var(--rose-light); }
-  .audience-card.techs .check { background: rgba(191,166,187,0.25); }
+  .audience-card.techs .check { background: rgba(191,166,168,0.25); }
 
   /* ── PRICING ── */
   .pricing-grid {
@@ -881,19 +881,19 @@
     margin: 0 auto;
   }
   .price-card {
-    background: linear-gradient(160deg, #FFFBF9 0%, #FBF6F8 100%);
+    background: linear-gradient(160deg, #FFFBF9 0%, #FBF6F6 100%);
     border-radius: 18px;
     padding: 36px 28px;
-    border: 1px solid rgba(191,166,187,0.18);
-    border-bottom: 3px solid rgba(191,166,187,0.22);
-    box-shadow: 0 2px 12px rgba(191,166,187,0.06), inset 0 1px 0 rgba(255,255,255,0.9);
+    border: 1px solid rgba(191,166,168,0.18);
+    border-bottom: 3px solid rgba(191,166,168,0.22);
+    box-shadow: 0 2px 12px rgba(191,166,168,0.06), inset 0 1px 0 rgba(255,255,255,0.9);
     text-align: center;
     position: relative;
     transition: transform 0.2s, box-shadow 0.2s;
   }
-  .price-card:hover { transform: translateY(-5px); box-shadow: 0 14px 40px rgba(191,166,187,0.16), inset 0 1px 0 rgba(255,255,255,0.9); }
+  .price-card:hover { transform: translateY(-5px); box-shadow: 0 14px 40px rgba(191,166,168,0.16), inset 0 1px 0 rgba(255,255,255,0.9); }
   .price-card.featured {
-    background: linear-gradient(160deg, #1A1520, #0B0B0D);
+    background: linear-gradient(160deg, #1C1A19, #0B0B0D);
     border-color: transparent;
     color: white;
     transform: scale(1.04);
@@ -958,7 +958,7 @@
 
   /* ── FINAL CTA ── */
   .final-cta {
-    background: linear-gradient(160deg, #F7EBEE 0%, #FBF6F8 40%, #EDEAE5 100%);
+    background: linear-gradient(160deg, #F7E2E3 0%, #FBF6F6 40%, #EDEAE5 100%);
     text-align: center;
     padding: 120px 24px 60px;
     position: relative; overflow: hidden;
@@ -966,7 +966,7 @@
   .final-cta::before {
     content: '';
     position: absolute; inset: 0;
-    background: radial-gradient(ellipse at center, rgba(191,166,187,0.08), transparent 70%);
+    background: radial-gradient(ellipse at center, rgba(191,166,168,0.08), transparent 70%);
   }
   .final-cta-inner { position: relative; z-index: 1; max-width: 640px; margin: 0 auto; }
   .final-cta h2 {
@@ -1039,7 +1039,7 @@
     transition: background .15s ease, color .15s ease, transform .15s ease;
   }
   .footer-socials a:hover {
-    background: rgba(191,166,187,0.85);
+    background: rgba(191,166,168,0.85);
     color: #FFFFFF;
     transform: translateY(-2px);
   }
@@ -1051,9 +1051,9 @@
     line-height: 1.6;
     color: rgba(255,255,255,0.78);
   }
-  .footer-hive .heart { color: #BFA6BB; font-size: 15px; }
+  .footer-hive .heart { color: #DEB3B5; font-size: 15px; }
   .footer-hive a {
-    color: #F7EBEE;
+    color: #F7E2E3;
     text-decoration: underline;
     font-weight: 600;
   }
@@ -1210,8 +1210,8 @@
   .announce-banner {
     position: fixed; top: 0; left: 0; right: 0;
     height: 36px;
-    background: linear-gradient(90deg, #BFA6BB 0%, #7D6478 25%, #8A7880 55%, #BFA6BB 100%);
-    color: #F7EBEE;
+    background: linear-gradient(90deg, #DEB3B5 0%, #A2636C 25%, #8A7879 55%, #DEB3B5 100%);
+    color: #F7E2E3;
     z-index: 110;
     overflow: hidden;
     display: flex; align-items: center;
@@ -1321,8 +1321,8 @@
     position: fixed;
     right: 24px; bottom: 24px;
     width: 340px; max-width: calc(100vw - 32px);
-    background: linear-gradient(160deg, #FFFFFF 0%, #F7EBEE 100%);
-    border: 1px solid rgba(191,166,187,0.28);
+    background: linear-gradient(160deg, #FFFFFF 0%, #F7E2E3 100%);
+    border: 1px solid rgba(191,166,168,0.28);
     border-radius: 22px;
     box-shadow: 0 20px 56px rgba(82,40,30,0.22), 0 2px 8px rgba(82,40,30,0.10);
     padding: 22px 22px 20px;
@@ -1340,20 +1340,20 @@
   }
   .popin::before {
     content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
-    background: linear-gradient(90deg, #BFA6BB 0%, #C9A8C7 50%, #8A7880 100%);
+    background: linear-gradient(90deg, #DEB3B5 0%, #D0A3A5 50%, #8A7879 100%);
     border-radius: 22px 22px 0 0;
   }
   .popin-close {
     position: absolute; top: 10px; right: 10px;
     width: 28px; height: 28px; border-radius: 50%;
-    background: rgba(191,166,187,0.08);
+    background: rgba(191,166,168,0.08);
     border: none; cursor: pointer;
     color: var(--muted);
     font-size: 16px; line-height: 1;
     display: flex; align-items: center; justify-content: center;
     transition: background 0.15s, color 0.15s, transform 0.15s;
   }
-  .popin-close:hover { background: rgba(191,166,187,0.18); color: var(--rose-dark); transform: rotate(90deg); }
+  .popin-close:hover { background: rgba(191,166,168,0.18); color: var(--rose-dark); transform: rotate(90deg); }
   .popin-bloom {
     font-size: 26px; line-height: 1;
     margin-bottom: 6px;
@@ -1406,11 +1406,11 @@
   /* Contrasting label on the dark final-cta background */
   .final-cta .coming-soon-label {
     display: inline-block;
-    background: linear-gradient(160deg, #F7EBEE 0%, #EDE7E6 100%);
+    background: linear-gradient(160deg, #F7E2E3 0%, #EDE7E6 100%);
     color: var(--rose-dark);
     padding: 14px 26px;
     border-radius: 16px;
-    border: 1.5px solid rgba(191,166,187,0.32);
+    border: 1.5px solid rgba(191,166,168,0.32);
     font-style: normal;
     font-weight: 500;
     font-size: 13.5px;
@@ -1449,8 +1449,8 @@
     padding-right: max(clamp(24px, 6vw, 72px), calc((100% - 1280px) / 2));
   }
   .hero::before {
-    background: radial-gradient(ellipse at 12% 25%, rgba(191,166,187,0.28) 0%, transparent 62%),
-                radial-gradient(ellipse at 85% 85%, rgba(125,100,120,0.10) 0%, transparent 55%);
+    background: radial-gradient(ellipse at 12% 25%, rgba(191,166,168,0.28) 0%, transparent 62%),
+                radial-gradient(ellipse at 85% 85%, rgba(125,100,102,0.10) 0%, transparent 55%);
   }
   .hero::after { opacity: 0.14; }
   /* The raised card (Anne, 2026-07-15: "love the lady on 2.5, do that for main
@@ -1500,13 +1500,13 @@
   .hero-ping .ic {
     width: 34px; height: 34px; border-radius: 9px;
     display: inline-flex; align-items: center; justify-content: center;
-    background: linear-gradient(160deg, #CDB8C9, #7D6478);
-    flex-shrink: 0; box-shadow: 0 2px 6px rgba(125,100,120,0.4);
+    background: linear-gradient(160deg, #CDB8B9, #A2636C);
+    flex-shrink: 0; box-shadow: 0 2px 6px rgba(125,100,102,0.4);
   }
   .hero-ping .body { flex: 1; min-width: 0; }
   .hero-ping .prow { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
-  .hero-ping .app { font-size: 10.5px; font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase; color: #7D6478; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .hero-ping .time { font-size: 10.5px; color: #A99DA8; font-weight: 500; white-space: nowrap; flex-shrink: 0; }
+  .hero-ping .app { font-size: 10.5px; font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase; color: #A2636C; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .hero-ping .time { font-size: 10.5px; color: #A99D9E; font-weight: 500; white-space: nowrap; flex-shrink: 0; }
   .hero-ping .msg { font-size: 13px; font-weight: 600; color: #141317; margin-top: 2px; line-height: 1.3; }
   .hero-ping .msg em { font-style: normal; color: #7A6E78; font-weight: 500; }
   /* gate: a ping needs (text-card gap) > (overhang + margin). At 1160px the gap
@@ -1540,12 +1540,12 @@
     position: absolute; inset: -12%;
     border-radius: 50%;
     z-index: -1;
-    background: radial-gradient(circle, rgba(191,166,187,0.38) 0%, transparent 64%);
+    background: radial-gradient(circle, rgba(191,166,168,0.38) 0%, transparent 64%);
   }
   .hero-inner { max-width: 620px; margin: 0; text-align: left; }
   .hero-logo { display: none; }
   .hero h1 { color: #141317; }
-  .hero h1 em { color: #7D6478; }
+  .hero h1 em { color: #A2636C; }
   .hero .hero-sub { color: #56505C; margin-left: 0; margin-right: 0; }
   .hero .hero-buttons { justify-content: flex-start; }
   .hero .store-btns--mini { justify-content: flex-start !important; }
@@ -1567,10 +1567,10 @@
   }
   .hero .hero-badge {
     background: rgba(20,19,23,0.045);
-    border: 1px solid rgba(125,100,120,0.22);
-    color: #7D6478;
+    border: 1px solid rgba(125,100,102,0.22);
+    color: #A2636C;
   }
-  .hero .hero-badge-dot { background: #7D6478; }
+  .hero .hero-badge-dot { background: #A2636C; }
 
   @media (max-width: 900px) {
     /* stack: copy first, lady beneath. She used to sit BEHIND the headline at
@@ -1605,21 +1605,21 @@
      ══════════════════════════════════════════════════════════════ */
   .gallery-strip { background: #141317; padding: 74px 0 70px; overflow: hidden; }
   .gallery-strip .gs-head { text-align: center; padding: 0 24px; margin-bottom: 26px; }
-  .gallery-strip .gs-eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 2.6px; text-transform: uppercase; color: #BFA6BB; margin-bottom: 12px; }
-  .gallery-strip h2 { font-family: 'Playfair Display', serif; font-weight: 700; font-size: clamp(28px,4.4vw,44px); color: #F7EBEE; line-height: 1.15; letter-spacing: -0.5px; }
-  .gallery-strip h2 em { font-style: italic; color: #BFA6BB; }
-  .gallery-strip .gs-sub { font-size: 15.5px; color: rgba(247,235,238,0.62); line-height: 1.6; max-width: 560px; margin: 14px auto 0; }
-  .gallery-strip .gs-sub strong { color: #BFA6BB; font-weight: 600; }
+  .gallery-strip .gs-eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 2.6px; text-transform: uppercase; color: #DEB3B5; margin-bottom: 12px; }
+  .gallery-strip h2 { font-family: 'Playfair Display', serif; font-weight: 700; font-size: clamp(28px,4.4vw,44px); color: #F7E2E3; line-height: 1.15; letter-spacing: -0.5px; }
+  .gallery-strip h2 em { font-style: italic; color: #DEB3B5; }
+  .gallery-strip .gs-sub { font-size: 15.5px; color: rgba(247,235,236,0.62); line-height: 1.6; max-width: 560px; margin: 14px auto 0; }
+  .gallery-strip .gs-sub strong { color: #DEB3B5; font-weight: 600; }
 
   .gs-chips { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 22px; }
   .gs-chip {
     font-family: inherit; font-size: 12.5px; font-weight: 600; cursor: pointer;
-    color: rgba(247,235,238,0.72); background: rgba(247,235,238,0.06);
-    border: 1px solid rgba(191,166,187,0.28); border-radius: 100px; padding: 8px 15px;
+    color: rgba(247,235,236,0.72); background: rgba(247,235,236,0.06);
+    border: 1px solid rgba(191,166,168,0.28); border-radius: 100px; padding: 8px 15px;
     transition: background .25s, color .25s, border-color .25s, transform .25s;
   }
-  .gs-chip:hover { background: rgba(191,166,187,0.20); color: #F7EBEE; }
-  .gs-chip.on { background: #F7EBEE; color: #141317; border-color: #F7EBEE; transform: translateY(-1px); box-shadow: 0 4px 14px rgba(247,235,238,0.22); }
+  .gs-chip:hover { background: rgba(191,166,168,0.20); color: #F7E2E3; }
+  .gs-chip.on { background: #F7E2E3; color: #141317; border-color: #F7E2E3; transform: translateY(-1px); box-shadow: 0 4px 14px rgba(247,235,236,0.22); }
 
   .gs-track-wrap { position: relative; display: flex; flex-direction: column; gap: 14px; }
   .gs-track-wrap::before, .gs-track-wrap::after { content: ''; position: absolute; top: 0; bottom: 0; width: 11%; z-index: 3; pointer-events: none; }
@@ -1644,12 +1644,12 @@
   }
   .gs-tile img { display: block; width: 100%; height: 100%; object-fit: cover; }
   .gs-tile.dim { opacity: 0.16; filter: grayscale(1) blur(1px); transform: scale(0.96); }
-  .gs-tile.hit { transform: scale(1.03); box-shadow: 0 0 0 2px rgba(247,235,238,0.9), 0 14px 32px rgba(0,0,0,0.5); }
+  .gs-tile.hit { transform: scale(1.03); box-shadow: 0 0 0 2px rgba(247,235,236,0.9), 0 14px 32px rgba(0,0,0,0.5); }
 
   .gs-tag {
     position: absolute; left: 8px; top: 8px; z-index: 2;
     font-size: 10px; font-weight: 700; letter-spacing: .3px;
-    color: #141317; background: #F7EBEE; padding: 4px 9px; border-radius: 100px;
+    color: #141317; background: #F7E2E3; padding: 4px 9px; border-radius: 100px;
     opacity: 0; transform: translateY(-4px); transition: opacity .3s, transform .3s;
     pointer-events: none; white-space: nowrap;
   }
@@ -1658,10 +1658,10 @@
   /* Two availability states, two colours, matching the app's own dots
      (avail-dot.now = rose/mauve, avail-dot.today = gold). Filters are blush,
      so a control never reads as a state. */
-  .gs-tile.live { box-shadow: 0 0 0 2px #BFA6BB, 0 0 30px 5px rgba(191,166,187,0.55), 0 10px 26px rgba(0,0,0,0.42); }
+  .gs-tile.live { box-shadow: 0 0 0 2px #DEB3B5, 0 0 30px 5px rgba(191,166,168,0.55), 0 10px 26px rgba(0,0,0,0.42); }
   .gs-tile.live::after {
     content: 'Available Today'; position: absolute; left: 8px; bottom: 8px;
-    font-size: 9.5px; font-weight: 700; color: #141317; background: #BFA6BB;
+    font-size: 9.5px; font-weight: 700; color: #141317; background: #DEB3B5;
     padding: 4px 9px; border-radius: 100px; box-shadow: 0 3px 10px rgba(0,0,0,0.35);
   }
   .gs-tile.week { box-shadow: 0 0 0 2px #D9B44A, 0 0 26px 4px rgba(217,180,74,0.42), 0 10px 26px rgba(0,0,0,0.42); }
@@ -1670,11 +1670,11 @@
     font-size: 9.5px; font-weight: 700; color: #141317; background: #D9B44A;
     padding: 4px 9px; border-radius: 100px; box-shadow: 0 3px 10px rgba(0,0,0,0.35);
   }
-  .gs-foot { text-align: center; margin-top: 28px; padding: 0 24px; font-size: 13.5px; color: rgba(247,235,238,0.5); }
-  .gs-foot strong { color: #BFA6BB; font-weight: 600; }
+  .gs-foot { text-align: center; margin-top: 28px; padding: 0 24px; font-size: 13.5px; color: rgba(247,235,236,0.5); }
+  .gs-foot strong { color: #DEB3B5; font-weight: 600; }
   .gs-key { display: inline-flex; align-items: center; gap: 6px; margin: 0 12px; }
   .gs-foot .wk { color: #D9B44A; }
-  .gs-live-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #BFA6BB; box-shadow: 0 0 8px 2px rgba(191,166,187,0.7); }
+  .gs-live-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #DEB3B5; box-shadow: 0 0 8px 2px rgba(191,166,168,0.7); }
   .gs-week-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #D9B44A; box-shadow: 0 0 8px 2px rgba(217,180,74,0.6); }
 
   @media (prefers-reduced-motion: reduce) {
@@ -1735,7 +1735,7 @@
     </div>
   </div>
   <div class="hero-inner">
-    <div class="hero-badge"><span class="hero-badge-dot"></span> Version <strong style="color:#141317;font-weight:700;letter-spacing:1.5px;">3.0</strong> <svg class="hero-badge-sparkle" aria-hidden="true" viewBox="0 0 16 16" width="11" height="11" style="vertical-align:-1px;"><path d="M8 0 L9 7 L16 8 L9 9 L8 16 L7 9 L0 8 L7 7 Z" fill="#7D6478"/></svg></div>
+    <div class="hero-badge"><span class="hero-badge-dot"></span> Version <strong style="color:#141317;font-weight:700;letter-spacing:1.5px;">3.0</strong> <svg class="hero-badge-sparkle" aria-hidden="true" viewBox="0 0 16 16" width="11" height="11" style="vertical-align:-1px;"><path d="M8 0 L9 7 L16 8 L9 9 L8 16 L7 9 L0 8 L7 7 Z" fill="#A2636C"/></svg></div>
 
     <h1>Still booking in <em>your DMs?</em></h1>
     <p class="hero-sub">Your work is already why clients pick you. Now it's your booking page too. Free forever, for every nail tech, no commission and no per-booking fee. Already book somewhere else? Keep your link, nothing to switch.</p>
@@ -1799,14 +1799,14 @@
     <div class="section-label">For Nail Techs</div>
     <h2 class="section-title">Your work deserves to be <em style="font-style:italic;color:var(--rose);">found.</em></h2>
     <p class="section-sub">Your booking profile is live the moment you join, free, forever. <strong>Your first photo is free</strong>, and every photo you add lands in the <strong>Gallery</strong> where clients browse by style. After that, photos are $1 each, $5 for ten, or <strong>Glow Up</strong> at $10.99 a month for 25 uploads. No slow patch penalty. You&rsquo;re active until you take yourself down.</p>
-    <p style="text-align:center;margin-top:-12px;margin-bottom:0;"><a href="tech-guide-v3.html" style="font-size:14px;font-weight:600;color:var(--rose);text-decoration:none;border-bottom:1.5px solid rgba(191,166,187,0.3);padding-bottom:1px;">Read the complete setup guide &rarr;</a></p>
+    <p style="text-align:center;margin-top:-12px;margin-bottom:0;"><a href="tech-guide-v3.html" style="font-size:14px;font-weight:600;color:var(--rose);text-decoration:none;border-bottom:1.5px solid rgba(191,166,168,0.3);padding-bottom:1px;">Read the complete setup guide &rarr;</a></p>
 
     <div class="tech-cards-grid">
 
       <div class="tech-card fade-up">
         <div class="tech-card-header">
           <div class="tech-card-icon">
-            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#BFA6BB" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#DEB3B5" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
           </div>
           <span class="tech-card-num">01</span>
         </div>
@@ -1817,7 +1817,7 @@
       <div class="tech-card fade-up">
         <div class="tech-card-header">
           <div class="tech-card-icon">
-            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#BFA6BB" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#DEB3B5" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
           </div>
           <span class="tech-card-num">02</span>
         </div>
@@ -1828,7 +1828,7 @@
       <div class="tech-card fade-up">
         <div class="tech-card-header">
           <div class="tech-card-icon">
-            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#BFA6BB" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#DEB3B5" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
           </div>
           <span class="tech-card-num">03</span>
         </div>
@@ -1839,7 +1839,7 @@
       <div class="tech-card fade-up">
         <div class="tech-card-header">
           <div class="tech-card-icon">
-            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#BFA6BB" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#DEB3B5" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
           </div>
           <span class="tech-card-num">04</span>
         </div>
@@ -1850,7 +1850,7 @@
       <div class="tech-card fade-up">
         <div class="tech-card-header">
           <div class="tech-card-icon">
-            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#BFA6BB" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#DEB3B5" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
           </div>
           <span class="tech-card-num">05</span>
         </div>
@@ -1861,7 +1861,7 @@
       <div class="tech-card fade-up">
         <div class="tech-card-header">
           <div class="tech-card-icon">
-            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#BFA6BB" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#DEB3B5" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>
           </div>
           <span class="tech-card-num">06</span>
         </div>
@@ -1872,9 +1872,9 @@
     </div>
 
     <!-- Archive / show-and-tell promise, your photos don't go anywhere -->
-    <div style="margin-top:48px;padding:40px 32px;background:linear-gradient(160deg, #FFFBF9 0%, #FDF2EC 100%);border-radius:22px;border:1px solid rgba(191,166,187,0.18);box-shadow:0 2px 20px rgba(20,15,25,0.04);text-align:center;max-width:780px;margin-left:auto;margin-right:auto;">
-      <div style="display:inline-flex;align-items:center;justify-content:center;width:52px;height:52px;border-radius:14px;background:rgba(191,166,187,0.1);margin-bottom:18px;">
-        <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#BFA6BB" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M3 16l5-4 4 3 4-5 5 6"/></svg>
+    <div style="margin-top:48px;padding:40px 32px;background:linear-gradient(160deg, #FFFBF9 0%, #FDF2EC 100%);border-radius:22px;border:1px solid rgba(191,166,168,0.18);box-shadow:0 2px 20px rgba(21,20,19,0.04);text-align:center;max-width:780px;margin-left:auto;margin-right:auto;">
+      <div style="display:inline-flex;align-items:center;justify-content:center;width:52px;height:52px;border-radius:14px;background:rgba(191,166,168,0.1);margin-bottom:18px;">
+        <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#DEB3B5" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M3 16l5-4 4 3 4-5 5 6"/></svg>
       </div>
       <h3 style="font-family:'Fraunces',serif;font-size:28px;font-weight:500;color:var(--text);margin:0 0 14px;line-height:1.25;">Your work stays put. <em style="color:var(--rose);font-style:italic;">A portfolio that grows with you.</em></h3>
       <p style="font-size:16px;line-height:1.65;color:var(--muted);max-width:580px;margin:0 auto;">This isn't a social feed, nothing autodeletes, nothing scrolls into the void. Every photo you add is yours. It's your <strong style="color:var(--text);">portfolio</strong>, your <strong style="color:var(--text);">archive</strong>, your <strong style="color:var(--text);">show-and-tell</strong>, the ombre you did last spring is still there next spring. Start with free booking and your first photo free. <em>Ready to grow?</em> Add photos one at a time for $1, grab 10 for $5, or go Glow Up at $10.99 a month for 25 uploads. Instagram rents attention. Here, you own a billboard.</p>
@@ -1884,7 +1884,7 @@
     <div id="pricing" style="margin-top:56px;padding-top:40px;border-top:1px solid var(--border);">
       <div style="text-align:center;">
         <p style="font-size:15px;color:var(--muted);margin-bottom:12px;">Free booking, always. Add photos <em style="color:var(--rose);font-style:italic;">when you're ready to grow.</em></p>
-        <button onclick="togglePricing()" id="pricing-toggle-btn" style="display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:600;color:var(--rose);background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;padding:0;border-bottom:1.5px solid rgba(191,166,187,0.3);padding-bottom:1px;transition:color 0.2s;">
+        <button onclick="togglePricing()" id="pricing-toggle-btn" style="display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:600;color:var(--rose);background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;padding:0;border-bottom:1.5px solid rgba(191,166,168,0.3);padding-bottom:1px;transition:color 0.2s;">
           See pricing plans
           <svg id="pricing-chevron" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="transition:transform 0.3s ease;"><path d="M6 9l6 6 6-6"/></svg>
         </button>
@@ -1900,12 +1900,12 @@
               <div class="price-amount">Free <span>forever</span></div>
               <p class="price-desc">Your booking profile, live. Free forever.</p>
               <ul class="price-features">
-                <li><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#BFA6BB" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> Free in-app booking</li>
-                <li><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#BFA6BB" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> Your first photo, free</li>
-                <li><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#BFA6BB" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> Full public profile</li>
-                <li><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#BFA6BB" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> Availability toggles</li>
-                <li><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#BFA6BB" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> Standing appointments</li>
-                <li><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#BFA6BB" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> Call &amp; Text contact</li>
+                <li><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#DEB3B5" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> Free in-app booking</li>
+                <li><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#DEB3B5" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> Your first photo, free</li>
+                <li><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#DEB3B5" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> Full public profile</li>
+                <li><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#DEB3B5" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> Availability toggles</li>
+                <li><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#DEB3B5" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> Standing appointments</li>
+                <li><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#DEB3B5" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> Call &amp; Text contact</li>
               </ul>
             </div>
 
@@ -1928,12 +1928,12 @@
               <div class="price-amount">$10.99 <span>/month</span></div>
               <p class="price-desc">25 uploads a month, for techs building a real portfolio.</p>
               <ul class="price-features">
-                <li><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#BFA6BB" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> Everything in Spotlight</li>
-                <li><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#BFA6BB" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> 25 photo uploads a month</li>
-                <li><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#BFA6BB" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> Available Today glow in the Gallery</li>
-                <li><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#BFA6BB" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> Every photo stays up permanently</li>
-                <li><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#BFA6BB" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> Portfolio compounds over time</li>
-                <li><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#BFA6BB" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> Cancel anytime</li>
+                <li><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#DEB3B5" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> Everything in Spotlight</li>
+                <li><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#DEB3B5" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> 25 photo uploads a month</li>
+                <li><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#DEB3B5" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> Available Today glow in the Gallery</li>
+                <li><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#DEB3B5" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> Every photo stays up permanently</li>
+                <li><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#DEB3B5" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> Portfolio compounds over time</li>
+                <li><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#DEB3B5" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> Cancel anytime</li>
               </ul>
             </div>
           </div>
@@ -1954,42 +1954,42 @@
     <div class="features-grid">
       <div class="feature-card">
         <div class="feature-icon">
-          <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#BFA6BB" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#DEB3B5" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
         </div>
         <h3>Browse by Style</h3>
         <p>Two ways to browse. <b>Find a Tech</b> mode shows real nail work near you, filter by distance, tap any photo to visit that tech's profile and book. <b>Get Inspo</b> mode is pure inspiration: open the Gallery up nationwide, heart looks you love, no distance filter.</p>
       </div>
       <div class="feature-card">
         <div class="feature-icon">
-          <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#BFA6BB" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+          <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#DEB3B5" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
         </div>
         <h3>Save Your Inspo</h3>
         <p>Heart any photo to save it to your personal inspo board. Bring it to your appointment and show your tech exactly what you want. No more lost screenshots.</p>
       </div>
       <div class="feature-card">
         <div class="feature-icon">
-          <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#BFA6BB" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="10" r="3"/><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
+          <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#DEB3B5" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="10" r="3"/><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
         </div>
         <h3>Find Techs Near You</h3>
         <p>See nail techs on a map. Set your distance radius and browse by proximity, whether you want someone three blocks away or thirty miles out.</p>
       </div>
       <div class="feature-card">
         <div class="feature-icon">
-          <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#BFA6BB" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#DEB3B5" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
         </div>
         <h3>Favorite Your Go-To Tech</h3>
         <p>Star your favorite artists so they're always one tap away. See their latest work, check their availability, and tap to text, call, or book, all in one place.</p>
       </div>
       <div class="feature-card">
         <div class="feature-icon">
-          <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#BFA6BB" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#DEB3B5" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
         </div>
         <h3>Available Right Now</h3>
         <p>Need a same-day appointment? Tap Available Today to instantly see which techs are open today. No calling around, no waiting for replies, just reach out directly and get on their calendar.</p>
       </div>
       <div class="feature-card">
         <div class="feature-icon">
-          <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#BFA6BB" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#DEB3B5" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
         </div>
         <h3>Book Right in the App</h3>
         <p>Find the look, find the tech, book them — without leaving MNC. Prefer to call or text? Every tech lists their contact info too. Either way, no third-party platform to learn, no guessing how to reach them.</p>
@@ -2014,21 +2014,21 @@
 
 <!-- DID YOU KNOW, use-in-browser / PWA -->
 <section id="use-in-browser" style="background:#fff;padding:64px 24px;">
-  <div style="max-width:620px;margin:0 auto;text-align:center;background:linear-gradient(160deg,#F7EBEE 0%,#F7EBEE 60%,#EDE7E6 100%);border:1px solid rgba(191,166,187,0.15);border-radius:28px;padding:44px 28px;box-shadow:0 10px 40px rgba(139,74,64,0.08);">
+  <div style="max-width:620px;margin:0 auto;text-align:center;background:linear-gradient(160deg,#F7E2E3 0%,#F7E2E3 60%,#EDE7E6 100%);border:1px solid rgba(191,166,168,0.15);border-radius:28px;padding:44px 28px;box-shadow:0 10px 40px rgba(139,74,64,0.08);">
     <p style="font-size:11px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin:0 0 10px;">Phone full?</p>
     <h2 style="font-family:'Playfair Display',serif;font-size:clamp(26px,4vw,40px);font-weight:700;color:var(--rose-dark);line-height:1.15;margin:0 0 14px;letter-spacing:-0.5px;">Try us <em style="font-style:italic;color:var(--rose);">before you download.</em></h2>
     <p style="font-size:16px;color:var(--charcoal);line-height:1.7;max-width:480px;margin:0 auto 22px;">Use My Nail Connection right in your browser, no install needed. Add it to your home screen and it works just like the app. Love it? Grab it from the App Store or Google Play anytime.</p>
     <div style="display:flex;flex-wrap:wrap;gap:16px;justify-content:center;text-align:left;max-width:480px;margin:0 auto 26px;">
-      <div style="flex:1;min-width:200px;background:#fff;border:1px solid rgba(191,166,187,0.15);border-radius:16px;padding:16px 18px;">
+      <div style="flex:1;min-width:200px;background:#fff;border:1px solid rgba(191,166,168,0.15);border-radius:16px;padding:16px 18px;">
         <p style="font-size:13px;font-weight:700;color:var(--rose-dark);margin:0 0 4px;">On iPhone</p>
         <p style="font-size:13.5px;color:var(--muted);line-height:1.55;margin:0;">Open it in Safari, tap Share, then "Add to Home Screen."</p>
       </div>
-      <div style="flex:1;min-width:200px;background:#fff;border:1px solid rgba(191,166,187,0.15);border-radius:16px;padding:16px 18px;">
+      <div style="flex:1;min-width:200px;background:#fff;border:1px solid rgba(191,166,168,0.15);border-radius:16px;padding:16px 18px;">
         <p style="font-size:13px;font-weight:700;color:var(--rose-dark);margin:0 0 4px;">On Android</p>
         <p style="font-size:13.5px;color:var(--muted);line-height:1.55;margin:0;">Open it in Chrome, tap the menu, then "Install app."</p>
       </div>
     </div>
-    <a href="https://mynailconnection.com/app/" style="display:inline-block;background:linear-gradient(135deg,var(--rose) 0%,var(--rose-dark) 100%);color:#fff;text-decoration:none;font-weight:600;font-size:15px;padding:14px 30px;border-radius:100px;box-shadow:0 4px 14px rgba(191,166,187,0.35);">Open it in your browser →</a>
+    <a href="https://mynailconnection.com/app/" style="display:inline-block;background:linear-gradient(135deg,var(--rose) 0%,var(--rose-dark) 100%);color:#fff;text-decoration:none;font-weight:600;font-size:15px;padding:14px 30px;border-radius:100px;box-shadow:0 4px 14px rgba(191,166,168,0.35);">Open it in your browser →</a>
   </div>
 </section>
 
@@ -2179,7 +2179,7 @@
   window.addEventListener('resize', resize);
 
   // MNC palette, rose, peach, gold, cream, deep brown, magnolia pink, soft blush
-  var colors = ['#BFA6BB','#C9A8C7','#8A7880','#F7EBEE','#EDEAE5','#7D6478','#5C3D5E','#D9C4D6','#B098AC'];
+  var colors = ['#DEB3B5','#D0A3A5','#8A7879','#F7E2E3','#EDEAE5','#A2636C','#A2636C','#D9C4C5','#B0989A'];
   var pieces = [];
   var COUNT = Math.min(180, Math.max(80, Math.round(W / 7)));
 
@@ -2519,13 +2519,13 @@
   .popin-form { display:flex; gap:8px; margin-bottom:4px; }
   .popin-form input[type=email] {
     flex:1; min-width:0; padding:11px 13px; border-radius:12px;
-    border:1.5px solid rgba(191,166,187,0.42); background:#fff;
+    border:1.5px solid rgba(191,166,168,0.42); background:#fff;
     font-family:'DM Sans',sans-serif; font-size:14px; color:var(--charcoal); outline:none;
   }
-  .popin-form input[type=email]:focus { border-color:var(--rose); box-shadow:0 0 0 3px rgba(191,166,187,0.18); }
+  .popin-form input[type=email]:focus { border-color:var(--rose); box-shadow:0 0 0 3px rgba(191,166,168,0.18); }
   .popin-form button {
     flex-shrink:0; padding:11px 16px; border-radius:12px; border:none; cursor:pointer;
-    background:linear-gradient(160deg,#34303A 0%,#141317 100%); color:#F7EBEE;
+    background:linear-gradient(160deg,#34303A 0%,#141317 100%); color:#F7E2E3;
     font-family:'DM Sans',sans-serif; font-size:14px; font-weight:600; letter-spacing:0.2px;
     transition:transform 0.12s ease, opacity 0.15s ease;
   }
