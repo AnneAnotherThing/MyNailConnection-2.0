@@ -1189,7 +1189,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
 }
 </style>
 
-<div class="screen" id="splash" style="z-index:200;" style="background:linear-gradient(180deg,#FAF7F7 0%,#F1EAEA 50%,#EDE7E6 100%);">
+<div class="screen active" id="splash" style="z-index:200;background:linear-gradient(180deg,#FAF7F7 0%,#F1EAEA 50%,#EDE7E6 100%);">
   <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#EDEAE5;min-height:100%;position:relative;overflow:hidden;isolation:isolate;z-index:1;">
 
     <!-- Top: logo + title -->
@@ -1548,7 +1548,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
 </div>
 
 <!-- HOME -->
-<div class="screen active" id="home">
+<div class="screen" id="home">
   <!-- Header -->
   <div class="header">
     <div id="home-logo" onclick="adminTap()" style="cursor:default;user-select:none;display:flex;align-items:center;gap:8px;" ondblclick="if(isTechUser())show('tech-home')">
@@ -3305,23 +3305,54 @@ function safeUrl(u) {
   return /^https?:\/\//i.test(u) ? u : '';
 }
 
-// ── Image sizing ────────────────────────────────────────────────────────
-// Supabase's /object/public/ endpoint returns the ORIGINAL upload, i.e.
-// whatever the tech's phone shot. Measured 2026-07-21: a gallery thumbnail
-// painted at 135px was a 1436x2516, 506KB JPEG. The /render/image/public/
-// endpoint returns a resized, re-compressed copy from the CDN instead, the
-// same photo at width=400&quality=70 is 77KB. That's ~85% less per photo,
-// and the gallery pulls 60+ of them.
-// Pass the CSS size you actually paint at; ~3x is plenty for retina.
-function mncImg(url, width, quality) {
+// ── Image sizing ──────────────────────────────────────────────
+// /object/public/ returns the ORIGINAL upload, i.e. whatever the tech's
+// phone shot. Measured 2026-07-21: a gallery thumbnail painted at 135px was
+// a 1436x2516, 506KB JPEG. So grids need a small copy.
+//
+// The first fix used Supabase image transforms (the render endpoint).
+// Do not go back to that. Transforms bill per unique ORIGIN IMAGE PER MONTH
+// (100/mo included on Pro, $5 per 1,000 after). The meter counts each source
+// photo once a month no matter how many times it is viewed, so the bill
+// tracks the size of the photo library and recurs forever for images that
+// never change. 183 real photos blew the quota in two days of testing.
+//
+// Instead every upload writes a 500px _thumb.jpg next to the original
+// (see uploadThumb), and deploy/backfill-thumbs.py filled in the ones that
+// predate it. One write, once, then free.
+function mncThumb(url) {
   url = safeUrl(url);
   if (!url) return '';
   if (url.indexOf('/storage/v1/object/public/') === -1) return url; // not our storage
-  if (url.indexOf('/render/image/') !== -1) return url;             // already sized
-  var out = url.replace('/storage/v1/object/public/', '/storage/v1/render/image/public/');
-  return out + (out.indexOf('?') === -1 ? '?' : '&') +
-         'width=' + (width || 400) + '&quality=' + (quality || 70);
+  if (/_thumb\.jpg($|\?)/.test(url)) return url;                    // already a thumb
+  // No recognised extension -> returns url unchanged, a safe no-op.
+  return url.replace(/\.(jpe?g|png|webp|gif)(\?.*)?$/i, '_thumb.jpg');
 }
+
+// src="..." plus a fallback to the full-size original, for the HTML template
+// strings. If the thumb 404s, the delegated handler in initThumbFallback()
+// swaps the original in, so a missing thumb is never a broken image.
+function thumbAttrs(url) {
+  var full = safeUrl(url);
+  if (!full) return 'src=""';
+  var th = mncThumb(full);
+  return 'src="' + esc(th) + '"' + (th !== full ? ' data-fb="' + esc(full) + '"' : '');
+}
+
+// Capture phase, so this runs BEFORE the inline onerror handlers that hide
+// the element. One listener covers every thumb on every screen.
+function initThumbFallback() {
+  document.addEventListener('error', function(ev) {
+    var el = ev.target;
+    if (!el || el.tagName !== 'IMG') return;
+    var fb = el.getAttribute('data-fb');
+    if (!fb) return;
+    el.removeAttribute('data-fb'); // only ever retry once
+    ev.stopPropagation();
+    el.src = fb;
+  }, true);
+}
+initThumbFallback();
 
 // { id, tier, photo_credits, subscription_expires_at, total_photos,
 //   paused_count, period_upload_count, period_reset_at }
@@ -4850,8 +4881,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 400,         /* __APP_BUILD_ANDROID__ */
-  ios:     205,          /* __APP_BUILD_IOS__     */
+  android: 402,         /* __APP_BUILD_ANDROID__ */
+  ios:     207,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -5227,6 +5258,15 @@ function urlBase64ToUint8Array(base64String) {
 let currentUser = null;
 let currentUserName = { first: "", last: "" };
 let currentUserPhoto = ""; // profile photo URL
+// The auth uid. THIS is a client's identity, not their email.
+// currentUserEmail holds `user.email || user.phone`, so for a phone-signup
+// client it is a phone number, and phone numbers get changed and recycled.
+// auth.uid() is stable across sign-in method and survives a number change,
+// which is why bookings key on it. user_inspo / user_favorites now do too
+// (sql/client-identity-user-id-migration.sql). 2026-07-21
+function currentUserId() {
+  try { return (currentUser && currentUser.id) || null; } catch(_) { return null; }
+}
 let currentUserEmail = ""; // signed-in user's email, declared at module scope so early-load code (updateGreeting on DOMContentLoaded) doesn't ReferenceError before sign-in sets it
 
 // ── Service Worker + Push registration ───────────────────────────────────────
@@ -6018,7 +6058,8 @@ let _inspoPhotos = null; // array of {photo_url, tech_name, saved_at}
 async function toggleFavTech() {
   if (!currentTech) return;
   const email = currentUserEmail;
-  if (!email) { showToast('Sign in to save favorites'); show('auth'); return; }
+  const uid = currentUserId();
+  if (!uid) { showToast('Sign in to save favorites'); show('auth'); return; }
   const techEmail = currentTech.email || currentTech.name;
   const btn = document.getElementById('td-fav-btn');
 
@@ -6026,7 +6067,7 @@ async function toggleFavTech() {
   if (_favTechs === null) await loadFavTechsCache();
   const already = _favTechs && _favTechs.some(f => f.tech_email === techEmail);
   if (already) {
-    await fetch(`${SUPABASE_URL}/rest/v1/user_favorites?user_email=eq.${encodeURIComponent(email)}&tech_email=eq.${encodeURIComponent(techEmail)}`, {
+    await fetch(`${SUPABASE_URL}/rest/v1/user_favorites?user_id=eq.${encodeURIComponent(uid)}&tech_email=eq.${encodeURIComponent(techEmail)}`, {
       method: 'DELETE', headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${window._mncAccessToken || SUPABASE_ANON_KEY}` }
     }).catch(()=>{});
     if (_favTechs) _favTechs = _favTechs.filter(f => f.tech_email !== techEmail);
@@ -6036,7 +6077,7 @@ async function toggleFavTech() {
     await fetch(`${SUPABASE_URL}/rest/v1/user_favorites`, {
       method: 'POST',
       headers: { 'Content-Type':'application/json','apikey': SUPABASE_ANON_KEY,'Authorization': `Bearer ${window._mncAccessToken || SUPABASE_ANON_KEY}`,'Prefer':'return=minimal' },
-      body: JSON.stringify({ user_email: email, tech_email: techEmail, tech_name: currentTech.name, tech_image: currentTech.imageUrl || '' })
+      body: JSON.stringify({ user_id: uid, user_email: email, tech_email: techEmail, tech_name: currentTech.name, tech_image: currentTech.imageUrl || '' })
     }).catch(()=>{});
     if (_favTechs) _favTechs.push({ tech_email: techEmail, tech_name: currentTech.name, tech_image: currentTech.imageUrl || '' });
     else _favTechs = [{ tech_email: techEmail, tech_name: currentTech.name, tech_image: currentTech.imageUrl || '' }];
@@ -6066,9 +6107,9 @@ async function updateFavBtn() {
 }
 
 async function loadFavTechsCache() {
-  if (!currentUserEmail) return;
+  if (!currentUserId()) return;
   try {
-    const r = await fetch(`${SUPABASE_URL}/rest/v1/user_favorites?user_email=eq.${encodeURIComponent(currentUserEmail)}&order=created_at.desc`,
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/user_favorites?user_id=eq.${encodeURIComponent(currentUserId())}&order=created_at.desc`,
       { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${window._mncAccessToken || SUPABASE_ANON_KEY}` } });
     _favTechs = r.ok ? await r.json() : [];
   } catch(e) { _favTechs = []; }
@@ -6141,7 +6182,7 @@ async function toggleInspoPhoto(url, techName, techEmail) {
     if (techEmail) bumpTechHeartCount(techEmail, -1);
     showToast('Removed from inspo');
     try {
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/user_inspo?user_email=eq.${encodeURIComponent(currentUserEmail)}&photo_url=eq.${encodeURIComponent(url)}`, {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/user_inspo?user_id=eq.${encodeURIComponent(currentUserId())}&photo_url=eq.${encodeURIComponent(url)}`, {
         method: 'DELETE',
         headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${window._mncAccessToken || SUPABASE_ANON_KEY}` }
       });
@@ -6165,7 +6206,7 @@ async function toggleInspoPhoto(url, techName, techEmail) {
       const res = await fetch(`${SUPABASE_URL}/rest/v1/user_inspo`, {
         method: 'POST',
         headers: { 'Content-Type':'application/json','apikey': SUPABASE_ANON_KEY,'Authorization': `Bearer ${window._mncAccessToken || SUPABASE_ANON_KEY}`,'Prefer':'return=minimal' },
-        body: JSON.stringify({ user_email: currentUserEmail, photo_url: url, tech_name: techName || '', tech_email: techEmail || null })
+        body: JSON.stringify({ user_id: currentUserId(), user_email: currentUserEmail, photo_url: url, tech_name: techName || '', tech_email: techEmail || null })
       });
       if (!res.ok) throw new Error('insert failed: ' + res.status);
     } catch(e) {
@@ -6191,7 +6232,7 @@ async function loadInspoPhotos() {
   if (!grid) return;
   grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:20px;"><div style="width:24px;height:24px;border:3px solid var(--border);border-top-color:var(--rose);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto;"></div></div>';
   try {
-    const r = await fetch(`${SUPABASE_URL}/rest/v1/user_inspo?user_email=eq.${encodeURIComponent(currentUserEmail)}&order=created_at.desc`,
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/user_inspo?user_id=eq.${encodeURIComponent(currentUserId())}&order=created_at.desc`,
       { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${window._mncAccessToken || SUPABASE_ANON_KEY}` } });
     _inspoPhotos = r.ok ? await r.json() : [];
   } catch(e) { _inspoPhotos = []; }
@@ -7396,6 +7437,7 @@ async function handlePhoto(input) {
     const slug = email.replace(/[^a-z0-9]/gi,'-').toLowerCase() + '-' + Date.now();
     const fileName = 'profiles/' + slug + '.' + file.name.split('.').pop();
     const _upBlob = await compressForUpload(file, 900, 0.85);
+    uploadThumb(fileName, file);   // fire-and-forget, see uploadThumb
     try {
       const res = await fetch(SUPABASE_URL + '/storage/v1/object/tech-photos/' + fileName, {
         method: 'POST',
@@ -7891,7 +7933,7 @@ function renderTechCards(query, filteredList) {
         // onerror falls the slot back to the per-tech placeholder gradient
         // (matches the no-photo branch below) so a stale/deleted Supabase URL
         // doesn't leave a broken-image icon on the find-a-tech grid. 2026-05-08
-        return `<div class="tech-card-photo-slot" style="background:${t.bg};"><img src="${esc(mncImg(url, 300))}" loading="lazy" onerror="this.style.display='none'"/></div>`;
+        return `<div class="tech-card-photo-slot" style="background:${t.bg};"><img ${thumbAttrs(url)} loading="lazy" onerror="this.style.display='none'"/></div>`;
       }
       // Placeholder with gradient and subtle initials watermark
       return `<div class="tech-card-photo-slot" style="background:${t.bg};opacity:0.7;"></div>`;
@@ -7899,7 +7941,7 @@ function renderTechCards(query, filteredList) {
 
     // Small avatar thumbnail
     const thumb = t.imageUrl
-      ? `<img src="${esc(mncImg(t.imageUrl, 150))}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/><div style="width:100%;height:100%;display:none;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:14px;color:${t.color};">${esc(t.initials)}</div>`
+      ? `<img ${thumbAttrs(t.imageUrl)} style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/><div style="width:100%;height:100%;display:none;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:14px;color:${t.color};">${esc(t.initials)}</div>`
       : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:14px;color:${t.color};">${esc(t.initials)}</div>`;
 
     const availBadge = t.is_available
@@ -8073,7 +8115,7 @@ function openTechDetail(tech) {
       heroImg.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;';
       hero.insertBefore(heroImg, hero.firstChild);
     }
-    heroImg.src = mncImg(photoUrl, 1000, 85);
+    heroImg.src = safeUrl(photoUrl);
     heroImg.style.display = 'block';
   } else {
     initEl.style.display = '';
@@ -8152,7 +8194,7 @@ function openTechDetail(tech) {
         + (isFeature ? 'grid-column:span 2;grid-row:span 1;' : '');
       (function(u) { div.onclick = function() { openGalleryPhoto(u); }; })(photoUrl);
       var img = document.createElement('img');
-      img.src = mncImg(photoUrl, 500, 82);
+      img.src = mncThumb(photoUrl); img.setAttribute('data-fb', safeUrl(photoUrl));
       img.loading = 'lazy';
       img.decoding = 'async';
       img.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block;';
@@ -8247,7 +8289,7 @@ function openGalleryPhoto(url, caption) {
     overlay.appendChild(cap);
     document.body.appendChild(overlay);
   }
-  document.getElementById('gallery-lightbox-img').src = mncImg(url, 1400, 88);
+  document.getElementById('gallery-lightbox-img').src = safeUrl(url);
   var capEl = document.getElementById('gallery-lightbox-caption');
   if (capEl) {
     var text = (caption == null ? '' : String(caption)).trim();
@@ -8950,6 +8992,7 @@ async function techEditProfilePhoto(input) {
       const ext = file.name.split('.').pop() || 'jpg';
       const fileName = 'profile/' + techSlug + '-' + Date.now() + '.' + ext;
       const _upBlob = await compressForUpload(file, 900, 0.85);
+      uploadThumb(fileName, file);   // fire-and-forget, see uploadThumb
       const res = await fetch(SUPABASE_URL + '/storage/v1/object/tech-photos/' + fileName, {
         method: 'POST',
         headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + (window._mncAccessToken || SUPABASE_ANON_KEY),
@@ -8978,12 +9021,36 @@ async function techEditProfilePhoto(input) {
 // galleries crawl (every thumbnail downloaded megabytes). Downscale to a
 // sane max dimension and re-encode JPEG before upload. Returns a Blob, or
 // the original file if anything fails (compression must never block upload).
-async function compressForUpload(file, maxDim, quality) {
+// Write a 500px _thumb.jpg next to the original on upload, so grids never
+// pull the full-size file. 500px covers every small slot we paint (135px
+// gallery tiles, 150px avatars, 500px detail tiles) even at 3x.
+//
+// Best-effort on purpose: if this fails the photo still works, it just falls
+// back to its original via the data-fb handler. A thumb failure must never
+// take down a real upload.
+async function uploadThumb(filePath, srcFile) {
+  try {
+    if (!filePath || !srcFile) return;
+    const blob = await compressForUpload(srcFile, 500, 0.72, true);
+    if (!blob) return;
+    const thumbPath = String(filePath).replace(/\.(jpe?g|png|webp|gif)$/i, '') + '_thumb.jpg';
+    await fetch(SUPABASE_URL + '/storage/v1/object/tech-photos/' + thumbPath, {
+      method: 'POST',
+      headers: { 'apikey': SUPABASE_ANON_KEY,
+                 'Authorization': 'Bearer ' + (window._mncAccessToken || SUPABASE_ANON_KEY),
+                 'Content-Type': 'image/jpeg', 'x-upsert': 'true' },
+      body: blob
+    });
+  } catch (_) { /* a thumb is an optimisation, not a requirement */ }
+}
+
+async function compressForUpload(file, maxDim, quality, force) {
   maxDim = maxDim || 1400; quality = quality || 0.82;
   try {
-    if (!file || !file.type || file.type.indexOf('image/') !== 0) return file;
-    if (file.type === 'image/gif') return file; // don't flatten animations
-    if (file.size && file.size < 200 * 1024) return file; // already small
+    if (!file || !file.type || file.type.indexOf('image/') !== 0) return force ? null : file;
+    if (file.type === 'image/gif') return force ? null : file; // don't flatten animations
+    if (!force && file.size && file.size < 200 * 1024) return file; // already small
+    // force = building a thumb: re-encode regardless, we want the SIZE not the bytes
     const dataUrl = await new Promise(function(res, rej) {
       const r = new FileReader(); r.onload = function(e){res(e.target.result);}; r.onerror = rej; r.readAsDataURL(file);
     });
@@ -8991,7 +9058,7 @@ async function compressForUpload(file, maxDim, quality) {
       const im = new Image(); im.onload = function(){res(im);}; im.onerror = rej; im.src = dataUrl;
     });
     var w = img.naturalWidth || img.width, h = img.naturalHeight || img.height;
-    if (!w || !h) return file;
+    if (!w || !h) return force ? null : file;
     if (w > maxDim || h > maxDim) {
       if (w >= h) { h = Math.round(h * maxDim / w); w = maxDim; }
       else { w = Math.round(w * maxDim / h); h = maxDim; }
@@ -9000,9 +9067,10 @@ async function compressForUpload(file, maxDim, quality) {
     canvas.width = w; canvas.height = h;
     canvas.getContext('2d').drawImage(img, 0, 0, w, h);
     const blob = await new Promise(function(res){ canvas.toBlob(res, 'image/jpeg', quality); });
-    if (!blob) return file;
-    return (blob.size < file.size) ? blob : file; // keep whichever is smaller
-  } catch (_) { return file; }
+    if (!blob) return force ? null : file;
+    if (force) return blob;                       // thumb: always the resized copy
+    return (blob.size < file.size) ? blob : file; // full: keep whichever is smaller
+  } catch (_) { return force ? null : file; }
 }
 
 async function techEditAddPhotos(input) {
@@ -9083,6 +9151,7 @@ async function techEditAddPhotos(input) {
         // local buffer so the publicUrl doesn't sit forever as a 404.
         try {
           const _upBlob = await compressForUpload(file, 1600, 0.85);
+          uploadThumb(_fileName, file);   // fire-and-forget, see uploadThumb
           const res = await fetch(SUPABASE_URL + '/storage/v1/object/tech-photos/' + _fileName, {
             method: 'POST',
             headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + (window._mncAccessToken || SUPABASE_ANON_KEY),
@@ -9253,6 +9322,7 @@ async function techBulkDropFiles(fileList) {
       // it. 1600px long edge @ 0.85 keeps the tech-detail hero crisp on
       // retina while cutting the payload hard. 2026-07-21.
       const _upBlob = await compressForUpload(file, 1600, 0.85);
+      uploadThumb(_fileName, file);   // fire-and-forget, see uploadThumb
       const res = await fetch(SUPABASE_URL + '/storage/v1/object/tech-photos/' + _fileName, {
         method: 'POST',
         headers: {
@@ -11006,7 +11076,7 @@ async function updateHomeFaveCounts() {
   } catch(e) {}
   try {
     if (_inspoPhotos === null) {
-      var r = await fetch(SUPABASE_URL + '/rest/v1/user_inspo?user_email=eq.' + encodeURIComponent(currentUserEmail),
+      var r = await fetch(SUPABASE_URL + '/rest/v1/user_inspo?user_id=eq.' + encodeURIComponent(currentUserId()),
         { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + (window._mncAccessToken || SUPABASE_ANON_KEY) } });
       _inspoPhotos = r.ok ? await r.json() : [];
     }
@@ -11416,7 +11486,8 @@ function buildFeedCard(post, tech) {
   av.className = 'feed-card-avatar';
   if (tech.image_url || tech.imageUrl) {
     var img = document.createElement('img');
-    img.src = mncImg(tech.image_url || tech.imageUrl, 150, 80);
+    img.src = mncThumb(tech.image_url || tech.imageUrl);
+    img.setAttribute('data-fb', safeUrl(tech.image_url || tech.imageUrl));
     img.alt = tech.name || '';
     img.loading = 'lazy';
     av.appendChild(img);
@@ -11713,7 +11784,7 @@ function renderStyleGrid() {
       var availBanner = p.tech.is_available
         ? '<div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(45,106,79,0.85));padding:14px 6px 5px;pointer-events:none;"><div style="font-size:10px;font-weight:700;color:white;text-align:center;letter-spacing:0.3px;">\u2728 Available today</div></div>'
         : '';
-      div.innerHTML = '<img src="' + esc(mncImg(p.url, 400)) + '" style="width:100%;display:block;aspect-ratio:1;object-fit:cover;" loading="lazy" onerror="this.parentElement.style.display=\'none\'">' + availBanner;
+      div.innerHTML = '<img ' + thumbAttrs(p.url) + ' style="width:100%;display:block;aspect-ratio:1;object-fit:cover;" loading="lazy" onerror="this.parentElement.style.display=\'none\'">' + availBanner;
       if (p.tech.is_available) div.classList.add('avail-glow-tile');
       div.onclick = function() { openTechDetail(p.tech); };
 
@@ -11839,11 +11910,11 @@ function renderLocTechCards() {
       .slice(0, 3);
 
     const avatar = t.imageUrl
-      ? `<img src="${esc(mncImg(t.imageUrl, 400))}" style="width:100%;height:100%;object-fit:cover;object-position:center top;" onerror="this.style.display='none'"/>`
+      ? `<img ${thumbAttrs(t.imageUrl)} style="width:100%;height:100%;object-fit:cover;object-position:center top;" onerror="this.style.display='none'"/>`
       : `<span style="font-family:'Playfair Display',serif;font-size:16px;color:${t.color||'var(--rose)'};">${t.initials||'?'}</span>`;
 
     const previewPics = photos.length
-      ? photos.map(url => `<div style="width:52px;height:52px;border-radius:8px;overflow:hidden;flex-shrink:0;"><img src="${esc(mncImg(url, 200))}" style="width:100%;height:100%;object-fit:cover;" loading="lazy" onerror="this.parentElement.style.display='none'"/></div>`).join('')
+      ? photos.map(url => `<div style="width:52px;height:52px;border-radius:8px;overflow:hidden;flex-shrink:0;"><img ${thumbAttrs(url)} style="width:100%;height:100%;object-fit:cover;" loading="lazy" onerror="this.parentElement.style.display='none'"/></div>`).join('')
       : '<div style="font-size:11px;color:var(--muted);padding:4px 0;">No photos yet</div>';
 
     const dist = t._dist !== null && t._dist !== undefined ? `<span style="font-size:11px;color:var(--muted);"><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;vertical-align:middle;"><circle cx="12" cy="10" r="3"/><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg> ${t._dist.toFixed(1)} mi away</span>` :
@@ -14637,18 +14708,19 @@ async function loadTechHomeStats() {
 
   // Saves, how many clients have favorited this tech
   try {
-    var r3 = await fetch(
-      SUPABASE_URL + '/rest/v1/user_favorites?tech_email=eq.' + encodeURIComponent(email) + '&select=user_email',
-      {
-        headers: {
-          apikey: SUPABASE_ANON_KEY,
-          Authorization: 'Bearer ' + (window._mncAccessToken || SUPABASE_ANON_KEY),
-          Prefer: 'count=exact', Range: '0-0'
-        }
-      }
-    );
-    var cr3 = r3.headers.get('content-range') || '';
-    var total3 = parseInt(cr3.split('/')[1], 10);
+    // Favourites are owner-scoped by RLS now, so a tech cannot read the rows
+    // to count them. tech_favorite_count() returns just the number, never the
+    // clients. See sql/client-identity-user-id-migration.sql
+    var r3 = await fetch(SUPABASE_URL + '/rest/v1/rpc/tech_favorite_count', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: 'Bearer ' + (window._mncAccessToken || SUPABASE_ANON_KEY)
+      },
+      body: JSON.stringify({ p_tech_email: email })
+    });
+    var total3 = r3.ok ? parseInt(await r3.text(), 10) : NaN;
     if (savesEl) savesEl.textContent = isNaN(total3) ? '0' : String(total3);
   } catch(e) { if (savesEl) savesEl.textContent = '-'; }
 }
@@ -15905,10 +15977,13 @@ document.addEventListener('DOMContentLoaded', async function() {
   // handler runs. If not, the splash stays up as normal.
   try { await restorePersistedSession(); } catch(e) { /* fall through */ }
 
-  // Splash+home merged (2026-07-17): no separate splash. If no session was
-  // restored (anonymous visitor), land on an initialised home so its data
-  // hook runs. Signed-in users were already routed by showCorrectHome.
-  try { if (!currentUserEmail) show('home'); } catch(_){}
+  // No session restored = a first-time or signed-out visitor: leave them on
+  // the splash so they get Sign In / Create a Free Account / view as guest.
+  // (The 2026-07-17 "splash+home merged" change sent them straight to home.
+  // The splash came back 2026-07-21 but this line kept skipping it, so a
+  // fresh browser or incognito window never saw it.) Guests reach home via
+  // enterGuest(), which calls show('home') and runs its data hook then.
+  try { if (!currentUserEmail) show('splash'); } catch(_){}
 
   // If the user just landed back from a Stripe checkout success redirect,
   // show the matching welcome modal. Runs after the session restore so
@@ -16368,6 +16443,7 @@ async function ueUploadPhoto(input) {
   showToast('Uploading photo…');
   try {
     const _upBlob = await compressForUpload(file, 900, 0.85);
+    uploadThumb(fileName, file);   // fire-and-forget, see uploadThumb
     const res = await fetch(SUPABASE_URL + '/storage/v1/object/tech-photos/' + fileName, {
       method: 'POST',
       headers: {
@@ -16433,6 +16509,7 @@ async function ueAddGalleryPhotos(input) {
   for (const file of files) {
     const fileName = 'gallery/' + slug + '/' + Date.now() + '-' + Math.random().toString(36).slice(2,6) + '.' + file.name.split('.').pop();
     const _upBlob = await compressForUpload(file, 1600, 0.85);
+    uploadThumb(fileName, file);   // fire-and-forget, see uploadThumb
     try {
       const res = await fetch(SUPABASE_URL + '/storage/v1/object/tech-photos/' + fileName, {
         method: 'POST',
@@ -17434,6 +17511,7 @@ async function uploadRegPhoto() {
   const fileName = 'profiles/' + slug + '.' + file.name.split('.').pop();
   try {
     const _upBlob = await compressForUpload(file, 900, 0.85);
+    uploadThumb(fileName, file);   // fire-and-forget, see uploadThumb
     const res = await fetch(SUPABASE_URL + '/storage/v1/object/tech-photos/' + fileName, {
       method: 'POST',
       headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + (window._mncAccessToken || SUPABASE_ANON_KEY),

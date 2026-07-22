@@ -1194,16 +1194,6 @@
     text-shadow: 0 1px 2px rgba(0,0,0,0.35) !important;
   }
 
-  /* ── Confetti canvas, overlays everything during the launch burst ── */
-  #launch-confetti {
-    position: fixed; inset: 0;
-    width: 100%; height: 100%;
-    pointer-events: none;
-    z-index: 9999;
-    opacity: 1;
-    transition: opacity 1.2s ease;
-  }
-  #launch-confetti.fading { opacity: 0; }
 
   /* ── Pre-launch announcement marquee ── */
   .announce-banner {
@@ -1326,7 +1316,7 @@
     padding: 11px 17px; border-radius: 100px;
     background: linear-gradient(140deg, #8A5F6C 0%, #6B4552 60%, #4E323C 100%);
     color: #fff; border: 1px solid rgba(38,26,32,0.42);
-    font-family: 'DM Sans', sans-serif; font-size: 13.5px; font-weight: 700; letter-spacing: 0.4px;
+    font-family: 'DM Sans', sans-serif; font-size: 13.5px; font-weight: 700; letter-spacing: 0.2px; white-space: nowrap;
     box-shadow: 0 8px 22px rgba(49,34,42,0.34), inset 0 1px 1px rgba(255,255,255,0.18);
     cursor: pointer; transition: transform 0.18s ease, box-shadow 0.18s ease;
   }
@@ -1343,7 +1333,7 @@
     100% { box-shadow: 0 0 0 0 rgba(247,226,227,0); }
   }
   @media (max-width: 480px) {
-    .wl-chip { right: 14px; bottom: 14px; padding: 10px 15px; font-size: 13px; }
+    .wl-chip { right: 12px; bottom: 12px; padding: 10px 14px; font-size: 12.5px; gap: 7px; }
   }
   @media (prefers-reduced-motion: reduce) { .wl-chip-dot { animation: none; } }
 
@@ -1674,7 +1664,7 @@
       justify-content: flex-start;
       align-items: center;
       min-height: 0;
-      padding: 118px clamp(20px, 5vw, 28px) 0;
+      padding: 76px clamp(20px, 5vw, 28px) 0;
     }
     .hero-inner { order: 1; margin: 0 auto; text-align: center; max-width: 560px; }
     .hero-art {
@@ -1778,7 +1768,7 @@
 </style>
 </head>
 <body>
-<div style="position:sticky;top:0;z-index:9999;background:linear-gradient(135deg,#8A5F6C,#4E323C);color:#fff;font-family:'DM Sans',system-ui,sans-serif;padding:10px 16px;display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap;font-size:13.5px;"><strong style="letter-spacing:1.2px;text-transform:uppercase;font-size:11px;">3.0 Preview</strong><span style="opacity:0.85;">Not the live site.</span><a href="app/" style="background:rgba(255,255,255,0.16);border:1px solid rgba(255,255,255,0.32);color:#fff;text-decoration:none;font-weight:700;padding:7px 16px;border-radius:100px;">Open the 3.0 app &rarr;</a></div>
+<style>#v3bar{position:sticky;top:0;z-index:9999;background:linear-gradient(135deg,#8A5F6C,#4E323C);color:#fff;font-family:"DM Sans",system-ui,sans-serif;padding:6px 12px;display:flex;gap:10px;align-items:center;justify-content:center;font-size:12.5px;line-height:1;}#v3bar b{letter-spacing:1.1px;text-transform:uppercase;font-size:10px;font-weight:700;}#v3bar a{background:rgba(255,255,255,0.16);border:1px solid rgba(255,255,255,0.32);color:#fff;text-decoration:none;font-weight:700;padding:5px 12px;border-radius:100px;white-space:nowrap;font-size:12px;}@media(max-width:520px){#v3bar span{display:none}}</style><div id="v3bar"><b>3.0 Preview</b><span style="opacity:0.85;">Not the live site.</span><a href="app/">Open the app &rarr;</a></div>
 
 <!-- LAUNCH MARQUEE, scrolling band announcing we're live. Updated from
      the "launching in days" pre-launch copy to celebratory launch copy. -->
@@ -2108,25 +2098,6 @@
   </div>
 </section>
 
-<!-- DID YOU KNOW, use-in-browser / PWA -->
-<section id="use-in-browser" style="background:#fff;padding:64px 24px;">
-  <div style="max-width:620px;margin:0 auto;text-align:center;background:linear-gradient(160deg,#F7E2E3 0%,#F7E2E3 60%,#EDE7E6 100%);border:1px solid rgba(191,166,168,0.15);border-radius:28px;padding:44px 28px;box-shadow:0 10px 40px rgba(139,74,64,0.08);">
-    <p style="font-size:11px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin:0 0 10px;">Phone full?</p>
-    <h2 style="font-family:'Playfair Display',serif;font-size:clamp(26px,4vw,40px);font-weight:700;color:var(--rose-dark);line-height:1.15;margin:0 0 14px;letter-spacing:-0.5px;">Try us <em style="font-style:italic;color:var(--rose);">before you download.</em></h2>
-    <p style="font-size:16px;color:var(--charcoal);line-height:1.7;max-width:480px;margin:0 auto 22px;">Use My Nail Connection right in your browser, no install needed. Add it to your home screen and it works just like the app. Love it? Grab it from the App Store or Google Play anytime.</p>
-    <div style="display:flex;flex-wrap:wrap;gap:16px;justify-content:center;text-align:left;max-width:480px;margin:0 auto 26px;">
-      <div style="flex:1;min-width:200px;background:#fff;border:1px solid rgba(191,166,168,0.15);border-radius:16px;padding:16px 18px;">
-        <p style="font-size:13px;font-weight:700;color:var(--rose-dark);margin:0 0 4px;">On iPhone</p>
-        <p style="font-size:13.5px;color:var(--muted);line-height:1.55;margin:0;">Open it in Safari, tap Share, then "Add to Home Screen."</p>
-      </div>
-      <div style="flex:1;min-width:200px;background:#fff;border:1px solid rgba(191,166,168,0.15);border-radius:16px;padding:16px 18px;">
-        <p style="font-size:13px;font-weight:700;color:var(--rose-dark);margin:0 0 4px;">On Android</p>
-        <p style="font-size:13.5px;color:var(--muted);line-height:1.55;margin:0;">Open it in Chrome, tap the menu, then "Install app."</p>
-      </div>
-    </div>
-    <a href="app/" style="display:inline-block;background:linear-gradient(135deg,var(--rose) 0%,var(--rose-dark) 100%);color:#fff;text-decoration:none;font-weight:600;font-size:15px;padding:14px 30px;border-radius:100px;box-shadow:0 4px 14px rgba(191,166,168,0.35);">Open it in your browser →</a>
-  </div>
-</section>
 
 <!-- FOOTER -->
 <footer>
@@ -2239,108 +2210,6 @@
   }
 </script>
 
-<!-- ── LAUNCH-DAY FANFARE, added 2026-05-05 ───────────────────────
-     One-time canvas confetti burst on the first visit per session
-     (sessionStorage flag). Respects the user's prefers-reduced-motion
-     setting and bails silently.
-     ─────────────────────────────────────────────────────────────── -->
-<script>
-(function(){
-  try {
-    if (sessionStorage.getItem('mnc_launch_confetti_shown') === '1') return;
-    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      sessionStorage.setItem('mnc_launch_confetti_shown', '1');
-      return;
-    }
-  } catch(e) {}
-
-  var canvas = document.createElement('canvas');
-  canvas.id = 'launch-confetti';
-  canvas.setAttribute('aria-hidden', 'true');
-  document.body.appendChild(canvas);
-  var ctx = canvas.getContext('2d');
-  var dpr = window.devicePixelRatio || 1;
-  var W = window.innerWidth, H = window.innerHeight;
-
-  function resize() {
-    W = window.innerWidth; H = window.innerHeight;
-    canvas.width = W * dpr;
-    canvas.height = H * dpr;
-    canvas.style.width = W + 'px';
-    canvas.style.height = H + 'px';
-    ctx.setTransform(1,0,0,1,0,0);
-    ctx.scale(dpr, dpr);
-  }
-  resize();
-  window.addEventListener('resize', resize);
-
-  // MNC palette, rose, peach, gold, cream, deep brown, magnolia pink, soft blush
-  var colors = ['#DEB3B5','#D0A3A5','#8A7879','#F7E2E3','#EDEAE5','#A2636C','#A2636C','#D9C4C5','#B0989A'];
-  var pieces = [];
-  var COUNT = Math.min(180, Math.max(80, Math.round(W / 7)));
-
-  for (var i = 0; i < COUNT; i++) {
-    pieces.push({
-      x: Math.random() * W,
-      y: -20 - Math.random() * H * 0.6,
-      w: 5 + Math.random() * 7,
-      h: 8 + Math.random() * 10,
-      vx: -0.6 + Math.random() * 1.2,
-      vy: 0.4 + Math.random() * 1.2,
-      rot: Math.random() * Math.PI * 2,
-      vrot: -0.08 + Math.random() * 0.16,
-      color: colors[Math.floor(Math.random() * colors.length)],
-      shape: Math.random() < 0.35 ? 'circle' : 'rect'
-    });
-  }
-
-  var startTime = performance.now();
-  var DURATION = 13000;   // total ms before canvas is removed
-  var FADE_AT  = 11000;   // ms after which opacity fades out
-
-  function tick(now){
-    var elapsed = now - startTime;
-    ctx.clearRect(0, 0, W, H);
-
-    for (var i = 0; i < pieces.length; i++) {
-      var p = pieces[i];
-      p.vy += 0.008;
-      p.vx += (Math.random() - 0.5) * 0.025;
-      if (p.vx > 1.2) p.vx = 1.2;
-      if (p.vx < -1.2) p.vx = -1.2;
-      p.x += p.vx;
-      p.y += p.vy;
-      p.rot += p.vrot;
-
-      ctx.save();
-      ctx.translate(p.x, p.y);
-      ctx.rotate(p.rot);
-      ctx.fillStyle = p.color;
-      ctx.globalAlpha = 0.92;
-      if (p.shape === 'circle') {
-        ctx.beginPath();
-        ctx.arc(0, 0, p.w * 0.5, 0, Math.PI * 2);
-        ctx.fill();
-      } else {
-        ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
-      }
-      ctx.restore();
-    }
-
-    if (elapsed > FADE_AT && !canvas.classList.contains('fading')) {
-      canvas.classList.add('fading');
-    }
-    if (elapsed < DURATION) {
-      requestAnimationFrame(tick);
-    } else {
-      try { canvas.parentNode && canvas.parentNode.removeChild(canvas); } catch(e){}
-    }
-  }
-  requestAnimationFrame(tick);
-
-  try { sessionStorage.setItem('mnc_launch_confetti_shown', '1'); } catch(e){}
-})();
-</script>
 
 <!-- Email-capture pop-in removed 2026-05-04, app is live, the ~5 emails
      captured pre-launch get treated as non-loaded founders (see
@@ -2634,9 +2503,9 @@
 
 <!-- Collapsed state: a small floating chip. The full card only opens when
      tapped, it was 340px wide and swallowed a phone screen on auto-open. -->
-<button class="wl-chip" id="wl-chip" type="button" aria-label="Get notified when MNC 3.0 launches">
+<button class="wl-chip" id="wl-chip" type="button" aria-label="Tell me when My Nail Connection 3.0 launches">
   <span class="wl-chip-dot" aria-hidden="true"></span>
-  <span>Get notified</span>
+  <span>Tell me when it launches!</span>
 </button>
 <div class="popin" id="wl-popin" role="dialog" aria-label="Join the launch list" aria-hidden="true">
   <button class="popin-close" id="wl-close" type="button" aria-label="Close">&times;</button>
@@ -2651,7 +2520,7 @@
     <div class="popin-msg" id="wl-msg" role="status" aria-live="polite"></div>
     <div class="popin-hint">No spam, just one note the day we launch.</div>
   </div>
-  <div class="popin-success" id="wl-success" style="display:none;">You're on the list! &#128153; We'll be in touch.</div>
+  <div class="popin-success" id="wl-success" style="display:none;">You're on the list! <svg viewBox="0 0 24 24" width="15" height="15" style="vertical-align:-2px;" aria-hidden="true"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="#8A5F6C"/></svg> We'll be in touch.</div>
 </div>
 
 <script>
@@ -2659,6 +2528,7 @@
   var SB_URL = 'https://nwqnakoongrorbwnrqzc.supabase.co';
   var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im53cW5ha29vbmdyb3Jid25ycXpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNzczMjUsImV4cCI6MjA5ODk1MzMyNX0.TFFMlg9VjB0cyJwbgmVbeatFYQFaF1Ri0nrH0GwhHJs';
   var LS = 'mnc_wl_v3';
+  var WL_HEART = '<svg viewBox="0 0 24 24" width="15" height="15" style="vertical-align:-2px;" aria-hidden="true"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="#8A5F6C"/></svg>';
   var popin = document.getElementById('wl-popin');
   if (!popin) return;
   var closeBtn = document.getElementById('wl-close');
@@ -2679,7 +2549,7 @@
   function showSuccess(dupe){
     formState.style.display = 'none';
     successEl.style.display = 'block';
-    if (dupe) { successEl.classList.add('is-dupe'); successEl.textContent = "You're already on the list, love. \u{1F49B}"; }
+    if (dupe) { successEl.classList.add('is-dupe'); successEl.innerHTML = "You're already on the list, love. " + WL_HEART; }
     setStored('joined');
     hideChip();
   }
