@@ -3404,7 +3404,7 @@ async function loadTechTier(email) {
       // Comp flags, populated below from tech_comps. Defaults assume
       // "not comped" so callers can read these unconditionally.
       is_comped: false,
-      comp_monthly_limit: 40,
+      comp_monthly_limit: (STRIPE_CONFIG.monthly_limit || 25),
       comp_note: ''
     };
     // Check if subscription expired
@@ -3427,7 +3427,7 @@ async function loadTechTier(email) {
           _techTier.tier = 'paid';
           _techTier.subscription_expires_at = null;  // never expires
           _techTier.is_comped = true;
-          _techTier.comp_monthly_limit = cd[0].monthly_limit || 40;
+          _techTier.comp_monthly_limit = cd[0].monthly_limit || STRIPE_CONFIG.monthly_limit || 25;
           _techTier.comp_note = cd[0].note || '';
         }
       } catch(_) {}
@@ -3446,7 +3446,7 @@ function _periodSlotsRemaining() {
   // in tech_comps). Fall back to STRIPE_CONFIG for normal Stripe paid
   // subs. 2026-04-27 comps system.
   const cap = _techTier.is_comped
-    ? (_techTier.comp_monthly_limit || 40)
+    ? (_techTier.comp_monthly_limit || STRIPE_CONFIG.monthly_limit || 25)
     : (STRIPE_CONFIG.monthly_limit || 25);
   const resetAt = _techTier.period_reset_at ? new Date(_techTier.period_reset_at) : null;
   // No reset marker, or the month has rolled over → full allowance.
@@ -4881,8 +4881,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 402,         /* __APP_BUILD_ANDROID__ */
-  ios:     207,          /* __APP_BUILD_IOS__     */
+  android: 403,         /* __APP_BUILD_ANDROID__ */
+  ios:     208,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -4931,7 +4931,8 @@ const STRIPE_CONFIG = {
   link_1_photo:   'https://buy.stripe.com/28E4gycjubtr2KA2xtgEg00',
   // Payment link for 10 photo credits ($5 bundle, portfolio-only), Live
   link_10_photos: 'https://buy.stripe.com/cNi8wOfvG7db4SI3BxgEg01',
-  // Payment link for Glow Up subscription ($10.99/mo = 40 photos/month, monthly rolling reset, feed-eligible), Live
+  // Payment link for Glow Up subscription ($10.99/mo, monthly_limit below,
+  // monthly rolling reset, feed-eligible), Live
   // Price bumped from $10 to $10.99 on 2026-04-28 to match Apple IAP tier 11
   // (Apple's available tiers don't include $10; nearest are $9.99 or $10.99).
   // We picked $10.99 across all platforms so the Stripe / Apple / Google
@@ -4966,6 +4967,9 @@ const STRIPE_CONFIG = {
   // Anne 2026-07-15: never "unlimited". Photos are permanent, so uncapped
   // uploads = storage we can never reclaim. Keep in sync with v_period_cap inside
   // consume_upload_slot() RPC.
+  // THE allowance number. Every cap in the app derives from this, and the
+  // DB's consume_upload_slot v_period_cap must match it. Drifted once:
+  // app said 25 while an older migration still had 40. 2026-07-21
   monthly_limit: 25
 };
 
