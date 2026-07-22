@@ -37,6 +37,8 @@ cp -r "$V3/deploy/ghpages/app/." "$OUT/app/"
 # ── Marketing page ──────────────────────────────────────────────────────
 cp "$V3/marketing-v3.html" "$OUT/index.html"
 cp -r "$V3/images" "$OUT/images"
+cp "$V3/og-image.png" "$OUT/og-image.png"
+cp "$V3/og-image.png" "$OUT/app/og-image.png"
 [ -d "$V3/app-screens" ] && cp -r "$V3/app-screens" "$OUT/app-screens"
 
 python - "$OUT" <<'PYEOF'
@@ -57,9 +59,18 @@ s = s2 if n else s.replace('</title>', '</title>\n' + NOINDEX, 1)
 appdir = s.count('https://mynailconnection.com/app/')
 s = s.replace('https://mynailconnection.com/app/', 'app/')
 
+# og: tags must stay ABSOLUTE (scrapers ignore relative), but must point at the
+# PREVIEW, or texting a /v3 link shows the production card. Undo the blanket
+# rewrite above for og:url, then move both url and image onto /v3.
+s = s.replace('content="app/"', 'content="https://mynailconnection.com/v3/app/"')
+s = s.replace('property="og:url" content="https://mynailconnection.com/"',
+              'property="og:url" content="https://mynailconnection.com/v3/"')
+s = s.replace('https://mynailconnection.com/og-image.png',
+              'https://mynailconnection.com/v3/og-image.png')
+
 # Obvious preview banner + a big button through to the app
 banner = (
- '<style>#v3bar{position:sticky;top:0;z-index:9999;background:linear-gradient(135deg,#8A5F6C,#4E323C);'
+ '<style>#v3bar{position:sticky;top:0;z-index:9999;background:linear-gradient(135deg,#4A4A4F,#141317);'
  'color:#fff;font-family:"DM Sans",system-ui,sans-serif;padding:6px 12px;display:flex;gap:10px;'
  'align-items:center;justify-content:center;font-size:12.5px;line-height:1;}'
  '#v3bar b{letter-spacing:1.1px;text-transform:uppercase;font-size:10px;font-weight:700;}'
@@ -76,6 +87,11 @@ print(f'  marketing: noindex set, {appdir} app link(s) repointed, banner+button 
 # ── 2. App page ─────────────────────────────────────────────────────────
 p = os.path.join(out, 'app', 'index.html')
 s = open(p, encoding='utf-8').read()
+# Same og: fix as the marketing page: keep them absolute, point them at /v3.
+s = s.replace('property="og:url" content="https://mynailconnection.com/app/"',
+              'property="og:url" content="https://mynailconnection.com/v3/app/"')
+s = s.replace('https://mynailconnection.com/og-image.png',
+              'https://mynailconnection.com/v3/app/og-image.png')
 if 'name="robots"' in s:
     s = re.sub(r'<meta name="robots" content="[^"]*"\s*/?>', NOINDEX, s, count=1)
 else:
