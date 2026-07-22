@@ -306,7 +306,7 @@
     --rose-mid: #D0A3A5;
     --gold: #8A7879;
     --gold-light: #EDE7E6;
-    --cream: #F7E2E3;
+    --cream: #FFFFFF;
     --charcoal: #0B0B0D;
     --muted: #7A6E78;
     --white: #ffffff;
@@ -634,7 +634,7 @@
     gap: 20px;
   }
   .tech-card {
-    background: linear-gradient(160deg, #FFFBF9 0%, #FBF6F6 100%);
+    background: #FFFFFF;
     border-radius: 18px;
     padding: 28px 26px;
     border: 1px solid rgba(191,166,168,0.18);
@@ -710,7 +710,7 @@
     gap: 20px;
   }
   .feature-card {
-    background: linear-gradient(160deg, #FFFBF9 0%, #FBF6F6 100%);
+    background: #FFFFFF;
     border-radius: 18px;
     padding: 32px 28px;
     border: 1px solid rgba(191,166,168,0.18);
@@ -880,7 +880,7 @@
     margin: 0 auto;
   }
   .price-card {
-    background: linear-gradient(160deg, #FFFBF9 0%, #FBF6F6 100%);
+    background: #FFFFFF;
     border-radius: 18px;
     padding: 36px 28px;
     border: 1px solid rgba(191,166,168,0.18);
@@ -957,7 +957,7 @@
 
   /* ── FINAL CTA ── */
   .final-cta {
-    background: linear-gradient(160deg, #F7E2E3 0%, #FBF6F6 40%, #EDEAE5 100%);
+    background: #FFFFFF;
     text-align: center;
     padding: 120px 24px 60px;
     position: relative; overflow: hidden;
@@ -1287,7 +1287,7 @@
   .waitlist-success {
     padding: 16px 26px;
     border-radius: 999px;
-    background: linear-gradient(160deg, #FFFFFF 0%, #F2F7E8 100%);
+    background: #FFFFFF;
     border: 2px solid #9CAF88;
     color: #3E5530;
     font-weight: 700;
@@ -1298,7 +1298,7 @@
     animation: waitlist-pop 0.4s cubic-bezier(0.34,1.5,0.64,1);
   }
   .waitlist-success.is-dupe {
-    background: linear-gradient(160deg, #FFFFFF 0%, #FBEEE9 100%);
+    background: #FFFFFF;
     border-color: var(--rose);
     color: var(--rose-dark);
   }
@@ -1341,7 +1341,7 @@
     position: fixed;
     right: 24px; bottom: 24px;
     width: 340px; max-width: calc(100vw - 32px);
-    background: linear-gradient(160deg, #FFFFFF 0%, #F7E2E3 100%);
+    background: #FFFFFF;
     border: 1px solid rgba(191,166,168,0.28);
     border-radius: 22px;
     box-shadow: 0 20px 56px rgba(82,40,30,0.22), 0 2px 8px rgba(82,40,30,0.10);
@@ -1405,7 +1405,7 @@
     color: #3E5530;
     font-weight: 700;
     font-size: 14.5px;
-    background: linear-gradient(160deg, #FFFFFF 0%, #F2F7E8 100%);
+    background: #FFFFFF;
     border-radius: 14px;
     border: 2px solid #9CAF88;
     box-shadow: 0 6px 18px rgba(82,40,30,0.10), inset 0 1px 0 rgba(255,255,255,0.9);
@@ -1413,7 +1413,7 @@
   }
   .popin-success.is-dupe {
     color: var(--rose-dark);
-    background: linear-gradient(160deg, #FFFFFF 0%, #FBEEE9 100%);
+    background: #FFFFFF;
     border-color: var(--rose);
   }
   @media (max-width: 480px) {
@@ -1460,7 +1460,7 @@
      Appended last so these win the cascade over the 2.0 hero rules.
      ══════════════════════════════════════════════════════════════ */
   .hero {
-    background: #EDEAE5;
+    background: #FFFFFF;
     text-align: left;
     justify-content: flex-start;
     padding-top: 150px;
@@ -1468,11 +1468,10 @@
     padding-left: max(clamp(24px, 6vw, 72px), calc((100% - 1280px) / 2));
     padding-right: max(clamp(24px, 6vw, 72px), calc((100% - 1280px) / 2));
   }
-  .hero::before {
-    background: radial-gradient(ellipse at 12% 25%, rgba(191,166,168,0.28) 0%, transparent 62%),
-                radial-gradient(ellipse at 85% 85%, rgba(125,100,102,0.10) 0%, transparent 55%);
-  }
-  .hero::after { opacity: 0.14; }
+  /* The two rose washes and the grain belonged to the ivory. On white they
+     only made it look grubby, so the hero is flat white now. 2026-07-21 */
+  .hero::before { background: none; }
+  .hero::after  { opacity: 0; }
   /* The raised card (Anne, 2026-07-15: "love the lady on 2.5, do that for main
      v3, the raised card"). Replaces the bleeding/faded treatment: she is now a
      square card with rounded corners and a lifted shadow, matching the 3.0 mark
@@ -1702,7 +1701,7 @@
     transition: background .25s, color .25s, border-color .25s, transform .25s;
   }
   .gs-chip:hover { background: rgba(191,166,168,0.20); color: #F7E2E3; }
-  .gs-chip.on { background: #F7E2E3; color: #141317; border-color: #F7E2E3; transform: translateY(-1px); box-shadow: 0 4px 14px rgba(247,235,236,0.22); }
+  .gs-chip.on { background: #141317; color: #FFFFFF; border-color: #141317; transform: translateY(-1px); box-shadow: 0 4px 14px rgba(247,235,236,0.22); }
 
   .gs-track-wrap { position: relative; display: flex; flex-direction: column; gap: 14px; }
   .gs-track-wrap::before, .gs-track-wrap::after { content: ''; position: absolute; top: 0; bottom: 0; width: 11%; z-index: 3; pointer-events: none; }
@@ -1732,7 +1731,7 @@
   .gs-tag {
     position: absolute; left: 8px; top: 8px; z-index: 2;
     font-size: 10px; font-weight: 700; letter-spacing: .3px;
-    color: #141317; background: #F7E2E3; padding: 4px 9px; border-radius: 100px;
+    color: #141317; background: #FAFAFA; padding: 4px 9px; border-radius: 100px;
     opacity: 0; transform: translateY(-4px); transition: opacity .3s, transform .3s;
     pointer-events: none; white-space: nowrap;
   }
@@ -1958,7 +1957,7 @@
     </div>
 
     <!-- Archive / show-and-tell promise, your photos don't go anywhere -->
-    <div style="margin-top:48px;padding:40px 32px;background:linear-gradient(160deg, #FFFBF9 0%, #FDF2EC 100%);border-radius:22px;border:1px solid rgba(191,166,168,0.18);box-shadow:0 2px 20px rgba(21,20,19,0.04);text-align:center;max-width:780px;margin-left:auto;margin-right:auto;">
+    <div style="margin-top:48px;padding:40px 32px;background:#FFFFFF;border-radius:22px;border:1px solid rgba(191,166,168,0.18);box-shadow:0 2px 20px rgba(21,20,19,0.04);text-align:center;max-width:780px;margin-left:auto;margin-right:auto;">
       <div style="display:inline-flex;align-items:center;justify-content:center;width:52px;height:52px;border-radius:14px;background:rgba(191,166,168,0.1);margin-bottom:18px;">
         <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#DEB3B5" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M3 16l5-4 4 3 4-5 5 6"/></svg>
       </div>
