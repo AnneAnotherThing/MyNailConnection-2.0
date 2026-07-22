@@ -87,7 +87,7 @@
   /* 3.0 identity, Leslie's Nagel-inspired board: black, mauve, blush.
      Variable NAMES kept (--rose etc.) so nothing else has to change;
      the values are the rebrand. */
-  --rose:#DEB3B5;--rose-light:#F7E2E3;--rose-mid:#D0A3A5;--rose-dark:#A2636C;
+  --rose:#DEB3B5;--rose-light:#FAFAFA;--rose-mid:#D0A3A5;--rose-dark:#A2636C;
   /* 3.0 ink depth scale, 2026-07-21. Grey to black, replacing the plum scale
      Anne pulled 2026-07-21. Blush and rose stay as the accent family,
      used for hero cards and primary buttons so they read as one system. */
@@ -136,7 +136,7 @@ body{font-family:'DM Sans',sans-serif;background:#FFFFFF;display:flex;justify-co
 /* .screen styles defined above in layout section */
 .chip-btn{padding:6px 14px;border-radius:100px;border:1.5px solid var(--border);background:white;font-size:12px;font-weight:500;color:var(--charcoal);cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;transition:all 0.15s;}
 .feed-radius-chip{padding:4px 10px;border-radius:100px;border:1px solid var(--border);background:white;font-size:11px;font-weight:500;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s;}
-.feed-radius-chip.on{background:var(--rose);color:white;border-color:var(--rose);}
+.feed-radius-chip.on{background:var(--rose-dark);color:white;border-color:var(--rose-dark);}
 /* ── Feed card, editorial styling for bulletin posts ───────────────────
    Each post type (Availability, Promo, Inspo, Update, Question) gets a
    quiet color identity via CSS vars set on a per-type class. The card's
@@ -342,7 +342,7 @@ body{font-family:'DM Sans',sans-serif;background:#FFFFFF;display:flex;justify-co
 .feed-card.board-type-inspo       {--feed-accent:#A98B8D;--feed-accent-light:var(--rose-light);}
 .feed-card.board-type-announcement{--feed-accent:#A2636C;--feed-accent-light:#F5E6E1;}
 .feed-card.board-type-question    {--feed-accent:#6A7B93;--feed-accent-light:#E8ECF1;}
-.chip-btn.active{background:var(--rose);color:white;border-color:var(--rose);}
+.chip-btn.active{background:var(--rose-dark);color:white;border-color:var(--rose-dark);}
 .logo-mark{font-family:'Playfair Display',serif;font-style:italic;font-size:22px;font-weight:600;letter-spacing:0.3px;color:var(--charcoal);}
 /* Gradient fill (same rose->gold ramp as the hero accent) instead of the flat
    muted gold, which read as drab against the dark header. 2026-07-20. */
@@ -574,7 +574,7 @@ input[type="password"]::-webkit-contacts-auto-fill-button{display:none;}
 input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
 .input-group input:focus{border-color:var(--rose-mid);background:white;}
 .toggle{width:44px;height:24px;border-radius:100px;border:none;cursor:pointer;position:relative;transition:background 0.2s;flex-shrink:0;}
-.toggle.on{background:var(--rose);}.toggle.off{background:#D5CDCE;}
+.toggle.on{background:var(--rose-dark);}.toggle.off{background:#D5CDCE;}
 .toggle::after{content:'';position:absolute;top:3px;width:18px;height:18px;border-radius:50%;background:white;transition:left 0.2s;}
 .toggle.on::after{left:23px;}.toggle.off::after{left:3px;}
 .avail-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
@@ -702,7 +702,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
 .stat-card.slate{background:var(--slate-light);}
 .tabs{display:flex;padding:0 20px 14px;gap:4px;}
 .tab{flex:1;padding:9px;text-align:center;font-size:13px;font-weight:500;border-radius:100px;cursor:pointer;border:1px solid var(--border);color:var(--muted);background:white;transition:all 0.2s;}
-.tab.active{background:var(--rose);color:white;border-color:var(--rose);}
+.tab.active{background:var(--rose-dark);color:white;border-color:var(--rose-dark);}
 .admin-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border);}
 .admin-row:last-child{border-bottom:none;}
 .status-pill{padding:3px 9px;border-radius:100px;font-size:10px;font-weight:500;}
@@ -711,7 +711,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
 .pg-item{aspect-ratio:1;border-radius:10px;overflow:hidden;position:relative;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:26px;}
 .pg-add{border:2px dashed var(--rose-mid);background:white;color:var(--rose-mid);font-size:26px;cursor:pointer;}
 .uf-pill{padding:5px 12px;border-radius:100px;border:1px solid var(--border);background:white;font-size:11px;cursor:pointer;color:var(--muted);font-family:'DM Sans',sans-serif;transition:all 0.2s;}
-.uf-pill.active{background:var(--rose);color:white;border-color:var(--rose);}
+.uf-pill.active{background:var(--rose-dark);color:white;border-color:var(--rose-dark);}
 .user-row{display:flex;padding:10px 0;border-bottom:1px solid var(--border);gap:10px;align-items:flex-start;}
 .user-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:13px;font-weight:600;flex-shrink:0;}
 .role-badge{display:inline-block;font-size:9px;font-weight:600;letter-spacing:0.5px;padding:2px 7px;border-radius:100px;text-transform:uppercase;}
@@ -725,18 +725,18 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
 .acc-row{width:100%;display:flex;align-items:center;justify-content:space-between;padding:13px 16px;background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;transition:background 0.15s;}
 .acc-row:hover{background:var(--rose-light);}
 .acc-label{font-size:14px;font-weight:500;color:var(--charcoal);}
-.acc-badge{background:var(--rose);color:white;font-size:10px;font-weight:600;padding:3px 9px;border-radius:100px;white-space:nowrap;}
+.acc-badge{background:var(--rose-dark);color:white;font-size:10px;font-weight:600;padding:3px 9px;border-radius:100px;white-space:nowrap;}
 .acc-body{background:var(--cream);}
 .acc-chip{display:inline-flex;align-items:center;gap:6px;padding:6px 13px;border-radius:100px;font-size:13px;font-weight:500;cursor:pointer;border:1.5px solid var(--border);background:white;color:var(--rose-dark);font-family:'DM Sans',sans-serif;transition:all 0.12s;user-select:none;}
 .acc-chip:hover{border-color:var(--rose-mid);background:var(--rose-light);}
 .acc-chip input{display:none;}
-.acc-chip:has(input:checked){background:var(--rose);color:white;border-color:var(--rose-dark);}
+.acc-chip:has(input:checked){background:var(--rose-dark);color:white;border-color:var(--rose-dark);}
 .acc-clear{background:none;border:none;font-size:12px;color:var(--rose);cursor:pointer;font-family:'DM Sans',sans-serif;padding:0;text-decoration:none;font-weight:500;}
 .acc-clear:hover{text-decoration:underline;}
 /* ── Tech editor tags ──────────────────────────────────────── */
 .te-tag{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:100px;font-size:12px;font-weight:500;cursor:pointer;border:1.5px solid var(--border);background:white;color:var(--rose-dark);font-family:'DM Sans',sans-serif;transition:all 0.12s;}
 .te-tag input{display:none;}
-.te-tag:has(input:checked){background:var(--rose);color:white;border-color:var(--rose-dark);}
+.te-tag:has(input:checked){background:var(--rose-dark);color:white;border-color:var(--rose-dark);}
 
 
 
@@ -820,7 +820,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
   display:flex; flex-direction:column; align-items:center; justify-content:center;
   gap:8px;
   padding:16px 8px 14px;
-  background:linear-gradient(180deg,#FFFFFF 0%,var(--cream) 100%);
+  background:linear-gradient(180deg,#FFFFFF 0%,#FFFFFF 100%);
   border:1.5px solid var(--border);
   border-bottom:3px solid rgba(125,100,102,0.25);
   box-shadow:0 2px 6px rgba(11,11,13,0.06),0 8px 20px rgba(11,11,13,0.05);
@@ -1296,7 +1296,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       <div class="logo-mark" style="font-size:24px;color:var(--ink);">Welcome, let's get you set up.</div>
       <div style="font-family:'Playfair Display',serif;font-style:italic;font-size:14px;color:var(--muted);margin-top:4px;">Step 1 of 3, Tell us about yourself</div>
       <!-- Progress bar -->
-      <div style="height:4px;background:var(--border);border-radius:100px;margin-top:12px;"><div style="height:100%;width:33%;background:var(--rose);border-radius:100px;transition:width 0.4s;"></div></div>
+      <div style="height:4px;background:var(--border);border-radius:100px;margin-top:12px;"><div style="height:100%;width:33%;background:var(--rose-dark);border-radius:100px;transition:width 0.4s;"></div></div>
     </div>
     <div style="background:white;border-radius:24px;padding:28px 24px;box-shadow:0 4px 40px rgba(125,100,102,0.1);">
       <div style="font-family:'Playfair Display',serif;font-size:20px;margin-bottom:4px;">What's your name?</div>
@@ -1320,10 +1320,10 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
 <div class="screen" id="signup-role">
   <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-start;padding:40px 24px 32px;background:linear-gradient(160deg,#EAF3EC 0%,white 80%);">
     <div style="text-align:center;margin-bottom:20px;">
-      <div style="margin-bottom:16px;display:flex;justify-content:center;"><div class="icon-glass" style="background:#F7E2E3;"><svg viewBox="0 0 24 24" style="width:26px;height:26px;stroke:var(--rose);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/><circle cx="5" cy="5" r="1" fill="#8B7F8A"/><circle cx="19" cy="7" r="1" fill="#8B7F8A"/><circle cx="7" cy="19" r="1" fill="#8B7F8A"/></svg></div></div>
+      <div style="margin-bottom:16px;display:flex;justify-content:center;"><div class="icon-glass" style="background:#FAFAFA;"><svg viewBox="0 0 24 24" style="width:26px;height:26px;stroke:var(--rose);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/><circle cx="5" cy="5" r="1" fill="#8B7F8A"/><circle cx="19" cy="7" r="1" fill="#8B7F8A"/><circle cx="7" cy="19" r="1" fill="#8B7F8A"/></svg></div></div>
       <div class="logo-mark" style="font-size:24px;color:var(--ink);">Just a couple more steps.</div>
       <div style="font-family:'Playfair Display',serif;font-style:italic;font-size:14px;color:var(--muted);margin-top:4px;">Step 2 of 3, How will you use the app?</div>
-      <div style="height:4px;background:var(--border);border-radius:100px;margin-top:12px;"><div style="height:100%;width:66%;background:var(--rose);border-radius:100px;"></div></div>
+      <div style="height:4px;background:var(--border);border-radius:100px;margin-top:12px;"><div style="height:100%;width:66%;background:var(--rose-dark);border-radius:100px;"></div></div>
     </div>
     <div style="background:white;border-radius:24px;padding:28px 24px;box-shadow:0 4px 40px rgba(125,100,102,0.1);">
       <div style="font-family:'Playfair Display',serif;font-size:20px;margin-bottom:4px;">Tell us a little about yourself.</div>
@@ -1334,7 +1334,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
         <div><div style="font-weight:500;font-size:15px;color:var(--charcoal);">I'm looking for a nail tech</div><div style="font-size:12px;color:var(--muted);margin-top:2px;">Find someone amazing near you and book instantly</div></div>
       </div>
       <div id="role-tech-card" onclick="selectRole('tech')" style="border:2px solid var(--border);border-radius:16px;padding:16px;margin-bottom:10px;cursor:pointer;transition:all 0.2s;display:flex;align-items:flex-start;gap:14px;">
-        <div style="margin-right:4px;margin-top:2px;"><div class="icon-glass" style="background:#F7E2E3;"><svg viewBox="0 0 24 24" style="width:26px;height:26px;stroke:var(--rose);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;"><path d="M12 2C8 2 5 5 5 9c0 2.4 1.1 4.5 2.8 5.9L12 22l4.2-7.1C17.9 13.5 19 11.4 19 9c0-4-3-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg></div></div>
+        <div style="margin-right:4px;margin-top:2px;"><div class="icon-glass" style="background:#FAFAFA;"><svg viewBox="0 0 24 24" style="width:26px;height:26px;stroke:var(--rose);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;"><path d="M12 2C8 2 5 5 5 9c0 2.4 1.1 4.5 2.8 5.9L12 22l4.2-7.1C17.9 13.5 19 11.4 19 9c0-4-3-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg></div></div>
         <div>
           <div style="font-weight:500;font-size:15px;color:var(--charcoal);">I'm a nail tech</div>
           <div style="font-size:12px;color:var(--muted);margin-top:2px;">Showcase your work and connect with new clients</div>
@@ -1359,7 +1359,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       <div style="margin-bottom:16px;display:flex;justify-content:center;"><div class="icon-glass" style="background:#E8EEF2;"><svg viewBox="0 0 24 24" style="width:26px;height:26px;stroke:#4A6274;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;"><circle cx="12" cy="10" r="3"/><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg></div></div>
       <div class="logo-mark" style="font-size:24px;color:var(--ink);">One last thing.</div>
       <div style="font-family:'Playfair Display',serif;font-style:italic;font-size:14px;color:var(--muted);margin-top:4px;"><span id="location-step-label">Step 3, Almost done!</span></div>
-      <div style="height:4px;background:var(--border);border-radius:100px;margin-top:12px;"><div style="height:100%;width:100%;background:var(--rose);border-radius:100px;"></div></div>
+      <div style="height:4px;background:var(--border);border-radius:100px;margin-top:12px;"><div style="height:100%;width:100%;background:var(--rose-dark);border-radius:100px;"></div></div>
     </div>
     <div style="background:white;border-radius:24px;padding:28px 24px;box-shadow:0 4px 40px rgba(125,100,102,0.1);">
       <div style="font-family:'Playfair Display',serif;font-size:20px;margin-bottom:4px;" id="location-screen-title">Help us find techs near you</div>
@@ -1391,10 +1391,10 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
 <div class="screen" id="signup-tech">
   <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-start;padding:40px 24px 32px;overflow-y:auto;background:linear-gradient(160deg,#F7E2E3 0%,white 80%);">
     <div style="text-align:center;margin-bottom:20px;">
-      <div style="margin-bottom:16px;display:flex;justify-content:center;"><div class="icon-glass" style="background:#F7E2E3;"><svg viewBox="0 0 24 24" style="width:26px;height:26px;stroke:var(--rose);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;"><path d="M12 2C8 2 5 5 5 9c0 2.4 1.1 4.5 2.8 5.9L12 22l4.2-7.1C17.9 13.5 19 11.4 19 9c0-4-3-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg></div></div>
+      <div style="margin-bottom:16px;display:flex;justify-content:center;"><div class="icon-glass" style="background:#FAFAFA;"><svg viewBox="0 0 24 24" style="width:26px;height:26px;stroke:var(--rose);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;"><path d="M12 2C8 2 5 5 5 9c0 2.4 1.1 4.5 2.8 5.9L12 22l4.2-7.1C17.9 13.5 19 11.4 19 9c0-4-3-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg></div></div>
       <div class="logo-mark" style="font-size:24px;color:var(--ink);">Tell us about your work.</div>
       <div style="font-family:'Playfair Display',serif;font-style:italic;font-size:14px;color:var(--muted);margin-top:4px;">Step 4 of 5, Your tech profile</div>
-      <div style="height:4px;background:var(--border);border-radius:100px;margin-top:12px;"><div style="height:100%;width:80%;background:var(--rose);border-radius:100px;"></div></div>
+      <div style="height:4px;background:var(--border);border-radius:100px;margin-top:12px;"><div style="height:100%;width:80%;background:var(--rose-dark);border-radius:100px;"></div></div>
     </div>
 
     <div style="background:white;border-radius:24px;padding:24px;box-shadow:0 4px 40px rgba(125,100,102,0.1);display:flex;flex-direction:column;gap:14px;">
@@ -1563,7 +1563,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       <input id="cp-new" type="password" placeholder="At least 8 characters" style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:12px;font-family:'DM Sans',sans-serif;font-size:14px;margin-bottom:14px;box-sizing:border-box;outline:none;background:var(--cream);"/>
       <div style="font-size:11px;font-weight:500;color:var(--muted);margin-bottom:4px;">Confirm password</div>
       <input id="cp-confirm" type="password" placeholder="Repeat your new password" style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:12px;font-family:'DM Sans',sans-serif;font-size:14px;margin-bottom:6px;box-sizing:border-box;outline:none;background:var(--cream);"/>
-      <div id="cp-error" style="display:none;font-size:12px;color:#C0392B;margin-bottom:10px;padding:8px 12px;background:#F7E2E3;border-radius:8px;"></div>
+      <div id="cp-error" style="display:none;font-size:12px;color:#C0392B;margin-bottom:10px;padding:8px 12px;background:#FAFAFA;border-radius:8px;"></div>
       <button class="btn btn-rose" onclick="doChangePassword()" id="cp-btn" style="width:100%;margin-top:10px;">Set New Password</button>
     </div>
   </div>
@@ -1746,7 +1746,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       <!-- Mode toggle pills -->
       <button onclick="openFiltersModal()" id="style-filter-btn" style="background:none;border:none;cursor:pointer;padding:6px;position:relative;">
         <svg viewBox="0 0 24 24" style="width:20px;height:20px;stroke:#F7F2F2;fill:none;stroke-width:2;stroke-linecap:round;"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
-        <span id="style-filter-dot" style="display:none;position:absolute;top:4px;right:4px;width:8px;height:8px;background:var(--rose);border-radius:50%;"></span>
+        <span id="style-filter-dot" style="display:none;position:absolute;top:4px;right:4px;width:8px;height:8px;background:var(--rose-dark);border-radius:50%;"></span>
       </button>
     </div>
     <!-- Mode description -->
@@ -1830,7 +1830,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
   <div id="map-status-bar" style="padding:8px 16px;background:#FFF8E8;border-bottom:1px solid #F0D890;font-size:12px;color:#7A5A00;display:flex;align-items:center;gap:8px;flex-shrink:0;">
     <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:#B8860B;fill:none;stroke-width:2;flex-shrink:0;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
     <span id="map-status-msg">Tap "Use My Location" to see techs near you</span>
-    <button onclick="requestLocation()" style="margin-left:auto;background:var(--rose);color:white;border:none;padding:4px 10px;border-radius:100px;font-size:11px;font-weight:500;cursor:pointer;white-space:nowrap;">Use My Location</button>
+    <button onclick="requestLocation()" style="margin-left:auto;background:var(--rose-dark);color:white;border:none;padding:4px 10px;border-radius:100px;font-size:11px;font-weight:500;cursor:pointer;white-space:nowrap;">Use My Location</button>
   </div>
 
   <!-- Filters active bar, shows when any filter is on -->
@@ -2057,7 +2057,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
          they've posted at least one photo. -->
     <div id="td-first-post-prompt" onclick="openTechEditFromProfile()"
          style="display:none;margin:16px 20px 0;padding:14px 16px;border-radius:14px;
-                background:linear-gradient(160deg,#FBF6F6 0%,#F6E9EA 100%);
+                background:#FAFAFA;
                 border:1px solid var(--rose-mid);cursor:pointer;
                 box-shadow:0 2px 10px rgba(169,139,141,0.14);">
       <div style="font-family:'Playfair Display',serif;font-size:17px;font-weight:600;color:var(--rose-dark);margin-bottom:4px;">Post your first look</div>
@@ -2096,7 +2096,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
           Upload Photos
         </button>
         <!-- Prices. Populated by updateSlotsRemainingDisplay() after loadTechTier. -->
-        <div id="td-slots-card" style="display:none;margin-top:12px;padding:13px 16px;border-radius:14px;background:linear-gradient(160deg,#FBF6F6 0%,#F6E9EA 100%);border:1px solid rgba(169,139,141,0.22);">
+        <div id="td-slots-card" style="display:none;margin-top:12px;padding:13px 16px;border-radius:14px;background:#FAFAFA;border:1px solid rgba(169,139,141,0.22);">
           <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;">
             <div id="td-slots-num" style="font-family:'Playfair Display',serif;font-size:34px;font-weight:600;color:var(--rose-dark);line-height:1;">-</div>
             <div id="td-slots-label" style="font-size:14px;color:var(--charcoal);font-weight:500;">uploads available</div>
@@ -2113,7 +2113,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
             <div style="font-size:14.5px;font-weight:700;color:var(--charcoal);">Bookings</div>
             <div style="font-size:12px;color:var(--muted);" id="td-bookings-sub">Set up free booking</div>
           </div>
-          <span id="td-bookings-pending" style="display:none;background:var(--rose);color:white;font-size:12px;font-weight:700;border-radius:100px;padding:3px 9px;">0</span>
+          <span id="td-bookings-pending" style="display:none;background:var(--rose-dark);color:white;font-size:12px;font-weight:700;border-radius:100px;padding:3px 9px;">0</span>
           <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:var(--muted);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg>
         </div>
         <div id="td-cal"></div>
@@ -2197,7 +2197,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
        the background as a safety net. Added 2026-04-21. -->
   <div id="myph-save-bar" style="position:sticky;top:0;background:white;padding:10px 16px;border-bottom:1px solid var(--border);z-index:5;display:flex;align-items:center;justify-content:space-between;gap:12px;">
     <span id="myph-save-status" style="font-size:12px;color:var(--muted);">All changes saved</span>
-    <button id="myph-save-btn" type="button" onclick="saveMyPhotosNow()" style="padding:7px 18px;border-radius:100px;border:none;background:linear-gradient(180deg,#BCA2A4 0%,#9B7F81 55%,#A2636C 100%);color:white;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:opacity 0.2s,background 0.2s;">Save</button>
+    <button id="myph-save-btn" type="button" onclick="saveMyPhotosNow()" style="padding:7px 18px;border-radius:100px;border:none;background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);color:white;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:opacity 0.2s,background 0.2s;">Save</button>
   </div>
 
   <div class="scroll-content" style="padding:20px 16px 100px;">
@@ -2237,7 +2237,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
             <div style="font-size:11px;color:var(--muted);" id="te-bulk-progress-count"></div>
           </div>
           <div style="height:6px;background:var(--border);border-radius:100px;overflow:hidden;">
-            <div id="te-bulk-progress-bar" style="height:100%;background:var(--rose);border-radius:100px;width:0%;transition:width 0.3s;"></div>
+            <div id="te-bulk-progress-bar" style="height:100%;background:var(--rose-dark);border-radius:100px;width:0%;transition:width 0.3s;"></div>
           </div>
         </div>
         <div style="display:none;" id="te-photo-grid"></div>
@@ -2248,7 +2248,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
          of a tech's portfolio. Photos aren't deleted, they're just hidden
          from public view until the tech re-subscribes. This banner is how
          they find out + reactivate. Populated by updatePausedPhotosBanner(). -->
-    <div id="myph-paused-banner" style="display:none;background:linear-gradient(160deg,#FBF6F6 0%,#F6E9EA 100%);border:1px solid rgba(169,139,141,0.25);border-radius:14px;padding:16px 16px 14px;margin-bottom:16px;">
+    <div id="myph-paused-banner" style="display:none;background:#FAFAFA;border:1px solid rgba(169,139,141,0.25);border-radius:14px;padding:16px 16px 14px;margin-bottom:16px;">
       <div style="display:flex;align-items:flex-start;gap:12px;">
         <div style="flex-shrink:0;width:34px;height:34px;border-radius:10px;background:rgba(169,139,141,0.14);display:flex;align-items:center;justify-content:center;">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#A98B8D" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
@@ -2256,7 +2256,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
         <div style="flex:1;min-width:0;">
           <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px;"><span id="myph-paused-count">0</span> photos paused</div>
           <div style="font-size:12.5px;color:var(--charcoal);line-height:1.5;margin-bottom:10px;">Your Glow Up ended, so photos beyond your free 5 are hidden from your profile. Nothing's deleted, reactivate Glow Up and everything comes right back.</div>
-          <button type="button" onclick="purchaseUnlimited()" style="padding:8px 16px;border-radius:100px;border:none;background:linear-gradient(180deg,#BCA2A4 0%,#9B7F81 55%,#A2636C 100%);color:white;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;">Resume Glow Up, $10.99/mo</button>
+          <button type="button" onclick="purchaseUnlimited()" style="padding:8px 16px;border-radius:100px;border:none;background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);color:white;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;">Resume Glow Up, $10.99/mo</button>
         </div>
       </div>
     </div>
@@ -2309,7 +2309,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       <div class="empty-state-title">No photos yet</div>
       <div class="empty-state-sub" style="margin-bottom:16px;">Tap below to add your first set, you'll tag and caption each one before it goes live.</div>
       <button type="button" onclick="openPhotoUploadFromHome()"
-        style="padding:12px 22px;border-radius:100px;border:none;background:linear-gradient(180deg,#BCA2A4 0%,#9B7F81 55%,#A2636C 100%);color:white;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:8px;box-shadow:0 2px 8px rgba(169,139,141,0.22);">
+        style="padding:12px 22px;border-radius:100px;border:none;background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);color:white;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:8px;box-shadow:0 2px 8px rgba(169,139,141,0.22);">
         <svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;">
           <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
           <polyline points="17 8 12 3 7 8"/>
@@ -2767,7 +2767,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
         <div style="width:68px;height:68px;border-radius:50%;border:2.5px solid rgba(255,240,230,0.85);background:var(--rose-light);display:flex;align-items:center;justify-content:center;overflow:hidden;box-shadow:0 3px 16px rgba(0,0,0,0.22), 0 0 0 5px rgba(255,210,195,0.12);" id="profile-photo-wrap">
           <div style="font-family:'Playfair Display',serif;font-size:24px;color:var(--rose-dark);" id="profile-initials">?</div>
         </div>
-        <div id="profile-photo-camera-badge" aria-hidden="true" style="position:absolute;right:-2px;bottom:-2px;width:24px;height:24px;border-radius:50%;background:var(--rose);border:2.5px solid white;display:flex;align-items:center;justify-content:center;pointer-events:none;box-shadow:0 2px 6px rgba(0,0,0,0.3);">
+        <div id="profile-photo-camera-badge" aria-hidden="true" style="position:absolute;right:-2px;bottom:-2px;width:24px;height:24px;border-radius:50%;background:var(--rose-dark);border:2.5px solid white;display:flex;align-items:center;justify-content:center;pointer-events:none;box-shadow:0 2px 6px rgba(0,0,0,0.3);">
           <svg viewBox="0 0 24 24" style="width:11px;height:11px;stroke:white;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
         </div>
       </div>
@@ -4903,8 +4903,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 410,         /* __APP_BUILD_ANDROID__ */
-  ios:     215,          /* __APP_BUILD_IOS__     */
+  android: 413,         /* __APP_BUILD_ANDROID__ */
+  ios:     218,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -5847,7 +5847,7 @@ async function devLogin(kind) {
       (function() {
         var on = false;
         try { on = localStorage.getItem('mnc_force_new_pricing') === '1'; } catch(e) {}
-        return '<button style="' + bs + (on ? 'background:var(--rose);color:white;' : '') +
+        return '<button style="' + bs + (on ? 'background:var(--rose-dark);color:white;' : '') +
                '" onclick="devToggleNewPricing()">DEV &middot; New pricing ' + (on ? 'ON' : 'off') + '</button>';
       })();
     anchor.parentNode.insertBefore(wrap, anchor);
@@ -6707,7 +6707,7 @@ function renderTechContactFooter(tech) {
   const showCall = phone && (onlyMessageSet || !Object.keys(cm).length ? true : !!cm.call);
   const showText = phone && (onlyMessageSet || !Object.keys(cm).length ? true : !!cm.text);
 
-  const cardStyle = `display:flex;align-items:center;justify-content:center;gap:8px;flex:1;min-width:0;padding:13px;border-radius:12px;background:linear-gradient(160deg,#B39A9C 0%,#A2636C 100%);border:1px solid rgba(80,62,63,0.3);border-bottom:3px solid rgba(43,41,39,0.5);box-shadow:0 3px 12px rgba(125,100,102,0.3),inset 0 1px 0 rgba(250,235,236,0.2);color:white;font-size:14px;font-weight:600;text-decoration:none;font-family:'DM Sans',sans-serif;text-shadow:0 1px 2px rgba(38,36,34,0.25);`;
+  const cardStyle = `display:flex;align-items:center;justify-content:center;gap:8px;flex:1;min-width:0;padding:13px;border-radius:12px;background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);border:1px solid rgba(80,62,63,0.3);border-bottom:3px solid rgba(43,41,39,0.5);box-shadow:0 3px 12px rgba(125,100,102,0.3),inset 0 1px 0 rgba(250,235,236,0.2);color:white;font-size:14px;font-weight:600;text-decoration:none;font-family:'DM Sans',sans-serif;text-shadow:0 1px 2px rgba(38,36,34,0.25);`;
 
   let btns = '';
   if (showCall) {
@@ -6730,7 +6730,7 @@ function renderTechContactFooter(tech) {
   if (tech.booking_enabled) {
     const bkFirst = ((tech.name || '').trim().split(/\s+/)[0]) || 'Now';
     nativeBookBtn = `<button onclick="openBookModal()"
-      style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px;border-radius:12px;background:linear-gradient(160deg,#B39A9C 0%,#A2636C 100%);border:1px solid rgba(96,76,77,0.3);border-bottom:3px solid rgba(43,41,39,0.5);box-shadow:0 3px 12px rgba(125,100,102,0.35);color:white;font-size:14px;font-weight:600;font-family:'DM Sans',sans-serif;margin-bottom:8px;box-sizing:border-box;cursor:pointer;">
+      style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px;border-radius:12px;background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);border:1px solid rgba(96,76,77,0.3);border-bottom:3px solid rgba(43,41,39,0.5);box-shadow:0 3px 12px rgba(125,100,102,0.35);color:white;font-size:14px;font-weight:600;font-family:'DM Sans',sans-serif;margin-bottom:8px;box-sizing:border-box;cursor:pointer;">
       <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:white;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
       Book ${bkFirst}
     </button>`;
@@ -6752,7 +6752,7 @@ function renderTechContactFooter(tech) {
                   bookingLink.includes('genbook') ? 'Book on Genbook' :
                   'Book Now';
     bookingBtn = `<a href="${esc(safeUrl(bookingLink))}" target="_blank" rel="noopener"
-      style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px;border-radius:12px;background:linear-gradient(160deg,#B39A9C 0%,#A2636C 100%);border:1px solid rgba(96,76,77,0.3);border-bottom:3px solid rgba(43,41,39,0.5);box-shadow:0 3px 12px rgba(125,100,102,0.35);color:white;font-size:14px;font-weight:600;text-decoration:none;font-family:'DM Sans',sans-serif;margin-bottom:8px;box-sizing:border-box;">
+      style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px;border-radius:12px;background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);border:1px solid rgba(96,76,77,0.3);border-bottom:3px solid rgba(43,41,39,0.5);box-shadow:0 3px 12px rgba(125,100,102,0.35);color:white;font-size:14px;font-weight:600;text-decoration:none;font-family:'DM Sans',sans-serif;margin-bottom:8px;box-sizing:border-box;">
       <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:white;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
       ${label}
     </a>`;
@@ -7220,7 +7220,7 @@ async function loadAdminInbox() {
         textBackBtn = '<a href="' + smsHref + '" style="display:inline-flex;align-items:center;gap:4px;font-size:11px;background:var(--sage);color:white;text-decoration:none;padding:5px 12px;border-radius:20px;font-family:\'DM Sans\',sans-serif;font-weight:500;">📱 Text back</a>';
       }
       const markReadBtn = unread
-        ? '<button onclick="markInboxRead(\'' + m.id + '\')" style="font-size:11px;background:var(--rose);color:white;border:none;padding:5px 12px;border-radius:20px;cursor:pointer;font-family:\'DM Sans\',sans-serif;">Mark read</button>'
+        ? '<button onclick="markInboxRead(\'' + m.id + '\')" style="font-size:11px;background:var(--rose-dark);color:white;border:none;padding:5px 12px;border-radius:20px;cursor:pointer;font-family:\'DM Sans\',sans-serif;">Mark read</button>'
         : '<span style="font-size:11px;color:var(--sage);">✓ Read</span>';
       const deleteBtn = '<button onclick="deleteInboxMessage(\'' + m.id + '\')" style="font-size:11px;background:transparent;color:var(--muted);border:1px solid var(--border);padding:4px 11px;border-radius:20px;cursor:pointer;font-family:\'DM Sans\',sans-serif;margin-left:auto;">Delete</button>';
       const actionRow = '<div style="margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">' + textBackBtn + markReadBtn + deleteBtn + '</div>';
@@ -9502,7 +9502,7 @@ function renderTePhotoGrid(photos) {
           var chip = document.createElement('span');
           chip.textContent = tag;
           chip.style.cssText = 'font-size:9px;padding:2px 6px;border-radius:100px;cursor:pointer;border:1px solid ' +
-            (isOn ? 'var(--rose);background:var(--rose);color:white;' : 'var(--border);background:white;color:var(--charcoal);');
+            (isOn ? 'var(--rose);background:var(--rose-dark);color:white;' : 'var(--border);background:white;color:var(--charcoal);');
           (function(idx, t, c) {
             c.onclick = function() {
               togglePhotoTag(idx, t);
@@ -9764,7 +9764,7 @@ function renderMyPhotosFilterBar() {
 
   function chipStyle(active) {
     return 'font-size:12px;padding:6px 12px;border-radius:100px;cursor:pointer;font-family:"DM Sans",sans-serif;font-weight:500;border:1.5px solid ' +
-      (active ? 'var(--rose-dark);background:var(--rose);color:white;'
+      (active ? 'var(--rose-dark);background:var(--rose-dark);color:white;'
               : 'var(--border);background:white;color:var(--charcoal);');
   }
 
@@ -9859,7 +9859,7 @@ function _openMyPhotosFilterPicker(cat, anchorBtn) {
     b.textContent = tag;
     var selected = window._myphFilter[catKey] === tag;
     b.style.cssText = 'font-size:12px;padding:6px 10px;border-radius:100px;cursor:pointer;font-family:"DM Sans",sans-serif;margin:0 5px 5px 0;border:1.5px solid ' +
-      (selected ? 'var(--rose-dark);background:var(--rose);color:white;'
+      (selected ? 'var(--rose-dark);background:var(--rose-dark);color:white;'
                 : 'var(--border);background:white;color:var(--charcoal);');
     b.onclick = function() {
       window._myphFilter[catKey] = tag;
@@ -10154,7 +10154,7 @@ function buildBulkReviewChip(photo, tag) {
   function applyStyle() {
     const isOn = (photo.tags || []).includes(tag);
     chip.style.cssText = 'font-size:11px;padding:5px 10px;border-radius:100px;cursor:pointer;font-family:"DM Sans",sans-serif;transition:all 0.15s ease;border:1px solid ' +
-      (isOn ? 'var(--rose);background:var(--rose);color:white;'
+      (isOn ? 'var(--rose);background:var(--rose-dark);color:white;'
             : 'var(--border);background:white;color:var(--charcoal);');
   }
   applyStyle();
@@ -10227,7 +10227,7 @@ function buildTaggedThumbnail(photo, idx) {
 
 function styleTagChip(chip, isOn) {
   chip.style.cssText = 'font-size:11px;padding:5px 10px;border-radius:100px;cursor:pointer;font-family:"DM Sans",sans-serif;transition:all 0.15s ease;border:1px solid ' +
-    (isOn ? 'var(--rose);background:var(--rose);color:white;'
+    (isOn ? 'var(--rose);background:var(--rose-dark);color:white;'
           : 'var(--border);background:white;color:var(--charcoal);');
 }
 
@@ -13472,7 +13472,7 @@ function tbRenderAppts() {
   const btn = function(label, fn, primary) {
     return '<button onclick="' + fn + '" style="flex:1;padding:9px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;' +
       (primary
-        ? 'border:none;background:linear-gradient(160deg,#B39A9C 0%,#A2636C 100%);color:white;'
+        ? 'border:none;background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);color:white;'
         : 'border:1.5px solid var(--border);background:white;color:var(--muted);') +
       '">' + label + '</button>';
   };
@@ -14100,7 +14100,7 @@ async function loadMyBoardPosts() {
         const thumb = p.image_url
           ? '<img src="' + esc(p.image_url) + '" style="width:44px;height:44px;border-radius:10px;object-fit:cover;flex-shrink:0;"/>'
           : '<div style="width:44px;height:44px;border-radius:10px;background:var(--cream);flex-shrink:0;"></div>';
-        return '<div class="board-post" style="position:relative;display:flex;align-items:center;gap:12px;padding:10px 12px;background:linear-gradient(135deg,#FBF4F4 0%,#F3E0E1 100%);border:1px solid var(--rose-mid);">'
+        return '<div class="board-post" style="position:relative;display:flex;align-items:center;gap:12px;padding:10px 12px;background:#FAFAFA;border:1px solid var(--rose-mid);">'
           + thumb
           + '<div style="flex:1;min-width:0;">'
           +   '<div style="font-size:13px;font-weight:600;color:var(--rose-dark);line-height:1.2;">Goes live ' + relUntil(pMs) + '</div>'
@@ -18451,7 +18451,7 @@ function renderReleaseWizardStep() {
       btn.textContent = tag;
       const isOn = selected.indexOf(tag) !== -1;
       btn.style.cssText = 'font-size:12px;padding:6px 12px;border-radius:100px;cursor:pointer;font-family:"DM Sans",sans-serif;transition:all 0.15s ease;border:1.5px solid ' +
-        (isOn ? 'var(--rose-dark);background:var(--rose);color:white;'
+        (isOn ? 'var(--rose-dark);background:var(--rose-dark);color:white;'
               : 'var(--border);background:white;color:var(--charcoal);');
       btn.onclick = function() { toggleReleaseWizardTag(tag); };
       chips.appendChild(btn);
@@ -18719,7 +18719,7 @@ function closeReleaseWizard() {
            benefit (reframed from "portfolio only" 2026-04-23 per Anne:
            "'portfolio only' sounds negative, lead with value"). -->
       <div style="position:relative;">
-        <div style="position:absolute;top:-10px;right:16px;background:var(--rose);color:white;font-size:10px;font-weight:700;padding:3px 10px;border-radius:100px;letter-spacing:0.5px;z-index:2;box-shadow:0 2px 6px rgba(178,110,95,0.35);">SAVE 50%</div>
+        <div style="position:absolute;top:-10px;right:16px;background:var(--rose-dark);color:white;font-size:10px;font-weight:700;padding:3px 10px;border-radius:100px;letter-spacing:0.5px;z-index:2;box-shadow:0 2px 6px rgba(178,110,95,0.35);">SAVE 50%</div>
         <div onclick="purchasePhotos(10)" style="border:2px solid var(--rose);border-radius:18px;padding:16px;cursor:pointer;display:flex;align-items:center;gap:14px;background:var(--rose-light);transition:all 0.15s;">
           <div style="width:44px;height:44px;border-radius:14px;background:white;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--rose);">$5</div>
           <div style="flex:1;">
@@ -19211,7 +19211,7 @@ function closeReleaseWizard() {
      via history.replaceState so a refresh doesn't re-trigger. 2026-04-23. -->
 <div id="stripe-welcome-modal" class="modal-overlay" style="display:none;position:fixed;inset:0;z-index:9080;background:rgba(20,10,11,0.72);backdrop-filter:blur(4px);align-items:center;justify-content:center;">
   <div style="background:white;border-radius:24px;width:100%;max-width:400px;margin:20px;padding:28px 24px 22px;box-shadow:0 10px 50px rgba(0,0,0,0.24);text-align:center;">
-    <div id="sw-icon-wrap" style="width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,#FBF4F4 0%,#F3E0E1 100%);margin:0 auto 16px;display:flex;align-items:center;justify-content:center;">
+    <div id="sw-icon-wrap" style="width:72px;height:72px;border-radius:50%;background:#FAFAFA;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;">
       <!-- Icon varies by variant; replaced at render time. -->
       <svg viewBox="0 0 24 24" style="width:34px;height:34px;stroke:var(--rose-dark);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
     </div>
@@ -19221,7 +19221,7 @@ function closeReleaseWizard() {
 
     <!-- Key-stat strip: big number + label + subtitle (e.g., refill date).
          Populated per-variant. -->
-    <div id="sw-stat" style="background:linear-gradient(160deg,#FBF6F6 0%,#F6E9EA 100%);border:1px solid rgba(169,139,141,0.22);border-radius:14px;padding:14px 16px;margin-bottom:18px;">
+    <div id="sw-stat" style="background:#FAFAFA;border:1px solid rgba(169,139,141,0.22);border-radius:14px;padding:14px 16px;margin-bottom:18px;">
       <div style="display:flex;align-items:baseline;justify-content:center;gap:10px;">
         <div id="sw-stat-num" style="font-family:'Playfair Display',serif;font-size:36px;font-weight:600;color:var(--rose-dark);line-height:1;">40</div>
         <div id="sw-stat-label" style="font-size:14px;color:var(--charcoal);font-weight:500;">uploads this month</div>
@@ -19245,7 +19245,7 @@ function closeReleaseWizard() {
      instant-gratification moment). 2026-04-22. -->
 <div id="post-upload-success-modal" class="modal-overlay" style="display:none;position:fixed;inset:0;z-index:9050;background:rgba(20,10,11,0.68);backdrop-filter:blur(4px);align-items:center;justify-content:center;">
   <div style="background:white;border-radius:22px;width:100%;max-width:380px;margin:20px;padding:24px 22px;box-shadow:0 8px 40px rgba(0,0,0,0.22);text-align:center;">
-    <div style="width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,#FBF4F4 0%,#F3E0E1 100%);margin:0 auto 14px;display:flex;align-items:center;justify-content:center;">
+    <div style="width:60px;height:60px;border-radius:50%;background:#FAFAFA;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;">
       <svg viewBox="0 0 24 24" style="width:28px;height:28px;stroke:var(--rose-dark);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
     </div>
     <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:600;color:var(--charcoal);margin-bottom:8px;" id="pus-title">Photos uploaded!</div>
@@ -19335,7 +19335,7 @@ function closeReleaseWizard() {
      Floating chip on every signed-in screen; taps open a modal that
      writes into public.feedback. Auto-captures current screen, user
      agent, and a rolling buffer of console errors/warnings. 2026-04-22. -->
-<button id="feedback-fab" onclick="openFeedbackModal()" aria-label="Send feedback" style="display:none;position:fixed;right:14px;bottom:86px;z-index:850;background:var(--rose);color:white;border:none;border-radius:100px;padding:10px 16px;font-size:13px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;box-shadow:0 4px 14px rgba(178,110,95,0.35),0 1px 3px rgba(0,0,0,0.18);align-items:center;gap:7px;">
+<button id="feedback-fab" onclick="openFeedbackModal()" aria-label="Send feedback" style="display:none;position:fixed;right:14px;bottom:86px;z-index:850;background:var(--rose-dark);color:white;border:none;border-radius:100px;padding:10px 16px;font-size:13px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;box-shadow:0 4px 14px rgba(178,110,95,0.35),0 1px 3px rgba(0,0,0,0.18);align-items:center;gap:7px;">
   <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
   Feedback
 </button>
