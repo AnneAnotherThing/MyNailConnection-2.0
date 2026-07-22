@@ -87,3 +87,10 @@ deploy/ghpages/campaign-assets/*.zip
 
 # Temp design preview, not part of the app
 _preview-mauve.html
+
+# Throwaway staging bundle for PWA testing (drag to Netlify Drop)
+deploy/staging-v3/
+
+# Python bytecode from deploy/ scripts
+__pycache__/
+*.pyc

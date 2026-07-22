@@ -218,49 +218,55 @@ else
   fi
 fi
 
+# ── RETIRED: legacy Netlify bundles (deploy/app + deploy/marketing) ─────
+# Removed 2026-07-21. GitHub Pages publishes deploy/ghpages/ ONLY; these two
+# were the pre-2026-04-23 Netlify drop folders kept as a rollback and were
+# ~108MB of duplicate build output. Recoverable from git history if ever
+# needed. Their copy lines below are commented out, not deleted, so the
+# original bundle layout stays readable.
 # ── App bundle ──────────────────────────────────────────────────────────
-copy_if_exists index.html              "$APP/index.html"
-copy_if_exists reset-password.html     "$APP/reset-password.html"
-copy_if_exists privacy.html            "$APP/privacy.html"
-copy_if_exists terms.html              "$APP/terms.html"
-copy_if_exists mncLogo-transparent.png "$APP/mncLogo-transparent.png"
-copy_if_exists favicon.ico             "$APP/favicon.ico"
-copy_if_exists favicon-32.png          "$APP/favicon-32.png"
-copy_if_exists apple-touch-icon.png    "$APP/apple-touch-icon.png"
-copy_if_exists manifest.json           "$APP/manifest.json"
-copy_if_exists sw.js                   "$APP/sw.js"
+# [retired 2026-07-21] copy_if_exists index.html              "$APP/index.html"
+# [retired 2026-07-21] copy_if_exists reset-password.html     "$APP/reset-password.html"
+# [retired 2026-07-21] copy_if_exists privacy.html            "$APP/privacy.html"
+# [retired 2026-07-21] copy_if_exists terms.html              "$APP/terms.html"
+# [retired 2026-07-21] copy_if_exists mncLogo-transparent.png "$APP/mncLogo-transparent.png"
+# [retired 2026-07-21] copy_if_exists favicon.ico             "$APP/favicon.ico"
+# [retired 2026-07-21] copy_if_exists favicon-32.png          "$APP/favicon-32.png"
+# [retired 2026-07-21] copy_if_exists apple-touch-icon.png    "$APP/apple-touch-icon.png"
+# [retired 2026-07-21] copy_if_exists manifest.json           "$APP/manifest.json"
+# [retired 2026-07-21] copy_if_exists sw.js                   "$APP/sw.js"
 
 # ── Marketing bundle ────────────────────────────────────────────────────
 # NOTE: marketing.html is renamed to index.html in the marketing bundle
 # so the domain root serves the marketing page with no extra config.
-copy_if_exists marketing.html          "$MKT/index.html"
-copy_if_exists 404.html                "$MKT/404.html"
-copy_if_exists stats.html              "$MKT/stats.html"
-copy_if_exists punch-list.html         "$MKT/punch-list.html"
-copy_if_exists tech-guide.html         "$MKT/tech-guide.html"
-copy_if_exists founders.html           "$MKT/founders.html"
-copy_if_exists admin-feedback.html     "$MKT/admin-feedback.html"
-copy_if_exists admin-stats.html        "$MKT/admin-stats.html"
-copy_if_exists support.html            "$MKT/support.html"
-copy_if_exists privacy.html            "$MKT/privacy.html"
-copy_if_exists terms.html              "$MKT/terms.html"
-copy_if_exists og-image.png            "$MKT/og-image.png"
-copy_if_exists favicon.ico             "$MKT/favicon.ico"
-copy_if_exists favicon-32.png          "$MKT/favicon-32.png"
-copy_if_exists apple-touch-icon.png    "$MKT/apple-touch-icon.png"
-copy_if_exists manifest.json           "$MKT/manifest.json"
-copy_if_exists sw.js                   "$MKT/sw.js"
-copy_if_exists sitemap.xml             "$MKT/sitemap.xml"
-copy_if_exists robots.txt              "$MKT/robots.txt"
+# [retired 2026-07-21] copy_if_exists marketing.html          "$MKT/index.html"
+# [retired 2026-07-21] copy_if_exists 404.html                "$MKT/404.html"
+# [retired 2026-07-21] copy_if_exists stats.html              "$MKT/stats.html"
+# [retired 2026-07-21] copy_if_exists punch-list.html         "$MKT/punch-list.html"
+# [retired 2026-07-21] copy_if_exists tech-guide.html         "$MKT/tech-guide.html"
+# [retired 2026-07-21] copy_if_exists founders.html           "$MKT/founders.html"
+# [retired 2026-07-21] copy_if_exists admin-feedback.html     "$MKT/admin-feedback.html"
+# [retired 2026-07-21] copy_if_exists admin-stats.html        "$MKT/admin-stats.html"
+# [retired 2026-07-21] copy_if_exists support.html            "$MKT/support.html"
+# [retired 2026-07-21] copy_if_exists privacy.html            "$MKT/privacy.html"
+# [retired 2026-07-21] copy_if_exists terms.html              "$MKT/terms.html"
+# [retired 2026-07-21] copy_if_exists og-image.png            "$MKT/og-image.png"
+# [retired 2026-07-21] copy_if_exists favicon.ico             "$MKT/favicon.ico"
+# [retired 2026-07-21] copy_if_exists favicon-32.png          "$MKT/favicon-32.png"
+# [retired 2026-07-21] copy_if_exists apple-touch-icon.png    "$MKT/apple-touch-icon.png"
+# [retired 2026-07-21] copy_if_exists manifest.json           "$MKT/manifest.json"
+# [retired 2026-07-21] copy_if_exists sw.js                   "$MKT/sw.js"
+# [retired 2026-07-21] copy_if_exists sitemap.xml             "$MKT/sitemap.xml"
+# [retired 2026-07-21] copy_if_exists robots.txt              "$MKT/robots.txt"
 
 # ── Marketing assets (folders) ──────────────────────────────────────────
 # Mirror asset folders (rsync when available, cp fallback otherwise).
-sync_dir images      "$MKT/images"
-sync_dir app-screens "$MKT/app-screens"
+# [retired 2026-07-21] sync_dir images      "$MKT/images"
+# [retired 2026-07-21] sync_dir app-screens "$MKT/app-screens"
 
 # ── Leslie campaign page + downloadable campaign assets ──────────────────
-copy_if_exists no-Download-Campaign.html "$MKT/no-Download-Campaign.html"
-sync_dir campaign-assets "$MKT/campaign-assets"
+# [retired 2026-07-21] copy_if_exists no-Download-Campaign.html "$MKT/no-Download-Campaign.html"
+# [retired 2026-07-21] sync_dir campaign-assets "$MKT/campaign-assets"
 
 # ── GitHub Pages bundle (deploy/ghpages/) ───────────────────────────────
 # Single-tree layout served by one repo:
