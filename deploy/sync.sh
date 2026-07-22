@@ -297,6 +297,13 @@ copy_if_exists robots.txt              "$GH/robots.txt"
 sync_dir images      "$GH/images"
 sync_dir app-screens "$GH/app-screens"
 
+# The app is served from /app/, and its image refs are RELATIVE
+# (images/foo.webp), so they resolve to /app/images/foo.webp. Without this
+# mirror the whole home screen's imagery 404s in production even though the
+# same files exist at the site root. Mirrored (not moved), the marketing site
+# at the root still needs its copy. 2026-07-20.
+sync_dir images      "$GH/app/images"
+
 # ── Leslie campaign page + downloadable campaign assets ──────────────────
 copy_if_exists no-Download-Campaign.html "$GH/no-Download-Campaign.html"
 sync_dir campaign-assets "$GH/campaign-assets"

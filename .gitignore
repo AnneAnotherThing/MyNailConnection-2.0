@@ -63,3 +63,27 @@ signing/
 /og17-launch
 OGeml.html
 og17-launch/send-to-original-founders.html
+rescue/
+
+# ── Repo-weight cleanup, 2026-07-20 ─────────────────────────────────────
+# Retired Netlify bundles. The GH Pages Action publishes deploy/ghpages/
+# ONLY, so these two are dead weight (~40MB of duplicated assets). Kept on
+# disk as a rollback option, just not versioned.
+deploy/marketing/
+deploy/app/
+
+# Derived campaign bundle, regenerated from campaign-assets/countdown/.
+# 19MB per copy and nothing links to it, so it doesn't belong in history.
+campaign-assets/*.zip
+deploy/ghpages/campaign-assets/*.zip
+
+# Local, machine-specific dev-server config (contains absolute paths)
+.claude/
+
+# Local archive of old 2.0 campaign material (README, archive-2.0 mp4s, brand
+# files). 42MB, not deployed (sync.sh never copies this dir), kept on disk.
+# Root-anchored so marketing.html / marketing-v3.html stay tracked.
+/marketing/
+
+# Temp design preview, not part of the app
+_preview-mauve.html

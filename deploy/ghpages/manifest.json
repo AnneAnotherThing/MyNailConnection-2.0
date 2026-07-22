@@ -7,8 +7,8 @@
   "id": "./",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#FAF5F7",
-  "theme_color": "#C4786A",
+  "background_color": "#EDEAE5",
+  "theme_color": "#BFA6BB",
   "lang": "en-US",
   "dir": "ltr",
   "categories": [

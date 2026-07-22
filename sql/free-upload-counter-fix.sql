@@ -85,7 +85,7 @@ create table if not exists public.tech_comps (
   granted_at     timestamptz not null default now(),
   granted_by     text,
   note           text,
-  monthly_limit  integer not null default 40
+  monthly_limit  integer not null default 25
                    check (monthly_limit > 0 and monthly_limit <= 1000)
 );
 
@@ -275,7 +275,7 @@ begin
   end if;
 
   -- Comp check: a row in tech_comps overrides Stripe state. Comped techs
-  -- are subscribers, period, with their own monthly_limit (default 40).
+  -- are subscribers, period, with their own monthly_limit (default 25).
   select monthly_limit into v_comp_limit
     from public.tech_comps
    where email = v_email
@@ -287,7 +287,7 @@ begin
   else
     v_is_subscriber := (v_tier = 'paid')
                        and (v_expires_at is null or v_expires_at > now());
-    v_period_cap    := 40;
+    v_period_cap    := 25;
   end if;
 
   -- Lazy reset: month rolled over → zero the counter, advance the
@@ -392,7 +392,7 @@ as $$
       (c.monthly_limit is not null)
         or (t.subscription_tier = 'paid' and (t.subscription_expires_at is null or t.subscription_expires_at > now()))
         as is_sub,
-      coalesce(c.monthly_limit, 40)                                              as cap,
+      coalesce(c.monthly_limit, 25)                                              as cap,
       t.credits, t.period_count, t.period_reset, t.free_used
     from t left join c on true
   )
