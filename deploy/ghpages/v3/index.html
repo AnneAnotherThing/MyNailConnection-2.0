@@ -1316,6 +1316,37 @@
               }
 
   /* ── Pop-in waitlist card (bottom-right slide) ── */
+
+  /* ── Launch-list chip (2026-07-21) ───────────────────────────────────
+     Replaces the auto-opening 340px card. Same footprint on desktop and
+     mobile: a compact pill in the lower-right that expands on tap. */
+  .wl-chip {
+    position: fixed; right: 18px; bottom: 18px; z-index: 121;
+    display: none; align-items: center; gap: 8px;
+    padding: 11px 17px; border-radius: 100px;
+    background: linear-gradient(140deg, #8A5F6C 0%, #6B4552 60%, #4E323C 100%);
+    color: #fff; border: 1px solid rgba(38,26,32,0.42);
+    font-family: 'DM Sans', sans-serif; font-size: 13.5px; font-weight: 700; letter-spacing: 0.4px;
+    box-shadow: 0 8px 22px rgba(49,34,42,0.34), inset 0 1px 1px rgba(255,255,255,0.18);
+    cursor: pointer; transition: transform 0.18s ease, box-shadow 0.18s ease;
+  }
+  .wl-chip.is-shown { display: inline-flex; }
+  .wl-chip:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(49,34,42,0.4); }
+  .wl-chip:active { transform: translateY(0) scale(0.97); }
+  .wl-chip-dot {
+    width: 8px; height: 8px; border-radius: 50%; background: #F7E2E3;
+    box-shadow: 0 0 0 0 rgba(247,226,227,0.7); animation: wlPulse 2s ease-out infinite; flex-shrink: 0;
+  }
+  @keyframes wlPulse {
+    0%   { box-shadow: 0 0 0 0 rgba(247,226,227,0.6); }
+    70%  { box-shadow: 0 0 0 7px rgba(247,226,227,0); }
+    100% { box-shadow: 0 0 0 0 rgba(247,226,227,0); }
+  }
+  @media (max-width: 480px) {
+    .wl-chip { right: 14px; bottom: 14px; padding: 10px 15px; font-size: 13px; }
+  }
+  @media (prefers-reduced-motion: reduce) { .wl-chip-dot { animation: none; } }
+
   .popin {
     position: fixed;
     right: 24px; bottom: 24px;
@@ -1539,18 +1570,24 @@
      normal flow under the headline, cycling through the same six messages. */
   .hero-pings-m { display: none; }
   @media (max-width: 1359px) {
-    .hero-pings-m { display: block; position: relative; height: 66px; margin: 18px 0 0; pointer-events: none; }
+    /* Under the portrait. THREE fixed slots; each slot holds two cards that
+       swap places, so the stack is always full and notifications replace one
+       another (a live feed) rather than the whole group clearing at once. */
+    .hero-pings-m {
+      display: block; position: relative;
+      order: 3; width: 100%; max-width: 330px; height: 206px;
+      margin: 16px auto 0; pointer-events: none;
+    }
     .hero-ping-m {
-      display: flex; position: absolute; top: 0; left: 0; right: 0;
-      width: 100%; max-width: 330px;
-      align-items: flex-start; gap: 10px;
+      display: flex; position: absolute; left: 0; right: 0;
+      align-items: flex-start; gap: 10px; min-height: 62px; box-sizing: border-box;
       background: rgba(255,255,255,0.92);
       -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
       border: 1px solid rgba(255,255,255,0.7);
       border-radius: 17px; padding: 11px 13px;
       box-shadow: 0 12px 30px rgba(20,19,23,0.16), 0 2px 6px rgba(20,19,23,0.07);
       opacity: 0;
-      animation: pingCycleM 21s linear infinite;
+      animation: pingSwapM 12s cubic-bezier(0.22,1,0.36,1) infinite;
     }
     .hero-ping-m .ic { flex-shrink: 0; }
     .hero-ping-m .body { flex: 1; min-width: 0; }
@@ -1559,23 +1596,34 @@
     .hero-ping-m .time { font-size: 10.5px; color: #A99D9E; font-weight: 500; flex-shrink: 0; }
     .hero-ping-m .msg { font-size: 13px; font-weight: 600; color: #141317; margin-top: 2px; line-height: 1.3; }
     .hero-ping-m .msg em { font-style: normal; color: #7A6E78; font-weight: 500; }
+
+    /* Slot positions: m1/m4 share the top row, m2/m5 the middle, m3/m6 the bottom */
+    .hero-ping-m.m1, .hero-ping-m.m4 { top: 0; }
+    .hero-ping-m.m2, .hero-ping-m.m5 { top: 72px; }
+    .hero-ping-m.m3, .hero-ping-m.m6 { top: 144px; }
+
+    /* Each slot's pair is offset by half the loop, so one hands off to the
+       other. Rows are staggered so all three don't swap in unison. */
     .hero-ping-m.m1 { animation-delay: 0s; }
-    .hero-ping-m.m2 { animation-delay: 3.5s; }
-    .hero-ping-m.m3 { animation-delay: 7s; }
-    .hero-ping-m.m4 { animation-delay: 10.5s; }
-    .hero-ping-m.m5 { animation-delay: 14s; }
-    .hero-ping-m.m6 { animation-delay: 17.5s; }
+    .hero-ping-m.m2 { animation-delay: 0.7s; }
+    .hero-ping-m.m3 { animation-delay: 1.4s; }
+    .hero-ping-m.m4 { animation-delay: 6s; }
+    .hero-ping-m.m5 { animation-delay: 6.7s; }
+    .hero-ping-m.m6 { animation-delay: 7.4s; }
   }
-  @keyframes pingCycleM {
-    0%              { opacity: 0; transform: translateY(8px); }
-    2%, 13%         { opacity: 1; transform: translateY(0); }
-    16%, 100%       { opacity: 0; transform: translateY(-6px); }
+  /* Visible for the first half of the loop, then its partner takes the slot. */
+  @keyframes pingSwapM {
+    0%        { opacity: 0; transform: translateY(10px) scale(0.96); }
+    4%        { opacity: 1; transform: translateY(-1px) scale(1.01); }
+    8%, 44%   { opacity: 1; transform: translateY(0) scale(1); }
+    50%, 100% { opacity: 0; transform: translateY(-8px) scale(0.98); }
   }
   @media (prefers-reduced-motion: reduce) {
-    .hero-ping-m { animation: none !important; }
-    .hero-ping-m.m1 { opacity: 1 !important; transform: none !important; }
-    .hero-ping-m.m2, .hero-ping-m.m3, .hero-ping-m.m4,
-    .hero-ping-m.m5, .hero-ping-m.m6 { display: none !important; }
+    .hero-ping-m { animation: none !important; transform: none !important; }
+    .hero-ping-m.m1, .hero-ping-m.m2, .hero-ping-m.m3 { opacity: 1 !important; }
+    .hero-ping-m.m4, .hero-ping-m.m5, .hero-ping-m.m6 { opacity: 0 !important; }
+  }
+  }
   }
 
 
@@ -1736,7 +1784,7 @@
      the "launching in days" pre-launch copy to celebratory launch copy. -->
 <div class="announce-banner" role="status" aria-label="We're live">
   <div class="announce-track">
-    <span class="announce-item"><span class="announce-bloom">✨</span> Version 3.0 is here</span>
+    <span class="announce-item"><span class="announce-bloom">✨</span> Version 3.0 is almost here</span>
     <span class="announce-item announce-dot">·</span>
     <span class="announce-item">Booking is free, forever</span>
     <span class="announce-item announce-dot">·</span>
@@ -1744,7 +1792,7 @@
     <span class="announce-item announce-dot">·</span>
     <span class="announce-item">Pinkies up ✨</span>
     <span class="announce-item announce-dot">·</span>
-    <span class="announce-item"><span class="announce-bloom">✨</span> Version 3.0 is here</span>
+    <span class="announce-item"><span class="announce-bloom">✨</span> Version 3.0 is almost here</span>
     <span class="announce-item announce-dot">·</span>
     <span class="announce-item">Booking is free, forever</span>
     <span class="announce-item announce-dot">·</span>
@@ -1780,15 +1828,10 @@
       <span class="hero-ping p6"><span class="ic"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span><span class="body"><span class="prow"><span class="app">My Nail Connection</span><span class="time">1h</span></span><span class="msg">New booking <em>&nbsp;&middot; Sat 1:15</em></span></span></span>
     </div>
   </div>
-  <div class="hero-inner">
-    <div class="hero-badge"><span class="hero-badge-dot"></span> Version <strong style="color:#141317;font-weight:700;letter-spacing:1.5px;">3.0</strong> <svg class="hero-badge-sparkle" aria-hidden="true" viewBox="0 0 16 16" width="11" height="11" style="vertical-align:-1px;"><path d="M8 0 L9 7 L16 8 L9 9 L8 16 L7 9 L0 8 L7 7 Z" fill="#A2636C"/></svg></div>
-
-    <h1>Still booking in <em>your DMs?</em></h1>
-    <p class="hero-sub">Your work is already why clients pick you. Now it's your booking page too. Free forever, for every nail tech, no commission and no per-booking fee. Already book somewhere else? Keep your link, nothing to switch.</p>
-    <!-- Mobile: the desktop pings float in the side margin (>=1360px only).
-         On phones there is no margin, so one card at a time cycles here,
-         under the headline. Same copy, no overlap with the hero text. -->
-    <div class="hero-pings-m" aria-hidden="true">
+  <!-- Mobile: desktop pings float in the side margin (>=1360px only).
+       On phones they stack UNDER the portrait, echoing how they pile up
+       beside it on desktop. 2026-07-21. -->
+  <div class="hero-pings-m" aria-hidden="true">
       <span class="hero-ping-m m1"><span class="ic"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span><span class="body"><span class="prow"><span class="app">My Nail Connection</span><span class="time">now</span></span><span class="msg">New booking <em>&nbsp;&middot; Thu 2:00</em></span></span></span>
       <span class="hero-ping-m m2"><span class="ic"><svg viewBox="0 0 24 24" width="15" height="15" fill="#fff"><circle cx="12" cy="12" r="6"/></svg></span><span class="body"><span class="prow"><span class="app">My Nail Connection</span><span class="time">2m</span></span><span class="msg">You're glowing <em>&nbsp;&middot; Available today</em></span></span></span>
       <span class="hero-ping-m m3"><span class="ic"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span><span class="body"><span class="prow"><span class="app">My Nail Connection</span><span class="time">6m</span></span><span class="msg">New booking <em>&nbsp;&middot; Thu 4:30</em></span></span></span>
@@ -1796,16 +1839,12 @@
       <span class="hero-ping-m m5"><span class="ic"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span><span class="body"><span class="prow"><span class="app">My Nail Connection</span><span class="time">22m</span></span><span class="msg">Cancelled slot filled <em>&nbsp;&middot; Fri 11:00</em></span></span></span>
       <span class="hero-ping-m m6"><span class="ic"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span><span class="body"><span class="prow"><span class="app">My Nail Connection</span><span class="time">1h</span></span><span class="msg">New booking <em>&nbsp;&middot; Sat 1:15</em></span></span></span>
     </div>
-    <div class="hero-buttons">
-      <a href="#for-techs" class="btn-primary">
-        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-        Set up my free book
-      </a>
-      <a href="#for-clients" class="btn-outline">
-        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
-        I'm looking for a tech
-      </a>
-    </div>
+
+  <div class="hero-inner">
+    <div class="hero-badge"><span class="hero-badge-dot"></span> Version <strong style="color:#141317;font-weight:700;letter-spacing:1.5px;">3.0</strong> <svg class="hero-badge-sparkle" aria-hidden="true" viewBox="0 0 16 16" width="11" height="11" style="vertical-align:-1px;"><path d="M8 0 L9 7 L16 8 L9 9 L8 16 L7 9 L0 8 L7 7 Z" fill="#A2636C"/></svg></div>
+
+    <h1>Still booking in <em>your DMs?</em></h1>
+    <p class="hero-sub">Your work is already why clients pick you. Now it's your booking page too. Free forever, for every nail tech, no commission and no per-booking fee. Already book somewhere else? Keep your link, nothing to switch.</p>
 
     <div class="store-btns store-btns--mini" style="margin-top:22px;">
       <a href="https://apps.apple.com/app/id6764125663" target="_blank" rel="noopener" class="store-btn" aria-label="Download My Nail Connection on the App Store">
@@ -1826,7 +1865,7 @@
 
 <!-- TAGLINE STRIP -->
 <div class="tagline-strip">
-  <strong>MNC 3.0 is here.</strong> &nbsp;·&nbsp; Free booking, forever. One Gallery. Photos that never expire.
+  <strong>MNC 3.0 is ALMOST here.</strong> &nbsp;·&nbsp; Free booking, forever. One Gallery. Photos that never expire.
 </div>
 
 <!-- THE GALLERY STRIP -->
@@ -2593,6 +2632,12 @@
   @keyframes waitlist-pop { 0% { transform:scale(0.94); opacity:0; } 100% { transform:scale(1); opacity:1; } }
 </style>
 
+<!-- Collapsed state: a small floating chip. The full card only opens when
+     tapped, it was 340px wide and swallowed a phone screen on auto-open. -->
+<button class="wl-chip" id="wl-chip" type="button" aria-label="Get notified when MNC 3.0 launches">
+  <span class="wl-chip-dot" aria-hidden="true"></span>
+  <span>Get notified</span>
+</button>
 <div class="popin" id="wl-popin" role="dialog" aria-label="Join the launch list" aria-hidden="true">
   <button class="popin-close" id="wl-close" type="button" aria-label="Close">&times;</button>
   <div id="wl-form-state">
@@ -2625,15 +2670,21 @@
   var formState = document.getElementById('wl-form-state');
   function stored(){ try { return localStorage.getItem(LS); } catch(_) { return null; } }
   function setStored(v){ try { localStorage.setItem(LS, v); } catch(_){} }
-  function openPop(){ popin.classList.add('is-open'); popin.setAttribute('aria-hidden','false'); }
+  var chip = document.getElementById('wl-chip');
+  function showChip(){ if (chip) chip.classList.add('is-shown'); }
+  function hideChip(){ if (chip) chip.classList.remove('is-shown'); }
+  function openPop(){ hideChip(); popin.classList.add('is-open'); popin.setAttribute('aria-hidden','false');
+                      var e=document.getElementById('wl-email'); if(e) setTimeout(function(){ try{e.focus();}catch(_){} },320); }
   function closePop(){ popin.classList.remove('is-open'); popin.setAttribute('aria-hidden','true'); }
   function showSuccess(dupe){
     formState.style.display = 'none';
     successEl.style.display = 'block';
     if (dupe) { successEl.classList.add('is-dupe'); successEl.textContent = "You're already on the list, love. \u{1F49B}"; }
     setStored('joined');
+    hideChip();
   }
-  closeBtn.addEventListener('click', function(){ closePop(); if (stored() !== 'joined') setStored('dismissed'); });
+  closeBtn.addEventListener('click', function(){ closePop(); if (stored() !== 'joined') showChip(); });
+  if (chip) chip.addEventListener('click', openPop);
   form.addEventListener('submit', function(e){
     e.preventDefault();
     var email = (emailInput.value||'').trim().toLowerCase();
@@ -2656,7 +2707,7 @@
     });
   });
   var flag = stored();
-  if (flag !== 'joined' && flag !== 'dismissed') { setTimeout(openPop, 5200); }
+  if (flag !== 'joined') { setTimeout(showChip, 3000); }
 })();
 </script>
 
