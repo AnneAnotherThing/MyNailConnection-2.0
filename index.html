@@ -48,7 +48,7 @@
   });
 </script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
-  <meta name="theme-color" content="#A98B8D"/>
+  <meta name="theme-color" content="#4A4A4F"/>
   <meta name="description" content="Find, book, and connect with nail techs near you."/>
   <meta name="mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-capable" content="yes"/>
@@ -87,7 +87,7 @@
   /* 3.0 identity, Leslie's Nagel-inspired board: black, mauve, blush.
      Variable NAMES kept (--rose etc.) so nothing else has to change;
      the values are the rebrand. */
-  --rose:#DEB3B5;--rose-light:#FAFAFA;--rose-mid:#D0A3A5;--rose-dark:#A2636C;
+  --rose:#DEB3B5;--rose-light:#FAF7F2;--rose-mid:#D0A3A5;--rose-dark:#A2636C;
   /* 3.0 ink depth scale, 2026-07-21. Grey to black, replacing the plum scale
      Anne pulled 2026-07-21. Blush and rose stay as the accent family,
      used for hero cards and primary buttons so they read as one system. */
@@ -136,7 +136,7 @@ body{font-family:'DM Sans',sans-serif;background:#FFFFFF;display:flex;justify-co
 /* .screen styles defined above in layout section */
 .chip-btn{padding:6px 14px;border-radius:100px;border:1.5px solid var(--border);background:white;font-size:12px;font-weight:500;color:var(--charcoal);cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;transition:all 0.15s;}
 .feed-radius-chip{padding:4px 10px;border-radius:100px;border:1px solid var(--border);background:white;font-size:11px;font-weight:500;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s;}
-.feed-radius-chip.on{background:var(--rose-dark);color:white;border-color:var(--rose-dark);}
+.feed-radius-chip.on{background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);color:white;border-color:var(--ink-3);}
 /* ── Feed card, editorial styling for bulletin posts ───────────────────
    Each post type (Availability, Promo, Inspo, Update, Question) gets a
    quiet color identity via CSS vars set on a per-type class. The card's
@@ -342,7 +342,7 @@ body{font-family:'DM Sans',sans-serif;background:#FFFFFF;display:flex;justify-co
 .feed-card.board-type-inspo       {--feed-accent:#A98B8D;--feed-accent-light:var(--rose-light);}
 .feed-card.board-type-announcement{--feed-accent:#A2636C;--feed-accent-light:#F5E6E1;}
 .feed-card.board-type-question    {--feed-accent:#6A7B93;--feed-accent-light:#E8ECF1;}
-.chip-btn.active{background:var(--rose-dark);color:white;border-color:var(--rose-dark);}
+.chip-btn.active{background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);color:white;border-color:var(--ink-3);}
 .logo-mark{font-family:'Playfair Display',serif;font-style:italic;font-size:22px;font-weight:600;letter-spacing:0.3px;color:var(--charcoal);}
 /* Gradient fill (same rose->gold ramp as the hero accent) instead of the flat
    muted gold, which read as drab against the dark header. 2026-07-20. */
@@ -574,7 +574,7 @@ input[type="password"]::-webkit-contacts-auto-fill-button{display:none;}
 input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
 .input-group input:focus{border-color:var(--rose-mid);background:white;}
 .toggle{width:44px;height:24px;border-radius:100px;border:none;cursor:pointer;position:relative;transition:background 0.2s;flex-shrink:0;}
-.toggle.on{background:var(--rose-dark);}.toggle.off{background:#D5CDCE;}
+.toggle.on{background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);}.toggle.off{background:#D5CDCE;}
 .toggle::after{content:'';position:absolute;top:3px;width:18px;height:18px;border-radius:50%;background:white;transition:left 0.2s;}
 .toggle.on::after{left:23px;}.toggle.off::after{left:3px;}
 .avail-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
@@ -702,7 +702,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
 .stat-card.slate{background:var(--slate-light);}
 .tabs{display:flex;padding:0 20px 14px;gap:4px;}
 .tab{flex:1;padding:9px;text-align:center;font-size:13px;font-weight:500;border-radius:100px;cursor:pointer;border:1px solid var(--border);color:var(--muted);background:white;transition:all 0.2s;}
-.tab.active{background:var(--rose-dark);color:white;border-color:var(--rose-dark);}
+.tab.active{background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);color:white;border-color:var(--ink-3);}
 .admin-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border);}
 .admin-row:last-child{border-bottom:none;}
 .status-pill{padding:3px 9px;border-radius:100px;font-size:10px;font-weight:500;}
@@ -711,7 +711,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
 .pg-item{aspect-ratio:1;border-radius:10px;overflow:hidden;position:relative;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:26px;}
 .pg-add{border:2px dashed var(--rose-mid);background:white;color:var(--rose-mid);font-size:26px;cursor:pointer;}
 .uf-pill{padding:5px 12px;border-radius:100px;border:1px solid var(--border);background:white;font-size:11px;cursor:pointer;color:var(--muted);font-family:'DM Sans',sans-serif;transition:all 0.2s;}
-.uf-pill.active{background:var(--rose-dark);color:white;border-color:var(--rose-dark);}
+.uf-pill.active{background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);color:white;border-color:var(--ink-3);}
 .user-row{display:flex;padding:10px 0;border-bottom:1px solid var(--border);gap:10px;align-items:flex-start;}
 .user-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:13px;font-weight:600;flex-shrink:0;}
 .role-badge{display:inline-block;font-size:9px;font-weight:600;letter-spacing:0.5px;padding:2px 7px;border-radius:100px;text-transform:uppercase;}
@@ -725,18 +725,18 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
 .acc-row{width:100%;display:flex;align-items:center;justify-content:space-between;padding:13px 16px;background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;transition:background 0.15s;}
 .acc-row:hover{background:var(--rose-light);}
 .acc-label{font-size:14px;font-weight:500;color:var(--charcoal);}
-.acc-badge{background:var(--rose-dark);color:white;font-size:10px;font-weight:600;padding:3px 9px;border-radius:100px;white-space:nowrap;}
+.acc-badge{background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);color:white;font-size:10px;font-weight:600;padding:3px 9px;border-radius:100px;white-space:nowrap;}
 .acc-body{background:var(--cream);}
 .acc-chip{display:inline-flex;align-items:center;gap:6px;padding:6px 13px;border-radius:100px;font-size:13px;font-weight:500;cursor:pointer;border:1.5px solid var(--border);background:white;color:var(--rose-dark);font-family:'DM Sans',sans-serif;transition:all 0.12s;user-select:none;}
 .acc-chip:hover{border-color:var(--rose-mid);background:var(--rose-light);}
 .acc-chip input{display:none;}
-.acc-chip:has(input:checked){background:var(--rose-dark);color:white;border-color:var(--rose-dark);}
+.acc-chip:has(input:checked){background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);color:white;border-color:var(--ink-3);}
 .acc-clear{background:none;border:none;font-size:12px;color:var(--rose);cursor:pointer;font-family:'DM Sans',sans-serif;padding:0;text-decoration:none;font-weight:500;}
 .acc-clear:hover{text-decoration:underline;}
 /* ── Tech editor tags ──────────────────────────────────────── */
 .te-tag{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:100px;font-size:12px;font-weight:500;cursor:pointer;border:1.5px solid var(--border);background:white;color:var(--rose-dark);font-family:'DM Sans',sans-serif;transition:all 0.12s;}
 .te-tag input{display:none;}
-.te-tag:has(input:checked){background:var(--rose-dark);color:white;border-color:var(--rose-dark);}
+.te-tag:has(input:checked){background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);color:white;border-color:var(--ink-3);}
 
 
 
@@ -1296,7 +1296,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       <div class="logo-mark" style="font-size:24px;color:var(--ink);">Welcome, let's get you set up.</div>
       <div style="font-family:'Playfair Display',serif;font-style:italic;font-size:14px;color:var(--muted);margin-top:4px;">Step 1 of 3, Tell us about yourself</div>
       <!-- Progress bar -->
-      <div style="height:4px;background:var(--border);border-radius:100px;margin-top:12px;"><div style="height:100%;width:33%;background:var(--rose-dark);border-radius:100px;transition:width 0.4s;"></div></div>
+      <div style="height:4px;background:var(--border);border-radius:100px;margin-top:12px;"><div style="height:100%;width:33%;background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);border-radius:100px;transition:width 0.4s;"></div></div>
     </div>
     <div style="background:white;border-radius:24px;padding:28px 24px;box-shadow:0 4px 40px rgba(125,100,102,0.1);">
       <div style="font-family:'Playfair Display',serif;font-size:20px;margin-bottom:4px;">What's your name?</div>
@@ -1323,7 +1323,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       <div style="margin-bottom:16px;display:flex;justify-content:center;"><div class="icon-glass" style="background:#FAFAFA;"><svg viewBox="0 0 24 24" style="width:26px;height:26px;stroke:var(--rose);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/><circle cx="5" cy="5" r="1" fill="#8B7F8A"/><circle cx="19" cy="7" r="1" fill="#8B7F8A"/><circle cx="7" cy="19" r="1" fill="#8B7F8A"/></svg></div></div>
       <div class="logo-mark" style="font-size:24px;color:var(--ink);">Just a couple more steps.</div>
       <div style="font-family:'Playfair Display',serif;font-style:italic;font-size:14px;color:var(--muted);margin-top:4px;">Step 2 of 3, How will you use the app?</div>
-      <div style="height:4px;background:var(--border);border-radius:100px;margin-top:12px;"><div style="height:100%;width:66%;background:var(--rose-dark);border-radius:100px;"></div></div>
+      <div style="height:4px;background:var(--border);border-radius:100px;margin-top:12px;"><div style="height:100%;width:66%;background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);border-radius:100px;"></div></div>
     </div>
     <div style="background:white;border-radius:24px;padding:28px 24px;box-shadow:0 4px 40px rgba(125,100,102,0.1);">
       <div style="font-family:'Playfair Display',serif;font-size:20px;margin-bottom:4px;">Tell us a little about yourself.</div>
@@ -1359,7 +1359,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       <div style="margin-bottom:16px;display:flex;justify-content:center;"><div class="icon-glass" style="background:#E8EEF2;"><svg viewBox="0 0 24 24" style="width:26px;height:26px;stroke:#4A6274;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;"><circle cx="12" cy="10" r="3"/><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg></div></div>
       <div class="logo-mark" style="font-size:24px;color:var(--ink);">One last thing.</div>
       <div style="font-family:'Playfair Display',serif;font-style:italic;font-size:14px;color:var(--muted);margin-top:4px;"><span id="location-step-label">Step 3, Almost done!</span></div>
-      <div style="height:4px;background:var(--border);border-radius:100px;margin-top:12px;"><div style="height:100%;width:100%;background:var(--rose-dark);border-radius:100px;"></div></div>
+      <div style="height:4px;background:var(--border);border-radius:100px;margin-top:12px;"><div style="height:100%;width:100%;background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);border-radius:100px;"></div></div>
     </div>
     <div style="background:white;border-radius:24px;padding:28px 24px;box-shadow:0 4px 40px rgba(125,100,102,0.1);">
       <div style="font-family:'Playfair Display',serif;font-size:20px;margin-bottom:4px;" id="location-screen-title">Help us find techs near you</div>
@@ -1394,7 +1394,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       <div style="margin-bottom:16px;display:flex;justify-content:center;"><div class="icon-glass" style="background:#FAFAFA;"><svg viewBox="0 0 24 24" style="width:26px;height:26px;stroke:var(--rose);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;"><path d="M12 2C8 2 5 5 5 9c0 2.4 1.1 4.5 2.8 5.9L12 22l4.2-7.1C17.9 13.5 19 11.4 19 9c0-4-3-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg></div></div>
       <div class="logo-mark" style="font-size:24px;color:var(--ink);">Tell us about your work.</div>
       <div style="font-family:'Playfair Display',serif;font-style:italic;font-size:14px;color:var(--muted);margin-top:4px;">Step 4 of 5, Your tech profile</div>
-      <div style="height:4px;background:var(--border);border-radius:100px;margin-top:12px;"><div style="height:100%;width:80%;background:var(--rose-dark);border-radius:100px;"></div></div>
+      <div style="height:4px;background:var(--border);border-radius:100px;margin-top:12px;"><div style="height:100%;width:80%;background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);border-radius:100px;"></div></div>
     </div>
 
     <div style="background:white;border-radius:24px;padding:24px;box-shadow:0 4px 40px rgba(125,100,102,0.1);display:flex;flex-direction:column;gap:14px;">
@@ -1638,7 +1638,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       <!-- Browse by Style -->
       <div onclick="show('browse-style')" style="cursor:pointer;border-radius:12px;background:#FFFFFF;border:1px solid rgba(96,76,77,0.22);border-bottom:3px solid rgba(70,54,55,0.35);box-shadow:0 2px 8px rgba(70,54,55,0.08);display:flex;align-items:center;gap:14px;padding:10px 14px;transition:transform 0.15s;">
         <div style="width:72px;height:72px;border-radius:14px;overflow:hidden;flex-shrink:0;box-sizing:border-box;border:1px solid var(--border);box-shadow:inset 0 0 0 1px rgba(255,255,255,0.35),0 1px 5px rgba(70,54,55,0.16);">
-          <img src="images/theLook.jpg?v=2" alt="Browse nail photos" style="width:100%;height:100%;object-fit:cover;object-position:center;"/>
+          <img src="images/theLook.jpg?v=3" alt="Browse nail photos" style="width:100%;height:100%;object-fit:cover;object-position:center;"/>
         </div>
         <div style="flex:1;">
           <div style="font-size:15px;font-weight:600;color:var(--charcoal);">The Look</div>
@@ -1650,7 +1650,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       <!-- Browse by Location -->
       <div onclick="show('browse-location')" style="cursor:pointer;border-radius:12px;background:#FFFFFF;border:1px solid rgba(96,76,77,0.22);border-bottom:3px solid rgba(70,54,55,0.35);box-shadow:0 2px 8px rgba(70,54,55,0.08);display:flex;align-items:center;gap:14px;padding:10px 14px;">
         <div style="width:72px;height:72px;border-radius:14px;overflow:hidden;flex-shrink:0;box-sizing:border-box;border:1px solid var(--border);box-shadow:inset 0 0 0 1px rgba(255,255,255,0.35),0 1px 5px rgba(70,54,55,0.16);">
-          <img src="images/location.jpg?v=2" alt="Find techs on the map" style="width:100%;height:100%;object-fit:cover;"/>
+          <img src="images/location.jpg?v=3" alt="Find techs on the map" style="width:100%;height:100%;object-fit:cover;"/>
         </div>
         <div style="flex:1;">
           <div style="font-size:15px;font-weight:600;color:var(--charcoal);">Near Me</div>
@@ -1699,9 +1699,9 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
     <div style="text-align:center;padding:0 20px 18px;">
       <div style="font-family:'Playfair Display',serif;font-style:italic;font-size:11px;color:var(--muted);opacity:0.85;letter-spacing:0.4px;margin-bottom:10px;">find us on</div>
       <div style="display:flex;justify-content:center;gap:14px;">
-        <a href="https://www.instagram.com/mynailconnection" target="_blank" rel="noopener noreferrer" aria-label="Instagram" style="display:inline-flex;text-decoration:none;"><img src="images/insta.jpg" alt="Instagram" style="width:42px;height:42px;border-radius:12px;"/></a>
-        <a href="https://www.tiktok.com/@mynailconnection" target="_blank" rel="noopener noreferrer" aria-label="TikTok" style="display:inline-flex;text-decoration:none;"><img src="images/tt.jpg" alt="TikTok" style="width:42px;height:42px;border-radius:12px;"/></a>
-        <a href="https://www.facebook.com/profile.php?id=61570995887375" target="_blank" rel="noopener noreferrer" aria-label="Facebook" style="display:inline-flex;text-decoration:none;"><img src="images/fb.jpg" alt="Facebook" style="width:42px;height:42px;border-radius:12px;"/></a>
+        <a href="https://www.instagram.com/mynailconnection" target="_blank" rel="noopener noreferrer" aria-label="Instagram" style="display:inline-flex;text-decoration:none;"><img src="images/insta.jpg?v=2" alt="Instagram" style="width:42px;height:42px;border-radius:12px;"/></a>
+        <a href="https://www.tiktok.com/@mynailconnection" target="_blank" rel="noopener noreferrer" aria-label="TikTok" style="display:inline-flex;text-decoration:none;"><img src="images/tt.jpg?v=2" alt="TikTok" style="width:42px;height:42px;border-radius:12px;"/></a>
+        <a href="https://www.facebook.com/profile.php?id=61570995887375" target="_blank" rel="noopener noreferrer" aria-label="Facebook" style="display:inline-flex;text-decoration:none;"><img src="images/fb.jpg?v=2" alt="Facebook" style="width:42px;height:42px;border-radius:12px;"/></a>
       </div>
       <div style="margin-top:10px;display:flex;justify-content:center;gap:14px;align-items:center;">
         <a onclick="show('find-us')" style="font-size:11px;color:var(--muted);text-decoration:underline;cursor:pointer;text-underline-offset:3px;letter-spacing:0.2px;">See all our links →</a>
@@ -1746,7 +1746,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       <!-- Mode toggle pills -->
       <button onclick="openFiltersModal()" id="style-filter-btn" style="background:none;border:none;cursor:pointer;padding:6px;position:relative;">
         <svg viewBox="0 0 24 24" style="width:20px;height:20px;stroke:#F7F2F2;fill:none;stroke-width:2;stroke-linecap:round;"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
-        <span id="style-filter-dot" style="display:none;position:absolute;top:4px;right:4px;width:8px;height:8px;background:var(--rose-dark);border-radius:50%;"></span>
+        <span id="style-filter-dot" style="display:none;position:absolute;top:4px;right:4px;width:8px;height:8px;background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);border-radius:50%;"></span>
       </button>
     </div>
     <!-- Mode description -->
@@ -1792,7 +1792,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
   <div id="style-filters-active-bar" style="display:none;padding:9px 16px;background:var(--rose-light);border-bottom:1px solid var(--rose-mid);font-size:12.5px;color:var(--rose-dark);align-items:center;gap:8px;flex-shrink:0;">
     <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:var(--rose);fill:none;stroke-width:2.5;flex-shrink:0;stroke-linecap:round;"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
     <span><b id="style-filters-active-count">0</b> filter<span id="style-filters-plural">s</span> active</span>
-    <button onclick="clearStyleFilters()" style="margin-left:auto;background:var(--rose-dark);color:white;border:none;padding:5px 14px;border-radius:100px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;">✕ Clear all</button>
+    <button onclick="clearStyleFilters()" style="margin-left:auto;background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);color:white;border:none;padding:5px 14px;border-radius:100px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;">✕ Clear all</button>
   </div>
 
   <!-- Photo grid, endless scroll -->
@@ -1830,14 +1830,14 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
   <div id="map-status-bar" style="padding:8px 16px;background:#FFF8E8;border-bottom:1px solid #F0D890;font-size:12px;color:#7A5A00;display:flex;align-items:center;gap:8px;flex-shrink:0;">
     <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:#B8860B;fill:none;stroke-width:2;flex-shrink:0;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
     <span id="map-status-msg">Tap "Use My Location" to see techs near you</span>
-    <button onclick="requestLocation()" style="margin-left:auto;background:var(--rose-dark);color:white;border:none;padding:4px 10px;border-radius:100px;font-size:11px;font-weight:500;cursor:pointer;white-space:nowrap;">Use My Location</button>
+    <button onclick="requestLocation()" style="margin-left:auto;background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);color:white;border:none;padding:4px 10px;border-radius:100px;font-size:11px;font-weight:500;cursor:pointer;white-space:nowrap;">Use My Location</button>
   </div>
 
   <!-- Filters active bar, shows when any filter is on -->
   <div id="filters-active-bar" style="display:none;padding:7px 16px;background:var(--rose-light);border-bottom:1px solid var(--rose-mid);font-size:12px;color:var(--rose-dark);display:none;align-items:center;gap:8px;flex-shrink:0;">
     <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:var(--rose);fill:none;stroke-width:2.5;flex-shrink:0;stroke-linecap:round;"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
     <span><b id="filters-active-count">0</b> filter<span id="filters-plural">s</span> active</span>
-    <button id="filters-clear-btn" onclick="clearAllFilters()" style="margin-left:auto;background:var(--rose-dark);color:white;border:none;padding:4px 12px;border-radius:100px;font-size:11px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;">✕ Clear all</button>
+    <button id="filters-clear-btn" onclick="clearAllFilters()" style="margin-left:auto;background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);color:white;border:none;padding:4px 12px;border-radius:100px;font-size:11px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;">✕ Clear all</button>
   </div>
 
   <!-- Leaflet Map -->
@@ -1877,7 +1877,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       <div style="font-family:'Playfair Display',serif;font-size:88px;" class="tech-initials-large" id="td-initials">ML</div>
       <div style="position:absolute;top:12px;right:12px;" id="td-hero-avail-wrap" style="display:none;">
         <span class="badge badge-now" id="td-hero-avail-badge" style="font-size:12px;padding:5px 12px;display:none;">
-          <span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--rose-dark);margin-right:4px;vertical-align:middle;"></span>
+          <span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);margin-right:4px;vertical-align:middle;"></span>
           <span id="td-hero-avail-label">Available</span>
         </span>
       </div>
@@ -2042,7 +2042,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
                 cursor:pointer;align-items:center;gap:11px;
                 box-shadow:0 1px 4px rgba(169,139,141,0.15);
                 animation:pulse-soft 2.8s ease-in-out infinite;">
-      <div style="width:8px;height:8px;border-radius:50%;background:var(--rose-dark);flex-shrink:0;animation:pulse-dot 2.8s ease-in-out infinite;"></div>
+      <div style="width:8px;height:8px;border-radius:50%;background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);flex-shrink:0;animation:pulse-dot 2.8s ease-in-out infinite;"></div>
       <div style="flex:1;font-size:13px;color:var(--rose-dark);font-weight:500;line-height:1.3;">
         <span id="td-needs-tagging-count">0</span> photo<span id="td-needs-tagging-plural">s</span> to tag
         <div style="font-size:11px;color:var(--rose-dark);font-style:italic;opacity:0.85;font-weight:400;margin-top:2px;">Clients find you by your tags ✨</div>
@@ -2113,7 +2113,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
             <div style="font-size:14.5px;font-weight:700;color:var(--charcoal);">Bookings</div>
             <div style="font-size:12px;color:var(--muted);" id="td-bookings-sub">Set up free booking</div>
           </div>
-          <span id="td-bookings-pending" style="display:none;background:var(--rose-dark);color:white;font-size:12px;font-weight:700;border-radius:100px;padding:3px 9px;">0</span>
+          <span id="td-bookings-pending" style="display:none;background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);color:white;font-size:12px;font-weight:700;border-radius:100px;padding:3px 9px;">0</span>
           <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:var(--muted);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg>
         </div>
         <div id="td-cal"></div>
@@ -2237,7 +2237,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
             <div style="font-size:11px;color:var(--muted);" id="te-bulk-progress-count"></div>
           </div>
           <div style="height:6px;background:var(--border);border-radius:100px;overflow:hidden;">
-            <div id="te-bulk-progress-bar" style="height:100%;background:var(--rose-dark);border-radius:100px;width:0%;transition:width 0.3s;"></div>
+            <div id="te-bulk-progress-bar" style="height:100%;background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);border-radius:100px;width:0%;transition:width 0.3s;"></div>
           </div>
         </div>
         <div style="display:none;" id="te-photo-grid"></div>
@@ -2767,7 +2767,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
         <div style="width:68px;height:68px;border-radius:50%;border:2.5px solid rgba(255,240,230,0.85);background:var(--rose-light);display:flex;align-items:center;justify-content:center;overflow:hidden;box-shadow:0 3px 16px rgba(0,0,0,0.22), 0 0 0 5px rgba(255,210,195,0.12);" id="profile-photo-wrap">
           <div style="font-family:'Playfair Display',serif;font-size:24px;color:var(--rose-dark);" id="profile-initials">?</div>
         </div>
-        <div id="profile-photo-camera-badge" aria-hidden="true" style="position:absolute;right:-2px;bottom:-2px;width:24px;height:24px;border-radius:50%;background:var(--rose-dark);border:2.5px solid white;display:flex;align-items:center;justify-content:center;pointer-events:none;box-shadow:0 2px 6px rgba(0,0,0,0.3);">
+        <div id="profile-photo-camera-badge" aria-hidden="true" style="position:absolute;right:-2px;bottom:-2px;width:24px;height:24px;border-radius:50%;background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);border:2.5px solid white;display:flex;align-items:center;justify-content:center;pointer-events:none;box-shadow:0 2px 6px rgba(0,0,0,0.3);">
           <svg viewBox="0 0 24 24" style="width:11px;height:11px;stroke:white;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
         </div>
       </div>
@@ -4903,8 +4903,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 413,         /* __APP_BUILD_ANDROID__ */
-  ios:     218,          /* __APP_BUILD_IOS__     */
+  android: 417,         /* __APP_BUILD_ANDROID__ */
+  ios:     222,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -5847,7 +5847,7 @@ async function devLogin(kind) {
       (function() {
         var on = false;
         try { on = localStorage.getItem('mnc_force_new_pricing') === '1'; } catch(e) {}
-        return '<button style="' + bs + (on ? 'background:var(--rose-dark);color:white;' : '') +
+        return '<button style="' + bs + (on ? 'background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);color:white;' : '') +
                '" onclick="devToggleNewPricing()">DEV &middot; New pricing ' + (on ? 'ON' : 'off') + '</button>';
       })();
     anchor.parentNode.insertBefore(wrap, anchor);
@@ -7220,7 +7220,7 @@ async function loadAdminInbox() {
         textBackBtn = '<a href="' + smsHref + '" style="display:inline-flex;align-items:center;gap:4px;font-size:11px;background:var(--sage);color:white;text-decoration:none;padding:5px 12px;border-radius:20px;font-family:\'DM Sans\',sans-serif;font-weight:500;">📱 Text back</a>';
       }
       const markReadBtn = unread
-        ? '<button onclick="markInboxRead(\'' + m.id + '\')" style="font-size:11px;background:var(--rose-dark);color:white;border:none;padding:5px 12px;border-radius:20px;cursor:pointer;font-family:\'DM Sans\',sans-serif;">Mark read</button>'
+        ? '<button onclick="markInboxRead(\'' + m.id + '\')" style="font-size:11px;background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);color:white;border:none;padding:5px 12px;border-radius:20px;cursor:pointer;font-family:\'DM Sans\',sans-serif;">Mark read</button>'
         : '<span style="font-size:11px;color:var(--sage);">✓ Read</span>';
       const deleteBtn = '<button onclick="deleteInboxMessage(\'' + m.id + '\')" style="font-size:11px;background:transparent;color:var(--muted);border:1px solid var(--border);padding:4px 11px;border-radius:20px;cursor:pointer;font-family:\'DM Sans\',sans-serif;margin-left:auto;">Delete</button>';
       const actionRow = '<div style="margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">' + textBackBtn + markReadBtn + deleteBtn + '</div>';
@@ -7971,7 +7971,7 @@ function renderTechCards(query, filteredList) {
       : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:14px;color:${t.color};">${esc(t.initials)}</div>`;
 
     const availBadge = t.is_available
-      ? `<span class="badge badge-now"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--rose-dark);margin-right:3px;vertical-align:middle;"></span>Now</span>`
+      ? `<span class="badge badge-now"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);margin-right:3px;vertical-align:middle;"></span>Now</span>`
       : t.is_same_day ? `<span class="badge badge-today">This Week</span>` : '';
     const newClientBadge = t.accepting_new_clients
       ? `<span class="badge" style="background:#F3E4E5;color:#A2636C;font-size:10px;">New Clients ✓</span>`
@@ -8559,7 +8559,7 @@ function _refreshMapPins() {
           <div style="font-weight:600;font-size:13px;color:#2D2D2D;margin-bottom:2px;">${esc(t.name)}</div>
           <div style="font-size:11px;color:#888;margin-bottom:8px;">${[t.city, t.state].filter(Boolean).join(', ') || ''}</div>
           ${t.booking_link ? `<a href="${t.booking_link}" target="_blank" rel="noopener"
-            style="display:block;width:100%;padding:6px;border-radius:100px;border:none;background:linear-gradient(135deg,var(--rose-dark),var(--rose));color:white;font-size:11px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;text-align:center;text-decoration:none;margin-bottom:6px;box-sizing:border-box;">
+            style="display:block;width:100%;padding:6px;border-radius:100px;border:none;background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);color:white;font-size:11px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;text-align:center;text-decoration:none;margin-bottom:6px;box-sizing:border-box;">
             📅 Book Now
           </a>` : ''}
           <button onclick="_mapPinTap(${JSON.stringify({id:t.id,name:t.name}).replace(/"/g,'&quot;')})"
@@ -9502,7 +9502,7 @@ function renderTePhotoGrid(photos) {
           var chip = document.createElement('span');
           chip.textContent = tag;
           chip.style.cssText = 'font-size:9px;padding:2px 6px;border-radius:100px;cursor:pointer;border:1px solid ' +
-            (isOn ? 'var(--rose);background:var(--rose-dark);color:white;' : 'var(--border);background:white;color:var(--charcoal);');
+            (isOn ? 'var(--rose);background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);color:white;' : 'var(--border);background:white;color:var(--charcoal);');
           (function(idx, t, c) {
             c.onclick = function() {
               togglePhotoTag(idx, t);
@@ -9764,7 +9764,7 @@ function renderMyPhotosFilterBar() {
 
   function chipStyle(active) {
     return 'font-size:12px;padding:6px 12px;border-radius:100px;cursor:pointer;font-family:"DM Sans",sans-serif;font-weight:500;border:1.5px solid ' +
-      (active ? 'var(--rose-dark);background:var(--rose-dark);color:white;'
+      (active ? 'var(--rose-dark);background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);color:white;'
               : 'var(--border);background:white;color:var(--charcoal);');
   }
 
@@ -9859,7 +9859,7 @@ function _openMyPhotosFilterPicker(cat, anchorBtn) {
     b.textContent = tag;
     var selected = window._myphFilter[catKey] === tag;
     b.style.cssText = 'font-size:12px;padding:6px 10px;border-radius:100px;cursor:pointer;font-family:"DM Sans",sans-serif;margin:0 5px 5px 0;border:1.5px solid ' +
-      (selected ? 'var(--rose-dark);background:var(--rose-dark);color:white;'
+      (selected ? 'var(--rose-dark);background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);color:white;'
                 : 'var(--border);background:white;color:var(--charcoal);');
     b.onclick = function() {
       window._myphFilter[catKey] = tag;
@@ -10154,7 +10154,7 @@ function buildBulkReviewChip(photo, tag) {
   function applyStyle() {
     const isOn = (photo.tags || []).includes(tag);
     chip.style.cssText = 'font-size:11px;padding:5px 10px;border-radius:100px;cursor:pointer;font-family:"DM Sans",sans-serif;transition:all 0.15s ease;border:1px solid ' +
-      (isOn ? 'var(--rose);background:var(--rose-dark);color:white;'
+      (isOn ? 'var(--rose);background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);color:white;'
             : 'var(--border);background:white;color:var(--charcoal);');
   }
   applyStyle();
@@ -10227,7 +10227,7 @@ function buildTaggedThumbnail(photo, idx) {
 
 function styleTagChip(chip, isOn) {
   chip.style.cssText = 'font-size:11px;padding:5px 10px;border-radius:100px;cursor:pointer;font-family:"DM Sans",sans-serif;transition:all 0.15s ease;border:1px solid ' +
-    (isOn ? 'var(--rose);background:var(--rose-dark);color:white;'
+    (isOn ? 'var(--rose);background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);color:white;'
           : 'var(--border);background:white;color:var(--charcoal);');
 }
 
@@ -10885,8 +10885,8 @@ function styleSetCategory(cat) {
     var row = document.getElementById('style-chips-' + c);
     if (btn) {
       var active = c === cat;
-      btn.style.color = active ? 'var(--rose)' : 'var(--muted)';
-      btn.style.borderBottom = active ? '2px solid var(--rose)' : '2px solid transparent';
+      btn.style.color = active ? 'var(--charcoal)' : 'var(--muted)';
+      btn.style.borderBottom = active ? '2px solid var(--charcoal)' : '2px solid transparent';
       btn.style.fontWeight = active ? '600' : '500';
     }
     if (row) row.style.display = c === cat ? 'flex' : 'none';
@@ -13626,7 +13626,7 @@ async function renderDashCalendar(techId, bookingOn) {
   for (let d = 1; d <= daysInMonth; d++) {
     const lit = booked.has(d), isToday = d === todayD;
     html += '<div style="font-size:11px;height:23px;line-height:23px;border-radius:50%;' +
-      (lit ? 'background:var(--rose-dark);color:white;font-weight:700;box-shadow:0 1px 4px rgba(162,99,108,0.35);'
+      (lit ? 'background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);color:white;font-weight:700;box-shadow:0 1px 4px rgba(162,99,108,0.35);'
            : 'color:var(--charcoal);') +
       (isToday && !lit ? 'box-shadow:inset 0 0 0 1.5px var(--rose-mid);font-weight:700;' : '') +
       '">' + d + '</div>';
@@ -18451,7 +18451,7 @@ function renderReleaseWizardStep() {
       btn.textContent = tag;
       const isOn = selected.indexOf(tag) !== -1;
       btn.style.cssText = 'font-size:12px;padding:6px 12px;border-radius:100px;cursor:pointer;font-family:"DM Sans",sans-serif;transition:all 0.15s ease;border:1.5px solid ' +
-        (isOn ? 'var(--rose-dark);background:var(--rose-dark);color:white;'
+        (isOn ? 'var(--rose-dark);background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);color:white;'
               : 'var(--border);background:white;color:var(--charcoal);');
       btn.onclick = function() { toggleReleaseWizardTag(tag); };
       chips.appendChild(btn);
@@ -18719,7 +18719,7 @@ function closeReleaseWizard() {
            benefit (reframed from "portfolio only" 2026-04-23 per Anne:
            "'portfolio only' sounds negative, lead with value"). -->
       <div style="position:relative;">
-        <div style="position:absolute;top:-10px;right:16px;background:var(--rose-dark);color:white;font-size:10px;font-weight:700;padding:3px 10px;border-radius:100px;letter-spacing:0.5px;z-index:2;box-shadow:0 2px 6px rgba(178,110,95,0.35);">SAVE 50%</div>
+        <div style="position:absolute;top:-10px;right:16px;background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);color:white;font-size:10px;font-weight:700;padding:3px 10px;border-radius:100px;letter-spacing:0.5px;z-index:2;box-shadow:0 2px 6px rgba(178,110,95,0.35);">SAVE 50%</div>
         <div onclick="purchasePhotos(10)" style="border:2px solid var(--rose);border-radius:18px;padding:16px;cursor:pointer;display:flex;align-items:center;gap:14px;background:var(--rose-light);transition:all 0.15s;">
           <div style="width:44px;height:44px;border-radius:14px;background:white;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--rose);">$5</div>
           <div style="flex:1;">
@@ -19335,7 +19335,7 @@ function closeReleaseWizard() {
      Floating chip on every signed-in screen; taps open a modal that
      writes into public.feedback. Auto-captures current screen, user
      agent, and a rolling buffer of console errors/warnings. 2026-04-22. -->
-<button id="feedback-fab" onclick="openFeedbackModal()" aria-label="Send feedback" style="display:none;position:fixed;right:14px;bottom:86px;z-index:850;background:var(--rose-dark);color:white;border:none;border-radius:100px;padding:10px 16px;font-size:13px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;box-shadow:0 4px 14px rgba(178,110,95,0.35),0 1px 3px rgba(0,0,0,0.18);align-items:center;gap:7px;">
+<button id="feedback-fab" onclick="openFeedbackModal()" aria-label="Send feedback" style="display:none;position:fixed;right:14px;bottom:86px;z-index:850;background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);color:white;border:none;border-radius:100px;padding:10px 16px;font-size:13px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;box-shadow:0 4px 14px rgba(178,110,95,0.35),0 1px 3px rgba(0,0,0,0.18);align-items:center;gap:7px;">
   <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
   Feedback
 </button>
