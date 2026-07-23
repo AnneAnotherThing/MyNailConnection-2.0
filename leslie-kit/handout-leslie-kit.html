@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="robots" content="noindex" />
-<title>My Nail Connection - Leslie's kit (2.0 to 3.0 strategy session)</title>
+<title>My Nail Connection - Leslie's kit (3.0 strategy session)</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600;1,700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
 <style>
   :root {
@@ -44,155 +44,125 @@
   h1 em { font-style: italic; color: var(--mauve-deep); }
   .intro { color: var(--ink-soft); font-size: 12px; max-width: 52em; }
 
-  /* ── QR grid ── */
-  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+  /* ── QR grid (page 1) ── */
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
   .item {
     background: var(--cream); border: 1px solid var(--line); border-radius: 13px;
-    padding: 10px 12px; display: flex; gap: 11px; align-items: center;
+    padding: 13px; display: flex; gap: 13px; align-items: center;
   }
   .item.hero { border: 1.6px solid var(--mauve); background: #FFFFFF; }
-  .item.hero::before {
-    content: attr(data-tag); position: absolute; }
-  .qr { width: 0.9in; height: 0.9in; flex-shrink: 0; background: #fff; border-radius: 7px; padding: 2px; border: 1px solid var(--line); }
+  .qr { width: 1.15in; height: 1.15in; flex-shrink: 0; background: #fff; border-radius: 7px; padding: 2px; border: 1px solid var(--line); }
   .i-body { min-width: 0; }
-  .i-name { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 15px; line-height: 1.1; }
+  .i-name { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 15.5px; line-height: 1.1; }
   .i-star { color: var(--mauve); font-size: 12px; }
-  .i-desc { font-size: 11px; color: var(--ink-soft); margin-top: 3px; line-height: 1.4; }
-  .i-url  { font-size: 9.5px; color: var(--mauve-deep); margin-top: 4px; word-break: break-all; font-weight: 600; }
+  .i-desc { font-size: 11.5px; color: var(--ink-soft); margin-top: 4px; line-height: 1.45; }
+  .i-url  { font-size: 10px; color: var(--mauve-deep); margin-top: 5px; word-break: break-all; font-weight: 600; }
 
   .tips {
-    margin-top: 12px; background: var(--blush); border: 1px solid var(--line);
-    border-radius: 13px; padding: 12px 15px; font-size: 11px; color: var(--ink-soft);
+    margin-top: 13px; background: var(--blush); border: 1px solid var(--line);
+    border-radius: 13px; padding: 13px 16px; font-size: 11.5px; color: var(--ink-soft);
   }
   .tips b { font-family: 'Playfair Display', serif; font-weight: 700; color: var(--ink); font-size: 12.5px; }
   .tips ul { margin: 5px 0 0; padding-left: 16px; }
-  .tips li { margin: 2.5px 0; }
-  .tips li b { font-family: 'DM Sans', sans-serif; font-size: 11px; color: var(--mauve-deep); }
+  .tips li { margin: 3px 0; }
+  .tips li b { font-family: 'DM Sans', sans-serif; font-size: 11.5px; color: var(--mauve-deep); }
 
   .foot { margin-top: auto; padding-top: 12px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; font-size: 10px; color: var(--ink-faint); }
   .foot b { color: var(--ink); }
 
-  /* ── Page 2 timeline ── */
-  .tl { margin-top: 16px; display: flex; flex-direction: column; gap: 11px; }
-  .tl-row {
-    display: flex; gap: 14px; background: var(--cream); border: 1px solid var(--line);
-    border-radius: 13px; padding: 13px 16px;
+  /* ── Feature grid (page 2) ── */
+  .scan-band {
+    display: flex; align-items: center; gap: 16px; margin-top: 14px;
+    background: var(--ink); border-radius: 14px; padding: 14px 18px; color: #fff;
   }
-  .tl-num {
-    flex-shrink: 0; width: 34px; height: 34px; border-radius: 50%;
-    background: var(--ink); color: #fff; display: flex; align-items: center; justify-content: center;
-    font-family: 'Playfair Display', serif; font-weight: 700; font-size: 16px;
-  }
+  .scan-band .qr { border: none; }
+  .scan-band .sb-h { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 16px; }
+  .scan-band .sb-d { font-size: 11.5px; color: rgba(255,255,255,0.72); margin-top: 3px; line-height: 1.45; }
+  .scan-band .sb-u { font-size: 10.5px; color: #E7C4C9; margin-top: 5px; font-weight: 600; }
+
+  .feat { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; margin-top: 13px; }
+  .f-card { background: var(--cream); border: 1px solid var(--line); border-radius: 13px; padding: 14px 15px; }
+  .f-ico { width: 30px; height: 30px; border-radius: 9px; background: var(--blush); display: flex; align-items: center; justify-content: center; margin-bottom: 8px; }
+  .f-ico svg { width: 17px; height: 17px; stroke: var(--mauve-deep); fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .f-h { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 14.5px; }
+  .f-d { font-size: 11px; color: var(--ink-soft); margin-top: 4px; line-height: 1.5; }
+  .f-d b { color: var(--ink); }
+
+  /* ── Guide columns (page 3) ── */
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px; }
+  .col { background: var(--cream); border: 1px solid var(--line); border-radius: 14px; padding: 15px 16px; }
+  .col-h { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 16px; display: flex; align-items: center; gap: 8px; }
+  .col-h .tag { font-size: 9.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #fff; background: var(--mauve); padding: 2px 8px; border-radius: 100px; }
+  .step { display: flex; gap: 11px; margin-top: 12px; }
+  .step-n { flex-shrink: 0; width: 24px; height: 24px; border-radius: 50%; background: var(--ink); color: #fff; font-family: 'Playfair Display', serif; font-weight: 700; font-size: 12px; display: flex; align-items: center; justify-content: center; }
+  .step-h { font-weight: 700; font-size: 12.5px; }
+  .step-d { font-size: 11px; color: var(--ink-soft); margin-top: 2px; line-height: 1.45; }
+
+  /* ── Page 4 timeline ── */
+  .tl { margin-top: 15px; display: flex; flex-direction: column; gap: 11px; }
+  .tl-row { display: flex; gap: 14px; background: var(--cream); border: 1px solid var(--line); border-radius: 13px; padding: 13px 16px; }
+  .tl-num { flex-shrink: 0; width: 34px; height: 34px; border-radius: 50%; background: var(--ink); color: #fff; display: flex; align-items: center; justify-content: center; font-family: 'Playfair Display', serif; font-weight: 700; font-size: 16px; }
   .tl-h { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 15.5px; }
   .tl-h em { font-style: italic; color: var(--mauve-deep); font-weight: 700; }
   .tl-d { font-size: 11.5px; color: var(--ink-soft); margin-top: 3px; line-height: 1.5; }
   .tl-d b { color: var(--ink); }
-  .status {
-    margin-top: 13px; background: var(--blush); border: 1px solid var(--line);
-    border-radius: 13px; padding: 13px 16px;
-  }
+  .status { margin-top: 13px; background: var(--blush); border: 1px solid var(--line); border-radius: 13px; padding: 13px 16px; }
   .status b { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 13px; }
-  .status .row { font-size: 11.5px; color: var(--ink-soft); margin-top: 5px; display: flex; gap: 8px; }
+  .status .row { font-size: 11.5px; color: var(--ink-soft); margin-top: 5px; display: flex; gap: 8px; align-items: center; }
   .status .dot { color: var(--mauve); font-weight: 700; flex-shrink: 0; }
-  .pill { display: inline-block; font-size: 9.5px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; padding: 2px 8px; border-radius: 100px; vertical-align: middle; }
+  .pill { display: inline-block; font-size: 9.5px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; padding: 2px 8px; border-radius: 100px; }
   .pill.done { background: #E7F1EA; color: #2F6B45; }
   .pill.pending { background: #F6E7D6; color: #8A5A1F; }
 </style>
 </head>
 <body>
 
-<!-- ══════════════════ PAGE 1 : THE KIT ══════════════════ -->
+<!-- ══════════════════ PAGE 1 : THE KIT (3.0 only) ══════════════════ -->
 <div class="page">
   <div class="head">
     <div class="head-l">
       <img class="mark" src="hat-mark.png" alt="My Nail Connection" />
-      <div>
-        <div class="eyebrow">My Nail Connection</div>
-        <div class="lockup">Leslie's kit</div>
-      </div>
+      <div><div class="eyebrow">My Nail Connection</div><div class="lockup">Leslie's kit</div></div>
     </div>
-    <div class="head-r">
-      <b>2.0 &rarr; 3.0 strategy session</b><br/>
-      Every artifact, one scan away
-    </div>
+    <div class="head-r"><b>3.0 strategy session</b><br/>Every 3.0 artifact, one scan away</div>
   </div>
 
-  <h1>Everything we've built, <em>one scan away.</em></h1>
-  <p class="intro">Your pocket reference for the session. Every page, app, and printable we've made for My Nail Connection, each behind its own QR. Scan any of them live on the spot, or hand your phone over and let people explore. The three outlined in mauve are the ones to lead with.</p>
+  <h1>The 3.0 kit, <em>one scan away.</em></h1>
+  <p class="intro">Your pocket reference for the session. Everything we've built for My Nail Connection 3.0, each behind its own QR. Scan any of them live on the spot, or hand your phone over and let people explore. The two outlined in mauve are the ones to lead with.</p>
 
   <div class="grid">
     <div class="item hero">
       <img class="qr" src="qr/qr-3-0-marketing.png" alt="QR: 3.0 marketing site" />
       <div class="i-body">
         <p class="i-name">The new 3.0 site <span class="i-star">&#9733;</span></p>
-        <p class="i-desc">The rebrand, live. Lead here: this is the whole "where we're going" in one screen.</p>
+        <p class="i-desc">The rebrand, live. Lead here: the whole "where we're going" in one screen.</p>
         <p class="i-url">mynailconnection.com/v3</p>
       </div>
     </div>
-
     <div class="item hero">
       <img class="qr" src="qr/qr-3-0-app.png" alt="QR: 3.0 app" />
       <div class="i-body">
         <p class="i-name">The new 3.0 app <span class="i-star">&#9733;</span></p>
-        <p class="i-desc">Installable preview. Hand the phone over: browse techs, tap a look, see the booking flow.</p>
+        <p class="i-desc">Installable preview. Hand the phone over: browse, tap a look, see booking.</p>
         <p class="i-url">mynailconnection.com/v3/app</p>
       </div>
     </div>
-
-    <div class="item hero">
-      <img class="qr" src="qr/qr-2-0-live.png" alt="QR: live 2.0 site" />
-      <div class="i-body">
-        <p class="i-name">Live 2.0, today <span class="i-star">&#9733;</span></p>
-        <p class="i-desc">What's public right now. Show it beside 3.0 for the before-and-after moment.</p>
-        <p class="i-url">mynailconnection.com</p>
-      </div>
-    </div>
-
     <div class="item">
-      <img class="qr" src="qr/qr-2-0-app.png" alt="QR: 2.0 app" />
-      <div class="i-body">
-        <p class="i-name">The 2.0 app</p>
-        <p class="i-desc">The current signed-in product, for comparing the old flow against the new.</p>
-        <p class="i-url">mynailconnection.com/app</p>
-      </div>
-    </div>
-
-    <div class="item">
-      <img class="qr" src="qr/qr-tech-guide.png" alt="QR: tech onboarding guide" />
+      <img class="qr" src="qr/qr-tech-guide.png" alt="QR: tech guide" />
       <div class="i-body">
         <p class="i-name">Tech onboarding guide</p>
-        <p class="i-desc">The 3.0 walk-through for nail techs. Show when the talk turns to "how do techs start?"</p>
+        <p class="i-desc">The 3.0 walk-through for nail techs, from profile to first booking.</p>
         <p class="i-url">.../v3/tech-guide-v3.html</p>
       </div>
     </div>
-
     <div class="item">
       <img class="qr" src="qr/qr-no-download.png" alt="QR: no-download campaign" />
       <div class="i-body">
         <p class="i-name">"No download needed" campaign</p>
-        <p class="i-desc">The angle that it works in a browser, no app store. Pull up when discussing reach.</p>
+        <p class="i-desc">The angle that it runs in a browser, no app store. For the reach conversation.</p>
         <p class="i-url">.../no-Download-Campaign.html</p>
       </div>
     </div>
-
-    <div class="item">
-      <img class="qr" src="qr/qr-founders.png" alt="QR: founders page" />
-      <div class="i-body">
-        <p class="i-name">Founders &amp; early techs</p>
-        <p class="i-desc">The early-supporter page. Good for the "who's already on board" part of the story.</p>
-        <p class="i-url">.../founders.html</p>
-      </div>
-    </div>
-
-    <div class="item">
-      <img class="qr" src="qr/qr-one-pager.png" alt="QR: campaign one-pager" />
-      <div class="i-body">
-        <p class="i-name">Campaign one-pager</p>
-        <p class="i-desc">The printable pitch sheet. Hand it out, or scan to keep the PDF.</p>
-        <p class="i-url">.../campaign-assets/one-pager.pdf</p>
-      </div>
-    </div>
-
     <div class="item">
       <img class="qr" src="qr/qr-punch-list.png" alt="QR: launch punch list" />
       <div class="i-body">
@@ -201,12 +171,11 @@
         <p class="i-url">.../punch-list.html</p>
       </div>
     </div>
-
     <div class="item">
       <img class="qr" src="qr/qr-stats.png" alt="QR: stats dashboard" />
       <div class="i-body">
         <p class="i-name">Usage &amp; stats</p>
-        <p class="i-desc">The numbers so far, techs, photos, activity. Pull up if the talk goes to traction.</p>
+        <p class="i-desc">The numbers so far, techs, photos, activity. Pull up if the talk turns to traction.</p>
         <p class="i-url">.../stats.html</p>
       </div>
     </div>
@@ -217,81 +186,166 @@
     <ul>
       <li><b>Open on 3.0.</b> Scan the first star, let the rebrand land before any explaining.</li>
       <li><b>Then the app.</b> Hand your phone over on the second star, people believe what they touch.</li>
-      <li><b>Contrast with 2.0.</b> The third star is today's site, the "here's how far we've come" beat.</li>
       <li><b>Everything else is on demand.</b> The rest are there so no question sends you hunting.</li>
     </ul>
   </div>
 
   <div class="foot">
-    <span>Page 1 of 2 &#183; Prepared for Leslie &#183; <b>My Nail Connection</b></span>
-    <span>Made with <svg viewBox="0 0 24 24" width="10" height="10" fill="#A2636C" aria-hidden="true" style="display:inline-block;vertical-align:-1px;"><path d="M12 21s-7-4.6-9.5-9C.8 8.4 2.9 4.5 6.6 4.5c2 0 3.6 1.1 5.4 2.7 1.8-1.6 3.4-2.7 5.4-2.7 3.7 0 5.8 3.9 4.1 7.5C19 16.4 12 21 12 21z"/></svg> by Hive-Rise <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#A2636C" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:inline-block;vertical-align:-2px;"><ellipse cx="12" cy="15" rx="4.5" ry="5.5"/><path d="M8.2 13.5h7.6M8.2 17h7.6"/><ellipse cx="7.5" cy="7.5" rx="3" ry="2" transform="rotate(-28 7.5 7.5)"/><ellipse cx="16.5" cy="7.5" rx="3" ry="2" transform="rotate(28 16.5 7.5)"/></svg> &#183; hive-rise.com</span>
+    <span>Page 1 of 4 &#183; The kit &#183; <b>My Nail Connection</b></span>
+    <span>Made with <svg viewBox="0 0 24 24" width="10" height="10" fill="#A2636C" style="display:inline-block;vertical-align:-1px;"><path d="M12 21s-7-4.6-9.5-9C.8 8.4 2.9 4.5 6.6 4.5c2 0 3.6 1.1 5.4 2.7 1.8-1.6 3.4-2.7 5.4-2.7 3.7 0 5.8 3.9 4.1 7.5C19 16.4 12 21 12 21z"/></svg> by Hive-Rise <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#A2636C" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><ellipse cx="12" cy="15" rx="4.5" ry="5.5"/><path d="M8.2 13.5h7.6M8.2 17h7.6"/><ellipse cx="7.5" cy="7.5" rx="3" ry="2" transform="rotate(-28 7.5 7.5)"/><ellipse cx="16.5" cy="7.5" rx="3" ry="2" transform="rotate(28 16.5 7.5)"/></svg> &#183; hive-rise.com</span>
   </div>
 </div>
 
-<!-- ══════════════════ PAGE 2 : WHAT CHANGED ══════════════════ -->
+<!-- ══════════════════ PAGE 2 : WHAT 3.0 DOES ══════════════════ -->
 <div class="page">
   <div class="head">
     <div class="head-l">
       <img class="mark" src="hat-mark.png" alt="My Nail Connection" />
-      <div>
-        <div class="eyebrow">My Nail Connection</div>
-        <div class="lockup">2.0 &rarr; 3.0</div>
-      </div>
+      <div><div class="eyebrow">My Nail Connection</div><div class="lockup">What 3.0 does</div></div>
     </div>
-    <div class="head-r">
-      <b>What changed, and why</b><br/>
-      Talking points for the session
+    <div class="head-r"><b>The features</b><br/>What's new, in plain terms</div>
+  </div>
+
+  <h1>Six things 3.0 <em>does for you.</em></h1>
+  <p class="intro">The feature set, in the language you'd use to explain it out loud. Scan below to try any of it live in the app.</p>
+
+  <div class="scan-band">
+    <img class="qr" src="qr/qr-3-0-app.png" alt="QR: try the 3.0 app" style="width:0.95in;height:0.95in;" />
+    <div>
+      <div class="sb-h">Try every feature live</div>
+      <div class="sb-d">Scan to open the 3.0 app on your phone. No download, it runs right in the browser.</div>
+      <div class="sb-u">mynailconnection.com/v3/app</div>
     </div>
+  </div>
+
+  <div class="feat">
+    <div class="f-card">
+      <div class="f-ico"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></div>
+      <div class="f-h">Discover two ways</div>
+      <div class="f-d"><b>The Look</b> browses real nail photos, filtered by shape, type and style. <b>Near Me</b> finds techs on a map by distance. Whichever way a client thinks, they land on a tech.</div>
+    </div>
+    <div class="f-card">
+      <div class="f-ico"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></div>
+      <div class="f-h">Book your own tech by name</div>
+      <div class="f-d">Already have a favorite? Search her name and book straight from her profile. It's not only for discovering someone new.</div>
+    </div>
+    <div class="f-card">
+      <div class="f-ico"><svg viewBox="0 0 24 24"><path d="M20 12v7a1 1 0 01-1 1H5a1 1 0 01-1-1v-7"/><path d="M12 3v13"/><path d="M8 7l4-4 4 4"/></svg></div>
+      <div class="f-h">Free booking, no commission</div>
+      <div class="f-d">Free for every tech, <b>no per-booking fee</b>. Two paths, their call: keep the link they already use, or turn on in-app booking. Nothing to switch.</div>
+    </div>
+    <div class="f-card">
+      <div class="f-ico"><svg viewBox="0 0 24 24"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M11 18h2"/></svg></div>
+      <div class="f-h">Works in a browser</div>
+      <div class="f-d">No app store, no download. It opens in Safari or Chrome, and "add to home screen" makes it feel like a native app. Removes the biggest reason people bounce.</div>
+    </div>
+    <div class="f-card">
+      <div class="f-ico"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="9" r="1.8"/><path d="M21 16l-5-5-6 6"/></svg></div>
+      <div class="f-h">Photos are the ad</div>
+      <div class="f-d">Being on the map is <b>always free</b>. Photos are what put a tech in the feed, and she controls it, first photo free, then she chooses how much to show.</div>
+    </div>
+    <div class="f-card">
+      <div class="f-ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
+      <div class="f-h">Live availability</div>
+      <div class="f-d"><b>Available Today</b> and <b>Open This Week</b> surface techs with real openings, so a client who needs a fast appointment finds one.</div>
+    </div>
+  </div>
+
+  <div class="foot">
+    <span>Page 2 of 4 &#183; The features &#183; <b>My Nail Connection</b></span>
+    <span>Made with <svg viewBox="0 0 24 24" width="10" height="10" fill="#A2636C" style="display:inline-block;vertical-align:-1px;"><path d="M12 21s-7-4.6-9.5-9C.8 8.4 2.9 4.5 6.6 4.5c2 0 3.6 1.1 5.4 2.7 1.8-1.6 3.4-2.7 5.4-2.7 3.7 0 5.8 3.9 4.1 7.5C19 16.4 12 21 12 21z"/></svg> by Hive-Rise <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#A2636C" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><ellipse cx="12" cy="15" rx="4.5" ry="5.5"/><path d="M8.2 13.5h7.6M8.2 17h7.6"/><ellipse cx="7.5" cy="7.5" rx="3" ry="2" transform="rotate(-28 7.5 7.5)"/><ellipse cx="16.5" cy="7.5" rx="3" ry="2" transform="rotate(28 16.5 7.5)"/></svg> &#183; hive-rise.com</span>
+  </div>
+</div>
+
+<!-- ══════════════════ PAGE 3 : THE COMPLETE HOW-TO ══════════════════ -->
+<div class="page">
+  <div class="head">
+    <div class="head-l">
+      <img class="mark" src="hat-mark.png" alt="My Nail Connection" />
+      <div><div class="eyebrow">My Nail Connection</div><div class="lockup">The how-to</div></div>
+    </div>
+    <div class="head-r"><b>The complete guide</b><br/>Client side &amp; tech side</div>
+  </div>
+
+  <h1>How it works, <em>start to finish.</em></h1>
+  <p class="intro">The whole flow on one page, both sides of it. Walk it out loud, or leave it behind. The full tech guide is one scan away at the bottom.</p>
+
+  <div class="cols">
+    <div class="col">
+      <div class="col-h">Finding &amp; booking <span class="tag">Clients</span></div>
+      <div class="step"><div class="step-n">1</div><div><div class="step-h">Open it, no download</div><div class="step-d">Tap the link or scan the QR. It runs in the browser; add to home screen to keep it.</div></div></div>
+      <div class="step"><div class="step-n">2</div><div><div class="step-h">Find your look, or your tech</div><div class="step-d">Browse The Look, find techs Near Me, or search a tech you already love by name.</div></div></div>
+      <div class="step"><div class="step-n">3</div><div><div class="step-h">See her work</div><div class="step-d">Open a profile for real photos, location, availability, and how to book.</div></div></div>
+      <div class="step"><div class="step-n">4</div><div><div class="step-h">Book in seconds</div><div class="step-d">Pick a time, confirm with your name and a verified phone. That's it, no calls, no DMs.</div></div></div>
+    </div>
+
+    <div class="col">
+      <div class="col-h">Getting set up <span class="tag">Techs</span></div>
+      <div class="step"><div class="step-n">1</div><div><div class="step-h">Create a free account</div><div class="step-d">Name, email, phone. Free forever, no commission and no per-booking fee.</div></div></div>
+      <div class="step"><div class="step-n">2</div><div><div class="step-h">Build your profile</div><div class="step-d">Your name, area, and a short bio. This is what puts you on the map for clients nearby.</div></div></div>
+      <div class="step"><div class="step-n">3</div><div><div class="step-h">Add photos</div><div class="step-d">First one's on us. Photos are what move you from the map into the feed, you control how much you show.</div></div></div>
+      <div class="step"><div class="step-n">4</div><div><div class="step-h">Turn on booking</div><div class="step-d">Keep the link you already use, or switch on in-app booking with your services and hours.</div></div></div>
+    </div>
+  </div>
+
+  <div class="scan-band" style="margin-top:14px;">
+    <img class="qr" src="qr/qr-tech-guide.png" alt="QR: full tech guide" style="width:0.95in;height:0.95in;" />
+    <div>
+      <div class="sb-h">The complete tech guide</div>
+      <div class="sb-d">Scan for the full walk-through, every step with screenshots. Share it with any tech who's getting started.</div>
+      <div class="sb-u">mynailconnection.com/v3/tech-guide-v3.html</div>
+    </div>
+  </div>
+
+  <div class="foot">
+    <span>Page 3 of 4 &#183; The how-to &#183; <b>My Nail Connection</b></span>
+    <span>Made with <svg viewBox="0 0 24 24" width="10" height="10" fill="#A2636C" style="display:inline-block;vertical-align:-1px;"><path d="M12 21s-7-4.6-9.5-9C.8 8.4 2.9 4.5 6.6 4.5c2 0 3.6 1.1 5.4 2.7 1.8-1.6 3.4-2.7 5.4-2.7 3.7 0 5.8 3.9 4.1 7.5C19 16.4 12 21 12 21z"/></svg> by Hive-Rise <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#A2636C" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><ellipse cx="12" cy="15" rx="4.5" ry="5.5"/><path d="M8.2 13.5h7.6M8.2 17h7.6"/><ellipse cx="7.5" cy="7.5" rx="3" ry="2" transform="rotate(-28 7.5 7.5)"/><ellipse cx="16.5" cy="7.5" rx="3" ry="2" transform="rotate(28 16.5 7.5)"/></svg> &#183; hive-rise.com</span>
+  </div>
+</div>
+
+<!-- ══════════════════ PAGE 4 : 2.0 → 3.0 WHAT CHANGED ══════════════════ -->
+<div class="page">
+  <div class="head">
+    <div class="head-l">
+      <img class="mark" src="hat-mark.png" alt="My Nail Connection" />
+      <div><div class="eyebrow">My Nail Connection</div><div class="lockup">2.0 &rarr; 3.0</div></div>
+    </div>
+    <div class="head-r"><b>What changed, and why</b><br/>Strategy talking points</div>
   </div>
 
   <h1>The story of the <em>rebuild.</em></h1>
   <p class="intro">Four moves took My Nail Connection from 2.0 to 3.0. Each one is a talking point, use them in order and the whole arc tells itself.</p>
 
   <div class="tl">
-    <div class="tl-row">
-      <div class="tl-num">1</div>
-      <div>
-        <div class="tl-h">The rebrand &mdash; <em>quiet luxury.</em></div>
-        <div class="tl-d">Off the busy pink look onto the Nagel board: <b>white space, mauve, black</b>, the hat-no-face mark, black buttons. Reads calmer, more premium, and it's consistent from the site through the app to this handout.</div>
-      </div>
-    </div>
-
-    <div class="tl-row">
-      <div class="tl-num">2</div>
-      <div>
-        <div class="tl-h">The free-booking pivot &mdash; <em>no commission, ever.</em></div>
-        <div class="tl-d">Booking is free for techs, with <b>no per-booking fee</b>. Two paths, their call: keep the link they already use (Vagaro, their site), or turn on in-app booking. Nothing to switch, no reason to say no.</div>
-      </div>
-    </div>
-
-    <div class="tl-row">
-      <div class="tl-num">3</div>
-      <div>
-        <div class="tl-h">Accounts that just work &mdash; <em>softer sign-in.</em></div>
-        <div class="tl-d">Sign-up and the confirm / reset emails were rewired so a tapped link lands people <b>inside the app, already signed in</b>, instead of dropping them on a dead page. Booking asks only for a name and a verified phone.</div>
-      </div>
-    </div>
-
-    <div class="tl-row">
-      <div class="tl-num">4</div>
-      <div>
-        <div class="tl-h">The data rescue &mdash; <em>nothing was lost.</em></div>
-        <div class="tl-d">The old database looked dead, it wasn't. It was a stale password, not lost data. Every tech, photo, and record from 2.0 was <b>recovered on 15 July 2026</b>. The final step is restoring it into the new paid database.</div>
-      </div>
-    </div>
+    <div class="tl-row"><div class="tl-num">1</div><div>
+      <div class="tl-h">The rebrand &mdash; <em>quiet luxury.</em></div>
+      <div class="tl-d">Off the busy pink look onto the Nagel board: <b>white space, mauve, black</b>, the hat-no-face mark, black buttons. Reads calmer, more premium, and consistent from the site through the app to this handout.</div>
+    </div></div>
+    <div class="tl-row"><div class="tl-num">2</div><div>
+      <div class="tl-h">The free-booking pivot &mdash; <em>no commission, ever.</em></div>
+      <div class="tl-d">Booking is free for techs, with <b>no per-booking fee</b>. Two paths, their call: keep the link they already use, or turn on in-app booking. Nothing to switch, no reason to say no.</div>
+    </div></div>
+    <div class="tl-row"><div class="tl-num">3</div><div>
+      <div class="tl-h">Accounts that just work &mdash; <em>softer sign-in.</em></div>
+      <div class="tl-d">Sign-up and the confirm / reset emails were rewired so a tapped link lands people <b>inside the app, already signed in</b>. Booking asks only for a name and a verified phone.</div>
+    </div></div>
+    <div class="tl-row"><div class="tl-num">4</div><div>
+      <div class="tl-h">The data rescue &mdash; <em>nothing was lost.</em></div>
+      <div class="tl-d">The old database looked dead, it wasn't, just a stale password. Every tech, photo, and record from 2.0 was <b>recovered on 15 July 2026</b>. The final step is restoring it into the new paid database.</div>
+    </div></div>
   </div>
 
   <div class="status">
     <b>Where things stand</b>
-    <div class="row"><span class="dot">&#9679;</span><span><span class="pill done">Done</span> &nbsp;Rebrand shipped to the 3.0 preview, marketing + app, and the tech guide.</span></div>
-    <div class="row"><span class="dot">&#9679;</span><span><span class="pill done">Done</span> &nbsp;Free-booking model and softer sign-in built. Old-database rescue complete (15 Jul 2026).</span></div>
-    <div class="row"><span class="dot">&#9679;</span><span><span class="pill pending">Pending</span> &nbsp;Restore the rescued data into the paid database, then real-device tests: one photo upload, one SMS booking.</span></div>
-    <div class="row"><span class="dot">&#9679;</span><span><span class="pill pending">Pending</span> &nbsp;Cutover: promote 3.0 to the main site and retire 2.0.</span></div>
+    <div class="row"><span class="dot">&#9679;</span><span class="pill done">Done</span><span>Rebrand shipped to the 3.0 preview, marketing + app, and the tech guide.</span></div>
+    <div class="row"><span class="dot">&#9679;</span><span class="pill done">Done</span><span>Free-booking model and softer sign-in built. Old-database rescue complete (15 Jul 2026).</span></div>
+    <div class="row"><span class="dot">&#9679;</span><span class="pill pending">Pending</span><span>Restore rescued data into the paid database, then real-device tests: one photo upload, one SMS booking.</span></div>
+    <div class="row"><span class="dot">&#9679;</span><span class="pill pending">Pending</span><span>Cutover: promote 3.0 to the main site and retire 2.0.</span></div>
   </div>
 
   <div class="foot">
-    <span>Page 2 of 2 &#183; Prepared for Leslie &#183; <b>My Nail Connection</b></span>
-    <span>Made with <svg viewBox="0 0 24 24" width="10" height="10" fill="#A2636C" aria-hidden="true" style="display:inline-block;vertical-align:-1px;"><path d="M12 21s-7-4.6-9.5-9C.8 8.4 2.9 4.5 6.6 4.5c2 0 3.6 1.1 5.4 2.7 1.8-1.6 3.4-2.7 5.4-2.7 3.7 0 5.8 3.9 4.1 7.5C19 16.4 12 21 12 21z"/></svg> by Hive-Rise <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#A2636C" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:inline-block;vertical-align:-2px;"><ellipse cx="12" cy="15" rx="4.5" ry="5.5"/><path d="M8.2 13.5h7.6M8.2 17h7.6"/><ellipse cx="7.5" cy="7.5" rx="3" ry="2" transform="rotate(-28 7.5 7.5)"/><ellipse cx="16.5" cy="7.5" rx="3" ry="2" transform="rotate(28 16.5 7.5)"/></svg> &#183; hive-rise.com</span>
+    <span>Page 4 of 4 &#183; The story &#183; <b>My Nail Connection</b></span>
+    <span>Made with <svg viewBox="0 0 24 24" width="10" height="10" fill="#A2636C" style="display:inline-block;vertical-align:-1px;"><path d="M12 21s-7-4.6-9.5-9C.8 8.4 2.9 4.5 6.6 4.5c2 0 3.6 1.1 5.4 2.7 1.8-1.6 3.4-2.7 5.4-2.7 3.7 0 5.8 3.9 4.1 7.5C19 16.4 12 21 12 21z"/></svg> by Hive-Rise <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#A2636C" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><ellipse cx="12" cy="15" rx="4.5" ry="5.5"/><path d="M8.2 13.5h7.6M8.2 17h7.6"/><ellipse cx="7.5" cy="7.5" rx="3" ry="2" transform="rotate(-28 7.5 7.5)"/><ellipse cx="16.5" cy="7.5" rx="3" ry="2" transform="rotate(28 16.5 7.5)"/></svg> &#183; hive-rise.com</span>
   </div>
 </div>
 
