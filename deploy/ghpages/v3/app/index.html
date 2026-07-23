@@ -2107,7 +2107,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       </div>
 
       <!-- CARD: bookings, with a month-at-a-glance calendar (lit = booked) -->
-      <div onclick="show('tech-bookings')" style="background:white;border:1px solid var(--border);border-radius:16px;padding:16px;box-shadow:var(--shadow);margin-bottom:12px;cursor:pointer;">
+      <div onclick="tbOpenBookings()" style="background:white;border:1px solid var(--border);border-radius:16px;padding:16px;box-shadow:var(--shadow);margin-bottom:12px;cursor:pointer;">
         <div style="display:flex;align-items:center;gap:9px;margin-bottom:11px;">
           <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:var(--rose-dark);fill:none;stroke-width:1.9;stroke-linecap:round;flex-shrink:0;"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
           <div style="flex:1;min-width:0;">
@@ -4904,8 +4904,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 423,         /* __APP_BUILD_ANDROID__ */
-  ios:     228,          /* __APP_BUILD_IOS__     */
+  android: 424,         /* __APP_BUILD_ANDROID__ */
+  ios:     229,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -13659,20 +13659,29 @@ async function tbLoadDashBadge() {
   const sub = document.getElementById('td-bookings-sub');
   const badge = document.getElementById('td-bookings-pending');
   try {
-    const r = await fetch(SUPABASE_URL + '/rest/v1/techs?select=id,booking_enabled&email=eq.' +
+    const r = await fetch(SUPABASE_URL + '/rest/v1/techs?select=id,booking_enabled,booking_link&email=eq.' +
       encodeURIComponent(currentUserEmail), { headers: bkHeaders() });
     if (!r.ok) return; // migration not run yet, leave the default copy
     const t = (await r.json())[0];
     if (!t) return;
+    // Remember how this tech takes bookings so tbOpenBookings() can route
+    // without a refetch. "Set up" = neither in-app booking nor a link.
+    window._bkSetup = { id: t.id, enabled: !!t.booking_enabled, link: (t.booking_link || '').trim() };
     if (!t.booking_enabled) {
-      if (sub) sub.textContent = 'Set up free booking';
       if (badge) badge.style.display = 'none';
-      // Still show the month, just dimmed with a nudge. Hiding it entirely
-      // meant a tech who hadn't switched booking on never knew the calendar
-      // existed. 2026-07-20.
+      if (sub) {
+        if (window._bkSetup.link) {
+          sub.innerHTML = 'Clients book through your link';
+          sub.style.color = 'var(--mauve-deep, #7E4E58)';
+        } else {
+          sub.innerHTML = 'Booking is off &#183; <b style="color:var(--rose-dark);">tap to set up</b>';
+          sub.style.color = 'var(--muted)';
+        }
+      }
       try { renderDashCalendar(t.id, false); } catch(_) {}
       return;
     }
+    if (sub) sub.style.color = 'var(--muted)';
     if (sub) sub.textContent = 'Your calendar and requests';
     try { renderDashCalendar(t.id, true); } catch(_) {}
     const cr = await fetch(SUPABASE_URL + '/rest/v1/bookings?tech_id=eq.' + t.id +
@@ -13685,6 +13694,91 @@ async function tbLoadDashBadge() {
 }
 
 // ── Client side: the Book flow ──────────────────────────────────────────────
+
+// ── Booking setup: one clear fork instead of a hidden "set up" line ──
+// The dashboard Bookings card calls this. Already set up (in-app OR a link)?
+// straight to the bookings screen. Not set up? ask the one question that
+// matters: do you already book somewhere, or set it up here? 2026-07-22, Anne.
+function tbOpenBookings() {
+  var st = window._bkSetup || {};
+  if (st.enabled || st.link) { show('tech-bookings'); return; }
+  bkOpenSetupFork();
+}
+function bkOpenSetupFork() {
+  var m = document.getElementById('booking-setup-modal');
+  if (!m) { show('tech-bookings'); return; }
+  var chooser = document.getElementById('bkf-chooser');
+  var linkStep = document.getElementById('bkf-linkstep');
+  if (chooser) chooser.style.display = 'block';
+  if (linkStep) linkStep.style.display = 'none';
+  var inp = document.getElementById('bkf-link');
+  if (inp) inp.value = (window._bkSetup && window._bkSetup.link) || '';
+  m.style.display = 'flex';
+  requestAnimationFrame(function(){ m.classList.add('open'); });
+}
+function bkCloseSetupFork() {
+  var m = document.getElementById('booking-setup-modal');
+  if (!m) return;
+  m.classList.remove('open');
+  setTimeout(function(){ m.style.display = 'none'; }, 220);
+}
+function bkForkExisting() {
+  var chooser = document.getElementById('bkf-chooser');
+  var linkStep = document.getElementById('bkf-linkstep');
+  if (chooser) chooser.style.display = 'none';
+  if (linkStep) linkStep.style.display = 'block';
+  var inp = document.getElementById('bkf-link');
+  if (inp) setTimeout(function(){ try { inp.focus(); } catch(_){} }, 250);
+}
+function bkForkBackToChooser() {
+  var chooser = document.getElementById('bkf-chooser');
+  var linkStep = document.getElementById('bkf-linkstep');
+  if (linkStep) linkStep.style.display = 'none';
+  if (chooser) chooser.style.display = 'block';
+}
+async function bkForkSaveLink() {
+  var inp = document.getElementById('bkf-link');
+  var url = safeUrl((inp && inp.value || '').trim());
+  if (!url) { showToast('Paste your booking link first'); return; }
+  if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+  var ok = await patchBookingField({ booking_link: url });
+  if (!ok) { showToast('Could not save, try again'); return; }
+  window._bkSetup = window._bkSetup || {}; window._bkSetup.link = url;
+  if (_bkMyTech) _bkMyTech.booking_link = url;
+  try { var te = document.getElementById('te-booking-link'); if (te) te.value = url; } catch(_){}
+  bkCloseSetupFork();
+  showToast('Set! Clients can book you through your link ✨');
+  try { tbLoadDashBadge(); } catch(_){}
+}
+async function bkForkInApp() {
+  var ok = await patchBookingField({ booking_enabled: true });
+  if (!ok) { showToast('Could not turn booking on, try again'); return; }
+  window._bkSetup = window._bkSetup || {}; window._bkSetup.enabled = true;
+  if (_bkMyTech) _bkMyTech.booking_enabled = true;
+  bkCloseSetupFork();
+  show('tech-bookings');
+  try { tbRenderSettings(); } catch(_){}
+  showToast('Booking is on. Add your services and hours next ✨');
+}
+// Patch a booking field, preferring tbPatchTech (keeps caches in step),
+// falling back to a direct PATCH if it isn't ready yet.
+async function patchBookingField(patch) {
+  if (typeof tbPatchTech === 'function' && _bkMyTech) {
+    var r = await tbPatchTech(patch); if (r) return true;
+  }
+  try {
+    var res = await fetch(SUPABASE_URL + '/rest/v1/techs?email=eq.' + encodeURIComponent(currentUserEmail), {
+      method: 'PATCH',
+      headers: bkHeaders({ 'Content-Type': 'application/json', 'Prefer': 'return=minimal' }),
+      body: JSON.stringify(patch)
+    });
+    if (res.ok) {
+      try { (window.ALL_TECHS || []).forEach(function(t){ if ((t.email||'').toLowerCase()===currentUserEmail) Object.assign(t, patch); }); } catch(_){}
+      return true;
+    }
+  } catch(_) {}
+  return false;
+}
 
 let _bkFlow = null;
 
@@ -19138,7 +19232,55 @@ function closeReleaseWizard() {
     </div>
   </div>
 </div>
-<!-- BROWSE PREFERENCE MODAL, shown once on first client login -->
+<!-- BOOKING SETUP FORK, the one question: already book somewhere, or set it up here? -->
+  <div id="booking-setup-modal" style="display:none;position:fixed;inset:0;background:rgba(20,19,23,0.5);z-index:520;align-items:flex-end;justify-content:center;">
+    <div style="background:white;border-radius:28px 28px 0 0;padding:0 0 40px;width:100%;max-width:480px;max-height:88vh;overflow-y:auto;">
+      <div style="width:36px;height:4px;background:var(--border);border-radius:100px;margin:14px auto 0;"></div>
+
+      <!-- Step 1: the chooser -->
+      <div id="bkf-chooser" style="padding:22px 22px 0;">
+        <div style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--charcoal);">How do you want to take bookings?</div>
+        <div style="font-size:13px;color:var(--muted);line-height:1.5;margin-top:6px;margin-bottom:20px;">Both are free. Pick whichever fits how you already work, you can change it anytime.</div>
+
+        <div onclick="bkForkExisting()" style="cursor:pointer;border:1.5px solid var(--border);border-radius:16px;padding:16px;display:flex;gap:14px;align-items:center;margin-bottom:12px;">
+          <div style="width:44px;height:44px;border-radius:13px;background:var(--rose-light);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <svg viewBox="0 0 24 24" style="width:22px;height:22px;stroke:var(--rose-dark);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;"><path d="M10 13a5 5 0 007 0l3-3a5 5 0 00-7-7l-1 1"/><path d="M14 11a5 5 0 00-7 0l-3 3a5 5 0 007 7l1-1"/></svg>
+          </div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:15px;font-weight:700;color:var(--charcoal);">I already book somewhere</div>
+            <div style="font-size:12.5px;color:var(--muted);line-height:1.45;margin-top:2px;">Vagaro, StyleSeat, your own site. Paste the link and clients book you there. Nothing to switch.</div>
+          </div>
+          <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--muted);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0;"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+
+        <div onclick="bkForkInApp()" style="cursor:pointer;border:1.5px solid var(--rose-dark);border-radius:16px;padding:16px;display:flex;gap:14px;align-items:center;">
+          <div style="width:44px;height:44px;border-radius:13px;background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <svg viewBox="0 0 24 24" style="width:22px;height:22px;stroke:white;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          </div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:15px;font-weight:700;color:var(--charcoal);">Set up booking here <span style="font-size:11px;color:var(--rose-dark);font-weight:700;">&#183; FREE</span></div>
+            <div style="font-size:12.5px;color:var(--muted);line-height:1.45;margin-top:2px;">Clients book right on your profile. You pick your services and hours, no other app needed.</div>
+          </div>
+          <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--muted);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0;"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+
+        <div onclick="bkCloseSetupFork()" style="text-align:center;font-size:13px;color:var(--muted);cursor:pointer;margin-top:18px;padding:8px;">Not now</div>
+      </div>
+
+      <!-- Step 2: paste the link -->
+      <div id="bkf-linkstep" style="display:none;padding:22px 22px 0;">
+        <div onclick="bkForkBackToChooser()" style="font-size:13px;color:var(--muted);cursor:pointer;margin-bottom:12px;display:inline-flex;align-items:center;gap:5px;"><svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;"><polyline points="15 18 9 12 15 6"/></svg> Back</div>
+        <div style="font-family:'Playfair Display',serif;font-size:21px;font-weight:700;color:var(--charcoal);">Where do you take bookings?</div>
+        <div style="font-size:13px;color:var(--muted);line-height:1.5;margin-top:6px;margin-bottom:16px;">Paste your booking link. It shows up as a Book button right on your profile.</div>
+        <input id="bkf-link" type="url" inputmode="url" autocomplete="off" placeholder="vagaro.com/yourname or your website" style="width:100%;padding:13px 15px;border:1.5px solid var(--border);border-radius:12px;font-size:15px;font-family:'DM Sans',sans-serif;box-sizing:border-box;"/>
+        <button onclick="bkForkSaveLink()" class="btn btn-rose" style="width:100%;margin-top:16px;">Save my booking link</button>
+        <div style="font-size:11.5px;color:var(--muted);text-align:center;margin-top:10px;line-height:1.5;">Works with Vagaro, StyleSeat, Square, GlossGenius, Booksy, Fresha, or any web link.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- BROWSE PREFERENCE MODAL, shown once on first client login -->
 <div id="browse-pref-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:500;display:none;align-items:flex-end;justify-content:center;">
   <div style="background:white;border-radius:28px 28px 0 0;padding:0 0 48px;width:100%;max-width:480px;max-height:85vh;overflow-y:auto;">
     <!-- Handle bar -->
