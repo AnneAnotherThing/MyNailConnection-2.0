@@ -2626,14 +2626,14 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
   <div class="scroll-content" style="padding-bottom:60px;">
 
     <!-- Intro -->
-    <div style="padding:24px 20px 4px;text-align:center;">
+    <div style="padding:16px 20px 2px;text-align:center;">
       <div style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--charcoal);margin-bottom:6px;">Follow My Nail Connection</div>
       <div style="font-size:13px;color:var(--muted);line-height:1.6;max-width:320px;margin:0 auto;">Behind-the-scenes nail inspo, tech spotlights, and updates straight from MNC.</div>
     </div>
 
     <!-- Magnolia divider, same motif used elsewhere -->
-    <div aria-hidden="true" style="padding:18px 40px 6px;display:flex;align-items:center;justify-content:center;gap:14px;">
-      <span style="flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--rose-mid),transparent);"></span>
+    <div aria-hidden="true" style="padding:10px 40px 4px;display:flex;align-items:center;justify-content:center;gap:14px;">
+      <span style="flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);"></span>
       <svg viewBox="0 0 40 40" style="width:16px;height:16px;flex-shrink:0;opacity:0.7;" aria-hidden="true">
         <g transform="translate(20 20)">
           <ellipse cx="0" cy="-7" rx="2.5" ry="6" fill="#DFC9CA"/>
@@ -2645,7 +2645,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
           <circle cx="0" cy="0" r="2" fill="#5E4A4B"/>
         </g>
       </svg>
-      <span style="flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--rose-mid),transparent);"></span>
+      <span style="flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);"></span>
     </div>
 
     <!-- Social cards -->
@@ -2718,9 +2718,9 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
     <!-- Share the app, uses the native OS share sheet via navigator.share()
          where available (iOS, Android, Capacitor WebViews), falls back to
          clipboard copy. -->
-    <div style="text-align:center;padding:24px 20px 0;">
+    <div style="text-align:center;padding:14px 20px 0;">
       <button onclick="shareApp()" type="button"
-              style="display:inline-flex;align-items:center;gap:10px;padding:12px 22px;border:none;border-radius:100px;background:linear-gradient(135deg,#C77D82,#E3AEB2);color:white;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:600;letter-spacing:0.3px;cursor:pointer;box-shadow:0 4px 14px rgba(199,125,130,0.32),0 1px 3px rgba(0,0,0,0.12);">
+              style="display:inline-flex;align-items:center;gap:10px;padding:12px 22px;border:none;border-radius:100px;background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);color:white;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:600;letter-spacing:0.3px;cursor:pointer;box-shadow:0 4px 14px rgba(199,125,130,0.32),0 1px 3px rgba(0,0,0,0.12);">
         <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;">
           <path d="M4 12v7a2 2 0 002 2h12a2 2 0 002-2v-7"/>
           <polyline points="16 6 12 2 8 6"/>
@@ -4904,8 +4904,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 421,         /* __APP_BUILD_ANDROID__ */
-  ios:     226,          /* __APP_BUILD_IOS__     */
+  android: 423,         /* __APP_BUILD_ANDROID__ */
+  ios:     228,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
