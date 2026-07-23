@@ -1650,7 +1650,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       <!-- Browse by Location -->
       <div onclick="show('browse-location')" style="cursor:pointer;border-radius:12px;background:#FFFFFF;border:1px solid rgba(96,76,77,0.22);border-bottom:3px solid rgba(70,54,55,0.35);box-shadow:0 2px 8px rgba(70,54,55,0.08);display:flex;align-items:center;gap:14px;padding:10px 14px;">
         <div style="width:72px;height:72px;border-radius:14px;overflow:hidden;flex-shrink:0;box-sizing:border-box;border:1px solid var(--border);box-shadow:inset 0 0 0 1px rgba(255,255,255,0.35),0 1px 5px rgba(70,54,55,0.16);">
-          <img src="images/location.jpg?v=3" alt="Find techs on the map" style="width:100%;height:100%;object-fit:cover;"/>
+          <img src="images/location.jpg?v=4" alt="Find techs on the map" style="width:100%;height:100%;object-fit:cover;"/>
         </div>
         <div style="flex:1;">
           <div style="font-size:15px;font-weight:600;color:var(--charcoal);">Near Me</div>
@@ -4903,8 +4903,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 420,         /* __APP_BUILD_ANDROID__ */
-  ios:     225,          /* __APP_BUILD_IOS__     */
+  android: 421,         /* __APP_BUILD_ANDROID__ */
+  ios:     226,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -13105,7 +13105,14 @@ async function tbPatchTech(patch) {
 // requests, and if they can't be reached the booking is useless (and clients
 // are left hanging). So turning booking ON requires notifications to be on.
 // 2026-07-20 per Anne. Returns true if we're clear to enable booking.
+// TEMP, Anne 2026-07-22: don't force notifications ON to enable booking
+// while testing. Flip REQUIRE_NOTIFS_FOR_BOOKING to true to restore the gate.
+var REQUIRE_NOTIFS_FOR_BOOKING = false;
 async function ensureBookingNotifications() {
+  if (!REQUIRE_NOTIFS_FOR_BOOKING) {
+    try { await subscribeToPush(currentUserEmail); } catch(_) {}
+    return true;
+  }
   // Native app (Capacitor): push runs through APNs/FCM via initCapacitorPush,
   // not the Web Notification API, so don't gate on Notification.permission
   // there. Best-effort (re)register and allow.
@@ -16276,6 +16283,9 @@ function updateAvatar() {
 
   // Update all nav avatars
   document.querySelectorAll('.avatar').forEach(function(el) {
+    // Client home header stays the MNC logo, always, so the brand mark lives
+    // inside the app (else it's only on marketing + favicon). Anne 2026-07-22.
+    if (el.id === 'home-avatar-btn') { el.innerHTML = coin; return; }
     if (currentUserPhoto) {
       el.innerHTML = '<img src="' + currentUserPhoto + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;"/>';
     } else {
