@@ -36,6 +36,7 @@ cp -r "$V3/deploy/ghpages/app/." "$OUT/app/"
 
 # ── Marketing page ──────────────────────────────────────────────────────
 cp "$V3/marketing-v3.html" "$OUT/index.html"
+[ -f "$V3/tech-guide-v3.html" ] && cp "$V3/tech-guide-v3.html" "$OUT/tech-guide-v3.html"
 cp -r "$V3/images" "$OUT/images"
 cp "$V3/og-image.png" "$OUT/og-image.png"
 cp "$V3/og-image.png" "$OUT/app/og-image.png"
