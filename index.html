@@ -363,7 +363,7 @@ button,input,select,textarea{font-family:'DM Sans','Helvetica Neue',Helvetica,Ar
    Signature surface: deep mauve gradient, soft top-left sheen, tiny
    uppercase eyebrow, serif headline with a gradient accent word. 2026-07-20. */
 .hero-card{
-  position:relative;overflow:hidden;border-radius:24px;padding:22px 20px 24px;
+  position:relative;overflow:hidden;border-radius:22px;padding:14px 18px 15px;
   background:#FFFFFF;border:1px solid var(--border);
     box-shadow:0 2px 6px rgba(20,19,23,0.04),0 10px 24px rgba(20,19,23,0.05);
 }
@@ -373,8 +373,8 @@ button,input,select,textarea{font-family:'DM Sans','Helvetica Neue',Helvetica,Ar
 }
 .hero-card > *{position:relative;z-index:1;}
 .hero-eyebrow{font-size:11px;font-weight:700;letter-spacing:1.6px;text-transform:uppercase;color:var(--muted);}
-.hero-title{font-family:'Playfair Display',serif;font-weight:700;font-size:27px;line-height:1.16;color:var(--charcoal);margin-top:8px;letter-spacing:0.2px;}
-.hero-sub{font-size:13px;color:var(--muted);margin-top:7px;line-height:1.5;}
+.hero-title{font-family:'Playfair Display',serif;font-weight:700;font-size:21px;line-height:1.12;color:var(--charcoal);margin-top:0;letter-spacing:0.2px;}
+.hero-sub{font-size:12.5px;color:var(--muted);margin-top:4px;line-height:1.45;}
 /* The pop. Was a pale rose->gold gradient built for a dark card; on white
      it disappeared, so it is flat mauve now. */
   .hero-accent,
@@ -1598,7 +1598,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
   <div class="scroll-content">
 
     <!-- Greeting -->
-    <div style="padding:14px 20px 14px;">
+    <div style="padding:6px 20px 2px;">
       <div class="hero-card">
       <div class="hero-title" id="home-greeting">Good morning.</div>
       <!-- Role-agnostic subline, used to say "find your next look" which
@@ -1618,7 +1618,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
     <!-- Search your own tech by name. High-intent path for clients who
          already know who they want to book, distinct from the discovery
          cards below. Filters ALL_TECHS live via searchTechsByName(). -->
-    <div style="padding:0 20px 10px;">
+    <div style="padding:0 20px 6px;">
       <div style="position:relative;">
         <svg viewBox="0 0 24 24" style="position:absolute;left:15px;top:50%;transform:translateY(-50%);width:16px;height:16px;stroke:var(--muted);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;pointer-events:none;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         <input id="tech-name-search" type="search" inputmode="search" autocomplete="off" placeholder="Know your tech? Search by name"
@@ -1696,14 +1696,14 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
          bottom of the home scroll. Tappable to the dedicated find-us page,
          OR direct-to-platform via the individual icons. Tucked in tightly
          under the illustration so it reads as a soft footer flourish. -->
-    <div style="text-align:center;padding:0 20px 18px;">
-      <div style="font-family:'Playfair Display',serif;font-style:italic;font-size:11px;color:var(--muted);opacity:0.85;letter-spacing:0.4px;margin-bottom:10px;">find us on</div>
+    <div style="text-align:center;padding:0 20px 6px;">
+      <div style="font-family:'Playfair Display',serif;font-style:italic;font-size:11px;color:var(--muted);opacity:0.85;letter-spacing:0.4px;margin-bottom:6px;">find us on</div>
       <div style="display:flex;justify-content:center;gap:14px;">
         <a href="https://www.instagram.com/mynailconnection" target="_blank" rel="noopener noreferrer" aria-label="Instagram" style="display:inline-flex;text-decoration:none;"><img src="images/insta.jpg?v=2" alt="Instagram" style="width:42px;height:42px;border-radius:12px;"/></a>
         <a href="https://www.tiktok.com/@mynailconnection" target="_blank" rel="noopener noreferrer" aria-label="TikTok" style="display:inline-flex;text-decoration:none;"><img src="images/tt.jpg?v=2" alt="TikTok" style="width:42px;height:42px;border-radius:12px;"/></a>
         <a href="https://www.facebook.com/profile.php?id=61570995887375" target="_blank" rel="noopener noreferrer" aria-label="Facebook" style="display:inline-flex;text-decoration:none;"><img src="images/fb.jpg?v=2" alt="Facebook" style="width:42px;height:42px;border-radius:12px;"/></a>
       </div>
-      <div style="margin-top:10px;display:flex;justify-content:center;gap:14px;align-items:center;">
+      <div style="margin-top:5px;display:flex;justify-content:center;gap:14px;align-items:center;">
         <a onclick="show('find-us')" style="font-size:11px;color:var(--muted);text-decoration:underline;cursor:pointer;text-underline-offset:3px;letter-spacing:0.2px;">See all our links →</a>
         <span style="opacity:0.4;font-size:11px;">·</span>
         <a onclick="shareApp()" style="font-size:11px;color:var(--rose-dark);text-decoration:underline;cursor:pointer;text-underline-offset:3px;letter-spacing:0.2px;font-weight:600;">Share the app</a>
@@ -4903,8 +4903,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 417,         /* __APP_BUILD_ANDROID__ */
-  ios:     222,          /* __APP_BUILD_IOS__     */
+  android: 420,         /* __APP_BUILD_ANDROID__ */
+  ios:     225,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
