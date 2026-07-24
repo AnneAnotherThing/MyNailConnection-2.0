@@ -4921,8 +4921,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 435,         /* __APP_BUILD_ANDROID__ */
-  ios:     240,          /* __APP_BUILD_IOS__     */
+  android: 436,         /* __APP_BUILD_ANDROID__ */
+  ios:     241,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -13051,8 +13051,8 @@ async function loadTechBookings() {
   const note = document.getElementById('tb-migration-note');
   try {
     const r = await fetch(SUPABASE_URL +
-      '/rest/v1/techs?select=id,name,email,booking_enabled,booking_auto_confirm,booking_timezone,booking_buffer_minutes,listing_paused&email=eq.' +
-      encodeURIComponent(currentUserEmail), { headers: bkHeaders() });
+      '/rest/v1/techs?select=id,name,email,booking_enabled,booking_auto_confirm,booking_timezone,booking_buffer_minutes,listing_paused&or=(email.eq.' +
+      encodeURIComponent(currentUserEmail) + ',phone.eq.' + encodeURIComponent(currentUserEmail) + ')', { headers: bkHeaders() });
     if (!r.ok) {
       // Almost always means the migration hasn't been run (unknown column).
       if (note) note.style.display = 'block';
@@ -13690,8 +13690,8 @@ async function tbLoadDashBadge() {
   const sub = document.getElementById('td-bookings-sub');
   const badge = document.getElementById('td-bookings-pending');
   try {
-    const r = await fetch(SUPABASE_URL + '/rest/v1/techs?select=id,booking_enabled,booking_link&email=eq.' +
-      encodeURIComponent(currentUserEmail), { headers: bkHeaders() });
+    const r = await fetch(SUPABASE_URL + '/rest/v1/techs?select=id,booking_enabled,booking_link&or=(email.eq.' +
+      encodeURIComponent(currentUserEmail) + ',phone.eq.' + encodeURIComponent(currentUserEmail) + ')', { headers: bkHeaders() });
     if (!r.ok) return; // migration not run yet, leave the default copy
     const t = (await r.json())[0];
     if (!t) return;
