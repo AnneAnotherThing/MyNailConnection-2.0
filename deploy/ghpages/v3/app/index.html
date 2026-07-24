@@ -4975,8 +4975,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 443,         /* __APP_BUILD_ANDROID__ */
-  ios:     248,          /* __APP_BUILD_IOS__     */
+  android: 444,         /* __APP_BUILD_ANDROID__ */
+  ios:     249,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -6151,8 +6151,17 @@ function updateContactLabel(type) {
 }
 
 // ── Favorites & Inspo, in-memory cache ──────────────────────────────────────
-let _favTechs = null;   // array of {tech_email, tech_name, tech_image, saved_at}
+let _favTechs = null;   // array of {tech_id, tech_email, tech_name, tech_image, saved_at}
 let _inspoPhotos = null; // array of {photo_url, tech_name, saved_at}
+
+// Does a cached favorite row point at this tech? tech_id (techs.id uuid) is
+// the key (sql/phone-auth-stage-e-favorites-tech-id.sql); rows written before
+// that migration may only carry tech_email, so fall back to the real email.
+function _favMatchesTech(f, techId, techEmail) {
+  if (!f) return false;
+  if (techId && f.tech_id) return f.tech_id === techId;
+  return !!techEmail && f.tech_email === techEmail;
+}
 
 // ── Toggle favorite tech ──────────────────────────────────────────────────────
 async function toggleFavTech() {
@@ -6160,27 +6169,37 @@ async function toggleFavTech() {
   const email = currentUserEmail;
   const uid = currentUserId();
   if (!uid) { showToast('Sign in to save favorites'); startPhoneAuth('signin'); return; }
-  const techEmail = currentTech.email || currentTech.name;
+  // techs.id keys the favorite; phone-first techs may have NO email, so email
+  // can't identify them. tech_email still rides along (real email or null,
+  // never the old name fallback) while the popularity RPCs aggregate on it.
+  const techId = currentTech.id || null;
+  const techEmail = currentTech.email || '';
+  if (!techId) { showToast('Please try again in a moment'); return; }
   const btn = document.getElementById('td-fav-btn');
 
   // Load cache first if not yet loaded
   if (_favTechs === null) await loadFavTechsCache();
-  const already = _favTechs && _favTechs.some(f => f.tech_email === techEmail);
-  if (already) {
-    await fetch(`${SUPABASE_URL}/rest/v1/user_favorites?user_id=eq.${encodeURIComponent(uid)}&tech_email=eq.${encodeURIComponent(techEmail)}`, {
+  const existing = _favTechs ? _favTechs.find(f => _favMatchesTech(f, techId, techEmail)) : null;
+  if (existing) {
+    // Legacy rows (pre-migration) have no tech_id; delete those by email so
+    // they don't linger and resurface as a stale favorite.
+    const rowFilter = existing.tech_id
+      ? `tech_id=eq.${encodeURIComponent(existing.tech_id)}`
+      : `tech_id=is.null&tech_email=eq.${encodeURIComponent(techEmail)}`;
+    await fetch(`${SUPABASE_URL}/rest/v1/user_favorites?user_id=eq.${encodeURIComponent(uid)}&${rowFilter}`, {
       method: 'DELETE', headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${window._mncAccessToken || SUPABASE_ANON_KEY}` }
     }).catch(()=>{});
-    if (_favTechs) _favTechs = _favTechs.filter(f => f.tech_email !== techEmail);
+    if (_favTechs) _favTechs = _favTechs.filter(f => !_favMatchesTech(f, techId, techEmail));
     bumpTechFavCount(techEmail, -1);
     showToast('Removed from favorites');
   } else {
     await fetch(`${SUPABASE_URL}/rest/v1/user_favorites`, {
       method: 'POST',
       headers: { 'Content-Type':'application/json','apikey': SUPABASE_ANON_KEY,'Authorization': `Bearer ${window._mncAccessToken || SUPABASE_ANON_KEY}`,'Prefer':'return=minimal' },
-      body: JSON.stringify({ user_id: uid, user_email: email, tech_email: techEmail, tech_name: currentTech.name, tech_image: currentTech.imageUrl || '' })
+      body: JSON.stringify({ user_id: uid, user_email: email, tech_id: techId, tech_email: techEmail || null, tech_name: currentTech.name, tech_image: currentTech.imageUrl || '' })
     }).catch(()=>{});
-    if (_favTechs) _favTechs.push({ tech_email: techEmail, tech_name: currentTech.name, tech_image: currentTech.imageUrl || '' });
-    else _favTechs = [{ tech_email: techEmail, tech_name: currentTech.name, tech_image: currentTech.imageUrl || '' }];
+    const row = { tech_id: techId, tech_email: techEmail || null, tech_name: currentTech.name, tech_image: currentTech.imageUrl || '' };
+    if (_favTechs) _favTechs.push(row); else _favTechs = [row];
     bumpTechFavCount(techEmail, +1);
     showToast('Saved to favorites!');
   }
@@ -6198,8 +6217,7 @@ async function updateFavBtn() {
   if (!btn || !currentTech || !currentUserEmail) { if (btn) btn.style.display = 'none'; return; }
   btn.style.display = 'flex';
   if (!_favTechs) await loadFavTechsCache();
-  const techEmail = currentTech.email || currentTech.name;
-  const isFav = _favTechs && _favTechs.some(f => f.tech_email === techEmail);
+  const isFav = _favTechs && _favTechs.some(f => _favMatchesTech(f, currentTech.id || null, currentTech.email || ''));
   btn.innerHTML = isFav
     ? '<svg viewBox="0 0 24 24" style="width:26px;height:26px;stroke:var(--gold);fill:var(--gold);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>'
     : '<svg viewBox="0 0 24 24" style="width:26px;height:26px;stroke:#F1E4E5;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
@@ -6226,7 +6244,8 @@ async function loadFavTechs() {
   }
   container.innerHTML = '';
   _favTechs.forEach(f => {
-    const tech = ALL_TECHS.find(t => t.email === f.tech_email) || { name: f.tech_name, imageUrl: f.tech_image, email: f.tech_email };
+    const tech = ALL_TECHS.find(t => (f.tech_id && t.id === f.tech_id) || (f.tech_email && t.email === f.tech_email))
+      || { id: f.tech_id || null, name: f.tech_name, imageUrl: f.tech_image, email: f.tech_email || '' };
     const div = document.createElement('div');
     div.style.cssText = 'display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);cursor:pointer;transition:transform 0.15s cubic-bezier(0.34,1.4,0.64,1);';
     div.classList.add('tech-card-anim');
