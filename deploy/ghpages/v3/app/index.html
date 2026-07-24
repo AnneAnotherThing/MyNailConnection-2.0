@@ -4920,8 +4920,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 431,         /* __APP_BUILD_ANDROID__ */
-  ios:     236,          /* __APP_BUILD_IOS__     */
+  android: 432,         /* __APP_BUILD_ANDROID__ */
+  ios:     237,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -5972,7 +5972,7 @@ function doSignOut() {
   // sign-in buttons reappear. Otherwise the welcoming class from the
   // previous session's restore would still be on #splash.
   try { clearSplashWelcoming(); } catch(_){}
-  show('home');
+  show('splash');
 }
 
 // ── Secret admin tap (3x on logo) ──────────────────────────────────────────
