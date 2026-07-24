@@ -4920,8 +4920,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 437,         /* __APP_BUILD_ANDROID__ */
-  ios:     242,          /* __APP_BUILD_IOS__     */
+  android: 438,         /* __APP_BUILD_ANDROID__ */
+  ios:     243,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -13982,6 +13982,11 @@ function startPhoneAuth(intent) {
 
 function paBack() {
   if (_paFlow && _paFlow.e164 && document.getElementById('pa-code')) { paRenderPhone(); return; }
+  // On the post-verify profile step the OTP has ALREADY minted a session.
+  // Backing out must tear that session down, otherwise a half-made account
+  // stays signed in with the raw phone number as its identity and the next
+  // load drops the user into the app profileless (Leslie, 2026-07-24).
+  if (currentUser && document.getElementById('pa-name')) { _paFlow = null; doSignOut(); return; }
   try { backFromAuth(); } catch(_) { show('splash'); }
 }
 
@@ -16253,6 +16258,20 @@ async function restorePersistedSession() {
         );
         if (r.ok) {
           const d = await r.json();
+          if (!d[0] && currentUserEmail.charAt(0) === '+') {
+            // A verified-phone session with NO users row: the signup was
+            // abandoned at the profile step (back arrow), or an existing
+            // tech phone-logged-in before the phone-normalize SQL ran.
+            // Never enter the app as a raw-phone identity; resume the
+            // finish-signup screen instead. 2026-07-24 (Leslie).
+            clearSplashWelcoming();
+            const resumeE164 = currentUserEmail;
+            startPhoneAuth('signup');
+            _paFlow.e164 = resumeE164;
+            _paFlow.phone = resumeE164;
+            paRenderProfile();
+            return true;
+          }
           if (d[0] && d[0].name) {
             const nm = String(d[0].name).trim();
             const sp = nm.split(/\s+/);
