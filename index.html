@@ -3308,7 +3308,6 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
            the current user is editing their own profile, because "Delete
            This Tech" pointed at yourself is never the right action. A
            tech who wants to leave MNC should contact Anne. 2026-04-23. -->
-      <button id="te-delete-tech-btn" type="button" onclick="deleteTech()" style="width:100%;padding:12px;border-radius:100px;border:1.5px solid var(--rose-mid);background:white;color:#C0404A;font-size:14px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;"><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg> Delete This Tech</button>
     </div>
   </div>
 
@@ -4920,8 +4919,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 439,         /* __APP_BUILD_ANDROID__ */
-  ios:     244,          /* __APP_BUILD_IOS__     */
+  android: 440,         /* __APP_BUILD_ANDROID__ */
+  ios:     245,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -8825,16 +8824,9 @@ function openTechEdit(tech) {
   }
   document.getElementById('tech-edit-modal').style.display = 'block';
   document.getElementById('tech-edit-title').textContent = tech.name || 'New Tech';
-  // Hide "Delete This Tech" when the tech is editing their own profile.
-  // Still visible to admins editing another tech's row. 2026-04-23.
-  try {
-    var _deleteBtn = document.getElementById('te-delete-tech-btn');
-    var _isSelfEdit = (
-      tech && tech.email && currentUserEmail &&
-      String(tech.email).toLowerCase() === String(currentUserEmail).toLowerCase()
-    );
-    if (_deleteBtn) _deleteBtn.style.display = _isSelfEdit ? 'none' : '';
-  } catch(_) {}
+  // The admin-era "Delete This Tech" button was removed 2026-07-24: the
+  // admin pane is gone, and its self-edit hide check was email-keyed, so
+  // phone-identity techs saw a delete button meant for admins.
   // Avatar
   const av = document.getElementById('tech-edit-avatar');
   const photoUrl = edit.photoUrl || tech.imageUrl;
@@ -8935,84 +8927,6 @@ async function openPhotoUploadFromHome() {
   }, 140);
 }
 
-async function deleteTech() {
-  if (!currentEditTech) return;
-  const name = currentEditTech.name || 'this tech';
-  const email = currentEditTech.email || '';
-  if (!(await showConfirm('Delete ' + name + '?', { body: 'This deletes their account and all their photos. This cannot be undone.', okLabel: 'Delete tech' }))) return;
-
-  // Disable both Save buttons (sticky-header + bottom) during delete so
-  // the user can't double-tap or kick off a save mid-delete. Modal
-  // closes on success, so no restore needed.
-  document.querySelectorAll('#tech-edit-modal .btn-rose').forEach(b => { b.disabled = true; });
-
-  try {
-    // 1. Delete all storage photos
-    const photos = (techEdits[name] && techEdits[name].photos) || currentEditTech.photos || [];
-    const profileUrl = (techEdits[name] && techEdits[name].photoUrl) || currentEditTech.imageUrl || '';
-
-    const allUrls = [...photos.map(p => p.url || p), profileUrl].filter(u =>
-      u && u.includes('/storage/v1/object/public/tech-photos/')
-    );
-
-    for (const url of allUrls) {
-      const filePath = url.split('/storage/v1/object/public/tech-photos/')[1];
-      if (filePath) {
-        await fetch(SUPABASE_URL + '/storage/v1/object/tech-photos/' + filePath, {
-          method: 'DELETE',
-          headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + (window._mncAccessToken || SUPABASE_ANON_KEY) }
-        }).catch(() => {});
-      }
-    }
-
-    // 2. Delete from Supabase techs table, match by id first, fall back to email
-    const techId = currentEditTech.id || currentEditTech.uuid || null;
-    const deleteUrl = techId
-      ? SUPABASE_URL + '/rest/v1/techs?id=eq.' + techId
-      : email
-        ? SUPABASE_URL + '/rest/v1/techs?email=eq.' + encodeURIComponent(email)
-        : null;
-
-    if (!deleteUrl) {
-      showToast('⚠️ Cannot delete, no ID or email found');
-      if (btn) btn.disabled = false;
-      return;
-    }
-
-    const res = await fetch(deleteUrl, {
-      method: 'DELETE',
-      headers: {
-        'apikey': SUPABASE_ANON_KEY,
-        'Authorization': 'Bearer ' + (window._mncAccessToken || SUPABASE_ANON_KEY),
-        'Prefer': 'return=minimal'
-      }
-    });
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      showToast('⚠️ DB error: ' + (err.message || 'delete failed'));
-      if (btn) btn.disabled = false;
-      return;
-    }
-
-    // 3. Remove from local ALL_TECHS
-    const idx = ALL_TECHS.findIndex(t => t.email === email || t.name === name);
-    if (idx > -1) ALL_TECHS.splice(idx, 1);
-
-    // 4. Remove from ALL_USERS
-    const uidx = ALL_USERS.findIndex(u => u.email === email);
-    if (uidx > -1) ALL_USERS.splice(uidx, 1);
-
-    // 5. Clean up edits
-    delete techEdits[name];
-
-    closeTechEdit();
-    renderTechAdminList();
-    showToast(name + ' deleted');
-  } catch(e) {
-    showToast('' + e.message);
-    if (btn) btn.disabled = false;
-  }
-}
 
 async function techEditProfilePhoto(input) {
   if (!input.files || !input.files[0] || !currentEditTech) return;
