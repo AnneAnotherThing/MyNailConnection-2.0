@@ -4903,8 +4903,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 424,         /* __APP_BUILD_ANDROID__ */
-  ios:     229,          /* __APP_BUILD_IOS__     */
+  android: 425,         /* __APP_BUILD_ANDROID__ */
+  ios:     230,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -12524,8 +12524,22 @@ async function completeSignup() {
       body: JSON.stringify({ email: regData.email, password: regData.pass,
         data: { first_name: regData.first, last_name: regData.last, role: regData.role } })
     }).then(function(r) { return r.json(); }).catch(function(e) { return { error: { message: 'Network error, check your connection.' } }; });
-    if (signupRes && signupRes.error) {
-      showSignupError((signupRes.error.message || signupRes.error.msg || 'Sign up failed'));
+    // GoTrue errors come in two shapes: nested { error: {...} } OR flat
+    // { code, error_code, msg } (rate limits, weak password, etc). The old
+    // check only caught the first, so a flat error fell through to the
+    // "confirm-email pending" branch and got mislabelled "account already
+    // exists". Catch both. A real success always has an id and no msg.
+    var srErr = signupRes && (signupRes.error ||
+      ((signupRes.msg || signupRes.error_code) && !signupRes.id && !signupRes.access_token));
+    if (srErr) {
+      var em = (signupRes.error && (signupRes.error.message || signupRes.error.msg)) ||
+               signupRes.msg || signupRes.error_description || 'Sign up failed';
+      if (/rate limit/i.test(em) || signupRes.error_code === 'over_email_send_rate_limit') {
+        em = "We've hit the email limit for now (too many signups in a short window). Give it a few minutes and try again.";
+      } else if (/password/i.test(em) && /weak|short|least/i.test(em)) {
+        em = 'Please choose a longer password (at least 8 characters).';
+      }
+      showSignupError(em);
       if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = originalBtnText; }
       return;
     }
