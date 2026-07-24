@@ -1321,7 +1321,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       <div class="input-group"><label>First Name</label><input type="text" id="reg-first" placeholder="e.g. Sara" onkeydown="if(event.key==='Enter')document.getElementById('reg-last').focus()"/></div>
       <div class="input-group"><label>Last Name</label><input type="text" id="reg-last" placeholder="e.g. Johnson" onkeydown="if(event.key==='Enter')document.getElementById('reg-email').focus()"/></div>
       <div class="input-group"><label>Email</label><input type="email" id="reg-email" placeholder="your@email.com" onkeydown="if(event.key==='Enter')document.getElementById('reg-phone').focus()"/></div>
-      <div class="input-group"><label>Phone Number</label><input type="tel" id="reg-phone" placeholder="(602) 555-1234" oninput="formatPhone(this)" maxlength="14" onkeydown="if(event.key==='Enter')document.getElementById('reg-pass').focus()" style="width:100%;"/></div>
+      <div class="input-group"><label>Phone Number</label><input type="tel" id="reg-phone" placeholder="(602) 555-1234" oninput="formatPhone(this)" maxlength="17" onkeydown="if(event.key==='Enter')document.getElementById('reg-pass').focus()" style="width:100%;"/></div>
       <div class="input-group"><label>Password</label><div style="position:relative;"><input type="password" id="reg-pass" placeholder="At least 8 characters" enterkeyhint="go" onkeydown="if(event.key==='Enter')goSignupStep2()" style="padding-right:44px;width:100%;"/><div style="position:absolute;right:14px;top:50%;transform:translateY(-50%);cursor:pointer;display:flex;align-items:center;" onclick="(function(id){var i=document.getElementById(id);var open=document.getElementById(id+'-eye-open');var closed=document.getElementById(id+'-eye-closed');if(i.type==='password'){i.type='text';open.style.display='none';closed.style.display='block';}else{i.type='password';open.style.display='block';closed.style.display='none';}})('reg-pass')"><svg id="reg-pass-eye-open" viewBox="0 0 24 24" style="width:18px;height:18px;stroke:var(--muted);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg><svg id="reg-pass-eye-closed" viewBox="0 0 24 24" style="width:18px;height:18px;stroke:var(--muted);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;display:none;"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg></div></div></div>
       <button type="button" class="btn btn-rose" onclick="goSignupStep2()" style="margin-top:4px;">Continue</button>
     </div>
@@ -1498,7 +1498,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
 
       <!-- Phone (pre-filled from step 1) -->
       <div><label style="font-size:11px;color:var(--muted);font-weight:500;display:block;margin-bottom:4px;letter-spacing:0.8px;">PHONE NUMBER</label>
-        <input id="reg-phone-tech" type="tel" oninput="formatPhone(this)" maxlength="14" placeholder="(555) 555-5555" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;box-sizing:border-box;"/></div>
+        <input id="reg-phone-tech" type="tel" oninput="formatPhone(this)" maxlength="17" placeholder="(555) 555-5555" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;box-sizing:border-box;"/></div>
 
       <!-- Bio -->
       <div><label style="font-size:11px;color:var(--muted);font-weight:500;display:block;margin-bottom:4px;letter-spacing:0.8px;">BIO <span style="font-weight:400;">(optional)</span></label>
@@ -3276,7 +3276,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       <div style="display:grid;gap:10px;margin-bottom:14px;">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
           <div><label style="font-size:10px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px;letter-spacing:0.8px;">YOUR EMAIL</label><input id="te-email" type="email" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;box-sizing:border-box;"/></div>
-          <div><label style="font-size:10px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px;letter-spacing:0.8px;">YOUR PHONE</label><input id="te-phone" type="tel" placeholder="(555) 555-5555" oninput="formatPhone(this)" maxlength="14" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;box-sizing:border-box;"/></div>
+          <div><label style="font-size:10px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px;letter-spacing:0.8px;">YOUR PHONE</label><input id="te-phone" type="tel" placeholder="(555) 555-5555" oninput="formatPhone(this)" maxlength="17" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;box-sizing:border-box;"/></div>
         </div>
         <!-- Contact method preferences -->
         <div>
@@ -4920,8 +4920,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 436,         /* __APP_BUILD_ANDROID__ */
-  ios:     241,          /* __APP_BUILD_IOS__     */
+  android: 437,         /* __APP_BUILD_ANDROID__ */
+  ios:     242,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -13996,7 +13996,7 @@ function paRenderPhone() {
   body.innerHTML =
     '<div style="font-size:13px;color:var(--muted);line-height:1.55;margin-bottom:14px;">Enter your mobile number and we’ll text you a code. No password to remember.</div>' +
     '<div class="input-group"><label>Mobile number</label>' +
-    '<input id="pa-phone" type="tel" inputmode="tel" autocomplete="tel" oninput="formatPhone(this)" maxlength="14" placeholder="(602) 555-1234" value="' + esc((_paFlow && _paFlow.phone) || '') + '" style="width:100%;"/></div>' +
+    '<input id="pa-phone" type="tel" inputmode="tel" autocomplete="tel" oninput="formatPhone(this)" maxlength="17" placeholder="(602) 555-1234" value="' + esc((_paFlow && _paFlow.phone) || '') + '" style="width:100%;"/></div>' +
     '<div id="pa-err" style="display:none;color:#B23;font-size:12.5px;margin:2px 0 8px;"></div>' +
     '<button class="btn btn-rose" id="pa-send-btn" onclick="paSendCode()" style="margin-top:4px;">Text me a code</button>' +
     '<div style="text-align:center;margin-top:16px;padding-top:14px;border-top:1px solid var(--border);">' +
@@ -14194,7 +14194,7 @@ function bkStartVerify() {
     '<div class="input-group"><label>Your name</label>' +
     '<input id="bkv-name" type="text" autocomplete="name" placeholder="First and last" value="' + bkEsc(_bkFlow.clientName || '') + '" style="width:100%;padding:11px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:inherit;box-sizing:border-box;"/></div>' +
     '<div class="input-group"><label>Mobile number</label>' +
-    '<input id="bkv-phone" type="tel" inputmode="tel" autocomplete="tel" oninput="formatPhone(this)" maxlength="14" placeholder="(602) 555-1234" value="' + bkEsc(_bkFlow.clientPhone || '') + '" style="width:100%;padding:11px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:inherit;box-sizing:border-box;"/></div>' +
+    '<input id="bkv-phone" type="tel" inputmode="tel" autocomplete="tel" oninput="formatPhone(this)" maxlength="17" placeholder="(602) 555-1234" value="' + bkEsc(_bkFlow.clientPhone || '') + '" style="width:100%;padding:11px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:inherit;box-sizing:border-box;"/></div>' +
     '<div id="bkv-err" style="display:none;color:#B23;font-size:12.5px;margin:2px 0 8px;"></div>' +
     '<button class="btn btn-rose" id="bkv-send-btn" onclick="bkSendCode()" style="margin-top:4px;">Text me a code</button>');
 }
@@ -15188,7 +15188,12 @@ async function syncHideAddressToggle() {
 
 
 function formatPhone(input) {
-  let v = input.value.replace(/\D/g, '').slice(0, 10);
+  let v = input.value.replace(/\D/g, '');
+  // Browser autofill hands us E.164 ("+14804402314"). Without this strip the
+  // slice(0,10) below kept the country code and DROPPED the last real digit,
+  // silently formatting a wrong number: (148) 044-0231.
+  if (v.length >= 11 && v[0] === '1') v = v.slice(1);
+  v = v.slice(0, 10);
   if (v.length <= 3)      input.value = v.length ? '(' + v : '';
   else if (v.length <= 6) input.value = '(' + v.slice(0,3) + ') ' + v.slice(3);
   else                    input.value = '(' + v.slice(0,3) + ') ' + v.slice(3,6) + '-' + v.slice(6);
@@ -19238,7 +19243,7 @@ function closeReleaseWizard() {
     </div>
     <div class="input-group" style="margin-bottom:10px;">
       <label>Best number to reach you</label>
-      <input id="contact-anne-phone" type="tel" inputmode="tel" autocomplete="tel" oninput="formatPhone(this)" maxlength="14" placeholder="(602) 555-1234" style="width:100%;padding:13px 16px;border:1.5px solid var(--border);border-radius:12px;font-family:'DM Sans',sans-serif;font-size:14px;box-sizing:border-box;outline:none;background:var(--cream);color:var(--charcoal);"/>
+      <input id="contact-anne-phone" type="tel" inputmode="tel" autocomplete="tel" oninput="formatPhone(this)" maxlength="17" placeholder="(602) 555-1234" style="width:100%;padding:13px 16px;border:1.5px solid var(--border);border-radius:12px;font-family:'DM Sans',sans-serif;font-size:14px;box-sizing:border-box;outline:none;background:var(--cream);color:var(--charcoal);"/>
     </div>
     <div style="display:flex;align-items:flex-start;gap:10px;margin:8px 0 16px;padding:12px 14px;background:var(--rose-light);border-radius:12px;border:1px solid rgba(224,168,152,0.3);">
       <input id="contact-anne-consent" type="checkbox" checked style="flex-shrink:0;width:18px;height:18px;margin:2px 0 0;accent-color:var(--rose);cursor:pointer;"/>
@@ -19286,7 +19291,7 @@ function closeReleaseWizard() {
       <div><label style="font-size:11px;color:var(--muted);font-weight:500;display:block;margin-bottom:4px;">EMAIL</label>
         <input id="ue-email" type="email" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;box-sizing:border-box;"/></div>
       <div><label style="font-size:11px;color:var(--muted);font-weight:500;display:block;margin-bottom:4px;">PHONE</label>
-        <input id="ue-phone" type="tel" oninput="formatPhone(this)" maxlength="14" placeholder="(555) 555-5555" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;box-sizing:border-box;"/></div>
+        <input id="ue-phone" type="tel" oninput="formatPhone(this)" maxlength="17" placeholder="(555) 555-5555" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;box-sizing:border-box;"/></div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
         <div><label style="font-size:11px;color:var(--muted);font-weight:500;display:block;margin-bottom:4px;">ROLE</label>
           <select id="ue-role" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;box-sizing:border-box;">
