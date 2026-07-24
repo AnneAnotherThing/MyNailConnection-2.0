@@ -4903,8 +4903,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 425,         /* __APP_BUILD_ANDROID__ */
-  ios:     230,          /* __APP_BUILD_IOS__     */
+  android: 426,         /* __APP_BUILD_ANDROID__ */
+  ios:     231,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -16328,16 +16328,14 @@ async function submitContactAnne() {
     return;
   }
 
-  // Step 2: fire-and-forget push so Anne gets a heads-up on any device she's
-  // subscribed from. If it fails (no subscription, CORS, offline), the message
-  // is still safely in the DB, Anne sees it on next admin-inbox load.
+  // Step 2: fire-and-forget EMAIL to Anne so the note lands in her inbox with
+  // no login required. Replaces the old push to anne@mynailconnection.com,
+  // which only worked from an account she was subscribed on, and never was.
+  // The note is already saved in contact_anne_messages above; this is the
+  // heads-up. Needs the notify-contact-email function deployed + RESEND_API_KEY
+  // / NOTIFY_TO secrets. If it isn't set up yet, the message is still saved.
   try {
-    var when = new Date();
-    var timeStr = when.toLocaleString('en-US', { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' });
-    var noteTrim = note.length > 200 ? note.slice(0, 200) + '…' : note;
-    var title = 'Tech help needed, ' + (whoEmail || '(signed-in tech)');
-    var body  = noteTrim + ' (' + timeStr + ')';
-    fetch(SUPABASE_URL + '/functions/v1/send-push', {
+    fetch(SUPABASE_URL + '/functions/v1/notify-contact-email', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -16345,13 +16343,13 @@ async function submitContactAnne() {
         'Authorization': 'Bearer ' + (window._mncAccessToken || SUPABASE_ANON_KEY)
       },
       body: JSON.stringify({
-        user_id: ANNE_PUSH_EMAIL,
-        title:   title,
-        body:    body,
-        url:     '/index.html#admin',
-        tag:     'mnc-tech-help-' + Date.now()
+        note:  note,
+        name:  whoName || '',
+        phone: whoPhone || '',
+        email: whoEmail || '',
+        role:  whoRole || ''
       })
-    }).catch(function(){ /* push is bonus; the message is already in the DB */ });
+    }).catch(function(){ /* email is a bonus; the message is already in the DB */ });
   } catch(_) { /* ignore */ }
 
   succEl.innerHTML = '<strong>Got it!</strong> The developer will text you back shortly.';
