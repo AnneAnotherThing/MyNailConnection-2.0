@@ -1267,7 +1267,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       <button class="btn btn-rose" onclick="signInWithEmail(document.getElementById('signin-email').value, document.getElementById('signin-password').value)" style="margin-top:4px;">Sign In</button>
       <div style="text-align:center;margin-top:18px;padding-top:16px;border-top:1px solid var(--border);">
         <div style="font-size:13px;color:var(--muted);margin-bottom:10px;">New to My Nail Connection?</div>
-        <button class="btn btn-outline" onclick="show('signup')" style="font-size:14px;">Create a Free Account</button>
+        <button class="btn btn-outline" onclick="startPhoneAuth('signup')" style="font-size:14px;">Create a Free Account</button>
       </div>
     </div>
     <div style="text-align:center;margin-top:18px;">
@@ -4920,8 +4920,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 429,         /* __APP_BUILD_ANDROID__ */
-  ios:     234,          /* __APP_BUILD_IOS__     */
+  android: 430,         /* __APP_BUILD_ANDROID__ */
+  ios:     235,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -6102,7 +6102,7 @@ async function toggleFavTech() {
   if (!currentTech) return;
   const email = currentUserEmail;
   const uid = currentUserId();
-  if (!uid) { showToast('Sign in to save favorites'); show('auth'); return; }
+  if (!uid) { showToast('Sign in to save favorites'); startPhoneAuth('signin'); return; }
   const techEmail = currentTech.email || currentTech.name;
   const btn = document.getElementById('td-fav-btn');
 
@@ -6203,7 +6203,7 @@ function isInspoSaved(url) {
 // techEmail still work but will be excluded from per-tech aggregates
 // (those show up as 'orphaned' rows in the user_inspo migration diagnostic).
 async function toggleInspoPhoto(url, techName, techEmail) {
-  if (!currentUserEmail) { showToast('Sign in to save inspo'); show('auth'); return; }
+  if (!currentUserEmail) { showToast('Sign in to save inspo'); startPhoneAuth('signin'); return; }
   // OPTIMISTIC UPDATE: mutate the local cache BEFORE firing the network
   // request, so any caller that re-reads state synchronously after this
   // function starts (e.g., the inspo-feed heart button's refresh() call
@@ -13046,7 +13046,7 @@ let _bkStanding = [];
 let _bkBlocked = [];
 
 async function loadTechBookings() {
-  if (!currentUserEmail) { show('auth'); return; }
+  if (!currentUserEmail) { startPhoneAuth('signin'); return; }
   const note = document.getElementById('tb-migration-note');
   try {
     const r = await fetch(SUPABASE_URL +
@@ -14761,7 +14761,7 @@ function backFromAuth() {
 // runs on every show() so the label tracks state on whatever screen. The
 // two <button> sign-out variants (home header, profile screen) are on
 // signed-in-only surfaces and are left alone. 2026-07-17.
-function authNav() { if (currentUserEmail) { doSignOut(); } else { show('auth'); } }
+function authNav() { if (currentUserEmail) { doSignOut(); } else { startPhoneAuth('signin'); } }
 function styleAuthNav() {
   var anon = !currentUserEmail;
   document.querySelectorAll('.auth-nav').forEach(function(el){
@@ -14779,7 +14779,7 @@ function requireLogin(action) {
     ? 'Sign in or create an account to book'
     : 'Sign in to continue';
   try { showToast(msg); } catch(_) {}
-  show('auth');
+  startPhoneAuth('signin');
 }
 function resumePendingAction() {
   var a = window._pendingAction;
