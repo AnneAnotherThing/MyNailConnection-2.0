@@ -515,7 +515,7 @@ button,input,select,textarea{font-family:'DM Sans','Helvetica Neue',Helvetica,Ar
 /* Scoped to .logo-mark only, the old [class*="logo"] catch-all forced a flat
    colour onto .logo-sub and killed its gradient fill. */
 .header .logo-mark{color:var(--charcoal) !important;font-weight:700 !important;}
-.back-btn{width:36px;height:36px;border-radius:50%;border:1px solid var(--border);background:transparent;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;color:#F7F2F2;}
+.back-btn{width:36px;height:36px;border-radius:50%;border:1px solid var(--border);background:transparent;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;color:var(--charcoal);}
 .avatar{width:36px;height:36px;border-radius:50%;background:var(--rose-light);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:500;color:var(--rose-dark);cursor:pointer;border:2px solid rgba(255,255,255,0.55);box-shadow:0 0 0 1px rgba(20,19,23,0.25),0 3px 10px rgba(0,0,0,0.35);transition:box-shadow 0.2s,transform 0.15s;}
 .avatar:hover{box-shadow:0 0 0 1px rgba(20,19,23,0.3),0 5px 16px rgba(0,0,0,0.45);transform:translateY(-1px);}
 .bottom-nav{background:rgba(255,255,255,0.94);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid rgba(162,99,108,0.16);display:flex;padding:8px 6px 16px;box-shadow:0 -6px 20px rgba(20,19,23,0.10),0 -1px 0 rgba(255,255,255,0.7) inset;}
@@ -1996,7 +1996,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
            link live there). Previously this routed to profile-screen, but
            tech-home has absorbed the profile tabs, so going "in" means
            editing, not navigating to a second page. -->
-      <div class="avatar" onclick="openTechEditFromProfile()" id="tech-dash-avatar" title="Edit your profile"><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;vertical-align:middle;"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></div>
+      <button type="button" onclick="doSignOut()" title="Sign out" aria-label="Sign out" style="width:36px;height:36px;border-radius:50%;border:1px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--charcoal);"><svg viewBox="0 0 24 24" style="width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></button><div class="avatar" onclick="openTechEditFromProfile()" id="tech-dash-avatar" title="Edit your profile"><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;vertical-align:middle;"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></div>
     </div>
   </div>
   <div class="scroll-content" style="padding-bottom:80px;">
@@ -4919,8 +4919,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 433,         /* __APP_BUILD_ANDROID__ */
-  ios:     238,          /* __APP_BUILD_IOS__     */
+  android: 434,         /* __APP_BUILD_ANDROID__ */
+  ios:     239,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
