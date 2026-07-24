@@ -2154,6 +2154,14 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
         </svg>
         Manage Profile
       </button>
+      <button type="button" onclick="viewMyProfileAsClient()"
+        style="width:100%;margin-top:10px;padding:14px 18px;border-radius:14px;border:1.5px solid var(--border);background:white;color:var(--charcoal);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:background 0.15s,transform 0.05s;"
+        onmousedown="this.style.transform='scale(0.98)'" onmouseup="this.style.transform=''" onmouseleave="this.style.transform=''">
+        <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;">
+          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+        </svg>
+        See What Clients See
+      </button>
     </div>
 
 
@@ -4967,8 +4975,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 441,         /* __APP_BUILD_ANDROID__ */
-  ios:     246,          /* __APP_BUILD_IOS__     */
+  android: 443,         /* __APP_BUILD_ANDROID__ */
+  ios:     248,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -5335,7 +5343,9 @@ const PUSH_ENABLED = true;
 // Generate your VAPID keys once:
 //   npx web-push generate-vapid-keys
 // Then paste your PUBLIC key below and store the PRIVATE key in your Edge Function env.
-const VAPID_PUBLIC_KEY = 'BINTHftWbkLsZZkNn0tafTXmhmgV6gvk46zmMeAC7wmJl5HWeUeWgGSoMDX9DRu7drBtS5XruZVPvduhoH4gSO4';
+// Regenerated 2026-07-24 for the NEW Supabase project (old private key
+// unrecoverable; push_subscriptions was empty so nothing was invalidated).
+const VAPID_PUBLIC_KEY = 'BN_e5ABJFlCD_tuCrbXxO0fu0VoorsQ60fy5iUYbfqcbuXeh3GHUHpXbdFGY6ZTUzFg7lDFYFTa-BLNN2eanG0o';
 
 function urlBase64ToUint8Array(base64String) {
   const padding = '='.repeat((4 - base64String.length % 4) % 4);
@@ -8923,6 +8933,20 @@ function openTechEdit(tech) {
 }
 
 // Open tech edit modal for the currently signed-in tech
+// "See what clients see" (2026-07-24): opens the tech's OWN public profile
+// exactly as a client gets it, gallery, bio, the Book button, everything.
+// backFromTechDetail already returns techs to tech-home, so the back arrow
+// lands them right back on their dashboard.
+function viewMyProfileAsClient() {
+  const id = (currentUserEmail || '').toLowerCase();
+  const idDigits = id.replace(/\D/g, '').slice(-10);
+  const mine = ALL_TECHS.find(t =>
+    (t.email && String(t.email).toLowerCase() === id) ||
+    (idDigits.length === 10 && t.phone && String(t.phone).replace(/\D/g, '').slice(-10) === idDigits));
+  if (!mine) { showToast('Finish your profile first, then peek at it here'); return; }
+  openTechDetail(mine);
+}
+
 async function openTechEditFromProfile() {
   if (!currentUserEmail) { showToast('Please sign in first'); return; }
   try {
@@ -15007,7 +15031,7 @@ async function loadTechHomeStats() {
   // we can surface the "needs tagging" nudge below the stats row.
   try {
     var r1 = await fetch(
-      SUPABASE_URL + '/rest/v1/techs?email=eq.' + encodeURIComponent(email) + '&select=photos',
+      SUPABASE_URL + '/rest/v1/techs?or=(email.eq.' + encodeURIComponent(email) + ',phone.eq.' + encodeURIComponent(email) + ')&select=photos',
       { headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + (window._mncAccessToken || SUPABASE_ANON_KEY) } }
     );
     var d1 = await r1.json();
@@ -15085,7 +15109,7 @@ async function loadTechHomePortfolio() {
   if (!email) return;
   try {
     var r = await fetch(
-      SUPABASE_URL + '/rest/v1/techs?email=eq.' + encodeURIComponent(email) + '&select=photos',
+      SUPABASE_URL + '/rest/v1/techs?or=(email.eq.' + encodeURIComponent(email) + ',phone.eq.' + encodeURIComponent(email) + ')&select=photos',
       { headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + (window._mncAccessToken || SUPABASE_ANON_KEY) } }
     );
     var d = await r.json();
