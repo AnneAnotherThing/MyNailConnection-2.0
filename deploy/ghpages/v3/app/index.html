@@ -3766,7 +3766,7 @@ async function _refundUnsavedSessionUploads() {
     const edit = techEdits[editKey];
     if (!edit || !Array.isArray(edit.photos) || edit.photos.length === 0) return;
     // Re-fetch DB state to know what's actually persisted
-    const r = await fetch(SUPABASE_URL + '/rest/v1/techs?email=eq.' + encodeURIComponent(currentUserEmail) +
+    const r = await fetch(SUPABASE_URL + '/rest/v1/techs?or=(email.eq.' + encodeURIComponent(currentUserEmail) + ',phone.eq.' + encodeURIComponent(currentUserEmail) + ')' +
       '&select=photos,photo_credits,period_upload_count,lifetime_free_used', {
       headers: {
         'apikey': SUPABASE_ANON_KEY,
@@ -3798,7 +3798,7 @@ async function _refundUnsavedSessionUploads() {
     if (counts.weekly > 0) updates.period_upload_count = Math.max(0, (dbRow.period_upload_count || 0) - counts.weekly);
     if (counts.free   > 0) updates.lifetime_free_used  = Math.max(0, (dbRow.lifetime_free_used  || 0) - counts.free);
     if (Object.keys(updates).length === 0) return;
-    await fetch(SUPABASE_URL + '/rest/v1/techs?email=eq.' + encodeURIComponent(currentUserEmail), {
+    await fetch(SUPABASE_URL + '/rest/v1/techs?or=(email.eq.' + encodeURIComponent(currentUserEmail) + ',phone.eq.' + encodeURIComponent(currentUserEmail) + ')', {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -4262,7 +4262,7 @@ async function initBillingForTech() {
   // under-promise on a network hiccup).
   if (!window._mncTechJoined && currentUserEmail) {
     try {
-      const jr = await fetch(SUPABASE_URL + '/rest/v1/users?select=joined&email=eq.' + encodeURIComponent(currentUserEmail),
+      const jr = await fetch(SUPABASE_URL + '/rest/v1/users?select=joined&or=(email.eq.' + encodeURIComponent(currentUserEmail) + ',phone.eq.' + encodeURIComponent(currentUserEmail) + ')',
         { headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + (window._mncAccessToken || SUPABASE_ANON_KEY) } });
       const jrows = jr.ok ? await jr.json() : [];
       if (jrows[0] && jrows[0].joined) window._mncTechJoined = String(jrows[0].joined).slice(0, 10);
@@ -4920,8 +4920,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 432,         /* __APP_BUILD_ANDROID__ */
-  ios:     237,          /* __APP_BUILD_IOS__     */
+  android: 433,         /* __APP_BUILD_ANDROID__ */
+  ios:     238,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -8888,7 +8888,7 @@ async function openTechEditFromProfile() {
   if (!currentUserEmail) { showToast('Please sign in first'); return; }
   try {
     const res = await fetch(
-      `${SUPABASE_URL}/rest/v1/techs?email=eq.${encodeURIComponent(currentUserEmail)}&select=*`,
+      `${SUPABASE_URL}/rest/v1/techs?or=(email.eq.${encodeURIComponent(currentUserEmail)},phone.eq.${encodeURIComponent(currentUserEmail)})&select=*`,
       { headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + (window._mncAccessToken || SUPABASE_ANON_KEY) } }
     );
     const rows = await res.json();
@@ -9233,7 +9233,7 @@ async function _seedEditTechFromCurrentUser() {
   if (!currentUserEmail) return false;
   try {
     const res = await fetch(
-      `${SUPABASE_URL}/rest/v1/techs?email=eq.${encodeURIComponent(currentUserEmail)}&select=*`,
+      `${SUPABASE_URL}/rest/v1/techs?or=(email.eq.${encodeURIComponent(currentUserEmail)},phone.eq.${encodeURIComponent(currentUserEmail)})&select=*`,
       { headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + (window._mncAccessToken || SUPABASE_ANON_KEY) } }
     );
     const rows = await res.json();
@@ -9661,7 +9661,7 @@ async function loadMyPhotosData() {
 
   try {
     const res = await fetch(
-      `${SUPABASE_URL}/rest/v1/techs?email=eq.${encodeURIComponent(currentUserEmail)}&select=id,name,photos`,
+      `${SUPABASE_URL}/rest/v1/techs?or=(email.eq.${encodeURIComponent(currentUserEmail)},phone.eq.${encodeURIComponent(currentUserEmail)})&select=id,name,photos`,
       { headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + (window._mncAccessToken || SUPABASE_ANON_KEY) } }
     );
     const rows = await res.json();
@@ -13116,7 +13116,7 @@ function tbRenderSettings() {
 }
 
 async function tbPatchTech(patch) {
-  const r = await fetch(SUPABASE_URL + '/rest/v1/techs?email=eq.' + encodeURIComponent(currentUserEmail), {
+  const r = await fetch(SUPABASE_URL + '/rest/v1/techs?or=(email.eq.' + encodeURIComponent(currentUserEmail) + ',phone.eq.' + encodeURIComponent(currentUserEmail) + ')', {
     method: 'PATCH',
     headers: bkHeaders({ 'Content-Type': 'application/json', 'Prefer': 'return=minimal' }),
     body: JSON.stringify(patch)
@@ -13797,7 +13797,7 @@ async function patchBookingField(patch) {
     var r = await tbPatchTech(patch); if (r) return true;
   }
   try {
-    var res = await fetch(SUPABASE_URL + '/rest/v1/techs?email=eq.' + encodeURIComponent(currentUserEmail), {
+    var res = await fetch(SUPABASE_URL + '/rest/v1/techs?or=(email.eq.' + encodeURIComponent(currentUserEmail) + ',phone.eq.' + encodeURIComponent(currentUserEmail) + ')', {
       method: 'PATCH',
       headers: bkHeaders({ 'Content-Type': 'application/json', 'Prefer': 'return=minimal' }),
       body: JSON.stringify(patch)
@@ -15143,7 +15143,7 @@ async function toggleHideAddress() {
   btn.classList.toggle('off', !newVal);
   try {
     const res = await fetch(
-      `${SUPABASE_URL}/rest/v1/techs?email=eq.${encodeURIComponent(currentUserEmail)}`,
+      `${SUPABASE_URL}/rest/v1/techs?or=(email.eq.${encodeURIComponent(currentUserEmail)},phone.eq.${encodeURIComponent(currentUserEmail)})`,
       {
         method: 'PATCH',
         headers: {
@@ -15176,7 +15176,7 @@ async function syncHideAddressToggle() {
   if (!btn) return;
   try {
     const res = await fetch(
-      `${SUPABASE_URL}/rest/v1/techs?email=eq.${encodeURIComponent(currentUserEmail)}&select=hide_address_public`,
+      `${SUPABASE_URL}/rest/v1/techs?or=(email.eq.${encodeURIComponent(currentUserEmail)},phone.eq.${encodeURIComponent(currentUserEmail)})&select=hide_address_public`,
       { headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + (window._mncAccessToken || SUPABASE_ANON_KEY) } }
     );
     const rows = await res.json();
