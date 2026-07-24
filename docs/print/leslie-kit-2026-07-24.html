@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Leslie's Kit, MNC 3.0, July 24 2026</title>
+<style>
+  :root{
+    --charcoal:#141317; --mauve:#BFA6BB; --deep:#7D6478;
+    --blush:#F7EBEE; --ivory:#EDEAE5; --muted:#6E6873;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    font-family:"DM Sans","Segoe UI",system-ui,sans-serif;
+    color:var(--charcoal); background:#fff;
+    max-width:8.5in; margin:0 auto; padding:0.6in 0.7in;
+    font-size:13.5px; line-height:1.5;
+  }
+  h1,h2{font-family:Georgia,"Playfair Display",serif;}
+  .band{
+    background:linear-gradient(135deg,#34303A,#141317);
+    color:var(--blush); border-radius:14px;
+    padding:22px 26px; margin-bottom:22px;
+  }
+  .band .eyebrow{font-size:10.5px; letter-spacing:2.2px; text-transform:uppercase; color:var(--mauve); font-weight:700;}
+  .band h1{font-size:30px; font-weight:600; margin:4px 0 2px;}
+  .band .date{font-size:12px; color:#CFC5CC;}
+  h2{
+    font-size:17px; color:var(--deep); margin:20px 0 8px;
+    padding-bottom:4px; border-bottom:2px solid var(--mauve);
+  }
+  p{margin-bottom:8px;}
+  .steps{counter-reset:step; margin:10px 0 4px;}
+  .step{
+    display:flex; gap:12px; align-items:flex-start; margin-bottom:9px;
+  }
+  .step .n{
+    counter-increment:step; flex:0 0 auto;
+    width:24px; height:24px; border-radius:50%;
+    background:var(--mauve); color:#fff; font-weight:700; font-size:13px;
+    display:flex; align-items:center; justify-content:center; margin-top:1px;
+  }
+  .step .n::before{content:counter(step);}
+  .ui{
+    background:var(--blush); border:1px solid var(--mauve);
+    border-radius:6px; padding:1px 7px; font-weight:600; white-space:nowrap;
+  }
+  .links td{padding:4px 14px 4px 0; vertical-align:top;}
+  .links .url{font-family:Consolas,monospace; font-size:12.5px; font-weight:700; color:var(--deep); white-space:nowrap;}
+  .note{
+    background:var(--ivory); border-left:4px solid var(--deep);
+    border-radius:0 10px 10px 0; padding:10px 14px; margin:10px 0; font-size:13px;
+  }
+  ul{margin:4px 0 8px 20px;}
+  li{margin-bottom:4px;}
+  .noteslines{margin-top:10px;}
+  .noteslines div{border-bottom:1px solid #C9C2CC; height:26px;}
+  .foot{margin-top:22px; font-size:11.5px; color:var(--muted); text-align:center;}
+  @media print{
+    body{padding:0.25in 0.15in;}
+    .band{-webkit-print-color-adjust:exact; print-color-adjust:exact;}
+    *{-webkit-print-color-adjust:exact; print-color-adjust:exact;}
+  }
+</style>
+</head>
+<body>
+
+<div class="band">
+  <div class="eyebrow">My Nail Connection 3.0</div>
+  <h1>Leslie's Kit</h1>
+  <div class="date">Testing day, July 24, 2026</div>
+</div>
+
+<h2>Where 3.0 stands</h2>
+<p>The new model is simple: <strong>booking is free for techs, forever.</strong> Photos are how MNC earns, they are paid, permanent, and they double as each tech's advertising in the one shared Gallery. The whole app wears the new look, black, mauve, and blush, with the hat lady as the mark.</p>
+
+<h2>Your new sign-in (the big change)</h2>
+<p>Passwords are gone. You sign in with your phone number and a text message:</p>
+<div class="steps">
+  <div class="step"><span class="n"></span><div>Go to <strong>mynailconnection.com/v3/app</strong> and tap sign in.</div></div>
+  <div class="step"><span class="n"></span><div>Enter your mobile number and tap <span class="ui">Text me a code</span>.</div></div>
+  <div class="step"><span class="n"></span><div>Type the 6-digit code from the text and tap <span class="ui">Verify</span>.</div></div>
+  <div class="step"><span class="n"></span><div>That's it. You land on your own tech dashboard, photos, services, everything intact.</div></div>
+</div>
+<div class="note">Your old email login still works if you ever want it: on the phone screen, tap <em>"Have an email login? Use that instead."</em> Same for every tech.</div>
+
+<h2>What this means for your techs</h2>
+<ul>
+  <li>Every tech signs in the same way now, phone number, text code, done. No more forgotten passwords, no more reset emails.</li>
+  <li>Existing techs keep their whole profile, that is exactly what we are testing together today.</li>
+  <li>New techs can add an email on signup if they want one, clients never need one at all.</li>
+</ul>
+
+<h2>Your links</h2>
+<table class="links">
+  <tr><td class="url">mynailconnection.com/v3</td><td>The new marketing page (3.0 preview)</td></tr>
+  <tr><td class="url">mynailconnection.com/v3/app</td><td>The 3.0 app itself</td></tr>
+  <tr><td class="url">mynailconnection.com/v3/tech-guide-v3.html</td><td>The updated tech guide</td></tr>
+</table>
+<div class="note">These are <strong>preview</strong> links, you will see a "3.0 Preview" bar at the top. The live site and the current app are untouched. Please keep these links between us until launch.</div>
+
+<h2>Your posting kit</h2>
+<p>The campaign kit is one zip file: <strong>mnc-3-countdown-kit.zip</strong>. Inside are the animated cards (open one in a browser, press F11, screen-record about 10 seconds, post) plus ready-to-post story and feed images and a captions file. The campaign runs as a steady drumbeat now, not a dated countdown, so post them in any order, whenever it suits you.</p>
+
+<h2>Notes</h2>
+<div class="noteslines"><div></div><div></div><div></div><div></div><div></div></div>
+
+<div class="foot">My Nail Connection 3.0 &middot; prepared by Anne &middot; July 24, 2026</div>
+
+</body>
+</html>

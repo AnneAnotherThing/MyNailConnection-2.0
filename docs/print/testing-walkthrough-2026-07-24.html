@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>MNC 3.0 Testing Walkthrough, July 24 2026</title>
+<style>
+  :root{
+    --charcoal:#141317; --mauve:#BFA6BB; --deep:#7D6478;
+    --blush:#F7EBEE; --ivory:#EDEAE5; --muted:#6E6873; --gold:#D9B44A;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    font-family:"DM Sans","Segoe UI",system-ui,sans-serif;
+    color:var(--charcoal); background:#fff;
+    max-width:8.5in; margin:0 auto; padding:0.5in 0.65in;
+    font-size:13px; line-height:1.45;
+  }
+  h1,h2{font-family:Georgia,"Playfair Display",serif;}
+  .band{
+    background:linear-gradient(135deg,#34303A,#141317);
+    color:var(--blush); border-radius:14px;
+    padding:18px 24px; margin-bottom:18px;
+  }
+  .band .eyebrow{font-size:10.5px; letter-spacing:2.2px; text-transform:uppercase; color:var(--mauve); font-weight:700;}
+  .band h1{font-size:25px; font-weight:600; margin:3px 0 1px;}
+  .band .date{font-size:12px; color:#CFC5CC;}
+  h2{
+    font-size:15.5px; color:var(--deep); margin:16px 0 7px;
+    padding-bottom:3px; border-bottom:2px solid var(--mauve);
+  }
+  h2 .tag{
+    font-family:"DM Sans","Segoe UI",system-ui,sans-serif;
+    font-size:10px; letter-spacing:1.2px; text-transform:uppercase;
+    background:var(--deep); color:#fff; border-radius:100px;
+    padding:2px 9px; vertical-align:2px; margin-left:8px; font-weight:700;
+  }
+  h2 .tag.anne{background:var(--gold); color:var(--charcoal);}
+  .item{display:flex; gap:10px; align-items:flex-start; margin-bottom:7px;}
+  .box{
+    flex:0 0 auto; width:15px; height:15px; margin-top:2px;
+    border:2px solid var(--deep); border-radius:4px;
+  }
+  .item .why{color:var(--muted); font-size:12px;}
+  .ui{
+    background:var(--blush); border:1px solid var(--mauve);
+    border-radius:5px; padding:0 6px; font-weight:600; white-space:nowrap;
+  }
+  .warn{
+    background:var(--ivory); border-left:4px solid var(--gold);
+    border-radius:0 10px 10px 0; padding:9px 13px; margin:8px 0; font-size:12.5px;
+  }
+  code{font-family:Consolas,monospace; font-size:12px; color:var(--deep); font-weight:700;}
+  table.log{width:100%; border-collapse:collapse; margin-top:6px;}
+  table.log th{
+    text-align:left; font-size:10.5px; letter-spacing:1px; text-transform:uppercase;
+    color:var(--deep); border-bottom:2px solid var(--mauve); padding:4px 6px;
+  }
+  table.log td{border-bottom:1px solid #C9C2CC; height:30px; padding:0 6px;}
+  table.log td:first-child{width:28%;}
+  table.log td:last-child{width:18%;}
+  .foot{margin-top:16px; font-size:11.5px; color:var(--muted); text-align:center;}
+  @media print{
+    body{padding:0.2in 0.1in;}
+    *{-webkit-print-color-adjust:exact; print-color-adjust:exact;}
+    h2{break-after:avoid;}
+    .pagebreak{break-before:page;}
+  }
+</style>
+</head>
+<body>
+
+<div class="band">
+  <div class="eyebrow">My Nail Connection 3.0 &middot; Phone sign-in cutover</div>
+  <h1>Testing Walkthrough</h1>
+  <div class="date">Anne + Leslie &middot; July 24, 2026 &middot; mynailconnection.com/v3/app</div>
+</div>
+
+<h2>Before Leslie arrives <span class="tag anne">Anne only</span></h2>
+<div class="item"><span class="box"></span><div><strong>Run <code>sql/phone-auth-normalize-existing-phones.sql</code></strong> in the Supabase SQL Editor. <span class="why">Required first. Without it, Leslie and all 27 existing techs look like brand-new users when they sign in by phone, and every test below fails in a confusing way.</span></div></div>
+<div class="item"><span class="box"></span><div>Supabase &rarr; Auth &rarr; Email &rarr; turn <strong>Confirm email OFF</strong> for the testing window. <span class="why">Kills the email rate limit while testing.</span></div></div>
+<div class="item"><span class="box"></span><div>Optional: review, then run <code>sql/cleanup-anne-accounts.sql</code> to clear the junk test accounts. <span class="why">Deletes are permanent, read the list it targets first.</span></div></div>
+<div class="item"><span class="box"></span><div>Have ready: Leslie's phone, your phone, and one number that has <strong>never</strong> been in MNC (for the fresh-client test).</div></div>
+
+<h2>1. Leslie signs in by phone <span class="tag">The big one</span></h2>
+<div class="item"><span class="box"></span><div>App &rarr; sign in &rarr; enter her mobile &rarr; <span class="ui">Text me a code</span> &rarr; the text arrives.</div></div>
+<div class="item"><span class="box"></span><div>Enter the 6-digit code &rarr; <span class="ui">Verify</span> &rarr; she lands on <strong>her own tech dashboard</strong>.</div></div>
+<div class="item"><span class="box"></span><div>Her profile is intact: photos, services, hours, bio. <span class="why">This proves an existing tech survives the cutover. If she looks like a new user, stop, the normalize SQL has not taken effect.</span></div></div>
+
+<h2>2. Sign out, sign back in</h2>
+<div class="item"><span class="box"></span><div>Sign out from the tech dashboard (the button is new, confirm it is there and works).</div></div>
+<div class="item"><span class="box"></span><div>Sign back in with the same phone number. <span class="why">She should be recognized as returning, straight back to her dashboard, not pushed through signup again.</span></div></div>
+
+<h2>3. Brand-new client signup</h2>
+<div class="item"><span class="box"></span><div>Using the never-used number: sign up as a <strong>client</strong>. Phone and code only, <span class="why">no email should ever be asked of a client.</span></div></div>
+<div class="item"><span class="box"></span><div>Sign out, sign back in with that number. <span class="why">Returning-user recognition for a fresh account.</span></div></div>
+
+<h2>4. New tech signup</h2>
+<div class="item"><span class="box"></span><div>Sign up as a <strong>tech</strong>: phone plus the optional email field. <span class="why">Confirm email is truly optional and nothing blocks on it.</span></div></div>
+
+<h2>5. The old email door</h2>
+<div class="item"><span class="box"></span><div>On the phone screen, tap <em>"Have an email login? Use that instead"</em> and sign in with an email account. <span class="why">The fallback has to keep working for anyone attached to their email login.</span></div></div>
+
+<h2>6. Contact the developer</h2>
+<div class="item"><span class="box"></span><div>Send a test message through the contact form; Anne confirms the email lands in her inbox.</div></div>
+
+<h2>7. If time allows, the money paths</h2>
+<div class="item"><span class="box"></span><div>As the test client, <strong>book an appointment</strong> with Leslie, confirm it appears on both sides.</div></div>
+<div class="item"><span class="box"></span><div>As Leslie, <strong>upload a photo</strong>. <span class="why">Storage writes now require being signed in. If upload fails, this policy change is the first thing to check, not a dead end.</span></div></div>
+
+<div class="warn"><strong>Expect a few leftovers.</strong> Some screens may still assume everyone has an email. That is normal for today. Nothing needs solving in the room, just capture the screen name and what it said below, each one is a fast fix afterward.</div>
+
+<h2>Bug log</h2>
+<table class="log">
+  <tr><th>Screen</th><th>What happened</th><th>Which phone</th></tr>
+  <tr><td></td><td></td><td></td></tr>
+  <tr><td></td><td></td><td></td></tr>
+  <tr><td></td><td></td><td></td></tr>
+  <tr><td></td><td></td><td></td></tr>
+  <tr><td></td><td></td><td></td></tr>
+  <tr><td></td><td></td><td></td></tr>
+  <tr><td></td><td></td><td></td></tr>
+  <tr><td></td><td></td><td></td></tr>
+</table>
+
+<div class="foot">My Nail Connection 3.0 &middot; phone-auth testing day &middot; July 24, 2026</div>
+
+</body>
+</html>
