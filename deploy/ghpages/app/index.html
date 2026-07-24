@@ -1616,7 +1616,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
 
     <!-- Greeting -->
     <div style="padding:6px 20px 2px;">
-      <div class="hero-card">
+      <div class="hero-card" style="background:none;border:none;box-shadow:none;padding:8px 0 0;">
       <div class="hero-title" id="home-greeting">Good morning.</div>
       <!-- Role-agnostic subline, used to say "find your next look" which
            felt client-biased. Each word flows in with a subtle blur-to-
@@ -2458,7 +2458,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       <div style="font-size:12px;color:var(--muted);margin-top:2px;">They're never told. They simply never see an opening with you again.</div>
       <div id="tb-blocked-list" style="margin-top:10px;"></div>
       <div style="display:flex;gap:6px;margin-top:8px;align-items:center;">
-        <input type="email" id="tb-block-email" placeholder="client@email.com" style="flex:1;padding:9px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:white;color:var(--charcoal);">
+        <input type="email" id="tb-block-email" placeholder="Phone number or email" style="flex:1;padding:9px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:white;color:var(--charcoal);">
         <button onclick="tbAddBlocked()" style="padding:9px 14px;border-radius:8px;border:1.5px solid var(--rose-mid);background:white;color:var(--rose-dark);font-size:12px;font-weight:700;cursor:pointer;">Block</button>
       </div>
     </div>
@@ -3080,14 +3080,6 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       <!-- Bio + Booking link (MOVED UP, high-visibility profile copy) -->
       <div style="display:grid;gap:10px;margin-bottom:14px;">
         <div><label style="font-size:10px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px;letter-spacing:0.8px;">ABOUT YOU</label><textarea id="te-bio" rows="3" placeholder="Tell clients about this tech style and specialty…" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;resize:none;box-sizing:border-box;"></textarea></div>
-        <div>
-          <label style="font-size:10px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px;letter-spacing:0.8px;">WHERE TO BOOK YOU</label>
-          <div style="position:relative;">
-            <div style="position:absolute;left:12px;top:50%;transform:translateY(-50%);pointer-events:none;"><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:var(--muted);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg></div>
-            <input id="te-booking-link" type="url" placeholder="https://vagaro.com/yourname or your website…" style="width:100%;padding:10px 12px 10px 34px;border:1.5px solid var(--border);border-radius:10px;font-size:13px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;box-sizing:border-box;"/>
-          </div>
-          <div style="font-size:11px;color:var(--muted);margin-top:4px;">✨ Clients can book directly from your profile! Vagaro, StyleSeat, Square, Fresha, or your own site, anything works.</div>
-        </div>
         <div>
           <label style="font-size:10px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px;letter-spacing:0.8px;">INSTAGRAM / SOCIAL</label>
           <div style="position:relative;">
@@ -4331,17 +4323,37 @@ const TUTORIALS = {
     {
       icon: '<svg viewBox="0 0 24 24" style="width:60px;height:60px;stroke:var(--rose);fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>',
       title: 'You\u2019re in, welcome.',
-      body: '<p style="margin:0 0 14px;">Taking your craft online is a big move, and we\u2019re so glad you made it with us. Nail techs are artists, and here you get to be seen like one.</p><p style="margin:0;">MNC gives you two things: a <b>booking system that\u2019s free and stays free</b>, and a <b>Gallery</b> where your work is your advertising. The next two screens cover both. Takes about a minute.</p>'
+      body: '<p style="margin:0 0 14px;">Taking your craft online is a big move, and we\u2019re so glad you made it with us. This quick tour walks you through setting up your whole studio: your profile, your photos, your book, and where new bookings land.</p><p style="margin:0;"><b>Swipe</b> through at your own pace, or tap Next. You can replay it anytime from your profile.</p>'
+    },
+    {
+      icon: '<svg viewBox="0 0 24 24" style="width:60px;height:60px;stroke:var(--rose);fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
+      title: 'First, make it yours.',
+      body: '<p style="margin:0 0 14px;">From your <b>Dashboard</b>, open <b>Edit Profile</b>. Add your photo, a short bio, and your city so nearby clients can find you. This page is your storefront, and it\u2019s what every client sees first.</p><p style="margin:0;">A friendly face and two warm sentences go further than you\u2019d think.</p>'
     },
     {
       icon: '<svg viewBox="0 0 24 24" style="width:60px;height:60px;stroke:var(--rose);fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>',
       title: 'Your photos do the talking.',
-      body: '<p style="margin:0 0 14px;">Every photo you post joins the one <b>Gallery</b> every client scrolls, and your share of it grows with every photo, post 10 and you\u2019re seen twice as often as 5. Photos are $1 each, $5 for a 10-pack, or Glow Up\u2019s monthly bundle. <b>Every photo you post is your own personal ad in the live feed</b>, running for you until you decide you no longer want to be found. Your gallery is your ad budget, spend it at your pace.</p><p style="margin:0;">One quiet magic trick: tag every photo with its <b>Shape</b>, <b>Type</b>, and <b>Style</b>. Each tag is another path a client can take to find your work. More photos + more tags = more bookings in your chair.</p>'
+      body: '<p style="margin:0 0 14px;">Every photo you post joins the one <b>Gallery</b> every client scrolls. Photos are $1 each, $5 for a 10-pack, or Glow Up\u2019s monthly bundle, and each one is your own personal ad, running until you take it down.</p><p style="margin:0;">One quiet magic trick: tag every photo with its <b>Shape</b>, <b>Type</b>, and <b>Style</b>. Each tag is another path a client can take to find your work.</p>'
     },
     {
       icon: '<svg viewBox="0 0 24 24" style="width:60px;height:60px;stroke:var(--rose);fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
-      title: 'Show up. The rest follows.',
-      body: '<p style="margin:0 0 14px;">Open <b>Bookings</b> on your Dashboard, add your services and weekly hours, and flip it on, clients book you right from your profile and it\u2019s free, always. Already booking through Vagaro, StyleSeat, or Square? Drop in your link and a <b>Book Now</b> button appears instead.</p><p style="margin:0 0 14px;">Flip <b>Available Today</b> whenever you\u2019ve got openings, your photos <b>glow</b> in the Gallery until you turn it off, and same-day clients see you first.</p><p style="margin:0;font-style:italic;color:var(--rose-dark);">That\u2019s it, go get booked.</p>'
+      title: 'Turn on your book.',
+      body: '<p style="margin:0 0 14px;">Open <b>Bookings</b> on your Dashboard: add your services, set your weekly hours, and flip booking on. Clients book you right from your profile, free, always, no commission.</p><p style="margin:0;">Already booking through Vagaro, StyleSeat, or Square? Drop your link in there instead and a <b>Book Now</b> button sends clients to it.</p>'
+    },
+    {
+      icon: '<svg viewBox="0 0 24 24" style="width:60px;height:60px;stroke:var(--rose);fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>',
+      title: 'Here\u2019s what clients see.',
+      body: '<p style="margin:0 0 14px;">Your profile shows your gallery, your bio, and one big <b>Book</b> button, plus <b>Call</b> and <b>Text</b> if you want them. When a client taps Book, they pick a service, a day, and a time. That\u2019s it.</p><p style="margin:0;">Share your profile link anywhere, your bio, your stories, a QR at your station. It\u2019s your booking page now.</p>'
+    },
+    {
+      icon: '<svg viewBox="0 0 24 24" style="width:60px;height:60px;stroke:var(--rose);fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><polyline points="9 16 11 18 15 14"/></svg>',
+      title: 'When a booking lands.',
+      body: '<p style="margin:0 0 14px;">New requests show up in <b>Bookings</b> with a badge on your Dashboard. Confirm or decline with a tap, or turn on <b>auto-confirm</b> and let your book run itself.</p><p style="margin:0;">Reminders go out automatically, a day before and 3 hours before, to you <b>and</b> your client. Fewer no-shows, nothing to remember.</p>'
+    },
+    {
+      icon: '<svg viewBox="0 0 24 24" style="width:60px;height:60px;stroke:var(--rose);fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>',
+      title: 'Say yes to notifications.',
+      body: '<p style="margin:0 0 14px;">When the app asks to send notifications, tap <b>Allow</b>, that\u2019s how new bookings ping your phone the moment they land.</p><p style="margin:0 0 14px;">One more perk: flip <b>Available Today</b> whenever you\u2019ve got an open chair, and your photos glow in the Gallery for same-day clients.</p><p style="margin:0;"><span style="font-style:italic;color:var(--rose-dark);">That\u2019s the whole studio. Go get booked.</span></p>'
     }
   ],
 
@@ -4366,7 +4378,10 @@ const TUTORIALS = {
 
 let _tutorialSlides = [];
 let _tutorialIndex = 0;
-const _TUTORIAL_KEY = 'mnc_tutorial_seen_';
+// Key versioned to '30' on 2026-07-24: the tech tutorial became the full
+// 3.0 setup walkthrough and EVERY tech (incl. the existing 27) should see
+// it exactly once. Bumping the key retires the old seen-flags.
+const _TUTORIAL_KEY = 'mnc_tutorial_seen30_';
 
 function showTutorial(role) {
   _tutorialSlides = TUTORIALS[role] || TUTORIALS.client;
@@ -4377,11 +4392,18 @@ function showTutorial(role) {
 
 function replayTutorial() {
   // Determine role from current user
-  const email = currentUserEmail || '';
-  const userRecord = ALL_USERS.find(u => u.email && u.email.toLowerCase() === email.toLowerCase());
-  const role = userRecord ? userRecord.role : 'client';
-  const tutRole = role || 'client';
-  showTutorial(tutRole);
+  // Prefer the role resolved at login; the old ALL_USERS lookup was
+  // email-only and handed phone-identity techs the CLIENT tutorial.
+  var role = window._mncCurrentRole;
+  if (!role) {
+    const id = (currentUserEmail || '').toLowerCase();
+    const idDigits = id.replace(/\D/g, '').slice(-10);
+    const rec = ALL_USERS.find(u =>
+      (u.email && u.email.toLowerCase() === id) ||
+      (idDigits.length === 10 && u.phone && String(u.phone).replace(/\D/g, '').slice(-10) === idDigits));
+    role = rec ? rec.role : 'client';
+  }
+  showTutorial(role || 'client');
 }
 
 // Share the app, uses the OS share sheet via navigator.share() when
@@ -4848,6 +4870,31 @@ function tutorialNext() {
   _renderTutorialSlide();
 }
 
+function tutorialPrev() {
+  if (_tutorialIndex <= 0) return;
+  _tutorialIndex--;
+  _renderTutorialSlide();
+}
+
+// Swipe between slides (2026-07-24, Anne: "feels like we should swipe").
+// Horizontal swipes only, so scrolling a tall slide vertically still works.
+(function() {
+  var sx = 0, sy = 0;
+  var card = document.getElementById('tutorial-card');
+  if (!card) return;
+  card.addEventListener('touchstart', function(e) {
+    if (!e.touches || !e.touches.length) return;
+    sx = e.touches[0].clientX; sy = e.touches[0].clientY;
+  }, { passive: true });
+  card.addEventListener('touchend', function(e) {
+    var t = e.changedTouches && e.changedTouches[0];
+    if (!t) return;
+    var dx = t.clientX - sx, dy = t.clientY - sy;
+    if (Math.abs(dx) < 48 || Math.abs(dx) < Math.abs(dy) * 1.2) return;
+    if (dx < 0) tutorialNext(); else tutorialPrev();
+  }, { passive: true });
+})();
+
 function _renderTutorialSlide() {
   const slide = _tutorialSlides[_tutorialIndex];
   const total = _tutorialSlides.length;
@@ -4919,8 +4966,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 440,         /* __APP_BUILD_ANDROID__ */
-  ios:     245,          /* __APP_BUILD_IOS__     */
+  android: 441,         /* __APP_BUILD_ANDROID__ */
+  ios:     246,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -8856,7 +8903,6 @@ function openTechEdit(tech) {
   document.getElementById('te-state').value   = edit.state;
   document.getElementById('te-zip').value     = edit.zip;
   document.getElementById('te-bio').value     = edit.bio;
-  document.getElementById('te-booking-link').value = edit.booking_link || tech.booking_link || '';
   document.getElementById('te-gallery-link').value = edit.gallery_link || tech.gallery_link || '';
   // Tags
   document.querySelectorAll('#te-tags input[type=checkbox]').forEach(cb => {
@@ -10550,7 +10596,6 @@ async function saveTechEdit() {
   edit.state = document.getElementById('te-state').value.trim();
   edit.zip   = document.getElementById('te-zip').value.trim();
   edit.bio   = document.getElementById('te-bio').value.trim();
-  edit.booking_link = document.getElementById('te-booking-link').value.trim();
   edit.gallery_link = document.getElementById('te-gallery-link').value.trim();
   edit.tags  = Array.from(document.querySelectorAll('#te-tags input:checked')).map(c => c.value);
   edit.contact_methods = {
@@ -10571,14 +10616,17 @@ async function saveTechEdit() {
     document.getElementById('te-name').focus();
     return;
   }
-  if (!edit.email) {
-    showToast('Email is required, it is used as the unique ID for each tech');
+  // Phone-first (2026-07-24): email is OPTIONAL for phone-identity techs.
+  // It stays required only when the signed-in identity IS an email, since
+  // blanking it would orphan the row from its own login.
+  if (!edit.email && (currentUserEmail || '').indexOf('@') > 0) {
+    showToast('Email is required, it is how this account signs in');
     restoreSaveBtns();
     document.getElementById('te-email').focus();
     return;
   }
-  // Basic email format check
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(edit.email)) {
+  // Basic email format check, only when one was provided
+  if (edit.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(edit.email)) {
     showToast('Please enter a valid email address');
     restoreSaveBtns();
     document.getElementById('te-email').focus();
@@ -10591,7 +10639,7 @@ async function saveTechEdit() {
     const techData = {
       name: edit.name,
       shop_name: edit.shop || '',
-      email: edit.email,
+      email: edit.email || null,
       phone: edit.phone || '',
       address: edit.address || '',
       hide_address_public: !!edit.hide_address_public,
@@ -10599,7 +10647,6 @@ async function saveTechEdit() {
       state: edit.state || '',
       zip: edit.zip || '',
       bio: edit.bio || '',
-      booking_link: edit.booking_link || '',
       gallery_link: edit.gallery_link || '',
       tags: edit.tags || [],
       lat: edit.lat || null,
@@ -13360,7 +13407,7 @@ function tbRenderBlocked() {
     return;
   }
   wrap.innerHTML = _bkBlocked.map(function(b) {
-    return '<span style="display:inline-flex;align-items:center;gap:6px;background:var(--cream);border:1px solid var(--border);color:var(--charcoal);font-size:12px;font-weight:600;border-radius:100px;padding:4px 10px;margin:2px 4px 2px 0;">' + bkEsc(b.client_email) +
+    return '<span style="display:inline-flex;align-items:center;gap:6px;background:var(--cream);border:1px solid var(--border);color:var(--charcoal);font-size:12px;font-weight:600;border-radius:100px;padding:4px 10px;margin:2px 4px 2px 0;">' + bkEsc(/^\d{10}$/.test(b.client_email || '') ? '(' + b.client_email.slice(0,3) + ') ' + b.client_email.slice(3,6) + '-' + b.client_email.slice(6) : b.client_email) +
       '<span onclick="tbDeleteBlocked(\'' + b.id + '\')" style="cursor:pointer;font-size:14px;line-height:1;color:var(--muted);">&times;</span></span>';
   }).join('');
 }
@@ -13368,8 +13415,17 @@ function tbRenderBlocked() {
 async function tbAddBlocked() {
   if (!_bkMyTech) return;
   const el = document.getElementById('tb-block-email');
-  const email = (el.value || '').trim().toLowerCase();
-  if (!email || email.indexOf('@') < 1) { showToast('Enter the client\u2019s email address'); return; }
+  // Clients are phone-first now: accept a phone number OR an email.
+  // Phones are stored as bare 10 digits; get_open_slots matches either.
+  const raw = (el.value || '').trim();
+  let email = '';
+  if (raw.indexOf('@') > 0) email = raw.toLowerCase();
+  else {
+    let d = raw.replace(/\D/g, '');
+    if (d.length === 11 && d[0] === '1') d = d.slice(1);
+    if (d.length === 10) email = d;
+  }
+  if (!email) { showToast('Enter the client\u2019s phone number or email'); return; }
   const r = await fetch(SUPABASE_URL + '/rest/v1/blocked_clients', {
     method: 'POST',
     headers: bkHeaders({ 'Content-Type': 'application/json', 'Prefer': 'return=representation' }),
