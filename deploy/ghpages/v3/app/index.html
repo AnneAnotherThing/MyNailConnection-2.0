@@ -1237,16 +1237,17 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
 
     <!-- Buttons -->
     <div class="splash-btns-animated" style="display:flex;flex-direction:column;align-items:center;gap:8px;width:100%;max-width:300px;padding:0 2rem;margin-top:16px;z-index:2;">
-      <!-- Browse-first splash (2026-07-17): the two real entry points lead,
-           login is a small tech-facing link. New techs reach signup via the
-           sign-in screen's "Create a Free Account"; returning clients get
-           prompted to log in at the moment they book / open their profile. -->
-      <button class="btn btn-rose" onclick="startPhoneAuth('signin')" style="width:100%;white-space:nowrap;font-size:15px;border-radius:50px;">Sign In</button>
-      <button class="btn btn-outline" onclick="startPhoneAuth('signup')" style="width:100%;white-space:nowrap;font-size:15px;padding:13px 20px;border-radius:50px;">Create a Free Account</button>
-      <a onclick="enterGuest()" style="margin-top:10px;font-size:13px;color:#413E3B;text-decoration:none;cursor:pointer;letter-spacing:0.3px;font-weight:700;">Just looking? View as guest &rarr;</a>
-      <div style="margin-top:10px;font-size:11.5px;line-height:1.5;color:#6B5F63;text-align:center;max-width:280px;">
-        Browsing is open to everyone. To <b>book an appointment</b> or join as a <b>nail tech</b>, you'll need a free account.
+      <!-- Guest-first splash (2026-07-24, Anne): browsing is the widest door,
+           so it leads as the primary button. Sign In / Create a Free Account
+           follow for techs and returning clients; the caption under the guest
+           button names exactly what still needs an account (booking, and
+           adding photos as a tech), so nobody hits a login wall surprised. -->
+      <button class="btn btn-rose" onclick="enterGuest()" style="width:100%;white-space:nowrap;font-size:15px;border-radius:50px;">Browse as Guest</button>
+      <div style="font-size:11.5px;line-height:1.5;color:#6B5F63;text-align:center;max-width:280px;margin-top:2px;">
+        No account needed to look around. To <b>book an appointment</b> or <b>add photos as a tech</b>, you'll need to sign in.
       </div>
+      <button class="btn btn-outline" onclick="startPhoneAuth('signin')" style="width:100%;white-space:nowrap;font-size:15px;padding:13px 20px;border-radius:50px;margin-top:8px;">Sign In</button>
+      <button class="btn btn-outline" onclick="startPhoneAuth('signup')" style="width:100%;white-space:nowrap;font-size:15px;padding:13px 20px;border-radius:50px;">Create a Free Account</button>
     </div>
 
     <!-- (blooming magnolia removed with the 3.0 rebrand, per Anne 2026-07-06) -->
@@ -4920,8 +4921,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 434,         /* __APP_BUILD_ANDROID__ */
-  ios:     239,          /* __APP_BUILD_IOS__     */
+  android: 435,         /* __APP_BUILD_ANDROID__ */
+  ios:     240,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
