@@ -4920,8 +4920,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 430,         /* __APP_BUILD_ANDROID__ */
-  ios:     235,          /* __APP_BUILD_IOS__     */
+  android: 431,         /* __APP_BUILD_ANDROID__ */
+  ios:     236,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -14053,7 +14053,7 @@ async function paVerify() {
     currentUser = out.data.user || out.data.session.user;
     window._mncAccessToken = out.data.session.access_token;
     try { saveSession(out.data.session); } catch(_) {}
-    currentUserEmail = ((currentUser && (currentUser.email || currentUser.phone)) || _paFlow.e164 || '').toLowerCase();
+    currentUserEmail = (mncIdentity(currentUser) || (_paFlow && _paFlow.e164) || '').toLowerCase();
     var prof = await loadOwnUserRow('role,name');
     if (prof && prof.role) {
       var np = (prof.name || '').trim().split(/\s+/);
@@ -14165,6 +14165,21 @@ async function loadOwnUserRow(select) {
 }
 
 
+// The signed-in user's canonical identity: email lowercased, or their phone
+// as E.164 with a leading +. Supabase returns the phone WITHOUT the + (e.g.
+// "16025021813"), but we STORE it with the + (create_signup_profile_phone +
+// the normalize migration both write +1...), so the login identity must add
+// the + back or the profile lookup misses and a returning user is treated as
+// new. 2026-07-23.
+function mncIdentity(user) {
+  if (user && user.email) return String(user.email).toLowerCase();
+  var dg = String((user && user.phone) || '').replace(/\D/g, '');
+  if (!dg) return '';
+  if (dg.length === 10) return '+1' + dg;
+  if (dg.length === 11 && dg[0] === '1') return '+' + dg;
+  return '+' + dg;
+}
+
 function bkNormalizePhone(raw) {
   const d = (raw || '').replace(/\D/g, '');
   if (d.length === 10) return '+1' + d;
@@ -14241,7 +14256,7 @@ async function bkVerifyCode() {
     currentUser = data.user || data.session.user;
     window._mncAccessToken = data.session.access_token;
     try { saveSession(data.session); } catch(_) {}
-    currentUserEmail = ((currentUser && (currentUser.email || currentUser.phone)) || '').toLowerCase();
+    currentUserEmail = (mncIdentity(currentUser) || '').toLowerCase();
     const parts = (_bkFlow.clientName || '').trim().split(/\s+/);
     currentUserName = { first: parts[0] || '', last: parts.slice(1).join(' ') || '' };
     try { updateAvatar(); } catch(_) {}
@@ -16214,7 +16229,7 @@ async function restorePersistedSession() {
       currentUser = s.user;
       // Phone-auth (Path A) users have no email, use the phone as their
       // identity so nav/gates treat them as signed in across reloads.
-      currentUserEmail = (s.user.email || s.user.phone || '').toLowerCase();
+      currentUserEmail = (mncIdentity(s.user) || '').toLowerCase();
     }
 
     // Init RevenueCat now that currentUser is loaded. The sign-in flow
