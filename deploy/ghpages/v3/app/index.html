@@ -4975,8 +4975,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 444,         /* __APP_BUILD_ANDROID__ */
-  ios:     249,          /* __APP_BUILD_IOS__     */
+  android: 445,         /* __APP_BUILD_ANDROID__ */
+  ios:     250,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -5870,7 +5870,7 @@ async function doChangePassword() {
         body: JSON.stringify({ last_password_change: now })
       });
       // Try updating techs table too
-      await fetch(SUPABASE_URL + '/rest/v1/techs?email=eq.' + encodeURIComponent(email), {
+      await fetch(SUPABASE_URL + '/rest/v1/techs?or=(email.eq.' + encodeURIComponent(email) + ',phone.eq.' + encodeURIComponent(email) + ')', {
         method: 'PATCH',
         headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
         body: JSON.stringify({ last_password_change: now })
@@ -6609,7 +6609,7 @@ async function getTechJoinedDate(techEmail) {
   if (_techJoinedCache.has(key)) return _techJoinedCache.get(key);
   try {
     const r = await fetch(
-      `${SUPABASE_URL}/rest/v1/users?email=eq.${encodeURIComponent(key)}&select=joined`,
+      `${SUPABASE_URL}/rest/v1/users?or=(email.eq.${encodeURIComponent(key)},phone.eq.${encodeURIComponent(key)})&select=joined`,
       { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${window._mncAccessToken || SUPABASE_ANON_KEY}` } }
     );
     if (r.ok) {
@@ -6677,7 +6677,7 @@ async function renderTechPopularity(tech) {
     const [favCount, heartCount, joined] = await Promise.all([
       getTechFavCount(tech.email),
       getTechHeartCount(tech.email),
-      getTechJoinedDate(tech.email)
+      getTechJoinedDate(tech.email || tech.phone)
     ]);
     const html = popularityRowHTML(favCount, heartCount, joined);
     if (html) {
@@ -6922,7 +6922,7 @@ function saveAvailability() {
   // (Supabase returns 204 and the UI thinks it saved). Anne 2026-04-24
   // after an orphan account (amwhite1971) kept flipping her toggles
   // with nothing persisting to the DB.
-  fetch(SUPABASE_URL + '/rest/v1/techs?email=eq.' + encodeURIComponent(email), {
+  fetch(SUPABASE_URL + '/rest/v1/techs?or=(email.eq.' + encodeURIComponent(email) + ',phone.eq.' + encodeURIComponent(email) + ')', {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
@@ -6977,7 +6977,7 @@ function scheduleAvailabilityResets() {
 
   // Reset "Available Right Now" at midnight
   setTimeout(function resetNow() {
-    fetch(SUPABASE_URL + '/rest/v1/techs?email=eq.' + encodeURIComponent(email), {
+    fetch(SUPABASE_URL + '/rest/v1/techs?or=(email.eq.' + encodeURIComponent(email) + ',phone.eq.' + encodeURIComponent(email) + ')', {
       method: 'PATCH',
       headers: { 'Content-Type':'application/json','apikey':SUPABASE_ANON_KEY,'Authorization':'Bearer '+(window._mncAccessToken||SUPABASE_ANON_KEY),'Prefer':'return=minimal' },
       body: JSON.stringify({ is_available: false })
@@ -6992,7 +6992,7 @@ function scheduleAvailabilityResets() {
 
   // Reset "Open This Week" on Sunday midnight
   setTimeout(function resetWeek() {
-    fetch(SUPABASE_URL + '/rest/v1/techs?email=eq.' + encodeURIComponent(email), {
+    fetch(SUPABASE_URL + '/rest/v1/techs?or=(email.eq.' + encodeURIComponent(email) + ',phone.eq.' + encodeURIComponent(email) + ')', {
       method: 'PATCH',
       headers: { 'Content-Type':'application/json','apikey':SUPABASE_ANON_KEY,'Authorization':'Bearer '+(window._mncAccessToken||SUPABASE_ANON_KEY),'Prefer':'return=minimal' },
       body: JSON.stringify({ is_same_day: false })
@@ -8977,7 +8977,7 @@ async function openTechEditFromProfile() {
     if (!rows || !rows.length) { showToast('Tech profile not found'); return; }
     const t = rows[0];
     openTechEdit({
-      name: t.name, email: t.email, phone: t.phone,
+      id: t.id, name: t.name, email: t.email, phone: t.phone,
       shop_name: t.shop_name, address: t.address, city: t.city, state: t.state, zip: t.zip,
       bio: t.bio, tags: t.tags || [], hours_available: t.hours_available,
       imageUrl: t.image_url, photos: t.photos || [],
@@ -10730,7 +10730,14 @@ async function saveTechEdit() {
 
     // Determine if this is insert (new) or update (existing)
     const patchEmail = edit.email || currentEditTech.email || '';
-    const isExisting = !isNew && patchEmail;
+    const patchPhone = edit.phone || currentEditTech.phone || '';
+    // Prefer the row id (present on self-edit); else email OR phone. Without
+    // this, a phone-only tech had patchEmail='' so isExisting went false and
+    // the save took the INSERT branch, minting a DUPLICATE tech row.
+    const patchSelector = currentEditTech.id
+      ? 'id=eq.' + encodeURIComponent(currentEditTech.id)
+      : 'or=(email.eq.' + encodeURIComponent(patchEmail) + ',phone.eq.' + encodeURIComponent(patchPhone) + ')';
+    const isExisting = !isNew && (currentEditTech.id || patchEmail || patchPhone);
     let res;
     // CRITICAL: use the signed-in user's JWT for both PATCH and INSERT.
     // public.techs RLS policies (techs_update_self / techs_insert_admin)
@@ -10742,7 +10749,7 @@ async function saveTechEdit() {
     const authBearer = 'Bearer ' + (window._mncAccessToken || SUPABASE_ANON_KEY);
     if (isExisting) {
       // PATCH by email
-      res = await fetch(SUPABASE_URL + '/rest/v1/techs?email=eq.' + encodeURIComponent(patchEmail), {
+      res = await fetch(SUPABASE_URL + '/rest/v1/techs?' + patchSelector, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -10809,7 +10816,7 @@ async function saveTechEdit() {
           .then(d => {
             if (d && d[0]) {
               const lat = parseFloat(d[0].lat), lng = parseFloat(d[0].lon);
-              fetch(SUPABASE_URL + '/rest/v1/techs?email=eq.' + encodeURIComponent(edit.email), {
+              fetch(SUPABASE_URL + '/rest/v1/techs?' + patchSelector, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + (window._mncAccessToken || SUPABASE_ANON_KEY) },
                 body: JSON.stringify({ lat, lng })
@@ -12819,7 +12826,7 @@ async function initProfileScreen() {
   // Fetch role + location from Supabase
   let role = 'client', location = '';
   try {
-    const r = await fetch(`${SUPABASE_URL}/rest/v1/users?email=eq.${encodeURIComponent(email)}&select=role,city,state`,
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/users?or=(email.eq.${encodeURIComponent(email)},phone.eq.${encodeURIComponent(email)})&select=role,city,state`,
       { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${window._mncAccessToken || SUPABASE_ANON_KEY}` } });
     if (r.ok) {
       const d = await r.json();
@@ -12882,7 +12889,7 @@ async function initProfileScreen() {
 async function loadProfilePortfolio(email) {
   try {
     const res = await fetch(
-      `${SUPABASE_URL}/rest/v1/techs?email=eq.${encodeURIComponent(email)}&select=photos`,
+      `${SUPABASE_URL}/rest/v1/techs?or=(email.eq.${encodeURIComponent(email)},phone.eq.${encodeURIComponent(email)})&select=photos`,
       { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${window._mncAccessToken || SUPABASE_ANON_KEY}` } }
     );
     if (!res.ok) return;
@@ -14894,7 +14901,7 @@ async function _showCorrectHomeInner() {
             // once had Laura Ortega's photo leaking onto Anne's profile).
             // Account avatar comes from users.image_url only (set above).
             const tRes = await fetch(
-              `${SUPABASE_URL}/rest/v1/techs?email=eq.${encodeURIComponent(email)}&select=email`,
+              `${SUPABASE_URL}/rest/v1/techs?or=(email.eq.${encodeURIComponent(email)},phone.eq.${encodeURIComponent(email)})&select=email`,
               { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${window._mncAccessToken || SUPABASE_ANON_KEY}` } }
             );
             if (tRes.ok) {
@@ -14912,7 +14919,7 @@ async function _showCorrectHomeInner() {
           window._mncIsTechTableUser = true;
           // Also grab tech photo
           const res3 = await fetch(
-            `${SUPABASE_URL}/rest/v1/techs?email=eq.${encodeURIComponent(email)}&select=image_url`,
+            `${SUPABASE_URL}/rest/v1/techs?or=(email.eq.${encodeURIComponent(email)},phone.eq.${encodeURIComponent(email)})&select=image_url`,
             { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${window._mncAccessToken || SUPABASE_ANON_KEY}` } }
           );
           if (res3.ok) {
@@ -14927,7 +14934,7 @@ async function _showCorrectHomeInner() {
     }
     // Also check techs table (account exists in techs but not users, edge case)
     const res2 = await fetch(
-      `${SUPABASE_URL}/rest/v1/techs?email=eq.${encodeURIComponent(email)}&select=email,image_url`,
+      `${SUPABASE_URL}/rest/v1/techs?or=(email.eq.${encodeURIComponent(email)},phone.eq.${encodeURIComponent(email)})&select=email,image_url`,
       { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${window._mncAccessToken || SUPABASE_ANON_KEY}` } }
     );
     if (res2.ok) {
@@ -16507,7 +16514,11 @@ function openContactAnne() {
   if (phoneEl) {
     phoneEl.value = '';
     var _em = (typeof currentUserEmail !== 'undefined' && currentUserEmail) ? currentUserEmail : '';
-    if (_em && _em.indexOf('@') !== -1) {
+    if (_em && _em.charAt(0) === '+') {
+      // Phone-identity user: the identity IS their number, no fetch needed.
+      phoneEl.value = _em;
+      try { formatPhone(phoneEl); } catch(_){}
+    } else if (_em && _em.indexOf('@') !== -1) {
       fetch(SUPABASE_URL + '/rest/v1/users?email=eq.' + encodeURIComponent(_em) + '&select=phone',
         { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + (window._mncAccessToken || SUPABASE_ANON_KEY) } })
         .then(function(r){ return r.ok ? r.json() : []; })
