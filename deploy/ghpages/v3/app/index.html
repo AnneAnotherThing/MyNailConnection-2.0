@@ -4975,8 +4975,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 446,         /* __APP_BUILD_ANDROID__ */
-  ios:     251,          /* __APP_BUILD_IOS__     */
+  android: 447,         /* __APP_BUILD_ANDROID__ */
+  ios:     252,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -14032,10 +14032,11 @@ function paRenderPhone() {
     '<div class="input-group"><label>Mobile number</label>' +
     '<input id="pa-phone" type="tel" inputmode="tel" autocomplete="tel" oninput="formatPhone(this)" maxlength="17" placeholder="(602) 555-1234" value="' + esc((_paFlow && _paFlow.phone) || '') + '" style="width:100%;"/></div>' +
     '<div id="pa-err" style="display:none;color:#B23;font-size:12.5px;margin:2px 0 8px;"></div>' +
-    '<button class="btn btn-rose" id="pa-send-btn" onclick="paSendCode()" style="margin-top:4px;">Text me a code</button>' +
-    '<div style="text-align:center;margin-top:16px;padding-top:14px;border-top:1px solid var(--border);">' +
-      '<span style="font-size:12.5px;color:var(--muted);cursor:pointer;" onclick="show(\'auth\')">Have an email login? Use that instead</span>' +
-    '</div>';
+    '<button class="btn btn-rose" id="pa-send-btn" onclick="paSendCode()" style="margin-top:4px;">Text me a code</button>';
+  // The "Have an email login? Use that instead" door was hidden 2026-07-24
+  // (Anne: no active users yet, phone is THE identity). The #auth screen and
+  // signInWithEmail remain in code for legacy paths and can be reached via
+  // show('auth') from the console if ever needed.
 }
 
 async function paSendCode() {
