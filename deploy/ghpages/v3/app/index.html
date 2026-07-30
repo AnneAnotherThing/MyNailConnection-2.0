@@ -4975,8 +4975,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 445,         /* __APP_BUILD_ANDROID__ */
-  ios:     250,          /* __APP_BUILD_IOS__     */
+  android: 446,         /* __APP_BUILD_ANDROID__ */
+  ios:     251,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -5391,6 +5391,14 @@ async function requestPushPermission() {
 // and the booking senders passed emails while the admin senders passed UUIDs.
 function pushKey(v) {
   return String(v == null ? '' : v).trim().toLowerCase();
+}
+
+// Push-address a person who may be email- OR phone-identified. Phone users'
+// subscriptions are keyed by their E.164 identity ('+1XXXXXXXXXX').
+function pushKeyFor(email, phone) {
+  if (email) return email;
+  var d = String(phone || '').replace(/\D/g, '').slice(-10);
+  return d.length === 10 ? '+1' + d : '';
 }
 
 async function subscribeToPush(userId) {
@@ -13640,7 +13648,7 @@ async function tbSetStatus(id, status) {
       cancelled_by_tech: { title: 'Appointment cancelled', body: techName + ' cancelled your appointment on ' + when + '.' }
     };
     const m = msgs[status];
-    if (m) sendPushToUser(b.client_email, { title: m.title, body: m.body, url: '/app/', tag: 'booking-' + id });
+    if (m) sendPushToUser(pushKeyFor(b.client_email, b.client_phone), { title: m.title, body: m.body, url: '/app/', tag: 'booking-' + id });
   }
   showToast('Updated ✓');
 }
@@ -14329,9 +14337,10 @@ async function bkConfirm() {
     const confirmed = data.status === 'confirmed';
     const when = bkFmtStamp(_bkFlow.slot, _bkFlow.tz);
     const techName = _bkFlow.tech.name || 'your tech';
-    // Tell the tech (their push subscription is keyed by email)
-    if (_bkFlow.tech.email) {
-      sendPushToUser(_bkFlow.tech.email, {
+    // Tell the tech (subscription keyed by email, or E.164 for phone techs)
+    var _techPushKey = pushKeyFor(_bkFlow.tech.email, _bkFlow.tech.phone);
+    if (_techPushKey) {
+      sendPushToUser(_techPushKey, {
         title: confirmed ? 'New booking 💅' : 'New booking request 💅',
         body: (clientName || 'A client') + ' · ' + _bkFlow.svc.name + ' · ' + when +
               (confirmed ? '' : '. Tap to confirm.'),
@@ -14411,9 +14420,9 @@ async function bkCancelMine(id) {
   const b = _maRows.find(function(x) { return x.id === id; });
   if (b) {
     const tech = (window.ALL_TECHS || []).find(function(t) { return t.id === b.tech_id; });
-    if (tech && tech.email) {
+    if (tech && pushKeyFor(tech.email, tech.phone)) {
       const who = ((currentUserName.first || '') + ' ' + (currentUserName.last || '')).trim() || 'A client';
-      sendPushToUser(tech.email, {
+      sendPushToUser(pushKeyFor(tech.email, tech.phone), {
         title: 'Appointment cancelled',
         body: who + ' cancelled ' + bkFmtStamp(b.starts_at, tech.booking_timezone) + '.',
         url: '/app/', tag: 'booking-' + id
