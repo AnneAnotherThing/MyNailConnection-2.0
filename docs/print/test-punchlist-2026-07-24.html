@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>MNC 3.0 Full Test Punchlist</title>
+<style>
+  :root{
+    --charcoal:#141317; --mauve:#BFA6BB; --deep:#7D6478;
+    --blush:#F7EBEE; --ivory:#EDEAE5; --muted:#6E6873; --gold:#D9B44A;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    font-family:"DM Sans","Segoe UI",system-ui,sans-serif;
+    color:var(--charcoal); background:#fff;
+    max-width:8.5in; margin:0 auto; padding:0.5in 0.6in;
+    font-size:12.5px; line-height:1.42;
+  }
+  h1,h2{font-family:Georgia,"Playfair Display",serif;}
+  .band{
+    background:linear-gradient(135deg,#34303A,#141317);
+    color:var(--blush); border-radius:14px;
+    padding:16px 22px; margin-bottom:14px;
+  }
+  .band .eyebrow{font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--mauve); font-weight:700;}
+  .band h1{font-size:23px; font-weight:600; margin:2px 0 1px;}
+  .band .date{font-size:11.5px; color:#CFC5CC;}
+  h2{
+    font-size:14.5px; color:var(--deep); margin:14px 0 6px;
+    padding-bottom:3px; border-bottom:2px solid var(--mauve);
+  }
+  h2 .tag{
+    font-family:"DM Sans",system-ui,sans-serif;
+    font-size:9.5px; letter-spacing:1px; text-transform:uppercase;
+    border-radius:100px; padding:2px 8px; vertical-align:2px; margin-left:7px; font-weight:700;
+  }
+  .tag.tech{background:var(--charcoal); color:var(--blush);}
+  .tag.client{background:var(--mauve); color:var(--charcoal);}
+  .tag.both{background:var(--gold); color:var(--charcoal);}
+  .item{display:flex; gap:9px; align-items:flex-start; margin-bottom:5px;}
+  .box{flex:0 0 auto; width:13px; height:13px; margin-top:2px; border:2px solid var(--deep); border-radius:3px;}
+  .why{color:var(--muted); font-size:11.5px;}
+  .ui{background:var(--blush); border:1px solid var(--mauve); border-radius:5px; padding:0 5px; font-weight:600; white-space:nowrap;}
+  .warn{
+    background:var(--ivory); border-left:4px solid var(--gold);
+    border-radius:0 9px 9px 0; padding:8px 12px; margin:8px 0; font-size:11.5px;
+  }
+  code{font-family:Consolas,monospace; font-size:11px; color:var(--deep); font-weight:700;}
+  table.log{width:100%; border-collapse:collapse; margin-top:5px;}
+  table.log th{text-align:left; font-size:10px; letter-spacing:1px; text-transform:uppercase; color:var(--deep); border-bottom:2px solid var(--mauve); padding:3px 5px;}
+  table.log td{border-bottom:1px solid #C9C2CC; height:26px; padding:0 5px;}
+  table.log td:first-child{width:26%;}
+  table.log td:last-child{width:16%;}
+  .foot{margin-top:14px; font-size:11px; color:var(--muted); text-align:center;}
+  @media print{
+    body{padding:0.2in 0.1in;}
+    *{-webkit-print-color-adjust:exact; print-color-adjust:exact;}
+    h2{break-after:avoid;}
+    .pagebreak{break-before:page;}
+  }
+</style>
+</head>
+<body>
+
+<div class="band">
+  <div class="eyebrow">My Nail Connection 3.0 &middot; phone-first cutover</div>
+  <h1>Full Test Punchlist</h1>
+  <div class="date">Client phone: (480) 699-6166 &nbsp;&middot;&nbsp; Tech phone: (480) 440-2314 &nbsp;&middot;&nbsp; mynailconnection.com/v3/app</div>
+</div>
+
+<h2>0. Setup, before touching either phone <span class="tag both">Once</span></h2>
+<div class="item"><span class="box"></span><div>All SQL through <code>phone-auth-stage-e-reminder-keys.sql</code> has been run (B, C, D, E; normalize is confirmed done).</div></div>
+<div class="item"><span class="box"></span><div>Run <code>cleanup-test-phone-accounts.sql</code> so BOTH test numbers start as clean slates. <span class="why">Review step first; it targets only 6166 and 2314.</span></div></div>
+<div class="item"><span class="box"></span><div>On both phones: if the app is on the home screen, <strong>remove and re-add it</strong>. <span class="why">Checks the new hat-lady icon AND is required on iPhone for push to work at all (iOS only delivers web push to installed home-screen apps).</span></div></div>
+<div class="item"><span class="box"></span><div>Open <strong>mynailconnection.com/v3/app</strong> fresh on both phones (pull to refresh once).</div></div>
+
+<h2>1. Tech signup, the storefront <span class="tag tech">Tech 2314</span></h2>
+<div class="item"><span class="box"></span><div>Sign up: enter (480) 440-2314 &rarr; <span class="ui">Text me a code</span> &rarr; SMS arrives fast &rarr; code &rarr; <span class="ui">Verify</span>.</div></div>
+<div class="item"><span class="box"></span><div>Profile step: name, pick <strong>Nail Tech</strong>, ZIP. <strong>Leave email BLANK.</strong> &rarr; <span class="ui">Create my account</span> &rarr; lands on the tech dashboard. <span class="why">Blank email is the point, the whole system must work without one.</span></div></div>
+<div class="item"><span class="box"></span><div><strong>Wrong-code check</strong> (during signup, before the right code): type a wrong 6-digit code once &rarr; friendly error, <span class="ui">Resend code</span> works.</div></div>
+<div class="item"><span class="box"></span><div><strong>The walkthrough appears automatically</strong>, 7 slides. <strong>Swipe left</strong> advances, <strong>swipe right</strong> goes back, dots track, Skip works.</div></div>
+<div class="item"><span class="box"></span><div>Replay it later: profile menu &rarr; <span class="ui">Replay the tutorial</span> &rarr; the TECH version shows (not the client one).</div></div>
+<div class="item"><span class="box"></span><div>Notification prompt: tap <strong>Allow</strong>. <span class="why">Everything in section 4 depends on this.</span></div></div>
+<div class="item"><span class="box"></span><div>"Good morning" on the dashboard reads as plain text, nothing happens when tapped, nothing looks tappable.</div></div>
+
+<h2>2. Tech profile + photos <span class="tag tech">Tech 2314</span></h2>
+<div class="item"><span class="box"></span><div><span class="ui">Manage Profile</span>: add a profile photo, bio, city and state. <strong>Save with email still blank</strong> &rarr; saves clean, no "email required."</div></div>
+<div class="item"><span class="box"></span><div>Reopen Manage Profile &rarr; everything stuck. <span class="why">Confirms the save UPDATED your row instead of quietly making a duplicate.</span></div></div>
+<div class="item"><span class="box"></span><div>From the client phone (still signed out): browse the Gallery/list, your tech appears <strong>exactly once</strong>. <span class="why">Duplicate check from the outside.</span></div></div>
+<div class="item"><span class="box"></span><div>Upload a photo (first one is free) &rarr; it appears in your gallery and survives a sign-out/in.</div></div>
+<div class="item"><span class="box"></span><div>Leave it untagged on purpose &rarr; the <strong>"1 photo to tag"</strong> chip appears on the dashboard, tapping it opens your photos.</div></div>
+<div class="item"><span class="box"></span><div>Tag the photo (Shape, Type, Style) &rarr; the chip goes away.</div></div>
+<div class="item"><span class="box"></span><div>Remove a photo &rarr; it's gone and stays gone after reopening.</div></div>
+<div class="item"><span class="box"></span><div><span class="ui">See What Clients See</span> &rarr; your public profile exactly as clients get it; back arrow returns to the dashboard.</div></div>
+
+<h2>3. Tech booking setup <span class="tag tech">Tech 2314</span></h2>
+<div class="item"><span class="box"></span><div>Bookings &rarr; add a <strong>service</strong> (name, duration, price) &rarr; saves. <span class="why">This exact spot threw "new row violates" before Stage B.</span></div></div>
+<div class="item"><span class="box"></span><div>Add <strong>weekly hours</strong> (give tomorrow a window) &rarr; saves. Edit a window, delete a window, both stick.</div></div>
+<div class="item"><span class="box"></span><div>Flip <strong>booking ON</strong>.</div></div>
+<div class="item"><span class="box"></span><div>Add a <strong>time-off</strong> day next week &rarr; saves; delete it &rarr; gone.</div></div>
+<div class="item"><span class="box"></span><div>Flip <strong>Available Today</strong> ON &rarr; sign out, sign back in &rarr; still ON. <span class="why">This silently saved nothing for phone techs until yesterday.</span></div></div>
+<div class="item"><span class="box"></span><div>Sign out (button on dashboard) &rarr; splash. Sign back in by phone &rarr; straight to YOUR dashboard, everything intact.</div></div>
+<div class="item"><span class="box"></span><div>Tap sign UP with the same number &rarr; recognized as returning, no second signup.</div></div>
+
+<h2>4. Client side <span class="tag client">Client 6166</span></h2>
+<div class="item"><span class="box"></span><div><strong>Guest first:</strong> browse without signing in, Gallery loads, tech profiles open, filters work, your test tech's tile <strong>glows</strong> (Available Today from step 3).</div></div>
+<div class="item"><span class="box"></span><div>Sign up: (480) 699-6166 &rarr; code &rarr; name + ZIP only. <strong>No email field should appear at all for clients.</strong></div></div>
+<div class="item"><span class="box"></span><div>Client home "Good morning" is plain text, not a button.</div></div>
+<div class="item"><span class="box"></span><div>Notification prompt: <strong>Allow</strong> on this phone too.</div></div>
+<div class="item"><span class="box"></span><div><strong>Autofill check:</strong> on any phone field, accept the phone's suggested number &rarr; it formats to (480) 699-6166 with ALL the right digits. <span class="why">Used to mangle to (148) 044-... by dropping the last digit.</span></div></div>
+<div class="item"><span class="box"></span><div>Heart a photo &rarr; shows in Profile &rarr; Inspo. Star the test tech &rarr; shows in Favorites. <span class="why">If favoriting the phone-only tech acts weird, log it, the favorites re-keying is mid-build in a separate task.</span></div></div>
+
+<h2>5. The handshake, booking end to end <span class="tag both">Both phones</span></h2>
+<div class="item"><span class="box"></span><div>Client: open the tech's profile &rarr; <span class="ui">Book</span> &rarr; pick the service, tomorrow, a time &rarr; confirm. Booking created.</div></div>
+<div class="item"><span class="box"></span><div><strong>Tech phone pings</strong> "New booking request" within seconds. <span class="why">The moment of truth for the whole push chain.</span></div></div>
+<div class="item"><span class="box"></span><div>Tech: badge on the dashboard Bookings tile; open it, the request is there with the client's name and NUMBER (no email, and nothing reads "undefined").</div></div>
+<div class="item"><span class="box"></span><div>Tech confirms &rarr; <strong>client phone pings</strong> the confirmation.</div></div>
+<div class="item"><span class="box"></span><div>Client: My Appointments shows it as confirmed.</div></div>
+<div class="item"><span class="box"></span><div>Client cancels it &rarr; <strong>tech phone pings</strong> the cancellation.</div></div>
+<div class="item"><span class="box"></span><div>Tech: flip <strong>auto-confirm ON</strong>. Client books again &rarr; instantly confirmed, no tech action.</div></div>
+<div class="item"><span class="box"></span><div><strong>Reminder check (patience required):</strong> book a slot 2 to 3 hours from now and leave it. Within ~15 minutes of entering the 3-hour window, BOTH phones get the reminder. <span class="why">Cron runs every 15 minutes; day-before fires the same way at 24h.</span></div></div>
+<div class="item"><span class="box"></span><div>Double-book attempt: with both phones on the same tech's calendar, try booking the same slot twice &rarr; the second gets "just taken."</div></div>
+
+<h2>6. Blocklist <span class="tag both">Both phones</span></h2>
+<div class="item"><span class="box"></span><div>Tech: Bookings &rarr; block <strong>4806996166</strong> (type it as a phone number). It lists formatted as (480) 699-6166.</div></div>
+<div class="item"><span class="box"></span><div>Client: try to book the tech &rarr; no open slots / generic "not taking bookings." <strong>Nothing says blocked.</strong> <span class="why">Quiet by design; and this simply didn't work for phone clients before Stage D.</span></div></div>
+<div class="item"><span class="box"></span><div>Tech: unblock &rarr; client can book again.</div></div>
+
+<h2>7. Odds and ends <span class="tag both">Either</span></h2>
+<div class="item"><span class="box"></span><div>The sign-in screen shows <strong>no email option anywhere</strong>, phone only.</div></div>
+<div class="item"><span class="box"></span><div>Contact the developer &rarr; send a note &rarr; it lands in your inbox, and the phone field came pre-filled with the sender's number.</div></div>
+<div class="item"><span class="box"></span><div>Close the installed app fully, reopen from the home-screen icon &rarr; still signed in, lands on the right home.</div></div>
+<div class="item"><span class="box"></span><div>Back arrow is visible on every auth screen (no invisible white circle), and from the code screen it returns to the phone-entry step.</div></div>
+
+<div class="warn"><strong>If a push never arrives:</strong> check the phone allowed notifications for the site (Settings &rarr; Notifications), confirm the app was re-added to the home screen (iPhone requirement), then tell me, I can read the send-push function logs from here. <strong>Anything else off:</strong> screen name + what it said in the log below, keep moving, don't debug in the moment.</div>
+
+<h2>Bug log</h2>
+<table class="log">
+  <tr><th>Screen</th><th>What happened</th><th>Which phone</th></tr>
+  <tr><td></td><td></td><td></td></tr>
+  <tr><td></td><td></td><td></td></tr>
+  <tr><td></td><td></td><td></td></tr>
+  <tr><td></td><td></td><td></td></tr>
+  <tr><td></td><td></td><td></td></tr>
+  <tr><td></td><td></td><td></td></tr>
+  <tr><td></td><td></td><td></td></tr>
+</table>
+
+<div class="foot">My Nail Connection 3.0 &middot; full-system punchlist &middot; July 24, 2026</div>
+
+</body>
+</html>
