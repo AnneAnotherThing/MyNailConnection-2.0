@@ -4949,8 +4949,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 453,         /* __APP_BUILD_ANDROID__ */
-  ios:     258,          /* __APP_BUILD_IOS__     */
+  android: 454,         /* __APP_BUILD_ANDROID__ */
+  ios:     259,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -14792,34 +14792,45 @@ function styleNavForRole() {
   var galleryCard = document.getElementById('home-my-gallery-card');
   if (galleryCard) galleryCard.style.display = isTechSlot ? 'block' : 'none';
 
-  // Swap the bottom-nav "Sign Out" slot → "My Gallery" for techs.
-  // Sign-out moves to a small header icon (home-signout-btn) so techs
-  // don't lose the action. Non-techs keep Sign Out where it is.
-  // 2026-04-22 per Anne.
+  // The auth slot (design review punch 09, 2026-07-30): Sign Out no
+  // longer spends a third of the nav. Anonymous browsers keep the
+  // Sign In door; signed-in techs get My Gallery (as before,
+  // 2026-04-22); signed-in clients now get a Gallery tab. Sign Out
+  // lives on the profile screen (clients, the "My Saves" surface) and
+  // the home header icon (techs), both pre-existing.
   var GALLERY_ICON = '<rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>';
-  var SIGNOUT_ICON = '<path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>';
+  var SIGNIN_ICON = '<path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>';
   document.querySelectorAll('.bottom-nav .nav-item').forEach(function(item) {
     var lbl = item.querySelector('.nav-label');
     if (!lbl) return;
     var text = (lbl.textContent || '').trim();
-    if (text !== 'Sign Out' && text !== 'My Gallery') return;
+    if (text !== 'Sign Out' && text !== 'My Gallery' && text !== 'Gallery' && text !== 'Sign In') return;
     var svg = item.querySelector('.nav-icon svg');
-    if (isTechSlot) {
+    if (!currentUserEmail) {
+      lbl.textContent = 'Sign In';
+      if (svg) svg.innerHTML = SIGNIN_ICON;
+      item.setAttribute('onclick', 'authNav()');
+      item.setAttribute('title', 'Sign In');
+      item.style.opacity = '1';
+    } else if (isTechSlot) {
       lbl.textContent = 'My Gallery';
       if (svg) svg.innerHTML = GALLERY_ICON;
       item.setAttribute('onclick', "show('my-photos')");
       item.setAttribute('title', 'My Gallery');
       item.style.opacity = '';
     } else {
-      lbl.textContent = 'Sign Out';
-      if (svg) svg.innerHTML = SIGNOUT_ICON;
-      item.setAttribute('onclick', 'doSignOut()');
-      item.setAttribute('title', 'Sign Out');
-      item.style.opacity = '0.55';
+      lbl.textContent = 'Gallery';
+      if (svg) svg.innerHTML = GALLERY_ICON;
+      item.setAttribute('onclick', "show('browse-style')");
+      item.setAttribute('title', 'Gallery');
+      item.style.opacity = '';
     }
   });
+  // Punch 09: with Sign Out off the nav, the header icon serves every
+  // signed-in role, not just techs. (Clients also have the Sign Out
+  // button on their profile screen.)
   var signoutBtn = document.getElementById('home-signout-btn');
-  if (signoutBtn) signoutBtn.style.display = isTechSlot ? 'flex' : 'none';
+  if (signoutBtn) signoutBtn.style.display = currentUserEmail ? 'flex' : 'none';
 }
 
 // ── Tech Dashboard ────────────────────────────────────────────────────────────
@@ -14867,12 +14878,29 @@ function backFromAuth() {
 // signed-in-only surfaces and are left alone. 2026-07-17.
 function authNav() { if (currentUserEmail) { doSignOut(); } else { startPhoneAuth('signin'); } }
 function styleAuthNav() {
+  // Punch 09 (2026-07-30): anonymous -> Sign In (the door). Signed-in ->
+  // a Gallery tab; styleNavForRole upgrades it to My Gallery for techs
+  // right after this runs in show(). Sign Out lives on the profile
+  // screen and the home header icon.
   var anon = !currentUserEmail;
+  var GALLERY_ICON = '<rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>';
+  var SIGNIN_ICON = '<path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>';
   document.querySelectorAll('.auth-nav').forEach(function(el){
     var lbl = el.querySelector('.nav-label');
-    if (lbl) lbl.textContent = anon ? 'Sign In' : 'Sign Out';
-    el.setAttribute('title', anon ? 'Sign In' : 'Sign Out');
-    el.style.opacity = anon ? '1' : '0.55';
+    var svg = el.querySelector('.nav-icon svg');
+    if (anon) {
+      if (lbl) lbl.textContent = 'Sign In';
+      if (svg) svg.innerHTML = SIGNIN_ICON;
+      el.setAttribute('onclick', 'authNav()');
+      el.setAttribute('title', 'Sign In');
+      el.style.opacity = '1';
+    } else if ((lbl && (lbl.textContent || '').trim()) !== 'My Gallery') {
+      if (lbl) lbl.textContent = 'Gallery';
+      if (svg) svg.innerHTML = GALLERY_ICON;
+      el.setAttribute('onclick', "show('browse-style')");
+      el.setAttribute('title', 'Gallery');
+      el.style.opacity = '';
+    }
   });
 }
 
