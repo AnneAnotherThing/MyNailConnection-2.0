@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300..800;1,9..40,300..700&family=Playfair+Display:ital,wght@0,400..800;1,400..700&display=swap" rel="stylesheet"/>
+<style>
+  body{margin:0;padding:0;background:#EDEAE5;}
+  a{color:#A2636C;}
+  a:hover{color:#0B0B0D;}
+</style>
+</helmet>
+
+<div style="font-family:'DM Sans',sans-serif;background:#EDEAE5;padding:56px 56px 120px;color:#0B0B0D;">
+
+  <!-- ── HEADER ─────────────────────────────────────────────── -->
+  <div style="max-width:1180px;">
+    <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#7A6E78;">Launch campaign · 5 days</div>
+    <h1 style="font-family:'Playfair Display',serif;font-size:52px;font-weight:600;line-height:1.05;letter-spacing:-0.5px;margin:12px 0 0;">She knows. She isn't telling yet.</h1>
+    <div style="font-size:16px;line-height:1.65;color:#4A4A4F;max-width:780px;margin-top:16px;text-wrap:pretty;">
+      Her eyes are already hidden by the brim, so she's doing the withholding for us. Each day the curtain drops a little further down the artwork &mdash; day 5 is a black band and a sliver of cheek, and by launch you're all the way down to the nails. Same image every day, so the grid reads as one story instead of five unrelated posts.
+    </div>
+    <div style="font-size:14.5px;line-height:1.65;color:#7A6E78;max-width:780px;margin-top:12px;">
+      Stories 1080&times;1920, feed posts 1080&times;1080, at true size &mdash; zoom in to check detail. It's a reveal rather than a zoom on purpose: the artwork is only 900px, so magnifying it would have gone soft. This way it stays crisp.
+    </div>
+  </div>
+
+  <!-- ── STORIES ────────────────────────────────────────────── -->
+  <div style="margin-top:52px;">
+    <div style="font-size:12px;font-weight:700;letter-spacing:2.4px;text-transform:uppercase;color:#A2636C;border-bottom:2px solid #0B0B0D;padding-bottom:9px;max-width:1180px;">Stories · 1080 &times; 1920</div>
+
+    <div style="display:flex;gap:40px;margin-top:32px;align-items:flex-start;">
+
+      <!-- STORY DAY 5 -->
+      <div>
+        <div style="font-size:13px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:#7A6E78;margin-bottom:12px;">Day 5 &middot; the tease</div>
+        <div id="story-d5" style="width:1080px;height:1920px;background:#0B0B0D;display:flex;flex-direction:column;overflow:hidden;">
+          <div style="width:1080px;height:300px;overflow:hidden;flex-shrink:0;">
+            <img src="assets/lady-card.webp" alt="" style="width:1080px;height:1080px;object-fit:cover;display:block;"/>
+          </div>
+          <div style="flex:1;padding:0 92px;display:flex;flex-direction:column;justify-content:center;">
+            <div style="font-size:26px;font-weight:700;letter-spacing:5px;text-transform:uppercase;color:#DEB3B5;">In 5 days</div>
+            <div style="font-family:'Playfair Display',serif;font-size:110px;font-weight:600;line-height:1.02;color:#fff;margin-top:28px;">Five things change for nail techs.</div>
+            <div style="font-size:36px;line-height:1.5;color:rgba(255,255,255,0.68);margin-top:34px;">One revealed every day. The last one is the price.</div>
+            <div style="font-size:24px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#DEB3B5;margin-top:56px;">mynailconnection.com</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STORY DAY 4 -->
+      <div>
+        <div style="font-size:13px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:#7A6E78;margin-bottom:12px;">Day 4 &middot; reveal one</div>
+        <div id="story-d4" style="width:1080px;height:1920px;background:#0B0B0D;display:flex;flex-direction:column;overflow:hidden;">
+          <div style="width:1080px;height:420px;overflow:hidden;flex-shrink:0;">
+            <img src="assets/lady-card.webp" alt="" style="width:1080px;height:1080px;object-fit:cover;display:block;"/>
+          </div>
+          <div style="flex:1;padding:0 92px;display:flex;flex-direction:column;justify-content:center;">
+            <div style="font-size:26px;font-weight:700;letter-spacing:5px;text-transform:uppercase;color:#DEB3B5;">One of five</div>
+            <div style="font-family:'Playfair Display',serif;font-size:106px;font-weight:600;line-height:1.02;color:#fff;margin-top:26px;">A booking page of your own.</div>
+            <div style="font-size:36px;line-height:1.5;color:rgba(255,255,255,0.68);margin-top:32px;">Clients pick a service, a day, a time. No DMs. No "let me check."</div>
+            <div style="font-size:24px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#DEB3B5;margin-top:52px;">4 days to go</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STORY DAY 3 -->
+      <div>
+        <div style="font-size:13px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:#7A6E78;margin-bottom:12px;">Day 3 &middot; reveal two</div>
+        <div id="story-d3" style="width:1080px;height:1920px;background:#0B0B0D;display:flex;flex-direction:column;overflow:hidden;">
+          <div style="width:1080px;height:540px;overflow:hidden;flex-shrink:0;">
+            <img src="assets/lady-card.webp" alt="" style="width:1080px;height:1080px;object-fit:cover;display:block;"/>
+          </div>
+          <div style="flex:1;padding:0 92px;display:flex;flex-direction:column;justify-content:center;">
+            <div style="font-size:26px;font-weight:700;letter-spacing:5px;text-transform:uppercase;color:#DEB3B5;">Two of five</div>
+            <div style="font-family:'Playfair Display',serif;font-size:106px;font-weight:600;line-height:1.02;color:#fff;margin-top:26px;">Nobody takes a cut.</div>
+            <div style="font-size:36px;line-height:1.5;color:rgba(255,255,255,0.68);margin-top:32px;">Not a percentage of your bookings. Not a fee added to your clients.</div>
+            <div style="font-size:24px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#DEB3B5;margin-top:52px;">3 days to go</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STORY DAY 2 -->
+      <div>
+        <div style="font-size:13px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:#7A6E78;margin-bottom:12px;">Day 2 &middot; reveal three</div>
+        <div id="story-d2" style="width:1080px;height:1920px;background:#0B0B0D;display:flex;flex-direction:column;overflow:hidden;">
+          <div style="width:1080px;height:660px;overflow:hidden;flex-shrink:0;">
+            <img src="assets/lady-card.webp" alt="" style="width:1080px;height:1080px;object-fit:cover;display:block;"/>
+          </div>
+          <div style="flex:1;padding:0 92px;display:flex;flex-direction:column;justify-content:center;">
+            <div style="font-size:26px;font-weight:700;letter-spacing:5px;text-transform:uppercase;color:#DEB3B5;">Three of five</div>
+            <div style="font-family:'Playfair Display',serif;font-size:100px;font-weight:600;line-height:1.02;color:#fff;margin-top:24px;">Photos that never expire.</div>
+            <div style="font-size:34px;line-height:1.5;color:rgba(255,255,255,0.68);margin-top:28px;">Post a set once and it keeps working. Nothing vanishes in 24 hours.</div>
+            <div style="font-size:24px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#DEB3B5;margin-top:44px;">2 days to go</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STORY DAY 1 -->
+      <div>
+        <div style="font-size:13px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:#7A6E78;margin-bottom:12px;">Day 1 &middot; reveal four + the hook</div>
+        <div id="story-d1" style="width:1080px;height:1920px;background:#0B0B0D;display:flex;flex-direction:column;overflow:hidden;">
+          <div style="width:1080px;height:800px;overflow:hidden;flex-shrink:0;">
+            <img src="assets/lady-card.webp" alt="" style="width:1080px;height:1080px;object-fit:cover;display:block;"/>
+          </div>
+          <div style="flex:1;padding:0 92px;display:flex;flex-direction:column;justify-content:center;">
+            <div style="font-size:26px;font-weight:700;letter-spacing:5px;text-transform:uppercase;color:#DEB3B5;">Four of five</div>
+            <div style="font-family:'Playfair Display',serif;font-size:88px;font-weight:600;line-height:1.02;color:#fff;margin-top:20px;">Found by your actual work.</div>
+            <div style="margin-top:30px;border-top:2px solid rgba(222,179,181,0.4);padding-top:26px;">
+              <div style="font-family:'Playfair Display',serif;font-style:italic;font-size:58px;color:#DEB3B5;line-height:1.15;">Tomorrow: what it costs.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STORY LAUNCH -->
+      <div>
+        <div style="font-size:13px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:#A2636C;margin-bottom:12px;">Launch day &middot; the payoff</div>
+        <div id="story-d0" style="width:1080px;height:1920px;background:#DEB3B5;display:flex;flex-direction:column;overflow:hidden;">
+          <div style="width:1080px;height:1080px;overflow:hidden;flex-shrink:0;">
+            <img src="assets/lady-card.webp" alt="" style="width:1080px;height:1080px;object-fit:cover;display:block;"/>
+          </div>
+          <div style="flex:1;background:#DEB3B5;padding:0 92px;display:flex;flex-direction:column;justify-content:center;">
+            <div style="font-size:26px;font-weight:700;letter-spacing:5px;text-transform:uppercase;color:#0B0B0D;">And the price</div>
+            <div style="font-family:'Playfair Display',serif;font-size:158px;font-weight:700;line-height:0.94;color:#0B0B0D;margin-top:22px;">Free.<br/>All of it.</div>
+            <div style="font-size:34px;line-height:1.45;color:#0B0B0D;opacity:0.82;margin-top:28px;">Booking, your profile, and 50 looks a month in the Gallery.</div>
+            <div style="font-size:24px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#0B0B0D;margin-top:38px;">mynailconnection.com</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── FEED SQUARES ───────────────────────────────────────── -->
+  <div style="margin-top:72px;">
+    <div style="font-size:12px;font-weight:700;letter-spacing:2.4px;text-transform:uppercase;color:#A2636C;border-bottom:2px solid #0B0B0D;padding-bottom:9px;max-width:1180px;">Feed posts · 1080 &times; 1080 &middot; also works as a launch-day carousel</div>
+
+    <div style="display:flex;gap:40px;margin-top:32px;align-items:flex-start;">
+
+      <div>
+        <div style="font-size:13px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:#7A6E78;margin-bottom:12px;">Day 5</div>
+        <div id="feed-d5" style="width:1080px;height:1080px;background:#0B0B0D;display:flex;flex-direction:column;overflow:hidden;">
+          <div style="width:1080px;height:220px;overflow:hidden;flex-shrink:0;">
+            <img src="assets/lady-card.webp" alt="" style="width:1080px;height:1080px;object-fit:cover;display:block;"/>
+          </div>
+          <div style="flex:1;padding:0 80px;display:flex;flex-direction:column;justify-content:center;">
+            <div style="font-size:23px;font-weight:700;letter-spacing:4.5px;text-transform:uppercase;color:#DEB3B5;">In 5 days</div>
+            <div style="font-family:'Playfair Display',serif;font-size:98px;font-weight:600;line-height:1.03;color:#fff;margin-top:24px;">Five things change for nail techs.</div>
+            <div style="font-size:32px;line-height:1.5;color:rgba(255,255,255,0.66);margin-top:28px;">One revealed every day. The last one is the price.</div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div style="font-size:13px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:#7A6E78;margin-bottom:12px;">Day 4</div>
+        <div id="feed-d4" style="width:1080px;height:1080px;background:#0B0B0D;display:flex;flex-direction:column;overflow:hidden;">
+          <div style="width:1080px;height:300px;overflow:hidden;flex-shrink:0;">
+            <img src="assets/lady-card.webp" alt="" style="width:1080px;height:1080px;object-fit:cover;display:block;"/>
+          </div>
+          <div style="flex:1;padding:0 80px;display:flex;flex-direction:column;justify-content:center;">
+            <div style="font-size:23px;font-weight:700;letter-spacing:4.5px;text-transform:uppercase;color:#DEB3B5;">One of five &middot; 4 days to go</div>
+            <div style="font-family:'Playfair Display',serif;font-size:88px;font-weight:600;line-height:1.03;color:#fff;margin-top:22px;">A booking page of your own.</div>
+            <div style="font-size:30px;line-height:1.5;color:rgba(255,255,255,0.66);margin-top:24px;">Clients pick a service, a day, a time. No DMs.</div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div style="font-size:13px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:#7A6E78;margin-bottom:12px;">Day 3</div>
+        <div id="feed-d3" style="width:1080px;height:1080px;background:#0B0B0D;display:flex;flex-direction:column;overflow:hidden;">
+          <div style="width:1080px;height:380px;overflow:hidden;flex-shrink:0;">
+            <img src="assets/lady-card.webp" alt="" style="width:1080px;height:1080px;object-fit:cover;display:block;"/>
+          </div>
+          <div style="flex:1;padding:0 80px;display:flex;flex-direction:column;justify-content:center;">
+            <div style="font-size:23px;font-weight:700;letter-spacing:4.5px;text-transform:uppercase;color:#DEB3B5;">Two of five &middot; 3 days to go</div>
+            <div style="font-family:'Playfair Display',serif;font-size:88px;font-weight:600;line-height:1.03;color:#fff;margin-top:22px;">Nobody takes a cut.</div>
+            <div style="font-size:30px;line-height:1.5;color:rgba(255,255,255,0.66);margin-top:24px;">Not from your bookings. Not from your clients.</div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div style="font-size:13px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:#7A6E78;margin-bottom:12px;">Day 2</div>
+        <div id="feed-d2" style="width:1080px;height:1080px;background:#0B0B0D;display:flex;flex-direction:column;overflow:hidden;">
+          <div style="width:1080px;height:460px;overflow:hidden;flex-shrink:0;">
+            <img src="assets/lady-card.webp" alt="" style="width:1080px;height:1080px;object-fit:cover;display:block;"/>
+          </div>
+          <div style="flex:1;padding:0 80px;display:flex;flex-direction:column;justify-content:center;">
+            <div style="font-size:23px;font-weight:700;letter-spacing:4.5px;text-transform:uppercase;color:#DEB3B5;">Three of five &middot; 2 days to go</div>
+            <div style="font-family:'Playfair Display',serif;font-size:82px;font-weight:600;line-height:1.03;color:#fff;margin-top:20px;">Photos that never expire.</div>
+            <div style="font-size:29px;line-height:1.5;color:rgba(255,255,255,0.66);margin-top:22px;">Post once. Nothing vanishes in 24 hours.</div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div style="font-size:13px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:#7A6E78;margin-bottom:12px;">Day 1</div>
+        <div id="feed-d1" style="width:1080px;height:1080px;background:#0B0B0D;display:flex;flex-direction:column;overflow:hidden;">
+          <div style="width:1080px;height:540px;overflow:hidden;flex-shrink:0;">
+            <img src="assets/lady-card.webp" alt="" style="width:1080px;height:1080px;object-fit:cover;display:block;"/>
+          </div>
+          <div style="flex:1;padding:0 80px;display:flex;flex-direction:column;justify-content:center;">
+            <div style="font-size:23px;font-weight:700;letter-spacing:4.5px;text-transform:uppercase;color:#DEB3B5;">Four of five</div>
+            <div style="font-family:'Playfair Display',serif;font-size:76px;font-weight:600;line-height:1.03;color:#fff;margin-top:16px;">Found by your actual work.</div>
+            <div style="margin-top:22px;border-top:2px solid rgba(222,179,181,0.4);padding-top:20px;">
+              <div style="font-family:'Playfair Display',serif;font-style:italic;font-size:50px;color:#DEB3B5;line-height:1.15;">Tomorrow: what it costs.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div style="font-size:13px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:#A2636C;margin-bottom:12px;">Launch day</div>
+        <div id="feed-d0" style="width:1080px;height:1080px;background:#DEB3B5;display:flex;flex-direction:column;overflow:hidden;">
+          <div style="width:1080px;height:660px;overflow:hidden;flex-shrink:0;">
+            <img src="assets/lady-card.webp" alt="" style="width:1080px;height:1080px;object-fit:cover;display:block;"/>
+          </div>
+          <div style="flex:1;background:#DEB3B5;padding:0 80px;display:flex;flex-direction:column;justify-content:center;">
+            <div style="font-size:23px;font-weight:700;letter-spacing:4.5px;text-transform:uppercase;color:#0B0B0D;">And the price</div>
+            <div style="font-family:'Playfair Display',serif;font-size:108px;font-weight:700;line-height:0.96;color:#0B0B0D;margin-top:14px;">Free. All of it.</div>
+            <div style="font-size:28px;line-height:1.45;color:#0B0B0D;opacity:0.82;margin-top:18px;">Booking, your profile, 50 looks a month. mynailconnection.com</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── CAPTIONS ───────────────────────────────────────────── -->
+  <div style="margin-top:72px;max-width:1180px;">
+    <div style="font-size:12px;font-weight:700;letter-spacing:2.4px;text-transform:uppercase;color:#A2636C;border-bottom:2px solid #0B0B0D;padding-bottom:9px;">Captions · ready to paste</div>
+
+    <div style="display:flex;flex-direction:column;gap:14px;margin-top:26px;">
+      <sc-for list="{{ captions }}" as="cap" hint-placeholder-count="6">
+        <div style="background:#fff;border-radius:16px;padding:22px 26px;">
+          <div style="font-size:11px;font-weight:700;letter-spacing:1.6px;text-transform:uppercase;color:#A2636C;">{{ cap.day }}</div>
+          <div style="font-size:15.5px;line-height:1.7;color:#0B0B0D;margin-top:9px;white-space:pre-wrap;">{{ cap.text }}</div>
+        </div>
+      </sc-for>
+    </div>
+
+    <div style="background:#0B0B0D;border-radius:18px;padding:28px 32px;margin-top:26px;">
+      <div style="font-family:'Playfair Display',serif;font-size:22px;font-weight:600;color:#fff;">How to run it</div>
+      <div style="font-size:15px;line-height:1.75;color:rgba(255,255,255,0.72);margin-top:12px;">
+        Post the story each morning and the feed square the same day, so anyone who only catches one still gets the build. Save every story to a Highlight called <b style="color:#fff;">3.0</b> &mdash; the curtain dropping is only legible as a sequence, and it's completely lost if they expire.
+      </div>
+      <div style="font-size:15px;line-height:1.75;color:rgba(255,255,255,0.72);margin-top:12px;">
+        On launch day, post all six feed squares together as one carousel. Anybody who missed the week swipes the whole story in ten seconds and lands on <b style="color:#DEB3B5;">Free. All of it.</b>
+      </div>
+      <div style="font-size:15px;line-height:1.75;color:rgba(255,255,255,0.72);margin-top:12px;">
+        Don't answer the price in the comments before launch day. Someone will guess, someone will argue, and that argument is the campaign working.
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1400,&quot;height&quot;:900}}">
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      captions: [
+        {
+          day: 'Day 5 · the tease',
+          text: 'Five things are about to change for nail techs.\n\nOne revealed every day this week. The last one is the price, and that is the one you will want to talk about.\n\nmynailconnection.com\n\n#nailtech #nailtechlife #nailsofinstagram #nailtechbusiness #licensednailtech'
+        },
+        {
+          day: 'Day 4 · a booking page of your own',
+          text: 'One of five: a booking page that is actually yours.\n\nClients pick a service, a day, and a time. No DMs at 11pm. No "let me check and get back to you." No scrolling back through a thread to find what she asked for.\n\nFour to go. The price is last.\n\n#nailtech #nailtechlife #nailbooking #salonlife #nailtechbusiness'
+        },
+        {
+          day: 'Day 3 · nobody takes a cut',
+          text: 'Two of five: nobody takes a cut.\n\nNot a percentage of your bookings. Not a fee quietly added to your client at checkout. Not now, not later, not once we get big.\n\nYou already know which apps do. Three days.\n\n#nailtech #nailtechlife #nailtechbusiness #smallbusinessowner #beautyindustry'
+        },
+        {
+          day: 'Day 2 · photos that never expire',
+          text: 'Three of five: photos that never expire.\n\nYou post a set to your story, it is gone in 24 hours, and next week you post the same kind of set again. Here it stays up and keeps working. The ombre you did last spring is still bringing you clients next spring.\n\nTwo days.\n\n#nailtech #nailportfolio #nailsofinstagram #nailtechlife #nailinspo'
+        },
+        {
+          day: 'Day 1 · found by your actual work',
+          text: 'Four of five: clients find you by your actual work.\n\nNot by hashtags. Not by who posted most recently. Someone searching almond, soft gel, chrome, near me lands on the set you made.\n\nTomorrow you find out what all of this costs. Guesses in the comments.\n\n#nailtech #nailtechlife #almondnails #chromenails #nailsofinstagram'
+        },
+        {
+          day: 'Launch day · the payoff',
+          text: 'It is free.\n\nAll of it. Your profile, your booking page, and 50 looks a month in the Gallery. No commission on your bookings. No fees for your clients. Nothing to cancel, because there is nothing to start.\n\nEverybody else takes a cut. We do not take anything.\n\nMy Nail Connection 3.0 is live — mynailconnection.com\n\n#nailtech #nailtechlife #nailtechbusiness #freebooking #nailsofinstagram #licensednailtech'
+        }
+      ]
+    };
+  }
+}
+
+</script>
+</body>
+</html>
