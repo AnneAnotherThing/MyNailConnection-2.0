@@ -3,8 +3,8 @@
 
 // IMPORTANT: bump this string every release so returning users get the
 // new build instead of a stale cached copy. Old caches are deleted on activate.
-const CACHE_NAME = 'mnc-v3preview-mnc-v462';
-const STATIC_ASSETS = ['./', './index.html', './manifest.json'];
+const CACHE_NAME = 'mnc-v471';
+const STATIC_ASSETS = ['/', '/index.html', '/manifest.json'];
 
 // ── Install ───────────────────────────────────────────────────────────────────
 self.addEventListener('install', event => {
@@ -18,7 +18,7 @@ self.addEventListener('install', event => {
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k.startsWith('mnc-v3preview-') && k !== CACHE_NAME).map(k => caches.delete(k)))
+      Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
     )
   );
   self.clients.claim();
