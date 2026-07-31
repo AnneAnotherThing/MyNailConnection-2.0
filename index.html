@@ -4949,8 +4949,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 455,         /* __APP_BUILD_ANDROID__ */
-  ios:     260,          /* __APP_BUILD_IOS__     */
+  android: 456,         /* __APP_BUILD_ANDROID__ */
+  ios:     261,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -10715,6 +10715,37 @@ async function saveTechEdit() {
     if (techData.image_url && techData.image_url.startsWith('data:')) {
       techData.image_url = '';
       showToast('Profile photo not saved, Supabase Storage needed. Use a URL instead.');
+    }
+
+    // Identity lock (2026-07-30): techs_update_self's WITH CHECK requires
+    // the SAVED row to still match the signed-in identity (email stays the
+    // login email / phone stays the login phone). Without this guard a
+    // tech who edits that one field gets the raw "new row violates
+    // row-level security" toast, and would lock the row away from her own
+    // login if it succeeded. Admins are exempt (techs_admin_update), they
+    // legitimately edit other techs' emails and phones.
+    var _ident = (currentUserEmail || '').trim().toLowerCase();
+    var _isAdminEditor = (window._mncCurrentRole === 'admin');
+    if (_ident && !_isAdminEditor) {
+      if (_ident.indexOf('@') > 0) {
+        if ((techData.email || '').trim().toLowerCase() !== _ident) {
+          showToast('Your email is how you sign in, so it can\u2019t change here. Message Anne from Get help to move your account.');
+          restoreSaveBtns();
+          var _teEm = document.getElementById('te-email');
+          if (_teEm) { _teEm.value = currentEditTech.email || _ident; _teEm.focus(); }
+          return;
+        }
+      } else {
+        var _identDigits = _ident.replace(/\D/g, '').slice(-10);
+        var _newDigits = (techData.phone || '').replace(/\D/g, '').slice(-10);
+        if (_identDigits && _newDigits !== _identDigits) {
+          showToast('Your phone number is how you sign in, so it can\u2019t change here. Message Anne from Get help to move your account.');
+          restoreSaveBtns();
+          var _tePh = document.getElementById('te-phone');
+          if (_tePh) { _tePh.value = currentEditTech.phone || ''; _tePh.focus(); }
+          return;
+        }
+      }
     }
 
     // Determine if this is insert (new) or update (existing)
