@@ -21,7 +21,7 @@
 //
 // Setup in RevenueCat dashboard:
 //   Project Settings → Integrations → + Add → Webhook
-//   URL:    https://ktiztunuifzbzwzyqrrq.supabase.co/functions/v1/revenuecat-webhook
+//   URL:    https://nwqnakoongrorbwnrqzc.supabase.co/functions/v1/revenuecat-webhook
 //   Header: Authorization: Bearer <REVENUECAT_WEBHOOK_AUTH_HEADER value>
 //
 // Set the secret in Supabase:

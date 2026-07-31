@@ -54,9 +54,3 @@ Disallow: /
 
 # Sitemap
 Sitemap: https://mynailconnection.com/sitemap.xml
-
-# Pre-launch 3.0 preview, kept out of search until launch
-Disallow: /marketing-v3.html
-
-# 3.0 preview, unreleased. Never index.
-Disallow: /v3/

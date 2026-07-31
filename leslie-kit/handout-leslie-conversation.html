@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex" />
+<title>My Nail Connection - Leslie &amp; Anne conversation guide (July 24)</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600;1,700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --ink: #141317; --ink-soft: #4A4A4F; --ink-faint: #7A6E78;
+    --mauve: #A2636C; --mauve-deep: #7E4E58; --blush: #F7E2E3; --cream: #FAF7F2; --line: #E4D9DA;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  body {
+    background: #E8E2E3; color: var(--ink);
+    font-family: 'DM Sans', sans-serif; line-height: 1.5;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+  .page {
+    width: 8.5in; min-height: 11in; margin: 24px auto; padding: 0.5in 0.55in;
+    background: #fff; box-shadow: 0 10px 40px rgba(0,0,0,.18); display: flex; flex-direction: column;
+  }
+  @page { size: letter portrait; margin: 0; }
+  @media print {
+    :root { --cream: #fff; }
+    body { background: none; }
+    .page { margin: 0; box-shadow: none; width: auto; min-height: auto; page-break-after: always; }
+    .page:last-child { page-break-after: auto; }
+  }
+  .head { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--ink); padding-bottom: 12px; }
+  .head-l { display: flex; align-items: center; gap: 12px; }
+  .mark { width: 46px; height: 46px; border-radius: 10px; object-fit: cover; border: 1px solid var(--line); }
+  .lockup { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 20px; }
+  .eyebrow { font-size: 10px; letter-spacing: .28em; text-transform: uppercase; font-weight: 700; color: var(--mauve); }
+  .head-r { text-align: right; font-size: 10.5px; color: var(--ink-faint); line-height: 1.45; }
+  .head-r b { color: var(--ink); font-weight: 700; }
+  h1 { font-family: 'Playfair Display', serif; font-weight: 600; font-size: 25px; line-height: 1.1; margin: 14px 0 3px; }
+  h1 em { font-style: italic; color: var(--mauve-deep); }
+  .intro { color: var(--ink-soft); font-size: 11.5px; max-width: 52em; }
+
+  .oneliner { margin-top: 11px; background: var(--ink); color: #fff; border-radius: 14px; padding: 13px 18px; }
+  .oneliner .lbl { font-size: 9.5px; letter-spacing: .2em; text-transform: uppercase; color: #E7C4C9; font-weight: 700; }
+  .oneliner .say { font-family: 'Playfair Display', serif; font-style: italic; font-size: 16.5px; line-height: 1.28; margin-top: 4px; }
+  .oneliner .say b { font-style: normal; font-weight: 700; }
+
+  .sec-h { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 14.5px; margin: 11px 0 3px; display: flex; align-items: baseline; gap: 9px; }
+  .sec-h .say { font-family: 'DM Sans', sans-serif; font-size: 10.5px; font-style: italic; color: var(--mauve-deep); font-weight: 600; }
+
+  table.cmp { width: 100%; border-collapse: collapse; margin-top: 7px; font-size: 10.8px; }
+  table.cmp th { text-align: left; font-family: 'Playfair Display', serif; font-size: 12px; padding: 5px 9px; border-bottom: 1.5px solid var(--ink); }
+  table.cmp th.mnc { color: var(--mauve-deep); }
+  table.cmp td { padding: 4px 9px; vertical-align: top; border-bottom: 1px solid var(--line); color: var(--ink-soft); }
+  table.cmp td.mnc { color: var(--ink); }
+  table.cmp tr:last-child td { border-bottom: none; }
+
+  .diff { margin-top: 8px; display: grid; gap: 6px; }
+  .diff .d { font-size: 11px; color: var(--ink-soft); padding-left: 15px; position: relative; line-height: 1.45; }
+  .diff .d::before { content: '\2014'; position: absolute; left: 0; color: var(--mauve); font-weight: 700; }
+  .diff .d b { color: var(--ink); }
+
+  .price { margin-top: 8px; background: var(--cream); border: 1px solid var(--line); border-radius: 12px; padding: 10px 15px; font-size: 11px; color: var(--ink-soft); }
+  .price b { color: var(--ink); font-family: 'Playfair Display', serif; font-size: 12px; }
+
+  .qa { margin-top: 8px; display: flex; flex-direction: column; gap: 7px; }
+  .qa .item { background: var(--cream); border: 1px solid var(--line); border-radius: 12px; padding: 9px 13px; }
+  .qa .q { font-weight: 700; font-size: 12px; color: var(--ink); }
+  .qa .q::before { content: 'Q'; display: inline-block; width: 17px; height: 17px; line-height: 17px; text-align: center; background: var(--ink); color: #fff; border-radius: 50%; font-family: 'Playfair Display', serif; font-size: 10px; margin-right: 7px; vertical-align: 1px; }
+  .qa .a { font-size: 10.6px; color: var(--ink-soft); margin-top: 4px; line-height: 1.45; padding-left: 24px; }
+  .qa .a b { color: var(--mauve-deep); }
+
+  .starters { margin-top: 8px; display: grid; gap: 6px; }
+  .starters .s { font-size: 10.6px; color: var(--ink-soft); background: var(--blush); border-radius: 10px; padding: 7px 12px; line-height: 1.4; }
+  .starters .s b { color: var(--ink); }
+
+  .foot { margin-top: auto; padding-top: 11px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; font-size: 10px; color: var(--ink-faint); }
+  .foot b { color: var(--ink); }
+</style>
+</head>
+<body>
+
+<!-- ═══════════ PAGE 1 : THE PITCH ═══════════ -->
+<div class="page">
+  <div class="head">
+    <div class="head-l">
+      <img class="mark" src="hat-mark.png" alt="My Nail Connection" />
+      <div><div class="eyebrow">My Nail Connection</div><div class="lockup">On-camera guide</div></div>
+    </div>
+    <div class="head-r"><b>Anne &amp; Leslie &#183; July 24</b><br/>Short answers first, depth underneath</div>
+  </div>
+
+  <h1>The pitch, <em>said out loud.</em></h1>
+  <p class="intro">Built for a back-and-forth on camera. Lead with the bold line, reach for the rest as it flows. Every fact here matches the 3.0 app you'll be scanning.</p>
+
+  <div class="oneliner">
+    <div class="lbl">The one-liner</div>
+    <div class="say"><b>"MNC is where you find the nails you want, and the tech near you who can actually do them."</b></div>
+  </div>
+
+  <div class="sec-h">Vs. Instagram <span class="say">"Instagram is where nail techs perform. MNC is where they get found."</span></div>
+  <table class="cmp">
+    <tr><th>Instagram</th><th class="mnc">My Nail Connection</th></tr>
+    <tr><td>You compete with the whole internet</td><td class="mnc">You compete with techs in your radius, on work quality</td></tr>
+    <tr><td>The algorithm decides who sees you</td><td class="mnc">Tags and location decide, and the client controls both</td></tr>
+    <tr><td>Inspo leads nowhere: the artist's in Ohio, or unfindable</td><td class="mnc">Every photo is attached to a bookable local artist</td></tr>
+    <tr><td>Posts die in 48 hours, endless content treadmill</td><td class="mnc">Your portfolio is permanent and searchable forever</td></tr>
+    <tr><td>Followers are mostly other techs</td><td class="mnc">Viewers are clients looking for a tech</td></tr>
+    <tr><td>You need reels, trends, captions, consistency</td><td class="mnc">You need photos of your actual work, tagged</td></tr>
+  </table>
+
+  <div class="sec-h">Vs. booking sites <span class="say">"Booking sites manage the appointment. MNC creates the client."</span></div>
+  <div class="diff">
+    <div class="d"><b>They start from the tech, we start from the work.</b> They search a name and get a list; on MNC you search the nails, chrome french, almond, gel-x, and the tech comes attached to the set you fell for.</div>
+    <div class="d"><b>They're calendars with directories bolted on.</b> Discovery is an afterthought. MNC is discovery-first, and hands the client to whatever booking the tech uses.</div>
+    <div class="d"><b>No commissions, no client poaching.</b> MNC never sits between a tech and her client relationship, or her money.</div>
+    <div class="d"><b>No switching cost.</b> She doesn't move her calendar or deposits. She adds the place clients find her.</div>
+  </div>
+  <p style="font-size:11px;color:var(--ink);margin-top:8px;"><b>The line:</b> booking sites and MNC aren't competitors, they're two halves of the funnel. <b style="color:var(--mauve-deep);">MNC fills the top.</b></p>
+
+  <div class="price">
+    <b>If pricing comes up (3.0 model):</b> Free to start, <b style="font-family:inherit;font-size:11px">your first photo's on us</b>. More photos are $1 each, or $5 for 10. Glow Up is $10.99/month for 25 feed photos a month. And booking is <b style="font-family:inherit;font-size:11px">free with no per-booking fee</b>, keep the link you already use, or turn on in-app booking. Their call.
+  </div>
+
+  <div class="foot">
+    <span>Page 1 of 2 &#183; The pitch &#183; <b>My Nail Connection</b></span>
+    <span>Made with <svg viewBox="0 0 24 24" width="10" height="10" fill="#A2636C" style="display:inline-block;vertical-align:-1px;"><path d="M12 21s-7-4.6-9.5-9C.8 8.4 2.9 4.5 6.6 4.5c2 0 3.6 1.1 5.4 2.7 1.8-1.6 3.4-2.7 5.4-2.7 3.7 0 5.8 3.9 4.1 7.5C19 16.4 12 21 12 21z"/></svg> by Hive-Rise <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#A2636C" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><ellipse cx="12" cy="15" rx="4.5" ry="5.5"/><path d="M8.2 13.5h7.6M8.2 17h7.6"/><ellipse cx="7.5" cy="7.5" rx="3" ry="2" transform="rotate(-28 7.5 7.5)"/><ellipse cx="16.5" cy="7.5" rx="3" ry="2" transform="rotate(28 16.5 7.5)"/></svg> &#183; hive-rise.com</span>
+  </div>
+</div>
+
+<!-- ═══════════ PAGE 2 : DEVIL'S ADVOCATE + STARTERS ═══════════ -->
+<div class="page">
+  <div class="head">
+    <div class="head-l">
+      <img class="mark" src="hat-mark.png" alt="My Nail Connection" />
+      <div><div class="eyebrow">My Nail Connection</div><div class="lockup">Hard questions</div></div>
+    </div>
+    <div class="head-r"><b>Attack your own idea first</b><br/>Confidence comes from this page</div>
+  </div>
+
+  <h1>The questions, <em>with answers.</em></h1>
+  <p class="intro">If you two can answer these to each other on camera, you can answer anyone.</p>
+
+  <div class="qa">
+    <div class="item"><div class="q">"Instagram's free and everyone's there. Why pay you?"</div>
+      <div class="a">Because free isn't free. Instagram costs hours of content a week for reach the algorithm may never give, to an audience that's mostly not local. MNC starts free too. Glow Up is less than one soda a week, and <b>one new regular pays for years of it</b>. The real question is what Instagram is already costing her.</div></div>
+    <div class="item"><div class="q">"Chicken and egg, no clients without techs, no techs without clients."</div>
+      <div class="a">True of every marketplace, so you <b>win one metro at a time</b>. Start dense in the West Valley. Every tech who moves her link-in-bio to MNC imports her own clients, and each of those discovers three more local techs. That's what this filming push is for.</div></div>
+    <div class="item"><div class="q">"Doesn't booking outside the app add friction?"</div>
+      <div class="a">Not anymore. In 3.0 a client can <b>book right in the app, free, in two taps</b>, or the tech's own link is right there if she'd rather keep her system, deposits and policies. Either way MNC takes no cut. We're not trying to eat her business.</div></div>
+    <div class="item"><div class="q">"What stops Booksy or Instagram from copying this?"</div>
+      <div class="a">Nothing stops features. They can't copy <b>focus</b>. Instagram will never rank nail photos by shape and material within 10 miles. Booksy's incentive is to charge for bookings, not open discovery. And we ship weekly, with founders feeding us wishes directly.</div></div>
+    <div class="item"><div class="q">"Stolen photos, catfish portfolios, how's quality?"</div>
+      <div class="a">Honestly: community plus accountability. Local density is self-policing, a tech claiming work in a small radius gets called out fast. Verification's on the roadmap. <b>"We know, and here's how we think about it,"</b> not "it's solved."</div></div>
+    <div class="item"><div class="q">"Is the market big enough? It's just nails."</div>
+      <div class="a">"Just nails" is a multi-billion-dollar US industry, hundreds of thousands of mostly independent techs with zero marketing help, exactly who big platforms ignore. Works for nails, the playbook extends to lashes, brows, hair. <b>Nails first, because that's the world Leslie knows.</b></div></div>
+  </div>
+
+  <div class="sec-h">Dialogue starters <span class="say">trade these back and forth, each is a segment</span></div>
+  <div class="starters">
+    <div class="s"><b>Leslie &rarr; Anne:</b> "For someone who's never heard of it, what's MNC in one sentence?"</div>
+    <div class="s"><b>Anne &rarr; Leslie:</b> "You've been in the nail world for years, what made you sure this needed to exist?" <em>(Her origin story is the emotional core, let her tell it.)</em></div>
+    <div class="s"><b>Leslie:</b> "I can find nail pics on Instagram all day. Why do I need another app?"</div>
+    <div class="s"><b>Anne:</b> "Walk me through what a client does the first time she opens it."</div>
+    <div class="s"><b>Either:</b> "Play devil's advocate, what's the best argument against MNC?" <em>(then answer it)</em></div>
+    <div class="s"><b>Close:</b> "What do you say to the tech watching with five open slots this week?" &rarr; <b>"Open it, load your photos, tag them, flip on Available Today. It's free. See what happens."</b></div>
+  </div>
+
+  <div class="foot">
+    <span>Page 2 of 2 &#183; Hard questions &#183; <b>My Nail Connection</b></span>
+    <span>Made with <svg viewBox="0 0 24 24" width="10" height="10" fill="#A2636C" style="display:inline-block;vertical-align:-1px;"><path d="M12 21s-7-4.6-9.5-9C.8 8.4 2.9 4.5 6.6 4.5c2 0 3.6 1.1 5.4 2.7 1.8-1.6 3.4-2.7 5.4-2.7 3.7 0 5.8 3.9 4.1 7.5C19 16.4 12 21 12 21z"/></svg> by Hive-Rise <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#A2636C" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><ellipse cx="12" cy="15" rx="4.5" ry="5.5"/><path d="M8.2 13.5h7.6M8.2 17h7.6"/><ellipse cx="7.5" cy="7.5" rx="3" ry="2" transform="rotate(-28 7.5 7.5)"/><ellipse cx="16.5" cy="7.5" rx="3" ry="2" transform="rotate(28 16.5 7.5)"/></svg> &#183; hive-rise.com</span>
+  </div>
+</div>
+
+</body>
+</html>

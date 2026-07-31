@@ -1,0 +1,345 @@
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>My Nail Connection 3.0 is coming</title>
+
+<!-- Temporary teaser page, live for a few days before the 3.0 launch, then
+     retired. noindex on purpose: we do not want a short-lived page competing
+     with (or outliving) the real marketing page in search. Sharing still works. -->
+<meta name="robots" content="noindex, nofollow"/>
+<meta name="description" content="My Nail Connection 3.0 is coming. Free booking for nail techs, forever. Get on the list."/>
+<meta name="theme-color" content="#BFA6BB"/>
+
+<meta property="og:type" content="website"/>
+<meta property="og:title" content="My Nail Connection 3.0 is coming"/>
+<meta property="og:description" content="You loved 2.0. 3.0 is even better. Free booking for nail techs, forever. Get on the list."/>
+<meta property="og:image" content="https://mynailconnection.com/og-image.png"/>
+<meta property="og:url" content="https://mynailconnection.com/mnc-2.5.html"/>
+<meta name="twitter:card" content="summary_large_image"/>
+
+<link rel="icon" href="favicon.ico"/>
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png"/>
+<link rel="apple-touch-icon" href="apple-touch-icon.png"/>
+
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet"/>
+
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --black: #141317;
+    --mauve: #BFA6BB;
+    --deep:  #7D6478;
+    --plum:  #5C3D5E;
+    --blush: #F7EBEE;
+    --ivory: #EDEAE5;
+    --muted: #6E646E;
+  }
+
+  body {
+    font-family: 'DM Sans', system-ui, sans-serif;
+    background: var(--ivory);
+    color: var(--black);
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+    overflow-x: hidden;
+  }
+
+  .wash {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background:
+      radial-gradient(ellipse at 18% 12%, rgba(191,166,187,0.30) 0%, transparent 58%),
+      radial-gradient(ellipse at 84% 88%, rgba(125,100,120,0.16) 0%, transparent 55%);
+  }
+
+  main {
+    position: relative; z-index: 1;
+    flex: 1;
+    width: 100%;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: clamp(40px, 7vh, 80px) clamp(22px, 5vw, 40px) 48px;
+    display: flex; flex-direction: column; align-items: center;
+    text-align: center;
+  }
+
+  .eyebrow {
+    font-size: 11px; font-weight: 700; letter-spacing: 3px;
+    text-transform: uppercase; color: var(--deep);
+    display: inline-flex; align-items: center; gap: 9px;
+    padding: 8px 18px; border-radius: 100px;
+    background: rgba(20,19,23,0.04);
+    border: 1px solid rgba(125,100,120,0.24);
+  }
+  .eyebrow .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--deep);
+    animation: pulse 2.4s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: .45; transform: scale(.72); } }
+
+  /* ── the morph ─────────────────────────────────────────────────────── */
+  .morph {
+    position: relative;
+    width: clamp(210px, 42vw, 320px);
+    aspect-ratio: 1;
+    margin: clamp(26px, 5vh, 44px) 0 6px;
+  }
+  .morph img {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    object-fit: contain;
+    border-radius: 28px;
+  }
+  .morph .old {
+    animation: meltOut 9s cubic-bezier(0.65,0,0.35,1) infinite;
+    filter: drop-shadow(0 18px 40px rgba(139,74,64,0.28));
+  }
+  .morph .new {
+    animation: meltIn 9s cubic-bezier(0.65,0,0.35,1) infinite;
+    box-shadow: 0 18px 44px rgba(20,19,23,0.16);
+  }
+  @keyframes meltOut {
+    0%, 30%   { opacity: 1; transform: scale(1);     filter: blur(0px); }
+    46%       { opacity: 0; transform: scale(0.90);  filter: blur(11px); }
+    88%       { opacity: 0; transform: scale(0.90);  filter: blur(11px); }
+    100%      { opacity: 1; transform: scale(1);     filter: blur(0px); }
+  }
+  @keyframes meltIn {
+    0%, 30%   { opacity: 0; transform: scale(1.10); filter: blur(11px); }
+    52%, 88%  { opacity: 1; transform: scale(1);    filter: blur(0px); }
+    100%      { opacity: 0; transform: scale(1.10); filter: blur(11px); }
+  }
+  /* the halo that blooms as she arrives */
+  .morph::after {
+    content: ''; position: absolute; inset: -14%;
+    border-radius: 50%; z-index: -1;
+    background: radial-gradient(circle, rgba(191,166,187,0.42) 0%, transparent 62%);
+    animation: halo 9s ease-in-out infinite;
+  }
+  @keyframes halo {
+    0%, 30% { opacity: 0; transform: scale(.8); }
+    52%, 88% { opacity: 1; transform: scale(1); }
+    100% { opacity: 0; transform: scale(.8); }
+  }
+
+  .lines { height: 44px; margin-bottom: 4px; position: relative; width: 100%; }
+  .lines span {
+    position: absolute; left: 0; right: 0; top: 0;
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(19px, 3.4vw, 25px);
+    color: var(--muted); opacity: 0;
+  }
+  .lines .l1 { animation: line 9s ease-in-out infinite; }
+  .lines .l2 { animation: line 9s ease-in-out infinite; animation-delay: 4.6s; font-style: italic; color: var(--deep); }
+  @keyframes line {
+    0%   { opacity: 0; transform: translateY(7px); }
+    9%, 40% { opacity: 1; transform: translateY(0); }
+    50%, 100% { opacity: 0; transform: translateY(-7px); }
+  }
+
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(38px, 7.2vw, 68px);
+    font-weight: 700; line-height: 1.06;
+    letter-spacing: -1px;
+    margin-top: 14px;
+  }
+  h1 em { font-style: italic; color: var(--deep); }
+
+  .sub {
+    font-size: clamp(15px, 2.1vw, 18px);
+    color: var(--muted); line-height: 1.65;
+    max-width: 520px; margin: 18px auto 0;
+  }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 9px; justify-content: center; margin-top: 26px; }
+  .chip {
+    font-size: 13px; font-weight: 500; color: #463746;
+    padding: 9px 16px; border-radius: 100px;
+    background: rgba(191,166,187,0.20);
+    border: 1px solid rgba(125,100,120,0.30);
+  }
+
+  /* ── waitlist ──────────────────────────────────────────────────────── */
+  .wl {
+    margin-top: clamp(30px, 5vh, 46px);
+    width: 100%; max-width: 470px;
+  }
+  .wl-label {
+    font-size: 11px; font-weight: 700; letter-spacing: 2.4px;
+    text-transform: uppercase; color: var(--deep); margin-bottom: 12px;
+  }
+  form { display: flex; gap: 10px; }
+  input[type=email] {
+    flex: 1; min-width: 0;
+    font-family: inherit; font-size: 15px; color: var(--black);
+    padding: 15px 18px; border-radius: 13px;
+    background: #fff;
+    border: 1.5px solid rgba(125,100,120,0.34);
+    transition: border-color .18s, box-shadow .18s;
+  }
+  input[type=email]::placeholder { color: #A99DA8; }
+  input[type=email]:focus {
+    outline: none; border-color: var(--deep);
+    box-shadow: 0 0 0 4px rgba(191,166,187,0.28);
+  }
+  button {
+    font-family: inherit; font-size: 15px; font-weight: 600; cursor: pointer;
+    color: var(--blush);
+    padding: 15px 26px; border-radius: 13px;
+    background: linear-gradient(160deg, #34303A 0%, #141317 62%, #0B0B0D 100%);
+    border: 1px solid rgba(11,11,13,0.9);
+    border-bottom: 4px solid rgba(0,0,0,0.55);
+    box-shadow: 0 6px 20px rgba(20,19,23,0.28), inset 0 1px 0 rgba(255,255,255,0.16);
+    transition: transform .16s cubic-bezier(0.34,1.4,0.64,1), box-shadow .16s;
+    white-space: nowrap;
+  }
+  button:hover:not(:disabled) { transform: translateY(-3px); box-shadow: 0 13px 30px rgba(20,19,23,0.36), inset 0 1px 0 rgba(255,255,255,0.22); }
+  button:active { transform: translateY(1px); border-bottom-width: 1px; }
+  button:disabled { opacity: .6; cursor: default; }
+
+  .msg { font-size: 13.5px; margin-top: 11px; min-height: 19px; }
+  .msg.error { color: #A33C57; }
+  .note { font-size: 12.5px; color: #8C818C; margin-top: 12px; line-height: 1.5; }
+
+  .success { display: none; text-align: center; }
+  .success.show { display: block; animation: rise .5s ease-out; }
+  @keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+  .success .tick {
+    width: 52px; height: 52px; border-radius: 50%; margin: 0 auto 14px;
+    background: linear-gradient(160deg, var(--mauve), var(--deep));
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 8px 22px rgba(125,100,120,0.34);
+  }
+  .success h3 { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 700; margin-bottom: 7px; }
+  .success p { font-size: 14.5px; color: var(--muted); line-height: 1.6; }
+
+  footer {
+    position: relative; z-index: 1;
+    text-align: center; padding: 26px 20px 34px;
+    font-size: 12.5px; color: #8C818C;
+  }
+  footer a { color: var(--deep); text-decoration: none; font-weight: 600; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .morph .old, .morph .new, .morph::after, .lines span, .eyebrow .dot { animation: none !important; }
+    .morph .old { opacity: 0; }
+    .morph .new { opacity: 1; }
+    .lines .l2 { opacity: 1; }
+  }
+  @media (max-width: 560px) {
+    form { flex-direction: column; }
+    button { width: 100%; }
+  }
+</style>
+
+<div class="wash" aria-hidden="true"></div>
+
+<main>
+  <div class="eyebrow"><span class="dot"></span> Something new is coming</div>
+
+  <div class="morph" aria-label="The My Nail Connection logo becoming its 3.0 form">
+    <img class="old" src="images/morph-2.0.webp" alt="My Nail Connection 2.0 logo" width="512" height="512"/>
+    <img class="new" src="images/morph-3.0.webp" alt="My Nail Connection 3.0 logo" width="512" height="512"/>
+  </div>
+
+  <div class="lines" aria-hidden="true">
+    <span class="l1">You loved 2.0.</span>
+    <span class="l2">3.0 is even better.</span>
+  </div>
+
+  <h1>Still booking in <em>your DMs?</em></h1>
+  <p class="sub">
+    3.0 is nearly here, and it changes the part that actually costs you money.
+    Free booking for every nail tech, forever. Your work becomes your booking page.
+  </p>
+
+  <div class="chips">
+    <span class="chip">Free booking, forever</span>
+    <span class="chip">No commission</span>
+    <span class="chip">One Gallery</span>
+    <span class="chip">Photos that never expire</span>
+  </div>
+
+  <div class="wl">
+    <div id="wl-form-state">
+      <div class="wl-label">Get on the list</div>
+      <form id="wl-form" novalidate>
+        <input id="wl-email" type="email" autocomplete="email" placeholder="you@yourshop.com" aria-label="Your email"/>
+        <button id="wl-btn" type="submit">I'm In</button>
+      </form>
+      <div class="msg" id="wl-msg" role="status" aria-live="polite"></div>
+      <p class="note">One email when 3.0 goes live. Nothing else, ever. No spam, no sharing.</p>
+    </div>
+
+    <div class="success" id="wl-success">
+      <div class="tick">
+        <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <h3>You're on the list.</h3>
+      <p>We'll email you the moment 3.0 opens. Pinkies up.</p>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <a href="https://mynailconnection.com/">mynailconnection.com</a> &nbsp;·&nbsp; My Nail Connection
+</footer>
+
+<script>
+  // Waitlist -> public.launch_waitlist on the 3.0 project. This page is
+  // standalone, so it talks to the NEW (paid, backed-up) database regardless of
+  // where the app itself is pointed during cutover.
+  var SUPABASE_URL = 'https://nwqnakoongrorbwnrqzc.supabase.co';
+  var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im53cW5ha29vbmdyb3Jid25ycXpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNzczMjUsImV4cCI6MjA5ODk1MzMyNX0.TFFMlg9VjB0cyJwbgmVbeatFYQFaF1Ri0nrH0GwhHJs';
+
+  (function () {
+    var form = document.getElementById('wl-form');
+    var emailInput = document.getElementById('wl-email');
+    var btn = document.getElementById('wl-btn');
+    var msg = document.getElementById('wl-msg');
+
+    function showSuccess() {
+      document.getElementById('wl-form-state').style.display = 'none';
+      document.getElementById('wl-success').classList.add('show');
+      try { localStorage.setItem('mnc_wl_joined', '1'); } catch (_) {}
+    }
+    // returning visitor who already joined
+    try { if (localStorage.getItem('mnc_wl_joined') === '1') showSuccess(); } catch (_) {}
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var email = (emailInput.value || '').trim().toLowerCase();
+      msg.className = 'msg'; msg.textContent = '';
+
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
+        msg.className = 'msg error';
+        msg.textContent = 'That email does not look right. One more try?';
+        return;
+      }
+      btn.disabled = true; btn.textContent = 'Saving...';
+
+      fetch(SUPABASE_URL + '/rest/v1/launch_waitlist', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify({ email: email, source: 'teaser-2.5' })
+      }).then(function (r) {
+        // 409 = duplicate PK = she is already on the list. Success either way.
+        if (r.ok || r.status === 409) { showSuccess(); }
+        else { throw new Error('status ' + r.status); }
+      }).catch(function () {
+        btn.disabled = false; btn.textContent = "I'm In";
+        msg.className = 'msg error';
+        msg.textContent = 'Something hiccuped. Try again in a second?';
+      });
+    });
+  })();
+</script>

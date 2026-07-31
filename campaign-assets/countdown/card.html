@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>MNC 3.0 Countdown Card</title>
+<!--
+  Social card template for the 14-day countdown + drop day.
+  Palette matches the 3.0 APP (index.html mauve system: cream/blush,
+  charcoal letterpress text, rose accents), NOT the old dark mock.
+  Render with headless Chrome (ABSOLUTE output path required on Windows):
+    chrome --headless=new --window-size=1080,1920 --screenshot="C:/.../day14-story.png" "file:///.../card.html?day=14&fmt=story"
+    chrome --headless=new --window-size=1080,1350 --screenshot="C:/.../day14-feed.png"  "file:///.../card.html?day=14&fmt=feed"
+  ?day=14..1 picks the card, ?day=0 is drop day, ?fmt=story|feed sizes it.
+  Copy mirrors campaign-assets/14day-campaign.md; edit there first, here second.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --rose:      #BFA6BB;
+    --rose-light:#F7E8EE;
+    --rose-mid:  #D9C6D6;
+    --rose-dark: #7D6478;
+    --gold:      #8C7E76;
+    --cream:     #FBF8FA;
+    --charcoal:  #141317;
+    --muted:     #8B7F8A;
+  }
+  html, body { width: 1080px; height: 1920px; overflow: hidden; }
+  body.feed { height: 1350px; }
+  body {
+    background:
+      radial-gradient(ellipse at 15% 88%, rgba(191,166,187,0.30) 0%, transparent 55%),
+      radial-gradient(ellipse at 85% 6%, rgba(247,232,238,0.85) 0%, transparent 55%),
+      #FBF8FA;
+    color: var(--charcoal);
+    font-family: 'DM Sans', sans-serif;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: space-between;
+    text-align: center;
+    padding: 110px 90px 96px;
+  }
+  body.feed { padding: 80px 90px 72px; }
+
+  .top { display: flex; flex-direction: column; align-items: center; }
+  .logo-mark {
+    font-family: 'Playfair Display', serif;
+    font-size: 92px; font-weight: 700;
+    letter-spacing: 0.06em; line-height: 1;
+    color: var(--charcoal);
+    text-shadow: 0 2px 0 rgba(255,255,255,0.9);
+    margin-bottom: 10px;
+  }
+  .logo-sub {
+    font-size: 21px; font-weight: 500;
+    letter-spacing: 0.4em; text-transform: uppercase;
+    color: var(--rose-dark);
+  }
+  .aud {
+    margin-top: 34px;
+    background: var(--rose-dark);
+    color: #FBF8FA;
+    border-radius: 100px;
+    padding: 18px 44px;
+    font-size: 26px; font-weight: 600;
+    letter-spacing: 0.28em; text-transform: uppercase;
+  }
+  .phase {
+    margin-top: 38px;
+    font-size: 24px; font-weight: 500;
+    letter-spacing: 0.42em; text-transform: uppercase;
+    color: var(--rose-dark);
+  }
+  body.feed .phase { margin-top: 36px; }
+
+  .mid { display: flex; flex-direction: column; align-items: center; }
+  .days-num {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700; line-height: 0.9;
+    font-size: 560px;
+    background: linear-gradient(100deg, #6B5366 20%, #8F7389 42%, #BFA6BB 50%, #8F7389 58%, #6B5366 80%);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent; color: transparent;
+  }
+  body.feed .days-num { font-size: 420px; }
+  .days-word {
+    font-size: 30px; font-weight: 500;
+    letter-spacing: 0.5em; text-transform: uppercase;
+    color: var(--rose-dark);
+    margin-top: 48px;
+  }
+  .rule {
+    width: 120px; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--rose), transparent);
+    margin: 58px auto 54px;
+  }
+  body.feed .rule { margin: 38px auto 34px; }
+  .line-1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 76px; font-weight: 700;
+    line-height: 1.18; color: var(--charcoal);
+    text-shadow: 0 1px 0 rgba(255,255,255,0.85);
+    max-width: 880px;
+  }
+  body.feed .line-1 { font-size: 66px; }
+  .line-2 {
+    font-size: 34px; font-weight: 400;
+    line-height: 1.55; color: var(--muted);
+    max-width: 800px; margin-top: 30px;
+  }
+  body.feed .line-2 { font-size: 30px; margin-top: 24px; }
+  .line-2 b { color: var(--rose-dark); font-weight: 600; }
+
+  /* Day 5 special: the word itself is the visual */
+  body.day5 .days-num { display: none; }
+  body.day5 .days-word { display: none; }
+  body.day5 .line-1 {
+    font-size: 300px; font-style: italic; line-height: 1;
+    background: linear-gradient(100deg, #6B5366 20%, #8F7389 42%, #BFA6BB 50%, #8F7389 58%, #6B5366 80%);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent; color: transparent;
+    text-shadow: none;
+  }
+  body.feed.day5 .line-1 { font-size: 240px; }
+
+  /* Drop day: "3.0" numeral, no DAYS word */
+  body.dropday .days-word { display: none; }
+  body.dropday .days-num { font-size: 400px; }
+  body.feed.dropday .days-num { font-size: 320px; }
+
+  .bottom {
+    display: flex; flex-direction: column; align-items: center; gap: 18px;
+  }
+  .bloom { font-size: 44px; }
+  .tags {
+    font-size: 24px; font-weight: 500;
+    letter-spacing: 0.24em; text-transform: uppercase;
+    color: rgba(20,19,23,0.35);
+  }
+  .cta-pill {
+    background: var(--rose-dark);
+    color: #FBF8FA;
+    border-radius: 100px;
+    padding: 24px 52px;
+    font-size: 25px; font-weight: 600;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    box-shadow: 0 6px 20px rgba(125,100,120,0.35);
+  }
+</style>
+</head>
+<body>
+  <div class="top">
+    <div class="logo-mark">MNC</div>
+    <div class="logo-sub">My Nail Connection</div>
+    <div class="aud">For Nail Techs</div>
+    <div class="phase" id="phase"></div>
+  </div>
+
+  <div class="mid">
+    <div class="days-num" id="num"></div>
+    <div class="days-word" id="daysword">Days</div>
+    <div class="rule"></div>
+    <div class="line-1" id="l1"></div>
+    <div class="line-2" id="l2"></div>
+  </div>
+
+  <div class="bottom">
+    <div class="bloom">🌸</div>
+    <div class="cta-pill" id="cta">Get on the list &nbsp;·&nbsp; www.mynailconnection.com</div>
+    <div class="tags">#MNC3 &nbsp;·&nbsp; #MyNailConnection</div>
+  </div>
+
+<script>
+  // Copy mirrors campaign-assets/14day-campaign.md. Blunt voice, per Anne:
+  // every day is a demand granted, no vague teasers.
+  const CARDS = {
+    14: { phase: 'You Asked',   l1: 'Free booking? Fine.',                        l2: 'MNC 3.0 is coming.' },
+    13: { phase: 'You Asked',   l1: 'One app instead of three? Obviously.',       l2: 'Booking. Photos. Clients. <b>One place.</b>' },
+    12: { phase: 'You Asked',   l1: 'Tired of paying just to be seen?',           l2: 'So were we. <b>That stops.</b>' },
+    11: { phase: 'You Asked',   l1: 'Photos that don&rsquo;t vanish into a feed?', l2: 'Yours stay up. <b>Forever.</b>' },
+    10: { phase: 'You Asked',   l1: 'Your gallery IS your booking page.',         l2: 'Client sees your work. Taps. <b>Books.</b>' },
+    9:  { phase: 'We Built It', l1: 'Every &ldquo;I wish it did...&rdquo; you ever sent us?', l2: '<b>It does now.</b>' },
+    8:  { phase: 'We Built It', l1: 'Post your work.<br/>Get found. Get booked.', l2: 'That&rsquo;s the whole loop.' },
+    7:  { phase: 'We Built It', l1: 'Halfway. Quick recap:',                      l2: 'Free booking. Your gallery. Your clients. <b>One app.</b>' },
+    6:  { phase: 'We Built It', l1: 'The ombre from last spring? Still working for you.', l2: 'Old photos keep pulling new clients. <b>Nothing expires.</b>' },
+    5:  { phase: 'We Built It', l1: 'Free.',                                      l2: 'No trial. No tier. No catch. <b>Forever.</b>' },
+    4:  { phase: 'Your Move',   l1: 'Not a portfolio app.<br/>Not a booking app.', l2: 'Your whole business. <b>One place.</b>' },
+    3:  { phase: 'Your Move',   l1: 'Find clients. Show your work. Book your chair.', l2: '<b>One stop shop.</b>' },
+    2:  { phase: 'Your Move',   l1: 'Free booking. Gallery attached.',            l2: 'Clients included. <b>Two days.</b>' },
+    1:  { phase: 'Your Move',   l1: 'Tomorrow. Doors open.',                      l2: '<b>Be there.</b>' },
+    0:  { phase: 'MNC 3.0',     l1: 'It&rsquo;s here.',                           l2: 'Free booking. Your gallery. Your clients. <b>Go.</b>' }
+  };
+
+  const q = new URLSearchParams(location.search);
+  const day = parseInt(q.get('day') || '14', 10);
+  const fmt = q.get('fmt') || 'story';
+  const c = CARDS[day] !== undefined ? CARDS[day] : CARDS[14];
+
+  if (fmt === 'feed') document.body.classList.add('feed');
+  if (day === 5) document.body.classList.add('day5');
+  if (day === 0) document.body.classList.add('dropday');
+  if (day === 0) document.getElementById('cta').innerHTML = 'Join free &nbsp;·&nbsp; www.mynailconnection.com';
+
+  document.getElementById('phase').textContent = c.phase;
+  document.getElementById('num').textContent = day === 0 ? '3.0' : day;
+  document.getElementById('daysword').textContent = day === 1 ? 'Day' : 'Days';
+  document.getElementById('l1').innerHTML = c.l1;
+  document.getElementById('l2').innerHTML = c.l2;
+</script>
+</body>
+</html>
