@@ -1,5 +1,9 @@
 -- ========================================================================
--- 3.0 IS FREE, PERMANENTLY (2026-07-30, rev 3)
+-- 3.0 IS FREE, PERMANENTLY (2026-08-03, rev 4)
+--
+-- REV 4: restores the phone-identity lookup (email OR phone) that rev 3
+-- accidentally clobbered from stage C. Found live in Anne's launch lap:
+-- phone-signup techs got reason=not_found on every upload.
 --
 -- FINAL SHAPE. Photos are free forever. There is no lifetime ceiling and
 -- no photo paywall. A monthly upload allowance exists ONLY to stop abuse
@@ -96,7 +100,8 @@ begin
          coalesce(t.lifetime_free_used, 0)
     into v_tech_id, v_tier, v_expires_at, v_credits, v_period_count, v_period_reset, v_free_used
     from public.techs t
-    where lower(t.email) = v_email
+    where (lower(t.email) = v_email
+           or public.phone_digits(t.phone) = public.phone_digits(v_email))
     for update;
 
   if not found then
