@@ -4976,8 +4976,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 469,         /* __APP_BUILD_ANDROID__ */
-  ios:     274,          /* __APP_BUILD_IOS__     */
+  android: 470,         /* __APP_BUILD_ANDROID__ */
+  ios:     275,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -16428,6 +16428,20 @@ function show(id) {
   try { updateFeedbackButtonVisibility(); } catch(_) {}
   // (feed screen removed in 3.0, one-gallery consolidation)
   if (id === 'home') {
+    // One-trip availability filters (Anne, 2026-08-03): the Open today /
+    // Open this week cards filter a single trip to the map or Gallery.
+    // Landing back on Home clears them so the next browse starts fresh
+    // (the map was staying stuck on "just me, testing open today").
+    if (ddSelections.availNow || ddSelections.availToday) {
+      ddSelections.availNow = false;
+      ddSelections.availToday = false;
+      var _fn = document.getElementById('fm-avail-now');    if (_fn) _fn.checked = false;
+      var _ft = document.getElementById('fm-avail-today');  if (_ft) _ft.checked = false;
+      var _bn = document.getElementById('avail-btn-now');   if (_bn) _bn.classList.remove('active');
+      var _bt = document.getElementById('avail-btn-today'); if (_bt) _bt.classList.remove('active');
+      try { applyFilters(); } catch(_) {}
+      try { updateFiltersUI(); } catch(_) {}
+    }
     updateGreeting(); loadTechsFromSupabase(); updateAvailCounts(); updateHomeFaveCounts();
     // Retrigger the flowy greeting-subline animation on every home landing,
     // CSS animations only fire on initial render, so we reset by wiping
