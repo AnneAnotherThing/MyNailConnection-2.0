@@ -515,7 +515,8 @@ button,input,select,textarea{font-family:'DM Sans','Helvetica Neue',Helvetica,Ar
 /* Scoped to .logo-mark only, the old [class*="logo"] catch-all forced a flat
    colour onto .logo-sub and killed its gradient fill. */
 .header .logo-mark{color:var(--charcoal) !important;font-weight:700 !important;}
-.back-btn{width:36px;height:36px;border-radius:50%;border:1px solid var(--border);background:transparent;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;color:var(--charcoal);}
+/* Solid pill so the arrow reads on ANY header tint (Anne, 2026-08-03) */
+.back-btn{width:36px;height:36px;border-radius:50%;border:1.5px solid var(--border);background:white;cursor:pointer;font-size:18px;font-weight:600;display:flex;align-items:center;justify-content:center;color:var(--charcoal);box-shadow:0 1px 6px rgba(20,19,23,0.14);flex-shrink:0;}
 .avatar{width:36px;height:36px;border-radius:50%;background:var(--rose-light);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:500;color:var(--rose-dark);cursor:pointer;border:2px solid rgba(255,255,255,0.55);box-shadow:0 0 0 1px rgba(20,19,23,0.25),0 3px 10px rgba(0,0,0,0.35);transition:box-shadow 0.2s,transform 0.15s;}
 .avatar:hover{box-shadow:0 0 0 1px rgba(20,19,23,0.3),0 5px 16px rgba(0,0,0,0.45);transform:translateY(-1px);}
 .bottom-nav{background:rgba(255,255,255,0.94);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid rgba(162,99,108,0.16);display:flex;padding:8px 6px 16px;box-shadow:0 -6px 20px rgba(20,19,23,0.10),0 -1px 0 rgba(255,255,255,0.7) inset;}
@@ -4975,8 +4976,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 468,         /* __APP_BUILD_ANDROID__ */
-  ios:     273,          /* __APP_BUILD_IOS__     */
+  android: 469,         /* __APP_BUILD_ANDROID__ */
+  ios:     274,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
