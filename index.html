@@ -2118,6 +2118,17 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
         <div style="background:white;border-radius:12px;padding:10px 12px;"><div id="td-cal"></div></div>
       </div>
 
+      <!-- Booking settings entry (Anne, 2026-08-03): My Appts is
+           appointments only; the knobs live behind this card. -->
+      <div onclick="show('tech-booking-settings')" style="background:white;border:1px solid var(--border);border-radius:16px;padding:13px 16px;box-shadow:var(--shadow);margin-bottom:12px;cursor:pointer;display:flex;align-items:center;gap:10px;">
+        <svg viewBox="0 0 24 24" style="width:17px;height:17px;stroke:var(--rose-dark);fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.2 4.2l2.8 2.8M17 17l2.8 2.8M1 12h4M19 12h4M4.2 19.8L7 17M17 7l2.8-2.8"/></svg>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:13.5px;font-weight:600;color:var(--charcoal);">Booking settings</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:1px;">Services, hours, auto-confirm, blocking</div>
+        </div>
+        <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:var(--muted);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg>
+      </div>
+
       <div style="margin-bottom:12px;">
         <div style="font-family:'Playfair Display',serif;font-size:17px;font-weight:600;color:var(--rose-dark);">Post everything.</div>
         <div style="font-size:13px;color:var(--muted);margin-top:3px;line-height:1.45;"><b style="color:var(--rose-dark);">Your whole portfolio, free.</b> Every look you add is one more way a client can find you — and it keeps working for you forever.</div>
@@ -2371,10 +2382,10 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
   <div class="header">
     <button class="back-btn" onclick="show('tech-home')">←</button>
     <div style="flex:1;text-align:center;">
-      <div class="logo-mark" style="font-size:18px;">Bookings</div>
-      <div class="logo-sub">Free booking, right here on MNC</div>
+      <div class="logo-mark" style="font-size:18px;">My Appts</div>
+      <div class="logo-sub">Requests, upcoming, and history</div>
     </div>
-    <div style="width:32px;"></div>
+    <button class="back-btn" onclick="show('tech-booking-settings')" title="Booking settings" aria-label="Booking settings" style="font-size:15px;">⚙️</button>
   </div>
   <div class="scroll-content" style="padding-bottom:80px;" id="tb-body">
 
@@ -2383,6 +2394,37 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
     </div>
 
     <!-- Settings -->
+    <!-- Appointments -->
+    <div style="margin:20px 20px 0;">
+      <div style="font-family:'Playfair Display',serif;font-size:18px;color:var(--charcoal);margin-bottom:8px;">Appointments</div>
+      <div id="tb-appts"></div>
+    </div>
+
+    <!-- Save-and-close (Anne, 2026-08-03): everything on this screen
+         saves the moment you change it, but a scrolled-deep tech still
+         needs a clear way home. One labeled door at the bottom. -->
+    <div style="margin:8px 20px 28px;">
+      <button onclick="show('tech-home')" class="btn btn-rose" style="width:100%;">Done &mdash; back to Tech Portal</button>
+      <div style="font-size:12.5px;color:var(--muted);text-align:center;margin-top:8px;">Everything on this page saves as you change it.</div>
+    </div>
+  </div>
+</div>
+
+<!-- BOOKING SETTINGS, split off the appointments screen (Anne,
+     2026-08-03): My Appts is appointments only; everything
+     configurable lives here, reached from the Tech Portal card or
+     the gear on the My Appts header. -->
+<div class="screen" id="tech-booking-settings">
+  <div class="header">
+    <button class="back-btn" onclick="show('tech-home')">←</button>
+    <div style="flex:1;text-align:center;">
+      <div class="logo-mark" style="font-size:18px;">Booking Settings</div>
+      <div class="logo-sub">Services, hours, and how requests land</div>
+    </div>
+    <div style="width:32px;"></div>
+  </div>
+  <div class="scroll-content" style="padding-bottom:80px;">
+
     <div style="margin:16px 20px 0;background:white;border:1px solid var(--border);border-radius:16px;padding:16px;">
       <div style="display:flex;align-items:center;gap:10px;">
         <div style="flex:1;min-width:0;">
@@ -2441,12 +2483,6 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       </div>
     </div>
 
-    <!-- Appointments -->
-    <div style="margin:20px 20px 0;">
-      <div style="font-family:'Playfair Display',serif;font-size:18px;color:var(--charcoal);margin-bottom:8px;">Appointments</div>
-      <div id="tb-appts"></div>
-    </div>
-
     <!-- Services -->
     <div style="margin:20px 20px 0;background:white;border:1px solid var(--border);border-radius:16px;padding:16px;">
       <div style="font-size:15px;font-weight:600;color:var(--charcoal);">Services</div>
@@ -2496,7 +2532,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       <!-- Manual entry field removed (Anne, 2026-08-03): blocking now
            happens from the appointment card itself, the Block button on
            any past request. No typing, no typos. -->
-      <div style="font-size:13px;color:var(--muted);margin-top:8px;">To block someone, tap <b>Block</b> on any of their appointments below in Recent.</div>
+      <div style="font-size:13px;color:var(--muted);margin-top:8px;">To block someone, tap <b>Block</b> on any of their appointments in <b>My Appts</b> &rarr; Recent.</div>
     </div>
 
     <!-- Save-and-close (Anne, 2026-08-03): everything on this screen
@@ -2506,8 +2542,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       <button onclick="show('tech-home')" class="btn btn-rose" style="width:100%;">Done &mdash; back to Tech Portal</button>
       <div style="font-size:12.5px;color:var(--muted);text-align:center;margin-top:8px;">Everything on this page saves as you change it.</div>
     </div>
-  </div>
-</div>
+
 
 <!-- MY APPOINTMENTS, the client's bookings (3.0 free-booking pivot) -->
 <div class="screen" id="my-appts">
@@ -4979,8 +5014,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 473,         /* __APP_BUILD_ANDROID__ */
-  ios:     278,          /* __APP_BUILD_IOS__     */
+  android: 474,         /* __APP_BUILD_ANDROID__ */
+  ios:     279,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -13806,7 +13841,7 @@ function tbRenderAppts() {
     html = '<div style="background:white;border:1px dashed var(--border);border-radius:14px;padding:18px;text-align:center;font-size:13px;color:var(--muted);">' +
       (_bkMyTech && _bkMyTech.booking_enabled
         ? 'No appointments yet. Share your profile so clients can book you.'
-        : 'Turn on booking above and your calendar starts here.') + '</div>';
+        : 'Turn on booking in Booking settings and your calendar starts here.') + '</div>';
   }
   wrap.innerHTML = html;
 }
@@ -14060,7 +14095,7 @@ async function bkForkInApp() {
     window._bkSetup = window._bkSetup || {}; window._bkSetup.enabled = true;
     if (_bkMyTech) _bkMyTech.booking_enabled = true;
     bkCloseSetupFork();
-    show('tech-bookings');
+    show('tech-booking-settings');
     try { tbRenderSettings(); } catch(_){}
     showToast('Booking is on \u2728');
     try { tbLoadDashBadge(); } catch(_) {}
@@ -16368,7 +16403,7 @@ const SCREEN_DEPTH = {
   'welcome-new':1, 'change-password-screen':1,
   home:2, admin:2, 'tech-home':2, 'how-it-works':3,
   'browse-style':3, 'browse-location':3, messages:3, 'profile-screen':3,
-  'tech-detail':4, 'tech-bookings':3, 'my-appts':4,
+  'tech-detail':4, 'tech-bookings':3, 'tech-booking-settings':3, 'my-appts':4,
   'my-photos':3, 'find-us':3
 };
 let _currentScreen = 'home';
@@ -16546,6 +16581,7 @@ function show(id) {
   if (id === 'tech-home') { loadTechDashboard(); }
   if (id === 'my-photos') { loadMyPhotosData(); }
   if (id === 'tech-bookings') { loadTechBookings(); }
+  if (id === 'tech-booking-settings') { loadTechBookings(); }
   if (id === 'my-appts') { loadMyAppointments(); }
   if (id === 'profile-screen') { initProfileScreen(); }
   if (id === 'browse-style') {
