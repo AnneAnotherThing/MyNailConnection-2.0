@@ -4951,8 +4951,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 462,         /* __APP_BUILD_ANDROID__ */
-  ios:     267,          /* __APP_BUILD_IOS__     */
+  android: 463,         /* __APP_BUILD_ANDROID__ */
+  ios:     268,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -13894,62 +13894,107 @@ function bkForkCallsOnly() {
 }
 
 async function bkForkInApp() {
-  var ok = await patchBookingField({ booking_enabled: true });
-  if (!ok) { showToast('Could not turn booking on, try again'); return; }
-  try { localStorage.removeItem('mnc_booking_pref'); } catch(_) {}
-  window._bkSetup = window._bkSetup || {}; window._bkSetup.enabled = true;
-  if (_bkMyTech) _bkMyTech.booking_enabled = true;
-  // One-tap defaults (design review punch 06, 2026-07-30): services +
-  // hours before the toggle does anything was the highest-effort task in
-  // the app, and the one 3.0's pitch depends on. Seed a starter setup so
-  // she is bookable in ten seconds and can refine in Settings.
-  var seeded = false;
+  // Guided two-step setup (Anne, 2026-08-03): instead of silently
+  // seeding defaults, step her through the two things booking needs,
+  // one service and her hours, prefilled and editable on the spot.
+  // A tech who already has services or hours skips straight to Settings.
+  var techId = (window._bkSetup && window._bkSetup.id) || (_bkMyTech && _bkMyTech.id);
+  var hasSetup = false;
   try {
-    seeded = await bkSeedDefaults((window._bkSetup && window._bkSetup.id) || (_bkMyTech && _bkMyTech.id));
+    if (techId) {
+      var sr = await fetch(SUPABASE_URL + '/rest/v1/tech_services?tech_id=eq.' + techId + '&select=id&limit=1', { headers: bkHeaders() });
+      var ar = await fetch(SUPABASE_URL + '/rest/v1/tech_availability?tech_id=eq.' + techId + '&select=id&limit=1', { headers: bkHeaders() });
+      hasSetup = (sr.ok && ((await sr.json()) || []).length > 0) ||
+                 (ar.ok && ((await ar.json()) || []).length > 0);
+    }
   } catch(_) {}
-  bkCloseSetupFork();
-  show('tech-bookings');
-  try { tbRenderSettings(); } catch(_){}
-  showToast(seeded
-    ? 'You\u2019re bookable! Full set \u00b7 90 min \u00b7 $65, Mon\u2013Fri 9\u20135. Tweak anything in Settings.'
-    : 'Booking is on. Add your services and hours next ✨');
-  try { tbLoadDashBadge(); } catch(_) {}
+  if (hasSetup) {
+    var ok = await patchBookingField({ booking_enabled: true });
+    if (!ok) { showToast('Could not turn booking on, try again'); return; }
+    try { localStorage.removeItem('mnc_booking_pref'); } catch(_) {}
+    window._bkSetup = window._bkSetup || {}; window._bkSetup.enabled = true;
+    if (_bkMyTech) _bkMyTech.booking_enabled = true;
+    bkCloseSetupFork();
+    show('tech-bookings');
+    try { tbRenderSettings(); } catch(_){}
+    showToast('Booking is on \u2728');
+    try { tbLoadDashBadge(); } catch(_) {}
+    try { updateSetupChecklist(); } catch(_) {}
+    return;
+  }
+  var chooser = document.getElementById('bkf-chooser');
+  var svc = document.getElementById('bkf-svcstep');
+  if (chooser) chooser.style.display = 'none';
+  if (svc) svc.style.display = 'block';
 }
 
-// Seed a starter service + Mon-Fri 9-5 hours, but ONLY into an empty
-// setup: a tech who already has any service or any availability row is
-// never touched. Both writes go through the same RLS-guarded tables the
-// Settings screen uses, so editing after is the normal flow.
-async function bkSeedDefaults(techId) {
-  if (!techId) return false;
+function bkForkSvcBack() {
+  var chooser = document.getElementById('bkf-chooser');
+  var svc = document.getElementById('bkf-svcstep');
+  if (svc) svc.style.display = 'none';
+  if (chooser) chooser.style.display = 'block';
+}
+
+function bkForkSvcNext() {
+  var name = ((document.getElementById('bkf-svc-name') || {}).value || '').trim();
+  if (!name) { showToast('Give your service a name'); return; }
+  var svc = document.getElementById('bkf-svcstep');
+  var hrs = document.getElementById('bkf-hourstep');
+  if (svc) svc.style.display = 'none';
+  if (hrs) hrs.style.display = 'block';
+}
+
+function bkForkHoursBack() {
+  var svc = document.getElementById('bkf-svcstep');
+  var hrs = document.getElementById('bkf-hourstep');
+  if (hrs) hrs.style.display = 'none';
+  if (svc) svc.style.display = 'block';
+}
+
+async function bkForkHoursFinish() {
+  var techId = (window._bkSetup && window._bkSetup.id) || (_bkMyTech && _bkMyTech.id);
+  if (!techId) { showToast('Could not find your tech profile, try again'); return; }
+  var days = Array.from(document.querySelectorAll('#bkf-hourstep input[type="checkbox"]:checked'))
+    .map(function(c) { return parseInt(c.value, 10); })
+    .filter(function(d) { return d >= 0 && d <= 6; });
+  if (!days.length) { showToast('Pick at least one day'); return; }
+  var hStart = (document.getElementById('bkf-hr-start') || {}).value || '09:00';
+  var hEnd   = (document.getElementById('bkf-hr-end') || {}).value || '17:00';
+  if (hEnd <= hStart) { showToast('End time must be after the start'); return; }
+  var name = (((document.getElementById('bkf-svc-name') || {}).value || '').trim()) || 'Full set';
+  var dur  = parseInt((document.getElementById('bkf-svc-dur') || {}).value, 10) || 90;
+  var priceRaw = ((document.getElementById('bkf-svc-price') || {}).value || '').replace(/[^0-9.]/g, '');
+  var btn = document.getElementById('bkf-hr-finish');
+  if (btn) { btn.disabled = true; btn.textContent = 'Setting up\u2026'; }
   try {
-    var sr = await fetch(SUPABASE_URL + '/rest/v1/tech_services?tech_id=eq.' + techId + '&select=id&limit=1', { headers: bkHeaders() });
-    var ar = await fetch(SUPABASE_URL + '/rest/v1/tech_availability?tech_id=eq.' + techId + '&select=id&limit=1', { headers: bkHeaders() });
-    if (!sr.ok || !ar.ok) return false;
-    var hasSvc   = ((await sr.json()) || []).length > 0;
-    var hasAvail = ((await ar.json()) || []).length > 0;
-    var seeded = false;
-    if (!hasSvc) {
-      var r1 = await fetch(SUPABASE_URL + '/rest/v1/tech_services', {
-        method: 'POST',
-        headers: bkHeaders({ 'Content-Type': 'application/json', 'Prefer': 'return=minimal' }),
-        body: JSON.stringify({ tech_id: techId, name: 'Full set', duration_minutes: 90, price: 65, sort_order: 0 })
-      });
-      seeded = r1.ok;
+    var r1 = await fetch(SUPABASE_URL + '/rest/v1/tech_services', {
+      method: 'POST',
+      headers: bkHeaders({ 'Content-Type': 'application/json', 'Prefer': 'return=minimal' }),
+      body: JSON.stringify({ tech_id: techId, name: name, duration_minutes: Math.min(480, Math.max(15, dur)), price: priceRaw === '' ? null : Number(priceRaw), sort_order: 0 })
+    });
+    var rows = days.map(function(d) {
+      return { tech_id: techId, day_of_week: d, start_time: hStart, end_time: hEnd };
+    });
+    var r2 = await fetch(SUPABASE_URL + '/rest/v1/tech_availability', {
+      method: 'POST',
+      headers: bkHeaders({ 'Content-Type': 'application/json', 'Prefer': 'return=minimal' }),
+      body: JSON.stringify(rows)
+    });
+    var ok = await patchBookingField({ booking_enabled: true });
+    if (!r1.ok || !r2.ok || !ok) {
+      showToast('Something did not save, check your Bookings settings');
+    } else {
+      showToast('You\u2019re bookable! ' + name + ' \u00b7 ' + dur + ' min' + (priceRaw ? ' \u00b7 $' + priceRaw : '') + ' \u2014 tweak anytime in Settings.');
     }
-    if (!hasAvail) {
-      var rows = [1, 2, 3, 4, 5].map(function(d) {
-        return { tech_id: techId, day_of_week: d, start_time: '09:00', end_time: '17:00' };
-      });
-      var r2 = await fetch(SUPABASE_URL + '/rest/v1/tech_availability', {
-        method: 'POST',
-        headers: bkHeaders({ 'Content-Type': 'application/json', 'Prefer': 'return=minimal' }),
-        body: JSON.stringify(rows)
-      });
-      seeded = seeded || r2.ok;
-    }
-    return seeded;
-  } catch(e) { return false; }
+    try { localStorage.removeItem('mnc_booking_pref'); } catch(_) {}
+    window._bkSetup = window._bkSetup || {}; window._bkSetup.enabled = true;
+    if (_bkMyTech) _bkMyTech.booking_enabled = true;
+    bkCloseSetupFork();
+    try { tbLoadDashBadge(); } catch(_) {}
+    try { updateSetupChecklist(); } catch(_) {}
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Turn on booking'; }
+  }
 }
 // Patch a booking field, preferring tbPatchTech (keeps caches in step),
 // falling back to a direct PATCH if it isn't ready yet.
@@ -19866,6 +19911,65 @@ function closeReleaseWizard() {
         <input id="bkf-link" type="url" inputmode="url" autocomplete="off" placeholder="vagaro.com/yourname or your website" style="width:100%;padding:13px 15px;border:1.5px solid var(--border);border-radius:12px;font-size:15px;font-family:'DM Sans',sans-serif;box-sizing:border-box;"/>
         <button onclick="bkForkSaveLink()" class="btn btn-rose" style="width:100%;margin-top:16px;">Save my booking link</button>
         <div style="font-size:13px;color:var(--muted);text-align:center;margin-top:10px;line-height:1.5;">Works with Vagaro, StyleSeat, Square, GlossGenius, Booksy, Fresha, or any web link.</div>
+      </div>
+
+      <!-- Guided in-app setup, step 1 of 2: first service (2026-08-03,
+           Anne: step through the mandatory fields, no silent seeding) -->
+      <div id="bkf-svcstep" style="display:none;padding:22px 22px 0;">
+        <div onclick="bkForkSvcBack()" style="font-size:13px;color:var(--muted);cursor:pointer;margin-bottom:12px;display:inline-flex;align-items:center;gap:5px;"><svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;"><polyline points="15 18 9 12 15 6"/></svg> Back</div>
+        <div style="font-family:'Playfair Display',serif;font-size:21px;font-weight:700;color:var(--charcoal);">Your first service</div>
+        <div style="font-size:13px;color:var(--muted);line-height:1.5;margin-top:6px;margin-bottom:16px;">Step 1 of 2 &middot; We started you with a common one &mdash; change anything.</div>
+        <label style="font-size:11px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:5px;">Service name</label>
+        <input id="bkf-svc-name" type="text" value="Full set" style="width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:12px;font-size:15px;font-family:'DM Sans',sans-serif;box-sizing:border-box;background:white;margin-bottom:14px;"/>
+        <div style="display:flex;gap:10px;">
+          <div style="flex:1;">
+            <label style="font-size:11px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:5px;">How long</label>
+            <select id="bkf-svc-dur" style="width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:12px;font-size:15px;font-family:'DM Sans',sans-serif;box-sizing:border-box;background:white;">
+              <option value="30">30 min</option>
+              <option value="45">45 min</option>
+              <option value="60">1 hour</option>
+              <option value="75">1 hr 15</option>
+              <option value="90" selected>1 hr 30</option>
+              <option value="120">2 hours</option>
+              <option value="150">2 hr 30</option>
+              <option value="180">3 hours</option>
+            </select>
+          </div>
+          <div style="flex:1;">
+            <label style="font-size:11px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:5px;">Price ($)</label>
+            <input id="bkf-svc-price" type="number" inputmode="decimal" value="65" min="0" style="width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:12px;font-size:15px;font-family:'DM Sans',sans-serif;box-sizing:border-box;background:white;"/>
+          </div>
+        </div>
+        <button onclick="bkForkSvcNext()" class="btn btn-rose" style="width:100%;margin-top:18px;">Next: your hours &rarr;</button>
+        <div style="font-size:12.5px;color:var(--muted);text-align:center;margin-top:10px;">Add more services later in Settings.</div>
+      </div>
+
+      <!-- Guided in-app setup, step 2 of 2: weekly hours -->
+      <div id="bkf-hourstep" style="display:none;padding:22px 22px 0;">
+        <div onclick="bkForkHoursBack()" style="font-size:13px;color:var(--muted);cursor:pointer;margin-bottom:12px;display:inline-flex;align-items:center;gap:5px;"><svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;"><polyline points="15 18 9 12 15 6"/></svg> Back</div>
+        <div style="font-family:'Playfair Display',serif;font-size:21px;font-weight:700;color:var(--charcoal);">When can clients book?</div>
+        <div style="font-size:13px;color:var(--muted);line-height:1.5;margin-top:6px;margin-bottom:16px;">Step 2 of 2 &middot; One window for now, fine-tune day by day in Settings.</div>
+        <div style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:16px;">
+          <label style="display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--border);border-radius:100px;padding:8px 13px;font-size:13.5px;color:var(--charcoal);cursor:pointer;font-family:'DM Sans',sans-serif;"><input type="checkbox" value="0"> Sun</label>
+          <label style="display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--border);border-radius:100px;padding:8px 13px;font-size:13.5px;color:var(--charcoal);cursor:pointer;font-family:'DM Sans',sans-serif;"><input type="checkbox" value="1" checked> Mon</label>
+          <label style="display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--border);border-radius:100px;padding:8px 13px;font-size:13.5px;color:var(--charcoal);cursor:pointer;font-family:'DM Sans',sans-serif;"><input type="checkbox" value="2" checked> Tue</label>
+          <label style="display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--border);border-radius:100px;padding:8px 13px;font-size:13.5px;color:var(--charcoal);cursor:pointer;font-family:'DM Sans',sans-serif;"><input type="checkbox" value="3" checked> Wed</label>
+          <label style="display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--border);border-radius:100px;padding:8px 13px;font-size:13.5px;color:var(--charcoal);cursor:pointer;font-family:'DM Sans',sans-serif;"><input type="checkbox" value="4" checked> Thu</label>
+          <label style="display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--border);border-radius:100px;padding:8px 13px;font-size:13.5px;color:var(--charcoal);cursor:pointer;font-family:'DM Sans',sans-serif;"><input type="checkbox" value="5" checked> Fri</label>
+          <label style="display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--border);border-radius:100px;padding:8px 13px;font-size:13.5px;color:var(--charcoal);cursor:pointer;font-family:'DM Sans',sans-serif;"><input type="checkbox" value="6"> Sat</label>
+        </div>
+        <div style="display:flex;gap:10px;">
+          <div style="flex:1;">
+            <label style="font-size:11px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:5px;">From</label>
+            <input id="bkf-hr-start" type="time" value="09:00" style="width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:12px;font-size:15px;font-family:'DM Sans',sans-serif;box-sizing:border-box;background:white;"/>
+          </div>
+          <div style="flex:1;">
+            <label style="font-size:11px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:5px;">Until</label>
+            <input id="bkf-hr-end" type="time" value="17:00" style="width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:12px;font-size:15px;font-family:'DM Sans',sans-serif;box-sizing:border-box;background:white;"/>
+          </div>
+        </div>
+        <button id="bkf-hr-finish" onclick="bkForkHoursFinish()" class="btn btn-rose" style="width:100%;margin-top:18px;">Turn on booking</button>
+        <div style="font-size:12.5px;color:var(--muted);text-align:center;margin-top:10px;">Clients only ever see times inside these hours.</div>
       </div>
 
     </div>
