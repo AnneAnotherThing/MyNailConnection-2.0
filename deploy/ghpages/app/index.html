@@ -4975,8 +4975,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 467,         /* __APP_BUILD_ANDROID__ */
-  ios:     272,          /* __APP_BUILD_IOS__     */
+  android: 468,         /* __APP_BUILD_ANDROID__ */
+  ios:     273,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -9040,12 +9040,22 @@ function openTechEdit(tech) {
 // exactly as a client gets it, gallery, bio, the Book button, everything.
 // backFromTechDetail already returns techs to tech-home, so the back arrow
 // lands them right back on their dashboard.
-function viewMyProfileAsClient() {
+async function viewMyProfileAsClient() {
   const id = (currentUserEmail || '').toLowerCase();
   const idDigits = id.replace(/\D/g, '').slice(-10);
-  const mine = ALL_TECHS.find(t =>
+  const findMine = () => ALL_TECHS.find(t =>
     (t.email && String(t.email).toLowerCase() === id) ||
     (idDigits.length === 10 && t.phone && String(t.phone).replace(/\D/g, '').slice(-10) === idDigits));
+  let mine = findMine();
+  if (!mine) {
+    // The browse cache only loads when the client Home screen does; a
+    // tech who came straight to her portal hasn't populated it yet and
+    // was told to "finish her profile" with a finished profile (Anne,
+    // launch lap 2026-08-03). Load the list on demand and retry.
+    showToast('One sec\u2026');
+    try { await loadTechsFromSupabase(); } catch(_) {}
+    mine = findMine();
+  }
   if (!mine) { showToast('Finish your profile first, then peek at it here'); return; }
   openTechDetail(mine);
 }
