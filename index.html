@@ -2494,6 +2494,14 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
         <button onclick="tbAddBlocked()" style="padding:9px 14px;border-radius:8px;border:1.5px solid var(--rose-mid);background:white;color:var(--rose-dark);font-size:13px;font-weight:700;cursor:pointer;">Block</button>
       </div>
     </div>
+
+    <!-- Save-and-close (Anne, 2026-08-03): everything on this screen
+         saves the moment you change it, but a scrolled-deep tech still
+         needs a clear way home. One labeled door at the bottom. -->
+    <div style="margin:8px 20px 28px;">
+      <button onclick="show('tech-home')" class="btn btn-rose" style="width:100%;">Done &mdash; back to Tech Portal</button>
+      <div style="font-size:12.5px;color:var(--muted);text-align:center;margin-top:8px;">Everything on this page saves as you change it.</div>
+    </div>
   </div>
 </div>
 
@@ -4967,8 +4975,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 464,         /* __APP_BUILD_ANDROID__ */
-  ios:     269,          /* __APP_BUILD_IOS__     */
+  android: 465,         /* __APP_BUILD_ANDROID__ */
+  ios:     270,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
