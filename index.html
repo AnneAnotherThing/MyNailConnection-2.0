@@ -4976,8 +4976,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 470,         /* __APP_BUILD_ANDROID__ */
-  ios:     275,          /* __APP_BUILD_IOS__     */
+  android: 471,         /* __APP_BUILD_ANDROID__ */
+  ios:     276,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -14227,12 +14227,36 @@ function bkStepDays() {
     const open = !!_bkFlow.dows[dow] && !blocked;
     const label = new Date(iso + 'T12:00:00Z').toLocaleDateString('en-US', { weekday: 'short', month: 'numeric', day: 'numeric', timeZone: 'UTC' });
     chips += open
-      ? '<button onclick="bkPickDay(\'' + iso + '\')" style="padding:9px 6px;border-radius:10px;border:1.5px solid var(--rose-mid);background:white;color:var(--rose-dark);font-size:13px;font-weight:600;cursor:pointer;">' + label + '</button>'
+      ? '<button id="bk-day-' + iso + '" onclick="bkPickDay(\'' + iso + '\')" style="padding:9px 6px;border-radius:10px;border:1.5px solid var(--rose-mid);background:white;color:var(--rose-dark);font-size:13px;font-weight:600;cursor:pointer;">' + label + '</button>'
       : '<button disabled style="padding:9px 6px;border-radius:10px;border:1.5px solid var(--border);background:var(--cream);color:var(--muted);font-size:13px;opacity:0.55;">' + label + '</button>';
   }
   bkBody(bkHeader(bkEsc(_bkFlow.svc.name), 'bkStepServices()') +
     '<div style="font-size:13px;color:var(--muted);margin-bottom:10px;">Pick a day</div>' +
     '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">' + chips + '</div>');
+  // Honest today-chip (Anne, 2026-08-03): being a workday is not enough,
+  // late in the day every remaining slot may be past, taken, or inside
+  // the minimum-notice window. Ask the server; grey the chip if empty so
+  // "today" never advertises openings it cannot deliver.
+  (function() {
+    const todayIso = bkLocalDateISO(0, _bkFlow.tz);
+    const tDow = new Date(todayIso + 'T12:00:00Z').getUTCDay();
+    const tBlocked = (_bkFlow.timeOff || []).some(function(t) { return todayIso >= t.start_date && todayIso <= t.end_date; });
+    if (!_bkFlow.dows[tDow] || tBlocked) return;
+    fetch(SUPABASE_URL + '/rest/v1/rpc/get_open_slots', {
+      method: 'POST',
+      headers: bkHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ p_tech_id: _bkFlow.tech.id, p_service_id: _bkFlow.svc.id, p_day: todayIso })
+    }).then(function(r) { return r.ok ? r.json() : []; }).then(function(slots) {
+      if (slots && slots.length) return;
+      const btn = document.getElementById('bk-day-' + todayIso);
+      if (btn) {
+        btn.disabled = true;
+        btn.removeAttribute('onclick');
+        btn.setAttribute('style', 'padding:9px 6px;border-radius:10px;border:1.5px solid var(--border);background:var(--cream);color:var(--muted);font-size:13px;opacity:0.55;');
+        btn.title = 'No more openings today';
+      }
+    }).catch(function() {});
+  })();
 }
 
 async function bkPickDay(iso) {
