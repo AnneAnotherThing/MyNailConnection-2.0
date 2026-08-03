@@ -4336,7 +4336,7 @@ const TUTORIALS = {
     {
       icon: '<svg viewBox="0 0 24 24" style="width:60px;height:60px;stroke:var(--rose);fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>',
       title: 'Here\u2019s what clients see.',
-      body: '<p style="margin:0 0 14px;">Your profile shows your gallery, your bio, and one big <b>Book</b> button, plus <b>Call</b> and <b>Text</b> if you want them. When a client taps Book, they pick a service, a day, and a time. That\u2019s it.</p><p style="margin:0;">Share your profile link anywhere, your bio, your stories, a QR at your station. It\u2019s your booking page now.</p>'
+      body: '<p style="margin:0 0 14px;">Your profile shows your gallery, your bio, and the ways to reach you that <b>you</b> choose \u2014 <b>Book</b>, <b>Call</b>, <b>Text</b>, or your own booking link. When a client taps Book, they pick a service, a day, and a time. That\u2019s it.</p><p style="margin:0;">Share your profile link anywhere, your bio, your stories, a QR at your station. It\u2019s your booking page now.</p>'
     },
   ],
 
@@ -4949,8 +4949,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 456,         /* __APP_BUILD_ANDROID__ */
-  ios:     261,          /* __APP_BUILD_IOS__     */
+  android: 457,         /* __APP_BUILD_ANDROID__ */
+  ios:     262,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -6785,10 +6785,14 @@ function renderTechContactFooter(tech) {
   const showCall = phone && (onlyMessageSet || !Object.keys(cm).length ? true : !!cm.call);
   const showText = phone && (onlyMessageSet || !Object.keys(cm).length ? true : !!cm.text);
 
-  // Call/Text are secondary (design review punch 10, 2026-07-30): a
-  // client facing four equal dark buttons picks none. Booking is the
-  // primary action; these sit quiet beneath it.
-  const cardStyle = `display:flex;align-items:center;justify-content:center;gap:8px;flex:1;min-width:0;padding:12px;border-radius:12px;background:white;border:1.5px solid var(--border);color:var(--charcoal);font-size:14px;font-weight:600;text-decoration:none;font-family:'DM Sans',sans-serif;`;
+  // One hero, and it's the tech's chosen way (Anne, 2026-08-03): when a
+  // tech takes bookings (in-app or link), Call/Text sit quiet beneath the
+  // Book button. When calls/texts ARE how she books, they get the dark
+  // hero treatment, a call-me tech's contact row is never second-class.
+  const _hasBookPath = !!(tech.booking_enabled || tech.booking_link || tech.booking_url);
+  const cardStyle = _hasBookPath
+    ? `display:flex;align-items:center;justify-content:center;gap:8px;flex:1;min-width:0;padding:12px;border-radius:12px;background:white;border:1.5px solid var(--border);color:var(--charcoal);font-size:14px;font-weight:600;text-decoration:none;font-family:'DM Sans',sans-serif;`
+    : `display:flex;align-items:center;justify-content:center;gap:8px;flex:1;min-width:0;padding:13px;border-radius:12px;background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);border:1px solid rgba(80,62,63,0.3);border-bottom:3px solid rgba(43,41,39,0.5);box-shadow:0 3px 12px rgba(125,100,102,0.3);color:white;font-size:14px;font-weight:600;text-decoration:none;font-family:'DM Sans',sans-serif;`;
 
   let btns = '';
   if (showCall) {
@@ -13767,6 +13771,9 @@ async function tbLoadDashBadge() {
         if (window._bkSetup.link) {
           sub.innerHTML = 'Clients book through your link';
           sub.style.color = '#F7DEE1';
+        } else if (_bkCallsOnlyPref()) {
+          sub.innerHTML = 'Clients call or text you \u2014 your choice';
+          sub.style.color = 'rgba(255,255,255,0.78)';
         } else {
           sub.innerHTML = 'Booking is off &#183; <b style="color:#F7C8CE;">tap to set up</b>';
           sub.style.color = 'rgba(255,255,255,0.78)';
@@ -13839,6 +13846,7 @@ async function bkForkSaveLink() {
   if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
   var ok = await patchBookingField({ booking_link: url });
   if (!ok) { showToast('Could not save, try again'); return; }
+  try { localStorage.removeItem('mnc_booking_pref'); } catch(_) {}
   window._bkSetup = window._bkSetup || {}; window._bkSetup.link = url;
   if (_bkMyTech) _bkMyTech.booking_link = url;
   try { var te = document.getElementById('te-booking-link'); if (te) te.value = url; } catch(_){}
@@ -13846,9 +13854,22 @@ async function bkForkSaveLink() {
   showToast('Set! Clients can book you through your link ✨');
   try { tbLoadDashBadge(); } catch(_){}
 }
+function bkForkCallsOnly() {
+  // "Book the way they want to book" (Anne, 2026-08-03): calls/texts-only
+  // is a complete, first-class choice. Nothing to write server-side, the
+  // profile already shows Call and Text; remember the choice locally so
+  // the setup checklist counts this step done.
+  try { localStorage.setItem('mnc_booking_pref', 'calls'); } catch(_) {}
+  bkCloseSetupFork();
+  showToast('Done \u2014 clients will see big Call and Text buttons on your profile.');
+  try { updateSetupChecklist(); } catch(_) {}
+  try { tbLoadDashBadge(); } catch(_) {}
+}
+
 async function bkForkInApp() {
   var ok = await patchBookingField({ booking_enabled: true });
   if (!ok) { showToast('Could not turn booking on, try again'); return; }
+  try { localStorage.removeItem('mnc_booking_pref'); } catch(_) {}
   window._bkSetup = window._bkSetup || {}; window._bkSetup.enabled = true;
   if (_bkMyTech) _bkMyTech.booking_enabled = true;
   // One-tap defaults (design review punch 06, 2026-07-30): services +
@@ -15173,6 +15194,10 @@ function syncHeroStatus() {
 // loadTechHomeStats (photo count + profile fields) and tbLoadDashBadge
 // (booking state). Notification state is the browser permission plus a
 // local flag for the native shells, where the OS prompt is one-shot.
+function _bkCallsOnlyPref() {
+  try { return localStorage.getItem('mnc_booking_pref') === 'calls'; } catch(_) { return false; }
+}
+
 function _setupStepsState() {
   var bk = window._bkSetup || {};
   var pushDone = false;
@@ -15185,8 +15210,8 @@ function _setupStepsState() {
       done: !!window._setupProfileDone, action: 'openTechEditFromProfile()' },
     { label: 'Post your first look', sub: 'Photos are free \u00b7 1 min',
       done: (window._setupPhotoCount || 0) > 0, action: 'openPhotoUploadFromHome()' },
-    { label: 'Turn on booking', sub: 'Free forever, no commission \u00b7 2 min',
-      done: !!(bk.enabled || bk.link), action: 'tbOpenBookings()' },
+    { label: 'Choose how clients book you', sub: 'In-app, your link, or just calls \u00b7 2 min',
+      done: !!(bk.enabled || bk.link || _bkCallsOnlyPref()), action: 'tbOpenBookings()' },
     { label: 'Say yes to notifications', sub: 'So bookings ping your phone \u00b7 10 sec',
       done: pushDone, action: 'setupEnablePush()' }
   ];
@@ -19730,7 +19755,7 @@ function closeReleaseWizard() {
       <!-- Step 1: the chooser -->
       <div id="bkf-chooser" style="padding:22px 22px 0;">
         <div style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--charcoal);">How do you want to take bookings?</div>
-        <div style="font-size:13px;color:var(--muted);line-height:1.5;margin-top:6px;margin-bottom:20px;">Both are free. Pick whichever fits how you already work, you can change it anytime.</div>
+        <div style="font-size:13px;color:var(--muted);line-height:1.5;margin-top:6px;margin-bottom:20px;">All free. Pick whichever fits how you already work, you can change it anytime.</div>
 
         <div onclick="bkForkExisting()" style="cursor:pointer;border:1.5px solid var(--border);border-radius:16px;padding:16px;display:flex;gap:14px;align-items:center;margin-bottom:12px;">
           <div style="width:44px;height:44px;border-radius:13px;background:var(--rose-light);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
@@ -19750,6 +19775,17 @@ function closeReleaseWizard() {
           <div style="flex:1;min-width:0;">
             <div style="font-size:15px;font-weight:700;color:var(--charcoal);">Set up booking here <span style="font-size:13px;color:var(--rose-dark);font-weight:700;">&#183; FREE</span></div>
             <div style="font-size:13px;color:var(--muted);line-height:1.45;margin-top:2px;">Clients book right on your profile. You pick your services and hours, no other app needed.</div>
+          </div>
+          <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--muted);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0;"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+
+        <div onclick="bkForkCallsOnly()" style="cursor:pointer;border:1.5px solid var(--border);border-radius:16px;padding:16px;display:flex;gap:14px;align-items:center;margin-top:12px;">
+          <div style="width:44px;height:44px;border-radius:13px;background:var(--cream);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <svg viewBox="0 0 24 24" style="width:22px;height:22px;stroke:var(--rose-dark);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81a19.79 19.79 0 01-3.07-8.68A2 2 0 012 .9h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 8.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>
+          </div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:15px;font-weight:700;color:var(--charcoal);">Just calls and texts</div>
+            <div style="font-size:13px;color:var(--muted);line-height:1.45;margin-top:2px;">No booking system at all. Clients see big Call and Text buttons on your profile and reach you directly.</div>
           </div>
           <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--muted);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0;"><polyline points="9 18 15 12 9 6"/></svg>
         </div>
