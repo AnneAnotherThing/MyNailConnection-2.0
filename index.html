@@ -4979,8 +4979,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 472,         /* __APP_BUILD_ANDROID__ */
-  ios:     277,          /* __APP_BUILD_IOS__     */
+  android: 473,         /* __APP_BUILD_ANDROID__ */
+  ios:     278,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -15075,6 +15075,33 @@ function styleNavForRole() {
       // saved inspo live. "My Saves" reads more clearly than "Profile".
       lbl.textContent = 'My Saves';
       if (svg) svg.innerHTML = PROFILE_ICON;
+    }
+  });
+
+  // "My Appts" tab for techs (Anne, 2026-08-03): one tap to the
+  // appointments screen from anywhere, sitting right after Tech Portal.
+  // Injected dynamically so all nine bottom-nav copies stay in sync;
+  // hidden (not removed) when a non-tech signs in on the same device.
+  document.querySelectorAll('.bottom-nav').forEach(function(nav) {
+    var apptsItem = nav.querySelector('.mnc-appts-nav');
+    if (isTechSlot) {
+      if (!apptsItem) {
+        var portalItem = Array.prototype.find.call(nav.querySelectorAll('.nav-item'), function(it) {
+          var l = it.querySelector('.nav-label');
+          return l && (l.textContent || '').trim() === 'Tech Portal';
+        });
+        if (portalItem) {
+          var d = document.createElement('div');
+          d.className = 'nav-item mnc-appts-nav';
+          d.setAttribute('onclick', 'tbOpenBookings()');
+          d.innerHTML = '<span class="nav-icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><polyline points="9 16 11 18 15 14"/></svg></span><span class="nav-label">My Appts</span>';
+          portalItem.insertAdjacentElement('afterend', d);
+        }
+      } else {
+        apptsItem.style.display = '';
+      }
+    } else if (apptsItem) {
+      apptsItem.style.display = 'none';
     }
   });
 
