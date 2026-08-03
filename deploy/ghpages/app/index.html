@@ -4951,8 +4951,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 461,         /* __APP_BUILD_ANDROID__ */
-  ios:     266,          /* __APP_BUILD_IOS__     */
+  android: 462,         /* __APP_BUILD_ANDROID__ */
+  ios:     267,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -19319,6 +19319,19 @@ async function releaseCurrentWizardPhoto() {
   if (st.idx >= st.urls.length) {
     showToast(st.releasedCount > 0 ? 'All photos released! 🌸' : 'Photos added to your portfolio. 🌸');
     closeReleaseWizard();
+    // Launch-lap polish (2026-08-03, Anne): if she is mid-setup, take
+    // her back to the Tech Portal where the checklist points at the
+    // next step, instead of stranding her on My Gallery. Once setup is
+    // complete, landing on My Gallery is the right place to stay.
+    try {
+      var _undone = _setupStepsState().some(function(x) { return !x.done; });
+      if (_undone) {
+        setTimeout(function() {
+          show('tech-home');
+          try { updateSetupChecklist(); } catch(_) {}
+        }, 700);
+      }
+    } catch(_) {}
   } else {
     renderReleaseWizardStep();
   }
