@@ -1489,9 +1489,10 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       <input type="hidden" id="reg-zip-field"/>
       <div><label style="font-size:11px;color:var(--muted);font-weight:500;display:block;margin-bottom:4px;letter-spacing:0.8px;">ADDRESS</label>
         <div class="addr-wrap">
-          <input id="reg-address" type="text" placeholder="Start typing your address…" autocomplete="off"
+          <input id="reg-address" type="text" placeholder="Start typing your address…" autocomplete="address-line1"
             style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;box-sizing:border-box;"
-            oninput="addrAutocomplete(this,'reg-addr-list','reg-city','reg-state-field','reg-zip-field')"/>
+            oninput="addrAutocomplete(this,'reg-addr-list','reg-city','reg-state-field','reg-zip-field')"
+            onblur="mncSplitAddressField(this,'reg-city','reg-state-field','reg-zip-field')"/>
           <div id="reg-addr-list" class="addr-suggestions" style="display:none;"></div>
         </div>
       </div>
@@ -3179,9 +3180,10 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       <div style="display:grid;gap:10px;margin-bottom:14px;">
         <div><label style="font-size:10px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px;letter-spacing:0.8px;">WHERE YOU'RE BASED</label>
           <div class="addr-wrap">
-            <input id="te-address" type="text" placeholder="Start typing address…" autocomplete="off"
+            <input id="te-address" type="text" placeholder="Start typing address…" autocomplete="address-line1"
               style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;box-sizing:border-box;"
-              oninput="addrAutocomplete(this,'te-addr-list','te-city','te-state','te-zip')"/>
+              oninput="addrAutocomplete(this,'te-addr-list','te-city','te-state','te-zip')"
+              onblur="mncSplitAddressField(this,'te-city','te-state','te-zip')"/>
             <div id="te-addr-list" class="addr-suggestions" style="display:none;"></div>
           </div>
         </div>
@@ -4949,8 +4951,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 457,         /* __APP_BUILD_ANDROID__ */
-  ios:     262,          /* __APP_BUILD_IOS__     */
+  android: 458,         /* __APP_BUILD_ANDROID__ */
+  ios:     263,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -6868,7 +6870,13 @@ function renderTechContactFooter(tech) {
     </a>`;
   }
 
-  const allBtns = `${nativeBookBtn}${bookingBtn}${galleryBtn}<div style="display:flex;gap:8px;">${btns}</div>`;
+  // "Also accepts" (Anne, 2026-08-03): when a booking path is the hero,
+  // the quiet Call/Text row gets a small caption so it reads as her
+  // other welcome ways in, not an afterthought.
+  const alsoLabel = (_hasBookPath && btns)
+    ? '<div style="font-size:11px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin:4px 0 6px;text-align:center;">Also accepts</div>'
+    : '';
+  const allBtns = `${nativeBookBtn}${bookingBtn}${galleryBtn}${alsoLabel}<div style="display:flex;gap:8px;">${btns}</div>`;
   footer.innerHTML = allBtns;
   footer.style.display = (btns || nativeBookBtn || bookingBtn || galleryBtn) ? '' : 'none';
 }
@@ -10623,6 +10631,7 @@ async function saveTechEdit() {
   edit.shop  = document.getElementById('te-shop').value.trim();
   edit.email = document.getElementById('te-email').value.trim();
   edit.phone = document.getElementById('te-phone').value.replace(/\D/g,''); // digits-only for UNIQUE constraint
+  try { mncSplitAddressField(document.getElementById('te-address'), 'te-city', 'te-state', 'te-zip'); } catch(_) {}
   edit.address = document.getElementById('te-address').value.trim();
   // te-hide-address was removed from the modal, preserve whatever value
   // the tech set on their dashboard (td-t-hideaddr) by leaving edit's value
@@ -15465,6 +15474,32 @@ let _googlePlacesReady = !!window.__googlePlacesReady;
 function initGooglePlaces() {
   _googlePlacesReady = true;
   window.__googlePlacesReady = true;
+}
+
+// Phone-keyboard autofill (Google/Samsung saved addresses) ignores the
+// suggestion dropdown and crams the FULL address into the street field:
+// "123 N Main St, Phoenix, AZ 85001". On blur, un-cram it into the
+// street / city / state / zip fields. Only fills fields that are empty,
+// a hand-typed city is never overwritten. 2026-08-03, found by Anne in
+// the launch-day test lap.
+function mncSplitAddressField(addrEl, cityId, stateId, zipId) {
+  if (!addrEl) return;
+  var v = (addrEl.value || '').trim();
+  if (v.indexOf(',') === -1) return;
+  var parts = v.split(',').map(function(p) { return p.trim(); }).filter(Boolean);
+  if (parts.length && /^(usa|united states)$/i.test(parts[parts.length - 1])) parts.pop();
+  if (parts.length < 3) return;
+  var m = parts[parts.length - 1].match(/^([A-Za-z]{2})\.?(?:\s+(\d{5})(?:-\d{4})?)?$/);
+  if (!m) return;
+  var city = parts[parts.length - 2];
+  var street = parts.slice(0, parts.length - 2).join(', ');
+  addrEl.value = street;
+  var c = document.getElementById(cityId);
+  var st = document.getElementById(stateId);
+  var z = document.getElementById(zipId);
+  if (c && !(c.value || '').trim()) c.value = city;
+  if (st && !(st.value || '').trim()) st.value = m[1].toUpperCase();
+  if (z && m[2] && !(z.value || '').trim()) z.value = m[2];
 }
 
 function addrAutocomplete(input, listId, cityId, stateId, zipId) {
