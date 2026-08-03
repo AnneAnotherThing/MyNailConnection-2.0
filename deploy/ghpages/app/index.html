@@ -4975,8 +4975,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 465,         /* __APP_BUILD_ANDROID__ */
-  ios:     270,          /* __APP_BUILD_IOS__     */
+  android: 466,         /* __APP_BUILD_ANDROID__ */
+  ios:     271,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -5467,6 +5467,59 @@ async function showPushPrompt(userId) {
     };
   }
 }
+
+// ── PWA / browser back gesture (2026-08-03, found in Anne's launch lap) ──────
+// The native handler below only runs inside Capacitor. In the browser or
+// installed PWA, Android's back gesture is HISTORY back, and this app
+// never pushed history entries, so one back-swipe minimized the app from
+// three screens deep. Mirror the native behavior: every show() pushes a
+// history entry (deduped), popstate closes the topmost modal first, then
+// navigates the screen the entry names. Backing past the first entry
+// leaves the app, which is Android convention at a root screen.
+var _mncHistReady = false;
+var _mncHistSuppress = false;
+
+function _mncIsNativeShell() {
+  try { return !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()); }
+  catch(_) { return false; }
+}
+
+function _mncPushScreenState(id) {
+  if (_mncIsNativeShell() || _mncHistSuppress) return;
+  try {
+    if (!_mncHistReady) {
+      history.replaceState({ mncScreen: id }, '');
+      _mncHistReady = true;
+      return;
+    }
+    if (history.state && history.state.mncScreen === id) return; // dedupe
+    history.pushState({ mncScreen: id }, '');
+  } catch(_) {}
+}
+
+window.addEventListener('popstate', function(ev) {
+  if (_mncIsNativeShell()) return;
+  try {
+    // 1) A visible modal absorbs the back gesture: close it and re-arm
+    //    the history entry we just consumed.
+    var overlays = document.querySelectorAll('.modal-overlay');
+    for (var i = overlays.length - 1; i >= 0; i--) {
+      var d = overlays[i].style.display;
+      if (d && d !== 'none') {
+        overlays[i].style.display = 'none';
+        try { history.pushState({ mncScreen: _currentScreen }, ''); } catch(_) {}
+        return;
+      }
+    }
+    // 2) Navigate to the screen this history entry names, without
+    //    pushing a new entry for it.
+    var target = ev.state && ev.state.mncScreen;
+    if (target && target !== _currentScreen) {
+      _mncHistSuppress = true;
+      try { show(target); } finally { _mncHistSuppress = false; }
+    }
+  } catch(e) { try { console.warn('popstate handler:', e); } catch(_) {} }
+});
 
 // ── Capacitor Android hardware back button ───────────────────────────────────
 // Default Android behavior: the hardware back button exits the app from
@@ -16350,6 +16403,7 @@ function show(id) {
   }
   _prevScreen = _currentScreen;
   _currentScreen = id;
+  try { _mncPushScreenState(id); } catch(_) {}
   try { styleAuthNav(); } catch(_) {}
   // Per-screen nav transforms (label + icon changes based on role).
   // styleNavForRole repositions the shared Profile slot to "Tech Portal"
