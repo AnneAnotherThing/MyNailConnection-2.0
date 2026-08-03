@@ -4951,8 +4951,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 458,         /* __APP_BUILD_ANDROID__ */
-  ios:     263,          /* __APP_BUILD_IOS__     */
+  android: 459,         /* __APP_BUILD_ANDROID__ */
+  ios:     264,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -10728,6 +10728,19 @@ async function saveTechEdit() {
     if (techData.image_url && techData.image_url.startsWith('data:')) {
       techData.image_url = '';
       showToast('Profile photo not saved, Supabase Storage needed. Use a URL instead.');
+    }
+
+    // Same-number, same-format (2026-08-03, found in Anne's launch lap):
+    // the row stores the phone as E.164 (+1480...) while the form strips
+    // to bare digits. techs_update_self's WITH CHECK compares FULL digit
+    // strings against the JWT phone (11 digits with country code), so
+    // re-saving the same number in a different format read as "this row
+    // no longer belongs to you" and threw the RLS toast. If the last 10
+    // digits are unchanged, keep the stored format byte-for-byte.
+    var _oldPhoneStored = (currentEditTech.phone || '') + '';
+    if (_oldPhoneStored &&
+        _oldPhoneStored.replace(/\D/g, '').slice(-10) === (techData.phone || '').replace(/\D/g, '').slice(-10)) {
+      techData.phone = _oldPhoneStored;
     }
 
     // Identity lock (2026-07-30): techs_update_self's WITH CHECK requires
