@@ -4951,8 +4951,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 459,         /* __APP_BUILD_ANDROID__ */
-  ios:     264,          /* __APP_BUILD_IOS__     */
+  android: 460,         /* __APP_BUILD_ANDROID__ */
+  ios:     265,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -11775,6 +11775,11 @@ function renderStyleGrid() {
     if (tech.listing_paused) return; // 3.0: paused = off the Gallery
     (tech.photos || []).forEach(function(p) {
       var url = p.url || p;
+      // No-skip tagging (2026-08-03): a photo that escaped the wizard
+      // untagged (X'd out mid-flow) stays off the public Gallery until
+      // it is tagged in My Gallery. Tagging later surfaces it even if
+      // the stale pending flag is still on the object.
+      if (p && typeof p === 'object' && p.pending_feed && !(p.tags || []).length) return;
       if (url && url.startsWith('http')) {
         // Use the photo's own tags only, falling back to tech.tags here
         // makes the inspo filter overmatch (chip says "French (1)" but selecting
@@ -19239,13 +19244,12 @@ async function releaseCurrentWizardPhoto() {
   const tags = (st.tags[url] || []).slice();
   const errEl = document.getElementById('rw-error');
 
-  // Gate: at least 1 tag AND non-empty caption (per 2026-04-23 spec).
-  if (tags.length === 0 || !caption) {
+  // Gate: at least one tag (2026-08-03 per Anne: captions retired,
+  // nothing in 3.0 displays them; tagging is mandatory with no skip).
+  if (tags.length === 0) {
     if (errEl) {
       errEl.style.display = 'block';
-      errEl.textContent = (!caption && !tags.length)
-        ? 'Add a caption and pick at least one tag to release this photo.'
-        : (!caption ? 'Write a short caption before releasing.' : 'Pick at least one tag before releasing.');
+      errEl.textContent = 'Pick at least one tag, that is how clients find this look.';
     }
     return;
   }
@@ -19284,7 +19288,7 @@ async function releaseCurrentWizardPhoto() {
         body: JSON.stringify({
           tech_id: st.techEmail,
           type: 'inspo',
-          body: caption,
+          body: caption || tags.join(' \u00b7 '),
           image_url: url,
           publish_at: publishAt
         })
@@ -19999,16 +20003,17 @@ function closeReleaseWizard() {
     <div style="width:40px;height:4px;background:var(--border);border-radius:100px;margin:12px auto 8px;flex-shrink:0;"></div>
     <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 18px 12px;flex-shrink:0;">
       <div>
-        <div style="font-family:'Playfair Display',serif;font-size:18px;font-weight:600;color:var(--charcoal);line-height:1.2;">Tag &amp; caption to release</div>
+        <div style="font-family:'Playfair Display',serif;font-size:18px;font-weight:600;color:var(--charcoal);line-height:1.2;">Tag it to go live</div>
         <div id="rw-step-counter" style="font-size:11px;color:var(--muted);margin-top:2px;letter-spacing:0.4px;text-transform:uppercase;font-weight:600;">Photo 1 of 1</div>
       </div>
       <button onclick="closeReleaseWizard()" aria-label="Close" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted);line-height:1;padding:4px 8px;">&times;</button>
     </div>
     <div style="overflow-y:auto;padding:0 18px 12px;flex:1 1 auto;">
       <img id="rw-photo-img" src="" alt="" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:14px;margin-bottom:14px;background:var(--cream);"/>
-      <div style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;">Caption <span style="color:var(--rose);">*</span></div>
-      <textarea id="rw-caption" rows="2" maxlength="240" placeholder="Say something about this set, technique, inspiration, client vibe…" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:12px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--charcoal);background:var(--cream);resize:vertical;min-height:58px;margin-bottom:14px;box-sizing:border-box;"></textarea>
-      <div style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;">Tags <span style="color:var(--rose);">*</span> <span style="color:var(--muted);font-weight:500;text-transform:none;letter-spacing:0;">(at least one)</span></div>
+      <!-- Caption removed 2026-08-03 per Anne: nothing in 3.0 displays
+           captions (tapping a photo opens the tech), so it was pure
+           friction in the release gate. -->
+      <div style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;">Tags <span style="color:var(--rose);">*</span> <span style="color:var(--muted);font-weight:500;text-transform:none;letter-spacing:0;">(at least one, clients find you by these)</span></div>
       <div id="rw-chips"></div>
       <!-- Destination hint, updated per-photo by renderReleaseWizardStep
            based on the photo's slot_type. "credit" → portfolio-only copy;
@@ -20018,11 +20023,11 @@ function closeReleaseWizard() {
     </div>
     <div style="padding:12px 18px 18px;border-top:1px solid var(--border);flex-shrink:0;background:white;">
       <button id="rw-release-btn" onclick="releaseCurrentWizardPhoto()" class="btn btn-rose" style="width:100%;margin-bottom:8px;">Add to Gallery →</button>
-      <div style="display:flex;gap:8px;">
-        <button onclick="skipCurrentWizardPhoto()" class="btn btn-outline" style="flex:1;font-size:13px;">Skip for now</button>
-        <button onclick="closeReleaseWizard()" style="flex:1;padding:12px;border-radius:100px;border:1.5px solid var(--border);background:white;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;">Finish later</button>
-      </div>
-      <div style="font-size:13px;color:var(--muted);text-align:center;margin-top:10px;line-height:1.5;">Skipped photos stay in your portfolio but won't appear in the feed until you tag them.</div>
+      <!-- Skip / Finish later removed 2026-08-03 per Anne: no skipping
+           tags. The X above is the only exit; anything left untagged
+           stays OUT of the public Gallery until it is tagged in
+           My Gallery. -->
+      <div style="font-size:13px;color:var(--muted);text-align:center;margin-top:4px;line-height:1.5;">Your photo goes live the moment you tag it.</div>
     </div>
   </div>
 </div>
