@@ -2383,21 +2383,37 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       <div style="display:flex;align-items:center;gap:10px;">
         <div style="flex:1;min-width:0;">
           <div style="font-size:15px;font-weight:600;color:var(--charcoal);">Take bookings on MNC</div>
-          <div style="font-size:13px;color:var(--muted);margin-top:2px;">Free, always. Clients book you right from your profile.</div>
+          <div id="tb-enabled-sub" style="font-size:13px;color:var(--muted);margin-top:2px;">Free, always. Clients book you right from your profile.</div>
         </div>
         <button id="tb-enabled-btn" onclick="tbToggleEnabled()" style="min-width:56px;padding:8px 14px;border-radius:100px;font-size:13px;font-weight:700;cursor:pointer;border:1.5px solid var(--border);background:white;color:var(--muted);">Off</button>
       </div>
       <div style="display:flex;align-items:center;gap:10px;margin-top:14px;padding-top:14px;border-top:1px solid var(--border);">
         <div style="flex:1;min-width:0;">
           <div style="font-size:14px;font-weight:600;color:var(--charcoal);">Auto-confirm bookings</div>
-          <div style="font-size:13px;color:var(--muted);margin-top:2px;">On = bookings lock in instantly. Off = you approve each one first.</div>
+          <div id="tb-autoconfirm-sub" style="font-size:13px;color:var(--muted);margin-top:2px;">You approve each request before it books &mdash; stay near your phone!</div>
         </div>
         <button id="tb-autoconfirm-btn" onclick="tbToggleAutoConfirm()" style="min-width:56px;padding:8px 14px;border-radius:100px;font-size:13px;font-weight:700;cursor:pointer;border:1.5px solid var(--border);background:white;color:var(--muted);">Off</button>
+      </div>
+      <!-- Minimum notice, visible only while auto-confirm is on (Anne,
+           2026-08-03): with requests booking themselves, a tech needs a
+           floor on how soon a stranger can appear in her chair. Enforced
+           server-side in get_open_slots v3 (sql/booking-min-notice.sql). -->
+      <div id="tb-minnotice-row" style="display:none;align-items:center;gap:10px;margin-top:14px;padding-top:14px;border-top:1px solid var(--border);">
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:14px;font-weight:600;color:var(--charcoal);">Minimum notice</div>
+          <div style="font-size:13px;color:var(--muted);margin-top:2px;">Since requests confirm themselves, keep last-minute surprises off your calendar.</div>
+        </div>
+        <select id="tb-minnotice" onchange="tbSetMinNotice(this.value)" style="padding:8px 10px;border:1px solid var(--border);border-radius:10px;font-size:13px;color:var(--charcoal);background:white;">
+          <option value="0">None</option><option value="2">2 hours</option>
+          <option value="4">4 hours</option><option value="8">8 hours</option>
+          <option value="12">12 hours</option><option value="24">1 day</option>
+          <option value="48">2 days</option>
+        </select>
       </div>
       <div style="display:flex;align-items:center;gap:10px;margin-top:14px;padding-top:14px;border-top:1px solid var(--border);">
         <div style="flex:1;min-width:0;">
           <div style="font-size:14px;font-weight:600;color:var(--charcoal);">Pause my page</div>
-          <div style="font-size:13px;color:var(--muted);margin-top:2px;">Takes a break: hides your photos from the Gallery and pauses booking and messages. Flip it off and everything comes back.</div>
+          <div id="tb-paused-sub" style="font-size:13px;color:var(--muted);margin-top:2px;">You&rsquo;re live &mdash; photos in the Gallery, booking on your profile.</div>
         </div>
         <button id="tb-paused-btn" onclick="tbTogglePaused()" style="min-width:56px;padding:8px 14px;border-radius:100px;font-size:13px;font-weight:700;cursor:pointer;border:1.5px solid var(--border);background:white;color:var(--muted);">Off</button>
       </div>
@@ -4951,8 +4967,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 463,         /* __APP_BUILD_ANDROID__ */
-  ios:     268,          /* __APP_BUILD_IOS__     */
+  android: 464,         /* __APP_BUILD_ANDROID__ */
+  ios:     269,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -13136,7 +13152,7 @@ async function loadTechBookings() {
   const note = document.getElementById('tb-migration-note');
   try {
     const r = await fetch(SUPABASE_URL +
-      '/rest/v1/techs?select=id,name,email,booking_enabled,booking_auto_confirm,booking_timezone,booking_buffer_minutes,listing_paused&or=(email.eq.' +
+      '/rest/v1/techs?select=id,name,email,booking_enabled,booking_auto_confirm,booking_timezone,booking_buffer_minutes,booking_min_notice_hours,listing_paused&or=(email.eq.' +
       encodeURIComponent(currentUserEmail) + ',phone.eq.' + encodeURIComponent(currentUserEmail) + ')', { headers: bkHeaders() });
     if (!r.ok) {
       // Almost always means the migration hasn't been run (unknown column).
@@ -13199,6 +13215,35 @@ function tbRenderSettings() {
   if (tzl) tzl.textContent = _bkMyTech.booking_timezone || 'America/Phoenix';
   const buf = document.getElementById('tb-buffer');
   if (buf) buf.value = String(_bkMyTech.booking_buffer_minutes || 0);
+  // State copy (Anne, 2026-08-03): each toggle's sub-line says what is
+  // true RIGHT NOW, not an on-means/off-means legend.
+  const enSub = document.getElementById('tb-enabled-sub');
+  if (enSub) enSub.textContent = _bkMyTech.booking_enabled
+    ? 'Booking is on \u2014 clients book you right from your profile.'
+    : 'Booking is off \u2014 clients see your other contact options.';
+  const acSub = document.getElementById('tb-autoconfirm-sub');
+  if (acSub) acSub.textContent = _bkMyTech.booking_auto_confirm
+    ? 'Requests book straight onto your calendar \u2014 no approval step.'
+    : 'You approve each request before it books \u2014 stay near your phone!';
+  const pSub = document.getElementById('tb-paused-sub');
+  if (pSub) pSub.textContent = _bkMyTech.listing_paused
+    ? 'Your page is hidden and booking is paused \u2014 flip off and everything comes back.'
+    : 'You\u2019re live \u2014 photos in the Gallery, booking on your profile.';
+  // Minimum notice: only meaningful while requests confirm themselves.
+  const mnRow = document.getElementById('tb-minnotice-row');
+  if (mnRow) mnRow.style.display = _bkMyTech.booking_auto_confirm ? 'flex' : 'none';
+  const mnSel = document.getElementById('tb-minnotice');
+  if (mnSel) mnSel.value = String(_bkMyTech.booking_min_notice_hours || 0);
+}
+
+async function tbSetMinNotice(v) {
+  if (!_bkMyTech) return;
+  var hrs = parseInt(v, 10) || 0;
+  if (await tbPatchTech({ booking_min_notice_hours: hrs })) {
+    showToast(hrs
+      ? 'Clients must book at least ' + hrs + ' hour' + (hrs === 1 ? '' : 's') + ' ahead'
+      : 'Same-day, up-to-the-minute booking allowed');
+  }
 }
 
 async function tbPatchTech(patch) {
