@@ -691,9 +691,11 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
 .scroll-content{flex:1;min-height:0;overflow-y:auto;padding-top:8px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;width:100%;box-sizing:border-box;}
 .tech-card{background:white;border:1px solid var(--border);border-radius:18px;overflow:hidden;cursor:pointer;transition:all 0.2s;box-shadow:var(--shadow);margin-bottom:12px;}
 .tech-card:hover{border-color:var(--rose-mid);}
-.tech-card-photos{width:100%;height:150px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:2px;background:var(--border);}
+/* 110px + explicit center crop (Anne, 2026-08-03): the 150px strip
+   read as "just the top third" of a photo on some devices */
+.tech-card-photos{width:100%;height:110px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:2px;background:var(--border);}
 .tech-card-photo-slot{overflow:hidden;display:flex;align-items:center;justify-content:center;background:var(--cream);}
-.tech-card-photo-slot img{width:100%;height:100%;object-fit:cover;}
+.tech-card-photo-slot img{width:100%;height:100%;object-fit:cover;object-position:center;}
 .tech-card-body{padding:8px 12px 10px;display:flex;align-items:center;gap:8px;}
 .tech-thumb{width:32px;height:32px;border-radius:8px;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;border:2px solid white;box-shadow:0 1px 6px rgba(0,0,0,0.12);}
 .tech-initials{font-family:'Playfair Display',serif;font-size:16px;color:var(--rose-dark);}
@@ -1688,12 +1690,12 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
            inactive treatment (dim + "Not at this time" note + click
            disabled) so clients don't tap through to an empty list.
            2026-04-23 per Anne. -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-        <div onclick="handleAvailBtnClick('now')" id="avail-btn-now" style="cursor:pointer;border-radius:12px;background:#FFFFFF;border:1px solid rgba(96,76,77,0.22);border-bottom:3px solid rgba(70,54,55,0.35);box-shadow:0 2px 8px rgba(70,54,55,0.08);padding:8px 12px;display:flex;align-items:center;gap:9px;transition:opacity 0.2s, filter 0.2s;">
-          <div id="avail-dot-now" style="width:8px;height:8px;border-radius:50%;background:#5F9B72;flex-shrink:0;transition:background 0.2s;"></div>
+      <div style="display:grid;grid-template-columns:1fr;gap:8px;">
+        <div onclick="handleAvailBtnClick('now')" id="avail-btn-now" style="cursor:pointer;border-radius:14px;background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);border:1px solid rgba(96,76,77,0.3);border-bottom:3px solid rgba(43,41,39,0.5);box-shadow:0 4px 14px rgba(125,100,102,0.35);display:flex;align-items:center;gap:11px;padding:14px 16px;">
+          <div id="avail-dot-now" style="width:10px;height:10px;border-radius:50%;background:#8CEBAC;box-shadow:0 0 8px rgba(140,235,172,0.8);flex-shrink:0;transition:background 0.2s;"></div>
           <div>
-            <div style="font-size:13px;font-weight:600;color:var(--charcoal);">Open today</div>
-            <div style="font-size:13px;color:var(--muted);margin-top:1px;" id="avail-count-now">, techs</div>
+            <div style="font-size:15px;font-weight:700;color:white;letter-spacing:0.2px;">✨ Open today</div>
+            <div style="font-size:13px;color:rgba(255,255,255,0.85);margin-top:1px;" id="avail-count-now">, techs</div>
           </div>
         </div>
         <div onclick="handleAvailBtnClick('today')" id="avail-btn-today" style="cursor:pointer;border-radius:12px;background:#FFFFFF;border:1px solid rgba(96,76,77,0.22);border-bottom:3px solid rgba(70,54,55,0.35);box-shadow:0 2px 8px rgba(70,54,55,0.08);padding:8px 12px;display:flex;align-items:center;gap:9px;transition:opacity 0.2s, filter 0.2s;">
@@ -5014,8 +5016,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 475,         /* __APP_BUILD_ANDROID__ */
-  ios:     280,          /* __APP_BUILD_IOS__     */
+  android: 476,         /* __APP_BUILD_ANDROID__ */
+  ios:     281,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -11983,10 +11985,12 @@ function renderStyleGrid() {
       byTech[key].photos.push(p);
     });
     Object.keys(byTech).forEach(function(k) {
-      // 3.0: LINEAR weight. Photos are the ad budget, so presence is
-      // exactly proportional to photo count (sqrt used to dampen big
-      // uploaders, which taxed the best customers under the new model).
-      byTech[k].weight = byTech[k].photos.length;
+      // 3.0: LINEAR weight, presence proportional to photo count.
+      // Availability boost (Anne, 2026-08-03): techs who are open today
+      // surface twice as often while their toggle is on, same-day
+      // clients see same-day techs first.
+      var _openNow = byTech[k].photos[0] && byTech[k].photos[0].tech && byTech[k].photos[0].tech.is_available;
+      byTech[k].weight = byTech[k].photos.length * (_openNow ? 2 : 1);
       byTech[k].photos.sort(function() { return Math.random() - 0.5; });
       byTech[k].index = 0;
     });
@@ -12037,7 +12041,7 @@ function renderStyleGrid() {
       // 3.0: available-now techs glow in the gallery, a soft pulsing ring
       // plus a bottom banner. The daily reason to flip the toggle.
       var availBanner = p.tech.is_available
-        ? '<div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(45,106,79,0.85));padding:14px 6px 5px;pointer-events:none;"><div style="font-size:10px;font-weight:700;color:white;text-align:center;letter-spacing:0.3px;">\u2728 Open today</div></div>'
+        ? '<div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(45,106,79,0.92));padding:18px 6px 7px;pointer-events:none;"><div style="font-size:12.5px;font-weight:800;color:white;text-align:center;letter-spacing:0.7px;text-transform:uppercase;text-shadow:0 1px 3px rgba(0,0,0,0.35);">\u2728 Open today</div></div>'
         : '';
       div.innerHTML = '<img ' + thumbAttrs(p.url) + ' style="width:100%;display:block;aspect-ratio:1;object-fit:cover;" loading="lazy" onerror="this.parentElement.style.display=\'none\'">' + availBanner;
       if (p.tech.is_available) div.classList.add('avail-glow-tile');
