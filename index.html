@@ -93,7 +93,7 @@
      used for hero cards and primary buttons so they read as one system. */
   --ink-1:#4A4A4F;--ink-2:#2A2A2E;--ink-3:#141317;
   --gold:#8C7E76;--gold-light:#EDE7E6;--gold-mid:#C9BDB6;
-  --cream:#FBF8F8;--charcoal:#141317;--muted:#8B7F8A;
+  --cream:#FBF8F8;--charcoal:#141317;--muted:#6D6068;
   --slate:#4A6274;--slate-light:#E8EEF2;--green:#4A7A5A;--green-light:#EAF3EC;
   --white:#FFFFFF;--border:rgba(125,100,102,0.16);--shadow:0 1px 2px rgba(11,11,13,0.09),0 5px 14px rgba(11,11,13,0.08),0 14px 30px rgba(11,11,13,0.06);
 }
@@ -515,6 +515,9 @@ button,input,select,textarea{font-family:'DM Sans','Helvetica Neue',Helvetica,Ar
 /* Scoped to .logo-mark only, the old [class*="logo"] catch-all forced a flat
    colour onto .logo-sub and killed its gradient fill. */
 .header .logo-mark{color:var(--charcoal) !important;font-weight:700 !important;}
+/* Bookings screen backdrop, slightly darker so the white request
+   cards and the Confirm/Decline row pop (Anne, 2026-08-03) */
+#tech-bookings .scroll-content{background:#F0EAEC;}
 /* Solid pill so the arrow reads on ANY header tint (Anne, 2026-08-03) */
 .back-btn{width:36px;height:36px;border-radius:50%;border:1.5px solid var(--border);background:white;cursor:pointer;font-size:18px;font-weight:600;display:flex;align-items:center;justify-content:center;color:var(--charcoal);box-shadow:0 1px 6px rgba(20,19,23,0.14);flex-shrink:0;}
 .avatar{width:36px;height:36px;border-radius:50%;background:var(--rose-light);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:500;color:var(--rose-dark);cursor:pointer;border:2px solid rgba(255,255,255,0.55);box-shadow:0 0 0 1px rgba(20,19,23,0.25),0 3px 10px rgba(0,0,0,0.35);transition:box-shadow 0.2s,transform 0.15s;}
@@ -2490,10 +2493,10 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       <div style="font-size:15px;font-weight:600;color:var(--charcoal);">Blocked clients</div>
       <div style="font-size:13px;color:var(--muted);margin-top:2px;">They're never told. They simply never see an opening with you again.</div>
       <div id="tb-blocked-list" style="margin-top:10px;"></div>
-      <div style="display:flex;gap:6px;margin-top:8px;align-items:center;">
-        <input type="email" id="tb-block-email" placeholder="Phone number or email" style="flex:1;padding:9px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:white;color:var(--charcoal);">
-        <button onclick="tbAddBlocked()" style="padding:9px 14px;border-radius:8px;border:1.5px solid var(--rose-mid);background:white;color:var(--rose-dark);font-size:13px;font-weight:700;cursor:pointer;">Block</button>
-      </div>
+      <!-- Manual entry field removed (Anne, 2026-08-03): blocking now
+           happens from the appointment card itself, the Block button on
+           any past request. No typing, no typos. -->
+      <div style="font-size:13px;color:var(--muted);margin-top:8px;">To block someone, tap <b>Block</b> on any of their appointments below in Recent.</div>
     </div>
 
     <!-- Save-and-close (Anne, 2026-08-03): everything on this screen
@@ -4976,8 +4979,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 471,         /* __APP_BUILD_ANDROID__ */
-  ios:     276,          /* __APP_BUILD_IOS__     */
+  android: 472,         /* __APP_BUILD_ANDROID__ */
+  ios:     277,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -13681,6 +13684,23 @@ async function tbAddBlocked() {
   showToast('Blocked. They won\u2019t be told.');
 }
 
+async function tbBlockFromAppt(id) {
+  const b = _bkAppts.find(function(x) { return x.id === id; });
+  if (!b || !b.client_email || !_bkMyTech) return;
+  const who = b.client_name || b.client_email;
+  if (!(await showConfirm('Block ' + who + '?', { body: 'They are never told. They simply never see an opening with you again.', okLabel: 'Block' }))) return;
+  const r = await fetch(SUPABASE_URL + '/rest/v1/blocked_clients', {
+    method: 'POST',
+    headers: bkHeaders({ 'Content-Type': 'application/json', 'Prefer': 'return=representation' }),
+    body: JSON.stringify({ tech_id: _bkMyTech.id, client_email: String(b.client_email).toLowerCase() })
+  });
+  if (!r.ok) { showToast('Could not block, try again'); return; }
+  const rows = await r.json();
+  if (rows[0]) _bkBlocked.unshift(rows[0]);
+  tbRenderBlocked();
+  showToast('Blocked. They won\u2019t be told.');
+}
+
 async function tbDeleteBlocked(id) {
   const r = await fetch(SUPABASE_URL + '/rest/v1/blocked_clients?id=eq.' + id, {
     method: 'DELETE', headers: bkHeaders({ 'Prefer': 'return=minimal' })
@@ -13732,6 +13752,12 @@ function tbRenderAppts() {
   const delBtn = function(id) {
     return '<button onclick="tbDeleteBooking(\'' + id + '\')" style="flex:0 0 auto;padding:9px 13px;border-radius:10px;border:1.5px solid rgba(139,32,53,0.28);background:#FDE8EC;color:#8B2035;font-size:13px;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif;">Delete</button>';
   };
+  // Block straight from a past appointment (Anne, 2026-08-03): you block
+  // someone you dealt with, and the card already knows who they are.
+  const blockBtn = function(b2) {
+    if (!b2 || !b2.client_email) return '';
+    return '<button onclick="tbBlockFromAppt(\'' + b2.id + '\')" style="flex:0 0 auto;padding:9px 13px;border-radius:10px;border:1.5px solid var(--border);background:white;color:var(--muted);font-size:13px;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif;">Block</button>';
+  };
   const pending  = _bkAppts.filter(function(b) { return b.status === 'pending'; });
   const upcoming = _bkAppts.filter(function(b) { return b.status === 'confirmed'; });
   // Was slice(-5), too few to actually clean up a cluttered history.
@@ -13750,7 +13776,9 @@ function tbRenderAppts() {
     html += '<div style="font-size:12px;font-weight:700;color:var(--charcoal);letter-spacing:0.4px;text-transform:uppercase;margin:10px 0 6px;">Upcoming</div>';
     html += upcoming.map(function(b) {
       var bs = '';
-      if (!b.standing_id) bs += btn('Make standing', "tbOpenStanding('" + b.id + "')", true);
+      // Make standing removed from this screen (Anne, 2026-08-03): the
+      // confirm/decline surface stays clean. Existing standing series
+      // still show + end below; tbOpenStanding kept for a future home.
       bs += btn('Cancel', "tbSetStatus('" + b.id + "','cancelled_by_tech')", false);
       bs += delBtn(b.id);
       return tbApptCard(b, bs);
@@ -13758,7 +13786,7 @@ function tbRenderAppts() {
   }
   if (rest.length) {
     html += '<div style="font-size:12px;font-weight:700;color:var(--muted);letter-spacing:0.4px;text-transform:uppercase;margin:10px 0 6px;">Recent</div>';
-    html += rest.map(function(b) { return tbApptCard(b, delBtn(b.id)); }).join('');
+    html += rest.map(function(b) { return tbApptCard(b, blockBtn(b) + delBtn(b.id)); }).join('');
   }
   if (_bkStanding.length) {
     html += '<div style="font-size:12px;font-weight:700;color:var(--charcoal);letter-spacing:0.4px;text-transform:uppercase;margin:10px 0 6px;">Standing</div>';
