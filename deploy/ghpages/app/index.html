@@ -5016,8 +5016,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 476,         /* __APP_BUILD_ANDROID__ */
-  ios:     281,          /* __APP_BUILD_IOS__     */
+  android: 477,         /* __APP_BUILD_ANDROID__ */
+  ios:     282,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -7073,6 +7073,30 @@ function saveAvailability() {
     // flashing before the "profile missing" error).
     var msg = nowOn ? "Clients can see you're open today" : todayOn ? "Clients can see you're open this week" : newOn ? "Clients can see you're taking new clients" : "You're no longer showing as open";
     showToast(msg);
+    // Same-day nudge (Anne, 2026-08-03): Open today only helps if a
+    // same-day client can actually get in TODAY. If there is no instant
+    // path (no Call, no Text, and bookings wait for approval), nudge her
+    // toward one. Soft: the toggle stays on either way.
+    try {
+      var row0 = rows && rows[0];
+      if (nowOn && row0) {
+        var _cm = row0.contact_methods || {};
+        var _instant = !!(_cm.call || _cm.text || row0.booking_auto_confirm);
+        if (!_instant) {
+          setTimeout(async function() {
+            var go = await showConfirm('Same-day clients move fast!', {
+              body: 'You\u2019re showing Open today, but there\u2019s no instant way in: Call and Text are off, and bookings wait for your approval. Turn one on so today\u2019s clients can actually reach you today.',
+              okLabel: row0.booking_enabled ? 'Open Booking settings' : 'Open Edit Profile',
+              tone: 'neutral'
+            });
+            if (go) {
+              if (row0.booking_enabled) show('tech-booking-settings');
+              else openTechEditFromProfile();
+            }
+          }, 900);
+        }
+      }
+    } catch(_) {}
     // Refresh ALL_TECHS so every surface (tech-detail, browse cards, map
     // pins, avail count tiles) reflects the new state without a reload.
     // Anne asked for this 2026-04-22, she was seeing "No availability set"
