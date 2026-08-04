@@ -5069,8 +5069,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 493,         /* __APP_BUILD_ANDROID__ */
-  ios:     298,          /* __APP_BUILD_IOS__     */
+  android: 494,         /* __APP_BUILD_ANDROID__ */
+  ios:     299,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -14941,11 +14941,24 @@ async function loadMyAppointments() {
     const svc = (b.tech_services && b.tech_services.name) || 'Appointment';
     const future = new Date(b.starts_at).getTime() > Date.now();
     const cancellable = future && (b.status === 'pending' || b.status === 'confirmed');
+    // Tech identity on the card (Anne, 2026-08-03): avatar + tappable name
+    // that open the tech's profile, so a client can rebook or message
+    // without hunting the Gallery for them.
+    const avatar = tech
+      ? '<div onclick="maOpenTech(\'' + tech.id + '\')" style="width:40px;height:40px;border-radius:10px;overflow:hidden;flex-shrink:0;cursor:pointer;background:' + (tech.bg || 'var(--rose-light)') + ';display:flex;align-items:center;justify-content:center;border:1.5px solid var(--border);">' +
+          (tech.imageUrl
+            ? '<img src="' + bkEsc(tech.imageUrl) + '" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display=\'none\'"/>'
+            : '<span style="font-family:\'Playfair Display\',serif;font-size:16px;color:' + (tech.color || 'var(--rose-dark)') + ';">' + bkEsc(tech.initials || (techName[0] || '?')) + '</span>') +
+        '</div>'
+      : '';
+    const nameHtml = tech
+      ? '<span onclick="maOpenTech(\'' + tech.id + '\')" style="color:var(--rose-dark);font-weight:700;cursor:pointer;text-decoration:underline;text-underline-offset:2px;">' + bkEsc(techName) + '</span>'
+      : bkEsc(techName);
     return '<div style="background:white;border:1px solid var(--border);border-radius:14px;padding:13px 14px;margin-bottom:8px;box-shadow:var(--shadow);">' +
-      '<div style="display:flex;align-items:center;gap:8px;">' +
+      '<div style="display:flex;align-items:center;gap:10px;">' + avatar +
         '<div style="flex:1;min-width:0;">' +
           '<div style="font-size:14px;font-weight:700;color:var(--charcoal);">' + bkFmtStamp(b.starts_at, tz) + '</div>' +
-          '<div style="font-size:13px;color:var(--charcoal);margin-top:2px;">' + bkEsc(svc) + ' · ' + bkEsc(techName) + '</div>' +
+          '<div style="font-size:13px;color:var(--charcoal);margin-top:2px;">' + bkEsc(svc) + ' · ' + nameHtml + '</div>' +
         '</div>' + (b.standing_id ? '<span style="background:var(--rose-light);color:var(--rose-dark);font-size:13px;font-weight:700;border-radius:100px;padding:3px 7px;margin-right:4px;white-space:nowrap;">&#8635; standing</span>' : '') + bkStatusChip(b.status) +
       '</div>' +
       (cancellable
@@ -14953,6 +14966,15 @@ async function loadMyAppointments() {
         : '') +
     '</div>';
   }).join('');
+}
+
+// Open a tech's profile from an appointment card. ALL_TECHS is already
+// loaded by loadMyAppointments before render, so a miss means the tech
+// left the platform.
+function maOpenTech(techId) {
+  const tech = (window.ALL_TECHS || []).find(function(t) { return t.id === techId; });
+  if (tech) openTechDetail(tech);
+  else showToast('This tech is no longer on MNC');
 }
 
 async function bkCancelMine(id) {
