@@ -5018,8 +5018,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 481,         /* __APP_BUILD_ANDROID__ */
-  ios:     286,          /* __APP_BUILD_IOS__     */
+  android: 482,         /* __APP_BUILD_ANDROID__ */
+  ios:     287,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -13941,7 +13941,9 @@ async function tbSetStatus(id, status) {
   if (b) b.status = status;
   tbRenderAppts();
   tbLoadDashBadge();
-  if (b && b.client_email) {
+  // Phone-auth clients have client_email null; gating on email alone meant
+  // they never heard about confirm/decline/cancel (found 2026-08-03, block 1d).
+  if (b && (b.client_email || b.client_phone)) {
     const techName = (_bkMyTech && _bkMyTech.name) || 'Your tech';
     const when = bkFmtStamp(b.starts_at, _bkMyTech && _bkMyTech.booking_timezone);
     const msgs = {
