@@ -5066,8 +5066,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 491,         /* __APP_BUILD_ANDROID__ */
-  ios:     296,          /* __APP_BUILD_IOS__     */
+  android: 492,         /* __APP_BUILD_ANDROID__ */
+  ios:     297,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -5816,7 +5816,11 @@ async function initCapacitorDeepLinks() {
 //   - Android: google-services.json is in Capawesome's build inputs and
 //     `apply plugin: 'com.google.gms.google-services'` succeeded
 //   - iOS: APNs key is uploaded to RevenueCat / configured in Capawesome
-const NATIVE_PUSH_REGISTER_ENABLED = false;
+// Flipped true 2026-08-03: android/app/google-services.json is committed
+// (Firebase project my-nail-connection-31404), so the gradle conditional
+// applies com.google.gms.google-services in every build from this commit
+// on — register() can no longer hit the missing-Firebase crash.
+const NATIVE_PUSH_REGISTER_ENABLED = true;
 
 async function initCapacitorPush() {
   if (!PUSH_ENABLED) return;
