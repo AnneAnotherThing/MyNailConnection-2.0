@@ -72,7 +72,7 @@ serve(async (req) => {
     `<h2 style="font-family:Georgia,serif;font-weight:600;margin:6px 0 2px;">A note from ${esc(who)}</h2>` +
     (contactBits ? `<div style="font-size:13px;color:#7A6E78;margin-bottom:14px;">${esc(contactBits)}</div>` : '') +
     `<div style="background:#FAF7F2;border:1px solid #E4D9DA;border-radius:12px;padding:16px 18px;font-size:15px;line-height:1.6;white-space:pre-wrap;">${esc(note)}</div>` +
-    (phone ? `<div style="margin-top:14px;"><a href="sms:${esc(phone.replace(/[^\\d+]/g, ''))}" style="display:inline-block;background:#141317;color:#fff;text-decoration:none;font-weight:700;padding:10px 18px;border-radius:100px;font-size:14px;">Text ${esc(name || 'them')} back</a></div>` : '') +
+    (phone ? `<div style="margin-top:14px;"><a href="sms:${esc(phone.replace(/[^\d+]/g, ''))}" style="display:inline-block;background:#141317;color:#fff;text-decoration:none;font-weight:700;padding:10px 18px;border-radius:100px;font-size:14px;">Text ${esc(name || 'them')} back</a></div>` : '') +
     `<div style="font-size:11px;color:#918C81;margin-top:18px;">Sent from the Contact-the-developer form. The full note is also saved in contact_anne_messages.</div>` +
     `</div>`;
 

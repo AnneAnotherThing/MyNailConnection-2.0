@@ -67,6 +67,18 @@ serve(async (req) => {
     }
     const userId = userRes.user.id;
     const userEmail = (userRes.user.email || '').toLowerCase();
+    // Phone identity (audit 2026-08-03): phone-OTP accounts have email NULL,
+    // and the old email-only deletes matched NOTHING — the tech profile
+    // survived "account deletion" (Apple 5.1.1(v) violation). Digits-only
+    // phone plus the two key shapes the app stores: bare digits and E.164.
+    const phoneDigits = String(userRes.user.phone || '').replace(/\D/g, '');
+    const last10 = phoneDigits.slice(-10);
+    const pushKeys = [
+      userEmail,
+      last10.length === 10 ? '+1' + last10 : '',
+      phoneDigits,
+      last10,
+    ].filter(Boolean);
 
     // ── Step 2: admin client for cross-table + auth deletion ──────────────
     const admin = createClient(
@@ -90,24 +102,51 @@ serve(async (req) => {
       }
     }
 
+    // Generic best-effort delete with an arbitrary PostgREST-style filter,
+    // for the multi-key cases below.
+    async function bestEffortDeleteIn(table: string, column: string, values: string[]) {
+      if (!values.length) return;
+      try {
+        const { error } = await admin.from(table).delete().in(column, values);
+        if (error) warnings.push(`${table}.${column}: ${error.message}`);
+      } catch (e) {
+        warnings.push(`${table}.${column}: ${String(e)}`);
+      }
+    }
+
     // Order: tables keyed by email or user_id first, then the parent
     // user row, then auth (irreversible) last.
 
-    // push_subscriptions, keyed on auth user_id per project memory
-    await bestEffortDelete('push_subscriptions', 'user_id', userId);
+    // push_subscriptions: user_id holds pushKey() output — a lowercased
+    // email OR an E.164 phone — never the auth uuid (audit 2026-08-03:
+    // the old uuid match deleted nothing, and an orphaned phone-keyed
+    // subscription would deliver the old owner's pushes to whoever signs
+    // up with that number next).
+    await bestEffortDeleteIn('push_subscriptions', 'user_id', pushKeys);
 
-    // board_posts, feed posts authored by this tech (keyed by email)
-    await bestEffortDelete('board_posts', 'tech_email', userEmail);
+    // board_posts: owner column is tech_id (holds the email), NOT
+    // tech_email — the old delete targeted a column that doesn't exist.
+    if (userEmail) await bestEffortDelete('board_posts', 'tech_id', userEmail);
 
-    // tech_comps, comped/grandfathered grant rows
-    await bestEffortDelete('tech_comps', 'email', userEmail);
+    // tech_comps, comped/grandfathered grant rows (email-keyed by design;
+    // phone-only accounts can't have one)
+    if (userEmail) await bestEffortDelete('tech_comps', 'email', userEmail);
 
-    // techs, main tech profile row (keyed by email)
-    await bestEffortDelete('techs', 'email', userEmail);
+    // techs: email for email accounts, phone digits for phone accounts.
+    // techs.phone is stored E.164-ish; match both raw digit shapes.
+    if (userEmail) await bestEffortDelete('techs', 'email', userEmail);
+    if (last10.length === 10) {
+      await bestEffortDeleteIn('techs', 'phone', ['+1' + last10, '1' + last10, last10]);
+    }
 
-    // users, base public.users row (keyed on auth.users.id per memory
-    // note: project_mnc_push_notifications_wiring, user_id = public.users.id convention)
+    // users: phone signups get a public.users row whose id does NOT match
+    // auth.uid (create_signup_profile_phone inserts without an id), so the
+    // uuid delete alone strands the row. Match id, email, and phone shapes.
     await bestEffortDelete('users', 'id', userId);
+    if (userEmail) await bestEffortDelete('users', 'email', userEmail);
+    if (last10.length === 10) {
+      await bestEffortDeleteIn('users', 'phone', ['+1' + last10, '1' + last10, last10]);
+    }
 
     // ── Step 3: irreversible, delete the auth.users row ────────────────
     // This invalidates the caller's JWT immediately. After this, any
