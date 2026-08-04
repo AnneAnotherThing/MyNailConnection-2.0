@@ -1626,7 +1626,12 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
 
     <!-- Greeting -->
     <div style="padding:6px 20px 2px;">
-      <div class="hero-card" style="background:none;border:none;box-shadow:none;padding:8px 0 0;">
+      <!-- overflow:visible: this instance overrides the class padding to
+           8px 0 0, so the class-level clip fix (padding, 6f94fa8) never
+           applied here and the italic serif kept getting cut by
+           overflow:hidden. No background/border left on this card, so
+           there's nothing that needs clipping. 2026-08-03. -->
+      <div class="hero-card" style="background:none;border:none;box-shadow:none;padding:8px 0 0;overflow:visible;">
       <div class="hero-title" id="home-greeting">Good morning.</div>
       <!-- Role-agnostic subline, used to say "find your next look" which
            felt client-biased. Each word flows in with a subtle blur-to-
@@ -5061,8 +5066,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 489,         /* __APP_BUILD_ANDROID__ */
-  ios:     294,          /* __APP_BUILD_IOS__     */
+  android: 490,         /* __APP_BUILD_ANDROID__ */
+  ios:     295,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
