@@ -5036,8 +5036,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 484,         /* __APP_BUILD_ANDROID__ */
-  ios:     289,          /* __APP_BUILD_IOS__     */
+  android: 485,         /* __APP_BUILD_ANDROID__ */
+  ios:     290,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -5340,7 +5340,13 @@ try {
 
 // ── Mini Supabase client (no CDN) ────────────────────────────────────────────
 const sb = {
+  // Authorization must carry the SIGNED-IN user's token, not the anon key:
+  // push_subscriptions policies are `to authenticated`, so an anon-bearer
+  // write is rejected and the table silently stays empty (the launch-lap
+  // "no subscriptions found" mystery, 2026-08-03). Falls back to anon only
+  // when nobody is signed in, matching every other fetch in the app.
   async from(table) {
+    const bearer = () => `Bearer ${window._mncAccessToken || SUPABASE_ANON_KEY}`;
     return {
       async insert(data) {
         const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
@@ -5348,7 +5354,7 @@ const sb = {
           headers: {
             'Content-Type': 'application/json',
             'apikey': SUPABASE_ANON_KEY,
-            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+            'Authorization': bearer(),
             'Prefer': 'return=minimal'
           },
           body: JSON.stringify(data)
@@ -5357,7 +5363,7 @@ const sb = {
       },
       async select(cols = '*') {
         const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?select=${cols}`, {
-          headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
+          headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': bearer() }
         });
         return { data: res.ok ? await res.json() : [], error: res.ok ? null : 'fetch error' };
       },
@@ -5367,7 +5373,7 @@ const sb = {
           headers: {
             'Content-Type': 'application/json',
             'apikey': SUPABASE_ANON_KEY,
-            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+            'Authorization': bearer(),
             'Prefer': 'resolution=merge-duplicates,return=minimal'
           },
           body: JSON.stringify(data)
@@ -5505,15 +5511,21 @@ async function subscribeToPush(userId) {
     });
   }
 
-  // Save subscription to Supabase
+  // Save subscription to Supabase. If this write fails the browser still
+  // holds a subscription but nobody can ever push to it, so a failure here
+  // must not stay silent (it did until 2026-08-03).
   const client = await sb.from('push_subscriptions');
-  await client.upsert({
+  const saved = await client.upsert({
     user_id: pushKey(userId),
     endpoint: subscription.endpoint,
     p256dh: btoa(String.fromCharCode(...new Uint8Array(subscription.getKey('p256dh')))),
     auth: btoa(String.fromCharCode(...new Uint8Array(subscription.getKey('auth')))),
     updated_at: new Date().toISOString()
   });
+  if (saved && saved.error) {
+    console.warn('push_subscriptions save failed:', saved.error);
+    return null;
+  }
 
   if (window.__MNC_DEV__) console.log('Push subscription saved for user:', userId);
   return subscription;
