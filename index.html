@@ -5081,8 +5081,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 499,         /* __APP_BUILD_ANDROID__ */
-  ios:     304,          /* __APP_BUILD_IOS__     */
+  android: 500,         /* __APP_BUILD_ANDROID__ */
+  ios:     305,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -9556,7 +9556,9 @@ async function _seedEditTechFromCurrentUser() {
     const rows = await res.json();
     if (!rows || !rows.length) { showToast('Tech profile not found'); return false; }
     const t = rows[0];
-    currentEditTech = { name: t.name, email: t.email, photos: t.photos || [] };
+    // id + phone included (2026-08-03): phone-only techs have email null,
+    // and the Release Wizard needs a non-email identity to run at all.
+    currentEditTech = { id: t.id, name: t.name, email: t.email, phone: t.phone, photos: t.photos || [] };
     const key = t.name || '__new__';
     if (!techEdits[key]) techEdits[key] = {};
     if (!techEdits[key].photos) techEdits[key].photos = (t.photos || []).slice();
@@ -11157,9 +11159,12 @@ async function saveTechEdit() {
         const newUrls = safePhotos
           .map(p => (typeof p === 'string' ? p : p && p.url) || '')
           .filter(u => u && !oldUrls.has(u) && !(window._mncWizardedUrls && window._mncWizardedUrls.has(u)));
-        if (newUrls.length && edit.email) {
+        // email OR id (2026-08-03): phone-only techs have email null and
+        // were silently skipping the wizard here too.
+        var _wizId = (currentEditTech && currentEditTech.id) || null;
+        if (newUrls.length && (edit.email || _wizId)) {
           setTimeout(function() {
-            try { startReleaseWizard(newUrls, edit.email); } catch(_) {}
+            try { startReleaseWizard(newUrls, { email: edit.email || null, id: _wizId }); } catch(_) {}
           }, 400);
         }
       } catch(e) { console.warn('release-wizard launch failed (non-fatal):', e); }
@@ -19565,21 +19570,38 @@ window._mncWizardedUrls = window._mncWizardedUrls || new Set();
 // and the photos would sit pending_feed:true until the next session.
 function _launchReleaseWizardForNewlyUploaded(urls) {
   if (!Array.isArray(urls) || !urls.length) return;
-  if (!currentEditTech || !currentEditTech.email) return;  // new-tech: defer to save
+  // email OR id (2026-08-03): phone-only techs carry email null, and the
+  // old email-only gate silently skipped tagging for every one of them
+  // (Anne hit it as a fresh phone-auth tech). The unsaved brand-new-tech
+  // case (admin's New Tech modal) still defers: it has neither.
+  if (!currentEditTech || (!currentEditTech.email && !currentEditTech.id)) return;
   var fresh = urls.filter(function(u) { return u && !window._mncWizardedUrls.has(u); });
   if (!fresh.length) return;
   fresh.forEach(function(u) { window._mncWizardedUrls.add(u); });
   setTimeout(function() {
-    try { startReleaseWizard(fresh, currentEditTech.email); } catch(_) {}
+    try { startReleaseWizard(fresh, { email: currentEditTech.email, id: currentEditTech.id }); } catch(_) {}
   }, 400);
 }
 
-function startReleaseWizard(newUrls, techEmail) {
-  if (!newUrls || !newUrls.length || !techEmail) return;
+// PostgREST row filter for the wizard's tech. Prefers the uuid (works for
+// phone-only techs); falls back to email for callers that predate ids.
+function _rwTechFilter() {
+  const st = window._mncReleaseWizard;
+  if (!st) return null;
+  if (st.techId) return 'id=eq.' + encodeURIComponent(st.techId);
+  if (st.techEmail) return 'email=eq.' + encodeURIComponent(st.techEmail);
+  return null;
+}
+
+function startReleaseWizard(newUrls, techIdentity) {
+  // techIdentity: { email, id } (string email accepted for old callers).
+  const _ident = (typeof techIdentity === 'string') ? { email: techIdentity } : (techIdentity || {});
+  if (!newUrls || !newUrls.length || (!_ident.email && !_ident.id)) return;
   window._mncReleaseWizard = {
     urls: newUrls.slice(),
     idx: 0,
-    techEmail: techEmail,
+    techEmail: _ident.email || null,
+    techId: _ident.id || null,
     tags: {},       // url -> array of selected tag strings
     captions: {},   // url -> caption string
     slotTypes: {},  // url -> 'weekly' | 'credit' | 'free' | null (decides feed eligibility)
@@ -19597,7 +19619,7 @@ function startReleaseWizard(newUrls, techEmail) {
   // to feed-eligible (legacy behavior). 2026-04-23 portfolio/feed split.
   (async function prefill() {
     try {
-      const res = await fetch(SUPABASE_URL + '/rest/v1/techs?email=eq.' + encodeURIComponent(techEmail) + '&select=photos', {
+      const res = await fetch(SUPABASE_URL + '/rest/v1/techs?' + _rwTechFilter() + '&select=photos', {
         headers: {
           'apikey': SUPABASE_ANON_KEY,
           'Authorization': 'Bearer ' + (window._mncAccessToken || SUPABASE_ANON_KEY)
@@ -19725,11 +19747,11 @@ function toggleReleaseWizardTag(tag) {
 // against Supabase if ALL_TECHS is stale.
 async function _rwPatchPhoto(url, patch) {
   const st = window._mncReleaseWizard;
-  if (!st || !st.techEmail) return false;
+  if (!st || !_rwTechFilter()) return false;
   // Pull fresh photos from DB (safer than trusting in-memory state).
   let photos = null;
   try {
-    const res = await fetch(SUPABASE_URL + '/rest/v1/techs?email=eq.' + encodeURIComponent(st.techEmail) + '&select=photos', {
+    const res = await fetch(SUPABASE_URL + '/rest/v1/techs?' + _rwTechFilter() + '&select=photos', {
       headers: {
         'apikey': SUPABASE_ANON_KEY,
         'Authorization': 'Bearer ' + (window._mncAccessToken || SUPABASE_ANON_KEY)
@@ -19758,7 +19780,7 @@ async function _rwPatchPhoto(url, patch) {
   });
   if (!changed) return false;
   try {
-    const pres = await fetch(SUPABASE_URL + '/rest/v1/techs?email=eq.' + encodeURIComponent(st.techEmail), {
+    const pres = await fetch(SUPABASE_URL + '/rest/v1/techs?' + _rwTechFilter(), {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -19812,7 +19834,11 @@ async function releaseCurrentWizardPhoto() {
   // now post to board_posts. Stagger logic still applies so a bulk
   // batch of 10 photos doesn't dump on the feed at once. slot_type is
   // still tracked elsewhere for quota accounting.
-  {
+  // Phone-only techs (email null) skip this leg: board_posts.tech_id is
+  // keyed on email and its RLS can't admit an email-less tech. Tags are
+  // already saved above, which is what gates Gallery visibility — the
+  // 3.0 one-gallery surface. 2026-08-03.
+  if (st.techEmail) {
     const HOUR_MS = 3600000;
     const publishAt = new Date(Date.now() + st.releasedCount * HOUR_MS).toISOString();
     try {
