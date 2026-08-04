@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "755536374678",
+    "project_id": "my-nail-connection-31404",
+    "storage_bucket": "my-nail-connection-31404.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:755536374678:android:b7c174678a211c19dccbb7",
+        "android_client_info": {
+          "package_name": "com.mynailconnection.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCHhh2QaJrgVEuU87RfVPN3k13Zcq0HZmc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
