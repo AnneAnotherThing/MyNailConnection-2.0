@@ -5081,8 +5081,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 498,         /* __APP_BUILD_ANDROID__ */
-  ios:     303,          /* __APP_BUILD_IOS__     */
+  android: 499,         /* __APP_BUILD_ANDROID__ */
+  ios:     304,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -12368,7 +12368,9 @@ function renderLocTechCards() {
 
     return `<div data-tech-name="${esc(t.name)}"
       style="flex-shrink:0;width:180px;background:white;border-radius:16px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.08);cursor:pointer;">
-      <div style="height:72px;background:${t.bg||'linear-gradient(135deg,#F7E2E3,#E6D6D7)'};display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;">
+      <!-- 72px → 150px (Anne, 2026-08-03): at 72px the tech's portrait was
+           a letterbox sliver — "can't see tech's pics on the map screen". -->
+      <div style="height:150px;background:${t.bg||'linear-gradient(135deg,#F7E2E3,#E6D6D7)'};display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;">
         ${avatar}
         <div style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,0.35);border-radius:100px;padding:2px 7px;font-size:13px;color:white;">${esc(formatJoinedBadge(t.joined))}</div>
       </div>
