@@ -47,9 +47,9 @@ where public.phone_digits(t.phone) like '%4804402314'
 
 -- 2. Push subscriptions: the real key format (answers which user_ids
 --    variant send-push should be fired with).
-select user_id, left(endpoint, 45) as endpoint_start, created_at
+select user_id, left(endpoint, 45) as endpoint_start, updated_at
 from public.push_subscriptions
-order by created_at desc
+order by updated_at desc
 limit 10;
 
 -- 3. Cron jobs on this project — reminder jobs should appear here.
