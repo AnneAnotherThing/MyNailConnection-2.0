@@ -2211,7 +2211,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       <div class="etched-caps" style="padding:13px 16px 9px;font-size:11px;font-weight:700;letter-spacing:1.6px;color:var(--muted);text-transform:uppercase;">Help &amp; Account</div>
       <div onclick="show('how-it-works')" style="display:flex;align-items:center;gap:10px;padding:13px 16px;border-top:1px solid var(--border);cursor:pointer;"><div style="flex:1;font-size:13.5px;font-weight:600;color:var(--charcoal);">How MNC works</div><svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:var(--muted);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg></div>
       <div onclick="replayTutorial()" style="display:flex;align-items:center;gap:10px;padding:13px 16px;border-top:1px solid var(--border);cursor:pointer;"><div style="flex:1;font-size:13.5px;font-weight:600;color:var(--charcoal);">Replay the tutorial</div><svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:var(--muted);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg></div>
-      <div onclick="openChangePasswordFromSettings()" style="display:flex;align-items:center;gap:10px;padding:13px 16px;border-top:1px solid var(--border);cursor:pointer;"><div style="flex:1;font-size:13.5px;font-weight:600;color:var(--charcoal);">Change password</div><svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:var(--muted);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg></div>
+      <div class="mnc-pw-row" onclick="openChangePasswordFromSettings()" style="display:flex;align-items:center;gap:10px;padding:13px 16px;border-top:1px solid var(--border);cursor:pointer;"><div style="flex:1;font-size:13.5px;font-weight:600;color:var(--charcoal);">Change password</div><svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:var(--muted);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg></div>
       <div onclick="openContactAnne()" style="display:flex;align-items:center;gap:10px;padding:13px 16px;border-top:1px solid var(--border);cursor:pointer;"><div style="flex:1;font-size:13.5px;font-weight:600;color:var(--charcoal);">Get help</div><svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:var(--muted);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg></div>
     </div>
     <div style="text-align:center;margin:14px 20px 0;font-size:13px;color:var(--muted);line-height:1.7;">
@@ -3030,7 +3030,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       <div style="font-size:10px;font-weight:700;letter-spacing:1.3px;text-transform:uppercase;color:var(--muted);margin:0 0 10px 4px;">Help &amp; Account</div>
       <div style="background:var(--cream);border:1px solid var(--border);border-radius:16px;overflow:hidden;">
         <div onclick="replayTutorial()" style="display:flex;align-items:center;justify-content:space-between;padding:13px 16px;cursor:pointer;font-size:14px;color:var(--charcoal);border-bottom:1px solid var(--border);"><span>Replay tutorial</span><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:var(--muted);fill:none;stroke-width:2.4;stroke-linecap:round;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg></div>
-        <div onclick="openChangePasswordFromSettings()" style="display:flex;align-items:center;justify-content:space-between;padding:13px 16px;cursor:pointer;font-size:14px;color:var(--charcoal);border-bottom:1px solid var(--border);"><span>Change password</span><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:var(--muted);fill:none;stroke-width:2.4;stroke-linecap:round;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg></div>
+        <div class="mnc-pw-row" onclick="openChangePasswordFromSettings()" style="display:flex;align-items:center;justify-content:space-between;padding:13px 16px;cursor:pointer;font-size:14px;color:var(--charcoal);border-bottom:1px solid var(--border);"><span>Change password</span><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:var(--muted);fill:none;stroke-width:2.4;stroke-linecap:round;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg></div>
         <div onclick="show('find-us')" style="display:flex;align-items:center;justify-content:space-between;padding:13px 16px;cursor:pointer;font-size:14px;color:var(--charcoal);border-bottom:1px solid var(--border);"><span>Find us on social</span><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:var(--muted);fill:none;stroke-width:2.4;stroke-linecap:round;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg></div>
         <div onclick="openContactAnne()" style="display:flex;align-items:center;justify-content:space-between;padding:13px 16px;cursor:pointer;font-size:14px;color:var(--charcoal);"><span>Get help</span><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:var(--muted);fill:none;stroke-width:2.4;stroke-linecap:round;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg></div>
       </div>
@@ -5081,8 +5081,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 500,         /* __APP_BUILD_ANDROID__ */
-  ios:     305,          /* __APP_BUILD_IOS__     */
+  android: 501,         /* __APP_BUILD_ANDROID__ */
+  ios:     306,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -6125,16 +6125,18 @@ async function doChangePassword() {
     var now = new Date().toISOString();
     var email = currentUserEmail;
     if (email) {
-      // Try updating users table
-      await fetch(SUPABASE_URL + '/rest/v1/users?email=eq.' + encodeURIComponent(email), {
+      // or=(email,phone) on users too (audit 2026-08-03: the techs leg had
+      // it, users was missed), and the signed-in bearer — anon writes are
+      // RLS-rejected silently.
+      await fetch(SUPABASE_URL + '/rest/v1/users?or=(email.eq.' + encodeURIComponent(email) + ',phone.eq.' + encodeURIComponent(email) + ')', {
         method: 'PATCH',
-        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + (window._mncAccessToken || SUPABASE_ANON_KEY), 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
         body: JSON.stringify({ last_password_change: now })
       });
       // Try updating techs table too
       await fetch(SUPABASE_URL + '/rest/v1/techs?or=(email.eq.' + encodeURIComponent(email) + ',phone.eq.' + encodeURIComponent(email) + ')', {
         method: 'PATCH',
-        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + (window._mncAccessToken || SUPABASE_ANON_KEY), 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
         body: JSON.stringify({ last_password_change: now })
       });
     }
@@ -6934,11 +6936,26 @@ async function renderTechPopularity(tech) {
   if (!row) return;
   row.innerHTML = '';
   row.style.display = 'none';
-  if (!tech || !tech.email) return;
+  // email OR phone (audit 2026-08-03): the email-only gate hid this row on
+  // every phone-only tech's profile. Favorites resolve via the v2 RPC
+  // (email-or-phone); hearts are still keyed on tech_email in user_inspo so
+  // they honestly show 0 for email-less techs until that table gets a
+  // tech_id column.
+  if (!tech || (!tech.email && !tech.phone)) return;
+  const _favVia = tech.email
+    ? getTechFavCount(tech.email)
+    : fetch(SUPABASE_URL + '/rest/v1/rpc/tech_favorite_count_v2', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', apikey: SUPABASE_ANON_KEY,
+                   Authorization: 'Bearer ' + (window._mncAccessToken || SUPABASE_ANON_KEY) },
+        body: JSON.stringify({ p_key: tech.phone })
+      }).then(function(r) { return r.ok ? r.text() : '0'; })
+        .then(function(t) { var n = parseInt(t, 10); return isNaN(n) ? 0 : n; })
+        .catch(function() { return 0; });
   try {
     const [favCount, heartCount, joined] = await Promise.all([
-      getTechFavCount(tech.email),
-      getTechHeartCount(tech.email),
+      _favVia,
+      tech.email ? getTechHeartCount(tech.email) : Promise.resolve(0),
       getTechJoinedDate(tech.email || tech.phone)
     ]);
     const html = popularityRowHTML(favCount, heartCount, joined);
@@ -9180,8 +9197,10 @@ function updateTeTagCounts() {
 
 function openTechEdit(tech) {
   currentEditTech = tech;
-  // Load billing tier for this tech
-  if (tech.email) loadTechTier(tech.email).then(updatePhotoLimitUI);
+  // Load billing tier for this tech. email OR phone (audit 2026-08-03):
+  // phone-only techs never refreshed _techTier, so the photo-limit badge
+  // showed stale numbers. loadTechTier's internals already accept either.
+  if (tech.email || tech.phone) loadTechTier(tech.email || tech.phone).then(updatePhotoLimitUI);
   // Always initialize edit from tech data if not already edited
   if (!techEdits[tech.name]) techEdits[tech.name] = {};
   const edit = techEdits[tech.name];
@@ -9770,11 +9789,20 @@ function renderTePhotoGrid(photos) {
   // knows their own work best. Admins editing someone else's profile get
   // the grid with remove-photo only (no tag chips). Leslie-style admins
   // editing their OWN profile hit the editingSelf branch too.
+  // Match on email OR phone (audit 2026-08-03): a phone-only tech has
+  // email null and was falling into the admin-moderation branch of her
+  // own profile. currentUserEmail holds the phone string for phone
+  // sessions, so compare it against both identity columns.
   var editingSelf = (
     typeof currentEditTech !== 'undefined' &&
-    currentEditTech && currentEditTech.email &&
-    currentUserEmail &&
-    String(currentEditTech.email).toLowerCase() === String(currentUserEmail).toLowerCase()
+    currentEditTech && currentUserEmail && (
+      (currentEditTech.email &&
+        String(currentEditTech.email).toLowerCase() === String(currentUserEmail).toLowerCase()) ||
+      (currentEditTech.phone &&
+        String(currentEditTech.phone).replace(/\D/g, '').slice(-10) ===
+        String(currentUserEmail).replace(/\D/g, '').slice(-10) &&
+        String(currentUserEmail).replace(/\D/g, '').length >= 10)
+    )
   );
 
   // 2026-04-23: for self-edit, skip rendering the per-photo thumbnails +
@@ -15392,6 +15420,16 @@ function styleNavForRole() {
     }
   });
 
+  // Phone-OTP accounts have no password, so "Change password" is a trap:
+  // it sets a password that no sign-in path ever uses (audit 2026-08-03).
+  // currentUserEmail holds the phone string for phone sessions — no '@'.
+  try {
+    var _hasPw = (currentUserEmail || '').indexOf('@') > 0;
+    document.querySelectorAll('.mnc-pw-row').forEach(function(el) {
+      el.style.display = _hasPw ? '' : 'none';
+    });
+  } catch(_) {}
+
   // Tech-only "My Gallery" shortcut on the home screen, visible to
   // techs (and dual-role admin-techs) so they get one-tap access to
   // their portfolio without a Tech Portal detour. Clients + pure
@@ -15896,17 +15934,29 @@ async function loadTechHomeStats() {
   // Saves, how many clients have favorited this tech
   try {
     // Favourites are owner-scoped by RLS now, so a tech cannot read the rows
-    // to count them. tech_favorite_count() returns just the number, never the
-    // clients. See sql/client-identity-user-id-migration.sql
-    var r3 = await fetch(SUPABASE_URL + '/rest/v1/rpc/tech_favorite_count', {
+    // to count them. v2 resolves the tech by email OR phone digits (audit
+    // 2026-08-03: v1 was email-keyed, phone-only techs always showed 0);
+    // falls back to v1 if the SQL migration hasn't run yet.
+    var r3 = await fetch(SUPABASE_URL + '/rest/v1/rpc/tech_favorite_count_v2', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         apikey: SUPABASE_ANON_KEY,
         Authorization: 'Bearer ' + (window._mncAccessToken || SUPABASE_ANON_KEY)
       },
-      body: JSON.stringify({ p_tech_email: email })
+      body: JSON.stringify({ p_key: email })
     });
+    if (!r3.ok) {
+      r3 = await fetch(SUPABASE_URL + '/rest/v1/rpc/tech_favorite_count', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          apikey: SUPABASE_ANON_KEY,
+          Authorization: 'Bearer ' + (window._mncAccessToken || SUPABASE_ANON_KEY)
+        },
+        body: JSON.stringify({ p_tech_email: email })
+      });
+    }
     var total3 = r3.ok ? parseInt(await r3.text(), 10) : NaN;
     if (savesEl) savesEl.textContent = isNaN(total3) ? '0' : String(total3);
   } catch(e) { if (savesEl) savesEl.textContent = '-'; }
@@ -18426,9 +18476,12 @@ async function loadSubscriptionStats(headers) {
 
 async function loadUserAvailability(email) {
   try {
+    // or=(email,phone) — audit 2026-08-03: email-only meant a phone-only
+    // tech's hero toggles always rendered OFF, and tapping one then SAVED
+    // that wrong state, silently flipping her availability off.
     const res = await fetch(
-      SUPABASE_URL + '/rest/v1/techs?email=eq.' + encodeURIComponent(email) + '&select=is_available,is_same_day,accepting_new_clients',
-      { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY } }
+      SUPABASE_URL + '/rest/v1/techs?or=(email.eq.' + encodeURIComponent(email) + ',phone.eq.' + encodeURIComponent(email) + ')&select=is_available,is_same_day,accepting_new_clients',
+      { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + (window._mncAccessToken || SUPABASE_ANON_KEY) } }
     );
     if (!res.ok) return;
     const data = await res.json();
