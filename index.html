@@ -2893,8 +2893,11 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       </div>
       <input type="file" id="photo-input" accept="image/*" style="display:none;" onchange="handlePhoto(this)"/>
       <div style="flex:1;min-width:0;">
-        <div style="font-family:'Playfair Display',serif;font-size:22px;font-weight:600;color:#F7F2F2;line-height:1.2;letter-spacing:0.2px;" id="profile-display-name"></div>
-        <div style="font-size:13px;color:rgba(255,240,230,0.72);margin-top:4px;display:flex;align-items:center;gap:8px;font-style:italic;font-family:'Playfair Display',serif;letter-spacing:0.3px;">
+        <!-- Charcoal/muted, not the old near-white: the header went white
+             in the 3.0 restyle and the light text vanished on it
+             (Anne, 2026-08-03: "needs contrast on the header"). -->
+        <div style="font-family:'Playfair Display',serif;font-size:22px;font-weight:600;color:var(--charcoal);line-height:1.2;letter-spacing:0.2px;" id="profile-display-name"></div>
+        <div style="font-size:13px;color:var(--muted);margin-top:4px;display:flex;align-items:center;gap:8px;font-style:italic;font-family:'Playfair Display',serif;letter-spacing:0.3px;">
           <span id="profile-display-role"></span>
           <span id="profile-display-location" style="display:none;"></span>
         </div>
@@ -2924,12 +2927,14 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
          load / save code continues to work without the t-now / t-today /
          t-new profile buttons (every reference is null-safe). -->
 
-    <!-- My Appointments entry (3.0 booking). -->
-    <div onclick="show('my-appts')" style="margin:14px 20px 0;padding:13px 16px;border-radius:14px;background:white;border:1px solid var(--border);cursor:pointer;display:flex;align-items:center;gap:12px;box-shadow:var(--shadow);">
-      <svg viewBox="0 0 24 24" style="width:20px;height:20px;stroke:var(--rose-dark);fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0;"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-      <div style="flex:1;font-size:14px;font-weight:600;color:var(--charcoal);">My Appointments</div>
-      <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:var(--muted);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg>
-    </div>
+    <!-- My Appointments entry (3.0 booking). Promoted from a quiet white
+         row to a real button (Anne, 2026-08-03: "my appointments can be a
+         button too") — same ink-gradient family as the app's primary CTAs. -->
+    <button onclick="show('my-appts')" type="button" style="margin:14px 20px 0;width:calc(100% - 40px);padding:13px 16px;border:none;border-radius:14px;background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);color:white;cursor:pointer;display:flex;align-items:center;gap:12px;font-family:'DM Sans',sans-serif;box-shadow:0 4px 14px rgba(199,125,130,0.32),0 1px 3px rgba(0,0,0,0.12);">
+      <svg viewBox="0 0 24 24" style="width:20px;height:20px;stroke:white;fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0;"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <div style="flex:1;text-align:left;font-size:14px;font-weight:600;letter-spacing:0.3px;">My Appointments</div>
+      <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:rgba(255,255,255,0.8);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg>
+    </button>
 
     <!-- Tabs, different for tech vs client -->
     <div style="display:flex;border-bottom:1px solid var(--border);" id="profile-tabs">
@@ -5069,8 +5074,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 494,         /* __APP_BUILD_ANDROID__ */
-  ios:     299,          /* __APP_BUILD_IOS__     */
+  android: 495,         /* __APP_BUILD_ANDROID__ */
+  ios:     300,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
