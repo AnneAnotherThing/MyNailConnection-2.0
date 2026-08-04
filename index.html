@@ -5041,8 +5041,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 486,         /* __APP_BUILD_ANDROID__ */
-  ios:     291,          /* __APP_BUILD_IOS__     */
+  android: 487,         /* __APP_BUILD_ANDROID__ */
+  ios:     292,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -5491,49 +5491,62 @@ async function subscribeToPush(userId) {
   if (!granted) return;
 
   if (!('serviceWorker' in navigator)) { console.warn('SW not supported'); return; }
-  const reg = await navigator.serviceWorker.ready;
-  let subscription = await reg.pushManager.getSubscription();
-  // Key rotation guard (2026-08-03): a subscription minted under an old
-  // VAPID key can never be pushed by the new private key. If the stored
-  // subscription's applicationServerKey differs from ours, unsubscribe
-  // and re-mint. Runs silently on every boot-time re-subscribe.
-  if (subscription) {
-    try {
-      const want = urlBase64ToUint8Array(VAPID_PUBLIC_KEY);
-      const have = subscription.options && subscription.options.applicationServerKey
-        ? new Uint8Array(subscription.options.applicationServerKey) : null;
-      const same = have && have.length === want.length && have.every(function(b, i) { return b === want[i]; });
-      if (!same) {
-        await subscription.unsubscribe();
-        subscription = null;
-      }
-    } catch(_) { try { await subscription.unsubscribe(); } catch(__) {} subscription = null; }
-  }
-  if (!subscription) {
-    subscription = await reg.pushManager.subscribe({
-      userVisibleOnly: true,
-      applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
-    });
-  }
+  // Every failure past this point is toasted, not just logged: the launch-lap
+  // push hunt (2026-08-03) burned hours because this chain failed silently on
+  // a phone with no console. A user with notifications ON who can't actually
+  // be reached deserves to see why.
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    let subscription = await reg.pushManager.getSubscription();
+    // Key rotation guard (2026-08-03): a subscription minted under an old
+    // VAPID key can never be pushed by the new private key. If the stored
+    // subscription's applicationServerKey differs from ours, unsubscribe
+    // and re-mint. Runs silently on every boot-time re-subscribe.
+    if (subscription) {
+      try {
+        const want = urlBase64ToUint8Array(VAPID_PUBLIC_KEY);
+        const have = subscription.options && subscription.options.applicationServerKey
+          ? new Uint8Array(subscription.options.applicationServerKey) : null;
+        const same = have && have.length === want.length && have.every(function(b, i) { return b === want[i]; });
+        if (!same) {
+          await subscription.unsubscribe();
+          subscription = null;
+        }
+      } catch(_) { try { await subscription.unsubscribe(); } catch(__) {} subscription = null; }
+    }
+    const minted = !subscription; // fresh mint → worth announcing on success
+    if (!subscription) {
+      subscription = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+      });
+    }
 
-  // Save subscription to Supabase. If this write fails the browser still
-  // holds a subscription but nobody can ever push to it, so a failure here
-  // must not stay silent (it did until 2026-08-03).
-  const client = await sb.from('push_subscriptions');
-  const saved = await client.upsert({
-    user_id: pushKey(userId),
-    endpoint: subscription.endpoint,
-    p256dh: btoa(String.fromCharCode(...new Uint8Array(subscription.getKey('p256dh')))),
-    auth: btoa(String.fromCharCode(...new Uint8Array(subscription.getKey('auth')))),
-    updated_at: new Date().toISOString()
-  });
-  if (saved && saved.error) {
-    console.warn('push_subscriptions save failed:', saved.error);
+    // Save subscription to Supabase. If this write fails the browser still
+    // holds a subscription but nobody can ever push to it, so a failure here
+    // must not stay silent (it did until 2026-08-03).
+    const client = await sb.from('push_subscriptions');
+    const saved = await client.upsert({
+      user_id: pushKey(userId),
+      endpoint: subscription.endpoint,
+      p256dh: btoa(String.fromCharCode(...new Uint8Array(subscription.getKey('p256dh')))),
+      auth: btoa(String.fromCharCode(...new Uint8Array(subscription.getKey('auth')))),
+      updated_at: new Date().toISOString()
+    });
+    if (saved && saved.error) {
+      console.warn('push_subscriptions save failed:', saved.error);
+      showToast('Notification setup hit a snag (save: ' + (saved.error.code || saved.error.message || 'error') + ')', 5000);
+      return null;
+    }
+
+    if (minted) showToast('Notifications are on 💅');
+    if (window.__MNC_DEV__) console.log('Push subscription saved for user:', userId);
+    return subscription;
+  } catch (e) {
+    console.warn('subscribeToPush failed:', e);
+    showToast('Notification setup hit a snag (' + (e.name || 'error') + ': ' + (e.message || '') + ')', 5000);
     return null;
   }
-
-  if (window.__MNC_DEV__) console.log('Push subscription saved for user:', userId);
-  return subscription;
 }
 
 // Show in-app push permission prompt
