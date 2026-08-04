@@ -5066,8 +5066,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 490,         /* __APP_BUILD_ANDROID__ */
-  ios:     295,          /* __APP_BUILD_IOS__     */
+  android: 491,         /* __APP_BUILD_ANDROID__ */
+  ios:     296,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -5854,13 +5854,16 @@ async function initCapacitorPush() {
     if (window.__MNC_DEV__) console.log('Native push token:', token.value);
     const userId = currentUserEmail || (currentUser && currentUser.id);
     if (!userId) return;
-    // Save FCM/APNs token to push_subscriptions table
-    await fetch(`${SUPABASE_URL}/rest/v1/push_subscriptions`, {
+    // Save FCM/APNs token to push_subscriptions table. Bearer must be the
+    // signed-in user's token, not the anon key — RLS is `to authenticated`
+    // and silently rejected anon writes for months on the web path (fixed
+    // 2026-08-03); don't repeat that here.
+    const saveRes = await fetch(`${SUPABASE_URL}/rest/v1/push_subscriptions`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'apikey': SUPABASE_ANON_KEY,
-        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        'Authorization': `Bearer ${window._mncAccessToken || SUPABASE_ANON_KEY}`,
         'Prefer': 'resolution=merge-duplicates,return=minimal'
       },
       body: JSON.stringify({
@@ -5871,6 +5874,11 @@ async function initCapacitorPush() {
         updated_at: new Date().toISOString()
       })
     });
+    if (!saveRes.ok) {
+      showToast('Notification setup hit a snag (native save: ' + saveRes.status + ')', 5000);
+    } else {
+      showToast('Notifications are on 💅');
+    }
   });
 
   // Handle foreground notifications

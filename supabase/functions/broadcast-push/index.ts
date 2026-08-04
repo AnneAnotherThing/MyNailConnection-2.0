@@ -1,7 +1,11 @@
 // Supabase Edge Function: broadcast-push
-// Admin-only. Sends a Web Push notification to every active subscription
+// Admin-only. Sends a push notification to every active subscription
 // whose user matches the requested audience ('all' | 'techs' | 'clients' |
-// 'admins'). Returns a count of sent/failed/no-subscription users.
+// 'admins'):
+//   - web/PWA rows  → Web Push (VAPID)          [p256dh = real key]
+//   - native rows   → FCM HTTP v1 (Android+iOS) [p256dh = 'native',
+//                     auth = 'android'|'ios', endpoint = device token]
+// Returns a count of sent/failed/skipped subscriptions.
 //
 // Deploy with:
 //   supabase functions deploy broadcast-push
@@ -10,6 +14,11 @@
 //   supabase secrets set VAPID_PRIVATE_KEY="<...>"
 //   supabase secrets set VAPID_PUBLIC_KEY="<...>"
 //   supabase secrets set VAPID_SUBJECT="mailto:admin@mynailconnection.com"
+//   FCM_SERVICE_ACCOUNT  — full JSON of a Firebase service account
+//     (Firebase console → Project settings → Service accounts →
+//      Generate new private key). Without it, native rows are skipped
+//      with a 'skipped' count instead of erroring, so web push keeps
+//      working during rollout.
 
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
