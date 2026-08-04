@@ -699,7 +699,10 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
 .tech-card-photo-slot{overflow:hidden;display:flex;align-items:center;justify-content:center;background:var(--cream);}
 .tech-card-photo-slot img{width:100%;height:100%;object-fit:cover;object-position:center;}
 .tech-card-body{padding:8px 12px 10px;display:flex;align-items:center;gap:8px;}
-.tech-thumb{width:32px;height:32px;border-radius:8px;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;border:2px solid white;box-shadow:0 1px 6px rgba(0,0,0,0.12);}
+/* 32px → 56px (Anne, 2026-08-03): "the tech pics are still very short" —
+   the earlier fix resized the NAIL strip, but this avatar is the tech's
+   actual photo and at 32px you couldn't see a face. */
+.tech-thumb{width:56px;height:56px;border-radius:12px;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;border:2px solid white;box-shadow:0 1px 6px rgba(0,0,0,0.12);}
 .tech-initials{font-family:'Playfair Display',serif;font-size:16px;color:var(--rose-dark);}
 .avail-item{padding:12px 16px;display:flex;align-items:center;gap:10px;cursor:pointer;}
 .avail-item.immediate{background:var(--rose-light);border:1px solid var(--rose-mid);border-bottom:none;border-radius:14px 14px 0 0;}
@@ -5066,8 +5069,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 492,         /* __APP_BUILD_ANDROID__ */
-  ios:     297,          /* __APP_BUILD_IOS__     */
+  android: 493,         /* __APP_BUILD_ANDROID__ */
+  ios:     298,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -8333,8 +8336,8 @@ function renderTechCards(query, filteredList) {
 
     // Small avatar thumbnail
     const thumb = t.imageUrl
-      ? `<img ${thumbAttrs(t.imageUrl)} style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/><div style="width:100%;height:100%;display:none;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:14px;color:${t.color};">${esc(t.initials)}</div>`
-      : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:14px;color:${t.color};">${esc(t.initials)}</div>`;
+      ? `<img ${thumbAttrs(t.imageUrl)} style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/><div style="width:100%;height:100%;display:none;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:22px;color:${t.color};">${esc(t.initials)}</div>`
+      : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:22px;color:${t.color};">${esc(t.initials)}</div>`;
 
     const availBadge = t.is_available
       ? `<span class="badge badge-now"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);margin-right:3px;vertical-align:middle;"></span>Now</span>`
