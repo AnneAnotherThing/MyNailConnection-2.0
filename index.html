@@ -2556,7 +2556,12 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       <button onclick="show('tech-home')" class="btn btn-rose" style="width:100%;">Done &mdash; back to Tech Portal</button>
       <div style="font-size:12.5px;color:var(--muted);text-align:center;margin-top:8px;">Everything on this page saves as you change it.</div>
     </div>
-
+  </div><!-- /.scroll-content — this close and the screen close below were
+       missing since the 2026-08-03 screen split (4065f60), so every screen
+       and modal defined after this point in the file (incl. #confirm-modal)
+       parsed as a CHILD of this display:none screen. Fixed 2026-08-03:
+       that was the invisible-Confirm-dialog bug. -->
+</div>
 
 <!-- MY APPOINTMENTS, the client's bookings (3.0 free-booking pivot) -->
 <div class="screen" id="my-appts">
@@ -5036,8 +5041,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 485,         /* __APP_BUILD_ANDROID__ */
-  ios:     290,          /* __APP_BUILD_IOS__     */
+  android: 486,         /* __APP_BUILD_ANDROID__ */
+  ios:     291,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -13843,7 +13848,7 @@ function tbApptCard(b, buttons) {
   const contact = telClean
     ? '<div style="display:flex;gap:8px;margin-top:8px;">' +
         '<a href="sms:' + telClean + '" style="flex:1;text-align:center;padding:7px;border-radius:9px;border:1.5px solid var(--rose-mid);background:var(--rose-light);color:var(--rose-dark);font-size:13px;font-weight:700;text-decoration:none;">Text ' + bkEsc(b.client_phone) + '</a>' +
-        '<a href="tel:' + telClean + '" style="padding:7px 12px;border-radius:9px;border:1.5px solid var(--border);background:white;color:var(--charcoal);font-size:13px;font-weight:700;text-decoration:none;">Call</a>' +
+        '<a href="tel:' + telClean + '" style="flex:1;text-align:center;padding:7px;border-radius:9px;border:1.5px solid var(--border);background:white;color:var(--charcoal);font-size:13px;font-weight:700;text-decoration:none;">Call</a>' +
       '</div>' : '';
   return '<div style="background:white;border:1px solid var(--border);border-radius:14px;padding:13px 14px;margin-bottom:8px;box-shadow:var(--shadow);">' +
     '<div style="display:flex;align-items:center;gap:8px;">' +
@@ -13868,9 +13873,10 @@ function tbRenderAppts() {
   };
   // Subtle destructive action, deliberately NOT flex:1 so it never competes
   // with Confirm/Cancel. Shown on every card so old/test bookings can be
-  // cleared out. 2026-07-20.
+  // cleared out. 2026-07-20. Toned down from a pink pill to a bare text
+  // link 2026-08-03 per Anne: "very subtle".
   const delBtn = function(id) {
-    return '<button onclick="tbDeleteBooking(\'' + id + '\')" style="flex:0 0 auto;padding:9px 13px;border-radius:10px;border:1.5px solid rgba(139,32,53,0.28);background:#FDE8EC;color:#8B2035;font-size:13px;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif;">Delete</button>';
+    return '<button onclick="tbDeleteBooking(\'' + id + '\')" style="flex:0 0 auto;padding:9px 6px;border:none;background:none;color:var(--muted);font-size:12.5px;font-weight:500;cursor:pointer;font-family:\'DM Sans\',sans-serif;text-decoration:underline;text-underline-offset:3px;opacity:0.8;">Delete</button>';
   };
   // Block straight from a past appointment (Anne, 2026-08-03): you block
   // someone you dealt with, and the card already knows who they are.
