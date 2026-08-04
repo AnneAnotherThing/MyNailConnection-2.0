@@ -2207,6 +2207,16 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       <span style="margin:0 8px;opacity:0.5;">&middot;</span>
       <a href="https://mynailconnection.com/privacy.html" onclick="openLegal('privacy','Privacy Policy');return false;" style="color:var(--muted);text-decoration:underline;cursor:pointer;text-underline-offset:3px;">Privacy Policy</a>
     </div>
+    <!-- Store links, web/PWA only. Hidden in the native shells (see
+         initCapacitorBackButton): Apple rejects iOS builds that point at
+         Google Play, and neither store wants "go download me" inside
+         itself. Added 2026-08-03 per Anne. -->
+    <div class="mnc-store-row" style="text-align:center;margin:10px 20px 0;font-size:13px;color:var(--muted);line-height:1.7;">
+      Get the app:
+      <a href="https://apps.apple.com/app/id6764125663" target="_blank" rel="noopener" style="color:var(--muted);text-decoration:underline;text-underline-offset:3px;">App&nbsp;Store</a>
+      <span style="margin:0 8px;opacity:0.5;">&middot;</span>
+      <a href="https://play.google.com/store/apps/details?id=com.mynailconnection.app" target="_blank" rel="noopener" style="color:var(--muted);text-decoration:underline;text-underline-offset:3px;">Google&nbsp;Play</a>
+    </div>
     <div style="padding:8px 20px 24px;text-align:center;">
       <a onclick="openDeleteAccountModal()" style="font-size:13px;color:var(--muted);text-decoration:underline;cursor:pointer;text-underline-offset:3px;">Delete my account</a>
     </div>
@@ -3010,6 +3020,14 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       <a href="https://mynailconnection.com/terms.html" onclick="openLegal('terms','Terms of Use');return false;" style="color:var(--muted);text-decoration:underline;text-underline-offset:3px;opacity:0.85;">Terms of Use (EULA)</a>
       <span style="margin:0 8px;opacity:0.5;">·</span>
       <a href="https://mynailconnection.com/privacy.html" onclick="openLegal('privacy','Privacy Policy');return false;" style="color:var(--muted);text-decoration:underline;text-underline-offset:3px;opacity:0.85;">Privacy Policy</a>
+    </div>
+    <!-- Store links, web/PWA only; hidden in the native shells (see
+         initCapacitorBackButton). Added 2026-08-03 per Anne. -->
+    <div class="mnc-store-row" style="text-align:center;margin:10px 20px 0;font-size:13px;color:var(--muted);line-height:1.7;">
+      Get the app:
+      <a href="https://apps.apple.com/app/id6764125663" target="_blank" rel="noopener" style="color:var(--muted);text-decoration:underline;text-underline-offset:3px;">App&nbsp;Store</a>
+      <span style="margin:0 8px;opacity:0.5;">&middot;</span>
+      <a href="https://play.google.com/store/apps/details?id=com.mynailconnection.app" target="_blank" rel="noopener" style="color:var(--muted);text-decoration:underline;text-underline-offset:3px;">Google&nbsp;Play</a>
     </div>
 
     <!-- Account deletion entry point, required to be findable in-app per
@@ -5018,8 +5036,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 482,         /* __APP_BUILD_ANDROID__ */
-  ios:     287,          /* __APP_BUILD_IOS__     */
+  android: 483,         /* __APP_BUILD_ANDROID__ */
+  ios:     288,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -5597,6 +5615,10 @@ window.addEventListener('popstate', function(ev) {
 // that would leak listeners.
 async function initCapacitorBackButton() {
   if (!window.Capacitor || !window.Capacitor.isNativePlatform()) return;
+  // Store links ("Get the app") are for web/PWA visitors only; inside the
+  // native shells they'd violate store rules (iOS may not link to Google
+  // Play) and make no sense anyway. 2026-08-03.
+  document.querySelectorAll('.mnc-store-row').forEach(function(el) { el.style.display = 'none'; });
   const { App } = window.Capacitor.Plugins;
   if (!App || !App.addListener) return;
 
