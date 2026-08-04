@@ -47,7 +47,11 @@
     } catch(_) {}
   });
 </script>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<!-- maximum-scale=1 (2026-08-03): iOS zooms the whole app when a sub-16px
+     input gets focus, and an installed PWA often stays stuck zoomed-in —
+     "can't see the whole thing" (Leslie). max-scale stops the focus
+     auto-zoom; iOS still allows accessibility pinch-zoom regardless. -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover"/>
   <meta name="theme-color" content="#4A4A4F"/>
   <meta name="description" content="Find, book, and connect with nail techs near you."/>
   <meta name="mobile-web-app-capable" content="yes"/>
@@ -5077,8 +5081,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 497,         /* __APP_BUILD_ANDROID__ */
-  ios:     302,          /* __APP_BUILD_IOS__     */
+  android: 498,         /* __APP_BUILD_ANDROID__ */
+  ios:     303,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
