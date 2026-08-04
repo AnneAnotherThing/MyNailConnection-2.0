@@ -5077,8 +5077,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 496,         /* __APP_BUILD_ANDROID__ */
-  ios:     301,          /* __APP_BUILD_IOS__     */
+  android: 497,         /* __APP_BUILD_ANDROID__ */
+  ios:     302,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -5857,12 +5857,30 @@ async function initCapacitorPush() {
     return;
   }
 
+  // Listeners BEFORE register() — the registration event fires as soon as
+  // FCM hands back the token, which on Android beats the old post-register
+  // addListener to the punch: the event fired into the void and the token
+  // was never saved (the empty-push_subscriptions mystery, 2026-08-03).
+  // Guarded so repeat calls (boot + checklist tap) don't stack duplicates.
+  if (!window._mncCapPushListenersAdded) {
+    window._mncCapPushListenersAdded = true;
+    wireCapacitorPushListeners(PushNotifications);
+  }
+
   try {
     await PushNotifications.register();
   } catch (e) {
     console.warn('Capacitor push register failed, continuing without push:', e);
+    showToast('Notification setup hit a snag (register: ' + ((e && e.message) || e) + ')', 5000);
     return;
   }
+}
+
+function wireCapacitorPushListeners(PushNotifications) {
+  PushNotifications.addListener('registrationError', (err) => {
+    console.warn('Native push registrationError:', err);
+    showToast('Notification setup hit a snag (FCM: ' + (JSON.stringify(err) || '').slice(0, 90) + ')', 5000);
+  });
 
   // Get the device token and save to Supabase
   PushNotifications.addListener('registration', async (token) => {
