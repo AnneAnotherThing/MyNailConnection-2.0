@@ -363,7 +363,9 @@ button,input,select,textarea{font-family:'DM Sans','Helvetica Neue',Helvetica,Ar
    Signature surface: deep mauve gradient, soft top-left sheen, tiny
    uppercase eyebrow, serif headline with a gradient accent word. 2026-07-20. */
 .hero-card{
-  position:relative;overflow:hidden;border-radius:22px;padding:14px 18px 15px;
+  /* padding up 2026-08-03: the italic greeting's descenders were being
+     clipped where overflow:hidden meets the 22px corner radius */
+  position:relative;overflow:hidden;border-radius:22px;padding:14px 22px 19px;
   background:#FFFFFF;border:1px solid var(--border);
     box-shadow:0 2px 6px rgba(20,19,23,0.04),0 10px 24px rgba(20,19,23,0.05);
 }
@@ -5016,8 +5018,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 478,         /* __APP_BUILD_ANDROID__ */
-  ios:     283,          /* __APP_BUILD_IOS__     */
+  android: 479,         /* __APP_BUILD_ANDROID__ */
+  ios:     284,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
