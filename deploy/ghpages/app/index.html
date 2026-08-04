@@ -5061,8 +5061,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 488,         /* __APP_BUILD_ANDROID__ */
-  ios:     293,          /* __APP_BUILD_IOS__     */
+  android: 489,         /* __APP_BUILD_ANDROID__ */
+  ios:     294,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -5586,7 +5586,19 @@ async function showPushPrompt(userId) {
     try { await subscribeToPush(userId); } catch(e) {}
     return;
   }
-  if (Notification.permission !== 'default') return;
+  if (Notification.permission !== 'default') {
+    // 'denied'. Say so once per app open — the launch lap (2026-08-03) proved
+    // this state is otherwise indistinguishable from "working fine" on a
+    // phone, and on iOS the OS-level toggle doesn't always clear it (the sure
+    // reset is remove + re-add the Home Screen icon, then Allow when asked).
+    try {
+      if (!window._mncDeniedToastShown) {
+        window._mncDeniedToastShown = true;
+        showToast('Notifications are blocked for MNC on this device', 5000);
+      }
+    } catch(_) {}
+    return;
+  }
   const banner = document.getElementById('push-banner');
   if (banner) {
     banner.style.display = 'flex';
