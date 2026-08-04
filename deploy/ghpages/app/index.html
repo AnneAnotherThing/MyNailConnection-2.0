@@ -5016,8 +5016,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 477,         /* __APP_BUILD_ANDROID__ */
-  ios:     282,          /* __APP_BUILD_IOS__     */
+  android: 478,         /* __APP_BUILD_ANDROID__ */
+  ios:     283,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -5389,7 +5389,12 @@ const PUSH_ENABLED = true;
 // Then paste your PUBLIC key below and store the PRIVATE key in your Edge Function env.
 // Regenerated 2026-07-24 for the NEW Supabase project (old private key
 // unrecoverable; push_subscriptions was empty so nothing was invalidated).
-const VAPID_PUBLIC_KEY = 'BN_e5ABJFlCD_tuCrbXxO0fu0VoorsQ60fy5iUYbfqcbuXeh3GHUHpXbdFGY6ZTUzFg7lDFYFTa-BLNN2eanG0o';
+// Rotated 2026-08-03: the migration to this project never set VAPID
+// secrets server-side, so the old pair never delivered a single push.
+// This public key pairs with the VAPID_PRIVATE_KEY secret set the
+// same day. subscribeToPush() below re-mints any subscription created
+// under a different key automatically.
+const VAPID_PUBLIC_KEY = 'BJFMiqo_8PaBqz2PszUjaEBr2Otj9UnnHLEAg6smqUTTKF_qWq9CbAKjKKC3QbFIdIbeTuPiKt6TB-xWgTpGX5w';
 
 function urlBase64ToUint8Array(base64String) {
   const padding = '='.repeat((4 - base64String.length % 4) % 4);
@@ -5457,6 +5462,22 @@ async function subscribeToPush(userId) {
   if (!('serviceWorker' in navigator)) { console.warn('SW not supported'); return; }
   const reg = await navigator.serviceWorker.ready;
   let subscription = await reg.pushManager.getSubscription();
+  // Key rotation guard (2026-08-03): a subscription minted under an old
+  // VAPID key can never be pushed by the new private key. If the stored
+  // subscription's applicationServerKey differs from ours, unsubscribe
+  // and re-mint. Runs silently on every boot-time re-subscribe.
+  if (subscription) {
+    try {
+      const want = urlBase64ToUint8Array(VAPID_PUBLIC_KEY);
+      const have = subscription.options && subscription.options.applicationServerKey
+        ? new Uint8Array(subscription.options.applicationServerKey) : null;
+      const same = have && have.length === want.length && have.every(function(b, i) { return b === want[i]; });
+      if (!same) {
+        await subscription.unsubscribe();
+        subscription = null;
+      }
+    } catch(_) { try { await subscription.unsubscribe(); } catch(__) {} subscription = null; }
+  }
   if (!subscription) {
     subscription = await reg.pushManager.subscribe({
       userVisibleOnly: true,
