@@ -5081,8 +5081,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 501,         /* __APP_BUILD_ANDROID__ */
-  ios:     306,          /* __APP_BUILD_IOS__     */
+  android: 502,         /* __APP_BUILD_ANDROID__ */
+  ios:     307,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -14958,16 +14958,31 @@ async function bkConfirm() {
         url: '/app/', tag: 'booking-new'
       });
     }
+    // Confirmed vs pending must be unmistakable (Anne, 2026-08-03): green
+    // check + "Confirmed" chip when the slot is truly booked; amber clock +
+    // an explicit "not booked yet" notice while the tech still has to say
+    // yes. Before this they differed by one word and clients read
+    // "Request sent!" as a done deal.
     bkBody(
       '<div style="text-align:center;padding:18px 4px 6px;">' +
-        '<div style="width:54px;height:54px;border-radius:50%;background:var(--green-light);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;">' +
-          '<svg viewBox="0 0 24 24" style="width:26px;height:26px;stroke:var(--green);fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;"><path d="M20 6L9 17l-5-5"/></svg>' +
-        '</div>' +
+        (confirmed
+          ? '<div style="width:54px;height:54px;border-radius:50%;background:var(--green-light);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;">' +
+              '<svg viewBox="0 0 24 24" style="width:26px;height:26px;stroke:var(--green);fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;"><path d="M20 6L9 17l-5-5"/></svg>' +
+            '</div>'
+          : '<div style="width:54px;height:54px;border-radius:50%;background:#FFF4DE;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;">' +
+              '<svg viewBox="0 0 24 24" style="width:26px;height:26px;stroke:#B8860B;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15.5 14"/></svg>' +
+            '</div>') +
         '<div style="font-family:\'Playfair Display\',serif;font-size:22px;color:var(--charcoal);margin-bottom:6px;">' +
           (confirmed ? "You're booked!" : 'Request sent!') + '</div>' +
-        '<div style="font-size:14px;color:var(--muted);line-height:1.6;margin-bottom:18px;">' +
-          bkEsc(_bkFlow.svc.name) + ' with ' + bkEsc(techName) + '<br>' + when +
-          (confirmed ? '' : '<br>' + bkEsc(techName) + ' will confirm shortly.') + '</div>' +
+        (confirmed
+          ? '<div style="display:inline-block;background:var(--green-light);color:var(--green);font-size:12px;font-weight:700;letter-spacing:0.6px;text-transform:uppercase;border-radius:100px;padding:4px 12px;margin-bottom:10px;">Confirmed &mdash; you\'re on the calendar</div>'
+          : '<div style="display:inline-block;background:#FFF4DE;color:#7A5A00;font-size:12px;font-weight:700;letter-spacing:0.6px;text-transform:uppercase;border-radius:100px;padding:4px 12px;margin-bottom:10px;">Waiting for ' + bkEsc(techName) + ' to confirm</div>') +
+        '<div style="font-size:14px;color:var(--muted);line-height:1.6;margin-bottom:' + (confirmed ? '18px' : '12px') + ';">' +
+          bkEsc(_bkFlow.svc.name) + ' with ' + bkEsc(techName) + '<br>' + when + '</div>' +
+        (confirmed ? '' :
+          '<div style="background:#FFF8E8;border:1px solid #F0D890;border-radius:12px;padding:10px 14px;font-size:13px;color:#7A5A00;line-height:1.5;margin:0 8px 18px;">' +
+            'Nothing is booked yet &mdash; this time is requested, not reserved. You\'ll get a notification the moment ' + bkEsc(techName) + ' confirms.' +
+          '</div>') +
         '<button class="btn btn-rose" onclick="closeBookModal()">Done</button>' +
         '<div onclick="closeBookModal();show(\'my-appts\')" style="margin-top:12px;font-size:13px;color:var(--rose-dark);font-weight:600;cursor:pointer;">View my appointments</div>' +
       '</div>');
