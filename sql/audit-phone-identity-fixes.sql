@@ -4,6 +4,12 @@
 -- From the full email-keying audit. Three fixes + two verifications.
 -- Run in: Supabase dashboard → nwqnakoongrorbwnrqzc → SQL editor.
 -- Safe to re-run.
+--
+-- ⚠ PREREQUISITE (discovered 2026-08-03 when this file first errored):
+-- run sql/phone-auth-stage-e-favorites-tech-id.sql FIRST. It adds
+-- user_favorites.tech_id, which section 2 joins on — and the app already
+-- writes that column on every favorite-save, so until Stage E runs,
+-- saving a favorite fails live for EVERYONE. Order: stage-e → this file.
 
 begin;
 
