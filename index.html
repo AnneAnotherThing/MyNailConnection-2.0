@@ -5097,8 +5097,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 503,         /* __APP_BUILD_ANDROID__ */
-  ios:     308,          /* __APP_BUILD_IOS__     */
+  android: 504,         /* __APP_BUILD_ANDROID__ */
+  ios:     309,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -13957,13 +13957,23 @@ async function tbAddBlocked() {
 
 async function tbBlockFromAppt(id) {
   const b = _bkAppts.find(function(x) { return x.id === id; });
-  if (!b || !b.client_email || !_bkMyTech) return;
-  const who = b.client_name || b.client_email;
+  if (!b || !_bkMyTech) return;
+  // Blocklist key: email for email clients, bare 10 digits for phone
+  // clients (Stage D stores digits; get_open_slots matches either).
+  let blockKey = '';
+  if (b.client_email) blockKey = String(b.client_email).toLowerCase();
+  else if (b.client_phone) {
+    let d = String(b.client_phone).replace(/\D/g, '');
+    if (d.length === 11 && d[0] === '1') d = d.slice(1);
+    if (d.length === 10) blockKey = d;
+  }
+  if (!blockKey) { showToast('No contact info to block this client by'); return; }
+  const who = b.client_name || b.client_email || b.client_phone;
   if (!(await showConfirm('Block ' + who + '?', { body: 'They are never told. They simply never see an opening with you again.', okLabel: 'Block' }))) return;
   const r = await fetch(SUPABASE_URL + '/rest/v1/blocked_clients', {
     method: 'POST',
     headers: bkHeaders({ 'Content-Type': 'application/json', 'Prefer': 'return=representation' }),
-    body: JSON.stringify({ tech_id: _bkMyTech.id, client_email: String(b.client_email).toLowerCase() })
+    body: JSON.stringify({ tech_id: _bkMyTech.id, client_email: blockKey })
   });
   if (!r.ok) { showToast('Could not block, try again'); return; }
   const rows = await r.json();
@@ -14027,7 +14037,10 @@ function tbRenderAppts() {
   // Block straight from a past appointment (Anne, 2026-08-03): you block
   // someone you dealt with, and the card already knows who they are.
   const blockBtn = function(b2) {
-    if (!b2 || !b2.client_email) return '';
+    // email OR phone (audit follow-up 2026-08-03): phone-only clients have
+    // client_email null, so the Block button never rendered for them and
+    // Anne couldn't find where to block anyone.
+    if (!b2 || (!b2.client_email && !b2.client_phone)) return '';
     return '<button onclick="tbBlockFromAppt(\'' + b2.id + '\')" style="flex:0 0 auto;padding:9px 13px;border-radius:10px;border:1.5px solid var(--border);background:white;color:var(--muted);font-size:13px;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif;">Block</button>';
   };
   const pending  = _bkAppts.filter(function(b) { return b.status === 'pending'; });
@@ -15091,21 +15104,19 @@ async function loadMyAppointments() {
 // ALL_TECHS entry; fall back to a minimal object built from the booking's
 // embedded techs row (covers techs filtered off the public browse list,
 // e.g. no tagged photos yet). Only a true miss means they left MNC.
-function maOpenTech(techId) {
+async function maOpenTech(techId) {
   const tech = (window.ALL_TECHS || []).find(function(t) { return t.id === techId; });
   if (tech) { openTechDetail(tech); return; }
-  const row = (_maRows || []).map(function(b) { return b.techs; })
-    .find(function(t) { return t && t.id === techId; });
-  if (row) {
-    openTechDetail({
-      id: row.id, name: row.name || 'Your tech', email: row.email || '',
-      phone: row.phone || '', city: row.city || '', state: row.state || '',
-      imageUrl: row.image_url || '', photos: [],
-      initials: ((row.name || '?')[0] || '?').toUpperCase(),
-      bg: 'linear-gradient(135deg,#F7E2E3,#E6D6D7)', color: 'var(--rose)'
-    });
-    return;
-  }
+  // Not in the browse cache (stale load or filtered): fetch the full row
+  // and run it through the SAME mapper the browse grid uses, so the
+  // profile opens complete — gallery, availability, Book button, all of
+  // it (Anne, 2026-08-03: the earlier minimal object opened a bare shell).
+  try {
+    const r = await fetch(SUPABASE_URL + '/rest/v1/techs?id=eq.' + encodeURIComponent(techId) + '&select=*',
+      { headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + (window._mncAccessToken || SUPABASE_ANON_KEY) } });
+    const rows = r.ok ? await r.json() : [];
+    if (rows && rows[0]) { openTechDetail(_mapTechRow(rows[0])); return; }
+  } catch(_) {}
   showToast('This tech is no longer on MNC');
 }
 
@@ -19032,7 +19043,18 @@ async function loadTechsFromSupabase() {
     }
 
     // Map Supabase records to the shape renderTechCards expects
-    const mapped = data.map(function(t) {
+    const mapped = data.map(_mapTechRow);
+    _finishLoadTechs(mapped, container);
+  } catch (e) {
+    // Supabase unreachable, use hardcoded data silently
+    if (!techsLoaded) applyFilters();
+  }
+}
+
+// Extracted 2026-08-03 (audit follow-up): maOpenTech needs the SAME row
+// mapping when it fetches a tech that isn't in ALL_TECHS yet, otherwise
+// the profile opens sparse — no gallery, no availability, no Book button.
+function _mapTechRow(t) {
       return {
         // id is REQUIRED, without it, map pin routing falls back to
         // `undefined === undefined`, which is true for every tech, so
@@ -19093,8 +19115,9 @@ async function loadTechsFromSupabase() {
                        && (!t.subscription_expires_at
                            || new Date(t.subscription_expires_at) > new Date())
       };
-    });
+}
 
+function _finishLoadTechs(mapped, container) {
     // Replace ALL_TECHS contents in place so filters still work
     ALL_TECHS.length = 0;
     mapped.forEach(function(t) { ALL_TECHS.push(t); });
@@ -19107,11 +19130,6 @@ async function loadTechsFromSupabase() {
     // Update admin stat
     const statEl = document.getElementById('stat-techs');
     if (statEl) statEl.textContent = ALL_TECHS.length;
-
-  } catch(e) {
-    // Supabase unreachable, use hardcoded data silently
-    if (!techsLoaded) applyFilters();
-  }
 }
 
 // ── Filters Modal ─────────────────────────────────────────────────
