@@ -151,6 +151,7 @@ serve(async (req) => {
 
     const payload = JSON.stringify({ title, body, url: url || '/', tag: tag || 'mnc' });
     let sent = 0, failed = 0, skipped = 0;
+    const errors: string[] = [];
 
     for (const sub of subs) {
       const isNative = sub.p256dh === 'native';
@@ -172,6 +173,11 @@ serve(async (req) => {
         }
       } catch (err: any) {
         failed++;
+        // Surface WHY (2026-08-03): swallowing the error made FCM setup
+        // problems (bad secret JSON, API disabled) indistinguishable from
+        // dead tokens. Capped + deduped so the response stays small.
+        const msg = String(err?.message || err).slice(0, 300);
+        if (errors.length < 3 && !errors.includes(msg)) errors.push(msg);
         // Remove expired/invalid web subscriptions (410 Gone)
         if (!isNative && (err.statusCode === 410 || err.statusCode === 404)) {
           await supabase.from('push_subscriptions').delete().eq('endpoint', sub.endpoint);
@@ -179,7 +185,11 @@ serve(async (req) => {
       }
     }
 
-    return jsonResponse(skipped ? { sent, failed, skipped, note: 'native rows skipped: FCM_SERVICE_ACCOUNT not set' } : { sent, failed });
+    return jsonResponse({
+      sent, failed,
+      ...(skipped ? { skipped, note: 'native rows skipped: FCM_SERVICE_ACCOUNT not set' } : {}),
+      ...(errors.length ? { errors } : {}),
+    });
 
   } catch (err) {
     return jsonResponse({ error: String(err) }, 500);

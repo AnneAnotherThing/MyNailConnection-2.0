@@ -5102,8 +5102,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 505,         /* __APP_BUILD_ANDROID__ */
-  ios:     310,          /* __APP_BUILD_IOS__     */
+  android: 506,         /* __APP_BUILD_ANDROID__ */
+  ios:     311,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -5912,6 +5912,13 @@ function wireCapacitorPushListeners(PushNotifications) {
     if (window.__MNC_DEV__) console.log('Native push token:', token.value);
     const userId = currentUserEmail || (currentUser && currentUser.id);
     if (!userId) return;
+    // Boot race (seen live 2026-08-03, 'native save' snag toast): the
+    // registration event can beat the session restore, so the save went
+    // out with the anon bearer and RLS rejected it. Wait briefly for the
+    // access token before saving.
+    for (let i = 0; i < 10 && !window._mncAccessToken; i++) {
+      await new Promise(function(r) { setTimeout(r, 500); });
+    }
     // Save FCM/APNs token to push_subscriptions table. Bearer must be the
     // signed-in user's token, not the anon key — RLS is `to authenticated`
     // and silently rejected anon writes for months on the web path (fixed
