@@ -5127,8 +5127,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 508,         /* __APP_BUILD_ANDROID__ */
-  ios:     313,          /* __APP_BUILD_IOS__     */
+  android: 509,         /* __APP_BUILD_ANDROID__ */
+  ios:     314,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -5896,6 +5896,11 @@ async function initCapacitorPush() {
   try {
     const perm = await PushNotifications.requestPermissions();
     if (perm.receive !== 'granted') return;
+    // Storage audit 2026-08-03: only setupEnablePush wrote this flag, so
+    // after a reinstall the checklist nagged "Say yes to notifications"
+    // forever at techs whose push was already live. Permission granted on
+    // the boot path counts as done too.
+    try { localStorage.setItem('mnc_push_done', '1'); } catch(_) {}
   } catch (e) {
     console.warn('Capacitor push permission request failed:', e);
     return;
@@ -6340,6 +6345,19 @@ function doSignOut() {
   _favTechs = null;
   _inspoPhotos = null;
   window._mncCurrentRole = null;
+  // Per-user device flags (storage audit 2026-08-03): none are namespaced
+  // by user, so on a shared device account A's state leaked into account
+  // B — "push done" claimed for a user with no subscription, A's booking
+  // choice checked off B's checklist, A's tutorial suppressing B's, A's
+  // feed radius filtering B's home. Drop them at sign-out; sessionStorage
+  // too (the checklist "maybe later" dismissal).
+  try {
+    ['mnc_push_done', 'mnc_booking_pref', 'mnc_tutorial_seen30_tech',
+     'mnc_tutorial_seen30_client', 'mnc_feed_radius'].forEach(function(k) {
+      localStorage.removeItem(k);
+    });
+    sessionStorage.clear();
+  } catch(_) {}
   updateAvatar();
   try { refreshAdminNav(); } catch(e) {}
   // Reset the splash to its neutral "not signed in" state so the sign-up /
@@ -9370,7 +9388,13 @@ async function openTechEditFromProfile() {
       bio: t.bio, tags: t.tags || [], hours_available: t.hours_available,
       imageUrl: t.image_url, photos: t.photos || [],
       contact_methods: t.contact_methods || { call: true, text: true },
-      bg: 'linear-gradient(135deg,#F7E2E3,#E6D6D7)', color: 'var(--rose)'
+      // gallery_link/joined/bg/color were omitted here, so the self-edit
+      // save blanked the Instagram/TikTok button, could reset the joined
+      // date, and steamrolled custom avatar colors (clobber audit
+      // 2026-08-03). Carry the row's real values through.
+      gallery_link: t.gallery_link || '',
+      joined: t.joined || '',
+      bg: t.bg || 'linear-gradient(135deg,#F7E2E3,#E6D6D7)', color: t.color || 'var(--rose)'
     });
   } catch(e) { showToast('Could not load profile'); }
 }
@@ -10074,6 +10098,11 @@ async function loadMyPhotosData() {
       if (typeof p === 'string') return { url: p, tags: [] };
       return { url: p.url || '', tags: p.tags || [] };
     });
+    // Baseline for saveMyPhotos' merge (clobber audit 2026-08-03): URLs
+    // present at load time. A DB photo missing from local state is a
+    // same-visit DELETION only if it was in this set; otherwise it
+    // arrived after load (fresh upload / wizard) and must be preserved.
+    _myPhotosState.loadedUrls = _myPhotosState.photos.map(function(p) { return p.url; });
     renderMyPhotos();
   } catch(e) {
     summary.textContent = 'Error loading photos. Please try again.';
@@ -10708,6 +10737,48 @@ async function saveMyPhotos() {
     _myPhotosState.saveTimer = null;
   }
   try {
+    // Merge-with-DB before writing (clobber audit 2026-08-03; the same
+    // pattern _rwPatchPhoto uses). The local state was a lossy snapshot
+    // ({url,tags} only, taken at screen entry), so PATCHing it verbatim
+    // (a) DELETED photos uploaded during the same visit — the uploader
+    // writes straight to the DB, never into _myPhotosState — and
+    // (b) stripped slot_type/pending_feed/caption from every photo,
+    // breaking credit accounting and Release Wizard state.
+    // Rules: local order wins for photos it knows; local tags overwrite;
+    // all other DB keys survive; DB photos absent locally are kept unless
+    // they were present at load (= a genuine same-visit deletion).
+    let mergedPhotos = _myPhotosState.photos;
+    try {
+      const fres = await fetch(
+        `${SUPABASE_URL}/rest/v1/techs?id=eq.${_myPhotosState.techId}&select=photos`,
+        { headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + (window._mncAccessToken || SUPABASE_ANON_KEY) } }
+      );
+      if (!fres.ok) throw new Error('fetch-failed');
+      const frows = await fres.json();
+      let dbPhotos = (frows && frows[0] && frows[0].photos) || [];
+      if (typeof dbPhotos === 'string') { try { dbPhotos = JSON.parse(dbPhotos); } catch(_) { dbPhotos = []; } }
+      const dbByUrl = {};
+      dbPhotos.forEach(function(p) {
+        const u = (typeof p === 'string') ? p : (p && p.url);
+        if (u) dbByUrl[u] = (typeof p === 'string') ? { url: p } : p;
+      });
+      const loaded = _myPhotosState.loadedUrls || [];
+      const localUrls = {};
+      mergedPhotos = _myPhotosState.photos.map(function(lp) {
+        localUrls[lp.url] = true;
+        return Object.assign({}, dbByUrl[lp.url] || {}, { url: lp.url, tags: lp.tags || [] });
+      });
+      dbPhotos.forEach(function(p) {
+        const u = (typeof p === 'string') ? p : (p && p.url);
+        if (!u || localUrls[u]) return;
+        if (loaded.indexOf(u) !== -1) return; // deleted in this visit
+        mergedPhotos.push(dbByUrl[u]);        // arrived after load: keep
+      });
+    } catch(_) {
+      // Can't read the DB copy: refuse to guess rather than clobber.
+      showToast('Save failed, please try again');
+      return;
+    }
     const res = await fetch(
       `${SUPABASE_URL}/rest/v1/techs?id=eq.${_myPhotosState.techId}`,
       {
@@ -10718,7 +10789,7 @@ async function saveMyPhotos() {
           Authorization: 'Bearer ' + (window._mncAccessToken || SUPABASE_ANON_KEY),
           Prefer: 'return=minimal'
         },
-        body: JSON.stringify({ photos: _myPhotosState.photos })
+        body: JSON.stringify({ photos: mergedPhotos })
       }
     );
     if (!res.ok) {
@@ -11109,6 +11180,17 @@ async function saveTechEdit() {
       delete techData.is_available;
       delete techData.is_same_day;
       if (!currentEditTech.joined) delete techData.joined;
+      // lat/lng: edit.lat/lng are never assigned anywhere, so echoing them
+      // PATCHed null on every save and dropped the tech off the map until
+      // a re-geocode (clobber audit 2026-08-03). The background geocode
+      // after save writes them on its own when the address changes.
+      delete techData.lat;
+      delete techData.lng;
+      // hide_address_public is owned by the tech-home toggle; the modal's
+      // checkbox was removed, so when the element is absent !!undefined
+      // silently flipped the privacy setting back to public. Only send it
+      // when the checkbox actually existed on this form.
+      if (!_teHideSave) delete techData.hide_address_public;
     }
     // Strip any base64 photos, too large for DB rows, URL-only allowed
     const safePhotos = (techData.photos || []).filter(p => {
@@ -18151,7 +18233,10 @@ async function saveUserEdit() {
     showToast('Saved locally (offline)');
   }
 
-  restoreSaveBtns();
+  // restoreSaveBtns is function-scoped INSIDE saveTechEdit — calling it
+  // here threw a ReferenceError on every admin save, so the modal never
+  // closed and the list never refreshed (clobber audit 2026-08-03).
+  if (typeof restoreSaveBtns === 'function') { try { restoreSaveBtns(); } catch(_) {} }
   closeUserEdit();
   initUsers();
   renderUsers();
