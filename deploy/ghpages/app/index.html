@@ -5102,8 +5102,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 506,         /* __APP_BUILD_ANDROID__ */
-  ios:     311,          /* __APP_BUILD_IOS__     */
+  android: 507,         /* __APP_BUILD_ANDROID__ */
+  ios:     312,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -11075,6 +11075,16 @@ async function saveTechEdit() {
       is_same_day: currentEditTech.is_same_day || false,
       contact_methods: edit.contact_methods || { call: true, text: true }
     };
+    // The modal doesn't manage availability or the joined date, and
+    // openTechEditFromProfile doesn't load them — so on UPDATE, echoing
+    // them PATCHes availability to false and joined to today (Anne's
+    // "saved contact prefs, vanished from browse" bug, 2026-08-03).
+    // Send them only on INSERT, where the row needs initial values.
+    if (!isNew) {
+      delete techData.is_available;
+      delete techData.is_same_day;
+      if (!currentEditTech.joined) delete techData.joined;
+    }
     // Strip any base64 photos, too large for DB rows, URL-only allowed
     const safePhotos = (techData.photos || []).filter(p => {
       const url = p.url || p;
