@@ -5084,10 +5084,35 @@ function maybeShowTutorial(role) {
     const seen = localStorage.getItem(_TUTORIAL_KEY + role);
     if (seen) return;
   } catch(e) { /* storage blocked, show tutorial anyway */ }
-  // Small delay so the home screen can render behind the overlay
-  // before the tutorial fades in. Without this, tall tutorial cards
-  // feel like they "ghost in" before the page is ready.
-  setTimeout(function() { showTutorial(role); }, 350);
+  // Account-aware gate (Anne hit it 2026-08-03: fresh install replayed the
+  // tutorial at her on login). The seen-flag lives in localStorage, which a
+  // reinstall wipes — so before showing, check the ACCOUNT: a tech whose
+  // row predates today, or who already has photos, has plainly been here
+  // before. Mark seen and skip. Offline/fetch failure falls through to
+  // showing, which is the safe default for a genuinely new tech.
+  (async function() {
+    try {
+      const id = encodeURIComponent(currentUserEmail || '');
+      const r = await fetch(SUPABASE_URL + '/rest/v1/techs?or=(email.eq.' + id + ',phone.eq.' + id + ')&select=joined,photos',
+        { headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + (window._mncAccessToken || SUPABASE_ANON_KEY) } });
+      const rows = r.ok ? await r.json() : [];
+      const t = rows && rows[0];
+      if (t) {
+        const today = new Date().toISOString().split('T')[0];
+        let p = t.photos;
+        if (typeof p === 'string') { try { p = JSON.parse(p); } catch(_) { p = []; } }
+        const returning = (t.joined && t.joined < today) || (Array.isArray(p) && p.length > 0);
+        if (returning) {
+          try { localStorage.setItem(_TUTORIAL_KEY + role, '1'); } catch(_) {}
+          return;
+        }
+      }
+    } catch(_) { /* fall through */ }
+    // Small delay so the home screen can render behind the overlay
+    // before the tutorial fades in. Without this, tall tutorial cards
+    // feel like they "ghost in" before the page is ready.
+    setTimeout(function() { showTutorial(role); }, 350);
+  })();
 }
 
 // ── Build identity ───────────────────────────────────────────────────────────
@@ -5102,8 +5127,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 507,         /* __APP_BUILD_ANDROID__ */
-  ios:     312,          /* __APP_BUILD_IOS__     */
+  android: 508,         /* __APP_BUILD_ANDROID__ */
+  ios:     313,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -11099,7 +11124,20 @@ async function saveTechEdit() {
       }
       return p;
     });
-    techData.photos = safePhotos;
+    // Same disease as the availability clobber, photos edition (Anne,
+    // minutes later: "the refresh reset my photo tags"): the techEdits
+    // buffer snapshots photos when the modal first opens, so a later
+    // profile save overwrote the Release Wizard's tags with the stale
+    // copy. Uploads, removals, and tag saves all write to the DB directly
+    // (appendTechPhoto / removeTechPhotoByUrl / _rwPatchPhoto), so a
+    // SELF-edit UPDATE must not echo photos at all. Admins keep it: their
+    // moderation grid edits still flow through this save. Inserts keep it
+    // too (new row needs a photos value).
+    if (isNew || window._mncCurrentRole === 'admin') {
+      techData.photos = safePhotos;
+    } else {
+      delete techData.photos;
+    }
 
     // Strip base64 profile photo, cannot save to DB
     if (techData.image_url && techData.image_url.startsWith('data:')) {
