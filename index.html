@@ -1281,6 +1281,11 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       <button class="btn btn-outline" onclick="startPhoneAuth('signup')" style="width:100%;white-space:nowrap;font-size:15px;padding:13px 20px;border-radius:50px;">Create a Free Account</button>
     </div>
 
+    <!-- Build identity on the splash too (Anne, 2026-08-03): the auth-screen
+         tag alone meant you had to reach sign-in to check which build you're
+         on. Populated by the same DOMContentLoaded block as auth-build-tag. -->
+    <div id="splash-build-tag" style="text-align:center;margin-top:10px;font-size:10px;color:#6B5F63;opacity:0.55;letter-spacing:0.04em;z-index:2;"></div>
+
     <!-- (blooming magnolia removed with the 3.0 rebrand, per Anne 2026-07-06) -->
   </div>
 </div>
@@ -5097,8 +5102,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 504,         /* __APP_BUILD_ANDROID__ */
-  ios:     309,          /* __APP_BUILD_IOS__     */
+  android: 505,         /* __APP_BUILD_ANDROID__ */
+  ios:     310,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -17288,15 +17293,18 @@ document.addEventListener('DOMContentLoaded', async function() {
   // when running inside the Android shell, iOS CFBundleVersion on iOS,
   // sw.js cache name on the web. 2026-04-30
   try {
-    var tag = document.getElementById('auth-build-tag');
-    if (tag) {
-      var platform = (window.Capacitor && window.Capacitor.getPlatform && window.Capacitor.getPlatform()) || 'web';
-      var label;
-      if (platform === 'android')      label = 'v' + APP_BUILD.name + ' · build ' + APP_BUILD.android + ' · android';
-      else if (platform === 'ios')     label = 'v' + APP_BUILD.name + ' · build ' + APP_BUILD.ios + ' · ios';
-      else                              label = 'v' + APP_BUILD.name + ' · web';
-      tag.textContent = label;
-    }
+    var platform = (window.Capacitor && window.Capacitor.getPlatform && window.Capacitor.getPlatform()) || 'web';
+    var label;
+    if (platform === 'android')      label = 'v' + APP_BUILD.name + ' · build ' + APP_BUILD.android + ' · android';
+    else if (platform === 'ios')     label = 'v' + APP_BUILD.name + ' · build ' + APP_BUILD.ios + ' · ios';
+    // Web rides the same android counter — sync.sh bumps it on every app
+    // change, so it's an accurate monotone build id there too (was just
+    // "· web", useless for "which version am I on?", Anne 2026-08-03).
+    else                              label = 'v' + APP_BUILD.name + ' · build ' + APP_BUILD.android + ' · web';
+    ['auth-build-tag', 'splash-build-tag'].forEach(function(id) {
+      var tag = document.getElementById(id);
+      if (tag) tag.textContent = label;
+    });
   } catch(_) {}
 
   // Move any screens or modal overlays outside .device back inside it
