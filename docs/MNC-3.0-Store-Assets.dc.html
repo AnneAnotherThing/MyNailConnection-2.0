@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Jost:wght@200;300;400;500;600&display=swap" rel="stylesheet" />
+<style>
+  body { margin: 0; background: #E7E3DF; }
+  a { color: #B87385; text-decoration: none; }
+  a:hover { color: #8E5262; }
+</style>
+</helmet>
+<div style="font-family: Jost, sans-serif; color: #2E2E32; padding: 120px; display: flex; flex-direction: column; gap: 140px; background: #E7E3DF;">
+
+  <div style="display: flex; flex-direction: column; gap: 18px; max-width: 1100px;">
+    <div style="font-size: 15px; letter-spacing: 0.44em; text-transform: uppercase; color: #B87385; font-weight: 500;">My Nail Connection 3.0</div>
+    <div style="font-family: 'Playfair Display', serif; font-size: 76px; line-height: 1.02; font-weight: 600; letter-spacing: -0.02em;">Store &amp; ad <span style="font-style: italic; color: #B87385;">asset kit</span></div>
+    <div style="font-size: 21px; line-height: 1.5; font-weight: 300; opacity: 0.75;">Every asset below is drawn at its exact required pixel size, labelled with the store slot it fills. Real app captures are used where you supplied them; the two typographic panels stand in for screens you have not captured yet.</div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 44px;">
+    <div style="display: flex; align-items: baseline; gap: 20px; border-bottom: 1px solid rgba(46,46,50,0.18); padding-bottom: 16px;">
+      <div style="font-family: 'Playfair Display', serif; font-size: 40px; font-weight: 600;">01 &nbsp;App icon</div>
+      <div style="font-size: 16px; letter-spacing: 0.16em; text-transform: uppercase; opacity: 0.55;">1024 × 1024 master &middot; iOS + Play</div>
+    </div>
+    <div style="display: flex; gap: 72px; align-items: flex-end; flex-wrap: wrap;">
+      <div style="display: flex; flex-direction: column; gap: 16px;">
+        <div style="width: 1024px; height: 1024px; background: #F7F4F1; overflow: hidden; position: relative; display: flex; align-items: center; justify-content: center;">
+          <img src="../images/mnc-lady.png" alt="MNC monogram hat illustration" style="width: 100%; height: 100%; object-fit: cover; object-position: 44% 38%; display: block;" />
+        </div>
+        <div style="font-size: 16px; letter-spacing: 0.16em; text-transform: uppercase; opacity: 0.55;">1024 × 1024 &middot; no alpha, no rounding</div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 40px;">
+        <div style="display: flex; flex-direction: column; gap: 14px;">
+          <div style="width: 240px; height: 240px; border-radius: 56px; overflow: hidden; background: #F7F4F1; box-shadow: 0 18px 40px rgba(46,46,50,0.22);">
+            <img src="../images/mnc-lady.png" alt="" style="width: 100%; height: 100%; object-fit: contain; object-position: center; display: block;" />
+          </div>
+          <div style="font-size: 14px; letter-spacing: 0.16em; text-transform: uppercase; opacity: 0.55;">iOS home screen</div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 14px;">
+          <div style="width: 240px; height: 240px; border-radius: 50%; overflow: hidden; background: #F7F4F1; box-shadow: 0 18px 40px rgba(46,46,50,0.22);">
+            <img src="../images/mnc-lady.png" alt="" style="width: 82%; height: 82%; object-fit: contain; object-position: center; display: block; margin: 9%;" />
+          </div>
+          <div style="font-size: 14px; letter-spacing: 0.16em; text-transform: uppercase; opacity: 0.55;">Play adaptive mask</div>
+        </div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 20px; max-width: 320px; font-size: 17px; line-height: 1.55; font-weight: 300; opacity: 0.8;">
+        <div>Safe zone: the illustration is inset so the hat brim and fingertips survive both the iOS squircle and the Play circular mask.</div>
+        <div>Play also wants the same art at 512 × 512 for the legacy slot — downscale the master.</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 44px;">
+    <div style="display: flex; align-items: baseline; gap: 20px; border-bottom: 1px solid rgba(46,46,50,0.18); padding-bottom: 16px;">
+      <div style="font-family: 'Playfair Display', serif; font-size: 40px; font-weight: 600;">02 &nbsp;Play feature graphic</div>
+      <div style="font-size: 16px; letter-spacing: 0.16em; text-transform: uppercase; opacity: 0.55;">1024 × 500</div>
+    </div>
+    <div style="width: 1024px; height: 500px; background: #3A3A3E; display: flex; overflow: hidden; position: relative;">
+      <div style="flex: 1; padding: 62px 0 62px 72px; display: flex; flex-direction: column; justify-content: center; gap: 20px; color: #F7F4F1;">
+        <div style="display: flex; align-items: center; gap: 14px;">
+          <div style="width: 46px; height: 46px; border-radius: 50%; background: #F7F4F1; color: #2E2E32; display: flex; align-items: center; justify-content: center; font-family: 'Playfair Display', serif; font-size: 14px; letter-spacing: 0.08em; flex: none;">MNC</div>
+          <div style="font-size: 15px; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 400;">My Nail Connection</div>
+        </div>
+        <div style="font-size: 13px; letter-spacing: 0.44em; text-transform: uppercase; color: #E8B4BF; font-weight: 500;">Version 3.0</div>
+        <div style="font-family: 'Playfair Display', serif; font-size: 60px; line-height: 1.0; font-weight: 600; letter-spacing: -0.02em;">Free booking for<br /><span style="font-style: italic; color: #E8B4BF;">nail techs.</span></div>
+        <div style="font-size: 19px; line-height: 1.45; font-weight: 300; opacity: 0.8; max-width: 460px;">Your work is your booking page. No commission, no per-booking fee.</div>
+      </div>
+      <div style="width: 380px; position: relative; background: #F1E1E4;">
+        <img src="../images/lady-card.webp" alt="" style="width: 100%; height: 100%; object-fit: cover; object-position: 50% 30%; display: block;" />
+      </div>
+    </div>
+    <div style="font-size: 16px; line-height: 1.5; font-weight: 300; opacity: 0.7; max-width: 700px;">Play crops the outer edges on some surfaces — all type sits inside the centre 924 × 400 safe area, and no wordmark touches a corner.</div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 44px;">
+    <div style="display: flex; align-items: baseline; gap: 20px; border-bottom: 1px solid rgba(46,46,50,0.18); padding-bottom: 16px;">
+      <div style="font-family: 'Playfair Display', serif; font-size: 40px; font-weight: 600;">03 &nbsp;Play phone screenshots</div>
+      <div style="font-size: 16px; letter-spacing: 0.16em; text-transform: uppercase; opacity: 0.55;">1080 × 1920 &middot; 5 panels</div>
+    </div>
+    <div style="display: flex; gap: 64px; align-items: flex-start;">
+      <div style="width: 1080px; height: 1920px; flex: none; display: flex; overflow: hidden;"><dc-import name="MNCPanel" hint-size="100%,100%" style="width: 100%; height: 100%;" variant="shot" theme="cream" kicker="Version 3.0" head="Still booking in" accent="your DMs?" body="Your work is already why clients pick you. Now it's your booking page too." shot="../app-screens/home.png"></dc-import></div>
+      <div style="width: 1080px; height: 1920px; flex: none; display: flex; overflow: hidden;"><dc-import name="MNCPanel" hint-size="100%,100%" style="width: 100%; height: 100%;" variant="shot" theme="blush" kicker="One Gallery" head="This is where your work" accent="gets found." body="Clients filter by shape, type and style. Only tagged photos come back." shot="../app-screens/browse-style.png"></dc-import></div>
+      <div style="width: 1080px; height: 1920px; flex: none; display: flex; overflow: hidden;"><dc-import name="MNCPanel" hint-size="100%,100%" style="width: 100%; height: 100%;" variant="shot" theme="cream" kicker="Near Me" head="Find the tech" accent="near you." body="See nail techs on a map. Set your radius and browse by proximity." shot="../app-screens/map.png"></dc-import></div>
+      <div style="width: 1080px; height: 1920px; flex: none; display: flex; overflow: hidden;"><dc-import name="MNCPanel" hint-size="100%,100%" style="width: 100%; height: 100%;" variant="statement" theme="charcoal" kicker="Free forever" head="Free booking." accent="Free photos." body="No commission, no per-booking fee, no charge to your clients. Every look you post stays up permanently and serves as your ad on infinite scroll." chips="No commission | Photos never expire | Nails only"></dc-import></div>
+      <div style="width: 1080px; height: 1920px; flex: none; display: flex; overflow: hidden;"><dc-import name="MNCPanel" hint-size="100%,100%" style="width: 100%; height: 100%;" variant="statement" theme="cream" kicker="Open today" head="Had a cancellation?" accent="Fill it today." body="Flip Open today and your work glows in the Gallery, right when the clients who need nails today are looking." chips="Two taps | No cost | Every plan"></dc-import></div>
+    </div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 44px;">
+    <div style="display: flex; align-items: baseline; gap: 20px; border-bottom: 1px solid rgba(46,46,50,0.18); padding-bottom: 16px;">
+      <div style="font-family: 'Playfair Display', serif; font-size: 40px; font-weight: 600;">04 &nbsp;App Store iPhone 6.9"</div>
+      <div style="font-size: 16px; letter-spacing: 0.16em; text-transform: uppercase; opacity: 0.55;">1290 × 2796 &middot; 5 panels</div>
+    </div>
+    <div style="display: flex; gap: 64px; align-items: flex-start;">
+      <div style="width: 1290px; height: 2796px; flex: none; display: flex; overflow: hidden;"><dc-import name="MNCPanel" hint-size="100%,100%" style="width: 100%; height: 100%;" variant="shot" theme="cream" kicker="Version 3.0" head="Still booking in" accent="your DMs?" body="Your work is already why clients pick you. Now it's your booking page too." shot="../app-screens/home.png"></dc-import></div>
+      <div style="width: 1290px; height: 2796px; flex: none; display: flex; overflow: hidden;"><dc-import name="MNCPanel" hint-size="100%,100%" style="width: 100%; height: 100%;" variant="shot" theme="blush" kicker="One Gallery" head="This is where your work" accent="gets found." body="Clients filter by shape, type and style. Only tagged photos come back." shot="../app-screens/browse-style.png"></dc-import></div>
+      <div style="width: 1290px; height: 2796px; flex: none; display: flex; overflow: hidden;"><dc-import name="MNCPanel" hint-size="100%,100%" style="width: 100%; height: 100%;" variant="shot" theme="cream" kicker="Near Me" head="Find the tech" accent="near you." body="See nail techs on a map. Set your radius and browse by proximity." shot="../app-screens/map.png"></dc-import></div>
+      <div style="width: 1290px; height: 2796px; flex: none; display: flex; overflow: hidden;"><dc-import name="MNCPanel" hint-size="100%,100%" style="width: 100%; height: 100%;" variant="statement" theme="charcoal" kicker="Free forever" head="Free booking." accent="Free photos." body="No commission, no per-booking fee, no charge to your clients. Every look you post stays up permanently and serves as your ad on infinite scroll." chips="No commission | Photos never expire | Nails only"></dc-import></div>
+      <div style="width: 1290px; height: 2796px; flex: none; display: flex; overflow: hidden;"><dc-import name="MNCPanel" hint-size="100%,100%" style="width: 100%; height: 100%;" variant="statement" theme="cream" kicker="Open today" head="Had a cancellation?" accent="Fill it today." body="Flip Open today and your work glows in the Gallery, right when the clients who need nails today are looking." chips="Two taps | No cost | Every plan"></dc-import></div>
+    </div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 44px;">
+    <div style="display: flex; align-items: baseline; gap: 20px; border-bottom: 1px solid rgba(46,46,50,0.18); padding-bottom: 16px;">
+      <div style="font-family: 'Playfair Display', serif; font-size: 40px; font-weight: 600;">05 &nbsp;App Store iPhone 6.5"</div>
+      <div style="font-size: 16px; letter-spacing: 0.16em; text-transform: uppercase; opacity: 0.55;">1242 × 2688 &middot; 5 panels</div>
+    </div>
+    <div style="display: flex; gap: 64px; align-items: flex-start;">
+      <div style="width: 1242px; height: 2688px; flex: none; display: flex; overflow: hidden;"><dc-import name="MNCPanel" hint-size="100%,100%" style="width: 100%; height: 100%;" variant="shot" theme="cream" kicker="Version 3.0" head="Still booking in" accent="your DMs?" body="Your work is already why clients pick you. Now it's your booking page too." shot="../app-screens/home.png"></dc-import></div>
+      <div style="width: 1242px; height: 2688px; flex: none; display: flex; overflow: hidden;"><dc-import name="MNCPanel" hint-size="100%,100%" style="width: 100%; height: 100%;" variant="shot" theme="blush" kicker="One Gallery" head="This is where your work" accent="gets found." body="Clients filter by shape, type and style. Only tagged photos come back." shot="../app-screens/browse-style.png"></dc-import></div>
+      <div style="width: 1242px; height: 2688px; flex: none; display: flex; overflow: hidden;"><dc-import name="MNCPanel" hint-size="100%,100%" style="width: 100%; height: 100%;" variant="shot" theme="cream" kicker="Near Me" head="Find the tech" accent="near you." body="See nail techs on a map. Set your radius and browse by proximity." shot="../app-screens/map.png"></dc-import></div>
+      <div style="width: 1242px; height: 2688px; flex: none; display: flex; overflow: hidden;"><dc-import name="MNCPanel" hint-size="100%,100%" style="width: 100%; height: 100%;" variant="statement" theme="charcoal" kicker="Free forever" head="Free booking." accent="Free photos." body="No commission, no per-booking fee, no charge to your clients. Every look you post stays up permanently and serves as your ad on infinite scroll." chips="No commission | Photos never expire | Nails only"></dc-import></div>
+      <div style="width: 1242px; height: 2688px; flex: none; display: flex; overflow: hidden;"><dc-import name="MNCPanel" hint-size="100%,100%" style="width: 100%; height: 100%;" variant="statement" theme="cream" kicker="Open today" head="Had a cancellation?" accent="Fill it today." body="Flip Open today and your work glows in the Gallery, right when the clients who need nails today are looking." chips="Two taps | No cost | Every plan"></dc-import></div>
+    </div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 44px;">
+    <div style="display: flex; align-items: baseline; gap: 20px; border-bottom: 1px solid rgba(46,46,50,0.18); padding-bottom: 16px;">
+      <div style="font-family: 'Playfair Display', serif; font-size: 40px; font-weight: 600;">06 &nbsp;Static ad banners</div>
+      <div style="font-size: 16px; letter-spacing: 0.16em; text-transform: uppercase; opacity: 0.55;">Google Ads display sizes</div>
+    </div>
+    <div style="display: flex; gap: 80px; align-items: flex-start; flex-wrap: wrap;">
+
+      <div style="display: flex; flex-direction: column; gap: 14px;">
+        <div style="width: 300px; height: 250px; flex: none; box-sizing: border-box; background: #F7F4F1; display: flex; flex-direction: column; overflow: hidden;">
+          <div style="flex: 1; padding: 22px 22px 0; display: flex; flex-direction: column; gap: 8px;">
+            <div style="font-size: 8px; letter-spacing: 0.4em; text-transform: uppercase; color: #B87385; font-weight: 500;">My Nail Connection</div>
+            <div style="font-family: 'Playfair Display', serif; font-size: 30px; line-height: 1.03; font-weight: 600; letter-spacing: -0.01em;">Free booking for <span style="font-style: italic; color: #B87385;">nail techs.</span></div>
+            <div style="font-size: 12px; line-height: 1.35; font-weight: 300; opacity: 0.7;">No commission. No per-booking fee.</div>
+          </div>
+          <div style="display: flex; align-items: flex-end; justify-content: space-between; padding: 0 22px 20px; gap: 12px;">
+            <div style="background: #2E2E32; color: #F7F4F1; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; padding: 10px 16px; border-radius: 999px; white-space: nowrap; flex: none;">Get the app</div>
+            <div style="width: 76px; height: 76px; border-radius: 50%; background: #2E2E32; color: #F7F4F1; display: flex; align-items: center; justify-content: center; font-family: 'Playfair Display', serif; font-size: 22px; letter-spacing: 0.08em; flex: none;">MNC</div>
+          </div>
+        </div>
+        <div style="font-size: 14px; letter-spacing: 0.16em; text-transform: uppercase; opacity: 0.55;">300 × 250 medium rectangle</div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 14px;">
+        <div style="width: 728px; height: 90px; flex: none; box-sizing: border-box; background: #3A3A3E; color: #F7F4F1; display: flex; align-items: center; gap: 20px; padding: 0 24px; overflow: hidden;">
+          <div style="width: 54px; height: 54px; border-radius: 50%; background: #F7F4F1; color: #2E2E32; display: flex; align-items: center; justify-content: center; font-family: 'Playfair Display', serif; font-size: 16px; letter-spacing: 0.08em; flex: none;">MNC</div>
+          <div style="font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 600; letter-spacing: -0.01em; white-space: nowrap;">Free booking for <span style="font-style: italic; color: #E8B4BF;">nail techs.</span></div>
+          <div style="margin-left: auto; background: #E8B4BF; color: #2E2E32; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; padding: 11px 20px; border-radius: 999px; white-space: nowrap; flex: none;">Get the app</div>
+        </div>
+        <div style="font-size: 14px; letter-spacing: 0.16em; text-transform: uppercase; opacity: 0.55;">728 × 90 leaderboard</div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 14px;">
+        <div style="width: 320px; height: 50px; flex: none; box-sizing: border-box; background: #F1E1E4; display: flex; align-items: center; gap: 10px; padding: 0 10px; overflow: hidden;">
+          <div style="width: 32px; height: 32px; border-radius: 50%; background: #2E2E32; color: #F7F4F1; display: flex; align-items: center; justify-content: center; font-family: 'Playfair Display', serif; font-size: 10px; letter-spacing: 0.06em; flex: none;">MNC</div>
+          <div style="font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 600; line-height: 1.05; white-space: nowrap;">Free booking, <span style="font-style: italic; color: #A15E70;">forever.</span></div>
+          <div style="margin-left: auto; background: #2E2E32; color: #F7F4F1; font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; padding: 8px 12px; border-radius: 999px; white-space: nowrap; flex: none;">Get it</div>
+        </div>
+        <div style="font-size: 14px; letter-spacing: 0.16em; text-transform: uppercase; opacity: 0.55;">320 × 50 mobile banner</div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 14px;">
+        <div style="width: 160px; height: 600px; flex: none; box-sizing: border-box; background: #F7F4F1; display: flex; flex-direction: column; overflow: hidden;">
+          <div style="height: 190px; background: #F1E1E4; overflow: hidden;">
+            <img src="../images/lady-card.webp" alt="" style="width: 100%; height: 100%; object-fit: cover; object-position: 50% 28%; display: block;" />
+          </div>
+          <div style="flex: 1; padding: 20px 18px; display: flex; flex-direction: column; gap: 12px;">
+            <div style="font-size: 8px; letter-spacing: 0.34em; text-transform: uppercase; color: #B87385; font-weight: 500;">MNC 3.0</div>
+            <div style="font-family: 'Playfair Display', serif; font-size: 26px; line-height: 1.05; font-weight: 600;">Free booking for <span style="font-style: italic; color: #B87385;">nail techs.</span></div>
+            <div style="font-size: 12px; line-height: 1.4; font-weight: 300; opacity: 0.7;">Your work is your booking page. Free forever.</div>
+            <div style="margin-top: auto; background: #2E2E32; color: #F7F4F1; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; padding: 11px 0; border-radius: 999px; text-align: center;">Get the app</div>
+          </div>
+        </div>
+        <div style="font-size: 14px; letter-spacing: 0.16em; text-transform: uppercase; opacity: 0.55;">160 × 600 skyscraper</div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 14px;">
+        <div style="width: 300px; height: 600px; flex: none; box-sizing: border-box; background: #3A3A3E; color: #F7F4F1; display: flex; flex-direction: column; overflow: hidden;">
+          <div style="padding: 34px 28px 0; display: flex; flex-direction: column; gap: 14px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <div style="width: 34px; height: 34px; border-radius: 50%; background: #F7F4F1; color: #2E2E32; display: flex; align-items: center; justify-content: center; font-family: 'Playfair Display', serif; font-size: 10px; letter-spacing: 0.06em; flex: none;">MNC</div>
+              <div style="font-size: 9px; letter-spacing: 0.4em; text-transform: uppercase; color: #E8B4BF; font-weight: 500;">Version 3.0</div>
+            </div>
+            <div style="font-family: 'Playfair Display', serif; font-size: 42px; line-height: 1.0; font-weight: 600; letter-spacing: -0.02em;">Still booking in <span style="font-style: italic; color: #E8B4BF;">your DMs?</span></div>
+            <div style="font-size: 14px; line-height: 1.45; font-weight: 300; opacity: 0.78;">Free booking, free photos, and a gallery that never expires.</div>
+            <div style="background: #E8B4BF; color: #2E2E32; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; padding: 13px 0; border-radius: 999px; text-align: center;">Get the app</div>
+          </div>
+          <div style="flex: 1; margin: 28px 28px 0; border-radius: 22px 22px 0 0; overflow: hidden; border: 3px solid #1F1F22; border-bottom: none; background: #fff;">
+            <img src="../app-screens/browse-style.png" alt="" style="width: 100%; height: 100%; object-fit: cover; object-position: top center; display: block;" />
+          </div>
+        </div>
+        <div style="font-size: 14px; letter-spacing: 0.16em; text-transform: uppercase; opacity: 0.55;">300 × 600 half page</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 44px;">
+    <div style="display: flex; align-items: baseline; gap: 20px; border-bottom: 1px solid rgba(46,46,50,0.18); padding-bottom: 16px;">
+      <div style="font-family: 'Playfair Display', serif; font-size: 40px; font-weight: 600;">07 &nbsp;Social ad squares</div>
+      <div style="font-size: 16px; letter-spacing: 0.16em; text-transform: uppercase; opacity: 0.55;">1080 × 1080 &middot; 2 versions</div>
+    </div>
+    <div style="display: flex; gap: 80px; align-items: flex-start; flex-wrap: wrap;">
+      <div style="display: flex; flex-direction: column; gap: 14px;">
+        <div style="width: 1080px; height: 1080px; background: #F1E1E4; display: flex; flex-direction: column; overflow: hidden;">
+          <div style="padding: 84px 84px 0; display: flex; flex-direction: column; gap: 26px;">
+            <div style="font-size: 20px; letter-spacing: 0.44em; text-transform: uppercase; color: #A15E70; font-weight: 500;">For nail techs</div>
+            <div style="font-family: 'Playfair Display', serif; font-size: 104px; line-height: 0.98; font-weight: 600; letter-spacing: -0.03em;">Still booking in <span style="font-style: italic; color: #A15E70;">your DMs?</span></div>
+            <div style="font-size: 30px; line-height: 1.4; font-weight: 300; opacity: 0.75; max-width: 720px;">Free booking, free photos, and a gallery that works as your ad. No commission, ever.</div>
+          </div>
+          <div style="flex: 1; min-height: 0; display: flex; align-items: flex-end; justify-content: space-between; padding: 40px 84px 0; gap: 40px;">
+            <div style="background: #2E2E32; color: #F7F4F1; font-size: 24px; letter-spacing: 0.12em; text-transform: uppercase; padding: 26px 44px; border-radius: 999px; margin-bottom: 84px; white-space: nowrap;">Get the app</div>
+            <div style="width: 420px; height: 100%; background: #F7F4F1; border-radius: 32px 32px 0 0; overflow: hidden; flex: none;">
+              <img src="../images/mnc-lady.png" alt="" style="width: 100%; height: 100%; object-fit: contain; object-position: bottom center; display: block;" />
+            </div>
+          </div>
+        </div>
+        <div style="font-size: 14px; letter-spacing: 0.16em; text-transform: uppercase; opacity: 0.55;">1080 × 1080 &middot; tech audience</div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 14px;">
+        <div style="width: 1080px; height: 1080px; background: #F7F4F1; display: flex; flex-direction: column; overflow: hidden;">
+          <div style="padding: 84px 84px 0; display: flex; flex-direction: column; gap: 24px;">
+            <div style="display: flex; align-items: center; gap: 20px;">
+              <div style="width: 74px; height: 74px; border-radius: 50%; background: #2E2E32; color: #F7F4F1; display: flex; align-items: center; justify-content: center; font-family: 'Playfair Display', serif; font-size: 22px; letter-spacing: 0.08em; flex: none;">MNC</div>
+              <div style="font-size: 20px; letter-spacing: 0.44em; text-transform: uppercase; color: #B87385; font-weight: 500;">For nail addicts</div>
+            </div>
+            <div style="font-family: 'Playfair Display', serif; font-size: 96px; line-height: 0.98; font-weight: 600; letter-spacing: -0.03em;">Find the look. Find the tech. <span style="font-style: italic; color: #B87385;">Book them.</span></div>
+          </div>
+          <div style="flex: 1; min-height: 0; margin: 48px 84px 0; border-radius: 44px 44px 0 0; overflow: hidden; border: 6px solid #1F1F22; border-bottom: none; background: #fff;">
+            <img src="../app-screens/browse-style.png" alt="" style="width: 100%; height: 100%; object-fit: cover; object-position: top center; display: block;" />
+          </div>
+        </div>
+        <div style="font-size: 14px; letter-spacing: 0.16em; text-transform: uppercase; opacity: 0.55;">1080 × 1080 &middot; client audience</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 44px; max-width: 1400px;">
+    <div style="display: flex; align-items: baseline; gap: 20px; border-bottom: 1px solid rgba(46,46,50,0.18); padding-bottom: 16px;">
+      <div style="font-family: 'Playfair Display', serif; font-size: 40px; font-weight: 600;">08 &nbsp;Store listing copy</div>
+      <div style="font-size: 16px; letter-spacing: 0.16em; text-transform: uppercase; opacity: 0.55;">Within character limits</div>
+    </div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px;">
+      <div style="background: #F7F4F1; padding: 40px; display: flex; flex-direction: column; gap: 28px;">
+        <div style="font-size: 14px; letter-spacing: 0.3em; text-transform: uppercase; color: #B87385; font-weight: 500;">Apple App Store</div>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <div style="font-size: 13px; letter-spacing: 0.16em; text-transform: uppercase; opacity: 0.5;">Name &middot; 18 / 30</div>
+          <div style="font-size: 24px; font-weight: 400;">My Nail Connection</div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <div style="font-size: 13px; letter-spacing: 0.16em; text-transform: uppercase; opacity: 0.5;">Subtitle &middot; 27 / 30</div>
+          <div style="font-size: 24px; font-weight: 400;">Free booking for nail techs</div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <div style="font-size: 13px; letter-spacing: 0.16em; text-transform: uppercase; opacity: 0.5;">Keywords &middot; 96 / 100</div>
+          <div style="font-size: 17px; line-height: 1.5; font-weight: 300;">nail tech,nail booking,nails near me,nail salon,manicure,nail art,book nails,appointments</div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <div style="font-size: 13px; letter-spacing: 0.16em; text-transform: uppercase; opacity: 0.5;">Promotional text &middot; 168 / 170</div>
+          <div style="font-size: 17px; line-height: 1.55; font-weight: 300;">Version 3.0 is here. One Gallery where clients find your work by shape, type and style, free booking with no commission, and photos that never expire. Nails only.</div>
+        </div>
+      </div>
+      <div style="background: #F7F4F1; padding: 40px; display: flex; flex-direction: column; gap: 28px;">
+        <div style="font-size: 14px; letter-spacing: 0.3em; text-transform: uppercase; color: #B87385; font-weight: 500;">Google Play</div>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <div style="font-size: 13px; letter-spacing: 0.16em; text-transform: uppercase; opacity: 0.5;">Title &middot; 29 / 30</div>
+          <div style="font-size: 24px; font-weight: 400;">My Nail Connection: Booking</div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <div style="font-size: 13px; letter-spacing: 0.16em; text-transform: uppercase; opacity: 0.5;">Short description &middot; 74 / 80</div>
+          <div style="font-size: 20px; line-height: 1.45; font-weight: 300;">Free booking for nail techs. Your work is your booking page. Free forever.</div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          <div style="font-size: 13px; letter-spacing: 0.16em; text-transform: uppercase; opacity: 0.5;">Full description</div>
+          <div style="font-size: 17px; line-height: 1.6; font-weight: 300; display: flex; flex-direction: column; gap: 14px;">
+            <div>Still booking in your DMs? Your work is already why clients pick you. Now it's your booking page too.</div>
+            <div>My Nail Connection is free booking built for nail techs only. No commission, no per-booking fee, no charge to your clients.</div>
+            <div><strong style="font-weight: 500;">For nail techs</strong><br />&middot; Your profile is live the moment you join<br />&middot; Every photo you post lands in the Gallery, where clients browse by shape, type and style<br />&middot; Photos never expire — your gallery is a portfolio, not a feed<br />&middot; Flip "Open today" to fill a cancellation the same day<br />&middot; Standing appointments book your regulars automatically, every 1 to 4 weeks<br />&middot; Already on another platform? Add your link and a Book Now button appears</div>
+            <div><strong style="font-weight: 500;">For clients</strong><br />&middot; Browse real sets from real techs and filter by shape, type and style<br />&middot; Find techs near you on the map and set your own distance radius<br />&middot; Heart the looks you love and bring them to your appointment<br />&middot; See who is open today and book right in the app</div>
+            <div>Free for all basic features. More features as the app gains momentum.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>
