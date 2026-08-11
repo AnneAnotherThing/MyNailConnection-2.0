@@ -1256,13 +1256,13 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
            art top/bottom on short screens and cut off the MNC mark inside
            the image. The art's own ivory matches the splash bg, so contain
            letterboxes invisibly. -->
-      <!-- translateX(24%): the lady's face/lips sit at ~26% from the left
-           in the square art (measured), so unshifted she reads off-center.
-           The art's own ivory matches the splash bg, so the gap the shift
-           leaves is invisible. Anne, 2026-08-03. -->
+      <!-- translateX(-7%): the lips sit at ~57% of the art's width
+           (measured on the pink pixels — an earlier hat-based measurement
+           overshot badly), so a small left nudge centers them. Anne,
+           2026-08-03. -->
       <img src="images/lady-card.webp?v=3" class="mnc-logo"
            alt="Line-art woman in a wide black hat, mauve nails resting on her cheek"
-           style="width:calc(100% + 4rem);max-width:430px;max-height:54vh;object-fit:contain;display:block;margin:4px -2rem 0;transform:translateX(24%);-webkit-mask-image:linear-gradient(180deg,transparent 0,black 34px,black calc(100% - 26px),transparent 100%);mask-image:linear-gradient(180deg,transparent 0,black 34px,black calc(100% - 26px),transparent 100%);"/>
+           style="width:calc(100% + 4rem);max-width:430px;max-height:54vh;object-fit:contain;display:block;margin:4px -2rem 0;transform:translateX(-7%);-webkit-mask-image:linear-gradient(180deg,transparent 0,black 34px,black calc(100% - 26px),transparent 100%);mask-image:linear-gradient(180deg,transparent 0,black 34px,black calc(100% - 26px),transparent 100%);"/>
       <div class="etched-caps" style="font-size:13.5px;letter-spacing:5px;color:#141317;font-weight:600;z-index:2;margin-left:5px;">BEAUTY. CONNECTED.</div>
       <div style="font-size:13px;color:#6B5F63;z-index:2;margin-top:7px;text-align:center;">Free booking for nail techs. Always.</div>
       <!-- Shown via JS (setSplashWelcoming) only when restoring a persisted
@@ -5137,8 +5137,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 513,         /* __APP_BUILD_ANDROID__ */
-  ios:     318,          /* __APP_BUILD_IOS__     */
+  android: 514,         /* __APP_BUILD_ANDROID__ */
+  ios:     319,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
