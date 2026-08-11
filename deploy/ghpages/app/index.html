@@ -5220,8 +5220,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 525,         /* __APP_BUILD_ANDROID__ */
-  ios:     330,          /* __APP_BUILD_IOS__     */
+  android: 526,         /* __APP_BUILD_ANDROID__ */
+  ios:     331,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -18067,7 +18067,12 @@ document.addEventListener('DOMContentLoaded', async function() {
   // The splash came back 2026-07-21 but this line kept skipping it, so a
   // fresh browser or incognito window never saw it.) Guests reach home via
   // enterGuest(), which calls show('home') and runs its data hook then.
-  try { if (!currentUserEmail) show('splash'); } catch(_){}
+  // Web download gate: on the open web /app only sells the download now.
+  // Engaged before the splash decision so browser visitors never see the
+  // product UI flash underneath.
+  var _mncGated = false;
+  try { _mncGated = mncMaybeDownloadGate(); } catch(_) {}
+  try { if (!_mncGated && !currentUserEmail) show('splash'); } catch(_){}
 
   // If the user just landed back from a Stripe checkout success redirect,
   // show the matching welcome modal. Runs after the session restore so
@@ -20348,6 +20353,122 @@ function _stripeWelcomeApplyVariant(variant) {
   return true;
 }
 
+// ── Web download gate (2026-08-11, Anne: "remove access to the app from
+// /app — have this be only for generating downloads") ───────────────────────
+// On the open web, /app no longer serves the product. Every browser visitor
+// gets a full-screen download page instead: store installs ARE the product
+// now, and installs are what ads can attribute. The gate stays OFF for:
+//   • native Capacitor shells (they are the app)
+//   • dev mode (__MNC_DEV__: localhost, or ?mncdev=<key> — Anne's web door,
+//     sticky via localStorage)
+//   • Stripe checkout returns (?welcome=) and auth-token links, which must
+//     finish their flows in the browser.
+// A ?tech=<id> arrival personalizes the gate with that tech's photo, info,
+// and a taste of her gallery, so the download pitch has a face on it.
+function mncMaybeDownloadGate() {
+  try {
+    var isNativeApp = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+    if (isNativeApp || window.__MNC_DEV__) return false;
+    var q = null;
+    try { q = new URLSearchParams(location.search); } catch(_) {}
+    if (q && q.get('welcome')) return false;
+    var h = String(location.hash || '');
+    if (h.indexOf('token') !== -1 || h.indexOf('type=') !== -1) return false;
+    window._mncDownloadGateOn = true;
+    var techId = q ? (q.get('tech') || '') : '';
+    window._mncGetAppTech = techId;
+    mncRenderDownloadGate(null);
+    if (techId) {
+      fetch(SUPABASE_URL + '/rest/v1/techs?id=eq.' + encodeURIComponent(techId) +
+            '&select=name,shop_name,city,state,image_url,photos,tags,initials,bg,color', {
+        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY }
+      }).then(function(r) { return r.ok ? r.json() : []; }).then(function(rows) {
+        if (rows && rows[0]) mncRenderDownloadGate(rows[0]);
+      }).catch(function() {});
+    }
+    return true;
+  } catch(e) { return false; }
+}
+
+function mncRenderDownloadGate(t) {
+  var ua = navigator.userAgent || '';
+  var isAndroid = /Android/i.test(ua);
+  var techId = window._mncGetAppTech || '';
+  var playUrl = 'https://play.google.com/store/apps/details?id=com.mynailconnection.app&referrer=' +
+    encodeURIComponent('utm_source=profile_share&utm_medium=download_gate&utm_campaign=' + techId);
+  var iosUrl = 'https://apps.apple.com/app/id6764125663';
+
+  var primary = function(href, label, platform) {
+    return '<a href="' + href + '" target="_blank" rel="noopener" onclick="trackStoreTap(\'' + platform + '\')" ' +
+      'style="display:block;width:100%;padding:16px;border-radius:16px;box-sizing:border-box;text-decoration:none;' +
+      'background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);color:white;' +
+      'font-size:16px;font-weight:700;font-family:\'DM Sans\',sans-serif;border-bottom:3px solid rgba(43,41,39,0.5);' +
+      'box-shadow:0 4px 16px rgba(125,100,102,0.4);animation:pulse-soft 2.8s ease-in-out infinite;">' + label + '</a>';
+  };
+  var secondary = function(href, label, platform) {
+    return '<a href="' + href + '" target="_blank" rel="noopener" onclick="trackStoreTap(\'' + platform + '\')" ' +
+      'style="display:block;width:100%;padding:14px;border-radius:16px;box-sizing:border-box;text-decoration:none;' +
+      'background:white;color:var(--charcoal);border:1.5px solid var(--border);' +
+      'font-size:14.5px;font-weight:700;font-family:\'DM Sans\',sans-serif;">' + label + '</a>';
+  };
+  var buttons = isAndroid
+    ? primary(playUrl, 'Get it on Google Play \u2192', 'android') + '<div style="height:10px;"></div>' + secondary(iosUrl, 'Download on the App Store', 'ios')
+    : primary(iosUrl, 'Download on the App Store \u2192', 'ios') + '<div style="height:10px;"></div>' + secondary(playUrl, 'Get it on Google Play', 'android');
+
+  var techCard = '';
+  var headline = 'Your next nail tech is in here \ud83d\udc85';
+  var sub = 'Real local artists, their real work, and open spots you can book in seconds \u2014 all in the app.';
+  if (t) {
+    var first = ((t.name || '').trim().split(/\s+/)[0]) || 'She';
+    headline = bkEsc(first) + ' is booking on My Nail Connection';
+    sub = 'Download the free app to see ' + bkEsc(first) + '\u2019s latest sets and grab your spot.';
+    var loc = [t.city, t.state].filter(Boolean).join(', ');
+    var meta = [t.shop_name, loc].filter(Boolean).join(' \u00b7 ');
+    var avatar = t.image_url
+      ? '<img src="' + bkEsc(t.image_url) + '" alt="" style="width:96px;height:96px;border-radius:50%;object-fit:cover;border:3px solid var(--rose-mid);box-shadow:0 4px 14px rgba(125,100,102,0.35);"/>'
+      : '<div style="width:96px;height:96px;border-radius:50%;background:' + bkEsc(t.bg || 'linear-gradient(135deg,#F7E2E3,#E6D6D7)') + ';display:flex;align-items:center;justify-content:center;font-family:\'Playfair Display\',serif;font-size:32px;color:' + bkEsc(t.color || 'var(--rose)') + ';border:3px solid var(--rose-mid);">' + bkEsc(t.initials || (t.name || '?').slice(0, 2).toUpperCase()) + '</div>';
+    var tags = '';
+    (Array.isArray(t.tags) ? t.tags.slice(0, 3) : []).forEach(function(tag) {
+      tags += '<span style="display:inline-block;background:var(--rose-light);border:1px solid var(--rose-mid);color:var(--rose-dark);font-size:12px;font-weight:600;border-radius:100px;padding:4px 11px;margin:3px 2px;">' + bkEsc(tag) + '</span>';
+    });
+    var thumbs = '';
+    var ph = t.photos;
+    if (typeof ph === 'string') { try { ph = JSON.parse(ph); } catch(_) { ph = []; } }
+    (Array.isArray(ph) ? ph.slice(-3).reverse() : []).forEach(function(p) {
+      var u = (typeof p === 'string') ? p : ((p && p.url) || '');
+      if (u) thumbs += '<div style="aspect-ratio:1;border-radius:10px;overflow:hidden;background:var(--cream);"><img src="' + bkEsc(u) + '" alt="" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block;"/></div>';
+    });
+    techCard =
+      '<div style="background:white;border-radius:22px;box-shadow:var(--shadow);padding:22px 20px 18px;margin:16px 0 4px;width:100%;max-width:340px;box-sizing:border-box;">' +
+        '<div style="display:flex;justify-content:center;">' + avatar + '</div>' +
+        '<div style="font-family:\'Playfair Display\',serif;font-size:24px;color:var(--charcoal);margin-top:10px;">' + bkEsc(t.name || '') + '</div>' +
+        (meta ? '<div style="font-size:13px;color:var(--muted);margin-top:3px;">' + bkEsc(meta) + '</div>' : '') +
+        (tags ? '<div style="margin-top:9px;">' + tags + '</div>' : '') +
+        (thumbs ? '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:12px;">' + thumbs + '</div>' : '') +
+        '<div style="font-size:13.5px;color:var(--rose-dark);font-weight:600;margin-top:13px;font-style:italic;">\u201cSee my work and book me in the app \ud83d\udc85\u201d</div>' +
+      '</div>';
+  }
+
+  var el = document.getElementById('mnc-dl-gate');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'mnc-dl-gate';
+    el.style.cssText = 'position:fixed;inset:0;z-index:100000;overflow:auto;background:linear-gradient(165deg,#FBF8F8 0%,#F7E2E3 55%,#EFCFD2 100%);';
+    document.body.appendChild(el);
+  }
+  el.innerHTML =
+    '<div style="min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:34px 24px 40px;box-sizing:border-box;text-align:center;font-family:\'DM Sans\',sans-serif;">' +
+      '<img src="mncLogo-transparent.png" alt="My Nail Connection" style="width:72px;height:auto;"/>' +
+      '<div style="font-family:\'Playfair Display\',serif;font-size:19px;color:var(--rose-dark);letter-spacing:0.5px;margin-top:6px;">My Nail Connection</div>' +
+      techCard +
+      '<div style="font-family:\'Playfair Display\',serif;font-size:26px;line-height:1.25;color:var(--charcoal);margin-top:16px;max-width:340px;">' + headline + '</div>' +
+      '<div style="font-size:14.5px;color:var(--muted);line-height:1.55;margin-top:8px;max-width:320px;">' + sub + '</div>' +
+      '<div style="font-size:13px;color:var(--rose-dark);font-weight:600;margin-top:14px;">\u2728 Free &nbsp;\u00b7&nbsp; \ud83d\udcc5 Book in seconds &nbsp;\u00b7&nbsp; \ud83d\udd14 Appointment reminders</div>' +
+      '<div style="width:100%;max-width:340px;margin-top:16px;">' + buttons + '</div>' +
+      '<div style="font-size:12px;color:var(--muted);margin-top:14px;opacity:0.8;">Free on iPhone and Android \u00b7 no fees, ever</div>' +
+    '</div>';
+}
+
 // ── Shared profile deep link (2026-08-11, Anne) ─────────────────────────────
 // mynailconnection.com/app/?tech=<id> opens that tech's profile directly,
 // signed in or not (guest browsing already works; sign-in only gates the
@@ -20356,6 +20477,10 @@ function _stripeWelcomeApplyVariant(variant) {
 // src/utm params; _mncSharedArrival turns on the get-the-app banner on
 // tech-detail for web visitors.
 async function maybeOpenSharedProfile() {
+  // Web visitors never reach the app anymore — the download gate owns the
+  // screen and renders the tech itself. This opener now serves the native
+  // shells (store-app deep links), where the gate never engages.
+  if (window._mncDownloadGateOn) return;
   var techId = null;
   try {
     var params = new URLSearchParams(window.location.search);
