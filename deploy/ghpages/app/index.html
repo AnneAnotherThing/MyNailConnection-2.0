@@ -5220,8 +5220,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 528,         /* __APP_BUILD_ANDROID__ */
-  ios:     333,          /* __APP_BUILD_IOS__     */
+  android: 529,         /* __APP_BUILD_ANDROID__ */
+  ios:     334,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -14685,7 +14685,21 @@ async function tbSetStatus(id, status) {
       cancelled_by_tech: { title: 'Appointment cancelled', body: techName + ' cancelled your appointment on ' + when + '.' }
     };
     const m = msgs[status];
-    if (m) sendPushToUser(pushKeyFor(b.client_email, b.client_phone), { title: m.title, body: m.body, url: '/app/', tag: 'booking-' + id });
+    if (m) {
+      // Await + report the push result (2026-08-11, Anne: "i did not get a
+      // push notification as a client who was confirmed"). The send result
+      // used to be thrown away, so "client has no push subscription" and
+      // "delivered" looked identical. Now the toast says what happened, and
+      // sent:0 names the likeliest cause instead of faking success.
+      sendPushToUser(pushKeyFor(b.client_email, b.client_phone), { title: m.title, body: m.body, url: '/app/', tag: 'booking-' + id })
+        .then(function(pr) {
+          showToast(pr && pr.sent > 0
+            ? 'Updated ✓ — client notified'
+            : 'Updated ✓ — saved, but the client can’t be pushed (no notifications on their device' + (pr && pr.error ? ': ' + pr.error : '') + ')');
+        })
+        .catch(function() { showToast('Updated ✓ — saved, push failed to send'); });
+      return;
+    }
   }
   showToast('Updated ✓');
 }
@@ -16899,11 +16913,17 @@ function addrAutocomplete(input, listId, cityId, stateId, zipId) {
           input._googleAC = null;
           input._mncBoundState = null;
         }
-        input.value = '';
-        const cityEl = document.getElementById(cityId);
-        const zipEl  = document.getElementById(zipId);
-        if (cityEl) cityEl.value = '';
-        if (zipEl)  zipEl.value  = '';
+        // Only clear when no address is picked yet. This hook exists for
+        // "pick state first, then type address" (re-bias the autocomplete).
+        // When a tech fixes a BLANK state AFTER selecting her address,
+        // wiping the picked address/city/zip was the bug (Anne, 2026-08-11:
+        // "populated state and it blanked out all else").
+        if (!(input.value || '').trim()) {
+          const cityEl = document.getElementById(cityId);
+          const zipEl  = document.getElementById(zipId);
+          if (cityEl) cityEl.value = '';
+          if (zipEl)  zipEl.value  = '';
+        }
       });
     }
 
@@ -16957,7 +16977,9 @@ function addrAutocomplete(input, listId, cityId, stateId, zipId) {
       const stateEl = document.getElementById(stateId);
       const zipEl   = document.getElementById(zipId);
       if (cityEl)  cityEl.value  = city;
-      if (stateEl) stateEl.value = state;
+      // Only set when the place actually carried a state; writing '' just
+      // blanks the dropdown she may have set by hand (2026-08-11).
+      if (stateEl && state) stateEl.value = state;
       if (zipEl)   zipEl.value   = zip;
       document.getElementById(listId) && (document.getElementById(listId).style.display = 'none');
     });
@@ -17014,7 +17036,14 @@ function addrSelect(idx, listId, inputId, cityId, stateId, zipId) {
   const a = results[idx].address || {};
   const street = [a.house_number, a.road].filter(Boolean).join(' ');
   const city   = a.city || a.town || a.village || a.county || '';
-  const state  = stateAbbr(a.state || '');
+  let state  = stateAbbr(a.state || '');
+  // Nominatim sometimes omits address.state entirely; the ISO3166 code
+  // field usually survives ("US-MI"). Without this fallback the state
+  // dropdown stayed BLANK after picking an address (Anne, 2026-08-11).
+  if (!state) {
+    const iso = a['ISO3166-2-lvl4'] || '';
+    if (/^US-[A-Z]{2}$/.test(iso)) state = iso.slice(3);
+  }
   const zip    = a.postcode ? a.postcode.slice(0,5) : '';
 
   const streetInput = document.getElementById(inputId);
@@ -17024,7 +17053,7 @@ function addrSelect(idx, listId, inputId, cityId, stateId, zipId) {
 
   if (streetInput) streetInput.value = street;
   if (cityInput)   cityInput.value   = city;
-  if (stateInput)  stateInput.value  = state;
+  if (stateInput && state) stateInput.value = state;
   if (zipInput)    zipInput.value    = zip;
 
   list.style.display = 'none';
