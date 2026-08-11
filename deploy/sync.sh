@@ -317,6 +317,7 @@ sync_dir images      "$GH/app/images"
 
 # ── Leslie campaign page + downloadable campaign assets ──────────────────
 copy_if_exists no-Download-Campaign.html "$GH/no-Download-Campaign.html"
+copy_if_exists leslie.html "$GH/leslie.html"
 sync_dir campaign-assets "$GH/campaign-assets"
 
 # ── Google Search Console verification ──────────────────────────────────
