@@ -106,7 +106,7 @@
   --gold:#8C7E76;--gold-light:#EDE7E6;--gold-mid:#C9BDB6;
   --cream:#FBF8F8;--charcoal:#141317;--muted:#6D6068;
   --slate:#4A6274;--slate-light:#E8EEF2;--green:#4A7A5A;--green-light:#EAF3EC;
-  --white:#FFFFFF;--border:rgba(125,100,102,0.16);--shadow:0 1px 2px rgba(11,11,13,0.09),0 5px 14px rgba(11,11,13,0.08),0 14px 30px rgba(11,11,13,0.06);
+  --white:#FFFFFF;--border:rgba(125,100,102,0.42);--shadow:0 1px 2px rgba(11,11,13,0.09),0 5px 14px rgba(11,11,13,0.08),0 14px 30px rgba(11,11,13,0.06);
 }
 /* Hard-fit the app to the visible viewport (Anne, 2026-08-03: "always
    fits in screen, no scrolling on any device"). 100dvh tracks the REAL
@@ -151,7 +151,7 @@ body{font-family:'DM Sans',sans-serif;background:#FFFFFF;display:flex;justify-co
 #style-photo-grid > div img { width:100%; display:block; aspect-ratio:1; object-fit:cover; }
 /* .screen styles defined above in layout section */
 .chip-btn{padding:6px 14px;border-radius:100px;border:1.5px solid var(--border);background:white;font-size:13px;font-weight:500;color:var(--charcoal);cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;transition:all 0.15s;}
-.feed-radius-chip{padding:4px 10px;border-radius:100px;border:1px solid var(--border);background:white;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s;}
+.feed-radius-chip{padding:4px 10px;border-radius:100px;border:1.5px solid var(--border);background:white;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s;}
 .feed-radius-chip.on{background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);color:white;border-color:var(--ink-3);}
 /* ── Feed card, editorial styling for bulletin posts ───────────────────
    Each post type (Availability, Promo, Inspo, Update, Question) gets a
@@ -160,7 +160,7 @@ body{font-family:'DM Sans',sans-serif;background:#FFFFFF;display:flex;justify-co
    each post a coherent "column" feel without loud backgrounds. */
 .feed-card{
   background:white;
-  border:1px solid var(--border);
+  border:1.5px solid var(--border);
   border-left:4px solid var(--feed-accent, var(--rose-mid));
   border-radius:12px;
   padding:9px 12px 10px 13px;      /* tighter vertical padding */
@@ -382,7 +382,7 @@ button,input,select,textarea{font-family:'DM Sans','Helvetica Neue',Helvetica,Ar
   /* padding up 2026-08-03: the italic greeting's descenders were being
      clipped where overflow:hidden meets the 22px corner radius */
   position:relative;overflow:hidden;border-radius:22px;padding:14px 22px 19px;
-  background:#FFFFFF;border:1px solid var(--border);
+  background:#FFFFFF;border:1.5px solid var(--border);
     box-shadow:0 2px 6px rgba(20,19,23,0.04),0 10px 24px rgba(20,19,23,0.05);
 }
 .hero-card::after{
@@ -405,7 +405,7 @@ button,input,select,textarea{font-family:'DM Sans','Helvetica Neue',Helvetica,Ar
    word's gradient fill (same specificity would otherwise win on order). */
 .hero-card .hs-word:not(.hs-emph){color:var(--muted);}
 .hero-pill{
-  border:1px solid var(--border);background:#FFFFFF;color:var(--charcoal);
+  border:1.5px solid var(--border);background:#FFFFFF;color:var(--charcoal);
   font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;
   padding:8px 15px;border-radius:100px;cursor:pointer;
 }
@@ -540,7 +540,7 @@ button,input,select,textarea{font-family:'DM Sans','Helvetica Neue',Helvetica,Ar
 .back-btn{width:36px;height:36px;border-radius:50%;border:1.5px solid var(--border);background:white;cursor:pointer;font-size:18px;font-weight:600;display:flex;align-items:center;justify-content:center;color:var(--charcoal);box-shadow:0 1px 6px rgba(20,19,23,0.14);flex-shrink:0;}
 .avatar{width:36px;height:36px;border-radius:50%;background:var(--rose-light);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:500;color:var(--rose-dark);cursor:pointer;border:2px solid rgba(255,255,255,0.55);box-shadow:0 0 0 1px rgba(20,19,23,0.25),0 3px 10px rgba(0,0,0,0.35);transition:box-shadow 0.2s,transform 0.15s;}
 .avatar:hover{box-shadow:0 0 0 1px rgba(20,19,23,0.3),0 5px 16px rgba(0,0,0,0.45);transform:translateY(-1px);}
-.bottom-nav{background:rgba(255,255,255,0.94);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid rgba(162,99,108,0.16);display:flex;padding:8px 6px 16px;box-shadow:0 -6px 20px rgba(20,19,23,0.10),0 -1px 0 rgba(255,255,255,0.7) inset;}
+.bottom-nav{background:rgba(255,255,255,0.94);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid rgba(162,99,108,0.4);display:flex;padding:8px 6px 16px;box-shadow:0 -6px 20px rgba(20,19,23,0.10),0 -1px 0 rgba(255,255,255,0.7) inset;}
 .screen:not(.active) .bottom-nav{display:none;}
 /* ── Native safe-area inset handling ─────────────────────────────────────────
    The viewport meta sets `viewport-fit=cover`, so on native (Capacitor) the
@@ -559,7 +559,7 @@ button,input,select,textarea{font-family:'DM Sans','Helvetica Neue',Helvetica,Ar
 .nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:7px 6px;border-radius:14px;transition:background 0.2s ease,transform 0.15s ease;}
 .nav-item:active{transform:scale(0.94);}
 .nav-item:hover{background:rgba(224,168,152,0.10);}
-.nav-item.active{background:linear-gradient(160deg,#F7E2E3 0%,#EFCFD2 100%);box-shadow:0 1px 3px rgba(20,19,23,0.12),0 0 0 1px rgba(162,99,108,0.16);}
+.nav-item.active{background:linear-gradient(160deg,#F7E2E3 0%,#EFCFD2 100%);box-shadow:0 1px 3px rgba(20,19,23,0.12),0 0 0 1px rgba(162,99,108,0.4);}
 .nav-icon{width:22px;height:22px;display:flex;align-items:center;justify-content:center;}
 .nav-icon svg{width:22px;height:22px;stroke:#6E565D;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;transition:stroke 0.2s;} /* contrast pass 2026-08-11: was #9A7C82, too faint on the frosted white bar */
 .nav-item.active .nav-icon svg{stroke:var(--rose-dark);stroke-width:2.1;}
@@ -572,7 +572,7 @@ button,input,select,textarea{font-family:'DM Sans','Helvetica Neue',Helvetica,Ar
 .badge{font-size:13px;padding:3px 9px;border-radius:100px;font-weight:500;}
 .badge-now{background:var(--rose-light);color:var(--rose-dark);border:1px solid var(--rose-mid);}
 .badge-today{background:var(--gold-light);color:#413E3B;border:1px solid var(--gold-mid);}
-.badge-dist{background:var(--cream);color:var(--muted);border:1px solid var(--border);}
+.badge-dist{background:var(--cream);color:var(--muted);border:1.5px solid var(--border);}
 .badge-rating{background:var(--gold-light);color:#7A5C20;border:1px solid var(--gold-mid);}
 .input-group{margin-bottom:14px;}
 .input-group label{font-size:11px;font-weight:500;color:var(--muted);letter-spacing:1px;text-transform:uppercase;display:block;margin-bottom:6px;}
@@ -707,7 +707,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
 .modal{background:white;border-radius:28px 28px 0 0;padding:28px 24px 40px;width:420px;max-height:85vh;overflow-y:auto;}
 .modal-handle{width:40px;height:4px;background:var(--border);border-radius:100px;margin:0 auto 20px;}
 .scroll-content{flex:1;min-height:0;overflow-y:auto;padding-top:8px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;width:100%;box-sizing:border-box;}
-.tech-card{background:white;border:1px solid var(--border);border-radius:18px;overflow:hidden;cursor:pointer;transition:all 0.2s;box-shadow:var(--shadow);margin-bottom:12px;}
+.tech-card{background:white;border:1.5px solid var(--border);border-radius:18px;overflow:hidden;cursor:pointer;transition:all 0.2s;box-shadow:var(--shadow);margin-bottom:12px;}
 .tech-card:hover{border-color:var(--rose-mid);}
 /* 110px + explicit center crop (Anne, 2026-08-03): the 150px strip
    read as "just the top third" of a photo on some devices */
@@ -728,7 +728,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
 .stat-card.green{background:var(--green-light);}
 .stat-card.slate{background:var(--slate-light);}
 .tabs{display:flex;padding:0 20px 14px;gap:4px;}
-.tab{flex:1;padding:9px;text-align:center;font-size:13px;font-weight:500;border-radius:100px;cursor:pointer;border:1px solid var(--border);color:var(--muted);background:white;transition:all 0.2s;}
+.tab{flex:1;padding:9px;text-align:center;font-size:13px;font-weight:500;border-radius:100px;cursor:pointer;border:1.5px solid var(--border);color:var(--muted);background:white;transition:all 0.2s;}
 .tab.active{background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);color:white;border-color:var(--ink-3);}
 .admin-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border);}
 .admin-row:last-child{border-bottom:none;}
@@ -737,7 +737,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
 .status-pending{background:var(--gold-light);color:var(--gold);}
 .pg-item{aspect-ratio:1;border-radius:10px;overflow:hidden;position:relative;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:26px;}
 .pg-add{border:2px dashed var(--rose-mid);background:white;color:var(--rose-mid);font-size:26px;cursor:pointer;}
-.uf-pill{padding:5px 12px;border-radius:100px;border:1px solid var(--border);background:white;font-size:13px;cursor:pointer;color:var(--muted);font-family:'DM Sans',sans-serif;transition:all 0.2s;}
+.uf-pill{padding:5px 12px;border-radius:100px;border:1.5px solid var(--border);background:white;font-size:13px;cursor:pointer;color:var(--muted);font-family:'DM Sans',sans-serif;transition:all 0.2s;}
 .uf-pill.active{background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);color:white;border-color:var(--ink-3);}
 .user-row{display:flex;padding:10px 0;border-bottom:1px solid var(--border);gap:10px;align-items:flex-start;}
 .user-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:13px;font-weight:600;flex-shrink:0;}
@@ -798,7 +798,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
 .avail-item { transition: all 0.2s; }
 
 /* ── Bulletin board ──────────────────────────────────────────────────────── */
-.board-post { background:white; border:1px solid var(--border); border-radius:14px; padding:14px 16px; margin-bottom:10px; }
+.board-post { background:white; border:1.5px solid var(--border); border-radius:14px; padding:14px 16px; margin-bottom:10px; }
 .board-post-type { display:inline-flex; align-items:center; gap:5px; font-size:10px; font-weight:600; letter-spacing:.8px; text-transform:uppercase; padding:3px 9px; border-radius:100px; margin-bottom:8px; }
 .board-type-availability  { background:#EAF3EC; color:#2E6B44; }
 .board-type-promo         { background:var(--gold-light); color:#413E3B; }
@@ -1704,7 +1704,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
           oninput="searchTechsByName(this.value)" onfocus="searchTechsByName(this.value)"
           style="width:100%;padding:12px 14px 12px 42px;border:1.5px solid var(--border);border-radius:100px;font-size:14px;font-family:'DM Sans',sans-serif;background:white;outline:none;box-sizing:border-box;color:var(--charcoal);"/>
       </div>
-      <div id="tech-name-results" style="display:none;margin-top:8px;background:white;border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:0 6px 20px rgba(70,54,55,0.10);"></div>
+      <div id="tech-name-results" style="display:none;margin-top:8px;background:white;border:1.5px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:0 6px 20px rgba(70,54,55,0.10);"></div>
     </div>
 
     <!-- Browse by section -->
@@ -1716,7 +1716,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
 
       <!-- Browse by Style -->
       <div onclick="show('browse-style')" style="cursor:pointer;border-radius:12px;background:#FFFFFF;border:1px solid rgba(96,76,77,0.22);border-bottom:3px solid rgba(70,54,55,0.35);box-shadow:0 2px 8px rgba(70,54,55,0.08);display:flex;align-items:center;gap:14px;padding:10px 14px;transition:transform 0.15s;">
-        <div style="width:72px;height:72px;border-radius:14px;overflow:hidden;flex-shrink:0;box-sizing:border-box;border:1px solid var(--border);box-shadow:inset 0 0 0 1px rgba(255,255,255,0.35),0 1px 5px rgba(70,54,55,0.16);">
+        <div style="width:72px;height:72px;border-radius:14px;overflow:hidden;flex-shrink:0;box-sizing:border-box;border:1.5px solid var(--border);box-shadow:inset 0 0 0 1px rgba(255,255,255,0.35),0 1px 5px rgba(70,54,55,0.16);">
           <img src="images/theLook.jpg?v=3" alt="Browse nail photos" style="width:100%;height:100%;object-fit:cover;object-position:center;"/>
         </div>
         <div style="flex:1;">
@@ -1728,7 +1728,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
 
       <!-- Browse by Location -->
       <div onclick="show('browse-location')" style="cursor:pointer;border-radius:12px;background:#FFFFFF;border:1px solid rgba(96,76,77,0.22);border-bottom:3px solid rgba(70,54,55,0.35);box-shadow:0 2px 8px rgba(70,54,55,0.08);display:flex;align-items:center;gap:14px;padding:10px 14px;">
-        <div style="width:72px;height:72px;border-radius:14px;overflow:hidden;flex-shrink:0;box-sizing:border-box;border:1px solid var(--border);box-shadow:inset 0 0 0 1px rgba(255,255,255,0.35),0 1px 5px rgba(70,54,55,0.16);">
+        <div style="width:72px;height:72px;border-radius:14px;overflow:hidden;flex-shrink:0;box-sizing:border-box;border:1.5px solid var(--border);box-shadow:inset 0 0 0 1px rgba(255,255,255,0.35),0 1px 5px rgba(70,54,55,0.16);">
           <img src="images/location.jpg?v=4" alt="Find techs on the map" style="width:100%;height:100%;object-fit:cover;"/>
         </div>
         <div style="flex:1;">
@@ -2000,7 +2000,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
     <div style="margin:14px 20px 0;padding:14px;background:var(--cream);border-radius:14px;font-size:14px;color:var(--charcoal);line-height:1.7;" id="td-bio">Nail tech available for bookings.</div>
 
     <!-- Availability + Typical Hours -->
-    <div style="margin:14px 20px 0;padding:14px;background:white;border:1px solid var(--border);border-radius:14px;">
+    <div style="margin:14px 20px 0;padding:14px;background:white;border:1.5px solid var(--border);border-radius:14px;">
       <div style="font-size:11px;font-weight:500;letter-spacing:1.2px;color:var(--muted);margin-bottom:10px;">AVAILABILITY</div>
       <div id="td-avail" style="display:flex;flex-direction:column;gap:8px;">
         <div id="td-badge-now" style="display:none;align-items:center;gap:8px;font-size:13px;"><div class="avail-dot now"></div><span style="color:var(--charcoal);">I could take a client today!</span></div>
@@ -2059,7 +2059,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
            link live there). Previously this routed to profile-screen, but
            tech-home has absorbed the profile tabs, so going "in" means
            editing, not navigating to a second page. -->
-      <button type="button" onclick="doSignOut()" title="Sign out" aria-label="Sign out" style="width:36px;height:36px;border-radius:50%;border:1px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--charcoal);"><svg viewBox="0 0 24 24" style="width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></button><div class="avatar" onclick="openTechEditFromProfile()" id="tech-dash-avatar" title="Edit your profile"><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;vertical-align:middle;"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></div>
+      <button type="button" onclick="doSignOut()" title="Sign out" aria-label="Sign out" style="width:36px;height:36px;border-radius:50%;border:1.5px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--charcoal);"><svg viewBox="0 0 24 24" style="width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></button><div class="avatar" onclick="openTechEditFromProfile()" id="tech-dash-avatar" title="Edit your profile"><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;vertical-align:middle;"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></div>
     </div>
   </div>
   <div class="scroll-content" style="padding-bottom:80px;">
@@ -2188,7 +2188,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
 
       <!-- Booking settings entry (Anne, 2026-08-03): My Appts is
            appointments only; the knobs live behind this card. -->
-      <div onclick="show('tech-booking-settings')" style="background:white;border:1px solid var(--border);border-radius:16px;padding:13px 16px;box-shadow:var(--shadow);margin-bottom:12px;cursor:pointer;display:flex;align-items:center;gap:10px;">
+      <div onclick="show('tech-booking-settings')" style="background:white;border:1.5px solid var(--border);border-radius:16px;padding:13px 16px;box-shadow:var(--shadow);margin-bottom:12px;cursor:pointer;display:flex;align-items:center;gap:10px;">
         <svg viewBox="0 0 24 24" style="width:17px;height:17px;stroke:var(--rose-dark);fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.2 4.2l2.8 2.8M17 17l2.8 2.8M1 12h4M19 12h4M4.2 19.8L7 17M17 7l2.8-2.8"/></svg>
         <div style="flex:1;min-width:0;">
           <div style="font-size:13.5px;font-weight:600;color:var(--charcoal);">Booking settings</div>
@@ -2206,7 +2206,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
            gallery-ish tap lands on the My Gallery screen (my-photos),
            which stays the single place photos are managed and tagged. -->
       <div class="etched-caps" style="font-size:11px;font-weight:700;letter-spacing:1.6px;color:var(--muted);text-transform:uppercase;margin:22px 0 8px;">Your gallery</div>
-      <div style="background:white;border:1px solid var(--border);border-radius:16px;padding:16px;box-shadow:var(--shadow);margin-bottom:12px;">
+      <div style="background:white;border:1.5px solid var(--border);border-radius:16px;padding:16px;box-shadow:var(--shadow);margin-bottom:12px;">
         <div onclick="openMyPhotos()" style="display:flex;align-items:center;gap:9px;margin-bottom:11px;cursor:pointer;">
           <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:var(--rose-dark);fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
           <div style="flex:1;font-size:14.5px;font-weight:700;color:var(--charcoal);">Your latest looks</div>
@@ -2272,7 +2272,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
     <!-- HELP & ACCOUNT, gathered from the old quiet-links footer.
          Apple-required links stay reachable: Terms/Privacy (3.1.2c) and
          account deletion (5.1.1v). -->
-    <div style="margin:26px 20px 0;background:white;border:1px solid var(--border);border-bottom:3px solid rgba(125,100,102,0.2);border-radius:16px;overflow:hidden;box-shadow:var(--shadow);">
+    <div style="margin:26px 20px 0;background:white;border:1.5px solid var(--border);border-bottom:3px solid rgba(125,100,102,0.2);border-radius:16px;overflow:hidden;box-shadow:var(--shadow);">
       <div class="etched-caps" style="padding:13px 16px 9px;font-size:11px;font-weight:700;letter-spacing:1.6px;color:var(--muted);text-transform:uppercase;">Help &amp; Account</div>
       <div onclick="show('how-it-works')" style="display:flex;align-items:center;gap:10px;padding:13px 16px;border-top:1px solid var(--border);cursor:pointer;"><div style="flex:1;font-size:13.5px;font-weight:600;color:var(--charcoal);">How MNC works</div><svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:var(--muted);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg></div>
       <div onclick="replayTutorial()" style="display:flex;align-items:center;gap:10px;padding:13px 16px;border-top:1px solid var(--border);cursor:pointer;"><div style="flex:1;font-size:13.5px;font-weight:600;color:var(--charcoal);">Replay the tutorial</div><svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:var(--muted);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg></div>
@@ -2548,7 +2548,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
   </div>
   <div class="scroll-content" style="padding-bottom:80px;">
 
-    <div style="margin:16px 20px 0;background:white;border:1px solid var(--border);border-radius:16px;padding:16px;">
+    <div style="margin:16px 20px 0;background:white;border:1.5px solid var(--border);border-radius:16px;padding:16px;">
       <div style="display:flex;align-items:center;gap:10px;">
         <div style="flex:1;min-width:0;">
           <div style="font-size:15px;font-weight:600;color:var(--charcoal);">Take bookings on MNC</div>
@@ -2572,7 +2572,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
           <div style="font-size:14px;font-weight:600;color:var(--charcoal);">Minimum notice</div>
           <div style="font-size:13px;color:var(--muted);margin-top:2px;">Since requests confirm themselves, keep last-minute surprises off your calendar.</div>
         </div>
-        <select id="tb-minnotice" onchange="tbSetMinNotice(this.value)" style="padding:8px 10px;border:1px solid var(--border);border-radius:10px;font-size:13px;color:var(--charcoal);background:white;">
+        <select id="tb-minnotice" onchange="tbSetMinNotice(this.value)" style="padding:8px 10px;border:1.5px solid var(--border);border-radius:10px;font-size:13px;color:var(--charcoal);background:white;">
           <option value="0">None</option><option value="2">2 hours</option>
           <option value="4">4 hours</option><option value="8">8 hours</option>
           <option value="12">12 hours</option><option value="24">1 day</option>
@@ -2591,7 +2591,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
           <div style="font-size:14px;font-weight:600;color:var(--charcoal);">Buffer between appointments</div>
           <div style="font-size:13px;color:var(--muted);margin-top:2px;">Breathing room for cleanup and reset.</div>
         </div>
-        <select id="tb-buffer" onchange="tbSetBuffer(this.value)" style="padding:8px 10px;border:1px solid var(--border);border-radius:10px;font-size:13px;color:var(--charcoal);background:white;">
+        <select id="tb-buffer" onchange="tbSetBuffer(this.value)" style="padding:8px 10px;border:1.5px solid var(--border);border-radius:10px;font-size:13px;color:var(--charcoal);background:white;">
           <option value="0">None</option><option value="10">10 min</option>
           <option value="15">15 min</option><option value="20">20 min</option>
           <option value="30">30 min</option>
@@ -2607,48 +2607,48 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
     </div>
 
     <!-- Services -->
-    <div style="margin:20px 20px 0;background:white;border:1px solid var(--border);border-radius:16px;padding:16px;">
+    <div style="margin:20px 20px 0;background:white;border:1.5px solid var(--border);border-radius:16px;padding:16px;">
       <div style="font-size:15px;font-weight:600;color:var(--charcoal);">Services</div>
       <div style="font-size:13px;color:var(--muted);margin-top:2px;">What clients can book, how long it takes, what it costs.</div>
       <div id="tb-svc-list" style="margin-top:12px;"></div>
       <div style="display:grid;grid-template-columns:1fr;gap:8px;margin-top:10px;">
-        <input id="tb-svc-name" placeholder="e.g. Gel full set" style="padding:10px;border:1px solid var(--border);border-radius:10px;font-size:14px;box-sizing:border-box;width:100%;background:white;color:var(--charcoal);">
+        <input id="tb-svc-name" placeholder="e.g. Gel full set" style="padding:10px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;box-sizing:border-box;width:100%;background:white;color:var(--charcoal);">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-          <select id="tb-svc-dur" style="padding:10px;border:1px solid var(--border);border-radius:10px;font-size:14px;box-sizing:border-box;width:100%;background:white;color:var(--charcoal);">
+          <select id="tb-svc-dur" style="padding:10px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;box-sizing:border-box;width:100%;background:white;color:var(--charcoal);">
             <option value="30">30 min</option><option value="45">45 min</option>
             <option value="60" selected>1 hr</option><option value="75">1 hr 15</option>
             <option value="90">1 hr 30</option><option value="120">2 hr</option>
             <option value="150">2 hr 30</option><option value="180">3 hr</option>
             <option value="240">4 hr</option>
           </select>
-          <input id="tb-svc-price" placeholder="Price, e.g. 55" inputmode="decimal" style="padding:10px;border:1px solid var(--border);border-radius:10px;font-size:14px;box-sizing:border-box;width:100%;background:white;color:var(--charcoal);">
+          <input id="tb-svc-price" placeholder="Price, e.g. 55" inputmode="decimal" style="padding:10px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;box-sizing:border-box;width:100%;background:white;color:var(--charcoal);">
         </div>
       </div>
       <button class="btn btn-rose" style="margin-top:10px;" onclick="tbAddService()">Add Service</button>
     </div>
 
     <!-- Weekly hours -->
-    <div style="margin:20px 20px 24px;background:white;border:1px solid var(--border);border-radius:16px;padding:16px;">
+    <div style="margin:20px 20px 24px;background:white;border:1.5px solid var(--border);border-radius:16px;padding:16px;">
       <div style="font-size:15px;font-weight:600;color:var(--charcoal);">Weekly hours</div>
       <div style="font-size:13px;color:var(--muted);margin-top:2px;">When clients can book you. Add two windows on a day for a split shift.</div>
       <div id="tb-avail-list" style="margin-top:6px;"></div>
     </div>
 
     <!-- Time off (tier 1) -->
-    <div style="margin:20px 20px 24px;background:white;border:1px solid var(--border);border-radius:16px;padding:16px;">
+    <div style="margin:20px 20px 24px;background:white;border:1.5px solid var(--border);border-radius:16px;padding:16px;">
       <div style="font-size:15px;font-weight:600;color:var(--charcoal);">Time off</div>
       <div style="font-size:13px;color:var(--muted);margin-top:2px;">Block days you're away. Clients can't book them.</div>
       <div id="tb-timeoff-list" style="margin-top:10px;"></div>
       <div style="display:flex;gap:6px;margin-top:8px;align-items:center;flex-wrap:wrap;">
-        <input type="date" id="tb-toff-start" style="padding:8px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:white;color:var(--charcoal);">
+        <input type="date" id="tb-toff-start" style="padding:8px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:white;color:var(--charcoal);">
         <span style="font-size:13px;color:var(--muted);">to</span>
-        <input type="date" id="tb-toff-end" style="padding:8px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:white;color:var(--charcoal);">
+        <input type="date" id="tb-toff-end" style="padding:8px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:white;color:var(--charcoal);">
         <button onclick="tbAddTimeOff()" style="padding:8px 14px;border-radius:8px;border:1.5px solid var(--rose-mid);background:white;color:var(--rose-dark);font-size:13px;font-weight:700;cursor:pointer;">Block</button>
       </div>
     </div>
 
     <!-- Blocked clients (quiet blocklist) -->
-    <div style="margin:20px 20px 24px;background:white;border:1px solid var(--border);border-radius:16px;padding:16px;">
+    <div style="margin:20px 20px 24px;background:white;border:1.5px solid var(--border);border-radius:16px;padding:16px;">
       <div style="font-size:15px;font-weight:600;color:var(--charcoal);">Blocked clients</div>
       <div style="font-size:13px;color:var(--muted);margin-top:2px;">They're never told. They simply never see an opening with you again.</div>
       <div id="tb-blocked-list" style="margin-top:10px;"></div>
@@ -2719,7 +2719,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
     </div>
 
     <!-- ── Section: Bookings (3.0, the hook) ──────────────────────────── -->
-    <div style="margin:20px 20px 0;background:white;border:1px solid var(--border);border-radius:18px;overflow:hidden;">
+    <div style="margin:20px 20px 0;background:white;border:1.5px solid var(--border);border-radius:18px;overflow:hidden;">
       <div style="background:linear-gradient(135deg,var(--rose-dark),var(--rose));padding:16px 20px;display:flex;align-items:center;gap:12px;">
         <svg viewBox="0 0 24 24" style="width:22px;height:22px;stroke:white;fill:none;stroke-width:1.8;stroke-linecap:round;flex-shrink:0;"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
         <div style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:white;">Free Booking, the Heart of MNC</div>
@@ -2732,7 +2732,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
     </div>
 
     <!-- ── Section: The Gallery (3.0, one gallery, linear presence) ────── -->
-    <div style="margin:20px 20px 0;background:white;border:1px solid var(--border);border-radius:18px;overflow:hidden;">
+    <div style="margin:20px 20px 0;background:white;border:1.5px solid var(--border);border-radius:18px;overflow:hidden;">
       <div style="background:linear-gradient(135deg,var(--rose-dark),var(--rose));padding:16px 20px;display:flex;align-items:center;gap:12px;">
         <svg viewBox="0 0 24 24" style="width:22px;height:22px;stroke:white;fill:none;stroke-width:1.8;stroke-linecap:round;flex-shrink:0;"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
         <div style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:white;">How the Gallery Works</div>
@@ -2750,7 +2750,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
     </div>
 
     <!-- ── Section: What it costs (photos-free-3.0: one card, no tiers) ─ -->
-    <div style="margin:16px 20px 0;background:white;border:1px solid var(--border);border-radius:18px;overflow:hidden;">
+    <div style="margin:16px 20px 0;background:white;border:1.5px solid var(--border);border-radius:18px;overflow:hidden;">
       <div style="background:linear-gradient(135deg,var(--rose-dark),var(--rose));padding:16px 20px;display:flex;align-items:center;gap:12px;">
         <svg viewBox="0 0 24 24" style="width:22px;height:22px;stroke:white;fill:none;stroke-width:1.8;stroke-linecap:round;flex-shrink:0;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
         <div style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:white;">What it costs</div>
@@ -2768,7 +2768,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
     </div>
 
     <!-- ── Section: Photo Tagging ─────────────────────────────────────── -->
-    <div style="margin:16px 20px 0;background:white;border:1px solid var(--border);border-radius:18px;overflow:hidden;">
+    <div style="margin:16px 20px 0;background:white;border:1.5px solid var(--border);border-radius:18px;overflow:hidden;">
       <div style="background:linear-gradient(135deg,var(--rose-dark),var(--rose));padding:16px 20px;display:flex;align-items:center;gap:12px;">
         <svg viewBox="0 0 24 24" style="width:22px;height:22px;stroke:white;fill:none;stroke-width:1.8;stroke-linecap:round;flex-shrink:0;"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
         <div style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:white;">Tagging Your Photos</div>
@@ -2794,7 +2794,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
     </div>
 
     <!-- ── Section: Tips ──────────────────────────────────────────────── -->
-    <div style="margin:16px 20px 0;background:white;border:1px solid var(--border);border-radius:18px;overflow:hidden;">
+    <div style="margin:16px 20px 0;background:white;border:1.5px solid var(--border);border-radius:18px;overflow:hidden;">
       <div style="background:linear-gradient(135deg,var(--rose-dark),var(--rose));padding:16px 20px;display:flex;align-items:center;gap:12px;">
         <svg viewBox="0 0 24 24" style="width:22px;height:22px;stroke:white;fill:none;stroke-width:1.8;stroke-linecap:round;flex-shrink:0;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
         <div style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:white;">Tips for Getting the Most Out of MNC</div>
@@ -2869,7 +2869,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
 
       <!-- Instagram -->
       <a href="https://www.instagram.com/mynailconnection" target="_blank" rel="noopener noreferrer"
-         style="display:flex;align-items:center;gap:14px;padding:14px 16px;background:white;border:1px solid var(--border);border-radius:18px;text-decoration:none;color:inherit;box-shadow:0 1px 3px rgba(0,0,0,0.03);transition:transform 0.15s ease, box-shadow 0.15s ease;"
+         style="display:flex;align-items:center;gap:14px;padding:14px 16px;background:white;border:1.5px solid var(--border);border-radius:18px;text-decoration:none;color:inherit;box-shadow:0 1px 3px rgba(0,0,0,0.03);transition:transform 0.15s ease, box-shadow 0.15s ease;"
          onmousedown="this.style.transform='scale(0.99)'" onmouseup="this.style.transform=''" onmouseleave="this.style.transform=''">
         <div style="width:46px;height:46px;border-radius:12px;background:radial-gradient(circle at 30% 110%, #FED576 0%, #F47133 30%, #A84047 60%, #4C63D2 100%);display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 8px rgba(188,48,57,0.25);">
           <svg viewBox="0 0 24 24" style="width:22px;height:22px;stroke:white;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;">
@@ -2887,7 +2887,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
 
       <!-- TikTok -->
       <a href="https://www.tiktok.com/@mynailconnection" target="_blank" rel="noopener noreferrer"
-         style="display:flex;align-items:center;gap:14px;padding:14px 16px;background:white;border:1px solid var(--border);border-radius:18px;text-decoration:none;color:inherit;box-shadow:0 1px 3px rgba(0,0,0,0.03);transition:transform 0.15s ease, box-shadow 0.15s ease;"
+         style="display:flex;align-items:center;gap:14px;padding:14px 16px;background:white;border:1.5px solid var(--border);border-radius:18px;text-decoration:none;color:inherit;box-shadow:0 1px 3px rgba(0,0,0,0.03);transition:transform 0.15s ease, box-shadow 0.15s ease;"
          onmousedown="this.style.transform='scale(0.99)'" onmouseup="this.style.transform=''" onmouseleave="this.style.transform=''">
         <div style="width:46px;height:46px;border-radius:12px;background:#0F0F0F;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,0.18);position:relative;">
           <!-- TikTok 'note' glyph with subtle cyan/pink offsets -->
@@ -2910,7 +2910,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
 
       <!-- Facebook -->
       <a href="https://www.facebook.com/profile.php?id=61570995887375" target="_blank" rel="noopener noreferrer"
-         style="display:flex;align-items:center;gap:14px;padding:14px 16px;background:white;border:1px solid var(--border);border-radius:18px;text-decoration:none;color:inherit;box-shadow:0 1px 3px rgba(0,0,0,0.03);transition:transform 0.15s ease, box-shadow 0.15s ease;"
+         style="display:flex;align-items:center;gap:14px;padding:14px 16px;background:white;border:1.5px solid var(--border);border-radius:18px;text-decoration:none;color:inherit;box-shadow:0 1px 3px rgba(0,0,0,0.03);transition:transform 0.15s ease, box-shadow 0.15s ease;"
          onmousedown="this.style.transform='scale(0.99)'" onmouseup="this.style.transform=''" onmouseleave="this.style.transform=''">
         <div style="width:46px;height:46px;border-radius:12px;background:#1877F2;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 8px rgba(24,119,242,0.25);">
           <svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:white;">
@@ -3118,7 +3118,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
     <!-- Consolidated 2026-07-17 (Anne): the scattered quiet-links row -> one tidy section. -->
     <div style="margin:26px 20px 8px;">
       <div style="font-size:10px;font-weight:700;letter-spacing:1.3px;text-transform:uppercase;color:var(--muted);margin:0 0 10px 4px;">Help &amp; Account</div>
-      <div style="background:var(--cream);border:1px solid var(--border);border-radius:16px;overflow:hidden;">
+      <div style="background:var(--cream);border:1.5px solid var(--border);border-radius:16px;overflow:hidden;">
         <div onclick="replayTutorial()" style="display:flex;align-items:center;justify-content:space-between;padding:13px 16px;cursor:pointer;font-size:14px;color:var(--charcoal);border-bottom:1px solid var(--border);"><span>Replay tutorial</span><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:var(--muted);fill:none;stroke-width:2.4;stroke-linecap:round;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg></div>
         <div class="mnc-pw-row" onclick="openChangePasswordFromSettings()" style="display:flex;align-items:center;justify-content:space-between;padding:13px 16px;cursor:pointer;font-size:14px;color:var(--charcoal);border-bottom:1px solid var(--border);"><span>Change password</span><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:var(--muted);fill:none;stroke-width:2.4;stroke-linecap:round;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg></div>
         <div onclick="show('find-us')" style="display:flex;align-items:center;justify-content:space-between;padding:13px 16px;cursor:pointer;font-size:14px;color:var(--charcoal);border-bottom:1px solid var(--border);"><span>Find us on social</span><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:var(--muted);fill:none;stroke-width:2.4;stroke-linecap:round;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg></div>
@@ -5196,8 +5196,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 521,         /* __APP_BUILD_ANDROID__ */
-  ios:     326,          /* __APP_BUILD_IOS__     */
+  android: 522,         /* __APP_BUILD_ANDROID__ */
+  ios:     327,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -7221,7 +7221,7 @@ function renderTechContactFooter(tech) {
   if (!footer) return;
   // 3.0 pause switch: no contact, no booking, just a gentle note.
   if (tech.listing_paused) {
-    footer.innerHTML = '<div style="text-align:center;padding:12px;background:var(--cream);border:1px solid var(--border);border-radius:12px;font-size:13px;color:var(--muted);">' +
+    footer.innerHTML = '<div style="text-align:center;padding:12px;background:var(--cream);border:1.5px solid var(--border);border-radius:12px;font-size:13px;color:var(--muted);">' +
       bkEsc(((tech.name || 'This tech').trim().split(/\s+/)[0])) + ' is taking a break and not booking new clients right now.</div>';
     footer.style.display = '';
     return;
@@ -7792,7 +7792,7 @@ async function loadAdminInbox() {
       const markReadBtn = unread
         ? '<button onclick="markInboxRead(\'' + m.id + '\')" style="font-size:13px;background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);color:white;border:none;padding:5px 12px;border-radius:20px;cursor:pointer;font-family:\'DM Sans\',sans-serif;">Mark read</button>'
         : '<span style="font-size:13px;color:var(--sage);">✓ Read</span>';
-      const deleteBtn = '<button onclick="deleteInboxMessage(\'' + m.id + '\')" style="font-size:13px;background:transparent;color:var(--muted);border:1px solid var(--border);padding:4px 11px;border-radius:20px;cursor:pointer;font-family:\'DM Sans\',sans-serif;margin-left:auto;">Delete</button>';
+      const deleteBtn = '<button onclick="deleteInboxMessage(\'' + m.id + '\')" style="font-size:13px;background:transparent;color:var(--muted);border:1.5px solid var(--border);padding:4px 11px;border-radius:20px;cursor:pointer;font-family:\'DM Sans\',sans-serif;margin-left:auto;">Delete</button>';
       const actionRow = '<div style="margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">' + textBackBtn + markReadBtn + deleteBtn + '</div>';
 
       return '<div style="background:' + bg + ';border:1px solid ' + border + ';border-radius:12px;padding:12px 14px;margin-bottom:10px;">' +
@@ -10042,7 +10042,7 @@ function renderTePhotoGrid(photos) {
   // they legitimately need to moderate/remove from this side.
   if (editingSelf) {
     var hint = document.createElement('div');
-    hint.style.cssText = 'padding:14px 16px;border-radius:12px;background:var(--cream);border:1px dashed var(--border);font-size:13px;color:var(--muted);line-height:1.5;text-align:center;';
+    hint.style.cssText = 'padding:14px 16px;border-radius:12px;background:var(--cream);border:1.5px dashed var(--border);font-size:13px;color:var(--muted);line-height:1.5;text-align:center;';
     var count = (photos || []).length;
     hint.innerHTML = count
       ? ('You have <b style="color:var(--charcoal);">' + count + '</b> photo' + (count === 1 ? '' : 's') + ' in your portfolio. Manage and tag them in your <a onclick="closeTechEdit(); show(\'my-photos\');" style="color:var(--rose);cursor:pointer;font-weight:600;text-decoration:underline;text-underline-offset:2px;">Gallery</a>.')
@@ -10669,7 +10669,7 @@ function openBulkReviewSheet(startIdx) {
 
 function buildBulkReviewCard(photo, idx, onChange) {
   const card = document.createElement('div');
-  card.style.cssText = 'background:white;border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:14px;box-shadow:0 2px 8px rgba(0,0,0,0.04);';
+  card.style.cssText = 'background:white;border:1.5px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:14px;box-shadow:0 2px 8px rgba(0,0,0,0.04);';
 
   const imgWrap = document.createElement('div');
   imgWrap.style.cssText = 'position:relative;';
@@ -10775,7 +10775,7 @@ function closeBulkReviewSheet() {
 
 function buildUntaggedCard(photo, idx) {
   const card = document.createElement('div');
-  card.style.cssText = 'background:white;border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.04);';
+  card.style.cssText = 'background:white;border:1.5px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.04);';
   const img = document.createElement('img');
   img.src = photo.url;
   img.style.cssText = 'width:100%;aspect-ratio:1;object-fit:cover;display:block;';
@@ -11153,7 +11153,7 @@ async function previewTechCleanup() {
       + '<div style="font-size:13px;color:#8B2035;">' + toKeep + ' techs with data will be kept</div>'
       + '</div>';
 
-    html += '<div style="max-height:200px;overflow-y:auto;border:1px solid var(--border);border-radius:10px;margin-bottom:12px;">';
+    html += '<div style="max-height:200px;overflow-y:auto;border:1.5px solid var(--border);border-radius:10px;margin-bottom:12px;">';
     toDelete.forEach(function(t) {
       html += '<div style="padding:8px 12px;border-bottom:1px solid var(--border);font-size:13px;display:flex;justify-content:space-between;align-items:center;">'
         + '<span style="font-weight:500;color:var(--charcoal);">' + esc(t.name || '(no name)') + '</span>'
@@ -14062,7 +14062,7 @@ async function tbDeleteService(id) {
 function tbRenderAvail() {
   const wrap = document.getElementById('tb-avail-list');
   if (!wrap) return;
-  const inp = 'padding:7px 8px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:white;color:var(--charcoal);';
+  const inp = 'padding:7px 8px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:white;color:var(--charcoal);';
   wrap.innerHTML = BK_DAYS.map(function(day, d) {
     const wins = _bkAvail.filter(function(a) { return a.day_of_week === d; });
     const chips = wins.length
@@ -14124,7 +14124,7 @@ function tbRenderTimeOff() {
   };
   wrap.innerHTML = _bkTimeOff.map(function(t) {
     const label = t.start_date === t.end_date ? fmt(t.start_date) : fmt(t.start_date) + ' - ' + fmt(t.end_date);
-    return '<span style="display:inline-flex;align-items:center;gap:6px;background:var(--cream);border:1px solid var(--border);color:var(--charcoal);font-size:13px;font-weight:600;border-radius:100px;padding:4px 10px;margin:2px 4px 2px 0;">' + label +
+    return '<span style="display:inline-flex;align-items:center;gap:6px;background:var(--cream);border:1.5px solid var(--border);color:var(--charcoal);font-size:13px;font-weight:600;border-radius:100px;padding:4px 10px;margin:2px 4px 2px 0;">' + label +
       '<span onclick="tbDeleteTimeOff(\'' + t.id + '\')" style="cursor:pointer;font-size:14px;line-height:1;color:var(--muted);">&times;</span></span>';
   }).join('');
 }
@@ -14229,7 +14229,7 @@ function tbRenderBlocked() {
     return;
   }
   wrap.innerHTML = _bkBlocked.map(function(b) {
-    return '<span style="display:inline-flex;align-items:center;gap:6px;background:var(--cream);border:1px solid var(--border);color:var(--charcoal);font-size:13px;font-weight:600;border-radius:100px;padding:4px 10px;margin:2px 4px 2px 0;">' + bkEsc(/^\d{10}$/.test(b.client_email || '') ? '(' + b.client_email.slice(0,3) + ') ' + b.client_email.slice(3,6) + '-' + b.client_email.slice(6) : b.client_email) +
+    return '<span style="display:inline-flex;align-items:center;gap:6px;background:var(--cream);border:1.5px solid var(--border);color:var(--charcoal);font-size:13px;font-weight:600;border-radius:100px;padding:4px 10px;margin:2px 4px 2px 0;">' + bkEsc(/^\d{10}$/.test(b.client_email || '') ? '(' + b.client_email.slice(0,3) + ') ' + b.client_email.slice(3,6) + '-' + b.client_email.slice(6) : b.client_email) +
       '<span onclick="tbDeleteBlocked(\'' + b.id + '\')" style="cursor:pointer;font-size:14px;line-height:1;color:var(--muted);">&times;</span></span>';
   }).join('');
 }
@@ -14407,7 +14407,7 @@ var _bkNotes = {};
 function tbNoteView(id) {
   var note = _bkNotes[id] || '';
   if (note) {
-    return '<div onclick="tbEditNote(\'' + id + '\')" style="cursor:pointer;background:var(--cream);border:1px dashed var(--border);border-radius:10px;padding:8px 11px;">' +
+    return '<div onclick="tbEditNote(\'' + id + '\')" style="cursor:pointer;background:var(--cream);border:1.5px dashed var(--border);border-radius:10px;padding:8px 11px;">' +
       '<div style="font-size:10px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--muted);margin-bottom:3px;">Your note &middot; only you see this</div>' +
       '<div style="font-size:13px;color:var(--charcoal);line-height:1.45;white-space:pre-wrap;">' + bkEsc(note) + '</div>' +
     '</div>';
@@ -14478,7 +14478,7 @@ function tbApptCard(b, buttons) {
         '<a href="sms:' + telClean + '" style="flex:1;text-align:center;padding:7px;border-radius:9px;border:1.5px solid var(--rose-mid);background:var(--rose-light);color:var(--rose-dark);font-size:13px;font-weight:700;text-decoration:none;">Text ' + bkEsc(b.client_phone) + '</a>' +
         '<a href="tel:' + telClean + '" style="flex:1;text-align:center;padding:7px;border-radius:9px;border:1.5px solid var(--border);background:white;color:var(--charcoal);font-size:13px;font-weight:700;text-decoration:none;">Call</a>' +
       '</div>' : '';
-  return '<div style="background:white;border:1px solid var(--border);border-radius:14px;padding:13px 14px;margin-bottom:8px;box-shadow:var(--shadow);">' +
+  return '<div style="background:white;border:1.5px solid var(--border);border-radius:14px;padding:13px 14px;margin-bottom:8px;box-shadow:var(--shadow);">' +
     '<div style="display:flex;align-items:center;gap:8px;">' +
       '<div style="flex:1;min-width:0;">' +
         '<div style="font-size:14px;font-weight:700;color:var(--charcoal);">' + bkFmtStamp(b.starts_at, tz) + '</div>' +
@@ -14555,7 +14555,7 @@ function tbRenderAppts() {
     html += _bkStanding.map(function(s) {
       const svc = (s.tech_services && s.tech_services.name) || 'Appointment';
       const when = bkFmtStamp(s.anchor_starts_at, _bkMyTech && _bkMyTech.booking_timezone);
-      return '<div style="background:white;border:1px solid var(--border);border-radius:14px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:8px;">' +
+      return '<div style="background:white;border:1.5px solid var(--border);border-radius:14px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:8px;">' +
         '<div style="flex:1;min-width:0;">' +
           '<div style="font-size:13.5px;font-weight:700;color:var(--charcoal);">' + bkEsc(s.client_name || s.client_email || 'Client') + ' &middot; every ' + (s.interval_weeks === 1 ? 'week' : s.interval_weeks + ' weeks') + '</div>' +
           '<div style="font-size:13px;color:var(--muted);margin-top:2px;">' + bkEsc(svc) + ' &middot; ' + when.replace(/,.*$/, '') + 's at ' + bkFmtSlot(s.anchor_starts_at, _bkMyTech && _bkMyTech.booking_timezone) + '</div>' +
@@ -14565,7 +14565,7 @@ function tbRenderAppts() {
     }).join('');
   }
   if (!html) {
-    html = '<div style="background:white;border:1px dashed var(--border);border-radius:14px;padding:18px;text-align:center;font-size:13px;color:var(--muted);">' +
+    html = '<div style="background:white;border:1.5px dashed var(--border);border-radius:14px;padding:18px;text-align:center;font-size:13px;color:var(--muted);">' +
       (_bkMyTech && _bkMyTech.booking_enabled
         ? 'No appointments yet. Share your profile so clients can book you.'
         : 'Turn on booking in Booking settings and your calendar starts here.') + '</div>';
@@ -14739,7 +14739,7 @@ async function tdRenderApptAlerts(t) {
       var svc = (next.tech_services && next.tech_services.name) || 'Appointment';
       var who = next.client_name || next.client_email || 'a client';
       html += '<div onclick="tbOpenBookings()" style="display:flex;align-items:center;gap:11px;padding:12px 14px;background:white;' +
-        'border:1px solid var(--border);border-radius:14px;cursor:pointer;box-shadow:var(--shadow);">' +
+        'border:1.5px solid var(--border);border-radius:14px;cursor:pointer;box-shadow:var(--shadow);">' +
         '<svg viewBox="0 0 24 24" style="width:17px;height:17px;stroke:var(--rose-dark);fill:none;stroke-width:1.9;stroke-linecap:round;flex-shrink:0;"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>' +
         '<div style="flex:1;min-width:0;">' +
           '<div style="font-size:11px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--muted);">' + (isToday ? 'Today' : 'Up next') + '</div>' +
@@ -15058,7 +15058,7 @@ async function bkStepServices() {
     '<div style="font-size:13px;color:var(--muted);margin-bottom:10px;">Pick a service</div>' +
     _bkFlow.svcs.map(function(s, i) {
       const meta = [bkDur(s.duration_minutes), bkPrice(s.price)].filter(Boolean).join(' · ');
-      return '<div onclick="bkPickService(' + i + ')" style="display:flex;align-items:center;gap:10px;padding:13px 14px;border:1px solid var(--border);border-radius:12px;margin-bottom:8px;cursor:pointer;background:white;">' +
+      return '<div onclick="bkPickService(' + i + ')" style="display:flex;align-items:center;gap:10px;padding:13px 14px;border:1.5px solid var(--border);border-radius:12px;margin-bottom:8px;cursor:pointer;background:white;">' +
         '<div style="flex:1;min-width:0;">' +
           '<div style="font-size:14px;font-weight:600;color:var(--charcoal);">' + bkEsc(s.name) + '</div>' +
           '<div style="font-size:13px;color:var(--muted);margin-top:1px;">' + meta + '</div>' +
@@ -15154,13 +15154,13 @@ function bkPickSlot(ts) {
   const s = _bkFlow.svc;
   const meta = [bkDur(s.duration_minutes), bkPrice(s.price)].filter(Boolean).join(' · ');
   bkBody(bkHeader('Confirm', "bkPickDay('" + _bkFlow.day + "')") +
-    '<div style="background:var(--cream);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:12px;">' +
+    '<div style="background:var(--cream);border:1.5px solid var(--border);border-radius:14px;padding:14px;margin-bottom:12px;">' +
       '<div style="font-size:15px;font-weight:700;color:var(--charcoal);">' + bkEsc(s.name) + '</div>' +
       '<div style="font-size:13px;color:var(--muted);margin-top:3px;">' + meta + '</div>' +
       '<div style="font-size:14px;font-weight:600;color:var(--rose-dark);margin-top:8px;">' + bkFmtStamp(_bkFlow.slot, _bkFlow.tz) + '</div>' +
     '</div>' +
     '<div class="input-group"><label>Anything they should know? (optional)</label>' +
-    '<textarea id="bk-note" rows="2" placeholder="Inspo, allergies, running late..." style="width:100%;padding:10px;border:1px solid var(--border);border-radius:10px;font-size:14px;font-family:inherit;box-sizing:border-box;resize:vertical;"></textarea></div>' +
+    '<textarea id="bk-note" rows="2" placeholder="Inspo, allergies, running late..." style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:inherit;box-sizing:border-box;resize:vertical;"></textarea></div>' +
     '<button class="btn btn-rose" id="bk-confirm-btn" onclick="bkConfirm()" style="margin-top:6px;">Request Appointment</button>');
 }
 
@@ -15605,7 +15605,7 @@ async function loadMyAppointments() {
     _maRows = r.ok ? await r.json() : [];
   } catch(e) { _maRows = []; }
   if (!_maRows.length) {
-    wrap.innerHTML = '<div style="background:white;border:1px dashed var(--border);border-radius:14px;padding:22px;text-align:center;font-size:13px;color:var(--muted);line-height:1.6;">Nothing booked yet.<br>Find a tech you love and tap <b>Book</b> on their profile.</div>';
+    wrap.innerHTML = '<div style="background:white;border:1.5px dashed var(--border);border-radius:14px;padding:22px;text-align:center;font-size:13px;color:var(--muted);line-height:1.6;">Nothing booked yet.<br>Find a tech you love and tap <b>Book</b> on their profile.</div>';
     return;
   }
   wrap.innerHTML = _maRows.map(function(b) {
@@ -15643,7 +15643,7 @@ async function loadMyAppointments() {
           '<a href="sms:' + telClean + '" style="flex:1;text-align:center;padding:7px;border-radius:9px;border:1.5px solid var(--rose-mid);background:var(--rose-light);color:var(--rose-dark);font-size:13px;font-weight:700;text-decoration:none;">Text ' + bkEsc(techName) + '</a>' +
           '<a href="tel:' + telClean + '" style="flex:1;text-align:center;padding:7px;border-radius:9px;border:1.5px solid var(--border);background:white;color:var(--charcoal);font-size:13px;font-weight:700;text-decoration:none;">Call</a>' +
         '</div>' : '';
-    return '<div style="background:white;border:1px solid var(--border);border-radius:14px;padding:13px 14px;margin-bottom:8px;box-shadow:var(--shadow);">' +
+    return '<div style="background:white;border:1.5px solid var(--border);border-radius:14px;padding:13px 14px;margin-bottom:8px;box-shadow:var(--shadow);">' +
       '<div style="display:flex;align-items:center;gap:10px;">' + avatar +
         '<div style="flex:1;min-width:0;">' +
           '<div style="font-size:14px;font-weight:700;color:var(--charcoal);">' + bkFmtStamp(b.starts_at, tz) + '</div>' +
@@ -19269,7 +19269,7 @@ function ueParseAddress(val) {
   if (parsed) {
     const chips = [street, city, state, zip].filter(Boolean);
     parsed.innerHTML = chips.map(function(c) {
-      return '<span style="font-size:13px;padding:3px 8px;border-radius:100px;background:var(--cream);border:1px solid var(--border);color:var(--charcoal);">' + c + '</span>';
+      return '<span style="font-size:13px;padding:3px 8px;border-radius:100px;background:var(--cream);border:1.5px solid var(--border);color:var(--charcoal);">' + c + '</span>';
     }).join('');
   }
 }
@@ -19335,7 +19335,7 @@ function ueRenderHoursGrid(savedHours) {
     const copyBtn = document.createElement('button');
     copyBtn.type = 'button';
     copyBtn.textContent = 'Copy to…';
-    copyBtn.style.cssText = 'font-size:13px;padding:3px 8px;border-radius:100px;border:1px solid var(--border);background:var(--cream);color:var(--muted);cursor:pointer;display:' + (isActive ? 'block' : 'none') + ';';
+    copyBtn.style.cssText = 'font-size:13px;padding:3px 8px;border-radius:100px;border:1.5px solid var(--border);background:var(--cream);color:var(--muted);cursor:pointer;display:' + (isActive ? 'block' : 'none') + ';';
     copyBtn.onclick = function() { ueShowCopyMenu(day.key); };
 
     topRow.appendChild(cb);
@@ -19452,7 +19452,7 @@ function ueShowCopyMenu(fromDay) {
   [['Weekdays','mon,tue,wed,thu,fri'],['Weekend','sat,sun'],['All','mon,tue,wed,thu,fri,sat,sun']].forEach(function(s) {
     const btn = document.createElement('button');
     btn.type = 'button'; btn.textContent = s[0];
-    btn.style.cssText = 'padding:4px 10px;border-radius:100px;border:1px solid var(--border);background:var(--cream);font-size:13px;cursor:pointer;';
+    btn.style.cssText = 'padding:4px 10px;border-radius:100px;border:1.5px solid var(--border);background:var(--cream);font-size:13px;cursor:pointer;';
     btn.onclick = function() {
       const keys = s[1].split(',');
       dayChecks.querySelectorAll('input[type=checkbox]').forEach(function(cb) {
@@ -21520,7 +21520,7 @@ function closeReleaseWizard() {
         <label style="font-size:11px;font-weight:600;letter-spacing:0.8px;color:var(--muted);display:block;margin-bottom:5px;">TELL US</label>
         <textarea id="fb-message" rows="5" placeholder="What happened, what you tried, and what you expected..." style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;resize:vertical;box-sizing:border-box;min-height:90px;"></textarea>
       </div>
-      <div id="fb-context" style="font-size:13px;color:var(--muted);line-height:1.5;padding:10px 12px;background:var(--cream);border-radius:10px;border:1px dashed var(--border);">
+      <div id="fb-context" style="font-size:13px;color:var(--muted);line-height:1.5;padding:10px 12px;background:var(--cream);border-radius:10px;border:1.5px dashed var(--border);">
         <div style="font-weight:600;letter-spacing:0.5px;margin-bottom:4px;text-transform:uppercase;font-size:10px;">We'll auto-attach</div>
         <div id="fb-context-body">Your email, current screen, device info, and a recent console snapshot so we don't have to ask.</div>
       </div>
