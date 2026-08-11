@@ -1256,9 +1256,13 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
            art top/bottom on short screens and cut off the MNC mark inside
            the image. The art's own ivory matches the splash bg, so contain
            letterboxes invisibly. -->
+      <!-- translateX(24%): the lady's face/lips sit at ~26% from the left
+           in the square art (measured), so unshifted she reads off-center.
+           The art's own ivory matches the splash bg, so the gap the shift
+           leaves is invisible. Anne, 2026-08-03. -->
       <img src="images/lady-card.webp?v=3" class="mnc-logo"
            alt="Line-art woman in a wide black hat, mauve nails resting on her cheek"
-           style="width:calc(100% + 4rem);max-width:430px;max-height:54vh;object-fit:contain;display:block;margin:4px -2rem 0;-webkit-mask-image:linear-gradient(180deg,transparent 0,black 34px,black calc(100% - 26px),transparent 100%);mask-image:linear-gradient(180deg,transparent 0,black 34px,black calc(100% - 26px),transparent 100%);"/>
+           style="width:calc(100% + 4rem);max-width:430px;max-height:54vh;object-fit:contain;display:block;margin:4px -2rem 0;transform:translateX(24%);-webkit-mask-image:linear-gradient(180deg,transparent 0,black 34px,black calc(100% - 26px),transparent 100%);mask-image:linear-gradient(180deg,transparent 0,black 34px,black calc(100% - 26px),transparent 100%);"/>
       <div class="etched-caps" style="font-size:13.5px;letter-spacing:5px;color:#141317;font-weight:600;z-index:2;margin-left:5px;">BEAUTY. CONNECTED.</div>
       <div style="font-size:13px;color:#6B5F63;z-index:2;margin-top:7px;text-align:center;">Free booking for nail techs. Always.</div>
       <!-- Shown via JS (setSplashWelcoming) only when restoring a persisted
@@ -1645,8 +1649,12 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
            since the bottom-nav Sign Out slot was repurposed for My
            Gallery. Non-techs still have Sign Out in their nav and don't
            see this icon. 2026-04-22 per Anne. -->
-      <button id="home-signout-btn" onclick="doSignOut()" title="Sign Out" aria-label="Sign Out" style="display:none;background:rgba(255,255,255,0.14);border:1px solid rgba(255,255,255,0.22);width:34px;height:34px;border-radius:50%;align-items:center;justify-content:center;cursor:pointer;padding:0;">
-        <svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:#F7F2F2;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      <!-- Was white-on-white ghost styling from the dark-header era —
+           invisible since the header went white (Anne, 2026-08-03).
+           Matches .back-btn now: white pill, hairline border, charcoal
+           icon. -->
+      <button id="home-signout-btn" onclick="doSignOut()" title="Sign Out" aria-label="Sign Out" style="display:none;background:white;border:1.5px solid var(--border);box-shadow:0 1px 6px rgba(20,19,23,0.14);width:34px;height:34px;border-radius:50%;align-items:center;justify-content:center;cursor:pointer;padding:0;">
+        <svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:var(--charcoal);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
       </button>
       <div class="avatar" onclick="navToProfile()" id="home-avatar-btn"><img src="images/mncLogo-round-256.webp?v=2" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" draggable="false"/></div>
     </div>
@@ -5129,8 +5137,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 511,         /* __APP_BUILD_ANDROID__ */
-  ios:     316,          /* __APP_BUILD_IOS__     */
+  android: 512,         /* __APP_BUILD_ANDROID__ */
+  ios:     317,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -5632,6 +5640,8 @@ async function subscribeToPush(userId) {
       return null;
     }
 
+    window._mncHasPushSub = true;
+    try { updateSetupChecklist(); } catch(_) {}
     if (minted) showToast('Notifications are on 💅');
     if (window.__MNC_DEV__) console.log('Push subscription saved for user:', userId);
     return subscription;
@@ -5983,6 +5993,8 @@ function wireCapacitorPushListeners(PushNotifications) {
     if (!saveRes.ok) {
       showToast('Notification setup hit a snag (native save: ' + saveRes.status + ')', 5000);
     } else {
+      window._mncHasPushSub = true;
+      try { updateSetupChecklist(); } catch(_) {}
       showToast('Notifications are on 💅');
     }
   });
@@ -6356,6 +6368,7 @@ function doSignOut() {
   _favTechs = null;
   _inspoPhotos = null;
   window._mncCurrentRole = null;
+  window._mncHasPushSub = undefined; // next account re-checks the server
   // Per-user device flags (storage audit 2026-08-03): none are namespaced
   // by user, so on a shared device account A's state leaked into account
   // B — "push done" claimed for a user with no subscription, A's booking
@@ -9329,6 +9342,15 @@ function openTechEdit(tech) {
   document.getElementById('te-name').value    = edit.name;
   document.getElementById('te-shop').value    = edit.shop;
   document.getElementById('te-email').value   = edit.email;
+  // "Remove gathering the email at all" (Anne, 2026-08-03): phone-identity
+  // users never get asked for one. Email-identity accounts still see
+  // theirs (it's their login and the save guard requires it).
+  try {
+    var _teEmailWrap = document.getElementById('te-email').parentElement;
+    var _isEmailIdentity = (currentUserEmail || '').indexOf('@') > 0;
+    var _isAdminHere = (window._mncCurrentRole === 'admin');
+    _teEmailWrap.style.display = (_isEmailIdentity || _isAdminHere || edit.email) ? '' : 'none';
+  } catch(_) {}
   document.getElementById('te-phone').value   = edit.phone || '';
   formatPhone(document.getElementById('te-phone')); // format digits-only DB value for display
   document.getElementById('te-address').value = edit.address;
@@ -14913,11 +14935,10 @@ function paRenderProfile() {
     '<div class="input-group"><label>ZIP code</label>' +
     '<input id="pa-zip" type="text" inputmode="numeric" autocomplete="postal-code" maxlength="10" placeholder="90210" value="' + esc(_paFlow.zip || '') + '" style="width:100%;"/>' +
     '<div style="font-size:13px;color:var(--muted);margin-top:4px;">So we can show you techs (or clients) nearby.</div></div>' +
-    (isTech
-      ? '<div class="input-group"><label>Email <span style="color:var(--muted);font-weight:400;">(optional)</span></label>' +
-        '<input id="pa-email" type="email" autocomplete="email" placeholder="you@email.com" value="' + esc(_paFlow.email || '') + '" style="width:100%;"/>' +
-        '<div style="font-size:13px;color:var(--muted);margin-top:4px;">For receipts and getting back into your account. We never require it.</div></div>'
-      : '') +
+    // Email field removed entirely (Anne, 2026-08-03): phone IS the
+    // identity; email was optional noise at the exact moment we want
+    // signup friction lowest. Techs can add one later if a feature ever
+    // needs it.
     // Liability acknowledgment (Anne, 2026-08-03): the email-era signup
     // screens required this, but the phone flow — the door every real user
     // takes — skipped it entirely. Same copy and version tags
@@ -14942,7 +14963,6 @@ function paSetRole(role) {
   _paFlow.role = role;
   var n = document.getElementById('pa-name'); if (n) _paFlow.name = n.value;
   var z = document.getElementById('pa-zip'); if (z) _paFlow.zip = z.value;
-  var em = document.getElementById('pa-email'); if (em) _paFlow.email = em.value;
   var lb = document.getElementById('pa-liability'); if (lb) _paFlow.liab = lb.checked;
   paRenderProfile();
 }
@@ -14950,7 +14970,6 @@ function paSetRole(role) {
 async function paCreateProfile() {
   var name = ((document.getElementById('pa-name') || {}).value || '').trim();
   var zip  = ((document.getElementById('pa-zip') || {}).value || '').trim();
-  var email = ((document.getElementById('pa-email') || {}).value || '').trim();
   if (!name) { paErr('Please enter your name.'); return; }
   if (!zip || zip.length < 3) { paErr('Please enter your ZIP so we can set up your area.'); return; }
   var liab = document.getElementById('pa-liability');
@@ -14965,7 +14984,7 @@ async function paCreateProfile() {
                  'Authorization': 'Bearer ' + (window._mncAccessToken || SUPABASE_ANON_KEY) },
       body: JSON.stringify({
         p_phone: _paFlow.e164, p_name: name, p_role: _paFlow.role,
-        p_email: (_paFlow.role === 'tech' && email) ? email : null,
+        p_email: null,
         p_zip: zip,
         // Versioned acceptance record; the RPC already takes these
         // (default null) and stamps them onto users/techs.
@@ -16047,10 +16066,20 @@ function _bkCallsOnlyPref() {
 
 function _setupStepsState() {
   var bk = window._bkSetup || {};
+  // Server truth first (Anne, 2026-08-03: the checkbox showed pre-checked
+  // for a brand-new account — device permission + a leftover local flag
+  // from the previous account, neither of which means THIS account can be
+  // pushed to). When the subscription lookup has answered, it decides;
+  // device state is only the pre-fetch fallback.
   var pushDone = false;
   try {
-    pushDone = (window.Notification && Notification.permission === 'granted') ||
-               localStorage.getItem('mnc_push_done') === '1';
+    if (window._mncHasPushSub !== undefined) {
+      pushDone = !!window._mncHasPushSub;
+    } else {
+      pushDone = (window.Notification && Notification.permission === 'granted') ||
+                 localStorage.getItem('mnc_push_done') === '1';
+      _refreshPushSubState(); // answers async, then re-renders the checklist
+    }
   } catch(_) {}
   return [
     { label: 'Add your name and photo', sub: 'This is what clients see first \u00b7 1 min',
@@ -16062,6 +16091,27 @@ function _setupStepsState() {
     { label: 'Say yes to notifications', sub: 'So bookings ping your phone \u00b7 10 sec',
       done: pushDone, action: 'setupEnablePush()' }
   ];
+}
+
+// Does THIS account have a live push subscription row? Sets
+// window._mncHasPushSub and re-renders the checklist when the answer
+// lands. One in-flight fetch at a time.
+async function _refreshPushSubState() {
+  if (window._mncPushSubCheckInflight || !currentUserEmail) return;
+  window._mncPushSubCheckInflight = true;
+  try {
+    var key = pushKey(currentUserEmail);
+    if (!key) return;
+    var r = await fetch(SUPABASE_URL + '/rest/v1/push_subscriptions?user_id=eq.' + encodeURIComponent(key) + '&select=user_id&limit=1',
+      { headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + (window._mncAccessToken || SUPABASE_ANON_KEY) } });
+    if (r.ok) {
+      var rows = await r.json();
+      window._mncHasPushSub = !!(rows && rows.length);
+      try { updateSetupChecklist(); } catch(_) {}
+    }
+  } catch(_) {} finally {
+    window._mncPushSubCheckInflight = false;
+  }
 }
 
 function updateSetupChecklist() {
