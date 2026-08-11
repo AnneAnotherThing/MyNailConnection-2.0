@@ -96,8 +96,10 @@ async function sendFcm(
           token: deviceToken,
           notification: { title, body },
           data: { url, tag },
-          android: { notification: { tag } },
-          apns: { headers: { 'apns-collapse-id': tag.slice(0, 63) } },
+          // priority HIGH: bookings and confirmations must wake a dozing
+          // phone overnight, not wait for the next maintenance window.
+          android: { priority: 'HIGH', notification: { tag } },
+          apns: { headers: { 'apns-collapse-id': tag.slice(0, 63), 'apns-priority': '10' } },
         },
       }),
     }

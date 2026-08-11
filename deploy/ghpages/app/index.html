@@ -5137,8 +5137,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 512,         /* __APP_BUILD_ANDROID__ */
-  ios:     317,          /* __APP_BUILD_IOS__     */
+  android: 513,         /* __APP_BUILD_ANDROID__ */
+  ios:     318,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -15747,8 +15747,12 @@ function styleNavForRole() {
   // Punch 09: with Sign Out off the nav, the header icon serves every
   // signed-in role, not just techs. (Clients also have the Sign Out
   // button on their profile screen.)
+  // Home header sign-out icon retired (Anne, 2026-08-03: "we don't need
+  // 2, keep just one") — it was invisible white-on-white for weeks, and
+  // the moment it became visible it duplicated the profile-screen Sign
+  // Out. One door: profile/portal.
   var signoutBtn = document.getElementById('home-signout-btn');
-  if (signoutBtn) signoutBtn.style.display = currentUserEmail ? 'flex' : 'none';
+  if (signoutBtn) signoutBtn.style.display = 'none';
 }
 
 // ── Tech Dashboard ────────────────────────────────────────────────────────────
