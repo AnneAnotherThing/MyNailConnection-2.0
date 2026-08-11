@@ -2036,6 +2036,21 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
   </div>
 
   <!-- Sticky footer, contact buttons rendered dynamically -->
+  <!-- Get-the-app banner (2026-08-11, Anne: "we don't want them on the PWA
+       if we can help it"). Shown ONLY to WEB visitors who arrived through a
+       shared profile link (?tech=...) — natives never see it (they already
+       have the app, and the stores reject cross-links). Filled + displayed
+       by openTechDetail() when _mncSharedArrival is set. The Play link
+       carries an install-referrer so Android installs attribute to
+       profile shares in Play Console; both taps log to marketing_hits. -->
+  <div id="td-get-app" style="display:none;margin:0 16px 12px;padding:13px 14px;background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);border-radius:14px;color:white;box-shadow:var(--shadow);">
+    <div style="font-size:13.5px;font-weight:700;">Keep <span id="td-get-app-name">your tech</span> one tap away &mdash; get the app</div>
+    <div style="font-size:12.5px;opacity:0.85;margin-top:2px;">Book faster, get reminders, and never lose this page.</div>
+    <div style="display:flex;gap:8px;margin-top:10px;">
+      <a id="td-get-app-ios" target="_blank" rel="noopener" onclick="trackStoreTap('ios')" style="flex:1;text-align:center;padding:9px;border-radius:10px;background:white;color:var(--charcoal);font-size:13px;font-weight:700;text-decoration:none;">App&nbsp;Store</a>
+      <a id="td-get-app-android" target="_blank" rel="noopener" onclick="trackStoreTap('android')" style="flex:1;text-align:center;padding:9px;border-radius:10px;background:white;color:var(--charcoal);font-size:13px;font-weight:700;text-decoration:none;">Google&nbsp;Play</a>
+    </div>
+  </div>
   <div style="position:sticky;bottom:0;background:white;border-top:1px solid var(--border);padding:12px 20px 28px;" id="td-contact-footer">
   </div>
   <div class="bottom-nav">
@@ -2265,6 +2280,11 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
           <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
         </svg>
         See What Clients See
+      </button>
+      <button type="button" onclick="shareMyProfile()"
+        style="width:100%;margin-top:10px;padding:14px 18px;border-radius:14px;border:none;background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);color:white;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 3px 12px rgba(125,100,102,0.3);">
+        <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+        Share My Profile
       </button>
     </div>
 
@@ -4562,7 +4582,7 @@ const TUTORIALS = {
     {
       icon: '<svg viewBox="0 0 24 24" style="width:60px;height:60px;stroke:var(--rose);fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>',
       title: 'Here\u2019s what clients see.',
-      body: '<p style="margin:0 0 14px;">Your profile shows your gallery, your bio, and the ways to reach you that <b>you</b> choose \u2014 <b>Book</b>, <b>Call</b>, <b>Text</b>, or your own booking link. When a client taps Book, they pick a service, a day, and a time. That\u2019s it.</p><p style="margin:0;">Share your profile link anywhere, your bio, your stories, a QR at your station. It\u2019s your booking page now.</p>'
+      body: '<p style="margin:0 0 14px;">Your profile shows your gallery, your bio, and the ways to reach you that <b>you</b> choose \u2014 <b>Book</b>, <b>Call</b>, <b>Text</b>, or your own booking link. When a client taps Book, they pick a service, a day, and a time. That\u2019s it.</p><p style="margin:0;">Tap <b>Share My Profile</b> on your portal to send your link anywhere \u2014 your bio, your stories, a QR at your station. It\u2019s your booking page now.</p>'
     },
   ],
 
@@ -5200,8 +5220,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 524,         /* __APP_BUILD_ANDROID__ */
-  ios:     329,          /* __APP_BUILD_IOS__     */
+  android: 525,         /* __APP_BUILD_ANDROID__ */
+  ios:     330,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -8856,6 +8876,26 @@ function openTechDetail(tech) {
   // function hides the row when there's nothing above threshold, so the
   // profile still renders cleanly for brand-new techs with no data.
   renderTechPopularity(tech);
+  // Get-the-app banner: shared-link WEB arrivals only.
+  try {
+    var _gab = document.getElementById('td-get-app');
+    if (_gab) {
+      var _gabNative = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+      if (window._mncSharedArrival && !_gabNative) {
+        var _gn = document.getElementById('td-get-app-name');
+        if (_gn) _gn.textContent = ((tech.name || '').trim().split(/\s+/)[0]) || 'your tech';
+        var _ai = document.getElementById('td-get-app-ios');
+        if (_ai) _ai.href = 'https://apps.apple.com/app/id6764125663';
+        var _aa = document.getElementById('td-get-app-android');
+        if (_aa) _aa.href = 'https://play.google.com/store/apps/details?id=com.mynailconnection.app&referrer=' +
+          encodeURIComponent('utm_source=profile_share&utm_medium=deeplink&utm_campaign=' + (tech.id || ''));
+        window._mncGetAppTech = tech.id || '';
+        _gab.style.display = 'block';
+      } else {
+        _gab.style.display = 'none';
+      }
+    }
+  } catch(_) {}
   show('tech-detail');
 }
 
@@ -18035,6 +18075,9 @@ document.addEventListener('DOMContentLoaded', async function() {
   // Defers slightly so the modal renders on top of whatever landed screen
   // the session restore chose, not on top of the splash mid-transition.
   setTimeout(function() { try { maybeShowStripeWelcome(); } catch(_) {} }, 400);
+  // Shared profile link (?tech=<id>): open that profile over whatever
+  // screen the boot chose (splash for guests, home for signed-in).
+  setTimeout(function() { try { maybeOpenSharedProfile(); } catch(_) {} }, 450);
 
   updateGreeting();
   var techEl = document.getElementById('stat-techs');
@@ -20303,6 +20346,105 @@ function _stripeWelcomeApplyVariant(variant) {
   var btn = g('sw-primary-btn');
   if (btn) btn.dataset.action = v.primaryAction;
   return true;
+}
+
+// ── Shared profile deep link (2026-08-11, Anne) ─────────────────────────────
+// mynailconnection.com/app/?tech=<id> opens that tech's profile directly,
+// signed in or not (guest browsing already works; sign-in only gates the
+// actual booking). This is the link behind "Share My Profile" on the tech
+// portal. Arrivals are recorded by the marketing tracker via the link's
+// src/utm params; _mncSharedArrival turns on the get-the-app banner on
+// tech-detail for web visitors.
+async function maybeOpenSharedProfile() {
+  var techId = null;
+  try {
+    var params = new URLSearchParams(window.location.search);
+    techId = params.get('tech');
+    if (!techId) return;
+    // Strip the param so refresh/back doesn't retrigger; keep other params.
+    params.delete('tech');
+    var newQs = params.toString();
+    try { window.history.replaceState({}, '', window.location.pathname + (newQs ? '?' + newQs : '') + window.location.hash); } catch(_) {}
+  } catch(_) { return; }
+  try {
+    if (!ALL_TECHS.length) { try { await loadTechsFromSupabase(); } catch(_) {} }
+    var t = ALL_TECHS.find(function(x) { return String(x.id) === String(techId); });
+    if (!t) {
+      // Not in the browse cache (new tech, filtered, cache miss) — fetch solo.
+      try {
+        var r = await fetch(SUPABASE_URL + '/rest/v1/techs?id=eq.' + encodeURIComponent(techId) + '&select=*', {
+          headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + (window._mncAccessToken || SUPABASE_ANON_KEY) }
+        });
+        var rows = r.ok ? await r.json() : [];
+        if (rows[0]) t = _mapTechRow(rows[0]);
+      } catch(_) {}
+    }
+    if (!t) return;
+    window._mncSharedArrival = true;
+    if (!currentUserEmail) { try { enterGuest(); } catch(_) {} }
+    openTechDetail(t);
+  } catch(e) { console.warn('maybeOpenSharedProfile', e); }
+}
+
+// Store-tap tracking (2026-08-11): each App Store / Google Play tap from the
+// get-the-app banner writes a marketing_hits row (utm_medium =
+// store_tap_<platform>, utm_campaign = the shared tech's id) so stats can
+// count taps per platform and per sharing tech. Android installs also carry
+// the Play install-referrer for real install attribution in Play Console;
+// iOS install attribution needs Apple Search Ads wiring later.
+function trackStoreTap(platform) {
+  try {
+    fetch(SUPABASE_URL + '/rest/v1/marketing_hits', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY,
+                 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY, 'Prefer': 'return=minimal' },
+      body: JSON.stringify({
+        session_id: (function() { try { return localStorage.getItem('mnc_anon_sid') || 'anon'; } catch(_) { return 'anon'; } })(),
+        page: 'app',
+        device_type: /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent || '') ? 'mobile' : 'desktop',
+        entry_channel: 'campaign',
+        user_agent: String(navigator.userAgent || '').slice(0, 500),
+        utm_source: 'profile_share',
+        utm_medium: 'store_tap_' + platform,
+        utm_campaign: String(window._mncGetAppTech || '')
+      }),
+      keepalive: true
+    }).catch(function() {});
+  } catch(_) {}
+}
+
+// "Share My Profile" (2026-08-11): the button that makes the onboarding
+// promise true. OS share sheet with the tech's real deep link; clipboard
+// fallback, same pattern as shareApp(). The src/utm params make arrivals
+// countable in marketing_hits.
+async function shareMyProfile() {
+  if (!currentUserEmail) { showToast('Please sign in first'); return; }
+  var id = (window._bkSetup && window._bkSetup.id) || (currentEditTech && currentEditTech.id) || null;
+  if (!id) {
+    try {
+      var r = await fetch(SUPABASE_URL + '/rest/v1/techs?or=(email.eq.' + encodeURIComponent(currentUserEmail) + ',phone.eq.' + encodeURIComponent(currentUserEmail) + ')&select=id', {
+        headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + (window._mncAccessToken || SUPABASE_ANON_KEY) }
+      });
+      var rows = r.ok ? await r.json() : [];
+      if (rows[0]) id = rows[0].id;
+    } catch(_) {}
+  }
+  if (!id) { showToast('Finish your profile first, then share it'); return; }
+  var url = 'https://mynailconnection.com/app/?tech=' + encodeURIComponent(id) + '&src=profile_share&utm_medium=share';
+  var data = { title: 'Book me on My Nail Connection', text: 'My work, my openings, and my book \u2014 all right here \ud83d\udc85', url: url };
+  try {
+    if (navigator.share) { await navigator.share(data); return; }
+  } catch(e) {
+    if (e && e.name === 'AbortError') return;
+  }
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(url);
+      showToast('Your profile link is copied \u2014 paste it anywhere!');
+      return;
+    }
+  } catch(_) {}
+  showToast('Your link: ' + url);
 }
 
 function maybeShowStripeWelcome() {
