@@ -2503,8 +2503,12 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
           <input id="tb-ma-phone" type="tel" placeholder="Phone (optional, for one-tap text)" oninput="formatPhone(this)" maxlength="17" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;box-sizing:border-box;"/>
           <select id="tb-ma-svc" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;box-sizing:border-box;"></select>
           <div style="display:flex;gap:8px;">
-            <input id="tb-ma-date" type="date" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;box-sizing:border-box;flex:1;"/>
-            <input id="tb-ma-time" type="time" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;box-sizing:border-box;flex:1;"/>
+            <input id="tb-ma-date" type="date" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;box-sizing:border-box;flex:1;accent-color:var(--rose);"/>
+            <!-- Round times only (Anne 2026-08-11): a select instead of
+                 input type=time — the native Android clock dialog came up
+                 system-green and un-themeable, and freeform minutes weren't
+                 wanted anyway. Populated by tbToggleManualAdd(). -->
+            <select id="tb-ma-time" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;box-sizing:border-box;flex:1;"></select>
           </div>
           <textarea id="tb-ma-note" rows="2" placeholder="Private note (optional — only you see it)" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;box-sizing:border-box;resize:vertical;"></textarea>
         </div>
@@ -5196,8 +5200,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 523,         /* __APP_BUILD_ANDROID__ */
-  ios:     328,          /* __APP_BUILD_IOS__     */
+  android: 524,         /* __APP_BUILD_ANDROID__ */
+  ios:     329,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -14320,6 +14324,19 @@ function tbToggleManualAdd() {
   }
   var d = document.getElementById('tb-ma-date');
   if (d && !d.value) { try { d.value = new Date().toISOString().slice(0, 10); } catch(_) {} }
+  // Round times only: half-hour steps, 5:00 AM – 10:00 PM. Built once.
+  var t = document.getElementById('tb-ma-time');
+  if (t && !t.options.length) {
+    var topts = '<option value="">Time…</option>';
+    for (var h = 5; h <= 22; h++) {
+      ['00', '30'].forEach(function(m) {
+        if (h === 22 && m === '30') return;
+        var v = (h < 10 ? '0' : '') + h + ':' + m;
+        topts += '<option value="' + v + '">' + bkFmtTime(v) + '</option>';
+      });
+    }
+    t.innerHTML = topts;
+  }
   f.style.display = 'block';
   var n = document.getElementById('tb-ma-name');
   if (n) { try { n.focus(); } catch(_) {} }
