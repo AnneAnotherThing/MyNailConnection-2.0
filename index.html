@@ -5127,8 +5127,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 509,         /* __APP_BUILD_ANDROID__ */
-  ios:     314,          /* __APP_BUILD_IOS__     */
+  android: 510,         /* __APP_BUILD_ANDROID__ */
+  ios:     315,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -5459,7 +5459,12 @@ const sb = {
         return { data: res.ok ? await res.json() : [], error: res.ok ? null : 'fetch error' };
       },
       async upsert(data, opts = {}) {
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
+        // on_conflict names the unique constraint merge-duplicates resolves
+        // on. Without it PostgREST merges on the PK only, so re-saving a
+        // push subscription whose endpoint already existed 409'd instead
+        // of updating (Anne's 'native save 409', 2026-08-03).
+        const q = opts.onConflict ? '?on_conflict=' + encodeURIComponent(opts.onConflict) : '';
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}${q}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -5618,7 +5623,7 @@ async function subscribeToPush(userId) {
       p256dh: btoa(String.fromCharCode(...new Uint8Array(subscription.getKey('p256dh')))),
       auth: btoa(String.fromCharCode(...new Uint8Array(subscription.getKey('auth')))),
       updated_at: new Date().toISOString()
-    });
+    }, { onConflict: 'endpoint' });
     if (saved && saved.error) {
       console.warn('push_subscriptions save failed:', saved.error);
       showToast('Notification setup hit a snag (save: ' + (saved.error.code || saved.error.message || 'error') + ')', 5000);
@@ -5953,7 +5958,11 @@ function wireCapacitorPushListeners(PushNotifications) {
     // signed-in user's token, not the anon key — RLS is `to authenticated`
     // and silently rejected anon writes for months on the web path (fixed
     // 2026-08-03); don't repeat that here.
-    const saveRes = await fetch(`${SUPABASE_URL}/rest/v1/push_subscriptions`, {
+    // on_conflict=endpoint: without it, re-saving the SAME device token
+    // (reinstalls often get the same one back from FCM) 409'd instead of
+    // merging — Anne's 'native save 409', 2026-08-03. Merging also rebinds
+    // user_id when a different account signs in on this device.
+    const saveRes = await fetch(`${SUPABASE_URL}/rest/v1/push_subscriptions?on_conflict=endpoint`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
