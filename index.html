@@ -1433,7 +1433,9 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
         </label>
       </div>
       <button class="btn btn-rose" style="margin-top:12px;" onclick="completeSignup()">Create My Account</button>
-      <div style="text-align:center;margin-top:14px;font-size:13px;color:var(--muted);line-height:1.6;">By joining, you agree to our <span style="color:var(--rose);cursor:pointer;">Terms of Service</span> and <span style="color:var(--rose);cursor:pointer;">Privacy Policy</span>. We take care of our community. No spam, ever.</div>
+      <!-- Spans had cursor:pointer but no onclick — dead links since day
+           one. Wired to openLegal (audit follow-up 2026-08-03). -->
+      <div style="text-align:center;margin-top:14px;font-size:13px;color:var(--muted);line-height:1.6;">By joining, you agree to our <span onclick="openLegal('terms','Terms of Use')" style="color:var(--rose);cursor:pointer;text-decoration:underline;">Terms of Service</span> and <span onclick="openLegal('privacy','Privacy Policy')" style="color:var(--rose);cursor:pointer;text-decoration:underline;">Privacy Policy</span>. We take care of our community. No spam, ever.</div>
     </div>
     <div style="text-align:center;margin-top:16px;">
       <span style="font-size:13px;color:var(--muted);cursor:pointer;" id="location-back-btn" onclick="show('signup-role')"><svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:var(--muted);fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;display:inline-block;vertical-align:middle;margin-right:4px;"><path d="M15 18l-6-6 6-6"/></svg> Back</span>
@@ -5127,8 +5129,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 510,         /* __APP_BUILD_ANDROID__ */
-  ios:     315,          /* __APP_BUILD_IOS__     */
+  android: 511,         /* __APP_BUILD_ANDROID__ */
+  ios:     316,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -14916,8 +14918,24 @@ function paRenderProfile() {
         '<input id="pa-email" type="email" autocomplete="email" placeholder="you@email.com" value="' + esc(_paFlow.email || '') + '" style="width:100%;"/>' +
         '<div style="font-size:13px;color:var(--muted);margin-top:4px;">For receipts and getting back into your account. We never require it.</div></div>'
       : '') +
-    '<div id="pa-err" style="display:none;color:#B23;font-size:13px;margin:2px 0 8px;"></div>' +
-    '<button class="btn btn-rose" id="pa-create-btn" onclick="paCreateProfile()" style="margin-top:6px;">Create my account</button>';
+    // Liability acknowledgment (Anne, 2026-08-03): the email-era signup
+    // screens required this, but the phone flow — the door every real user
+    // takes — skipped it entirely. Same copy and version tags
+    // (client-v1 / tech-v1) as the original screens; acceptance is stored
+    // versioned + timestamped on the account via the RPC.
+    '<div style="margin-top:14px;padding:14px 14px;background:var(--rose-light);border:1px solid rgba(224,168,152,0.3);border-radius:12px;display:flex;align-items:flex-start;gap:10px;">' +
+      '<input id="pa-liability" type="checkbox" ' + (_paFlow.liab ? 'checked ' : '') + 'style="flex-shrink:0;width:18px;height:18px;margin:2px 0 0;accent-color:var(--rose);cursor:pointer;"/>' +
+      '<label for="pa-liability" style="margin:0;cursor:pointer;flex:1;font-size:13px;color:#4A3C36;line-height:1.55;">' +
+      (isTech
+        ? 'I confirm I am properly <strong>licensed and insured</strong> to practice in my jurisdiction, I will maintain that status, and I understand My Nail Connection <strong>does not verify</strong> or vouch for my credentials. I am solely responsible for the legality and quality of the services I offer.'
+        : 'I understand My Nail Connection is a <strong>discovery platform</strong> that connects me with independent nail technicians. MNC <strong>does not verify</strong> licensing, insurance, sanitation practices, or service quality, and appointments, cancellations, and payments are between me and the tech. Booking with any tech is my choice, and any concerns should be directed to the tech or to my local licensing board.') +
+      '</label>' +
+    '</div>' +
+    '<div id="pa-err" style="display:none;color:#B23;font-size:13px;margin:8px 0 0;"></div>' +
+    '<button class="btn btn-rose" id="pa-create-btn" onclick="paCreateProfile()" style="margin-top:12px;">Create my account</button>' +
+    '<div style="text-align:center;margin-top:12px;font-size:13px;color:var(--muted);line-height:1.6;">By creating an account you agree to our ' +
+      '<a href="https://mynailconnection.com/terms.html" onclick="openLegal(\'terms\',\'Terms of Use\');return false;" style="color:var(--rose);text-decoration:underline;cursor:pointer;">Terms of Use</a> and ' +
+      '<a href="https://mynailconnection.com/privacy.html" onclick="openLegal(\'privacy\',\'Privacy Policy\');return false;" style="color:var(--rose);text-decoration:underline;cursor:pointer;">Privacy Policy</a>.</div>';
 }
 
 function paSetRole(role) {
@@ -14925,6 +14943,7 @@ function paSetRole(role) {
   var n = document.getElementById('pa-name'); if (n) _paFlow.name = n.value;
   var z = document.getElementById('pa-zip'); if (z) _paFlow.zip = z.value;
   var em = document.getElementById('pa-email'); if (em) _paFlow.email = em.value;
+  var lb = document.getElementById('pa-liability'); if (lb) _paFlow.liab = lb.checked;
   paRenderProfile();
 }
 
@@ -14934,6 +14953,8 @@ async function paCreateProfile() {
   var email = ((document.getElementById('pa-email') || {}).value || '').trim();
   if (!name) { paErr('Please enter your name.'); return; }
   if (!zip || zip.length < 3) { paErr('Please enter your ZIP so we can set up your area.'); return; }
+  var liab = document.getElementById('pa-liability');
+  if (!liab || !liab.checked) { paErr('Please read and check the acknowledgment box to continue.'); return; }
   var parts = name.split(/\s+/);
   var btn = document.getElementById('pa-create-btn');
   if (btn) { btn.disabled = true; btn.textContent = 'Creating your account...'; }
@@ -14945,7 +14966,11 @@ async function paCreateProfile() {
       body: JSON.stringify({
         p_phone: _paFlow.e164, p_name: name, p_role: _paFlow.role,
         p_email: (_paFlow.role === 'tech' && email) ? email : null,
-        p_zip: zip
+        p_zip: zip,
+        // Versioned acceptance record; the RPC already takes these
+        // (default null) and stamps them onto users/techs.
+        p_liability_version: _paFlow.role === 'tech' ? 'tech-v1' : 'client-v1',
+        p_liability_accepted_at: new Date().toISOString()
       })
     });
     var rbody = null; try { rbody = await r.json(); } catch(_){}
