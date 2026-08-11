@@ -561,13 +561,13 @@ button,input,select,textarea{font-family:'DM Sans','Helvetica Neue',Helvetica,Ar
 .nav-item:hover{background:rgba(224,168,152,0.10);}
 .nav-item.active{background:linear-gradient(160deg,#F7E2E3 0%,#EFCFD2 100%);box-shadow:0 1px 3px rgba(20,19,23,0.12),0 0 0 1px rgba(162,99,108,0.16);}
 .nav-icon{width:22px;height:22px;display:flex;align-items:center;justify-content:center;}
-.nav-icon svg{width:22px;height:22px;stroke:#9A7C82;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;transition:stroke 0.2s;}
+.nav-icon svg{width:22px;height:22px;stroke:#6E565D;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;transition:stroke 0.2s;} /* contrast pass 2026-08-11: was #9A7C82, too faint on the frosted white bar */
 .nav-item.active .nav-icon svg{stroke:var(--rose-dark);stroke-width:2.1;}
 .icon-glass{width:48px;height:48px;border-radius:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:transparent!important;}
 .icon-glass svg{width:26px;height:26px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;}
 .icon-sm svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;}
 .icon-sm{display:inline-flex;align-items:center;justify-content:center;}
-.nav-label{font-size:11px;font-weight:600;color:#7C6169;letter-spacing:0.3px;}
+.nav-label{font-size:11px;font-weight:600;color:#5C484E;letter-spacing:0.3px;} /* contrast pass 2026-08-11: was #7C6169 */
 .nav-item.active .nav-label{color:var(--rose-dark);font-weight:700;}
 .badge{font-size:13px;padding:3px 9px;border-radius:100px;font-weight:500;}
 .badge-now{background:var(--rose-light);color:var(--rose-dark);border:1px solid var(--rose-mid);}
@@ -1801,7 +1801,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
 
     <div class="nav-item" onclick="navToProfile()"><span class="nav-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></span><span class="nav-label">Profile</span></div>
     
-      <div class="nav-item auth-nav" onclick="authNav()" style="opacity:0.55;" title="Sign Out">
+      <div class="nav-item auth-nav" onclick="authNav()" title="Sign Out">
       <span class="nav-icon"><svg viewBox="0 0 24 24" style="width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span>
       <span class="nav-label">Sign Out</span>
     </div>
@@ -1886,7 +1886,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
   <div class="bottom-nav">
     <div class="nav-item" onclick="navHome()"><span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg></span><span class="nav-label">Home</span></div>
     <div class="nav-item" onclick="navToProfile()"><span class="nav-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></span><span class="nav-label">Profile</span></div>
-    <div class="nav-item auth-nav" onclick="authNav()" style="opacity:0.55;" title="Sign Out"><span class="nav-icon"><svg viewBox="0 0 24 24" style="width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span><span class="nav-label">Sign Out</span></div>
+    <div class="nav-item auth-nav" onclick="authNav()" title="Sign Out"><span class="nav-icon"><svg viewBox="0 0 24 24" style="width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span><span class="nav-label">Sign Out</span></div>
   </div>
 </div>
 
@@ -1936,7 +1936,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
 
     <div class="nav-item" onclick="navToProfile()"><span class="nav-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></span><span class="nav-label">Profile</span></div>
     
-    <div class="nav-item auth-nav" onclick="authNav()" style="opacity:0.55;" title="Sign Out">
+    <div class="nav-item auth-nav" onclick="authNav()" title="Sign Out">
       <span class="nav-icon"><svg viewBox="0 0 24 24" style="width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span>
       <span class="nav-label">Sign Out</span>
     </div>
@@ -2041,7 +2041,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
   <div class="bottom-nav">
     <div class="nav-item" onclick="navHome()"><span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg></span><span class="nav-label">Home</span></div>
     <div class="nav-item" onclick="navToProfile()"><span class="nav-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></span><span class="nav-label">Profile</span></div>
-    <div class="nav-item auth-nav" onclick="authNav()" style="opacity:0.55;" title="Sign Out"><span class="nav-icon"><svg viewBox="0 0 24 24" style="width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span><span class="nav-label">Sign Out</span></div>
+    <div class="nav-item auth-nav" onclick="authNav()" title="Sign Out"><span class="nav-icon"><svg viewBox="0 0 24 24" style="width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span><span class="nav-label">Sign Out</span></div>
   </div>
 </div>
 
@@ -2069,6 +2069,15 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       <div style="font-family:'Playfair Display',serif;font-size:24px;color:var(--charcoal);line-height:1.2;" id="tech-dash-greeting">Good morning!</div>
       <div style="font-size:13px;color:var(--muted);margin-top:4px;" id="tech-dash-subtle">Your business, at a glance</div>
     </div>
+
+    <!-- IN-APP APPOINTMENT ALERTS (2026-08-10, Anne): a push can be missed,
+         swiped away, or turned off entirely, so the portal itself announces
+         what needs attention: pending booking requests first (rose, pulsing,
+         time-sensitive), then the next confirmed appointment (calm white
+         card). Both tap through to Bookings. Populated by
+         tdRenderApptAlerts() out of tbLoadDashBadge(); hidden when there is
+         nothing to say. -->
+    <div id="td-alerts" style="display:none;margin:14px 20px 0;gap:8px;"></div>
 
     <!-- HERO: status trio, the visual centerpiece -->
     <div style="margin:16px 20px 0;">
@@ -2154,8 +2163,11 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
     <!-- ── TECH PORTAL CARDS ─────────────────────────────────────────────
          2026-07-20 per Anne, reordered 2026-07-30 per design review:
          Bookings leads (the 3.0 promise, dark card), then the gallery
-         (photos, free). One job per card. -->
+         (photos, free). One job per card. Cohesion pass 2026-08-10: each
+         zone opens with the same etched-caps label so the portal reads as
+         one page instead of stacked widgets. -->
     <div style="margin:16px 20px 0;">
+      <div class="etched-caps" style="font-size:11px;font-weight:700;letter-spacing:1.6px;color:var(--muted);text-transform:uppercase;margin:6px 0 8px;">Your bookings</div>
       <!-- CARD: bookings, promoted to the top of the portal (design review
            punch 03, 2026-07-30): free booking is the 3.0 promise, so it is
            the first card and the only dark surface on the screen. The
@@ -2165,7 +2177,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
         <div style="display:flex;align-items:center;gap:9px;margin-bottom:11px;">
           <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:white;fill:none;stroke-width:1.9;stroke-linecap:round;flex-shrink:0;"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
           <div style="flex:1;min-width:0;">
-            <div style="font-size:15px;font-weight:700;color:white;">Bookings</div>
+            <div style="font-size:15px;font-weight:700;color:white;">Bookings &amp; Appointments</div>
             <div style="font-size:13px;color:rgba(255,255,255,0.78);" id="td-bookings-sub">Set up free booking</div>
           </div>
           <span id="td-bookings-pending" style="display:none;background:white;color:var(--ink-2);font-size:13px;font-weight:700;border-radius:100px;padding:3px 9px;">0</span>
@@ -2185,26 +2197,38 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
         <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:var(--muted);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg>
       </div>
 
-      <div style="margin-bottom:12px;">
-        <div style="font-family:'Playfair Display',serif;font-size:17px;font-weight:600;color:var(--rose-dark);">Post everything.</div>
-        <div style="font-size:13px;color:var(--muted);margin-top:3px;line-height:1.45;"><b style="color:var(--rose-dark);">Your whole portfolio, free.</b> Every look you add is one more way a client can find you — and it keeps working for you forever.</div>
-      </div>
-
-      <!-- CARD: your gallery -->
+      <!-- CARD: your gallery (cohesion pass 2026-08-10, Anne: the portal
+           felt stitched together). The card now leads with the tech's OWN
+           work: a live grid of her latest looks plus a count, populated by
+           loadTechHomeStats(). The old sales-pitch copy survives only as
+           the empty state (#td-gal-pitch), where it still has a job:
+           convincing a tech with zero photos to post her first one. Every
+           gallery-ish tap lands on the My Gallery screen (my-photos),
+           which stays the single place photos are managed and tagged. -->
+      <div class="etched-caps" style="font-size:11px;font-weight:700;letter-spacing:1.6px;color:var(--muted);text-transform:uppercase;margin:22px 0 8px;">Your gallery</div>
       <div style="background:white;border:1px solid var(--border);border-radius:16px;padding:16px;box-shadow:var(--shadow);margin-bottom:12px;">
-        <div style="display:flex;align-items:center;gap:9px;margin-bottom:11px;">
+        <div onclick="openMyPhotos()" style="display:flex;align-items:center;gap:9px;margin-bottom:11px;cursor:pointer;">
           <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:var(--rose-dark);fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
-          <div style="font-size:14.5px;font-weight:700;color:var(--charcoal);">Your gallery, all free</div>
+          <div style="flex:1;font-size:14.5px;font-weight:700;color:var(--charcoal);">Your latest looks</div>
+          <span id="td-gal-count" style="font-size:13px;color:var(--muted);font-weight:600;"></span>
+          <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:var(--muted);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg>
         </div>
-        <div style="display:grid;gap:8px;margin-bottom:13px;">
+        <div id="td-gal-preview" onclick="openMyPhotos()" style="display:none;grid-template-columns:repeat(3,1fr);gap:4px;margin-bottom:13px;cursor:pointer;"></div>
+        <div id="td-gal-pitch" style="display:grid;gap:8px;margin-bottom:13px;">
           <div style="display:flex;gap:8px;align-items:flex-start;"><svg viewBox="0 0 24 24" style="width:13px;height:13px;margin-top:2px;stroke:var(--rose-dark);fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;"><path d="M20 6L9 17l-5-5"/></svg><div style="font-size:13px;color:var(--charcoal);line-height:1.45;">Post up to <b>50 looks a month, free — forever.</b></div></div>
           <div style="display:flex;gap:8px;align-items:flex-start;"><svg viewBox="0 0 24 24" style="width:13px;height:13px;margin-top:2px;stroke:var(--rose-dark);fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;"><path d="M20 6L9 17l-5-5"/></svg><div style="font-size:13px;color:var(--charcoal);line-height:1.45;"><b>More looks means more of the Gallery is yours</b>; your share is exactly proportional to your photo count.</div></div>
           <div style="display:flex;gap:8px;align-items:flex-start;"><svg viewBox="0 0 24 24" style="width:13px;height:13px;margin-top:2px;stroke:var(--rose-dark);fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;"><path d="M20 6L9 17l-5-5"/></svg><div style="font-size:13px;color:var(--charcoal);line-height:1.45;"><b>Photos stay up forever.</b> Upload once, get found for years.</div></div>
         </div>
-        <button onclick="openPhotoUploadFromHome()" class="btn btn-outline" style="width:100%;display:flex;align-items:center;justify-content:center;gap:6px;font-size:13px;">
-          <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
-          Upload Photos
-        </button>
+        <div style="display:flex;gap:8px;">
+          <button onclick="openPhotoUploadFromHome()" class="btn btn-outline" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;font-size:13px;">
+            <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            Upload Photos
+          </button>
+          <button onclick="openMyPhotos()" class="btn btn-outline" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;font-size:13px;">
+            <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+            Manage &amp; Tag
+          </button>
+        </div>
         <!-- Slot meter (near-cap only). Populated by updateSlotsRemainingDisplay() after loadTechTier. -->
         <div id="td-slots-card" style="display:none;margin-top:12px;padding:13px 16px;border-radius:14px;background:#FAFAFA;border:1px solid rgba(169,139,141,0.22);">
           <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;">
@@ -2225,6 +2249,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
          their profile editor, so the tiny "Manage →" link is promoted to
          a proper primary button. -->
     <div style="margin:22px 20px 0;">
+      <div class="etched-caps" style="font-size:11px;font-weight:700;letter-spacing:1.6px;color:var(--muted);text-transform:uppercase;margin:0 0 8px;">Your profile</div>
       <button type="button" onclick="openTechEditFromProfile()"
         style="width:100%;padding:14px 18px;border-radius:14px;border:1.5px solid var(--rose);background:white;color:var(--rose-dark);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:background 0.15s,transform 0.05s;"
         onmousedown="this.style.transform='scale(0.98)'" onmouseup="this.style.transform=''" onmouseleave="this.style.transform=''">
@@ -2287,7 +2312,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
          button pointing back here was a no-op and visually crowded the
          nav. Admin stays hidden unless role === admin. -->
     
-      <div class="nav-item auth-nav" onclick="authNav()" style="opacity:0.55;" title="Sign Out">
+      <div class="nav-item auth-nav" onclick="authNav()" title="Sign Out">
       <span class="nav-icon"><svg viewBox="0 0 24 24" style="width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span>
       <span class="nav-label">Sign Out</span>
     </div>
@@ -2462,7 +2487,32 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
     <!-- Settings -->
     <!-- Appointments -->
     <div style="margin:20px 20px 0;">
-      <div style="font-family:'Playfair Display',serif;font-size:18px;color:var(--charcoal);margin-bottom:8px;">Appointments</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;">
+        <div style="font-family:'Playfair Display',serif;font-size:18px;color:var(--charcoal);">Appointments</div>
+        <button onclick="tbToggleManualAdd()" id="tb-manual-toggle" style="padding:7px 13px;border-radius:100px;border:1.5px solid var(--rose);background:white;color:var(--rose-dark);font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;">+ Add appointment</button>
+      </div>
+      <!-- Tech-entered appointment form (2026-08-11, Anne: "i don't see a
+           way to 'take a booking' for the tech to enter someone themselves").
+           Walk-ins and phone clients go straight onto the calendar as
+           confirmed via the tech_create_booking RPC
+           (sql/tech-manual-booking-migration.sql). -->
+      <div id="tb-manual-add" style="display:none;background:white;border:1px solid var(--rose-mid);border-radius:14px;padding:14px;margin-bottom:12px;box-shadow:var(--shadow);">
+        <div style="font-size:13.5px;font-weight:700;color:var(--charcoal);margin-bottom:10px;">Add an appointment</div>
+        <div style="display:grid;gap:8px;">
+          <input id="tb-ma-name" type="text" placeholder="Client name" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;box-sizing:border-box;"/>
+          <input id="tb-ma-phone" type="tel" placeholder="Phone (optional, for one-tap text)" oninput="formatPhone(this)" maxlength="17" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;box-sizing:border-box;"/>
+          <select id="tb-ma-svc" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;box-sizing:border-box;"></select>
+          <div style="display:flex;gap:8px;">
+            <input id="tb-ma-date" type="date" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;box-sizing:border-box;flex:1;"/>
+            <input id="tb-ma-time" type="time" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;box-sizing:border-box;flex:1;"/>
+          </div>
+          <textarea id="tb-ma-note" rows="2" placeholder="Private note (optional — only you see it)" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;box-sizing:border-box;resize:vertical;"></textarea>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:10px;">
+          <button onclick="tbSubmitManualAdd()" id="tb-ma-save" style="flex:1;padding:11px;border-radius:10px;border:none;background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);color:white;font-size:14px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;">Add to calendar</button>
+          <button onclick="tbToggleManualAdd()" style="flex:0 0 auto;padding:11px 16px;border-radius:10px;border:1.5px solid var(--border);background:white;color:var(--muted);font-size:14px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;">Cancel</button>
+        </div>
+      </div>
       <div id="tb-appts"></div>
     </div>
 
@@ -2646,7 +2696,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
     <!-- Static client My Appts slot (self, active); .mnc-client-appts-nav
          so styleNavForRole unhides instead of duplicating. -->
     <div class="nav-item mnc-client-appts-nav active"><span class="nav-icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span><span class="nav-label">My Appts</span></div>
-    <div class="nav-item auth-nav" onclick="authNav()" style="opacity:0.55;" title="Sign Out">
+    <div class="nav-item auth-nav" onclick="authNav()" title="Sign Out">
       <span class="nav-icon"><svg viewBox="0 0 24 24" style="width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span>
       <span class="nav-label">Sign Out</span>
     </div>
@@ -2775,7 +2825,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
     <div class="nav-item" onclick="navHome()"><span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg></span><span class="nav-label">Home</span></div>
     <div class="nav-item" onclick="show('tech-home')"><span class="nav-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></span><span class="nav-label">Tech Portal</span></div>
     <!-- Profile removed, tech-only screen; Dashboard above covers it. -->
-    <div class="nav-item auth-nav" onclick="authNav()" style="opacity:0.55;" title="Sign Out"><span class="nav-icon"><svg viewBox="0 0 24 24" style="width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span><span class="nav-label">Sign Out</span></div>
+    <div class="nav-item auth-nav" onclick="authNav()" title="Sign Out"><span class="nav-icon"><svg viewBox="0 0 24 24" style="width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span><span class="nav-label">Sign Out</span></div>
   </div>
 </div>
 
@@ -2902,7 +2952,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
   <div class="bottom-nav">
     <div class="nav-item" onclick="navHome()"><span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg></span><span class="nav-label">Home</span></div>
     <div class="nav-item" onclick="navToProfile()"><span class="nav-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></span><span class="nav-label">Profile</span></div>
-    <div class="nav-item auth-nav" onclick="authNav()" style="opacity:0.55;" title="Sign Out"><span class="nav-icon"><svg viewBox="0 0 24 24" style="width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span><span class="nav-label">Sign Out</span></div>
+    <div class="nav-item auth-nav" onclick="authNav()" title="Sign Out"><span class="nav-icon"><svg viewBox="0 0 24 24" style="width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span><span class="nav-label">Sign Out</span></div>
   </div>
 </div>
 
@@ -3129,7 +3179,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
 
     <div class="nav-item active"><span class="nav-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></span><span class="nav-label" id="profile-nav-self-label">My Saves</span></div>
     
-      <div class="nav-item auth-nav" onclick="authNav()" style="opacity:0.55;" title="Sign Out">
+      <div class="nav-item auth-nav" onclick="authNav()" title="Sign Out">
       <span class="nav-icon"><svg viewBox="0 0 24 24" style="width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span>
       <span class="nav-label">Sign Out</span>
     </div>
@@ -5146,8 +5196,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 516,         /* __APP_BUILD_ANDROID__ */
-  ios:     321,          /* __APP_BUILD_IOS__     */
+  android: 521,         /* __APP_BUILD_ANDROID__ */
+  ios:     326,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -9574,6 +9624,54 @@ async function compressForUpload(file, maxDim, quality, force) {
   } catch (_) { return force ? null : file; }
 }
 
+// ── Storage POST with timeout + one retry (2026-08-11) ──────────────────────
+// Mobile connections stall silently, and a bare fetch has no timeout, so a
+// dropped connection left the bulk-upload progress bar frozen forever
+// (Anne: "something choking?"). 60s covers a large photo on slow cell.
+// Retries once on network error, timeout, or 5xx/429; a plain 4xx is
+// returned as-is because it won't get better on retry.
+async function storagePostWithRetry(objectPath, blob, contentType) {
+  var lastErr = null;
+  for (var attempt = 0; attempt < 2; attempt++) {
+    var ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+    var timer = ctrl ? setTimeout(function() { try { ctrl.abort(); } catch(_) {} }, 60000) : null;
+    try {
+      var res = await fetch(SUPABASE_URL + '/storage/v1/object/' + objectPath, {
+        method: 'POST',
+        headers: { 'apikey': SUPABASE_ANON_KEY,
+                   'Authorization': 'Bearer ' + (window._mncAccessToken || SUPABASE_ANON_KEY),
+                   'Content-Type': contentType || 'image/jpeg', 'x-upsert': 'true' },
+        body: blob,
+        signal: ctrl ? ctrl.signal : undefined
+      });
+      if (timer) clearTimeout(timer);
+      if (res.ok || (res.status < 500 && res.status !== 429)) return res;
+      lastErr = new Error('storage-' + res.status);
+      if (attempt === 1) return res;
+    } catch(e) {
+      if (timer) clearTimeout(timer);
+      lastErr = e;
+    }
+  }
+  throw lastErr || new Error('storage-post-failed');
+}
+
+// Tiny worker pool: run async job functions with bounded concurrency.
+// Jobs handle their own errors; a throw here only ends that worker's lane.
+async function runJobPool(jobs, width) {
+  var i = 0;
+  async function worker() {
+    while (i < jobs.length) {
+      var job = jobs[i++];
+      try { await job(); } catch(_) { /* job reports its own failures */ }
+    }
+  }
+  var workers = [];
+  var n = Math.min(width || 3, jobs.length);
+  for (var k = 0; k < n; k++) workers.push(worker());
+  await Promise.all(workers);
+}
+
 async function techEditAddPhotos(input) {
   // Check photo limit before uploading
   await loadTechTier(currentUserEmail);
@@ -9650,13 +9748,8 @@ async function techEditAddPhotos(input) {
         try {
           const _upBlob = await compressForUpload(file, 1600, 0.85);
           uploadThumb(_fileName, file);   // fire-and-forget, see uploadThumb
-          const res = await fetch(SUPABASE_URL + '/storage/v1/object/tech-photos/' + _fileName, {
-            method: 'POST',
-            headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + (window._mncAccessToken || SUPABASE_ANON_KEY),
-                       'Content-Type': (_upBlob.type || file.type || 'image/jpeg'), 'x-upsert': 'true' },
-            body: _upBlob
-          });
-          if (!res.ok) throw new Error('upload-failed-' + res.status);
+          const res = await storagePostWithRetry('tech-photos/' + _fileName, _upBlob, (_upBlob && _upBlob.type) || file.type || 'image/jpeg');
+          if (!res || !res.ok) throw new Error('upload-failed-' + (res ? res.status : 'network'));
           // Storage upload succeeded, clear the _previewSrc so subsequent
           // renders use the real URL (which now resolves).
           const idx = edit.photos.findIndex(p => p.url === _publicUrl);
@@ -9761,9 +9854,21 @@ async function techBulkDropFiles(fileList) {
   const count = document.getElementById('te-bulk-progress-count');
   wrap.style.display = 'block';
 
-  let done = 0, skipped = 0;
+  let done = 0, skipped = 0, failed = 0;
   const total = files.length;
+  // Say something immediately: the old flow showed a 0% bar with no text
+  // until the first photo fully uploaded, which read as frozen.
+  label.textContent = 'Preparing ' + total + ' photo' + (total === 1 ? '' : 's') + '\u2026';
+  count.textContent = '0/' + total;
 
+  // ── Phase 1, serial + fast: validate, reserve a slot, persist the DB
+  // record, and queue the storage upload for each file. Serial because
+  // consumeUploadSlot is an atomic counter RPC. The slow part — the
+  // storage upload itself — is queued here and parallelized in phase 2.
+  // Until 2026-08-11 the POST was awaited inside this loop, so photo 2
+  // couldn't start until photo 1 finished uploading, and a 10-photo batch
+  // took minutes on cell upload speeds ("something choking?").
+  const uploadJobs = [];
   for (const file of files) {
     // Read as base64 for AI validation
     const b64data = await new Promise(resolve => {
@@ -9812,48 +9917,51 @@ async function techBulkDropFiles(fileList) {
     edit.photos.push(photoEntry);
     renderTePhotoGrid(edit.photos);
 
-    // Background storage upload. On failure, yank from DB + local.
-    try {
-      // Downscale before upload. This path shipped the raw camera file, so
-      // a phone shot landed as 1436x2516 / 506KB and every viewer paid for
-      // it. 1600px long edge @ 0.85 keeps the tech-detail hero crisp on
-      // retina while cutting the payload hard. 2026-07-21.
-      const _upBlob = await compressForUpload(file, 1600, 0.85);
-      uploadThumb(_fileName, file);   // fire-and-forget, see uploadThumb
-      const res = await fetch(SUPABASE_URL + '/storage/v1/object/tech-photos/' + _fileName, {
-        method: 'POST',
-        headers: {
-          'apikey': SUPABASE_ANON_KEY,
-          'Authorization': 'Bearer ' + (window._mncAccessToken || SUPABASE_ANON_KEY),
-          'Content-Type': (_upBlob && _upBlob.type) || file.type,
-          'x-upsert': 'true'
-        },
-        body: _upBlob
-      });
-      if (!res.ok) throw new Error('upload-failed-' + res.status);
-      // Storage upload OK, drop the inline preview so future renders
-      // use the real URL.
-      const idx = edit.photos.indexOf(photoEntry);
-      if (idx !== -1) { delete edit.photos[idx]._previewSrc; }
-    } catch(e) {
-      try { await removeTechPhotoByUrl(_publicUrl); } catch(_){}
-      const idx = edit.photos.indexOf(photoEntry);
-      if (idx !== -1) { edit.photos.splice(idx, 1); renderTePhotoGrid(edit.photos); }
-      try { showToast('Upload failed, photo removed.'); } catch(_){}
-    }
+    // Queue the storage upload for phase 2. On failure, yank from DB +
+    // local, and pull the URL back out of the Release Wizard list so the
+    // wizard never opens on a photo that no longer exists.
+    uploadJobs.push(async function() {
+      label.textContent = `Uploading ${file.name}\u2026`;
+      try {
+        // Downscale before upload. This path shipped the raw camera file, so
+        // a phone shot landed as 1436x2516 / 506KB and every viewer paid for
+        // it. 1600px long edge @ 0.85 keeps the tech-detail hero crisp on
+        // retina while cutting the payload hard. 2026-07-21.
+        const _upBlob = await compressForUpload(file, 1600, 0.85);
+        uploadThumb(_fileName, file);   // fire-and-forget, see uploadThumb
+        const res = await storagePostWithRetry('tech-photos/' + _fileName, _upBlob, (_upBlob && _upBlob.type) || file.type);
+        if (!res || !res.ok) throw new Error('upload-failed-' + (res ? res.status : 'network'));
+        // Storage upload OK, drop the inline preview so future renders
+        // use the real URL.
+        const idx = edit.photos.indexOf(photoEntry);
+        if (idx !== -1) { delete edit.photos[idx]._previewSrc; }
+      } catch(e) {
+        failed++;
+        try { await removeTechPhotoByUrl(_publicUrl); } catch(_){}
+        try { window._bulkDropNewUrls = (window._bulkDropNewUrls || []).filter(function(u) { return u !== _publicUrl; }); } catch(_){}
+        const idx = edit.photos.indexOf(photoEntry);
+        if (idx !== -1) { edit.photos.splice(idx, 1); renderTePhotoGrid(edit.photos); }
+        try { showToast('Upload failed, photo removed.'); } catch(_){}
+      }
+      done++;
+      bar.style.width = Math.round((done / total) * 100) + '%';
+      count.textContent = `${done}/${total}`;
+    });
+  }
 
-
-    done++;
-    bar.style.width = Math.round((done / total) * 100) + '%';
-    count.textContent = `${done}/${total}`;
-    label.textContent = `Uploading ${file.name}…`;
+  // ── Phase 2: run the queued storage uploads three at a time. Three keeps
+  // a phone's upstream pipe busy without starving the thumbnail POSTs that
+  // ride along, and finishes a big batch in roughly a third of the old
+  // serial wall-clock.
+  if (uploadJobs.length) {
+    await runJobPool(uploadJobs, 3);
   }
 
   // Done!
   bar.style.width = '100%';
   bar.style.background = '#2E6B44';
-  const uploadedCount = done - skipped;
-  label.textContent = `✓ Done! ${uploadedCount} photo${uploadedCount !== 1 ? 's' : ''} added${skipped ? `, ${skipped} skipped (not nail photos)` : ''}`;
+  const uploadedCount = done - skipped - failed;
+  label.textContent = `✓ Done! ${uploadedCount} photo${uploadedCount !== 1 ? 's' : ''} added${skipped ? `, ${skipped} skipped (not nail photos)` : ''}${failed ? `, ${failed} failed` : ''}`;
   count.textContent = '';
   showToast(`${uploadedCount} photo${uploadedCount !== 1 ? 's' : ''} added`);
   setTimeout(() => { wrap.style.display = 'none'; bar.style.background = 'var(--rose)'; bar.style.width = '0%'; }, 5000);
@@ -11153,10 +11261,14 @@ async function saveTechEdit() {
     call: document.getElementById('te-contact-call')?.checked || false,
     text: document.getElementById('te-contact-text')?.checked || false
   };
-  // Default to both if nothing selected
+  // Both-off is a VALID choice (Anne, 2026-08-11: "uncheck text and call and
+  // save, it doesn't save that setting"). This block used to silently force
+  // both back on, so a tech who only wants in-app bookings could never hide
+  // her Call/Text buttons. The client profile handles {call:false,text:false}
+  // fine, and the dashboard already nudges when she's Open with no instant
+  // way in — so just tell her what the empty state means and let it save.
   if (!edit.contact_methods.call && !edit.contact_methods.text) {
-    edit.contact_methods.call = true;
-    edit.contact_methods.text = true;
+    showToast('Call and Text hidden — clients reach you through booking only');
   }
   edit.hours = teSerializeHours();
 
@@ -13710,7 +13822,12 @@ async function loadTechBookings() {
             '&active=is.true&select=*,tech_services(name)&order=created_at.desc',
             { headers: bkHeaders() }),
       fetch(SUPABASE_URL + '/rest/v1/blocked_clients?tech_id=eq.' + _bkMyTech.id +
-            '&order=created_at.desc', { headers: bkHeaders() })
+            '&order=created_at.desc', { headers: bkHeaders() }),
+      // Tech-private notes. A separate query, NOT an embed on the bookings
+      // fetch, so a not-yet-migrated booking_notes table degrades to
+      // "no notes" instead of 400ing the whole appointments list.
+      fetch(SUPABASE_URL + '/rest/v1/booking_notes?tech_id=eq.' + _bkMyTech.id +
+            '&select=booking_id,note', { headers: bkHeaders() })
     ]);
     _bkSvcs  = results[0].ok ? await results[0].json() : [];
     _bkAvail = results[1].ok ? await results[1].json() : [];
@@ -13718,6 +13835,11 @@ async function loadTechBookings() {
     _bkTimeOff = results[3].ok ? await results[3].json() : [];
     _bkStanding = results[4].ok ? await results[4].json() : [];
     _bkBlocked = results[5].ok ? await results[5].json() : [];
+    _bkNotes = {};
+    try {
+      var _noteRows = results[6].ok ? await results[6].json() : [];
+      _noteRows.forEach(function(nr) { if (nr && nr.booking_id) _bkNotes[nr.booking_id] = nr.note || ''; });
+    } catch(_) {}
     tbRenderSettings();
     tbRenderServices();
     tbRenderAvail();
@@ -14175,6 +14297,172 @@ async function tbDeleteBlocked(id) {
   tbRenderBlocked();
 }
 
+// ── Tech-entered appointments (2026-08-11, Anne) ────────────────────────────
+// "i don't see a way to 'take a booking' for the tech to enter someone
+// themselves." Walk-ins, phone clients, DM bookings: + Add appointment on
+// My Appts opens the form; tech_create_booking
+// (sql/tech-manual-booking-migration.sql) inserts it as CONFIRMED with
+// client_id NULL — the typed name/phone are the client. Overlapping times
+// warn first and book anyway only on her say-so.
+function tbToggleManualAdd() {
+  var f = document.getElementById('tb-manual-add');
+  if (!f) return;
+  if (f.style.display !== 'none') { f.style.display = 'none'; return; }
+  // Service dropdown mirrors her current list every time the form opens.
+  var sel = document.getElementById('tb-ma-svc');
+  if (sel) {
+    var opts = '<option value="">No service / custom (1 hr)</option>';
+    (_bkSvcs || []).forEach(function(s) {
+      opts += '<option value="' + bkEsc(s.id) + '">' + bkEsc(s.name) +
+        (s.duration_minutes ? ' \u00b7 ' + bkDur(s.duration_minutes) : '') + '</option>';
+    });
+    sel.innerHTML = opts;
+  }
+  var d = document.getElementById('tb-ma-date');
+  if (d && !d.value) { try { d.value = new Date().toISOString().slice(0, 10); } catch(_) {} }
+  f.style.display = 'block';
+  var n = document.getElementById('tb-ma-name');
+  if (n) { try { n.focus(); } catch(_) {} }
+}
+
+async function tbSubmitManualAdd(force) {
+  if (!_bkMyTech) { showToast('Open this screen from your Tech Portal first'); return; }
+  var name  = ((document.getElementById('tb-ma-name') || {}).value || '').trim();
+  var phone = (document.getElementById('tb-ma-phone') || {}).value || '';
+  var svcId = (document.getElementById('tb-ma-svc') || {}).value || '';
+  var date  = (document.getElementById('tb-ma-date') || {}).value || '';
+  var time  = (document.getElementById('tb-ma-time') || {}).value || '';
+  var note  = ((document.getElementById('tb-ma-note') || {}).value || '').trim();
+  if (!name) { showToast('Who is the appointment for?'); return; }
+  if (!date || !time) { showToast('Pick a day and a time'); return; }
+  // Built in DEVICE-local time: if her phone's clock zone and her booking
+  // timezone disagree (traveling), the stored instant follows the phone.
+  var starts = new Date(date + 'T' + time);
+  if (isNaN(starts.getTime())) { showToast('That date/time didn\u2019t parse, try again'); return; }
+  var btn = document.getElementById('tb-ma-save');
+  if (btn) { btn.disabled = true; btn.textContent = 'Adding\u2026'; }
+  try {
+    var r = await fetch(SUPABASE_URL + '/rest/v1/rpc/tech_create_booking', {
+      method: 'POST',
+      headers: bkHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({
+        p_tech_id: _bkMyTech.id,
+        p_starts_at: starts.toISOString(),
+        p_service_id: svcId || null,
+        p_duration_minutes: 60,
+        p_client_name: name,
+        p_client_phone: phone.replace(/\D/g, '') || null,
+        p_force: !!force
+      })
+    });
+    if (r.status === 404) { showToast('Run sql/tech-manual-booking-migration.sql in Supabase first'); return; }
+    var out = r.ok ? await r.json() : null;
+    if (!out || out.error) {
+      if (out && out.error === 'overlap') {
+        if (await showConfirm('That time overlaps another appointment.', { body: 'Book it anyway? Two at once is your call.', okLabel: 'Book anyway' })) {
+          if (btn) { btn.disabled = false; btn.textContent = 'Add to calendar'; }
+          return tbSubmitManualAdd(true);
+        }
+      } else {
+        showToast('Could not add it (' + ((out && out.error) || ('HTTP ' + r.status)) + ')');
+      }
+      return;
+    }
+    // The private note rides along via booking_notes (its own migration).
+    if (note && out.id) {
+      try {
+        await fetch(SUPABASE_URL + '/rest/v1/booking_notes?on_conflict=booking_id', {
+          method: 'POST',
+          headers: bkHeaders({ 'Content-Type': 'application/json', 'Prefer': 'resolution=merge-duplicates,return=minimal' }),
+          body: JSON.stringify({ booking_id: out.id, tech_id: _bkMyTech.id, note: note, updated_at: new Date().toISOString() })
+        });
+        _bkNotes[out.id] = note;
+      } catch(_) {}
+    }
+    ['tb-ma-name', 'tb-ma-phone', 'tb-ma-time', 'tb-ma-note'].forEach(function(id) {
+      var el = document.getElementById(id); if (el) el.value = '';
+    });
+    var f = document.getElementById('tb-manual-add');
+    if (f) f.style.display = 'none';
+    showToast('On your calendar \u2728');
+    try { await loadTechBookings(); } catch(_) {}
+    try { tbLoadDashBadge(); } catch(_) {}
+  } catch(e) {
+    showToast('Network hiccup, try again');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Add to calendar'; }
+  }
+}
+
+// ── Tech-private booking notes (2026-08-11, Anne) ───────────────────────────
+// "please give us a notes section for each booking." Notes live in
+// booking_notes (sql/booking-notes-migration.sql), a separate table with
+// tech-only RLS — deliberately NOT a column on bookings, because the client
+// leg of the bookings policies lets a client select their own row, and a
+// note like "always reschedules twice" must never ride along in that
+// payload. Loaded into _bkNotes by loadTechBookings; edited inline on each
+// appointment card.
+var _bkNotes = {};
+
+function tbNoteView(id) {
+  var note = _bkNotes[id] || '';
+  if (note) {
+    return '<div onclick="tbEditNote(\'' + id + '\')" style="cursor:pointer;background:var(--cream);border:1px dashed var(--border);border-radius:10px;padding:8px 11px;">' +
+      '<div style="font-size:10px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--muted);margin-bottom:3px;">Your note &middot; only you see this</div>' +
+      '<div style="font-size:13px;color:var(--charcoal);line-height:1.45;white-space:pre-wrap;">' + bkEsc(note) + '</div>' +
+    '</div>';
+  }
+  return '<div onclick="tbEditNote(\'' + id + '\')" style="cursor:pointer;font-size:12.5px;color:var(--muted);font-weight:500;text-decoration:underline;text-underline-offset:3px;display:inline-block;">+ Add a private note</div>';
+}
+
+function tbEditNote(id) {
+  var wrap = document.getElementById('tb-note-' + id);
+  if (!wrap) return;
+  wrap.innerHTML =
+    '<textarea id="tb-note-input-' + id + '" rows="3" placeholder="Only you can see this — polish colors, allergies, reschedule history, anything." ' +
+      'style="width:100%;box-sizing:border-box;padding:9px 11px;border:1.5px solid var(--rose-mid);border-radius:10px;font-size:13px;font-family:\'DM Sans\',sans-serif;background:white;outline:none;resize:vertical;">' +
+      bkEsc(_bkNotes[id] || '') + '</textarea>' +
+    '<div style="display:flex;gap:8px;margin-top:6px;">' +
+      '<button onclick="tbSaveNote(\'' + id + '\')" style="flex:1;padding:8px;border-radius:9px;border:none;background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);color:white;font-size:13px;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif;">Save note</button>' +
+      '<button onclick="tbCancelNote(\'' + id + '\')" style="flex:0 0 auto;padding:8px 14px;border-radius:9px;border:1.5px solid var(--border);background:white;color:var(--muted);font-size:13px;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif;">Cancel</button>' +
+    '</div>';
+  var ta = document.getElementById('tb-note-input-' + id);
+  if (ta) { try { ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length); } catch(_) {} }
+}
+
+function tbCancelNote(id) {
+  var wrap = document.getElementById('tb-note-' + id);
+  if (wrap) wrap.innerHTML = tbNoteView(id);
+}
+
+async function tbSaveNote(id) {
+  if (!_bkMyTech) return;
+  var ta = document.getElementById('tb-note-input-' + id);
+  var v = ((ta && ta.value) || '').trim();
+  var wrap = document.getElementById('tb-note-' + id);
+  try {
+    var r;
+    if (!v) {
+      // Cleared note = delete the row, don't keep empty husks around.
+      r = await fetch(SUPABASE_URL + '/rest/v1/booking_notes?booking_id=eq.' + id, {
+        method: 'DELETE', headers: bkHeaders({ 'Prefer': 'return=minimal' })
+      });
+    } else {
+      r = await fetch(SUPABASE_URL + '/rest/v1/booking_notes?on_conflict=booking_id', {
+        method: 'POST',
+        headers: bkHeaders({ 'Content-Type': 'application/json', 'Prefer': 'resolution=merge-duplicates,return=minimal' }),
+        body: JSON.stringify({ booking_id: id, tech_id: _bkMyTech.id, note: v, updated_at: new Date().toISOString() })
+      });
+    }
+    if (!r.ok) throw new Error('note-save-' + r.status);
+    if (v) _bkNotes[id] = v; else delete _bkNotes[id];
+    if (wrap) wrap.innerHTML = tbNoteView(id);
+    showToast(v ? 'Note saved \u2014 only you can see it' : 'Note removed');
+  } catch(e) {
+    showToast('Could not save the note \u2014 if this keeps up, the booking-notes migration may not be run yet');
+  }
+}
+
 // Tech's appointment list
 function tbApptCard(b, buttons) {
   const tz  = _bkMyTech && _bkMyTech.booking_timezone;
@@ -14197,6 +14485,7 @@ function tbApptCard(b, buttons) {
         '<div style="font-size:13px;color:var(--charcoal);margin-top:2px;">' + bkEsc(svc) + ' · ' + who + '</div>' +
       '</div>' + (b.standing_id ? '<span style="background:var(--rose-light);color:var(--rose-dark);font-size:13px;font-weight:700;border-radius:100px;padding:3px 7px;margin-right:4px;white-space:nowrap;">&#8635; standing</span>' : '') + bkStatusChip(b.status) +
     '</div>' + note + contact +
+    '<div id="tb-note-' + b.id + '" style="margin-top:9px;">' + tbNoteView(b.id) + '</div>' +
     (buttons ? '<div style="display:flex;gap:8px;margin-top:10px;">' + buttons + '</div>' : '') +
   '</div>';
 }
@@ -14218,7 +14507,9 @@ function tbRenderAppts() {
   const delBtn = function(id) {
     return '<button onclick="tbDeleteBooking(\'' + id + '\')" style="flex:0 0 auto;padding:9px 6px;border:none;background:none;color:var(--muted);font-size:12.5px;font-weight:500;cursor:pointer;font-family:\'DM Sans\',sans-serif;text-decoration:underline;text-underline-offset:3px;opacity:0.8;">Delete</button>';
   };
-  // Block straight from a past appointment (Anne, 2026-08-03): you block
+  // Block straight from an appointment card (Anne, 2026-08-03; extended to
+  // EVERY section 2026-08-11 — "i don't see the way to block a client on
+  // the appt card" — because it only rendered under Recent). You block
   // someone you dealt with, and the card already knows who they are.
   const blockBtn = function(b2) {
     // email OR phone (audit follow-up 2026-08-03): phone-only clients have
@@ -14238,6 +14529,7 @@ function tbRenderAppts() {
       return tbApptCard(b,
         btn('Confirm', "tbSetStatus('" + b.id + "','confirmed')", true) +
         btn('Decline', "tbSetStatus('" + b.id + "','declined')", false) +
+        blockBtn(b) +
         delBtn(b.id));
     }).join('');
   }
@@ -14249,6 +14541,7 @@ function tbRenderAppts() {
       // confirm/decline surface stays clean. Existing standing series
       // still show + end below; tbOpenStanding kept for a future home.
       bs += btn('Cancel', "tbSetStatus('" + b.id + "','cancelled_by_tech')", false);
+      bs += blockBtn(b);
       bs += delBtn(b.id);
       return tbApptCard(b, bs);
     }).join('');
@@ -14400,12 +14693,73 @@ async function renderDashCalendar(techId, bookingOn) {
   }
 }
 
+// ── In-app appointment alerts (2026-08-10, Anne) ────────────────────────────
+// Push notifications get missed, swiped, or disabled, so the Tech Portal
+// itself says what's waiting: pending booking requests (rose, pulsing,
+// they're time-sensitive) and the next confirmed appointment (calm white
+// card, says "Today at 2:00 PM" when it's today in her timezone). Both tap
+// through to Bookings. Renders into #td-alerts under the greeting; hides
+// entirely when there's nothing to say. Refreshes whenever tbLoadDashBadge
+// runs, which already fires on dashboard entry and after confirm/decline.
+async function tdRenderApptAlerts(t) {
+  var wrap = document.getElementById('td-alerts');
+  if (!wrap || !t || !t.id) return;
+  try {
+    var nowIso = new Date().toISOString();
+    var res = await Promise.all([
+      fetch(SUPABASE_URL + '/rest/v1/bookings?tech_id=eq.' + t.id +
+        '&status=eq.pending&starts_at=gte.' + encodeURIComponent(nowIso) + '&select=id',
+        { headers: bkHeaders({ 'Prefer': 'count=exact', 'Range': '0-0' }) }),
+      fetch(SUPABASE_URL + '/rest/v1/bookings?tech_id=eq.' + t.id +
+        '&status=eq.confirmed&starts_at=gte.' + encodeURIComponent(nowIso) +
+        '&order=starts_at.asc&limit=1&select=starts_at,client_name,client_email,tech_services(name)',
+        { headers: bkHeaders() })
+    ]);
+    var pending = parseInt((res[0].headers.get('content-range') || '').split('/')[1], 10) || 0;
+    var next = res[1].ok ? (await res[1].json())[0] : null;
+    var html = '';
+    if (pending) {
+      html += '<div onclick="tbOpenBookings()" style="display:flex;align-items:center;gap:11px;padding:12px 14px;' +
+        'background:linear-gradient(135deg,var(--rose-light) 0%,#EBDCDD 100%);border:1px solid var(--rose-mid);' +
+        'border-radius:14px;cursor:pointer;box-shadow:0 1px 4px rgba(169,139,141,0.15);animation:pulse-soft 2.8s ease-in-out infinite;">' +
+        '<div style="width:8px;height:8px;border-radius:50%;background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);flex-shrink:0;animation:pulse-dot 2.8s ease-in-out infinite;"></div>' +
+        '<div style="flex:1;font-size:13.5px;color:var(--rose-dark);font-weight:600;line-height:1.35;">' +
+          pending + ' booking request' + (pending > 1 ? 's' : '') + ' waiting for you' +
+          '<div style="font-size:12px;font-weight:400;font-style:italic;opacity:0.85;margin-top:1px;">Tap to confirm or decline</div>' +
+        '</div>' +
+        '<svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:var(--rose-dark);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg>' +
+      '</div>';
+    }
+    if (next) {
+      var tz = t.booking_timezone;
+      var opts = { timeZone: tz || undefined };
+      var isToday = false;
+      try { isToday = new Date(next.starts_at).toLocaleDateString('en-US', opts) === new Date().toLocaleDateString('en-US', opts); } catch(_) {}
+      var when = isToday ? 'Today at ' + bkFmtSlot(next.starts_at, tz) : bkFmtStamp(next.starts_at, tz);
+      var svc = (next.tech_services && next.tech_services.name) || 'Appointment';
+      var who = next.client_name || next.client_email || 'a client';
+      html += '<div onclick="tbOpenBookings()" style="display:flex;align-items:center;gap:11px;padding:12px 14px;background:white;' +
+        'border:1px solid var(--border);border-radius:14px;cursor:pointer;box-shadow:var(--shadow);">' +
+        '<svg viewBox="0 0 24 24" style="width:17px;height:17px;stroke:var(--rose-dark);fill:none;stroke-width:1.9;stroke-linecap:round;flex-shrink:0;"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>' +
+        '<div style="flex:1;min-width:0;">' +
+          '<div style="font-size:11px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--muted);">' + (isToday ? 'Today' : 'Up next') + '</div>' +
+          '<div style="font-size:13.5px;font-weight:700;color:var(--charcoal);margin-top:1px;">' + bkEsc(when) + '</div>' +
+          '<div style="font-size:12.5px;color:var(--muted);margin-top:1px;">' + bkEsc(svc) + ' &middot; ' + bkEsc(who) + '</div>' +
+        '</div>' +
+        '<svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:var(--muted);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg>' +
+      '</div>';
+    }
+    wrap.innerHTML = html;
+    wrap.style.display = html ? 'grid' : 'none';
+  } catch(e) { console.warn('tdRenderApptAlerts', e); }
+}
+
 async function tbLoadDashBadge() {
   if (!currentUserEmail) return;
   const sub = document.getElementById('td-bookings-sub');
   const badge = document.getElementById('td-bookings-pending');
   try {
-    const r = await fetch(SUPABASE_URL + '/rest/v1/techs?select=id,booking_enabled,booking_link&or=(email.eq.' +
+    const r = await fetch(SUPABASE_URL + '/rest/v1/techs?select=id,booking_enabled,booking_link,booking_timezone&or=(email.eq.' +
       encodeURIComponent(currentUserEmail) + ',phone.eq.' + encodeURIComponent(currentUserEmail) + ')', { headers: bkHeaders() });
     if (!r.ok) return; // migration not run yet, leave the default copy
     const t = (await r.json())[0];
@@ -14413,6 +14767,9 @@ async function tbLoadDashBadge() {
     // Remember how this tech takes bookings so tbOpenBookings() can route
     // without a refetch. "Set up" = neither in-app booking nor a link.
     window._bkSetup = { id: t.id, enabled: !!t.booking_enabled, link: (t.booking_link || '').trim() };
+    // In-app appointment alerts (2026-08-10): fire-and-forget so the badge
+    // logic below never waits on the extra queries.
+    try { tdRenderApptAlerts(t); } catch(_) {}
     if (!t.booking_enabled) {
       if (badge) badge.style.display = 'none';
       if (sub) {
@@ -15835,6 +16192,32 @@ function styleAuthNav() {
   });
 }
 
+// ── Sign Out on every screen (2026-08-11, Anne) ─────────────────────────────
+// Punch 09 consolidated sign-out onto the profile screen + home header, and
+// styleAuthNav() turns the old Sign Out nav slots into Gallery tabs — which
+// left most screens with no visible way out at all ("please ensure there's
+// a logout every screen"). This injects a real Sign Out item into every
+// bottom nav when signed in; hidden when anonymous (the auth-nav slot shows
+// Sign In then). Re-appended on every call so it stays the right-most item
+// even after the role/appts injectors add their tabs.
+function ensureSignOutNav() {
+  var signedIn = !!currentUserEmail;
+  document.querySelectorAll('.bottom-nav').forEach(function(nav) {
+    var item = nav.querySelector('.mnc-signout-nav');
+    if (!signedIn) { if (item) item.style.display = 'none'; return; }
+    if (!item) {
+      item = document.createElement('div');
+      item.className = 'nav-item mnc-signout-nav';
+      item.setAttribute('onclick', 'doSignOut()');
+      item.setAttribute('title', 'Sign Out');
+      item.innerHTML = '<span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span>' +
+        '<span class="nav-label">Sign Out</span>';
+    }
+    item.style.display = '';
+    nav.appendChild(item); // appendChild moves an existing node, keeping it last
+  });
+}
+
 window._pendingAction = null;
 function requireLogin(action) {
   window._pendingAction = action || null;
@@ -16227,6 +16610,27 @@ async function loadTechHomeStats() {
         nudge.style.display = 'none';
       }
     }
+    // Gallery card preview (cohesion pass 2026-08-10): surface her actual
+    // work on the portal. Newest photos sit at the tail of the JSONB array,
+    // so take the last six and reverse for latest-first. Legacy entries can
+    // be bare URL strings instead of {url, tags} objects.
+    try {
+      var galPrev  = document.getElementById('td-gal-preview');
+      var galPitch = document.getElementById('td-gal-pitch');
+      var galCount = document.getElementById('td-gal-count');
+      if (galCount) galCount.textContent = n > 0 ? (n + ' look' + (n === 1 ? '' : 's')) : '';
+      if (galPrev) {
+        var thumbs = rawPhotos.slice(-6).reverse().map(function(p) {
+          var u = (typeof p === 'string') ? p : ((p && p.url) || '');
+          if (!u) return '';
+          return '<div style="aspect-ratio:1;border-radius:8px;overflow:hidden;background:var(--cream);">' +
+            '<img src="' + bkEsc(u) + '" loading="lazy" alt="" style="width:100%;height:100%;object-fit:cover;display:block;"/></div>';
+        }).join('');
+        galPrev.innerHTML = thumbs;
+        galPrev.style.display = thumbs ? 'grid' : 'none';
+      }
+      if (galPitch) galPitch.style.display = n > 0 ? 'none' : 'grid';
+    } catch(_) {}
     try { updateSetupChecklist(); } catch(_) {}
   } catch(e) { if (photosEl) photosEl.textContent = '-'; }
 
@@ -17155,6 +17559,7 @@ function show(id) {
   // admins. Cheap and safe to call on every transition.
   try { styleNavForRole(); } catch(_) {}
   try { refreshAdminNav(); } catch(_) {}
+  try { ensureSignOutNav(); } catch(_) {}
   // Feedback FAB visibility, hide on splash/auth/signup, show on every
   // signed-in screen. Cheap per-transition so sign-in / sign-out /
   // back-navigation all resolve to the right state automatically.
