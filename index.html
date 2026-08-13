@@ -5220,8 +5220,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 529,         /* __APP_BUILD_ANDROID__ */
-  ios:     334,          /* __APP_BUILD_IOS__     */
+  android: 530,         /* __APP_BUILD_ANDROID__ */
+  ios:     335,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -5738,6 +5738,16 @@ async function subscribeToPush(userId) {
 // Show in-app push permission prompt
 async function showPushPrompt(userId) {
   if (!PUSH_ENABLED) return;
+  // Native shell (Anne, 2026-08-10: client "never got the option, defaulted
+  // to off"): the web-push machinery below silently no-ops inside
+  // Capacitor, and only the TECH setup checklist ever called
+  // initCapacitorPush — so clients were never asked at all. Route every
+  // prompt call to the native register flow, which shows the standard OS
+  // permission dialog and saves the token.
+  if (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) {
+    try { await initCapacitorPush(); } catch(_) {}
+    return;
+  }
   if (!('Notification' in window)) return;
   // If permission was already granted on this browser (e.g. a different
   // user on the same browser already subscribed), silently re-subscribe
@@ -9736,13 +9746,12 @@ async function techEditAddPhotos(input) {
   const _newlyUploadedUrls = [];
 
   for (const file of files) {
-    // AI nail photo validation before anything else
-    const previewCheck = await new Promise(resolve => {
-      const r = new FileReader();
-      r.onload = e => resolve({ base64: e.target.result.split(',')[1], mimeType: file.type || 'image/jpeg' });
-      r.readAsDataURL(file);
-    });
-    const check = await validateNailPhoto(previewCheck.base64, previewCheck.mimeType);
+    // AI validation is DISABLED (task #9) — but this path still base64-read
+    // the ENTIRE original file (a 10MB phone photo → ~13MB string) just to
+    // hand it to the stub. That dead read was most of the "one photo
+    // chokes" lag (Anne, 2026-08-10). Skip straight past until validation
+    // is re-enabled; re-add the read inside validateNailPhoto then.
+    const check = await validateNailPhoto(null, file.type || 'image/jpeg');
     if (!check.ok) {
       showToast('❌ ' + check.reason);
       continue; // skip this file, try next
@@ -9776,38 +9785,35 @@ async function techEditAddPhotos(input) {
     // Persist immediately, race-free against Cancel.
     try { appendTechPhoto({ url: _publicUrl, tags: [], slot_type: _slotType }); } catch(_){}
     _newlyUploadedUrls.push(_publicUrl);
-    await new Promise(resolve => {
-      const reader = new FileReader();
-      reader.onload = async function(e) {
-        const preview = e.target.result;
-        // Local edit buffer stores the publicUrl (so save flow is consistent)
-        // plus _previewSrc (base64) so renderTePhotoGrid can show the photo
-        // instantly while the storage upload is still in flight.
-        edit.photos.push({ url: _publicUrl, _previewSrc: preview, tags: [], slot_type: _slotType });
-        added++;
-        renderTePhotoGrid(edit.photos);
-        resolve();
-        // Background storage upload. On failure, yank from both DB and
-        // local buffer so the publicUrl doesn't sit forever as a 404.
-        try {
-          const _upBlob = await compressForUpload(file, 1600, 0.85);
-          uploadThumb(_fileName, file);   // fire-and-forget, see uploadThumb
-          const res = await storagePostWithRetry('tech-photos/' + _fileName, _upBlob, (_upBlob && _upBlob.type) || file.type || 'image/jpeg');
-          if (!res || !res.ok) throw new Error('upload-failed-' + (res ? res.status : 'network'));
-          // Storage upload succeeded, clear the _previewSrc so subsequent
-          // renders use the real URL (which now resolves).
-          const idx = edit.photos.findIndex(p => p.url === _publicUrl);
-          if (idx !== -1) { delete edit.photos[idx]._previewSrc; }
-        } catch(err) {
-          // Yank, DB + local. User-facing toast so they know.
-          try { await removeTechPhotoByUrl(_publicUrl); } catch(_){}
-          const idx = edit.photos.findIndex(p => p.url === _publicUrl);
-          if (idx !== -1) { edit.photos.splice(idx, 1); renderTePhotoGrid(edit.photos); }
-          try { showToast('Upload failed, photo removed.'); } catch(_){}
-        }
-      };
-      reader.readAsDataURL(file);
-    });
+    // Instant preview via object URL (perf pass 2026-08-10): the old
+    // FileReader-to-base64 of the ORIGINAL file was the second full-file
+    // read per photo and the other half of the upload lag. An object URL
+    // is a zero-copy handle the <img> can render immediately.
+    const preview = URL.createObjectURL(file);
+    edit.photos.push({ url: _publicUrl, _previewSrc: preview, tags: [], slot_type: _slotType });
+    added++;
+    renderTePhotoGrid(edit.photos);
+    // Background storage upload. On failure, yank from both DB and
+    // local buffer so the publicUrl doesn't sit forever as a 404.
+    (async function() {
+      try {
+        const _upBlob = await compressForUpload(file, 1600, 0.85);
+        uploadThumb(_fileName, file);   // fire-and-forget, see uploadThumb
+        const res = await storagePostWithRetry('tech-photos/' + _fileName, _upBlob, (_upBlob && _upBlob.type) || file.type || 'image/jpeg');
+        if (!res || !res.ok) throw new Error('upload-failed-' + (res ? res.status : 'network'));
+        // Storage upload succeeded, clear the _previewSrc so subsequent
+        // renders use the real URL (which now resolves).
+        const idx = edit.photos.findIndex(p => p.url === _publicUrl);
+        if (idx !== -1) { delete edit.photos[idx]._previewSrc; }
+        try { URL.revokeObjectURL(preview); } catch(_) {}
+      } catch(err) {
+        // Yank, DB + local. User-facing toast so they know.
+        try { await removeTechPhotoByUrl(_publicUrl); } catch(_){}
+        const idx = edit.photos.findIndex(p => p.url === _publicUrl);
+        if (idx !== -1) { edit.photos.splice(idx, 1); renderTePhotoGrid(edit.photos); }
+        try { showToast('Upload failed, photo removed.'); } catch(_){}
+      }
+    })();
   }
   showToast('' + added + ' photo' + (added !== 1 ? 's' : '') + ' added');
   renderTePhotoGrid(edit.photos);
@@ -9914,15 +9920,10 @@ async function techBulkDropFiles(fileList) {
   // took minutes on cell upload speeds ("something choking?").
   const uploadJobs = [];
   for (const file of files) {
-    // Read as base64 for AI validation
-    const b64data = await new Promise(resolve => {
-      const r = new FileReader();
-      r.onload = e => resolve({ base64: e.target.result.split(',')[1], mimeType: file.type, preview: e.target.result });
-      r.readAsDataURL(file);
-    });
-
-    // AI nail check
-    const check = await validateNailPhoto(b64data.base64, b64data.mimeType);
+    // AI validation is DISABLED (task #9): the full-file base64 read that
+    // fed the stub cost seconds per phone photo (perf pass 2026-08-10).
+    // Preview below is a zero-copy object URL instead of the base64.
+    const check = await validateNailPhoto(null, file.type || 'image/jpeg');
     if (!check.ok) {
       skipped++;
       done++;
@@ -9957,7 +9958,7 @@ async function techBulkDropFiles(fileList) {
     try { appendTechPhoto({ url: _publicUrl, tags: [], slot_type: _slotType }); } catch(_){}
     if (!Array.isArray(window._bulkDropNewUrls)) window._bulkDropNewUrls = [];
     window._bulkDropNewUrls.push(_publicUrl);
-    const photoEntry = { url: _publicUrl, _previewSrc: b64data.preview, tags: [], slot_type: _slotType };
+    const photoEntry = { url: _publicUrl, _previewSrc: URL.createObjectURL(file), tags: [], slot_type: _slotType };
     edit.photos.push(photoEntry);
     renderTePhotoGrid(edit.photos);
 
