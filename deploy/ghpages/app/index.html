@@ -967,8 +967,8 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
     <div style="font-size:13px;font-weight:500;margin-bottom:2px;"><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg> Hear from My Nail Connection</div>
     <div style="font-size:13px;opacity:0.85;">Occasional updates, launches, and news, only from us.</div>
   </div>
-  <button id="push-enable-btn" style="background:white;color:var(--rose-dark);border:none;border-radius:100px;padding:7px 14px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;">Enable</button>
-  <button id="push-dismiss-btn" style="background:transparent;color:white;border:1.5px solid rgba(255,255,255,0.4);border-radius:100px;padding:7px 10px;font-size:13px;cursor:pointer;">x</button>
+  <button id="push-enable-btn" style="background:white;color:var(--rose-dark);border:none;border-radius:12px;padding:7px 14px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;">Enable</button>
+  <button id="push-dismiss-btn" style="background:transparent;color:white;border:1.5px solid rgba(255,255,255,0.4);border-radius:12px;padding:7px 10px;font-size:13px;cursor:pointer;">x</button>
 </div>
 <!-- end push-banner -->
 
@@ -1040,7 +1040,10 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
               0 3px 6px rgba(20,19,23,0.20) !important;
   color: #FFFFFF !important;
   text-shadow: 0 -1px 1px rgba(0,0,0,0.7), 0 1px 0 rgba(255,255,255,0.1) !important;
-  border-radius: 50px !important;
+  /* 12px, matching .btn everywhere else. This !important pill was why the
+     splash buttons never matched the app: inline border-radius on the
+     buttons themselves was silently losing to it. 2026-08-14. */
+  border-radius: 12px !important;
 }
 #splash .btn-outline {
   background: linear-gradient(180deg,#FFFFFF 0%,#F2EDED 100%) !important;
@@ -1049,7 +1052,10 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
               inset 0 -2px 4px rgba(125,100,102,0.16),
               0 4px 10px rgba(11,11,13,0.08) !important;
   color: #141317 !important;
-  border-radius: 50px !important;
+  /* 12px, matching .btn everywhere else. This !important pill was why the
+     splash buttons never matched the app: inline border-radius on the
+     buttons themselves was silently losing to it. 2026-08-14. */
+  border-radius: 12px !important;
 }
 .splash-headline {
   font-family:'Playfair Display',serif;
@@ -1286,12 +1292,12 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
            follow for techs and returning clients; the caption under the guest
            button names exactly what still needs an account (booking, and
            adding photos as a tech), so nobody hits a login wall surprised. -->
-      <button class="btn btn-rose" onclick="enterGuest()" style="width:100%;white-space:nowrap;font-size:15px;border-radius:50px;">Browse as Guest</button>
+      <button class="btn btn-rose" onclick="enterGuest()" style="width:100%;white-space:nowrap;font-size:15px;border-radius:12px;">Browse as Guest</button>
       <div style="font-size:13px;line-height:1.5;color:#6B5F63;text-align:center;max-width:280px;margin-top:2px;">
         No account needed to look around. To <b>book an appointment</b> or <b>add photos as a tech</b>, you'll need to sign in.
       </div>
-      <button class="btn btn-outline" onclick="startPhoneAuth('signin')" style="width:100%;white-space:nowrap;font-size:15px;padding:13px 20px;border-radius:50px;margin-top:8px;">Sign In</button>
-      <button class="btn btn-outline" onclick="startPhoneAuth('signup')" style="width:100%;white-space:nowrap;font-size:15px;padding:13px 20px;border-radius:50px;">Create a Free Account</button>
+      <button class="btn btn-outline" onclick="startPhoneAuth('signin')" style="width:100%;white-space:nowrap;font-size:15px;padding:13px 20px;border-radius:12px;margin-top:8px;">Sign In</button>
+      <button class="btn btn-outline" onclick="startPhoneAuth('signup')" style="width:100%;white-space:nowrap;font-size:15px;padding:13px 20px;border-radius:12px;">Create a Free Account</button>
     </div>
 
     <!-- Build identity on the splash too (Anne, 2026-08-03): the auth-screen
@@ -1303,41 +1309,18 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
   </div>
 </div>
 
-<!-- AUTH / SIGN IN -->
-<div class="screen" id="auth">
-  <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-start;padding:40px 24px 32px;background:linear-gradient(180deg,#FAF7F7 0%,#F1EAEA 50%,#EDE7E6 100%);">
-    <div style="text-align:center;margin-bottom:20px;">
-      <div class="logo-mark" style="font-size:26px;color:#141317;">Welcome back.</div>
-      <div style="font-family:'Playfair Display',serif;font-style:italic;font-size:14px;color:#A2636C;margin-top:4px;">We're so glad you are here.</div>
-    </div>
-    <div style="background:white;border-radius:24px;padding:28px 24px;box-shadow:0 4px 40px rgba(125,100,102,0.1);">
-      <div class="input-group"><label>Email</label><input type="email" id="signin-email" placeholder="your@email.com" onkeydown="if(event.key==='Enter')document.getElementById('signin-password').focus()"/></div>
-      <div class="input-group"><label>Password</label><div style="position:relative;"><input type="password" id="signin-password" placeholder="········" enterkeyhint="go" onkeydown="if(event.key==='Enter')signInWithEmail(document.getElementById('signin-email').value,document.getElementById('signin-password').value)" style="padding-right:44px;width:100%;"/><div style="position:absolute;right:14px;top:50%;transform:translateY(-50%);cursor:pointer;display:flex;align-items:center;" onclick="(function(id){var i=document.getElementById(id);var open=document.getElementById(id+'-eye-open');var closed=document.getElementById(id+'-eye-closed');if(i.type==='password'){i.type='text';open.style.display='none';closed.style.display='block';}else{i.type='password';open.style.display='block';closed.style.display='none';}})('signin-password')"><svg id="signin-password-eye-open" viewBox="0 0 24 24" style="width:18px;height:18px;stroke:var(--muted);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg><svg id="signin-password-eye-closed" viewBox="0 0 24 24" style="width:18px;height:18px;stroke:var(--muted);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;display:none;"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg></div></div></div>
-      <div style="text-align:right;margin-top:-8px;margin-bottom:16px;"><span style="font-size:13px;color:var(--rose);cursor:pointer;" onclick="showForgotPassword()">Forgot password?</span></div>
-      <button class="btn btn-rose" onclick="signInWithEmail(document.getElementById('signin-email').value, document.getElementById('signin-password').value)" style="margin-top:4px;">Sign In</button>
-      <div style="text-align:center;margin-top:18px;padding-top:16px;border-top:1px solid var(--border);">
-        <div style="font-size:13px;color:var(--muted);margin-bottom:10px;">New to My Nail Connection?</div>
-        <button class="btn btn-outline" onclick="startPhoneAuth('signup')" style="font-size:14px;">Create a Free Account</button>
-      </div>
-    </div>
-    <div style="text-align:center;margin-top:18px;">
-      <span style="font-size:13px;color:var(--muted);cursor:pointer;" onclick="backFromAuth()"><svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:var(--muted);fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;display:inline-block;vertical-align:middle;margin-right:4px;"><path d="M15 18l-6-6 6-6"/></svg> Back</span>
-    </div>
-    <!-- Support link, discreet, muted. Sits below Back so users
-         who tried Forgot Password and still can't get in have a path
-         to a real human. target="_blank" so the support page opens
-         in the device's browser without nuking the half-typed
-         sign-in form. 2026-04-27. -->
-    <div style="text-align:center;margin-top:10px;">
-      <a href="https://mynailconnection.com/support.html" target="_blank" rel="noopener" style="font-size:13px;color:var(--muted);text-decoration:none;border-bottom:1px dashed var(--rose-mid);padding-bottom:1px;">Get help</a>
-    </div>
-    <!-- Build identity tag, populated by JS on DOMContentLoaded from
-         APP_BUILD. Tells testers which build is installed (the store
-         listing only shows the marketing version like "2.0.0", which
-         doesn't change between iterations). 2026-04-30. -->
-    <div id="auth-build-tag" style="text-align:center;margin-top:14px;font-size:10px;color:var(--muted);opacity:0.55;letter-spacing:0.04em;"></div>
-  </div>
-</div>
+<!-- AUTH / SIGN IN — REMOVED 2026-08-14 (phone-only cutover).
+     The email + password sign-in screen (#auth) lived here. MNC is
+     phone-identity now: the splash routes both Sign In and Create a
+     Free Account straight to #phone-auth (SMS code), so this screen was
+     the last place in the app that asked anyone for an email address.
+
+     signInWithEmail() is deliberately KEPT in the JS below — the dev
+     test-account login still uses it, and it is not reachable from any
+     UI. lower(email) also remains the internal identity key for
+     push_subscriptions and every RLS policy (current_email()); that is a
+     database concern, not a login one, and changing it is a separate
+     migration. Removing the screen does not touch it. -->
 
 <!-- PHONE AUTH (3.0): one flow for sign-in AND sign-up. Enter phone -> SMS
        code -> in. New numbers collect a short profile; known numbers land home.
@@ -1355,33 +1338,17 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
     </div>
   </div>
 
-  <!-- SIGN UP - Step 1: Name & Email -->
-<div class="screen" id="signup">
-  <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-start;padding:40px 24px 32px;background:linear-gradient(160deg,#EDE7E6 0%,white 80%);">
-    <div style="text-align:center;margin-bottom:20px;">
-      <div style="margin-bottom:16px;display:flex;justify-content:center;"><div class="icon-glass" style="background:#EAF3EC;"><svg viewBox="0 0 24 24" style="width:26px;height:26px;stroke:#4A7A5A;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg></div></div>
-      <div class="logo-mark" style="font-size:24px;color:var(--ink);">Welcome, let's get you set up.</div>
-      <div style="font-family:'Playfair Display',serif;font-style:italic;font-size:14px;color:var(--muted);margin-top:4px;">Step 1, Tell us about yourself</div>
-      <!-- Progress bar -->
-      <div style="height:4px;background:var(--border);border-radius:100px;margin-top:12px;"><div style="height:100%;width:33%;background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);border-radius:100px;transition:width 0.4s;"></div></div>
-    </div>
-    <div style="background:white;border-radius:24px;padding:28px 24px;box-shadow:0 4px 40px rgba(125,100,102,0.1);">
-      <div style="font-family:'Playfair Display',serif;font-size:20px;margin-bottom:4px;">What's your name?</div>
-      <div style="font-size:13px;color:var(--muted);margin-bottom:20px;">We'd love to know who you are</div>
-      <div class="input-group"><label>First Name</label><input type="text" id="reg-first" placeholder="e.g. Sara" onkeydown="if(event.key==='Enter')document.getElementById('reg-last').focus()"/></div>
-      <div class="input-group"><label>Last Name</label><input type="text" id="reg-last" placeholder="e.g. Johnson" onkeydown="if(event.key==='Enter')document.getElementById('reg-email').focus()"/></div>
-      <div class="input-group"><label>Email</label><input type="email" id="reg-email" placeholder="your@email.com" onkeydown="if(event.key==='Enter')document.getElementById('reg-phone').focus()"/></div>
-      <div class="input-group"><label>Phone Number</label><input type="tel" id="reg-phone" placeholder="(602) 555-1234" oninput="formatPhone(this)" maxlength="17" onkeydown="if(event.key==='Enter')document.getElementById('reg-pass').focus()" style="width:100%;"/></div>
-      <div class="input-group"><label>Password</label><div style="position:relative;"><input type="password" id="reg-pass" placeholder="At least 8 characters" enterkeyhint="go" onkeydown="if(event.key==='Enter')goSignupStep2()" style="padding-right:44px;width:100%;"/><div style="position:absolute;right:14px;top:50%;transform:translateY(-50%);cursor:pointer;display:flex;align-items:center;" onclick="(function(id){var i=document.getElementById(id);var open=document.getElementById(id+'-eye-open');var closed=document.getElementById(id+'-eye-closed');if(i.type==='password'){i.type='text';open.style.display='none';closed.style.display='block';}else{i.type='password';open.style.display='block';closed.style.display='none';}})('reg-pass')"><svg id="reg-pass-eye-open" viewBox="0 0 24 24" style="width:18px;height:18px;stroke:var(--muted);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg><svg id="reg-pass-eye-closed" viewBox="0 0 24 24" style="width:18px;height:18px;stroke:var(--muted);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;display:none;"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg></div></div></div>
-      <button type="button" class="btn btn-rose" onclick="goSignupStep2()" style="margin-top:4px;">Continue</button>
-    </div>
-    <div style="text-align:center;margin-top:16px;">
-      <span style="font-size:13px;color:var(--muted);cursor:pointer;" onclick="backFromAuth()"><svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:var(--muted);fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;display:inline-block;vertical-align:middle;margin-right:4px;"><path d="M15 18l-6-6 6-6"/></svg> Back</span>
-      <span style="font-size:13px;color:var(--muted);margin:0 8px;">·</span>
-      <span style="font-size:13px;color:var(--rose);cursor:pointer;" onclick="show('auth')">Already have an account? Sign in</span>
-    </div>
-  </div>
-</div>
+<!-- SIGN UP Step 1 (name / email / password) — REMOVED 2026-08-14.
+     Phone signup (#phone-auth → create_signup_profile_phone, p_email:null)
+     collects name, role and ZIP in #pa-body and lands the user straight on
+     their home screen, so this screen and its email + password fields were
+     unreachable dead weight.
+
+     NOTE: #signup-role / #signup-location / #signup-tech below are also
+     orphaned by the same cutover, but they contain NO email fields and
+     share reg-* element ids with code that the tech editor may still call.
+     Left in place rather than risk breaking tech onboarding on launch day.
+     Safe follow-up cleanup once someone can click through a tech edit. -->
 
 <!-- SIGN UP - Step 2: Role -->
 <div class="screen" id="signup-role">
@@ -2266,7 +2233,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
     <div style="margin:22px 20px 0;">
       <div class="etched-caps" style="font-size:11px;font-weight:700;letter-spacing:1.6px;color:var(--muted);text-transform:uppercase;margin:0 0 8px;">Your profile</div>
       <button type="button" onclick="openTechEditFromProfile()"
-        style="width:100%;padding:14px 18px;border-radius:14px;border:1.5px solid var(--rose);background:white;color:var(--rose-dark);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:background 0.15s,transform 0.05s;"
+        style="width:100%;padding:14px 18px;border-radius:12px;border:1.5px solid var(--rose);background:white;color:var(--rose-dark);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:background 0.15s,transform 0.05s;"
         onmousedown="this.style.transform='scale(0.98)'" onmouseup="this.style.transform=''" onmouseleave="this.style.transform=''">
         <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;">
           <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
@@ -2274,7 +2241,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
         Edit Profile
       </button>
       <button type="button" onclick="viewMyProfileAsClient()"
-        style="width:100%;margin-top:10px;padding:14px 18px;border-radius:14px;border:1.5px solid var(--border);background:white;color:var(--charcoal);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:background 0.15s,transform 0.05s;"
+        style="width:100%;margin-top:10px;padding:14px 18px;border-radius:12px;border:1.5px solid var(--border);background:white;color:var(--charcoal);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:background 0.15s,transform 0.05s;"
         onmousedown="this.style.transform='scale(0.98)'" onmouseup="this.style.transform=''" onmouseleave="this.style.transform=''">
         <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;">
           <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
@@ -2282,7 +2249,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
         See What Clients See
       </button>
       <button type="button" onclick="shareMyProfile()"
-        style="width:100%;margin-top:10px;padding:14px 18px;border-radius:14px;border:none;background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);color:white;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 3px 12px rgba(125,100,102,0.3);">
+        style="width:100%;margin-top:10px;padding:14px 18px;border-radius:12px;border:none;background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);color:white;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 3px 12px rgba(125,100,102,0.3);">
         <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
         Share My Profile
       </button>
@@ -2357,7 +2324,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
        the background as a safety net. Added 2026-04-21. -->
   <div id="myph-save-bar" style="position:sticky;top:0;background:white;padding:10px 16px;border-bottom:1px solid var(--border);z-index:5;display:flex;align-items:center;justify-content:space-between;gap:12px;">
     <span id="myph-save-status" style="font-size:13px;color:var(--muted);">All changes saved</span>
-    <button id="myph-save-btn" type="button" onclick="saveMyPhotosNow()" style="padding:7px 18px;border-radius:100px;border:none;background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);color:white;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:opacity 0.2s,background 0.2s;">Save</button>
+    <button id="myph-save-btn" type="button" onclick="saveMyPhotosNow()" style="padding:7px 18px;border-radius:12px;border:none;background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);color:white;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:opacity 0.2s,background 0.2s;">Save</button>
   </div>
 
   <div class="scroll-content" style="padding:20px 16px 100px;">
@@ -2454,7 +2421,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       <div id="myph-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;"></div>
       <div id="myph-filter-empty" style="display:none;text-align:center;padding:40px 20px;color:var(--muted);font-size:13px;line-height:1.55;">
         No photos match this filter.
-        <br><button type="button" onclick="clearMyPhotosFilter()" style="font-size:13px;padding:7px 16px;border-radius:100px;border:1.5px solid var(--rose-mid);background:white;color:var(--rose-dark);font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;margin-top:10px;">Clear filter</button>
+        <br><button type="button" onclick="clearMyPhotosFilter()" style="font-size:13px;padding:7px 16px;border-radius:12px;border:1.5px solid var(--rose-mid);background:white;color:var(--rose-dark);font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;margin-top:10px;">Clear filter</button>
       </div>
     </div>
 
@@ -2468,7 +2435,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       <div class="empty-state-title">No photos yet</div>
       <div class="empty-state-sub" style="margin-bottom:16px;">Tap below to add your first set, you'll tag and caption each one before it goes live.</div>
       <button type="button" onclick="openPhotoUploadFromHome()"
-        style="padding:12px 22px;border-radius:100px;border:none;background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);color:white;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:8px;box-shadow:0 2px 8px rgba(169,139,141,0.22);">
+        style="padding:12px 22px;border-radius:12px;border:none;background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);color:white;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:8px;box-shadow:0 2px 8px rgba(169,139,141,0.22);">
         <svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;">
           <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
           <polyline points="17 8 12 3 7 8"/>
@@ -2509,7 +2476,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
     <div style="margin:20px 20px 0;">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;">
         <div style="font-family:'Playfair Display',serif;font-size:18px;color:var(--charcoal);">Appointments</div>
-        <button onclick="tbToggleManualAdd()" id="tb-manual-toggle" style="padding:7px 13px;border-radius:100px;border:1.5px solid var(--rose);background:white;color:var(--rose-dark);font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;">+ Add appointment</button>
+        <button onclick="tbToggleManualAdd()" id="tb-manual-toggle" style="padding:7px 13px;border-radius:12px;border:1.5px solid var(--rose);background:white;color:var(--rose-dark);font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;">+ Add appointment</button>
       </div>
       <!-- Tech-entered appointment form (2026-08-11, Anne: "i don't see a
            way to 'take a booking' for the tech to enter someone themselves").
@@ -2533,8 +2500,8 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
           <textarea id="tb-ma-note" rows="2" placeholder="Private note (optional — only you see it)" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;box-sizing:border-box;resize:vertical;"></textarea>
         </div>
         <div style="display:flex;gap:8px;margin-top:10px;">
-          <button onclick="tbSubmitManualAdd()" id="tb-ma-save" style="flex:1;padding:11px;border-radius:10px;border:none;background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);color:white;font-size:14px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;">Add to calendar</button>
-          <button onclick="tbToggleManualAdd()" style="flex:0 0 auto;padding:11px 16px;border-radius:10px;border:1.5px solid var(--border);background:white;color:var(--muted);font-size:14px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;">Cancel</button>
+          <button onclick="tbSubmitManualAdd()" id="tb-ma-save" style="flex:1;padding:11px;border-radius:12px;border:none;background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);color:white;font-size:14px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;">Add to calendar</button>
+          <button onclick="tbToggleManualAdd()" style="flex:0 0 auto;padding:11px 16px;border-radius:12px;border:1.5px solid var(--border);background:white;color:var(--muted);font-size:14px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;">Cancel</button>
         </div>
       </div>
       <div id="tb-appts"></div>
@@ -2667,7 +2634,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
         <input type="date" id="tb-toff-start" style="padding:8px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:white;color:var(--charcoal);">
         <span style="font-size:13px;color:var(--muted);">to</span>
         <input type="date" id="tb-toff-end" style="padding:8px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:white;color:var(--charcoal);">
-        <button onclick="tbAddTimeOff()" style="padding:8px 14px;border-radius:8px;border:1.5px solid var(--rose-mid);background:white;color:var(--rose-dark);font-size:13px;font-weight:700;cursor:pointer;">Block</button>
+        <button onclick="tbAddTimeOff()" style="padding:8px 14px;border-radius:12px;border:1.5px solid var(--rose-mid);background:white;color:var(--rose-dark);font-size:13px;font-weight:700;cursor:pointer;">Block</button>
       </div>
     </div>
 
@@ -2960,7 +2927,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
          clipboard copy. -->
     <div style="text-align:center;padding:14px 20px 0;">
       <button onclick="shareApp()" type="button"
-              style="display:inline-flex;align-items:center;gap:10px;padding:12px 22px;border:none;border-radius:100px;background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);color:white;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:600;letter-spacing:0.3px;cursor:pointer;box-shadow:0 4px 14px rgba(199,125,130,0.32),0 1px 3px rgba(0,0,0,0.12);">
+              style="display:inline-flex;align-items:center;gap:10px;padding:12px 22px;border:none;border-radius:12px;background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);color:white;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:600;letter-spacing:0.3px;cursor:pointer;box-shadow:0 4px 14px rgba(199,125,130,0.32),0 1px 3px rgba(0,0,0,0.12);">
         <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;">
           <path d="M4 12v7a2 2 0 002 2h12a2 2 0 002-2v-7"/>
           <polyline points="16 6 12 2 8 6"/>
@@ -3051,7 +3018,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
     <!-- My Appointments entry (3.0 booking). Promoted from a quiet white
          row to a real button (Anne, 2026-08-03: "my appointments can be a
          button too") — same ink-gradient family as the app's primary CTAs. -->
-    <button onclick="show('my-appts')" type="button" style="margin:14px 20px 0;width:calc(100% - 40px);padding:13px 16px;border:none;border-radius:14px;background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);color:white;cursor:pointer;display:flex;align-items:center;gap:12px;font-family:'DM Sans',sans-serif;box-shadow:0 4px 14px rgba(199,125,130,0.32),0 1px 3px rgba(0,0,0,0.12);">
+    <button onclick="show('my-appts')" type="button" style="margin:14px 20px 0;width:calc(100% - 40px);padding:13px 16px;border:none;border-radius:12px;background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);color:white;cursor:pointer;display:flex;align-items:center;gap:12px;font-family:'DM Sans',sans-serif;box-shadow:0 4px 14px rgba(199,125,130,0.32),0 1px 3px rgba(0,0,0,0.12);">
       <svg viewBox="0 0 24 24" style="width:20px;height:20px;stroke:white;fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0;"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
       <div style="flex:1;text-align:left;font-size:14px;font-weight:600;letter-spacing:0.3px;">My Appointments</div>
       <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:rgba(255,255,255,0.8);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg>
@@ -3166,7 +3133,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       <span style="flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--rose-mid),transparent);"></span>
     </div>
     <div style="padding:14px 20px 4px;text-align:center;">
-      <button type="button" onclick="doSignOut()" style="padding:10px 22px;border-radius:100px;border:1.5px solid var(--border);background:white;color:var(--muted);font-size:13px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;display:inline-flex;align-items:center;gap:7px;letter-spacing:0.3px;">
+      <button type="button" onclick="doSignOut()" style="padding:10px 22px;border-radius:12px;border:1.5px solid var(--border);background:white;color:var(--muted);font-size:13px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;display:inline-flex;align-items:center;gap:7px;letter-spacing:0.3px;">
         <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
         Sign Out
       </button>
@@ -3236,7 +3203,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
 
       <!-- Navigation -->
       <div style="padding:14px 28px 26px;">
-        <button id="tutorial-next" onclick="tutorialNext()" style="width:100%;padding:14px;border-radius:100px;border:1px solid rgba(0,0,0,0.42);background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);color:#FFFFFF;font-size:14.5px;font-weight:700;letter-spacing:0.9px;cursor:pointer;font-family:'DM Sans',sans-serif;box-shadow:0 6px 16px rgba(20,19,23,0.30),inset 0 1px 1px rgba(255,255,255,0.18);">Next &rarr;</button>
+        <button id="tutorial-next" onclick="tutorialNext()" style="width:100%;padding:14px;border-radius:12px;border:1px solid rgba(0,0,0,0.42);background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);color:#FFFFFF;font-size:14.5px;font-weight:700;letter-spacing:0.9px;cursor:pointer;font-family:'DM Sans',sans-serif;box-shadow:0 6px 16px rgba(20,19,23,0.30),inset 0 1px 1px rgba(255,255,255,0.18);">Next &rarr;</button>
         <button id="tutorial-skip" onclick="closeTutorial()" style="display:block;margin:13px auto 0;padding:8px 22px;border:none;background:none;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;letter-spacing:0.6px;">Skip</button>
       </div>
     </div>
@@ -3280,7 +3247,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
              obvious "exit without saving" affordance. The previous tiny
              "x" was hard to spot, especially on iPad where the modal
              rendered awkwardly. 2026-04-30 per Anne. -->
-        <button type="button" onclick="closeTechEdit()" style="padding:8px 14px;font-size:13px;background:none;border:1.5px solid var(--border);color:var(--muted);border-radius:100px;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500;flex-shrink:0;">Cancel</button>
+        <button type="button" onclick="closeTechEdit()" style="padding:8px 14px;font-size:13px;background:none;border:1.5px solid var(--border);color:var(--muted);border-radius:12px;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500;flex-shrink:0;">Cancel</button>
         <div style="font-family:'Playfair Display',serif;font-size:18px;font-weight:600;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:center;" id="tech-edit-title">Edit Tech</div>
         <button type="button" class="btn btn-rose" onclick="saveTechEdit()" style="padding:8px 18px;font-size:13px;flex-shrink:0;width:auto;">Save</button>
       </div>
@@ -3301,7 +3268,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
         </div>
         <input type="file" id="te-profile-file" accept="image/*" style="display:none;" onchange="techEditProfilePhoto(this)"/>
         <div style="display:flex;justify-content:flex-end;margin-top:8px;">
-          <button type="button" onclick="clearProfilePhoto()" style="padding:6px 12px;border-radius:10px;border:1.5px solid var(--border);background:white;color:var(--muted);font-size:13px;cursor:pointer;">Remove photo</button>
+          <button type="button" onclick="clearProfilePhoto()" style="padding:6px 12px;border-radius:12px;border:1.5px solid var(--border);background:white;color:var(--muted);font-size:13px;cursor:pointer;">Remove photo</button>
         </div>
       </div>
 
@@ -4766,7 +4733,7 @@ async function confirmDeleteAccount() {
     // Show a brief confirmation, then send them to auth.
     showToast('Account deleted. Thanks for trying MNC.');
     setTimeout(function(){
-      try { show('auth'); } catch(_) { try { show('home'); } catch(__){} }
+      try { startPhoneAuth('signin'); } catch(_) { try { show('home'); } catch(__){} }
     }, 600);
   } catch (e) {
     if (btn) {
@@ -5219,9 +5186,9 @@ function maybeShowTutorial(role) {
 // __APP_BUILD_*__ below are how sync.sh finds and rewrites the values.
 // Don't reorder or rename them.
 const APP_BUILD = {
-  name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 532,         /* __APP_BUILD_ANDROID__ */
-  ios:     337,          /* __APP_BUILD_IOS__     */
+  name:    '3.0.0',     /* __APP_BUILD_NAME__   */
+  android: 534,         /* __APP_BUILD_ANDROID__ */
+  ios:     339,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -7901,9 +7868,9 @@ async function loadAdminInbox() {
         textBackBtn = '<a href="' + smsHref + '" style="display:inline-flex;align-items:center;gap:4px;font-size:13px;background:var(--sage);color:white;text-decoration:none;padding:5px 12px;border-radius:20px;font-family:\'DM Sans\',sans-serif;font-weight:500;">📱 Text back</a>';
       }
       const markReadBtn = unread
-        ? '<button onclick="markInboxRead(\'' + m.id + '\')" style="font-size:13px;background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);color:white;border:none;padding:5px 12px;border-radius:20px;cursor:pointer;font-family:\'DM Sans\',sans-serif;">Mark read</button>'
+        ? '<button onclick="markInboxRead(\'' + m.id + '\')" style="font-size:13px;background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);color:white;border:none;padding:5px 12px;border-radius:12px;cursor:pointer;font-family:\'DM Sans\',sans-serif;">Mark read</button>'
         : '<span style="font-size:13px;color:var(--sage);">✓ Read</span>';
-      const deleteBtn = '<button onclick="deleteInboxMessage(\'' + m.id + '\')" style="font-size:13px;background:transparent;color:var(--muted);border:1.5px solid var(--border);padding:4px 11px;border-radius:20px;cursor:pointer;font-family:\'DM Sans\',sans-serif;margin-left:auto;">Delete</button>';
+      const deleteBtn = '<button onclick="deleteInboxMessage(\'' + m.id + '\')" style="font-size:13px;background:transparent;color:var(--muted);border:1.5px solid var(--border);padding:4px 11px;border-radius:12px;cursor:pointer;font-family:\'DM Sans\',sans-serif;margin-left:auto;">Delete</button>';
       const actionRow = '<div style="margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">' + textBackBtn + markReadBtn + deleteBtn + '</div>';
 
       return '<div style="background:' + bg + ';border:1px solid ' + border + ';border-radius:12px;padding:12px 14px;margin-bottom:10px;">' +
@@ -9533,13 +9500,17 @@ function openTechEdit(tech) {
   document.getElementById('te-shop').value    = edit.shop;
   document.getElementById('te-email').value   = edit.email;
   // "Remove gathering the email at all" (Anne, 2026-08-03): phone-identity
-  // users never get asked for one. Email-identity accounts still see
-  // theirs (it's their login and the save guard requires it).
+  // users never get asked for one.
+  // 2026-08-14, phone-only cutover: now nobody is, except admins. The old
+  // condition also showed the field to email-identity accounts on the
+  // grounds that "it's their login" — that stopped being true when email
+  // sign-in was removed. Admins keep it because lower(email) is still the
+  // internal identity key behind push_subscriptions and every RLS policy,
+  // so Anne needs to be able to see and correct it on legacy accounts.
   try {
     var _teEmailWrap = document.getElementById('te-email').parentElement;
-    var _isEmailIdentity = (currentUserEmail || '').indexOf('@') > 0;
     var _isAdminHere = (window._mncCurrentRole === 'admin');
-    _teEmailWrap.style.display = (_isEmailIdentity || _isAdminHere || edit.email) ? '' : 'none';
+    _teEmailWrap.style.display = _isAdminHere ? '' : 'none';
   } catch(_) {}
   document.getElementById('te-phone').value   = edit.phone || '';
   formatPhone(document.getElementById('te-phone')); // format digits-only DB value for display
@@ -11288,7 +11259,7 @@ async function previewTechCleanup() {
     window._cleanupIds = toDelete.map(function(t) { return t.id; });
     window._cleanupEmails = toDelete.map(function(t) { return t.email; }).filter(Boolean);
 
-    html += '<button onclick="confirmTechCleanup()" style="width:100%;padding:10px;border-radius:100px;border:none;background:#C0392B;color:white;font-size:13px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif;">'
+    html += '<button onclick="confirmTechCleanup()" style="width:100%;padding:10px;border-radius:12px;border:none;background:#C0392B;color:white;font-size:13px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif;">'
       + '<svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;vertical-align:middle;"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg> Delete ' + toDelete.length + ' Techs Permanently'
       + '</button>';
 
@@ -12889,7 +12860,7 @@ function renderAdminUsersList() {
       <span style="font-size:10px;font-weight:600;color:var(--rose);background:var(--rose-light);padding:3px 8px;border-radius:100px;letter-spacing:0.5px;">ADMIN</span>
       ${isSelf
         ? ''
-        : `<button onclick="demoteAdmin('${esc(u.email||'')}')" title="Remove admin role" style="margin-left:6px;background:none;border:none;cursor:pointer;color:var(--muted);font-size:18px;line-height:1;padding:4px 8px;border-radius:6px;" onmouseover="this.style.background='rgba(192,57,43,0.1)';this.style.color='#c0392b';" onmouseout="this.style.background='none';this.style.color='var(--muted)';">&times;</button>`
+        : `<button onclick="demoteAdmin('${esc(u.email||'')}')" title="Remove admin role" style="margin-left:6px;background:none;border:none;cursor:pointer;color:var(--muted);font-size:18px;line-height:1;padding:4px 8px;border-radius:12px;" onmouseover="this.style.background='rgba(192,57,43,0.1)';this.style.color='#c0392b';" onmouseout="this.style.background='none';this.style.color='var(--muted)';">&times;</button>`
       }
     </div>
   `;
@@ -12999,25 +12970,20 @@ function showExistingAccountPrompt(opts) {
   modal.style.display = 'flex';
 }
 
+// Phone-only cutover 2026-08-14. Both of these used to drive the email
+// sign-in form: one prefilled it, the other opened the password-reset modal.
+// Neither exists now — sign-in is a texted code — so both collapse to the
+// same action. The `email` parameter is kept so the existing-account modal's
+// wiring doesn't need touching, and "forgot" is kept as its own name because
+// the modal still labels a button that way.
 function existingAccountSignIn(email) {
   closeModal('existing-account-modal');
-  show('auth');
-  setTimeout(function() {
-    var el = document.getElementById('signin-email');
-    if (el && email) { el.value = email; }
-    var pw = document.getElementById('signin-password');
-    if (pw) { try { pw.focus(); } catch(_){} }
-  }, 60);
+  startPhoneAuth('signin');
 }
 
 function existingAccountForgot(email) {
   closeModal('existing-account-modal');
-  show('auth');
-  setTimeout(function() {
-    showForgotPassword();
-    var el = document.getElementById('forgot-email');
-    if (el && email) { el.value = email; }
-  }, 100);
+  startPhoneAuth('signin');
 }
 
 function showSignupError(msg) {
@@ -13177,7 +13143,7 @@ function showConfirmationPending(email) {
 // flow itself handles the "still not confirmed" error by reshowing the
 // check-your-inbox state, so a premature tap is self-healing. 2026-04-22.
 async function continueAfterConfirmation(email) {
-  show('auth');
+  startPhoneAuth('signin');
   const emailInput = document.getElementById('signin-email');
   if (emailInput && email) emailInput.value = email;
   if (typeof regData !== 'undefined' && regData && regData.pass && email) {
@@ -14202,7 +14168,7 @@ function tbRenderAvail() {
         '<input type="time" id="tb-av-s-' + d + '" value="09:00" style="' + inp + '">' +
         '<span style="font-size:13px;color:var(--muted);">to</span>' +
         '<input type="time" id="tb-av-e-' + d + '" value="17:00" style="' + inp + '">' +
-        '<button onclick="tbAddWindow(' + d + ')" style="padding:7px 12px;border-radius:8px;border:1.5px solid var(--rose-mid);background:white;color:var(--rose-dark);font-size:13px;font-weight:700;cursor:pointer;">Add</button>' +
+        '<button onclick="tbAddWindow(' + d + ')" style="padding:7px 12px;border-radius:12px;border:1.5px solid var(--rose-mid);background:white;color:var(--rose-dark);font-size:13px;font-weight:700;cursor:pointer;">Add</button>' +
       '</div>' +
     '</div>';
   }).join('');
@@ -14294,7 +14260,7 @@ function tbOpenStanding(id) {
   m.style.display = 'flex'; m.classList.add('open');
   const who = bkEsc(b.client_name || b.client_email || 'this client');
   const opts = [1, 2, 3, 4].map(function(n) {
-    return '<button onclick="tbConvertStanding(\'' + id + '\',' + n + ')" style="padding:12px 6px;border-radius:10px;border:1.5px solid var(--rose-mid);background:white;color:var(--rose-dark);font-size:13px;font-weight:700;cursor:pointer;">' + (n === 1 ? 'Every week' : 'Every ' + n + ' weeks') + '</button>';
+    return '<button onclick="tbConvertStanding(\'' + id + '\',' + n + ')" style="padding:12px 6px;border-radius:12px;border:1.5px solid var(--rose-mid);background:white;color:var(--rose-dark);font-size:13px;font-weight:700;cursor:pointer;">' + (n === 1 ? 'Every week' : 'Every ' + n + ' weeks') + '</button>';
   }).join('');
   bkBody(bkHeader('Standing appointment', '') +
     '<div style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:12px;">Repeat ' + who + ' at this same time, automatically. The next visits land on your calendar as confirmed, anything that collides with time off or another booking gets skipped, and the series keeps itself topped up.</div>' +
@@ -14558,8 +14524,8 @@ function tbEditNote(id) {
       'style="width:100%;box-sizing:border-box;padding:9px 11px;border:1.5px solid var(--rose-mid);border-radius:10px;font-size:13px;font-family:\'DM Sans\',sans-serif;background:white;outline:none;resize:vertical;">' +
       bkEsc(_bkNotes[id] || '') + '</textarea>' +
     '<div style="display:flex;gap:8px;margin-top:6px;">' +
-      '<button onclick="tbSaveNote(\'' + id + '\')" style="flex:1;padding:8px;border-radius:9px;border:none;background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);color:white;font-size:13px;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif;">Save note</button>' +
-      '<button onclick="tbCancelNote(\'' + id + '\')" style="flex:0 0 auto;padding:8px 14px;border-radius:9px;border:1.5px solid var(--border);background:white;color:var(--muted);font-size:13px;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif;">Cancel</button>' +
+      '<button onclick="tbSaveNote(\'' + id + '\')" style="flex:1;padding:8px;border-radius:12px;border:none;background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);color:white;font-size:13px;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif;">Save note</button>' +
+      '<button onclick="tbCancelNote(\'' + id + '\')" style="flex:0 0 auto;padding:8px 14px;border-radius:12px;border:1.5px solid var(--border);background:white;color:var(--muted);font-size:13px;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif;">Cancel</button>' +
     '</div>';
   var ta = document.getElementById('tb-note-input-' + id);
   if (ta) { try { ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length); } catch(_) {} }
@@ -14629,7 +14595,7 @@ function tbRenderAppts() {
   const wrap = document.getElementById('tb-appts');
   if (!wrap) return;
   const btn = function(label, fn, primary) {
-    return '<button onclick="' + fn + '" style="flex:1;padding:9px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;' +
+    return '<button onclick="' + fn + '" style="flex:1;padding:9px;border-radius:12px;font-size:13px;font-weight:700;cursor:pointer;' +
       (primary
         ? 'border:none;background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);color:white;'
         : 'border:1.5px solid var(--border);background:white;color:var(--muted);') +
@@ -14651,7 +14617,7 @@ function tbRenderAppts() {
     // client_email null, so the Block button never rendered for them and
     // Anne couldn't find where to block anyone.
     if (!b2 || (!b2.client_email && !b2.client_phone)) return '';
-    return '<button onclick="tbBlockFromAppt(\'' + b2.id + '\')" style="flex:0 0 auto;padding:9px 13px;border-radius:10px;border:1.5px solid var(--border);background:white;color:var(--muted);font-size:13px;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif;">Block</button>';
+    return '<button onclick="tbBlockFromAppt(\'' + b2.id + '\')" style="flex:0 0 auto;padding:9px 13px;border-radius:12px;border:1.5px solid var(--border);background:white;color:var(--muted);font-size:13px;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif;">Block</button>';
   };
   const pending  = _bkAppts.filter(function(b) { return b.status === 'pending'; });
   const upcoming = _bkAppts.filter(function(b) { return b.status === 'confirmed'; });
@@ -14695,7 +14661,7 @@ function tbRenderAppts() {
           '<div style="font-size:13.5px;font-weight:700;color:var(--charcoal);">' + bkEsc(s.client_name || s.client_email || 'Client') + ' &middot; every ' + (s.interval_weeks === 1 ? 'week' : s.interval_weeks + ' weeks') + '</div>' +
           '<div style="font-size:13px;color:var(--muted);margin-top:2px;">' + bkEsc(svc) + ' &middot; ' + when.replace(/,.*$/, '') + 's at ' + bkFmtSlot(s.anchor_starts_at, _bkMyTech && _bkMyTech.booking_timezone) + '</div>' +
         '</div>' +
-        '<button onclick="tbEndStanding(\'' + s.id + '\')" style="padding:7px 12px;border-radius:8px;border:1.5px solid var(--border);background:white;color:var(--muted);font-size:13px;font-weight:700;cursor:pointer;">End</button>' +
+        '<button onclick="tbEndStanding(\'' + s.id + '\')" style="padding:7px 12px;border-radius:12px;border:1.5px solid var(--border);background:white;color:var(--muted);font-size:13px;font-weight:700;cursor:pointer;">End</button>' +
       '</div>';
     }).join('');
   }
@@ -15237,8 +15203,8 @@ function bkStepDays() {
     const open = !!_bkFlow.dows[dow] && !blocked;
     const label = new Date(iso + 'T12:00:00Z').toLocaleDateString('en-US', { weekday: 'short', month: 'numeric', day: 'numeric', timeZone: 'UTC' });
     chips += open
-      ? '<button id="bk-day-' + iso + '" onclick="bkPickDay(\'' + iso + '\')" style="padding:9px 6px;border-radius:10px;border:1.5px solid var(--rose-mid);background:white;color:var(--rose-dark);font-size:13px;font-weight:600;cursor:pointer;">' + label + '</button>'
-      : '<button disabled style="padding:9px 6px;border-radius:10px;border:1.5px solid var(--border);background:var(--cream);color:var(--muted);font-size:13px;opacity:0.55;">' + label + '</button>';
+      ? '<button id="bk-day-' + iso + '" onclick="bkPickDay(\'' + iso + '\')" style="padding:9px 6px;border-radius:12px;border:1.5px solid var(--rose-mid);background:white;color:var(--rose-dark);font-size:13px;font-weight:600;cursor:pointer;">' + label + '</button>'
+      : '<button disabled style="padding:9px 6px;border-radius:12px;border:1.5px solid var(--border);background:var(--cream);color:var(--muted);font-size:13px;opacity:0.55;">' + label + '</button>';
   }
   bkBody(bkHeader(bkEsc(_bkFlow.svc.name), 'bkStepServices()') +
     '<div style="font-size:13px;color:var(--muted);margin-bottom:10px;">Pick a day</div>' +
@@ -15293,7 +15259,7 @@ async function bkPickDay(iso) {
     '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">' +
     slots.map(function(s) {
       const ts = s.slot_start || s;
-      return '<button onclick="bkPickSlot(\'' + ts + '\')" style="padding:10px 6px;border-radius:10px;border:1.5px solid var(--rose-mid);background:white;color:var(--rose-dark);font-size:13px;font-weight:600;cursor:pointer;">' +
+      return '<button onclick="bkPickSlot(\'' + ts + '\')" style="padding:10px 6px;border-radius:12px;border:1.5px solid var(--rose-mid);background:white;color:var(--rose-dark);font-size:13px;font-weight:600;cursor:pointer;">' +
         bkFmtSlot(ts, _bkFlow.tz) + '</button>';
     }).join('') + '</div>');
 }
@@ -15804,7 +15770,7 @@ async function loadMyAppointments() {
       '</div>' +
       contact +
       (cancellable
-        ? '<div style="display:flex;margin-top:8px;"><button onclick="bkCancelMine(\'' + b.id + '\')" style="flex:1;padding:9px;border-radius:10px;border:1.5px solid var(--border);background:white;color:var(--muted);font-size:13px;font-weight:700;cursor:pointer;">Cancel</button></div>'
+        ? '<div style="display:flex;margin-top:8px;"><button onclick="bkCancelMine(\'' + b.id + '\')" style="flex:1;padding:9px;border-radius:12px;border:1.5px solid var(--border);background:white;color:var(--muted);font-size:13px;font-weight:700;cursor:pointer;">Cancel</button></div>'
         : '') +
     '</div>';
   }).join('');
@@ -21265,18 +21231,12 @@ function closeReleaseWizard() {
   </div>
 </div>
 
-<div class="modal-overlay" id="forgot-modal" style="display:none;">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <div style="font-family:'Playfair Display',serif;font-size:22px;margin-bottom:6px;">Reset Password</div>
-    <div style="font-size:14px;color:var(--muted);margin-bottom:20px;">Enter your email and we will send you a reset link.</div>
-    <div id="forgot-success" style="display:none;background:#EAF3EC;border:1px solid #A8D5B0;border-radius:10px;padding:12px 14px;font-size:13px;color:#2D6A4F;margin-bottom:16px;"></div>
-    <div id="forgot-error" style="display:none;background:#FDE8EC;border:1px solid #F0B0BC;border-radius:10px;padding:10px 14px;font-size:13px;color:#8B2035;margin-bottom:14px;"></div>
-    <div class="input-group"><label>Email</label><input type="email" id="forgot-email" placeholder="your@email.com"/></div>
-    <button class="btn btn-rose" id="forgot-btn" onclick="submitForgotPassword()" style="margin-top:4px;">Send Reset Link</button>
-    <button class="btn btn-outline" style="margin-top:10px;" onclick="closeModal('forgot-modal')">Cancel</button>
-  </div>
-</div>
+<!-- RESET PASSWORD modal — REMOVED 2026-08-14 (phone-only cutover).
+     This was the last email input left in the app. There is no password to
+     reset any more: sign-in is a texted code, so "I can't get in" is solved
+     by requesting another code, not by an emailed link.
+     showForgotPassword() / submitForgotPassword() are now unreachable and
+     left in the JS only so nothing that still names them throws. -->
 
 <!-- CONFIRM MODAL, replaces native browser confirm() dialogs. Opened via
      showConfirm(message, opts) which returns a Promise<boolean>. Keeps the
@@ -21290,8 +21250,8 @@ function closeReleaseWizard() {
     <div id="confirm-title" style="font-family:'Playfair Display',serif;font-size:19px;font-weight:600;color:var(--charcoal);text-align:center;margin-bottom:8px;line-height:1.3;"></div>
     <div id="confirm-body" style="font-size:13.5px;color:var(--muted);text-align:center;line-height:1.55;margin-bottom:22px;white-space:pre-wrap;"></div>
     <div style="display:flex;gap:10px;">
-      <button id="confirm-cancel" type="button" style="flex:1;padding:12px;border-radius:100px;border:1.5px solid var(--border);background:white;color:var(--charcoal);font-size:14px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;">Cancel</button>
-      <button id="confirm-ok" type="button" style="flex:1;padding:12px;border-radius:100px;border:none;background:linear-gradient(135deg,#A98B8D,#A2636C);color:white;font-size:14px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;box-shadow:0 2px 8px rgba(125,100,102,0.35);">Confirm</button>
+      <button id="confirm-cancel" type="button" style="flex:1;padding:12px;border-radius:12px;border:1.5px solid var(--border);background:white;color:var(--charcoal);font-size:14px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;">Cancel</button>
+      <button id="confirm-ok" type="button" style="flex:1;padding:12px;border-radius:12px;border:none;background:linear-gradient(135deg,#A98B8D,#A2636C);color:white;font-size:14px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;box-shadow:0 2px 8px rgba(125,100,102,0.35);">Confirm</button>
     </div>
   </div>
 </div>
@@ -21328,11 +21288,11 @@ function closeReleaseWizard() {
     </div>
     <div style="display:flex;flex-direction:column;gap:10px;">
       <button type="button" id="delete-account-confirm-btn" onclick="confirmDeleteAccount()" disabled
-              style="width:100%;padding:13px 16px;border:none;border-radius:100px;background:#8B2035;color:white;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:not-allowed;opacity:0.5;letter-spacing:0.3px;">
+              style="width:100%;padding:13px 16px;border:none;border-radius:12px;background:#8B2035;color:white;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:not-allowed;opacity:0.5;letter-spacing:0.3px;">
         Permanently delete my account
       </button>
       <button type="button" onclick="closeDeleteAccountModal()"
-              style="width:100%;padding:11px 16px;border:1.5px solid var(--border);border-radius:100px;background:white;color:var(--charcoal);font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:500;cursor:pointer;">
+              style="width:100%;padding:11px 16px;border:1.5px solid var(--border);border-radius:12px;background:white;color:var(--charcoal);font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:500;cursor:pointer;">
         Cancel
       </button>
     </div>
@@ -21517,7 +21477,7 @@ function closeReleaseWizard() {
           </label>
           <div style="margin-bottom:8px;">
             <textarea id="ue-gallery-url" rows="3" placeholder="Paste one URL per line, add as many as you like" style="width:100%;padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;resize:vertical;box-sizing:border-box;"></textarea>
-            <button type="button" onclick="ueAddGalleryUrl()" style="margin-top:5px;width:100%;padding:8px;border-radius:8px;border:1.5px solid var(--rose-mid);background:var(--rose-light);color:var(--rose);font-size:13px;font-weight:500;cursor:pointer;">Add All URLs</button>
+            <button type="button" onclick="ueAddGalleryUrl()" style="margin-top:5px;width:100%;padding:8px;border-radius:12px;border:1.5px solid var(--rose-mid);background:var(--rose-light);color:var(--rose);font-size:13px;font-weight:500;cursor:pointer;">Add All URLs</button>
           </div>
           <div id="ue-gallery-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;"></div>
         </div>
@@ -21778,7 +21738,7 @@ function closeReleaseWizard() {
       </button>
       <div style="display:flex;gap:8px;">
         <button onclick="changeWelcomeBackPref()" class="btn btn-outline" style="flex:1;font-size:13px;">Change preference</button>
-        <button onclick="dismissWelcomeBack()" style="flex:1;padding:12px;border-radius:100px;border:1.5px solid var(--border);background:white;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;">Browse normally</button>
+        <button onclick="dismissWelcomeBack()" style="flex:1;padding:12px;border-radius:12px;border:1.5px solid var(--border);background:white;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;">Browse normally</button>
       </div>
     </div>
   </div>
@@ -21906,7 +21866,7 @@ function closeReleaseWizard() {
            removeMyPhotoFromGallery() which handles the splice + PATCH +
            storage cleanup + re-render. 2026-04-23 per Anne: "we have a
            gallery now, we can remove photos from there." -->
-      <button type="button" onclick="removeMyPhotoFromGallery()" style="width:100%;margin-top:18px;padding:11px;border-radius:100px;border:1.5px solid rgba(192,64,74,0.35);background:white;color:#C0404A;font-size:13px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;display:flex;align-items:center;justify-content:center;gap:8px;">
+      <button type="button" onclick="removeMyPhotoFromGallery()" style="width:100%;margin-top:18px;padding:11px;border-radius:12px;border:1.5px solid rgba(192,64,74,0.35);background:white;color:#C0404A;font-size:13px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;display:flex;align-items:center;justify-content:center;gap:8px;">
         <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
         Remove this photo
       </button>
@@ -21953,7 +21913,7 @@ function closeReleaseWizard() {
       </div>
       <div id="fb-status" style="display:none;font-size:13px;line-height:1.4;padding:10px 12px;border-radius:10px;"></div>
       <div style="display:flex;gap:8px;margin-top:4px;">
-        <button onclick="closeFeedbackModal()" style="flex:1;padding:12px;border-radius:100px;border:1.5px solid var(--border);background:white;font-size:14px;font-weight:500;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;">Cancel</button>
+        <button onclick="closeFeedbackModal()" style="flex:1;padding:12px;border-radius:12px;border:1.5px solid var(--border);background:white;font-size:14px;font-weight:500;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;">Cancel</button>
         <button id="fb-send" onclick="submitFeedback()" class="btn btn-rose" style="flex:2;">Send feedback</button>
       </div>
     </div>
