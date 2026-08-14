@@ -5220,8 +5220,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 531,         /* __APP_BUILD_ANDROID__ */
-  ios:     336,          /* __APP_BUILD_IOS__     */
+  android: 532,         /* __APP_BUILD_ANDROID__ */
+  ios:     337,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -18609,6 +18609,17 @@ let currentEditUserIdx = null;
 let currentEditUserTable = 'users';
 let ueCurrentPhotoUrl = '';
 let ueGalleryPhotos = [];
+// url → the FULL original photo object ({url, tags, slot_type, ...}).
+//
+// ueGalleryPhotos deliberately stays a flat array of URL strings because the
+// render/add/remove code all indexes it that way. That flattening is what ate
+// Anne's tags (2026-08-14, "logged into 4804402314 as tech and my tags are
+// gone"): saving a tech from the admin user-edit modal rebuilt photos as
+// `{url, tags: []}`, so ANY admin edit — changing a role, fixing a phone,
+// touching a bio — silently wiped every photo tag that tech had ever set.
+// Tags are how clients filter, so a wiped tech drops out of every search.
+// Keep the originals here and re-attach on save.
+let ueGalleryMeta = {};
 
 function toggleTechSection(role) {
   const sec = document.getElementById('ue-tech-section');
@@ -18737,6 +18748,7 @@ async function openUserEdit(idx) {
   currentEditUserIdx = idx;
   ueCurrentPhotoUrl = '';
   ueGalleryPhotos = [];
+  ueGalleryMeta = {}; // must clear with the gallery, or tags leak between techs
   const u = ALL_USERS[idx];
   if (!u) return;
 
@@ -18811,6 +18823,11 @@ async function openUserEdit(idx) {
   // Gallery (techs only)
   const photos = f.photos || [];
   if (Array.isArray(photos)) {
+    ueGalleryMeta = {};
+    photos.forEach(function(p) {
+      // Legacy rows store a bare URL string; newer ones store an object.
+      if (p && typeof p === 'object' && p.url) ueGalleryMeta[p.url] = p;
+    });
     ueGalleryPhotos = photos.map(function(p) { return p.url || p; });
     ueRenderGallery();
   }
@@ -18838,7 +18855,16 @@ async function saveUserEdit() {
   const updated = {
     name: document.getElementById('ue-name').value.trim(),
     email: document.getElementById('ue-email').value.trim(),
-    phone: document.getElementById('ue-phone').value.replace(/\D/g,''), // digits-only for UNIQUE constraint
+    // E.164, NOT digits-only. This field wrote '4804402314' while phone
+    // signup (create_signup_profile_phone) wrote '+14804402314', and every
+    // lookup in this app is an exact `phone.eq.<mncIdentity()>` — which
+    // always produces the +1 form. So any tech saved through this modal
+    // became invisible to themselves: their own techs row stopped resolving,
+    // and profile, photos and tags all read as empty. Second half of Anne's
+    // "my tags are gone", 2026-08-14. A DB trigger now normalizes this
+    // column on both tables (sql/phone-normalize-e164.sql); this keeps the
+    // client from sending the wrong shape in the first place.
+    phone: bkNormalizePhone(document.getElementById('ue-phone').value) || document.getElementById('ue-phone').value.replace(/\D/g,''),
     role: role,
     joined: document.getElementById('ue-joined').value,
     address: document.getElementById('ue-address').value.trim(),
@@ -18853,7 +18879,12 @@ async function saveUserEdit() {
   if (isTech) {
     updated.shop_name = (document.getElementById('ue-shop') || {}).value?.trim() || '';
     updated.hours_available = (document.getElementById('ue-hours') || {}).value?.trim() || '';
-    updated.photos = ueGalleryPhotos.map(url => ({ url, tags: [] }));
+    // Carry the original tags/slot_type through. Photos added during THIS
+    // edit have no prior entry and correctly start with no tags.
+    updated.photos = ueGalleryPhotos.map(url => {
+      const prev = ueGalleryMeta[url];
+      return prev ? Object.assign({}, prev, { url: url }) : { url: url, tags: [] };
+    });
     updated.initials = (updated.name || '?').split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
     updated.bg = 'linear-gradient(135deg,#F7E2E3,#E6D6D7)';
     updated.color = 'var(--rose)';
