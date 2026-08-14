@@ -70,7 +70,7 @@ validate_html() {
 }
 
 # Validate every critical HTML source before any cache bump or copy
-for f in index.html marketing.html marketing-v3.html reset-password.html tech-guide.html tech-guide-v3.html \
+for f in index.html marketing-v3.html reset-password.html tech-guide-v3.html \
          privacy.html terms.html 404.html founders.html; do
   validate_html "$f"
 done
@@ -123,7 +123,7 @@ sync_dir() {
 # stay no-op until the user edits HTML again.
 if [ -f sw.js ]; then
   needs_bump=0
-  for f in index.html marketing.html marketing-v3.html reset-password.html tech-guide.html tech-guide-v3.html founders.html admin-feedback.html admin-stats.html manifest.json; do
+  for f in index.html marketing-v3.html reset-password.html tech-guide-v3.html founders.html admin-feedback.html admin-stats.html manifest.json; do
     if [ -f "$f" ] && [ "$f" -nt sw.js ]; then needs_bump=1; break; fi
   done
   if [ "$needs_bump" = "1" ]; then
@@ -161,7 +161,7 @@ if [ ! -f .last-build-bump ]; then
   echo "  build-bump: marker initialized (no bump on first run)"
 else
   needs_build_bump=0
-  for f in index.html marketing.html marketing-v3.html reset-password.html tech-guide.html tech-guide-v3.html \
+  for f in index.html marketing-v3.html reset-password.html tech-guide-v3.html \
            capacitor.config.json android/app/src/main/AndroidManifest.xml; do
     if [ -f "$f" ] && [ "$f" -nt .last-build-bump ]; then
       needs_build_bump=1
@@ -281,14 +281,15 @@ mkdir -p "$GH" "$GH/app"
 
 # Marketing at root
 # 3.0 LAUNCH (2026-08-03): the hat-lady redesign (marketing-v3.html)
-# ships as the root index; the older marketing.html stays reachable
-# at /marketing-2.html as a rollback reference.
+# ships as the root index.
+# 2026-08-14: the 2.0 marketing.html and its /marketing-2.html rollback
+# copy were DELETED, along with the legacy tech-guide.html. Keeping them
+# around is what put four dead /marketing.html links on the live tech
+# guide and a non-existent URL in sitemap.xml. One version now.
 copy_if_exists marketing-v3.html       "$GH/index.html"
-copy_if_exists marketing.html          "$GH/marketing-2.html"
 copy_if_exists 404.html                "$GH/404.html"
 copy_if_exists stats.html              "$GH/stats.html"
 copy_if_exists punch-list.html         "$GH/punch-list.html"
-copy_if_exists tech-guide.html         "$GH/tech-guide.html"
 copy_if_exists tech-guide-v3.html      "$GH/tech-guide-v3.html"
 copy_if_exists founders.html           "$GH/founders.html"
 copy_if_exists admin-feedback.html     "$GH/admin-feedback.html"
@@ -316,7 +317,6 @@ sync_dir app-screens "$GH/app-screens"
 sync_dir images      "$GH/app/images"
 
 # ── Leslie campaign page + downloadable campaign assets ──────────────────
-copy_if_exists no-Download-Campaign.html "$GH/no-Download-Campaign.html"
 copy_if_exists leslie.html "$GH/leslie.html"
 sync_dir campaign-assets "$GH/campaign-assets"
 
