@@ -5220,8 +5220,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '2.0.9',     /* __APP_BUILD_NAME__   */
-  android: 530,         /* __APP_BUILD_ANDROID__ */
-  ios:     335,          /* __APP_BUILD_IOS__     */
+  android: 531,         /* __APP_BUILD_ANDROID__ */
+  ios:     336,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -5665,6 +5665,89 @@ function pushKeyFor(email, phone) {
   return d.length === 10 ? '+1' + d : '';
 }
 
+// Save (or rebind) a push subscription row. Used by BOTH the web-push path
+// and the Capacitor native path, they were drifting apart and only one of
+// them ever got a fix.
+//
+// Why an RPC first (2026-08-14, Anne's 'native save: 403'): the write is an
+// upsert on the unique `endpoint` column, and when that endpoint row already
+// belongs to a DIFFERENT account (Anne signs into a test client account on
+// the same phone her tech account registered), Postgres runs the ON CONFLICT
+// branch as an UPDATE. RLS then evaluates push_update_self's USING clause
+// against the row as it exists NOW, which is still owned by the old user, so
+// it fails and PostgREST returns 403 / 42501. The INSERT policy never gets a
+// say. public.save_push_subscription() is SECURITY DEFINER: it verifies the
+// caller owns the identity they're claiming, then rebinds the endpoint.
+// Migration: sql/push-subscription-upsert-rpc.sql.
+//
+// Falls back to the old direct upsert if the RPC isn't deployed yet (404 /
+// PGRST202), so this is safe to ship before the SQL is run.
+//
+// Returns { ok, status, detail } — detail is the Postgres code + message, not
+// a bare status number. The bare number cost hours: '403' alone can't tell
+// "wrote with the anon bearer" from "RLS said no" from "endpoint owned by
+// someone else", and all three land here.
+async function savePushSubscription(row) {
+  var tok = window._mncAccessToken;
+  if (!tok) return { ok: false, status: 0, detail: 'no session token yet' };
+  var hdrs = {
+    'Content-Type': 'application/json',
+    'apikey': SUPABASE_ANON_KEY,
+    'Authorization': 'Bearer ' + tok
+  };
+
+  async function detailOf(res) {
+    try {
+      var t = await res.text();
+      if (!t) return String(res.status);
+      var j = null;
+      try { j = JSON.parse(t); } catch (_) {}
+      if (j && (j.code || j.message)) {
+        return res.status + ' ' + (j.code || '') + ' ' + (j.message || j.hint || '');
+      }
+      return res.status + ' ' + t.slice(0, 120);
+    } catch (_) { return String(res.status); }
+  }
+
+  try {
+    var rpc = await fetch(SUPABASE_URL + '/rest/v1/rpc/save_push_subscription', {
+      method: 'POST',
+      headers: hdrs,
+      body: JSON.stringify({
+        p_user_id: row.user_id,
+        p_endpoint: row.endpoint,
+        p_p256dh: row.p256dh,
+        p_auth: row.auth
+      })
+    });
+    if (rpc.ok) return { ok: true, status: rpc.status, detail: '' };
+    // Not deployed yet → fall through to the direct upsert below.
+    if (rpc.status !== 404) {
+      return { ok: false, status: rpc.status, detail: await detailOf(rpc) };
+    }
+  } catch (e) {
+    return { ok: false, status: 0, detail: (e && e.message) || 'network' };
+  }
+
+  try {
+    var res = await fetch(SUPABASE_URL + '/rest/v1/push_subscriptions?on_conflict=endpoint', {
+      method: 'POST',
+      headers: Object.assign({}, hdrs, { 'Prefer': 'resolution=merge-duplicates,return=minimal' }),
+      body: JSON.stringify({
+        user_id: row.user_id,
+        endpoint: row.endpoint,
+        p256dh: row.p256dh,
+        auth: row.auth,
+        updated_at: new Date().toISOString()
+      })
+    });
+    if (res.ok) return { ok: true, status: res.status, detail: '' };
+    return { ok: false, status: res.status, detail: await detailOf(res) };
+  } catch (e) {
+    return { ok: false, status: 0, detail: (e && e.message) || 'network' };
+  }
+}
+
 async function subscribeToPush(userId) {
   if (!PUSH_ENABLED) return;
   if (VAPID_PUBLIC_KEY === 'YOUR_VAPID_PUBLIC_KEY_HERE') {
@@ -5709,17 +5792,15 @@ async function subscribeToPush(userId) {
     // Save subscription to Supabase. If this write fails the browser still
     // holds a subscription but nobody can ever push to it, so a failure here
     // must not stay silent (it did until 2026-08-03).
-    const client = await sb.from('push_subscriptions');
-    const saved = await client.upsert({
+    const saved = await savePushSubscription({
       user_id: pushKey(userId),
       endpoint: subscription.endpoint,
       p256dh: btoa(String.fromCharCode(...new Uint8Array(subscription.getKey('p256dh')))),
-      auth: btoa(String.fromCharCode(...new Uint8Array(subscription.getKey('auth')))),
-      updated_at: new Date().toISOString()
-    }, { onConflict: 'endpoint' });
-    if (saved && saved.error) {
-      console.warn('push_subscriptions save failed:', saved.error);
-      showToast('Notification setup hit a snag (save: ' + (saved.error.code || saved.error.message || 'error') + ')', 5000);
+      auth: btoa(String.fromCharCode(...new Uint8Array(subscription.getKey('auth'))))
+    });
+    if (!saved.ok) {
+      console.warn('push_subscriptions save failed:', saved);
+      showToast('Notification setup hit a snag (save: ' + (saved.detail || saved.status) + ')', 8000);
       return null;
     }
 
@@ -6050,41 +6131,37 @@ function wireCapacitorPushListeners(PushNotifications) {
   // Get the device token and save to Supabase
   PushNotifications.addListener('registration', async (token) => {
     if (window.__MNC_DEV__) console.log('Native push token:', token.value);
-    const userId = currentUserEmail || (currentUser && currentUser.id);
-    if (!userId) return;
     // Boot race (seen live 2026-08-03, 'native save' snag toast): the
-    // registration event can beat the session restore, so the save went
-    // out with the anon bearer and RLS rejected it. Wait briefly for the
-    // access token before saving.
-    for (let i = 0; i < 10 && !window._mncAccessToken; i++) {
+    // registration event can beat the session restore, so the save went out
+    // with the anon bearer and RLS rejected it. Wait for the access token —
+    // and for the identity, which lands on the same restore. 20s, because a
+    // cold native start on a slow connection routinely blows past 5s and the
+    // old code just gave up and fired an anon-bearer write that could only
+    // ever 403.
+    for (let i = 0; i < 40 && (!window._mncAccessToken || !currentUserEmail); i++) {
       await new Promise(function(r) { setTimeout(r, 500); });
     }
-    // Save FCM/APNs token to push_subscriptions table. Bearer must be the
-    // signed-in user's token, not the anon key — RLS is `to authenticated`
-    // and silently rejected anon writes for months on the web path (fixed
-    // 2026-08-03); don't repeat that here.
-    // on_conflict=endpoint: without it, re-saving the SAME device token
-    // (reinstalls often get the same one back from FCM) 409'd instead of
-    // merging — Anne's 'native save 409', 2026-08-03. Merging also rebinds
-    // user_id when a different account signs in on this device.
-    const saveRes = await fetch(`${SUPABASE_URL}/rest/v1/push_subscriptions?on_conflict=endpoint`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'apikey': SUPABASE_ANON_KEY,
-        'Authorization': `Bearer ${window._mncAccessToken || SUPABASE_ANON_KEY}`,
-        'Prefer': 'resolution=merge-duplicates,return=minimal'
-      },
-      body: JSON.stringify({
-        user_id: pushKey(userId),
-        endpoint: token.value,       // device token acts as endpoint
-        p256dh: 'native',            // marker so Edge Function knows it is native
-        auth: window.Capacitor.getPlatform(), // 'ios' or 'android'
-        updated_at: new Date().toISOString()
-      })
+    // NEVER fall back to currentUser.id here. push_subscriptions.user_id is
+    // keyed on lowercased email (or E.164 for phone accounts) and the RLS
+    // policies compare it to current_email() / current_phone() — a UUID
+    // matches neither, so that fallback wrote nothing but 403s.
+    const userId = pushKey(currentUserEmail || mncIdentity(currentUser));
+    if (!userId) {
+      showToast('Notification setup hit a snag (no signed-in identity yet)', 5000);
+      return;
+    }
+    if (!window._mncAccessToken) {
+      showToast('Notification setup hit a snag (session not ready)', 5000);
+      return;
+    }
+    const saved = await savePushSubscription({
+      user_id: userId,
+      endpoint: token.value,               // device token acts as endpoint
+      p256dh: 'native',                    // marker so Edge Function knows it is native
+      auth: window.Capacitor.getPlatform() // 'ios' or 'android'
     });
-    if (!saveRes.ok) {
-      showToast('Notification setup hit a snag (native save: ' + saveRes.status + ')', 5000);
+    if (!saved.ok) {
+      showToast('Notification setup hit a snag (native save: ' + (saved.detail || saved.status) + ')', 8000);
     } else {
       window._mncHasPushSub = true;
       try { updateSetupChecklist(); } catch(_) {}
