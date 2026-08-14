@@ -4544,12 +4544,22 @@ const TUTORIALS = {
     {
       icon: '<svg viewBox="0 0 24 24" style="width:60px;height:60px;stroke:var(--rose);fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>',
       title: 'You\u2019re in, welcome.',
-      body: '<p style="margin:0 0 14px;">Taking your craft online is a big move, and we\u2019re so glad you made it with us. Your <b>Tech Portal</b> has a short setup list waiting: four steps, about five minutes, and you\u2019re bookable.</p><p style="margin:0;">It saves as you go, so stop any time. One more peek at what clients see, then dive in.</p>'
+      body: '<p style="margin:0 0 14px;">Taking your craft online is a big move, and we\u2019re so glad you made it with us. Your <b>Tech Portal</b> has a short setup list waiting: five steps, well under ten minutes, and you\u2019re bookable.</p><p style="margin:0;">It saves as you go, so stop any time. A quick tour first, then dive in.</p>'
     },
     {
       icon: '<svg viewBox="0 0 24 24" style="width:60px;height:60px;stroke:var(--rose);fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>',
       title: 'Here\u2019s what clients see.',
       body: '<p style="margin:0 0 14px;">Your profile shows your gallery, your bio, and the ways to reach you that <b>you</b> choose \u2014 <b>Book</b>, <b>Call</b>, <b>Text</b>, or your own booking link. When a client taps Book, they pick a service, a day, and a time. That\u2019s it.</p><p style="margin:0;">Tap <b>Share My Profile</b> on your portal to send your link anywhere \u2014 your bio, your stories, a QR at your station. It\u2019s your booking page now.</p>'
+    },
+    {
+      icon: '<svg viewBox="0 0 24 24" style="width:60px;height:60px;stroke:var(--rose);fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15.5 14"/></svg>',
+      title: 'Make the schedule yours.',
+      body: '<p style="margin:0 0 14px;">In <b>Booking Settings</b> (the \u2699\ufe0f on My Appts, or the card on your portal) you control how appointments land:</p><p style="margin:0 0 10px;"><b>Buffer</b> \u2014 breathing room between appointments, so back-to-back sets never collide.<br><b>Minimum notice</b> \u2014 how soon someone can grab a slot, so a stranger can\u2019t appear in your chair in twenty minutes.<br><b>Auto-confirm</b> \u2014 on, requests book themselves; off, you approve each one first.<br><b>Weekly hours</b> \u2014 the days and windows clients can book. Add two windows on a day for a split shift.</p><p style="margin:0;">Everything saves the moment you change it.</p>'
+    },
+    {
+      icon: '<svg viewBox="0 0 24 24" style="width:60px;height:60px;stroke:var(--rose);fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>',
+      title: 'Light up when you\u2019re open.',
+      body: '<p style="margin:0 0 14px;">The three chips at the top of your portal are how clients find you <b>right now</b>. Tap to flip them any time \u2014 they save instantly:</p><p style="margin:0 0 10px;"><b>\u2728 Open today</b> \u2014 you have chair time <i>today</i>. Your photos glow in the Gallery with an Open today banner and you appear in the Open today rail on the home screen. Your best free advertising.<br><b>This week</b> \u2014 the softer signal: you have openings in the next few days.<br><b>New clients \u2713</b> \u2014 tells browsers you\u2019re taking fresh faces, right on your card.</p><p style="margin:0;">Flip them off when you\u2019re slammed \u2014 clients only ever see what\u2019s true. That\u2019s the whole tour. Go get booked. \ud83d\udc85</p>'
     },
   ],
 
@@ -5187,8 +5197,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.0',     /* __APP_BUILD_NAME__   */
-  android: 534,         /* __APP_BUILD_ANDROID__ */
-  ios:     339,          /* __APP_BUILD_IOS__     */
+  android: 535,         /* __APP_BUILD_ANDROID__ */
+  ios:     340,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -6506,6 +6516,7 @@ function doSignOut() {
   _inspoPhotos = null;
   window._mncCurrentRole = null;
   window._mncHasPushSub = undefined; // next account re-checks the server
+  window._mncHasAvailability = undefined;
   // Per-user device flags (storage audit 2026-08-03): none are namespaced
   // by user, so on a shared device account A's state leaked into account
   // B — "push done" claimed for a user with no subscription, A's booking
@@ -14187,6 +14198,8 @@ async function tbAddWindow(d) {
   if (!r.ok) { showToast('Could not save those hours, try again'); return; }
   const rows = await r.json();
   if (rows[0]) _bkAvail.push(rows[0]);
+  window._mncHasAvailability = true; // schedule checklist step flips live
+  try { updateSetupChecklist(); } catch(_) {}
   tbRenderAvail();
 }
 
@@ -15073,6 +15086,7 @@ async function bkForkHoursFinish() {
       headers: bkHeaders({ 'Content-Type': 'application/json', 'Prefer': 'return=minimal' }),
       body: JSON.stringify(rows)
     });
+    if (r2.ok) { window._mncHasAvailability = true; try { updateSetupChecklist(); } catch(_) {} }
     var ok = await patchBookingField({ booking_enabled: true });
     if (!r1.ok || !r2.ok || !ok) {
       showToast('Something did not save, check your Bookings settings');
@@ -16596,6 +16610,7 @@ function _setupStepsState() {
       _refreshPushSubState(); // answers async, then re-renders the checklist
     }
   } catch(_) {}
+  try { if (window._mncHasAvailability === undefined) _refreshAvailabilityState(); } catch(_) {}
   return [
     { label: 'Add your name and photo', sub: 'This is what clients see first \u00b7 1 min',
       done: !!window._setupProfileDone, action: 'openTechEditFromProfile()' },
@@ -16603,9 +16618,37 @@ function _setupStepsState() {
       done: (window._setupPhotoCount || 0) > 0, action: 'openPhotoUploadFromHome()' },
     { label: 'Choose how clients book you', sub: 'In-app, your link, or just calls \u00b7 2 min',
       done: !!(bk.enabled || bk.link || _bkCallsOnlyPref()), action: 'tbOpenBookings()' },
+    // Schedule step (Anne, 2026-08-10): walk new techs into Booking
+    // Settings for buffer / notice / weekly hours. Done = availability
+    // windows exist on the server; techs on an external link or
+    // calls-only don't need a schedule here, so it's done for them the
+    // moment they've made that choice.
+    { label: 'Dial in your schedule', sub: 'Hours, buffer, and notice \u00b7 2 min',
+      done: (!bk.enabled && !!(bk.link || _bkCallsOnlyPref())) || !!window._mncHasAvailability,
+      action: "show('tech-booking-settings')" },
     { label: 'Say yes to notifications', sub: 'So bookings ping your phone \u00b7 10 sec',
       done: pushDone, action: 'setupEnablePush()' }
   ];
+}
+
+// Server truth for the schedule step: does this tech have any weekly
+// availability windows? Cached like the push-sub check; re-renders the
+// checklist when the answer lands.
+async function _refreshAvailabilityState() {
+  var bk = window._bkSetup || {};
+  if (window._mncAvailCheckInflight || !bk.id || window._mncHasAvailability !== undefined) return;
+  window._mncAvailCheckInflight = true;
+  try {
+    var r = await fetch(SUPABASE_URL + '/rest/v1/tech_availability?tech_id=eq.' + encodeURIComponent(bk.id) + '&select=id&limit=1',
+      { headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + (window._mncAccessToken || SUPABASE_ANON_KEY) } });
+    if (r.ok) {
+      var rows = await r.json();
+      window._mncHasAvailability = !!(rows && rows.length);
+      try { updateSetupChecklist(); } catch(_) {}
+    }
+  } catch(_) {} finally {
+    window._mncAvailCheckInflight = false;
+  }
 }
 
 // Does THIS account have a live push subscription row? Sets
