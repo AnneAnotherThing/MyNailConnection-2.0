@@ -5197,8 +5197,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.0',     /* __APP_BUILD_NAME__   */
-  android: 537,         /* __APP_BUILD_ANDROID__ */
-  ios:     342,          /* __APP_BUILD_IOS__     */
+  android: 538,         /* __APP_BUILD_ANDROID__ */
+  ios:     343,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -6528,6 +6528,13 @@ function doSignOut() {
      'mnc_tutorial_seen30_client', 'mnc_feed_radius'].forEach(function(k) {
       localStorage.removeItem(k);
     });
+    // Sweep the per-account booking-pref keys too, plus the legacy global
+    // one, so a stale 'calls' choice can never pre-complete another
+    // account's setup list (2026-08-11).
+    for (var _i = localStorage.length - 1; _i >= 0; _i--) {
+      var _k = localStorage.key(_i);
+      if (_k && _k.indexOf('mnc_booking_pref') === 0) localStorage.removeItem(_k);
+    }
     sessionStorage.clear();
   } catch(_) {}
   updateAvatar();
@@ -15005,7 +15012,7 @@ async function bkForkSaveLink() {
   if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
   var ok = await patchBookingField({ booking_link: url });
   if (!ok) { showToast('Could not save, try again'); return; }
-  try { localStorage.removeItem('mnc_booking_pref'); } catch(_) {}
+  try { localStorage.removeItem(_bkPrefKey()); } catch(_) {}
   window._bkSetup = window._bkSetup || {}; window._bkSetup.link = url;
   if (_bkMyTech) _bkMyTech.booking_link = url;
   try { var te = document.getElementById('te-booking-link'); if (te) te.value = url; } catch(_){}
@@ -15018,7 +15025,7 @@ function bkForkCallsOnly() {
   // is a complete, first-class choice. Nothing to write server-side, the
   // profile already shows Call and Text; remember the choice locally so
   // the setup checklist counts this step done.
-  try { localStorage.setItem('mnc_booking_pref', 'calls'); } catch(_) {}
+  try { localStorage.setItem(_bkPrefKey(), 'calls'); } catch(_) {}
   bkCloseSetupFork();
   showToast('Done \u2014 clients will see big Call and Text buttons on your profile.');
   try { updateSetupChecklist(); } catch(_) {}
@@ -15043,7 +15050,7 @@ async function bkForkInApp() {
   if (hasSetup) {
     var ok = await patchBookingField({ booking_enabled: true });
     if (!ok) { showToast('Could not turn booking on, try again'); return; }
-    try { localStorage.removeItem('mnc_booking_pref'); } catch(_) {}
+    try { localStorage.removeItem(_bkPrefKey()); } catch(_) {}
     window._bkSetup = window._bkSetup || {}; window._bkSetup.enabled = true;
     if (_bkMyTech) _bkMyTech.booking_enabled = true;
     bkCloseSetupFork();
@@ -15119,7 +15126,7 @@ async function bkForkHoursFinish() {
     } else {
       showToast('You\u2019re bookable! ' + name + ' \u00b7 ' + dur + ' min' + (priceRaw ? ' \u00b7 $' + priceRaw : '') + ' \u2014 tweak anytime in Settings.');
     }
-    try { localStorage.removeItem('mnc_booking_pref'); } catch(_) {}
+    try { localStorage.removeItem(_bkPrefKey()); } catch(_) {}
     window._bkSetup = window._bkSetup || {}; window._bkSetup.enabled = true;
     if (_bkMyTech) _bkMyTech.booking_enabled = true;
     bkCloseSetupFork();
@@ -16615,8 +16622,18 @@ function syncHeroStatus() {
 // loadTechHomeStats (photo count + profile fields) and tbLoadDashBadge
 // (booking state). Notification state is the browser permission plus a
 // local flag for the native shells, where the OS prompt is one-shot.
+function _bkPrefKey() {
+  // Per-account key (Anne, 2026-08-11: setup 'dropped me early'). This flag
+  // was a single global 'mnc_booking_pref', so a choice made while testing
+  // ANOTHER account marked the booking AND schedule steps done for a
+  // brand-new tech — the list hit 5/5 and retired itself mid-setup. Same
+  // disease as the pre-checked notifications box.
+  var id = '';
+  try { id = (typeof pushKey === 'function' ? (pushKey(currentUserEmail) || '') : (currentUserEmail || '')); } catch(_) {}
+  return 'mnc_booking_pref:' + (id || 'anon');
+}
 function _bkCallsOnlyPref() {
-  try { return localStorage.getItem('mnc_booking_pref') === 'calls'; } catch(_) { return false; }
+  try { return localStorage.getItem(_bkPrefKey()) === 'calls'; } catch(_) { return false; }
 }
 
 function _setupStepsState() {
