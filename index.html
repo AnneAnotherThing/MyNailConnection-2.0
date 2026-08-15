@@ -5197,8 +5197,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.0',     /* __APP_BUILD_NAME__   */
-  android: 538,         /* __APP_BUILD_ANDROID__ */
-  ios:     343,          /* __APP_BUILD_IOS__     */
+  android: 539,         /* __APP_BUILD_ANDROID__ */
+  ios:     344,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -9746,6 +9746,23 @@ function _decodeImageFile(file) {
   return p;
 }
 
+// Kick off (and memoize) the full-size compression for a picked file so it
+// runs CONCURRENTLY with the upload preamble's server round-trips instead
+// of after them (Anne, 2026-08-11: "a single photo is really sluggish").
+// The old order was strictly serial: seed tech row -> loadTechTier ->
+// consumeUploadSlot RPC -> THEN decode + compress -> THEN upload, so a
+// phone on cell sat idle through ~3 round-trips before touching the image.
+const _compressCache = new WeakMap();
+function precompressForUpload(file) {
+  var hit = _compressCache.get(file);
+  if (hit) return hit;
+  var p = Promise.resolve()
+    .then(function() { return compressForUpload(file, 1600, 0.85); })
+    .catch(function() { return file; });   // never block the upload on this
+  _compressCache.set(file, p);
+  return p;
+}
+
 async function compressForUpload(file, maxDim, quality, force) {
   maxDim = maxDim || 1400; quality = quality || 0.82;
   try {
@@ -9836,6 +9853,8 @@ async function techEditAddPhotos(input) {
   showToast('Adding ' + files.length + ' photo(s)…');
   let added = 0;
   const _newlyUploadedUrls = [];
+  // Overlap compression with the slot round-trips below (perf 2026-08-11).
+  files.slice(0, 3).forEach(function(f) { try { precompressForUpload(f); } catch(_) {} });
 
   for (const file of files) {
     // AI validation is DISABLED (task #9) — but this path still base64-read
@@ -9889,10 +9908,10 @@ async function techEditAddPhotos(input) {
     // local buffer so the publicUrl doesn't sit forever as a 404.
     (async function() {
       try {
-        const _upBlob = await compressForUpload(file, 1600, 0.85);
-        uploadThumb(_fileName, file);   // fire-and-forget, see uploadThumb
+        const _upBlob = await precompressForUpload(file);   // started at pick time
         const res = await storagePostWithRetry('tech-photos/' + _fileName, _upBlob, (_upBlob && _upBlob.type) || file.type || 'image/jpeg');
         if (!res || !res.ok) throw new Error('upload-failed-' + (res ? res.status : 'network'));
+        uploadThumb(_fileName, file);   // after the real photo, not alongside
         // Storage upload succeeded, clear the _previewSrc so subsequent
         // renders use the real URL (which now resolves).
         const idx = edit.photos.findIndex(p => p.url === _publicUrl);
@@ -9945,6 +9964,11 @@ async function techBulkDropFiles(fileList) {
   if (!currentEditTech) return;
   const files = Array.from(fileList).filter(f => f.type.startsWith('image/'));
   if (!files.length) { showToast('No image files found'); return; }
+  // Start compressing the first few RIGHT NOW so the decode/encode overlaps
+  // the tier + slot round-trips below (perf, 2026-08-11). Capped at 3 so a
+  // 20-photo batch doesn't hold that many full-res bitmaps at once; the
+  // rest compress as their upload job starts.
+  files.slice(0, 3).forEach(function(f) { try { precompressForUpload(f); } catch(_) {} });
 
   // Paywall gate. Without this, Anne added a 6th photo via the bulk drop
   // zone on 2026-04-21 and never saw the upgrade modal, because only
@@ -10064,10 +10088,13 @@ async function techBulkDropFiles(fileList) {
         // a phone shot landed as 1436x2516 / 506KB and every viewer paid for
         // it. 1600px long edge @ 0.85 keeps the tech-detail hero crisp on
         // retina while cutting the payload hard. 2026-07-21.
-        const _upBlob = await compressForUpload(file, 1600, 0.85);
-        uploadThumb(_fileName, file);   // fire-and-forget, see uploadThumb
+        const _upBlob = await precompressForUpload(file);   // usually already done
         const res = await storagePostWithRetry('tech-photos/' + _fileName, _upBlob, (_upBlob && _upBlob.type) || file.type);
         if (!res || !res.ok) throw new Error('upload-failed-' + (res ? res.status : 'network'));
+        // Thumb goes up AFTER the real photo (perf, 2026-08-11): it used to
+        // fire alongside and split a phone's narrow uplink, so the photo the
+        // tech is waiting on finished later. Still fire-and-forget.
+        uploadThumb(_fileName, file);
         // Storage upload OK, drop the inline preview so future renders
         // use the real URL.
         const idx = edit.photos.indexOf(photoEntry);
