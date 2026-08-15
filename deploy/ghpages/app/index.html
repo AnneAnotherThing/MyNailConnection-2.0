@@ -5197,8 +5197,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.0',     /* __APP_BUILD_NAME__   */
-  android: 539,         /* __APP_BUILD_ANDROID__ */
-  ios:     344,          /* __APP_BUILD_IOS__     */
+  android: 540,         /* __APP_BUILD_ANDROID__ */
+  ios:     345,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -16837,11 +16837,26 @@ async function loadTechHomeStats() {
   // untagged photos (no tags / empty tags / legacy string-URL format) so
   // we can surface the "needs tagging" nudge below the stats row.
   try {
+    // id/booking_enabled/booking_link joined in (2026-08-11): the setup
+    // checklist read booking state from window._bkSetup, which ONLY
+    // loadTechBookings populates — so until the tech happened to open the
+    // Bookings screen, steps 3 and 4 showed not-done even when booking was
+    // already on, and the schedule lookup had no tech id to query with.
+    // The portal already fetches this row, so seed it here.
     var r1 = await fetch(
-      SUPABASE_URL + '/rest/v1/techs?or=(email.eq.' + encodeURIComponent(email) + ',phone.eq.' + encodeURIComponent(email) + ')&select=photos,image_url,bio',
+      SUPABASE_URL + '/rest/v1/techs?or=(email.eq.' + encodeURIComponent(email) + ',phone.eq.' + encodeURIComponent(email) + ')&select=id,photos,image_url,bio,booking_enabled,booking_link',
       { headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + (window._mncAccessToken || SUPABASE_ANON_KEY) } }
     );
     var d1 = await r1.json();
+    try {
+      var _t0 = d1 && d1[0];
+      if (_t0 && _t0.id) {
+        window._bkSetup = window._bkSetup || {};
+        if (!window._bkSetup.id) window._bkSetup.id = _t0.id;
+        if (window._bkSetup.enabled === undefined) window._bkSetup.enabled = !!_t0.booking_enabled;
+        if (window._bkSetup.link === undefined) window._bkSetup.link = (_t0.booking_link || '').trim();
+      }
+    } catch(_) {}
     var rawPhotos = (d1 && d1[0] && Array.isArray(d1[0].photos)) ? d1[0].photos : [];
     var n = rawPhotos.length;
     if (photosEl) photosEl.textContent = String(n);
