@@ -5197,8 +5197,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.0',     /* __APP_BUILD_NAME__   */
-  android: 536,         /* __APP_BUILD_ANDROID__ */
-  ios:     341,          /* __APP_BUILD_IOS__     */
+  android: 537,         /* __APP_BUILD_ANDROID__ */
+  ios:     342,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -9708,6 +9708,37 @@ async function uploadThumb(filePath, srcFile) {
   } catch (_) { /* a thumb is an optimisation, not a requirement */ }
 }
 
+// Decode a File to something drawable WITHOUT a base64 round-trip.
+// The old path did readAsDataURL (a ~13MB string for a 12MP phone photo)
+// and this ran TWICE per upload — once for the full image, once for the
+// thumb — which is what made a single photo crawl (Anne, 2026-08-11).
+// createImageBitmap decodes straight from the blob (often off the main
+// thread); the object-URL fallback covers older browsers. The decode is
+// memoized per File so the upload and its thumb share one decode.
+const _decodeCache = new WeakMap();
+function _decodeImageFile(file) {
+  var hit = _decodeCache.get(file);
+  if (hit) return hit;
+  var p = (async function() {
+    if (typeof createImageBitmap === 'function') {
+      try { return await createImageBitmap(file); } catch(_) { /* fall through */ }
+    }
+    var url = URL.createObjectURL(file);
+    try {
+      return await new Promise(function(res, rej) {
+        var im = new Image();
+        im.onload = function() { res(im); };
+        im.onerror = rej;
+        im.src = url;
+      });
+    } finally {
+      setTimeout(function() { try { URL.revokeObjectURL(url); } catch(_) {} }, 30000);
+    }
+  })();
+  _decodeCache.set(file, p);
+  return p;
+}
+
 async function compressForUpload(file, maxDim, quality, force) {
   maxDim = maxDim || 1400; quality = quality || 0.82;
   try {
@@ -9715,12 +9746,7 @@ async function compressForUpload(file, maxDim, quality, force) {
     if (file.type === 'image/gif') return force ? null : file; // don't flatten animations
     if (!force && file.size && file.size < 200 * 1024) return file; // already small
     // force = building a thumb: re-encode regardless, we want the SIZE not the bytes
-    const dataUrl = await new Promise(function(res, rej) {
-      const r = new FileReader(); r.onload = function(e){res(e.target.result);}; r.onerror = rej; r.readAsDataURL(file);
-    });
-    const img = await new Promise(function(res, rej) {
-      const im = new Image(); im.onload = function(){res(im);}; im.onerror = rej; im.src = dataUrl;
-    });
+    const img = await _decodeImageFile(file);
     var w = img.naturalWidth || img.width, h = img.naturalHeight || img.height;
     if (!w || !h) return force ? null : file;
     if (w > maxDim || h > maxDim) {
