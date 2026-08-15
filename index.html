@@ -5197,8 +5197,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.0',     /* __APP_BUILD_NAME__   */
-  android: 535,         /* __APP_BUILD_ANDROID__ */
-  ios:     340,          /* __APP_BUILD_IOS__     */
+  android: 536,         /* __APP_BUILD_ANDROID__ */
+  ios:     341,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -16625,7 +16625,7 @@ function _setupStepsState() {
     // moment they've made that choice.
     { label: 'Dial in your schedule', sub: 'Hours, buffer, and notice \u00b7 2 min',
       done: (!bk.enabled && !!(bk.link || _bkCallsOnlyPref())) || !!window._mncHasAvailability,
-      action: "show('tech-booking-settings')" },
+      action: 'setupOpenSchedule()' },
     { label: 'Say yes to notifications', sub: 'So bookings ping your phone \u00b7 10 sec',
       done: pushDone, action: 'setupEnablePush()' }
   ];
@@ -16672,6 +16672,15 @@ async function _refreshPushSubState() {
   }
 }
 
+// Open Booking Settings FROM THE CHECKLIST with its data loaded. A bare
+// show('tech-booking-settings') left every control empty/dead because the
+// screen's loader only runs on the My Appts route (found 2026-08-10 when
+// Anne's setup run went sideways here).
+async function setupOpenSchedule() {
+  show('tech-booking-settings');
+  try { await loadTechBookings(); } catch(_) {}
+}
+
 function updateSetupChecklist() {
   var card = document.getElementById('td-setup-checklist');
   if (!card) return;
@@ -16679,7 +16688,23 @@ function updateSetupChecklist() {
   try { dismissed = sessionStorage.getItem('mnc_setup_later') === '1'; } catch(_) {}
   var steps = _setupStepsState();
   var done = steps.filter(function(st) { return st.done; }).length;
-  if (dismissed || done === steps.length) { card.style.display = 'none'; return; }
+  if (dismissed) { card.style.display = 'none'; return; }
+  if (done === steps.length) {
+    // All five done. Celebrate once instead of vanishing mid-use (the
+    // async server-truth checks can complete the list while the tech is
+    // still looking at it — reads as "setup kicked me out").
+    if (!window._mncSetupDoneCelebrated) {
+      window._mncSetupDoneCelebrated = true;
+      var host0 = document.getElementById('td-setup-steps');
+      if (host0) host0.innerHTML = '<div style="padding:14px 12px;text-align:center;font-size:13.5px;color:var(--charcoal);">Setup complete — you’re bookable! 🎉<br><span style="font-size:12.5px;color:var(--muted);">This list retires itself now. Everything lives in your portal and Booking Settings.</span></div>';
+      var prog0 = document.getElementById('td-setup-progress');
+      if (prog0) prog0.textContent = done + ' of ' + steps.length;
+      card.style.display = 'block';
+      setTimeout(function() { if (card) card.style.display = 'none'; }, 6000);
+      return;
+    }
+    card.style.display = 'none'; return;
+  }
   var prog = document.getElementById('td-setup-progress');
   if (prog) prog.textContent = done + ' of ' + steps.length;
   var host = document.getElementById('td-setup-steps');
