@@ -20,7 +20,20 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [main]
+    # 3.0 CUTOVER, 2026-08-17: this was [main]. `v3` is now the default branch
+    # and the only one that deploys.
+    #
+    # Why the branches were never merged: `main` accumulated ~130 commits all
+    # named "v3 preview refresh: …", each one a re-commit of v3's work so it
+    # could be previewed at /v3/ without disturbing the live 2.0 site. v3 has
+    # 166 real commits of the same work. Same content, two irreconcilable
+    # histories — `git merge` would have been a conflict storm that bought
+    # nothing. Switching the trigger sidesteps it completely.
+    #
+    # `main` is kept, frozen, as the rollback: point this back at [main] and
+    # flip the GitHub default branch back, and the old site returns intact.
+    # Nothing was force-pushed and no history was rewritten.
+    branches: [v3]
   # Allow manual re-run from the Actions tab without needing a new commit.
   workflow_dispatch:
 
