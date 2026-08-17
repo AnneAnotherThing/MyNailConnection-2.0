@@ -2,10 +2,15 @@
 // Admin-only. Sends a push notification to every active subscription
 // whose user matches the requested audience ('all' | 'techs' | 'clients' |
 // 'admins'):
-//   - web/PWA rows  → Web Push (VAPID)          [p256dh = real key]
-//   - native rows   → FCM HTTP v1 (Android+iOS) [p256dh = 'native',
-//                     auth = 'android'|'ios', endpoint = device token]
+//   - web/PWA rows  → Web Push (VAPID)   [p256dh = real key]
+//   - Android rows  → FCM HTTP v1        [p256dh = 'native', auth = 'android']
+//   - iOS rows      → APNs directly      [p256dh = 'native', auth = 'ios']
+//     endpoint = the device token in every native case.
 // Returns a count of sent/failed/skipped subscriptions.
+//
+// iOS goes straight to Apple, not through FCM, for the reason spelled out
+// at the top of send-push: there is no Firebase SDK on iOS in this app, so
+// Capacitor hands back a raw APNs token that FCM can never deliver to.
 //
 // Deploy with:
 //   supabase functions deploy broadcast-push
@@ -16,9 +21,14 @@
 //   supabase secrets set VAPID_SUBJECT="mailto:admin@mynailconnection.com"
 //   FCM_SERVICE_ACCOUNT  — full JSON of a Firebase service account
 //     (Firebase console → Project settings → Service accounts →
-//      Generate new private key). Without it, native rows are skipped
+//      Generate new private key). Without it, Android rows are skipped
 //      with a 'skipped' count instead of erroring, so web push keeps
 //      working during rollout.
+//   APNS_PRIVATE_KEY / APNS_KEY_ID / APNS_TEAM_ID   — the .p8 contents,
+//     its 10-char Key ID, and the 10-char Apple Team ID. Optional:
+//     APNS_BUNDLE_ID (default com.mynailconnection.app) and APNS_ENV
+//     ('production' default, or 'sandbox'). Without them iOS rows skip
+//     the same way Android rows do without FCM.
 
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
@@ -114,6 +124,97 @@ async function sendFcm(
   // UNREGISTERED / INVALID_ARGUMENT on a stale token → prune the row.
   if (res.status === 404 || text.includes('UNREGISTERED')) return 'dead';
   throw new Error(`FCM send failed: ${res.status} ${text}`);
+}
+
+// ── APNs, token-based, straight to Apple ────────────────────────────────────
+// Kept byte-identical to the block in send-push. Both functions are
+// paste-deployed from the dashboard, so a _shared import would break the
+// paste; duplication is the deliberate trade. Change one, change both.
+const APNS_KEY_ID      = Deno.env.get('APNS_KEY_ID')     || '';
+const APNS_TEAM_ID     = Deno.env.get('APNS_TEAM_ID')    || '';
+const APNS_PRIVATE_KEY = Deno.env.get('APNS_PRIVATE_KEY') || '';
+const APNS_BUNDLE_ID   = Deno.env.get('APNS_BUNDLE_ID')  || 'com.mynailconnection.app';
+const APNS_SANDBOX     = (Deno.env.get('APNS_ENV') || 'production').toLowerCase() === 'sandbox';
+const APNS_HOST        = APNS_SANDBOX ? 'https://api.sandbox.push.apple.com' : 'https://api.push.apple.com';
+const APNS_ALT_HOST    = APNS_SANDBOX ? 'https://api.push.apple.com' : 'https://api.sandbox.push.apple.com';
+
+let _apnsJwt: { token: string; iat: number } | null = null;
+
+async function apnsJwt(): Promise<string | null> {
+  if (!APNS_PRIVATE_KEY || !APNS_KEY_ID || !APNS_TEAM_ID) return null;
+  const now = Math.floor(Date.now() / 1000);
+  // Apple rejects a provider token older than an hour (ExpiredProviderToken)
+  // and rate-limits refreshes faster than every 20 minutes
+  // (TooManyProviderTokenUpdates). 50 minutes sits safely between the two.
+  if (_apnsJwt && now - _apnsJwt.iat < 50 * 60) return _apnsJwt.token;
+
+  const header = b64url(JSON.stringify({ alg: 'ES256', kid: APNS_KEY_ID }));
+  const claims = b64url(JSON.stringify({ iss: APNS_TEAM_ID, iat: now }));
+  const pem = APNS_PRIVATE_KEY.replace(/-----[A-Z ]+-----/g, '').replace(/\s/g, '');
+  const der = Uint8Array.from(atob(pem), (c) => c.charCodeAt(0));
+  const key = await crypto.subtle.importKey(
+    'pkcs8', der, { name: 'ECDSA', namedCurve: 'P-256' }, false, ['sign']
+  );
+  // WebCrypto hands back the raw r||s pair that JWS ES256 wants. Do NOT
+  // reach for a DER unwrap here — that's the OpenSSL shape, not this one.
+  const sig = new Uint8Array(await crypto.subtle.sign(
+    { name: 'ECDSA', hash: 'SHA-256' }, key, new TextEncoder().encode(`${header}.${claims}`)
+  ));
+  const token = `${header}.${claims}.${b64url(sig)}`;
+  _apnsJwt = { token, iat: now };
+  return token;
+}
+
+// deviceToken → APNs. Same contract as sendFcm: 'sent' | 'dead' (prune the
+// row) | 'skipped' (no key configured). Anything else throws.
+async function sendApns(
+  deviceToken: string, title: string, body: string, url: string, tag: string
+): Promise<'sent' | 'dead' | 'skipped'> {
+  const jwt = await apnsJwt();
+  if (!jwt) return 'skipped';
+
+  const payload = JSON.stringify({
+    aps: {
+      alert: { title, body },
+      sound: 'default',
+      'thread-id': tag,
+    },
+    // Mirrors FCM's `data` block so pushNotificationActionPerformed reads
+    // the same two fields whichever platform delivered the notification.
+    url,
+    tag,
+  });
+
+  const post = (host: string) => fetch(`${host}/3/device/${deviceToken}`, {
+    method: 'POST',
+    headers: {
+      'authorization':    `bearer ${jwt}`,
+      'apns-topic':       APNS_BUNDLE_ID,
+      'apns-push-type':   'alert',
+      // 10 = deliver now, don't wait for a battery window.
+      'apns-priority':    '10',
+      'apns-collapse-id': tag.slice(0, 64),
+      'content-type':     'application/json',
+    },
+    body: payload,
+  });
+
+  let res  = await post(APNS_HOST);
+  let text = res.ok ? '' : await res.text();
+
+  // A token minted by a build signed for the OTHER APNs environment comes
+  // back BadDeviceToken. Retry once on the other host rather than pruning a
+  // subscription that is actually perfectly good.
+  if (res.status === 400 && text.includes('BadDeviceToken')) {
+    res  = await post(APNS_ALT_HOST);
+    text = res.ok ? '' : await res.text();
+  }
+
+  if (res.ok) return 'sent';
+  if (res.status === 410 || text.includes('BadDeviceToken') || text.includes('Unregistered')) {
+    return 'dead';
+  }
+  throw new Error(`APNs send failed: ${res.status} ${text}`);
 }
 
 const CORS_HEADERS = {
@@ -236,14 +337,24 @@ serve(async (req) => {
   const effTag = tag || ('mnc-broadcast-' + Date.now());
   const payload = JSON.stringify({ title, body, url: effUrl, tag: effTag });
   let sent = 0, failed = 0, skipped = 0;
+  const skipReasons = new Set<string>();
 
   await Promise.all(targetSubs.map(async (sub) => {
     const isNative = sub.p256dh === 'native';
+    // auth carries the platform on native rows ('ios' | 'android').
+    const isApple  = isNative && String(sub.auth || '').toLowerCase() === 'ios';
     try {
       if (isNative) {
-        const r = await sendFcm(sub.endpoint, title, body, effUrl, effTag);
+        const r = isApple
+          ? await sendApns(sub.endpoint, title, body, effUrl, effTag)
+          : await sendFcm(sub.endpoint, title, body, effUrl, effTag);
         if (r === 'sent') sent++;
-        else if (r === 'skipped') skipped++;
+        else if (r === 'skipped') {
+          skipped++;
+          skipReasons.add(isApple
+            ? 'iOS rows skipped: APNS_PRIVATE_KEY / APNS_KEY_ID / APNS_TEAM_ID not all set'
+            : 'Android rows skipped: FCM_SERVICE_ACCOUNT not set');
+        }
         else {
           failed++;
           await supabase.from('push_subscriptions').delete().eq('endpoint', sub.endpoint);
@@ -266,7 +377,7 @@ serve(async (req) => {
 
   return jsonResponse(
     skipped
-      ? { sent, failed, skipped, total_subs: targetSubs.length, audience, note: 'native rows skipped: FCM_SERVICE_ACCOUNT not set' }
+      ? { sent, failed, skipped, total_subs: targetSubs.length, audience, note: [...skipReasons].join('; ') }
       : { sent, failed, total_subs: targetSubs.length, audience }
   );
 });

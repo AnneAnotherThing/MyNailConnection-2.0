@@ -134,60 +134,104 @@ serve(async (req) => {
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
   );
 
-  // Resolve the techs row from app_user_id. We use auth.users.id as the
-  // RevenueCat App User ID at configure() time, so app_user_id should
-  // match auth.users.id (which usually equals public.users.id in MNC).
-  // Three lookup paths in order of preference, each handling a different
-  // failure mode of the user-table sync:
-  const { data: userRow } = await admin
-    .from('users')
-    .select('id, email')
-    .eq('id', appUserId)
-    .single();
+  // ── Resolve the techs ROW ID from app_user_id ────────────────────────────
+  // Keyed on techs.id, not techs.email. Every path here used to end at an
+  // email and every write ran .eq('email', techEmail), so a PHONE-ONLY tech
+  // (email is nullable since the 2026-07-23 phone-auth cutover) could pay and
+  // have the subscription applied to nobody, while the webhook still answered
+  // 200 and RevenueCat considered it delivered. An id is an id whichever way
+  // the account was created. 2026-08-15
+  //
+  // Each lookup below handles a different failure mode of the user-table sync.
+  let techId: string | null = null;
+  let techLabel = '';   // logging only
 
-  let techEmail: string | null = userRow?.email?.toLowerCase() || null;
-
-  // Fallback 1: a previous webhook hit already stamped revenuecat_app_user_id
-  // on the techs row, so we can find the tech by that id even if public.users
-  // no longer matches.
-  if (!techEmail) {
-    const { data: techRow } = await admin
-      .from('techs')
-      .select('email')
-      .eq('revenuecat_app_user_id', appUserId)
-      .maybeSingle();
-    techEmail = techRow?.email?.toLowerCase() || null;
+  // techs.phone storage has drifted across the phone-auth migrations (+1XXXXXXXXXX
+  // after phone-normalize-e164, bare digits before it) and GoTrue reports the
+  // phone claim without the plus. Match every shape rather than guess one.
+  function phoneVariants(raw: string | null | undefined): string[] {
+    const digits = String(raw || '').replace(/\D/g, '');
+    if (digits.length < 10) return [];
+    const ten = digits.slice(-10);
+    return [...new Set([`+1${ten}`, `1${ten}`, ten, `+${digits}`, digits])];
   }
 
-  // Fallback 2a: app_user_id sometimes IS an email when initRevenueCat() ran
-  // before currentUser.id was populated (race during sign-in or session
-  // restore, the JS code falls back from currentUser.id to currentUserEmail).
-  // Once RC is configured with an email as the App User ID, all that user's
-  // future events carry that email instead of the auth UUID. So before doing
-  // the UUID-based auth.users lookup, sniff the format and use email path
-  // directly if it looks like an email. added 2026-04-30 after seeing
-  // testuserbob@gmail.com hit this exact pattern in webhook logs.
+  async function techByEmail(email: string | null | undefined) {
+    if (!email) return null;
+    const { data } = await admin
+      .from('techs').select('id, email, phone')
+      .eq('email', String(email).toLowerCase()).limit(1).maybeSingle();
+    return data || null;
+  }
+
+  async function techByPhone(phone: string | null | undefined) {
+    const variants = phoneVariants(phone);
+    if (!variants.length) return null;
+    const { data } = await admin
+      .from('techs').select('id, email, phone')
+      .in('phone', variants).limit(1).maybeSingle();
+    return data || null;
+  }
+
+  function take(row: { id: string; email?: string | null; phone?: string | null } | null) {
+    if (!row) return false;
+    techId = row.id;
+    techLabel = row.email || row.phone || row.id;
+    return true;
+  }
+
+  // 1. A previous webhook hit already stamped revenuecat_app_user_id on the
+  //    techs row, so this finds the tech even if public.users no longer matches.
+  {
+    const { data } = await admin
+      .from('techs').select('id, email, phone')
+      .eq('revenuecat_app_user_id', appUserId).limit(1).maybeSingle();
+    take(data || null);
+  }
+
+  // 2. public.users by id. We pass auth.users.id as the App User ID at
+  //    configure() time, and it usually equals public.users.id in MNC.
+  if (!techId) {
+    const { data: userRow } = await admin
+      .from('users').select('id, email, phone')
+      .eq('id', appUserId).limit(1).maybeSingle();
+    if (userRow) {
+      take(await techByEmail(userRow.email) || await techByPhone(userRow.phone));
+    }
+  }
+
+  // 3. app_user_id sometimes IS an email, when initRevenueCat() ran before
+  //    currentUser.id was populated (sign-in / session-restore race, the JS
+  //    falls back from currentUser.id to currentUserEmail). Once RC is
+  //    configured with an email as App User ID, all that user's future events
+  //    carry the email instead of the auth UUID. Seen live 2026-04-30 with
+  //    testuserbob@gmail.com. Same reasoning now applies to a phone identity.
   const looksLikeEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(appUserId);
-  if (!techEmail && looksLikeEmail) {
-    techEmail = appUserId.toLowerCase();
-    console.log('app_user_id was an email, using directly:', techEmail);
+  const looksLikePhone = /^\+?\d{10,15}$/.test(appUserId);
+  if (!techId && looksLikeEmail) {
+    take(await techByEmail(appUserId));
+    if (techId) console.log('app_user_id was an email, matched tech', techLabel);
+  }
+  if (!techId && looksLikePhone) {
+    take(await techByPhone(appUserId));
+    if (techId) console.log('app_user_id was a phone, matched tech', techLabel);
   }
 
-  // Fallback 2b: query auth.users by UUID. The app_user_id should be auth.users.id
-  // (set at Purchases.configure time from currentUser.id) for properly
-  // synchronized users. Catches the orphan-auth pattern where public.users.id
-  // and auth.users.id drifted apart. Skipped if we already determined this
-  // is an email (getUserById would throw on a non-UUID input).
-  if (!techEmail && !looksLikeEmail) {
+  // 4. auth.users by UUID. Catches the orphan-auth pattern where
+  //    public.users.id and auth.users.id drifted apart. Skipped when we
+  //    already know this is an email or phone, since getUserById throws on a
+  //    non-UUID input.
+  if (!techId && !looksLikeEmail && !looksLikePhone) {
     try {
       const { data: authUserData } = await admin.auth.admin.getUserById(appUserId);
-      techEmail = authUserData?.user?.email?.toLowerCase() || null;
+      const au = authUserData?.user;
+      if (au) take(await techByEmail(au.email) || await techByPhone(au.phone));
     } catch (e) {
       console.warn('auth.admin.getUserById threw for app_user_id', appUserId, e);
     }
   }
 
-  if (!techEmail) {
+  if (!techId) {
     console.warn('No matching tech found for app_user_id:', appUserId);
     return new Response('ok (no matching tech)', { status: 200 });
   }
@@ -217,27 +261,27 @@ serve(async (req) => {
         subscription_tier: 'paid',
         subscription_expires_at: null,  // Stripe-era column; null for IAP since renewal is automatic
         period_reset_at: expiresAt,     // when the next renewal/refresh happens
-        glow_up_months_purchased: (await getCurrentCount(admin, techEmail, 'glow_up_months_purchased')) + 1,
-      }).eq('email', techEmail);
+        glow_up_months_purchased: (await getCurrentCount(admin, techId, 'glow_up_months_purchased')) + 1,
+      }).eq('id', techId);
     } else if (eventType === 'CANCELLATION') {
       // User canceled but sub still active until period_reset_at. Don't
       // flip tier to 'free' yet, let EXPIRATION handle that.
-      await admin.from('techs').update(sourceUpdate).eq('email', techEmail);
+      await admin.from('techs').update(sourceUpdate).eq('id', techId);
     } else if (eventType === 'EXPIRATION') {
       // Subscription period ended without renewal, flip to free.
       await admin.from('techs').update({
         ...sourceUpdate,
         subscription_tier: 'free',
-      }).eq('email', techEmail);
+      }).eq('id', techId);
     } else if (eventType === 'BILLING_ISSUE') {
       // Apple/Google is retrying billing, leave tier alone, just stamp source
-      await admin.from('techs').update(sourceUpdate).eq('email', techEmail);
+      await admin.from('techs').update(sourceUpdate).eq('id', techId);
     } else if (eventType === 'REFUND') {
       // Apple refunded a Glow Up charge, revoke tier
       await admin.from('techs').update({
         ...sourceUpdate,
         subscription_tier: 'free',
-      }).eq('email', techEmail);
+      }).eq('id', techId);
     }
   } else {
     // Consumable: photos1 / photos10, increment photo_credits + counter
@@ -247,31 +291,32 @@ serve(async (req) => {
       : 'spotlight_10_purchased_count';
 
     if (eventType === 'NON_RENEWING_PURCHASE' || eventType === 'INITIAL_PURCHASE') {
-      const currentCredits = (await getCurrentCount(admin, techEmail, 'photo_credits')) || 0;
-      const currentCounter = (await getCurrentCount(admin, techEmail, counterCol)) || 0;
+      const currentCredits = (await getCurrentCount(admin, techId, 'photo_credits')) || 0;
+      const currentCounter = (await getCurrentCount(admin, techId, counterCol)) || 0;
       await admin.from('techs').update({
         ...sourceUpdate,
         photo_credits: currentCredits + creditsToAdd,
         [counterCol]: currentCounter + 1,
-      }).eq('email', techEmail);
+      }).eq('id', techId);
     } else if (eventType === 'REFUND') {
       // Apple refunded a consumable, best-effort deduct (don't go negative).
-      const currentCredits = (await getCurrentCount(admin, techEmail, 'photo_credits')) || 0;
+      const currentCredits = (await getCurrentCount(admin, techId, 'photo_credits')) || 0;
       await admin.from('techs').update({
         ...sourceUpdate,
         photo_credits: Math.max(0, currentCredits - creditsToAdd),
-      }).eq('email', techEmail);
+      }).eq('id', techId);
     }
   }
 
   return new Response('ok', { status: 200 });
 });
 
-// Helper to read a single column off the techs row by email. Returns 0
-// if the row or column is missing/null. Cheap one-shot reads keep the
-// webhook handler readable without batching.
-async function getCurrentCount(admin: any, email: string, column: string): Promise<number> {
-  const { data } = await admin.from('techs').select(column).eq('email', email).single();
+// Helper to read a single column off the techs row by id. Returns 0 if the
+// row or column is missing/null. Cheap one-shot reads keep the webhook
+// handler readable without batching. Keyed on id, not email, so it also
+// resolves a phone-only tech.
+async function getCurrentCount(admin: any, techId: string, column: string): Promise<number> {
+  const { data } = await admin.from('techs').select(column).eq('id', techId).maybeSingle();
   if (!data) return 0;
   const v = data[column];
   return typeof v === 'number' ? v : (v ? Number(v) || 0 : 0);

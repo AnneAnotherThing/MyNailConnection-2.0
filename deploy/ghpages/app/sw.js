@@ -3,7 +3,7 @@
 
 // IMPORTANT: bump this string every release so returning users get the
 // new build instead of a stale cached copy. Old caches are deleted on activate.
-const CACHE_NAME = 'mnc-v561';
+const CACHE_NAME = 'mnc-v566';
 const STATIC_ASSETS = ['/', '/index.html', '/manifest.json'];
 
 // ── Install ───────────────────────────────────────────────────────────────────
@@ -99,4 +99,8 @@ self.addEventListener('pushsubscriptionchange', event => {
     }).then(subscription => {
       // Post new subscription to app
       return self.clients.matchAll().then(clients => {
-        clients.forEach(c => c.postMessage({ type: 'PUSH_RESUBSCRIBED', 
+        clients.forEach(c => c.postMessage({ type: 'PUSH_RESUBSCRIBED', subscription }));
+      });
+    }).catch(err => console.error('Re-subscribe failed:', err))
+  );
+});

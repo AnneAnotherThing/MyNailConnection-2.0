@@ -1,69 +1,148 @@
-# Native push (FCM/APNs) — bring-up runbook
+# Native push (FCM + APNs) — bring-up runbook
 
-_2026-08-03. Store apps are the priority; native push is the missing piece.
-The code is ready on both ends — what remains is Firebase/Apple console work
-(Anne) and one build. Android first: it needs no Apple paperwork and can be
-tested by sideloading the APK the same day._
+_Updated 2026-08-15. Android is live. iOS is code-complete and waiting on one
+Apple key. The web/PWA push path is unchanged and keeps working alongside both._
 
-## Already done (code, shipped on v3)
+## Where each platform stands
 
-- Client: `initCapacitorPush()` in index.html registers, grabs the device
-  token, and saves it to `push_subscriptions` (p256dh='native',
-  auth='android'|'ios', endpoint=token) using the signed-in user's bearer.
-  Success/failure toasts on-device.
-- Server: `supabase/functions/send-push/index.ts` now sends web rows via
-  VAPID and native rows via FCM HTTP v1 (needs the `FCM_SERVICE_ACCOUNT`
-  secret; until it's set, native rows report `skipped`, web keeps working).
-- Android gradle: already wired — the google-services plugin applies
-  automatically the moment `android/app/google-services.json` exists.
-- `NATIVE_PUSH_REGISTER_ENABLED` is still **false**. Do NOT flip it until
-  google-services.json is confirmed in the build — register() without it
-  hard-crashes the Android app (the 2026-04-30 Google-review rejection).
+| Platform | Path | State |
+|---|---|---|
+| Web / PWA | Web Push (VAPID) | Live |
+| Android | FCM HTTP v1 | Live, proven on Anne's phone |
+| iOS | APNs, direct | Code done, needs the .p8 key and a deploy |
 
-## Anne's steps — Android (do first)
+## How a push is routed
 
-1. **Firebase project**: console.firebase.google.com → Add project (name:
-   "My Nail Connection", Analytics optional/off).
-2. **Add Android app**: package name exactly `com.mynailconnection.app`.
-   Download **google-services.json** and drop it at
-   `android/app/google-services.json` in the 3.0 repo (tell Claude — it gets
-   committed; it contains no secrets).
-3. **Service account key**: Firebase console → ⚙ Project settings →
-   Service accounts → **Generate new private key** (downloads a JSON).
-4. **Supabase secret**: dashboard (nwqnakoongrorbwnrqzc) → Edge Functions →
-   Secrets → add `FCM_SERVICE_ACCOUNT` = the ENTIRE contents of that JSON,
-   pasted as one value.
-5. **Deploy send-push**: dashboard → Edge Functions → send-push → replace
-   code with the repo's `supabase/functions/send-push/index.ts` → deploy.
+`push_subscriptions` holds one row per device. `p256dh` is the discriminator:
 
-## Then (Claude + Anne together)
+- `p256dh` = a real key → web/PWA row, sent with VAPID.
+- `p256dh` = `'native'` → `auth` holds the platform and `endpoint` holds the
+  device token.
+  - `auth` = `'android'` → FCM HTTP v1.
+  - `auth` = `'ios'` → APNs directly.
 
-6. Flip `NATIVE_PUSH_REGISTER_ENABLED = true`, sync, commit, snapshot, push.
-7. Build the Android app (Capawesome, versionCode already bumping each sync).
-   Confirm the build log shows `google-services` plugin applied.
-8. **Sideload test** (no store review needed): install the APK on Anne's
-   Android phone → sign in → tap "Say yes to notifications" → OS prompt →
-   Allow → expect "Notifications are on 💅" toast → Claude fires
-   `scripts/refire-test-push.sh` → phone buzzes.
-9. Then submit to Play (internal testing → production at will).
+## Why iOS does not go through FCM
 
-## Anne's steps — iOS (after Android proves out)
+The previous version of this runbook told you to add an iOS app in Firebase,
+upload the .p8 there, and drop `GoogleService-Info.plist` into the repo. That
+would not have worked, and it is worth writing down why so nobody tries again.
 
-1. Apple Developer → Certificates, IDs & Profiles → Keys → add key with
-   **Apple Push Notifications service (APNs)** enabled → download the .p8
-   (note Key ID + Team ID).
-2. Firebase console → Project settings → Cloud Messaging → Apple app
-   configuration: **add iOS app** (bundle id `com.mynailconnection.app`),
-   upload the .p8 with Key ID + Team ID.
-3. Download **GoogleService-Info.plist** → `ios/App/App/` in the repo.
-4. Xcode capability "Push Notifications" must be on the App target
-   (check `ios/App/App/App.entitlements` — aps-environment).
-5. `bash deploy/bump-marketing.sh` BEFORE the iOS build (train-closed trap).
-6. Build via Capawesome → TestFlight → same test as Android step 8.
+Routing iOS through FCM requires the Firebase SDK to be running inside the iOS
+app, because FCM delivers to a *Firebase* registration token, which only exists
+if `FirebaseMessaging` is in the build and has been handed the APNs token. This
+app has none of that: no `GoogleService-Info.plist`, no `FirebaseMessaging` pod
+in `ios/App/Podfile`, and an `AppDelegate.swift` that forwards the raw APNs
+token straight to the Capacitor plugin. Capacitor's own documentation for the
+`registration` event says the token is the APNs token on iOS and the FCM token
+on Android.
+
+So the iOS rows in `push_subscriptions` have always held raw APNs tokens, and
+the edge function has always sent them to FCM, which cannot deliver to them.
+Every iPhone push failed on the server, not on the phone.
+
+Adding Firebase to the iOS build would mean a Podfile change, a new native
+dependency, and AppDelegate surgery, all pushed through a Capawesome cloud
+build. That is the same class of change that hard-crashed the Android app on
+2026-04-30 and drew the Google review rejection. Talking to Apple directly
+needs zero native changes: the app is already correct.
+
+The iOS app side is already complete and needs no edits:
+
+- `ios/App/App/App.entitlements` has `aps-environment` = `production`.
+- `ios/App/App/Info.plist` has `UIBackgroundModes` = `remote-notification`.
+- `ios/App/Podfile` has `CapacitorPushNotifications`.
+- `AppDelegate.swift` forwards both the token and the failure to the plugin.
+- `initCapacitorPush()` in `index.html` saves the token with `auth: 'ios'`.
+
+## Anne's steps — iOS
+
+Everything here is console and dashboard work. No build, no store submission,
+no app change. The currently shipped iOS build will start receiving pushes the
+moment the secrets are set and the functions are deployed.
+
+1. **Get the key.** developer.apple.com → Certificates, Identifiers & Profiles
+   → Keys → the **+** button. Name it something like "MNC Push". Tick
+   **Apple Push Notifications service (APNs)**. Continue, then Register.
+2. **Download the .p8.** It downloads exactly once and cannot be re-downloaded,
+   so put it somewhere you keep things. On the same screen, note the
+   **Key ID** (10 characters).
+3. **Team ID: `YYS8GZPZ78`.** Already known, no lookup needed. It is the
+   `DEVELOPMENT_TEAM` the app is signed with in
+   `ios/App/App.xcodeproj/project.pbxproj`, and the portal shows the same
+   value top right next to your name.
+
+   **The key MUST come from this team.** Apple validates the key's team
+   against the app's bundle ID, so a .p8 minted under any other team returns
+   `InvalidProviderToken` for `com.mynailconnection.app` no matter what else
+   is correct. If developer.apple.com shows "Join the Apple Developer Program"
+   and no "Certificates, Identifiers & Profiles" section, you are signed in
+   with an Apple ID that is not a member of this team. Do not enroll that
+   account, that creates a second empty team. Find the Apple ID that gets into
+   App Store Connect for MNC and use that one. Creating keys also requires the
+   Account Holder or Admin role; a Developer-role member sees Keys read-only.
+4. **Set five secrets.** Supabase dashboard (project `nwqnakoongrorbwnrqzc`) →
+   Edge Functions → Secrets:
+
+   | Secret | Value |
+   |---|---|
+   | `APNS_PRIVATE_KEY` | the entire contents of the .p8 file, including the `-----BEGIN PRIVATE KEY-----` and `-----END PRIVATE KEY-----` lines |
+   | `APNS_KEY_ID` | the 10-character Key ID from step 2 |
+   | `APNS_TEAM_ID` | the 10-character Team ID from step 3 |
+   | `APNS_BUNDLE_ID` | `com.mynailconnection.app` (optional, this is the default) |
+   | `APNS_ENV` | `production` (optional, this is the default) |
+
+   Open the .p8 in Notepad to copy it. It is a short text file. If all three of
+   the first three secrets are not set, iOS rows report `skipped` and nothing
+   else changes, exactly the way Android rows did before FCM was configured.
+
+5. **Deploy both functions.** Supabase dashboard → Edge Functions → replace the
+   code with the repo copy and deploy, for **both**:
+   - `send-push` ← `supabase/functions/send-push/index.ts`
+   - `broadcast-push` ← `supabase/functions/broadcast-push/index.ts`
+
+   `send-push` also picks up high-priority delivery and the error reporting in
+   this deploy, so an overnight booking wakes a sleeping phone immediately
+   instead of waiting for a battery window.
+
+6. **Test.** On the iPhone: open the app, sign in, accept notifications, wait
+   for the "Notifications are on 💅" toast. That toast means the token reached
+   `push_subscriptions`. Then tell Claude and it fires a probe at that account.
+
+## Reading the response
+
+`send-push` returns counts, so a failed send says why instead of going quiet:
+
+- `{ sent: 1 }` — delivered to Apple. If the phone shows nothing after this,
+  the problem is on the device (Focus mode, notifications off for the app).
+- `{ sent: 0, reason: 'no subscriptions found' }` — no row for that identity.
+  The device never registered, or registered under a different identity.
+  `push_subscriptions.user_id` is the lowercased email, or the E.164 phone for
+  phone accounts.
+- `{ skipped: 1, note: 'iOS rows skipped: ...' }` — the secrets are missing or
+  incomplete. Step 4.
+- `{ failed: 1, errors: ['APNs send failed: 403 ...InvalidProviderToken'] }` —
+  the Key ID, Team ID, or .p8 do not match each other. Recheck step 4. A common
+  cause is pasting the .p8 with the BEGIN/END lines stripped off.
+- `{ failed: 1 }` with the row gone — Apple returned 410 Unregistered or 400
+  BadDeviceToken, meaning that token is permanently dead, so the row was
+  pruned. The device re-registers next time the app opens.
+
+## The reinstall rule, worth knowing permanently
+
+Reinstalling the app invalidates the old device token, and the server prunes it
+on the next failed send. It re-registers automatically, but only when the app
+is opened and signed in. So **after every store update, a device has to open
+the app once before pushes resume**. An empty subscription row right after an
+update is expected, not a bug.
 
 ## Notes
 
-- FCM v1 delivers to BOTH platforms once the APNs key is uploaded — the
-  edge function needs no iOS-specific changes.
-- broadcast-push still speaks web-push only; separate follow-up task exists.
-- The PWA/web push path stays as-is and keeps working alongside native.
+- Sandbox vs production: TestFlight and App Store builds use production APNs,
+  which is what `aps-environment` is set to. A debug build run straight from
+  Xcode uses sandbox. `sendApns` retries once on the other host when Apple
+  answers `BadDeviceToken`, so a debug build still works without changing
+  `APNS_ENV`, and a good token never gets pruned by mistake.
+- The APNs block is duplicated byte-for-byte in `send-push` and
+  `broadcast-push`. Both are paste-deployed from the dashboard, so a shared
+  import would break the paste. Change one, change both.
+- iPhone users who never install the app still get the PWA path, unchanged.

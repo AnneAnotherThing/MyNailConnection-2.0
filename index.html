@@ -1592,7 +1592,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
 <!-- CHANGE PASSWORD (first login) -->
 <div class="screen" id="change-password-screen">
   <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;background:linear-gradient(160deg,#F7E2E3 0%,#FBF8F8 50%,#EDE7E6 100%);">
-    <div style="margin-bottom:16px;display:flex;justify-content:center;"><img src="mncLogo-transparent.png" class="mnc-logo" style="width:64px;height:64px;object-fit:contain;filter:drop-shadow(0 4px 14px rgba(125,100,102,0.4));" alt="My Nail Connection"/></div>
+    <div style="margin-bottom:16px;display:flex;justify-content:center;"><img src="images/mncLogo-round-512.webp" class="mnc-logo" width="512" height="512" style="width:64px;height:64px;border-radius:18px;box-shadow:0 2px 6px rgba(11,11,13,0.10),0 10px 24px rgba(125,100,102,0.28);" alt="My Nail Connection"/></div>
     <div data-cp-title style="font-family:'Playfair Display',serif;font-size:24px;font-weight:600;color:var(--rose-dark);margin-bottom:6px;text-align:center;">Welcome</div>
     <div data-cp-sub style="font-size:13px;color:var(--muted);margin-bottom:24px;text-align:center;line-height:1.6;">For your security, please set a new password<br>before continuing.</div>
     <div style="background:white;border-radius:20px;padding:22px;width:100%;box-shadow:0 4px 24px rgba(125,100,102,0.12);">
@@ -3605,28 +3605,46 @@ async function loadTechTier(email) {
     // Parallel: techs row + comp grant lookup. The comp table is a few
     // dozen rows at most, so this is cheap. Promise.all keeps it off the
     // critical path.
-    const [r, cr] = await Promise.all([
-      fetch(
-        `${SUPABASE_URL}/rest/v1/techs?or=(email.eq.${encodeURIComponent(e)},phone.eq.${encodeURIComponent(e)})&select=id,subscription_tier,photo_credits,subscription_expires_at,photos,paused_photos,period_upload_count,period_reset_at,lifetime_free_used`,
-        { headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${window._mncAccessToken || SUPABASE_ANON_KEY}` } }
-      ),
+    const techHeaders = { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${window._mncAccessToken || SUPABASE_ANON_KEY}` };
+    const techRowUrl = (sel) =>
+      `${SUPABASE_URL}/rest/v1/techs?or=(email.eq.${encodeURIComponent(e)},phone.eq.${encodeURIComponent(e)})&select=${sel}`;
+    let [r, cr] = await Promise.all([
+      fetch(techRowUrl('id,subscription_tier,photo_credits,subscription_expires_at,photos_count,paused_count,period_upload_count,period_reset_at,lifetime_free_used'), { headers: techHeaders }),
       fetch(
         `${SUPABASE_URL}/rest/v1/tech_comps?email=eq.${encodeURIComponent(e)}&select=monthly_limit,note,granted_at`,
-        { headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${window._mncAccessToken || SUPABASE_ANON_KEY}` } }
+        { headers: techHeaders }
       )
     ]);
+
+    // Deploy-order guard. photos_count / paused_count are computed columns
+    // added by sql/photo-count-computed-columns.sql. If this HTML ships
+    // before that SQL is run, PostgREST 400s on the unknown columns and the
+    // old code's `if (!r.ok) return` would leave _techTier null, which takes
+    // upload gating down with it. Fall back to the legacy select once and
+    // count client-side, so the order the two land in cannot break uploads.
+    let legacyCounts = false;
+    if (!r.ok) {
+      r = await fetch(techRowUrl('id,subscription_tier,photo_credits,subscription_expires_at,photos,paused_photos,period_upload_count,period_reset_at,lifetime_free_used'), { headers: techHeaders });
+      legacyCounts = r.ok;
+    }
     if (!r.ok) return;
     const d = await r.json();
     if (!d[0]) return;
-    const photos = Array.isArray(d[0].photos) ? d[0].photos : [];
-    const paused = Array.isArray(d[0].paused_photos) ? d[0].paused_photos : [];
+    if (legacyCounts) {
+      d[0].photos_count = Array.isArray(d[0].photos) ? d[0].photos.length : 0;
+      d[0].paused_count = Array.isArray(d[0].paused_photos) ? d[0].paused_photos.length : 0;
+    }
     _techTier = {
       id: d[0].id,   // UUID, used as Stripe client_reference_id so the webhook can identify the tech
       tier: d[0].subscription_tier || 'free',
       photo_credits: d[0].photo_credits || 0,
       subscription_expires_at: d[0].subscription_expires_at || null,
-      total_photos: photos.length,
-      paused_count: paused.length,
+      // photos_count / paused_count are PostgREST computed columns
+      // (sql/photo-count-computed-columns.sql). They exist so this call,
+      // which runs on EVERY upload, stops downloading a tech's entire
+      // portfolio just to read two array lengths.
+      total_photos: d[0].photos_count || 0,
+      paused_count: d[0].paused_count || 0,
       period_upload_count: d[0].period_upload_count || 0,
       period_reset_at: d[0].period_reset_at || null,
       // lifetime_free_used: real free-upload counter on public.techs.
@@ -4780,7 +4798,11 @@ window.closeDeleteAccountModal = closeDeleteAccountModal;
 // iOS uses native IAP per Apple's rules.
 //
 // RevenueCat Product IDs MUST match what's configured in App Store Connect:
-//   com.mynailconnection.app.glow_up_monthly  ($10.99/mo subscription)
+//   com.mynailconnection.app.pro_glow_up      ($10.99/mo subscription)
+//     ^ CONFIRMED against App Store Connect 2026-08-15. This comment used to
+//       read glow_up_monthly, which was never the live product ID and did not
+//       match IAP_PRODUCT_GLOW_UP below. Do not "fix" the constant to match a
+//       stale comment — the constant is the correct one.
 //   com.mynailconnection.app.spotlight_1      ($0.99 consumable)
 //   com.mynailconnection.app.spotlight_10     ($4.99 consumable)
 //
@@ -5197,8 +5219,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.0',     /* __APP_BUILD_NAME__   */
-  android: 540,         /* __APP_BUILD_ANDROID__ */
-  ios:     345,          /* __APP_BUILD_IOS__     */
+  android: 545,         /* __APP_BUILD_ANDROID__ */
+  ios:     350,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -5370,10 +5392,15 @@ function scheduleProactiveRefresh(session) {
   _mncRefreshTimer = setTimeout(async function() {
     const fresh = await refreshSession();
     if (!fresh) {
-      // Refresh failed (revoked, expired). Drop the user to sign-in on
-      // their next action, don't yank them mid-screen. Token is already
-      // cleared by refreshSession on failure.
       window._mncAccessToken = null;
+      // refreshSession only clears the stored session on a definitive
+      // 400/401/403. If the session survived, this was transient — keep
+      // retrying quietly instead of stranding a signed-in user who would
+      // otherwise need a brand new SMS code to get back in. 2026-08-15
+      if (loadSession()) {
+        try { if (_mncRefreshTimer) clearTimeout(_mncRefreshTimer); } catch (e) {}
+        _mncRefreshTimer = setTimeout(function () { refreshSession(); }, 60000);
+      }
     }
     // saveSession (called inside refreshSession on success) re-schedules.
   }, delaySec * 1000);
@@ -5407,27 +5434,60 @@ function isSessionExpired(session, graceSeconds = 0) {
 async function refreshSession() {
   const s = loadSession();
   if (!s || !s.refresh_token) { clearSession(); return null; }
-  try {
-    const res = await fetch(SUPABASE_URL + '/auth/v1/token?grant_type=refresh_token', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY },
-      body: JSON.stringify({ refresh_token: s.refresh_token })
-    });
-    if (!res.ok) { clearSession(); return null; }
-    const data = await res.json();
-    if (!data || !data.access_token) { clearSession(); return null; }
-    // Preserve the user object across refresh. Supabase's refresh-token
-    // endpoint doesn't always include user in its response, so without
-    // this carry-forward saveSession would write user:null. That breaks
-    // currentUser on the next restorePersistedSession, which breaks
-    // initRevenueCat (bails on !currentUser.id), which breaks IAP with
-    // "Purchases must be configured." The bug surfaced ~1hr after each
-    // sign-in (when the access token first refreshes). 2026-04-30, this
-    // is the actual root cause of the recurring IAP regression.
-    if (!data.user && s.user) data.user = s.user;
-    saveSession(data);
-    return loadSession();
-  } catch(e) { return null; }
+
+  // A transient failure must NOT sign the user out. Until 2026-08-15 ANY
+  // non-ok response called clearSession(), so a single 500 — or the July
+  // Supabase degradation that served 47-second auth and timed-out REST —
+  // silently logged people out, and phone-only auth means the only way
+  // back in is a fresh SMS code Anne pays for. Now only a definitive
+  // rejection from GoTrue (400 / 401 / 403) clears the session; 5xx, 429,
+  // and network errors keep it and retry with backoff.
+  const MAX_TRIES = 3;
+  for (let attempt = 1; attempt <= MAX_TRIES; attempt++) {
+    let res = null;
+    try {
+      res = await fetch(SUPABASE_URL + '/auth/v1/token?grant_type=refresh_token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY },
+        body: JSON.stringify({ refresh_token: s.refresh_token })
+      });
+    } catch (e) {
+      res = null;   // offline / DNS / TLS — transient, handled below
+    }
+
+    if (res && res.ok) {
+      let data = null;
+      try { data = await res.json(); } catch (e) { data = null; }
+      if (data && data.access_token) {
+        // Preserve the user object across refresh. Supabase's refresh-token
+        // endpoint doesn't always include user in its response, so without
+        // this carry-forward saveSession would write user:null. That breaks
+        // currentUser on the next restorePersistedSession, which breaks
+        // initRevenueCat (bails on !currentUser.id), which breaks IAP with
+        // "Purchases must be configured." The bug surfaced ~1hr after each
+        // sign-in (when the access token first refreshes). 2026-04-30, this
+        // is the actual root cause of the recurring IAP regression.
+        if (!data.user && s.user) data.user = s.user;
+        saveSession(data);
+        return loadSession();
+      }
+      // 200 with no token is malformed, not proof the grant is dead. Retry.
+    } else if (res && (res.status === 400 || res.status === 401 || res.status === 403)) {
+      // GoTrue has definitively rejected this refresh token. It will never
+      // work again, so stop retrying and make them sign in.
+      clearSession();
+      return null;
+    }
+
+    if (attempt < MAX_TRIES) {
+      await new Promise(function (r) { setTimeout(r, attempt * 1500); });
+    }
+  }
+
+  // Out of retries. The stored session is left in place ON PURPOSE so the
+  // next app open can try again, rather than demanding a new SMS code over
+  // what may well be a passing outage.
+  return null;
 }
 
 let sbClient = null;
@@ -8007,15 +8067,15 @@ async function __deadLoadAdminStats_deprecated() {
     countTable('users', 'role=eq.client'),
     countTable('users', 'role=eq.client&joined=gte.' + sevenDaysAgoDate),
     countTable('techs'),
-    // Photos-as-JSONB: fetch every tech's photos column, sum lengths.
-    // At ~17 techs this is trivial; at scale swap for an RPC that runs
-    // `sum(jsonb_array_length(photos))` server-side.
+    // Photos-as-JSONB: photos_count is a PostgREST computed column, so
+    // Postgres does the jsonb_array_length and only integers cross the
+    // wire. This used to pull every tech's entire photos array.
     (async () => {
       try {
-        const r = await fetch(SUPABASE_URL + '/rest/v1/techs?select=photos', { headers: h });
+        const r = await fetch(SUPABASE_URL + '/rest/v1/techs?select=photos_count', { headers: h });
         if (!r.ok) return 0;
         const rows = await r.json();
-        return (rows || []).reduce((sum, t) => sum + (Array.isArray(t.photos) ? t.photos.length : 0), 0);
+        return (rows || []).reduce((sum, t) => sum + (t.photos_count || 0), 0);
       } catch (e) { return 0; }
     })(),
     // Client signups over the last 14 days, feeds the trend sparkline.
@@ -14082,19 +14142,27 @@ async function tbPatchTech(patch) {
 // while testing. Flip REQUIRE_NOTIFS_FOR_BOOKING to true to restore the gate.
 var REQUIRE_NOTIFS_FOR_BOOKING = false;
 async function ensureBookingNotifications() {
+  // Native app (Capacitor): push runs through APNs/FCM via initCapacitorPush,
+  // not the Web Notification API, so don't gate on Notification.permission
+  // there. Best-effort (re)register and allow.
+  //
+  // This check has to come BEFORE the REQUIRE_NOTIFS_FOR_BOOKING early return.
+  // It used to sit after it, so with the gate off (which is how it ships) a
+  // client booking inside the native app fell into subscribeToPush(), the
+  // web-push path, which silently no-ops inside Capacitor. Booking is the
+  // moment a client most needs notifications and it was the one moment that
+  // could never register them. Same class of bug as the 2026-08-10 "client
+  // never got the option" fix in showPushPrompt. 2026-08-15
+  try {
+    if (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) {
+      try { await initCapacitorPush(); } catch(_) {}
+      return true;
+    }
+  } catch(_) {}
   if (!REQUIRE_NOTIFS_FOR_BOOKING) {
     try { await subscribeToPush(currentUserEmail); } catch(_) {}
     return true;
   }
-  // Native app (Capacitor): push runs through APNs/FCM via initCapacitorPush,
-  // not the Web Notification API, so don't gate on Notification.permission
-  // there. Best-effort (re)register and allow.
-  try {
-    if (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) {
-      try { initCapacitorPush(); } catch(_) {}
-      return true;
-    }
-  } catch(_) {}
   // Web / installed PWA:
   // Browsers disable Notifications + service workers on insecure origins, so
   // over plain http:// (e.g. testing on a LAN IP) permission can never be
@@ -19273,13 +19341,13 @@ async function loadAdminStats() {
     countTable('users', 'role=eq.client'),
     countTable('users', 'role=eq.client&joined=gte.' + sevenDaysAgoDate),
     countTable('techs'),
-    // Photos are stored as JSONB array on public.techs.photos, sum lengths.
+    // photos_count is a computed column, so only the integers cross the wire.
     (async () => {
       try {
-        const r = await fetch(SUPABASE_URL + '/rest/v1/techs?select=photos', { headers: h });
+        const r = await fetch(SUPABASE_URL + '/rest/v1/techs?select=photos_count', { headers: h });
         if (!r.ok) return 0;
         const rows = await r.json();
-        return (rows || []).reduce((sum, t) => sum + (Array.isArray(t.photos) ? t.photos.length : 0), 0);
+        return (rows || []).reduce((sum, t) => sum + (t.photos_count || 0), 0);
       } catch (e) { return 0; }
     })(),
     countTable('techs', 'is_available=eq.true'),
@@ -20672,8 +20740,17 @@ function mncRenderDownloadGate(t) {
     ? primary(playUrl, 'Get it on Google Play \u2192', 'android') + '<div style="height:10px;"></div>' + secondary(iosUrl, 'Download on the App Store', 'ios')
     : primary(iosUrl, 'Download on the App Store \u2192', 'ios') + '<div style="height:10px;"></div>' + secondary(playUrl, 'Get it on Google Play', 'android');
 
+  // Feature row is typographic rather than emoji: small-caps labels with
+  // hairline dots between them, so it reads as brand furniture.
+  var gateFeat = function(label) {
+    return '<span style="font-size:10.5px;font-weight:600;letter-spacing:1.3px;text-transform:uppercase;' +
+      'color:var(--rose-dark);white-space:nowrap;">' + label + '</span>';
+  };
+  var gateDot = '<span style="width:3px;height:3px;border-radius:50%;background:var(--rose-mid);' +
+    'display:inline-block;flex:none;"></span>';
+
   var techCard = '';
-  var headline = 'Your next nail tech is in here \ud83d\udc85';
+  var headline = 'Your next nail tech is in here';
   var sub = 'Real local artists, their real work, and open spots you can book in seconds \u2014 all in the app.';
   if (t) {
     var first = ((t.name || '').trim().split(/\s+/)[0]) || 'She';
@@ -20702,7 +20779,7 @@ function mncRenderDownloadGate(t) {
         (meta ? '<div style="font-size:13px;color:var(--muted);margin-top:3px;">' + bkEsc(meta) + '</div>' : '') +
         (tags ? '<div style="margin-top:9px;">' + tags + '</div>' : '') +
         (thumbs ? '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:12px;">' + thumbs + '</div>' : '') +
-        '<div style="font-size:13.5px;color:var(--rose-dark);font-weight:600;margin-top:13px;font-style:italic;">\u201cSee my work and book me in the app \ud83d\udc85\u201d</div>' +
+        '<div style="font-size:13.5px;color:var(--rose-dark);font-weight:600;margin-top:13px;font-style:italic;">\u201cSee my work and book me in the app.\u201d</div>' +
       '</div>';
   }
 
@@ -20710,17 +20787,24 @@ function mncRenderDownloadGate(t) {
   if (!el) {
     el = document.createElement('div');
     el.id = 'mnc-dl-gate';
-    el.style.cssText = 'position:fixed;inset:0;z-index:100000;overflow:auto;background:linear-gradient(165deg,#FBF8F8 0%,#F7E2E3 55%,#EFCFD2 100%);';
+    el.style.cssText = 'position:fixed;inset:0;z-index:100000;overflow:auto;' +
+      'background:radial-gradient(120% 78% at 50% 0%,rgba(255,255,255,0.88) 0%,rgba(255,255,255,0) 58%),' +
+      'linear-gradient(165deg,#FBF8F8 0%,#F4DCDE 52%,#E7C3C7 100%);';
     document.body.appendChild(el);
   }
   el.innerHTML =
     '<div style="min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:34px 24px 40px;box-sizing:border-box;text-align:center;font-family:\'DM Sans\',sans-serif;">' +
-      '<img src="mncLogo-transparent.png" alt="My Nail Connection" style="width:72px;height:auto;"/>' +
-      '<div style="font-family:\'Playfair Display\',serif;font-size:19px;color:var(--rose-dark);letter-spacing:0.5px;margin-top:6px;">My Nail Connection</div>' +
+      '<img src="images/mncLogo-round-512.webp" width="512" height="512" alt="My Nail Connection" fetchpriority="high" ' +
+           'style="width:92px;height:92px;border-radius:26px;display:block;' +
+           'box-shadow:0 2px 6px rgba(11,11,13,0.10),0 14px 34px rgba(125,100,102,0.30);"/>' +
+      '<div style="font-family:\'Playfair Display\',serif;font-size:21px;color:var(--ink-2);letter-spacing:1.4px;margin-top:14px;">My Nail Connection</div>' +
+      '<div style="width:36px;height:2px;border-radius:2px;margin-top:10px;background:linear-gradient(90deg,var(--rose-mid),var(--rose-dark));"></div>' +
       techCard +
       '<div style="font-family:\'Playfair Display\',serif;font-size:26px;line-height:1.25;color:var(--charcoal);margin-top:16px;max-width:340px;">' + headline + '</div>' +
       '<div style="font-size:14.5px;color:var(--muted);line-height:1.55;margin-top:8px;max-width:320px;">' + sub + '</div>' +
-      '<div style="font-size:13px;color:var(--rose-dark);font-weight:600;margin-top:14px;">\u2728 Free &nbsp;\u00b7&nbsp; \ud83d\udcc5 Book in seconds &nbsp;\u00b7&nbsp; \ud83d\udd14 Appointment reminders</div>' +
+      '<div style="display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:11px;margin-top:18px;max-width:330px;">' +
+        gateFeat('Free') + gateDot + gateFeat('Book in seconds') + gateDot + gateFeat('Appointment reminders') +
+      '</div>' +
       '<div style="width:100%;max-width:340px;margin-top:16px;">' + buttons + '</div>' +
       '<div style="font-size:12px;color:var(--muted);margin-top:14px;opacity:0.8;">Free on iPhone and Android \u00b7 no fees, ever</div>' +
       '<a href="https://mynailconnection.com/" style="display:inline-block;font-size:12.5px;color:var(--rose-dark);font-weight:600;margin-top:10px;text-decoration:underline;text-underline-offset:3px;font-family:\'DM Sans\',sans-serif;">What is My Nail Connection? \u2192</a>' +
