@@ -4478,13 +4478,6 @@ function mncFreeLimit() {
   return STRIPE_CONFIG.free_limit;
 }
 
-function devToggleNewPricing() {
-  try {
-    var on = localStorage.getItem('mnc_force_new_pricing') === '1';
-    localStorage.setItem('mnc_force_new_pricing', on ? '0' : '1');
-  } catch(e) {}
-  location.reload();
-}
 
 async function initBillingForTech() {
   // 3.0: fetch join date once so mncFreeLimit() can grandfather
@@ -5219,8 +5212,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.0',     /* __APP_BUILD_NAME__   */
-  android: 545,         /* __APP_BUILD_ANDROID__ */
-  ios:     350,          /* __APP_BUILD_IOS__     */
+  android: 547,         /* __APP_BUILD_ANDROID__ */
+  ios:     352,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -6439,48 +6432,12 @@ async function doChangePassword() {
   btn.textContent = 'Set New Password'; btn.disabled = false;
 }
 
-// ── Dev quick-login (localhost ONLY) ────────────────────────────────────────
-// One-tap sign-in as the booking test accounts from
-// sql/test-booking-accounts.sql. The buttons mount only when the app is
-// served from localhost, so they never render on the live site. Still:
-// REMOVE this block before the 3.0 cutover (listed in docs/V3-PLAN.md),
-// index.html ships publicly and test creds don't belong in it long-term.
-async function devLogin(kind) {
-  var email = kind === 'tech'
-    ? 'annewilson1021+booktech@gmail.com'
-    : 'annewilson1021+bookclient@gmail.com';
-  showToast('Signing in as test ' + kind + '...');
-  // Real sign-in only (offline fallback removed 2026-07-06 per Anne:
-  // a fake session without data isn't testable, better to fail loudly).
-  try { await signInWithEmail(email, 'MNC2026'); }
-  catch(e) {}
-  if ((currentUserEmail || '').toLowerCase() !== email) {
-    showToast('Dev login failed, Supabase is probably struggling. Try again in a bit.', 4200);
-  }
-}
-(function devQuickLoginInit() {
-  function mount() {
-    if (!/^(localhost|127\.0\.0\.1)$/.test(location.hostname)) return;
-    var anchor = document.getElementById('auth-build-tag');
-    if (!anchor || document.getElementById('dev-quick-login')) return;
-    var wrap = document.createElement('div');
-    wrap.id = 'dev-quick-login';
-    wrap.style.cssText = 'display:flex;gap:8px;justify-content:center;margin-top:14px;';
-    var bs = 'padding:8px 14px;border-radius:10px;border:1.5px dashed var(--rose-mid);background:rgba(255,255,255,0.7);color:var(--rose-dark);font-size:12px;font-weight:700;cursor:pointer;font-family:monospace;';
-    wrap.innerHTML =
-      '<button style="' + bs + '" onclick="devLogin(\'tech\')">DEV &middot; Tech</button>' +
-      '<button style="' + bs + '" onclick="devLogin(\'client\')">DEV &middot; Client</button>' +
-      (function() {
-        var on = false;
-        try { on = localStorage.getItem('mnc_force_new_pricing') === '1'; } catch(e) {}
-        return '<button style="' + bs + (on ? 'background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);color:white;' : '') +
-               '" onclick="devToggleNewPricing()">DEV &middot; New pricing ' + (on ? 'ON' : 'off') + '</button>';
-      })();
-    anchor.parentNode.insertBefore(wrap, anchor);
-  }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mount);
-  else mount();
-})();
+// Dev quick-login was REMOVED 2026-08-17 before the 3.0 store submission.
+// It shipped two real Supabase accounts and their literal password
+// in a file served publicly at /app/ and baked into both native binaries.
+// The buttons only mounted on localhost, but the credentials were readable
+// by anyone who opened view-source or unzipped the APK. If you need test
+// sign-in again, put the creds in a local-only file, never in index.html.
 
 async function signInWithEmail(email, password) {
   if (!email || !email.includes('@')) { showAuthError('Please enter a valid email address.'); return; }
@@ -7376,7 +7333,7 @@ function renderTechContactFooter(tech) {
   const footer = document.getElementById('td-contact-footer');
   if (!footer) return;
   // 3.0 pause switch: no contact, no booking, just a gentle note.
-  if (tech.listing_paused) {
+  if (!tech.is_live) {
     footer.innerHTML = '<div style="text-align:center;padding:12px;background:var(--cream);border:1.5px solid var(--border);border-radius:12px;font-size:13px;color:var(--muted);">' +
       bkEsc(((tech.name || 'This tech').trim().split(/\s+/)[0])) + ' is taking a break and not booking new clients right now.</div>';
     footer.style.display = '';
@@ -11855,7 +11812,7 @@ function buildStyleFilterChips() {
   // (styleFilterChip calls back in here) to keep the numbers live.
   var allPhotoTags = [];
   ALL_TECHS.forEach(function(tech) {
-    if (tech.listing_paused) return;
+    if (!tech.is_live) return;
     (tech.photos || []).forEach(function(p) {
       var url = (p && (p.url || p)) || '';
       if (url && String(url).startsWith('http')) {
@@ -12650,7 +12607,7 @@ function renderStyleGrid() {
 
   var photos = [];
   ALL_TECHS.forEach(function(tech) {
-    if (tech.listing_paused) return; // 3.0: paused = off the Gallery
+    if (!tech.is_live) return; // off the Gallery: paused herself, or not subscribed
     (tech.photos || []).forEach(function(p) {
       var url = p.url || p;
       // No-skip tagging (2026-08-03): a photo that escaped the wizard
@@ -14013,7 +13970,7 @@ async function loadTechBookings() {
   const note = document.getElementById('tb-migration-note');
   try {
     const r = await fetch(SUPABASE_URL +
-      '/rest/v1/techs?select=id,name,email,booking_enabled,booking_auto_confirm,booking_timezone,booking_buffer_minutes,booking_min_notice_hours,listing_paused&or=(email.eq.' +
+      '/rest/v1/techs?select=id,name,email,booking_enabled,booking_auto_confirm,booking_timezone,booking_buffer_minutes,booking_min_notice_hours,listing_paused,paused_by_tech&or=(email.eq.' +
       encodeURIComponent(currentUserEmail) + ',phone.eq.' + encodeURIComponent(currentUserEmail) + ')', { headers: bkHeaders() });
     if (!r.ok) {
       // Almost always means the migration hasn't been run (unknown column).
@@ -14081,7 +14038,7 @@ function tbRenderSettings() {
   if (!_bkMyTech) return;
   tbPill('tb-enabled-btn', !!_bkMyTech.booking_enabled);
   tbPill('tb-autoconfirm-btn', !!_bkMyTech.booking_auto_confirm);
-  tbPill('tb-paused-btn', !!_bkMyTech.listing_paused);
+  tbPill('tb-paused-btn', !!_bkMyTech.paused_by_tech);
   const tzl = document.getElementById('tb-tz-label');
   if (tzl) tzl.textContent = _bkMyTech.booking_timezone || 'America/Phoenix';
   const buf = document.getElementById('tb-buffer');
@@ -14097,7 +14054,7 @@ function tbRenderSettings() {
     ? 'Requests book straight onto your calendar \u2014 clients will be counting on you, keep an eye on your schedule!'
     : 'You approve each request before it books \u2014 stay near your phone!';
   const pSub = document.getElementById('tb-paused-sub');
-  if (pSub) pSub.textContent = _bkMyTech.listing_paused
+  if (pSub) pSub.textContent = _bkMyTech.paused_by_tech
     ? 'Your page is hidden and booking is paused \u2014 flip off and everything comes back.'
     : 'You\u2019re live \u2014 photos in the Gallery, booking on your profile.';
   // Minimum notice: only meaningful while requests confirm themselves.
@@ -14441,11 +14398,14 @@ async function tbEndStanding(id) {
 // Pause switch + quiet blocklist
 async function tbTogglePaused() {
   if (!_bkMyTech) return;
-  const next = !_bkMyTech.listing_paused;
+  const next = !_bkMyTech.paused_by_tech;
   if (next && !(await showConfirm('Pause your listing?', {
     body: 'Your photos leave the Gallery and clients can\u2019t book or contact you until you flip this back off. Your portfolio is safe.',
     okLabel: 'Pause it' }))) return;
-  if (!(await tbPatchTech({ listing_paused: next }))) return;
+  // Write paused_by_tech, never listing_paused: a BEFORE trigger derives
+  // listing_paused from this plus subscription state (sql/tech-paywall.sql).
+  // Writing the derived column directly would be overwritten on the way in.
+  if (!(await tbPatchTech({ paused_by_tech: next }))) return;
   tbRenderSettings();
   showToast(next ? 'Listing paused. Enjoy the break \u2728' : 'Welcome back! Your photos are live again');
 }
@@ -17514,7 +17474,7 @@ async function loadMembersFromSupabase() {
     const [usersRes, techsRes] = await Promise.all([
       fetch(`${SUPABASE_URL}/rest/v1/users?select=*&order=joined.desc`,
         { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` } }),
-      fetch(`${SUPABASE_URL}/rest/v1/techs?select=*&order=joined.desc`,
+      fetch(`${SUPABASE_URL}/rest/v1/techs?select=*,is_live&order=joined.desc`,
         { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` } })
     ]);
     const users = usersRes.ok ? await usersRes.json() : [];
@@ -20073,7 +20033,7 @@ async function loadTechsFromSupabase() {
 
   try {
     const res = await fetch(
-      SUPABASE_URL + '/rest/v1/techs?select=*&order=name.asc',
+      SUPABASE_URL + '/rest/v1/techs?select=*,is_live&order=name.asc',
       { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY } }
     );
 
@@ -20149,6 +20109,14 @@ function _mapTechRow(t) {
         // paused techs still showed. 2026-07-17.
         booking_enabled: !!t.booking_enabled,
         listing_paused: !!t.listing_paused,
+        // is_live is the PostgREST computed column from sql/tech-paywall.sql:
+        // not paused by the tech AND (founding tech OR paid). It is what every
+        // visibility filter reads now — listing_paused is kept here only
+        // because other code still reads it. NOTE: computed columns are NOT
+        // included in select=*, they must be named, which is why both tech
+        // queries above spell out ",is_live". Drop it from either and every
+        // tech silently vanishes from the Map and the Gallery.
+        is_live: (t.is_live !== undefined ? !!t.is_live : !t.listing_paused),
         // Subscriber flag drives the Glow Up badge on cards / tech
         // detail header. True for both Stripe-paid (active sub) AND
         // comped techs (the tech_comps INSERT trigger writes

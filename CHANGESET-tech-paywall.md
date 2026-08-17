@@ -8,9 +8,10 @@ Decided with Anne 2026-08-15. Companion migration: `sql/tech-paywall.sql` (to be
 ## The model, stated once
 
 > **Clients: free forever.**
-> **Techs: build your gallery and set your availability free. Your first month
-> of taking bookings is free. After that, $10.99/month.**
-> **The 28 existing techs stay free for life.**
+> **Techs: build your gallery and set your availability free. Your first three
+> months of taking bookings are free. After that, $10.99/month — locked at that
+> price for life for anyone who joins as a founding tech.**
+> **The 21 techs already on the platform stay free for life.**
 
 An unpaid tech is **invisible and unbookable** — off the Map, off the Gallery,
 no open slots, no direct-link booking. Her account, photos, tags, hours and
@@ -23,6 +24,42 @@ in front of a stranger who's never seen the product.
 Why nothing is left open for her own clients: if a direct `?tech=` link still
 booked, a tech would put it in her Instagram bio and never pay. Anne's call,
 and it's the right one.
+
+### ⚠ SELL THE TOOLING, NOT THE DISCOVERY
+
+The single most important thing in this file. An earlier draft of the purchase
+copy promised *"clients can find you on the Map, in the Gallery"* — a
+**discovery** promise. MNC has ~21 techs and no client base, so that promise
+cannot be kept for months. A tech who buys it and gets nobody cancels the day
+the trial ends and tells her friends MNC does not work.
+
+There are two value propositions here and only one of them is deliverable today:
+
+| | Works on day one? |
+|---|---|
+| **A — Booking tooling.** Her booking page, link + QR, standing appointments, reminders, private notes, walk-ins, no commission, nothing charged to her clients | **Yes.** Needs zero MNC clients — she brings her own |
+| **B — Discovery.** New clients finding her in the Gallery | **No.** Needs density that does not exist yet |
+
+**Every word of paid-tier copy sells A.** B is upside, never a promise. This
+also matches the 3.0 pivot already in `docs/HANDOFF.md` ("the customer is the
+TECH", clients arrive via her shared link) — discovery-first is the model that
+already flopped once.
+
+**Why three months and not one:** a nail client cycles every 2–3 weeks, so one
+month is barely two fills — not long enough for a tech to judge whether the
+booking system is working. Three months costs roughly **fifteen cents per tech**
+in real infrastructure. There is no financial argument against it.
+
+**Why the founding rate:** it converts the cold-start weakness into a reason to
+join now instead of waiting. Say plainly that the price goes up later. Both
+stores preserve an existing subscriber's price when you raise it, so this
+promise is automatic to keep and requires no code.
+
+**Do not conflate the two "founder" concepts.**
+`techs.founder_free` = the 21 existing techs, **free forever, never charged**.
+The *founding rate* = new techs who subscribe before the cutoff, who **do pay**
+$10.99 and simply never see an increase. That one is store pricing, not a
+database flag.
 
 ---
 
@@ -164,12 +201,19 @@ payment reasons, don't just refuse — **open the purchase sheet**. The buy path
 already exists and is wired to RevenueCat + Stripe (`index.html:4403`,
 `_stripeLink('link_glow_up', …)`).
 
-Copy for the sheet, first time:
-> **Ready for clients.**
-> Your gallery and your hours are set. Turn on bookings and clients can find
-> you on the Map, in the Gallery, and book you straight from your profile.
+Copy for the sheet, first time — note it promises tooling, never new clients:
+> **Your book, your link, your rules.**
+> Your own booking page and QR code, standing appointments for your regulars,
+> automatic reminders, and private notes on every client. No commission, no
+> per-booking fee, and never a charge to your clients.
 >
-> **Your first month is free**, then $10.99/month. Cancel anytime.
+> **Free for three months**, then $10.99/month — locked at that price for life
+> as a founding tech. Cancel anytime.
+
+Everything named there is live today and works with the clients she already
+has. Nothing in it depends on strangers finding her. When the Gallery does
+start delivering new clients, that lands as a surprise rather than an
+expectation she has been waiting on.
 
 ### 2c. The role fork — leave it alone
 
@@ -177,16 +221,26 @@ Copy for the sheet, first time:
 exactly as it is. **Signup is still free.** This is the whole point of moving
 the gate to "bookable"; do not add a paywall here.
 
-### 2d. Day-31 warning
+### 2d. End-of-trial warning (day ~90)
 
-A tech whose free month is about to end and who has clients booked must not be
-surprised. Three days before `paid_through`:
+A tech whose free period is ending and who has clients booked must not be
+surprised. Warn **twice** — three months is long enough that she will have
+forgotten the trial ever started:
 
-- push notification (`sendPushToUser`, already built)
-- a persistent banner on the Tech Portal
+- **7 days out** — a persistent banner on the Tech Portal
+- **1 day out** — push notification (`sendPushToUser`, already built) + banner
 
-Copy: *"Your free month ends Friday. Keep bookings on for $10.99/month —
-your calendar and everything you've built stays either way."*
+Copy, seven days:
+> *Your three free months are almost up. Keep your book open for $10.99/month —
+> your founding-tech price, locked for good.*
+
+Copy, one day:
+> *Your free trial ends tomorrow. Keep bookings on for $10.99/month — your
+> calendar, your gallery and everything you've built stays either way.*
+
+The second half of that sentence matters and must not be cut: the biggest
+reason a tech ignores a renewal prompt is fear that declining nukes her work.
+It does not. Say so.
 
 ---
 
@@ -212,21 +266,32 @@ it would break the permanence promise.
 
 ## 4. Store configuration
 
-**Use a store-native introductory offer. Do not build your own free month.**
+**Use a store-native introductory offer. Do not build your own free trial.**
 
-Apple and Google both support "1 month free" as an intro offer on an existing
-subscription, RevenueCat already handles it, the card is captured up front, and
-it converts automatically on day 31. A homegrown "free now, we'll ask later" is
-more code and worse conversion.
+Apple offers free-trial durations of 3 days / 1 week / 2 weeks / 1 month /
+2 months / **3 months** / 6 months / 1 year, and Google Play supports a custom
+free-trial period. So three months is a native option on both — no code, no
+trial state in the database, the card is captured up front, and it converts
+automatically. A homegrown "free now, we'll ask later" is more work and worse
+conversion.
 
-**⚠ Verify the product ID first.** There is a mismatch in the repo:
+Configure on `com.mynailconnection.app.pro_glow_up`:
+- **Introductory offer: 3 months free**, then $10.99/month recurring
+- Apple: App Store Connect → the subscription → Introductory Offers
+- Google: Play Console → the base plan → free-trial offer
+- RevenueCat needs no change; it reports the trial as an active entitlement, so
+  `subscription_tier` goes to `'paid'` from day one and `tech_is_live()` is
+  true throughout the trial. **The database models no trial at all.**
 
-- `index.html:4801` (comment) says `com.mynailconnection.app.glow_up_monthly`
-- `index.html:4807` (the constant actually used) says
-  `com.mynailconnection.app.pro_glow_up`
+**The founding rate needs no build.** Both stores let you preserve existing
+subscribers' pricing when you raise a subscription price, so "locked for life"
+is kept by simply not opting them into the increase. Pick and record the cutoff
+date for who counts as founding.
 
-One of these is wrong. If it's the constant, **every iOS purchase fails at
-product lookup.** Check App Store Connect before shipping anything.
+**✅ Product ID confirmed 2026-08-17.** The live product is
+`com.mynailconnection.app.pro_glow_up` — the constant `IAP_PRODUCT_GLOW_UP` was
+correct and the comment above it was stale. The comment has been corrected in
+`index.html`; do not "fix" the constant to match any older note.
 
 Also: **enroll in the Apple Small Business Program.** It's a free application
 and it's the difference between 15% and 30% — at 1,000 techs, $18k vs $36k a
@@ -249,8 +314,13 @@ biggest single chunk of work here. Every surface currently promises free.
   the first two are still true, keep them, they're your differentiator
 - *"Free for all basic features. More features as the app gains momentum."* — replace
 - Suggested subtitle: `Booking built for nail techs`
-- Suggested line: *"Free to set up. First month of bookings free, then $10.99/month.
-  No commission, no per-booking fee, and never a charge to your clients."*
+- Suggested line: *"Free to set up, free for three months, then $10.99/month —
+  locked for life as a founding tech. No commission, no per-booking fee, and
+  never a charge to your clients."*
+- **Do not put a discovery promise in the store listing either.** The current
+  description leads with the Gallery. Lead with the booking page, the shareable
+  link and QR, standing appointments, and reminders. Keep the Gallery, but as a
+  feature she gets, not as a stream of new clients she is being sold.
 
 ### `marketing-v3.html` — CRITICAL
 This is the LIVE page (`sync.sh` copies it to `deploy/ghpages/index.html`).
