@@ -4370,6 +4370,96 @@ window._showCreditLoadingBanner = _showCreditLoadingBanner;
 window._hideCreditLoadingBanner = _hideCreditLoadingBanner;
 
 
+// ── Booking subscription ($10.99/mo) ───────────────────────────────────────
+// The paid thing is MNC's own booking engine. Being SEEN stays free, so
+// nothing here promises new clients — see sql/tech-paywall-split.sql and
+// CHANGESET-tech-paywall.md for why. Every feature named below works on day
+// one with the clients she already has; a discovery promise we cannot keep
+// yet is what makes a tech cancel the day the trial ends.
+//
+// Built in JS rather than as markup because index.html has repeatedly been
+// truncated by large edits near the END of the file (see CLAUDE.md). The
+// download gate is created the same way.
+const BOOKING_SUB_PRICE = '$10.99';
+
+function closeBookingSubscribe() {
+  var el = document.getElementById('mnc-sub-sheet');
+  if (el) el.remove();
+}
+
+function openBookingSubscribe() {
+  closeBookingSubscribe();
+  var el = document.createElement('div');
+  el.id = 'mnc-sub-sheet';
+  el.className = 'modal-overlay';
+  el.style.cssText = 'position:fixed;inset:0;z-index:100001;display:flex;align-items:flex-end;'
+    + 'justify-content:center;background:rgba(43,41,39,0.45);overflow:auto;';
+
+  var row = function(label) {
+    return '<div style="display:flex;align-items:flex-start;gap:10px;">'
+      + '<svg viewBox="0 0 24 24" style="width:17px;height:17px;flex-shrink:0;margin-top:2px;'
+      + 'stroke:var(--rose-dark);fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;">'
+      + '<polyline points="20 6 9 17 4 12"/></svg>'
+      + '<div style="font-size:13.5px;color:var(--charcoal);line-height:1.5;">' + label + '</div></div>';
+  };
+
+  el.innerHTML =
+    '<div style="background:white;width:100%;max-width:440px;border-radius:22px 22px 0 0;'
+      + 'padding:26px 22px 22px;box-sizing:border-box;font-family:\'DM Sans\',sans-serif;">'
+      + '<div style="width:38px;height:4px;border-radius:4px;background:var(--border);margin:0 auto 18px;"></div>'
+      + '<div style="font-family:\'Playfair Display\',serif;font-size:23px;line-height:1.25;color:var(--charcoal);text-align:center;">Your book, your link, your rules.</div>'
+      + '<div style="display:flex;flex-direction:column;gap:11px;margin-top:18px;">'
+        + row('Your own booking page and QR code')
+        + row('Standing appointments for your regulars')
+        + row('Automatic reminders, so fewer no-shows')
+        + row('Private notes on every client')
+        + row('<b>No commission, no per-booking fee</b>, and never a charge to your clients')
+      + '</div>'
+      + '<div style="margin-top:20px;padding:14px;border-radius:14px;background:var(--cream);text-align:center;">'
+        + '<div style="font-size:15px;font-weight:700;color:var(--charcoal);">Free for three months</div>'
+        + '<div style="font-size:13px;color:var(--muted);margin-top:3px;">then ' + BOOKING_SUB_PRICE + '/month, locked at that price for life as a founding tech</div>'
+      + '</div>'
+      + '<button onclick="subscribeToBooking()" style="width:100%;margin-top:16px;padding:15px;border:none;'
+        + 'border-radius:13px;background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);'
+        + 'color:white;font-size:15px;font-weight:700;font-family:\'DM Sans\',sans-serif;cursor:pointer;">'
+        + 'Start my three months free</button>'
+      + '<button onclick="closeBookingSubscribe()" style="width:100%;margin-top:9px;padding:15px;border:none;'
+        + 'background:none;color:var(--muted);font-size:13.5px;font-family:\'DM Sans\',sans-serif;cursor:pointer;">'
+        + 'Not yet</button>'
+      + '<div style="font-size:11.5px;color:var(--muted);text-align:center;margin-top:8px;line-height:1.5;">'
+        + 'Cancel anytime. Your gallery and your calendar stay put either way.</div>'
+    + '</div>';
+
+  el.addEventListener('click', function(e) { if (e.target === el) closeBookingSubscribe(); });
+  document.body.appendChild(el);
+}
+
+// Routes the same way purchaseUnlimited does: Apple IAP on iOS (required by
+// guideline 3.1.1), Stripe everywhere else. Deliberately NOT gated on
+// GLOW_UP_ENABLED — that flag belongs to the retired pay-per-photo product,
+// and this subscription is a different thing that happens to reuse the SKU.
+async function subscribeToBooking() {
+  closeBookingSubscribe();
+  if (isIOS()) {
+    var result = await purchaseIAP(IAP_PRODUCT_GLOW_UP);
+    if (result.ok) {
+      _showCreditLoadingBanner('glowup');
+      var upgraded = await _waitForTierUpgrade();
+      _hideCreditLoadingBanner();
+      showToast(upgraded
+        ? 'You\u2019re all set \u2014 your book is open \u2728'
+        : 'Subscription received. It will activate shortly, pull down to refresh.');
+      // Re-read her row so is_bookable reflects the new subscription.
+      try { await loadTechBookings(); } catch(_) {}
+    } else if (result.reason !== 'cancelled') {
+      showToast('Subscription failed. Please try again.');
+    }
+    return;
+  }
+  _stripeLaunch(_stripeLink('link_glow_up', 'link_glow_up_test'),
+               'Complete payment in browser, then return here');
+}
+
 async function purchaseUnlimited() {
   // Kept name for backward-compat call sites; actually launches Glow Up subscription.
   // While GLOW_UP_ENABLED is false, block all entry points, modal card is
@@ -5213,8 +5303,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.0',     /* __APP_BUILD_NAME__   */
-  android: 549,         /* __APP_BUILD_ANDROID__ */
-  ios:     354,          /* __APP_BUILD_IOS__     */
+  android: 550,         /* __APP_BUILD_ANDROID__ */
+  ios:     355,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -13976,7 +14066,7 @@ async function loadTechBookings() {
   const note = document.getElementById('tb-migration-note');
   try {
     const r = await fetch(SUPABASE_URL +
-      '/rest/v1/techs?select=id,name,email,booking_enabled,booking_auto_confirm,booking_timezone,booking_buffer_minutes,booking_min_notice_hours,listing_paused,paused_by_tech&or=(email.eq.' +
+      '/rest/v1/techs?select=id,name,email,booking_enabled,booking_auto_confirm,booking_timezone,booking_buffer_minutes,booking_min_notice_hours,listing_paused,paused_by_tech,is_visible,is_bookable&or=(email.eq.' +
       encodeURIComponent(currentUserEmail) + ',phone.eq.' + encodeURIComponent(currentUserEmail) + ')', { headers: bkHeaders() });
     if (!r.ok) {
       // Almost always means the migration hasn't been run (unknown column).
@@ -14153,6 +14243,14 @@ async function ensureBookingNotifications() {
 async function tbToggleEnabled() {
   if (!_bkMyTech) return;
   const next = !_bkMyTech.booking_enabled;
+  // Turning booking ON is the paid moment. If she is visible but not
+  // bookable, the only thing in the way is the subscription, so open the
+  // sheet instead of letting the toggle fail silently. If she is not visible
+  // she paused herself, which is a different fix and not a paywall problem.
+  if (next && _bkMyTech.is_visible && !_bkMyTech.is_bookable) {
+    openBookingSubscribe();
+    return;
+  }
   // Gate turning booking ON behind notifications (turning OFF is always fine).
   if (next && !(await ensureBookingNotifications())) return;
   if (!(await tbPatchTech({ booking_enabled: next }))) return;
