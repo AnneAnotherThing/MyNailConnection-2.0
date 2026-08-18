@@ -5213,8 +5213,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.0',     /* __APP_BUILD_NAME__   */
-  android: 548,         /* __APP_BUILD_ANDROID__ */
-  ios:     353,          /* __APP_BUILD_IOS__     */
+  android: 549,         /* __APP_BUILD_ANDROID__ */
+  ios:     354,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -7334,7 +7334,7 @@ function renderTechContactFooter(tech) {
   const footer = document.getElementById('td-contact-footer');
   if (!footer) return;
   // 3.0 pause switch: no contact, no booking, just a gentle note.
-  if (!tech.is_live) {
+  if (!tech.is_visible) {
     footer.innerHTML = '<div style="text-align:center;padding:12px;background:var(--cream);border:1.5px solid var(--border);border-radius:12px;font-size:13px;color:var(--muted);">' +
       bkEsc(((tech.name || 'This tech').trim().split(/\s+/)[0])) + ' is taking a break and not booking new clients right now.</div>';
     footer.style.display = '';
@@ -7351,7 +7351,12 @@ function renderTechContactFooter(tech) {
   // tech takes bookings (in-app or link), Call/Text sit quiet beneath the
   // Book button. When calls/texts ARE how she books, they get the dark
   // hero treatment, a call-me tech's contact row is never second-class.
-  const _hasBookPath = !!(tech.booking_enabled || tech.booking_link || tech.booking_url);
+  // MNC's own booking engine is the paid feature, so it needs BOTH her
+  // switch and her subscription. Her external booking_link stays free —
+  // a tech on Vagaro who lists MNC as her portfolio still fills the Gallery,
+  // and charging her for a link-out would earn nothing.
+  const _canBookNative = !!(tech.booking_enabled && tech.is_bookable);
+  const _hasBookPath = !!(_canBookNative || tech.booking_link || tech.booking_url);
   const cardStyle = _hasBookPath
     ? `display:flex;align-items:center;justify-content:center;gap:8px;flex:1;min-width:0;padding:12px;border-radius:12px;background:white;border:1.5px solid var(--border);color:var(--charcoal);font-size:14px;font-weight:600;text-decoration:none;font-family:'DM Sans',sans-serif;`
     : `display:flex;align-items:center;justify-content:center;gap:8px;flex:1;min-width:0;padding:13px;border-radius:12px;background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);border:1px solid rgba(80,62,63,0.3);border-bottom:3px solid rgba(43,41,39,0.5);box-shadow:0 3px 12px rgba(125,100,102,0.3);color:white;font-size:14px;font-weight:600;text-decoration:none;font-family:'DM Sans',sans-serif;`;
@@ -7374,7 +7379,7 @@ function renderTechContactFooter(tech) {
   // primary CTA books right here, no external platform needed. An external
   // booking_link can coexist while a tech transitions over.
   let nativeBookBtn = '';
-  if (tech.booking_enabled) {
+  if (_canBookNative) {
     const bkFirst = ((tech.name || '').trim().split(/\s+/)[0]) || 'Now';
     nativeBookBtn = `<button onclick="openBookModal()"
       style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px;border-radius:12px;background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);border:1px solid rgba(96,76,77,0.3);border-bottom:3px solid rgba(43,41,39,0.5);box-shadow:0 3px 12px rgba(125,100,102,0.35);color:white;font-size:14px;font-weight:600;font-family:'DM Sans',sans-serif;margin-bottom:8px;box-sizing:border-box;cursor:pointer;">
@@ -7402,7 +7407,7 @@ function renderTechContactFooter(tech) {
     // bookings in-app, that button is the hero and the external link
     // demotes to a quiet secondary. When the link is her only booking
     // path, it keeps the dark primary treatment.
-    const extStyle = tech.booking_enabled
+    const extStyle = _canBookNative
       ? "display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:13px;border-radius:12px;background:white;border:1.5px solid var(--border);color:var(--charcoal);font-size:14px;font-weight:600;text-decoration:none;font-family:'DM Sans',sans-serif;margin-bottom:8px;box-sizing:border-box;"
       : "display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px;border-radius:12px;background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);border:1px solid rgba(96,76,77,0.3);border-bottom:3px solid rgba(43,41,39,0.5);box-shadow:0 3px 12px rgba(125,100,102,0.35);color:white;font-size:14px;font-weight:600;text-decoration:none;font-family:'DM Sans',sans-serif;margin-bottom:8px;box-sizing:border-box;";
     bookingBtn = `<a href="${esc(safeUrl(bookingLink))}" target="_blank" rel="noopener"
@@ -8604,7 +8609,7 @@ function searchTechsByName(q) {
       ? '<img src="' + esc(safeUrl(t.imageUrl)) + '" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'"/><div style="width:100%;height:100%;display:none;align-items:center;justify-content:center;font-family:\'Playfair Display\',serif;font-size:14px;color:' + (t.color || 'var(--rose)') + ';">' + esc(t.initials || '') + '</div>'
       : '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-family:\'Playfair Display\',serif;font-size:14px;color:' + (t.color || 'var(--rose)') + ';">' + esc(t.initials || '') + '</div>';
     const sub = [t.shop_name, t.city].filter(Boolean).map(esc).join(' · ');
-    const bookBadge = t.booking_enabled
+    const bookBadge = (t.booking_enabled && t.is_bookable)
       ? '<span style="font-size:13px;font-weight:600;color:#1A7A4A;background:#E8F5EE;padding:2px 8px;border-radius:100px;white-space:nowrap;flex-shrink:0;">Books online</span>'
       : '';
     return '<div onclick="openTechDetail(' + JSON.stringify(t).replace(/"/g, '&quot;') + ')" style="display:flex;align-items:center;gap:12px;padding:11px 14px;cursor:pointer;' + (i > 0 ? 'border-top:1px solid var(--border);' : '') + '">' +
@@ -11813,7 +11818,7 @@ function buildStyleFilterChips() {
   // (styleFilterChip calls back in here) to keep the numbers live.
   var allPhotoTags = [];
   ALL_TECHS.forEach(function(tech) {
-    if (!tech.is_live) return;
+    if (!tech.is_visible) return;
     (tech.photos || []).forEach(function(p) {
       var url = (p && (p.url || p)) || '';
       if (url && String(url).startsWith('http')) {
@@ -12608,7 +12613,7 @@ function renderStyleGrid() {
 
   var photos = [];
   ALL_TECHS.forEach(function(tech) {
-    if (!tech.is_live) return; // off the Gallery: paused herself, or not subscribed
+    if (!tech.is_visible) return; // off the Gallery: she paused herself
     (tech.photos || []).forEach(function(p) {
       var url = p.url || p;
       // No-skip tagging (2026-08-03): a photo that escaped the wizard
@@ -17475,7 +17480,7 @@ async function loadMembersFromSupabase() {
     const [usersRes, techsRes] = await Promise.all([
       fetch(`${SUPABASE_URL}/rest/v1/users?select=*&order=joined.desc`,
         { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` } }),
-      fetch(`${SUPABASE_URL}/rest/v1/techs?select=*,is_live&order=joined.desc`,
+      fetch(`${SUPABASE_URL}/rest/v1/techs?select=*,is_visible,is_bookable&order=joined.desc`,
         { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` } })
     ]);
     const users = usersRes.ok ? await usersRes.json() : [];
@@ -20034,7 +20039,7 @@ async function loadTechsFromSupabase() {
 
   try {
     const res = await fetch(
-      SUPABASE_URL + '/rest/v1/techs?select=*,is_live&order=name.asc',
+      SUPABASE_URL + '/rest/v1/techs?select=*,is_visible,is_bookable&order=name.asc',
       { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY } }
     );
 
@@ -20110,14 +20115,16 @@ function _mapTechRow(t) {
         // paused techs still showed. 2026-07-17.
         booking_enabled: !!t.booking_enabled,
         listing_paused: !!t.listing_paused,
-        // is_live is the PostgREST computed column from sql/tech-paywall.sql:
-        // not paused by the tech AND (founding tech OR paid). It is what every
-        // visibility filter reads now — listing_paused is kept here only
-        // because other code still reads it. NOTE: computed columns are NOT
-        // included in select=*, they must be named, which is why both tech
-        // queries above spell out ",is_live". Drop it from either and every
-        // tech silently vanishes from the Map and the Gallery.
-        is_live: (t.is_live !== undefined ? !!t.is_live : !t.listing_paused),
+        // Two computed columns from sql/tech-paywall-split.sql:
+        //   is_visible  = she has not paused herself.            FREE.
+        //   is_bookable = is_visible AND (founding OR paid).     PAID.
+        // Being SEEN is free; being BOOKED is the paid thing.
+        // NOTE: PostgREST does NOT return computed columns for select=*, so
+        // both tech queries above name them explicitly. Drop either name and
+        // the value arrives undefined — and !undefined is true, which would
+        // hide every tech from the Map and the Gallery at once.
+        is_visible:  !!t.is_visible,
+        is_bookable: !!t.is_bookable,
         // Subscriber flag drives the Glow Up badge on cards / tech
         // detail header. True for both Stripe-paid (active sub) AND
         // comped techs (the tech_comps INSERT trigger writes
