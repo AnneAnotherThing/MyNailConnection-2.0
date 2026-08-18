@@ -20,7 +20,14 @@
       "backgroundColor": "#C4786A"
     },
     "PushNotifications": {
-      "presentationOptions": ["badge", "sound", "alert"]
+      "presentationOptions": [
+        "badge",
+        "sound",
+        "alert"
+      ]
+    },
+    "EdgeToEdge": {
+      "backgroundColor": "#C4786A"
     }
   }
 }
