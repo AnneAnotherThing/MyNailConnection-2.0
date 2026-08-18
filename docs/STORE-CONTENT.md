@@ -14,7 +14,7 @@ My Nail Connection
 
 **Subtitle** (27/30)
 ```
-Free booking for nail techs
+Booking built for nail techs
 ```
 
 **Keywords** (89/100)
@@ -24,14 +24,14 @@ nail tech,nail booking,nails near me,nail salon,manicure,nail art,book nails,app
 
 **Promotional Text** (162/170)
 ```
-Version 3.0 is here. One Gallery where clients find your work by shape, type and style, free booking with no commission, and photos that never expire. Nails only.
+Version 3.0 is here. One Gallery where clients find your work by shape, type and style, booking with no commission, and photos that never expire. Three months free. Nails only.
 ```
 
 **Description** (1302/4000)
 ```
 Still booking in your DMs? Your work is already why clients pick you. Now it's your booking page too.
 
-My Nail Connection is free booking built for nail techs only. No commission, no per-booking fee, no charge to your clients.
+My Nail Connection is booking built for nail techs only. No commission, no per-booking fee, and never a charge to your clients. Free to set up, free for three months, then $10.99/month - locked at that price for life as a founding tech.
 
 FOR NAIL TECHS
 * Your profile is live the moment you join
@@ -51,12 +51,12 @@ FOR CLIENTS
 * Heart the looks you love and bring them to your appointment
 * See who is open today and book right in the app
 
-Free for all basic features. More features as the app gains momentum.
+Always free for clients. For techs: free to set up, three months free, then $10.99/month at the founding rate.
 ```
 
 **What's New in This Version** (300/4000)
 ```
-3.0: Free booking is here. Clients book you right in the app - no commission, no per-booking fee. Your own shareable profile link and QR, standing appointments for your regulars, walk-in entry, private client notes, and in-app appointment alerts. Photos stay free - 50 a month, and they never expire.
+3.0: Real booking is here. Clients book you right in the app - no commission, no per-booking fee, and nothing charged to them. Your own shareable profile link and QR, standing appointments for your regulars, walk-in entry, private client notes, and in-app appointment alerts. Photos stay free - 50 a month, and they never expire.
 ```
 
 **Screenshots**: upload the 5 panels from `apple/iphone-6.9in-1290x2796/`
@@ -76,14 +76,14 @@ My Nail Connection: Booking
 
 **Short description** (74/80)
 ```
-Free booking for nail techs. Your work is your booking page. Free forever.
+Booking built for nail techs. Your work is your booking page. Three months free, then $10.99/month.
 ```
 
 **Full description** (1302/4000)
 ```
 Still booking in your DMs? Your work is already why clients pick you. Now it's your booking page too.
 
-My Nail Connection is free booking built for nail techs only. No commission, no per-booking fee, no charge to your clients.
+My Nail Connection is booking built for nail techs only. No commission, no per-booking fee, and never a charge to your clients. Free to set up, free for three months, then $10.99/month - locked at that price for life as a founding tech.
 
 FOR NAIL TECHS
 * Your profile is live the moment you join
@@ -103,12 +103,12 @@ FOR CLIENTS
 * Heart the looks you love and bring them to your appointment
 * See who is open today and book right in the app
 
-Free for all basic features. More features as the app gains momentum.
+Always free for clients. For techs: free to set up, three months free, then $10.99/month at the founding rate.
 ```
 
 **Release notes** (same as Apple's What's New)
 ```
-3.0: Free booking is here. Clients book you right in the app - no commission, no per-booking fee. Your own shareable profile link and QR, standing appointments for your regulars, walk-in entry, private client notes, and in-app appointment alerts. Photos stay free - 50 a month, and they never expire.
+3.0: Real booking is here. Clients book you right in the app - no commission, no per-booking fee, and nothing charged to them. Your own shareable profile link and QR, standing appointments for your regulars, walk-in entry, private client notes, and in-app appointment alerts. Photos stay free - 50 a month, and they never expire.
 ```
 
 **Assets**:
