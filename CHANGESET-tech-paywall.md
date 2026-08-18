@@ -1,7 +1,25 @@
 # CHANGE SET — techs pay to be bookable
 
-**For Claude Code. Apply in the numbered order.**
-Decided with Anne 2026-08-15. Companion migration: `sql/tech-paywall.sql` (to be written).
+**For Claude Code.** Decided with Anne 2026-08-15.
+
+> ## ⚠ STATUS, 2026-08-17 — READ FIRST
+> 
+> The **model** below is current. The **embedded SQL in §1 is historical** and
+> describes a design that has since been replaced three times. Do not copy it.
+> 
+> Authoritative, in run order:
+> 
+> | File | What it does |
+> |---|---|
+> | `sql/tech-paywall.sql` | columns + first cut. Superseded, but already run. |
+> | `sql/tech-paywall-split.sql` | **the design**: is_visible vs is_bookable, `paywall_enabled()` |
+> | `sql/tech-paywall-no-founders.sql` | drops `founder_free` — one rule for every tech |
+> 
+> Gone for good, do not reintroduce: `is_live`, `tech_is_live`, `tech_live_calc`,
+> `paid_through`, `founder_free`, and `sql/paywall-switch.sql`.
+> 
+> **The whole paywall is one function.** `paywall_enabled()` returns false today.
+> Flipping it to true is one statement — no rebuild, no store resubmission.
 
 ---
 
@@ -11,7 +29,8 @@ Decided with Anne 2026-08-15. Companion migration: `sql/tech-paywall.sql` (to be
 > **Techs: build your gallery and set your availability free. Your first three
 > months of taking bookings are free. After that, $10.99/month — locked at that
 > price for life for anyone who joins as a founding tech.**
-> **The 21 techs already on the platform stay free for life.**
+> **No exceptions and no grandfathering** — the techs already on the platform
+> go through the same door as everyone else.
 
 An unpaid tech is **invisible and unbookable** — off the Map, off the Gallery,
 no open slots, no direct-link booking. Her account, photos, tags, hours and
@@ -55,11 +74,18 @@ join now instead of waiting. Say plainly that the price goes up later. Both
 stores preserve an existing subscriber's price when you raise it, so this
 promise is automatic to keep and requires no code.
 
-**Do not conflate the two "founder" concepts.**
-`techs.founder_free` = the 21 existing techs, **free forever, never charged**.
-The *founding rate* = new techs who subscribe before the cutoff, who **do pay**
-$10.99 and simply never see an increase. That one is store pricing, not a
-database flag.
+**REMOVED 2026-08-17: founder grandfathering.** Anne: *"I don’t care if they’re
+free forever. Let’s just treat these techs like everyone else — they wouldn’t even
+get on to test. It was free for them when we didn’t have booking."* The 21 existing
+accounts were promised a product with no booking engine; the booking engine is a
+new thing and it costs the same for everybody. `techs.founder_free` is dropped in
+`sql/tech-paywall-no-founders.sql`.
+
+**What survives is the FOUNDING RATE, which is a different promise.**
+Early *subscribers* keep $10.99 for life — they **do pay**, they just never see an
+increase. Both stores preserve an existing subscriber’s price when you raise it, so
+this is store pricing, costs nothing to honour, and needs no database flag. Keep
+saying it in the marketing; it is still true.
 
 ---
 
