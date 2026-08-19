@@ -5303,8 +5303,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.0',     /* __APP_BUILD_NAME__   */
-  android: 552,         /* __APP_BUILD_ANDROID__ */
-  ios:     357,          /* __APP_BUILD_IOS__     */
+  android: 553,         /* __APP_BUILD_ANDROID__ */
+  ios:     358,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -14076,7 +14076,53 @@ async function loadTechBookings() {
     if (note) note.style.display = 'none';
     const rows = await r.json();
     _bkMyTech = rows[0] || null;
-    if (!_bkMyTech) { showToast('No tech profile found for this account'); show('tech-home'); return; }
+
+    // Fallback by tech id (2026-08-17). The identity filter above is
+    // or=(email.eq.X,phone.eq.X) where X is mncIdentity(), which PREFERS
+    // user.email and falls back to the E.164 phone. If an email appears on
+    // the auth user mid-session, X flips from phone to email while the
+    // techs row created by create_signup_profile_phone has email NULL, and
+    // this lookup silently returns zero rows. Same family as the 'my tags
+    // are gone' bug: sign-in still works because auth.users is separate,
+    // but every techs read comes back empty.
+    //
+    // tdRenderBookingsCard() already resolved this tech's id into
+    // window._bkSetup.id using the SAME filter at a moment when it did
+    // match, and bkForkInApp/bkForkHoursFinish rely on it, which is why
+    // booking setup could succeed and then Booking Settings could not load.
+    // An id is an id however the account was created, so re-fetch by it.
+    if (!_bkMyTech) {
+      var _fallbackId = (window._bkSetup && window._bkSetup.id) || null;
+      if (_fallbackId) {
+        try {
+          const r2 = await fetch(SUPABASE_URL +
+            '/rest/v1/techs?select=id,name,email,booking_enabled,booking_auto_confirm,booking_timezone,booking_buffer_minutes,booking_min_notice_hours,listing_paused,paused_by_tech,is_visible,is_bookable&id=eq.' +
+            encodeURIComponent(_fallbackId), { headers: bkHeaders() });
+          if (r2.ok) _bkMyTech = ((await r2.json()) || [])[0] || null;
+        } catch(_) {}
+      }
+    }
+    if (!_bkMyTech) {
+      // Do NOT bounce to the portal. Landing back on the dashboard with a
+      // toast that has already faded is indistinguishable from "the button
+      // did nothing" — which is exactly how this was reported (Anne,
+      // 2026-08-17: "after i set booking i still don't get to finish the
+      // rest of the setup list, it brings me to the dashboard instead").
+      // Stay put and say what is actually wrong, including the identity we
+      // looked for, because the cause is almost always an identity mismatch
+      // between auth and the techs row (see the phone-format E.164 note in
+      // sql/phone-normalize-e164.sql).
+      var _bkNote = document.getElementById('tb-migration-note');
+      if (_bkNote) {
+        _bkNote.style.display = 'block';
+        _bkNote.textContent = 'We could not find a tech profile for ' +
+          (currentUserEmail || 'this account') +
+          '. Your sign-in and your tech record do not match, so Booking Settings has nothing to load. Nudge support and we will link them up.';
+      } else {
+        showToast('No tech profile found for ' + (currentUserEmail || 'this account'), 6000);
+      }
+      return;
+    }
 
     const since = new Date(Date.now() - 86400000).toISOString();
     const results = await Promise.all([
