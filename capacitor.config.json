@@ -9,7 +9,7 @@
     "SplashScreen": {
       "launchShowDuration": 2000,
       "launchAutoHide": true,
-      "backgroundColor": "#EDEAE5",
+      "backgroundColor": "#DEB3B5",
       "androidScaleType": "FIT_CENTER",
       "showSpinner": false,
       "splashFullScreen": true,
@@ -17,7 +17,7 @@
     },
     "StatusBar": {
       "style": "LIGHT",
-      "backgroundColor": "#EDEAE5"
+      "backgroundColor": "#DEB3B5"
     },
     "PushNotifications": {
       "presentationOptions": [
@@ -27,7 +27,7 @@
       ]
     },
     "EdgeToEdge": {
-      "backgroundColor": "#EDEAE5"
+      "backgroundColor": "#DEB3B5"
     }
   }
 }
