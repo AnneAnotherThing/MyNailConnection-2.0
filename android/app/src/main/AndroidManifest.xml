@@ -1,16 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!-- android:enableOnBackInvokedCallback below: predictive back is
+         mandatory for targetSdk 36 (Android 16) and the opt-out no longer
+         exists. Declared explicitly so it reads as a decision rather than a
+         default, and so anyone chasing a back-gesture regression finds it.
+         Keep this comment OUT of the tag - a comment between attributes is
+         invalid XML and is what failed :app:processReleaseMainManifest on
+         build #114. 2026-08-17 -->
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        <!-- Predictive back is mandatory for targetSdk 36 (Android 16); the
-             opt-out no longer exists. Declared explicitly so the behaviour is
-             a decision rather than a default, and so anyone chasing a back
-             gesture regression finds it here first. 2026-08-17 -->
         android:enableOnBackInvokedCallback="true"
         android:theme="@style/AppTheme">
 
