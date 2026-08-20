@@ -5262,33 +5262,57 @@ function _renderTutorialSlide() {
 // so it fires exactly once per browser. Techs can always re-open via
 // "Replay tutorial" on their profile.
 function maybeShowTutorial(role) {
-  if (role !== 'tech') return;
+  // Was: if (role !== 'tech') return;  — which silently disabled the CLIENT
+  // and ADMIN tutorials entirely. TUTORIALS.client has three slides that
+  // could only ever be reached through the manual replay button under Saved
+  // looks; a brand-new client never saw them. Anne found it 2026-08-17 by
+  // hitting replay and being surprised the tutorial existed at all. The
+  // guard looks like collateral from the tech walkthrough's account-aware
+  // gate below, which is genuinely tech-specific.
+  if (role !== 'tech' && role !== 'client' && role !== 'admin') return;
   try {
     const seen = localStorage.getItem(_TUTORIAL_KEY + role);
     if (seen) return;
   } catch(e) { /* storage blocked, show tutorial anyway */ }
   // Account-aware gate (Anne hit it 2026-08-03: fresh install replayed the
   // tutorial at her on login). The seen-flag lives in localStorage, which a
-  // reinstall wipes — so before showing, check the ACCOUNT: a tech whose
-  // row predates today, or who already has photos, has plainly been here
-  // before. Mark seen and skip. Offline/fetch failure falls through to
-  // showing, which is the safe default for a genuinely new tech.
+  // reinstall wipes — so before showing, check the ACCOUNT: someone whose
+  // row predates today has plainly been here before. Mark seen and skip.
+  // Offline/fetch failure falls through to showing, which is the safe
+  // default for a genuinely new account.
   (async function() {
     try {
       const id = encodeURIComponent(currentUserEmail || '');
-      const r = await fetch(SUPABASE_URL + '/rest/v1/techs?or=(email.eq.' + id + ',phone.eq.' + id + ')&select=joined,photos',
-        { headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + (window._mncAccessToken || SUPABASE_ANON_KEY) } });
-      const rows = r.ok ? await r.json() : [];
-      const t = rows && rows[0];
-      if (t) {
-        const today = new Date().toISOString().split('T')[0];
-        let p = t.photos;
-        if (typeof p === 'string') { try { p = JSON.parse(p); } catch(_) { p = []; } }
-        const returning = (t.joined && t.joined < today) || (Array.isArray(p) && p.length > 0);
-        if (returning) {
-          try { localStorage.setItem(_TUTORIAL_KEY + role, '1'); } catch(_) {}
-          return;
+      const hdrs = { apikey: SUPABASE_ANON_KEY,
+                     Authorization: 'Bearer ' + (window._mncAccessToken || SUPABASE_ANON_KEY) };
+      const today = new Date().toISOString().split('T')[0];
+      let returning = false;
+
+      if (role === 'tech') {
+        const r = await fetch(SUPABASE_URL + '/rest/v1/techs?or=(email.eq.' + id + ',phone.eq.' + id + ')&select=joined,photos',
+          { headers: hdrs });
+        const rows = r.ok ? await r.json() : [];
+        const t = rows && rows[0];
+        if (t) {
+          let p = t.photos;
+          if (typeof p === 'string') { try { p = JSON.parse(p); } catch(_) { p = []; } }
+          returning = (t.joined && t.joined < today) || (Array.isArray(p) && p.length > 0);
         }
+      } else if (role === 'client') {
+        // Clients have no techs row, so the equivalent signal is their
+        // public.users join date. Same or-filter shape as everywhere else.
+        const r = await fetch(SUPABASE_URL + '/rest/v1/users?or=(email.eq.' + id + ',phone.eq.' + id + ')&select=joined&limit=1',
+          { headers: hdrs });
+        const rows = r.ok ? await r.json() : [];
+        const u = rows && rows[0];
+        returning = !!(u && u.joined && u.joined < today);
+      }
+      // admin: no server check. There are two of them and the localStorage
+      // flag above is enough.
+
+      if (returning) {
+        try { localStorage.setItem(_TUTORIAL_KEY + role, '1'); } catch(_) {}
+        return;
       }
     } catch(_) { /* fall through */ }
     // Small delay so the home screen can render behind the overlay
@@ -5310,8 +5334,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.0',     /* __APP_BUILD_NAME__   */
-  android: 558,         /* __APP_BUILD_ANDROID__ */
-  ios:     363,          /* __APP_BUILD_IOS__     */
+  android: 559,         /* __APP_BUILD_ANDROID__ */
+  ios:     364,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
