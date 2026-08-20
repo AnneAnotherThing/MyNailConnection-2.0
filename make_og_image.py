@@ -66,7 +66,12 @@ d.text((x, 128), "MY NAIL CONNECTION", font=dm(20, 700), fill=DEEP)
 d.text((x, 178), "Still booking", font=pf(70, 700), fill=BLACK)
 d.text((x, 256), "in your DMs?", font=pf(70, 700, italic=True), fill=DEEP)
 
-sub = ["Free booking for nail techs, forever.", "Your work is your booking page."]
+# No price on the social card. iMessage, WhatsApp and Google cache OG images
+# hard and for a long time, so a number baked in here outlives every change to
+# it. "Free booking for nail techs, forever" is exactly how that goes wrong —
+# it survived on this card through the whole 2026-08-17 pricing sweep and was
+# still what people saw when they texted the link. Keep this line timeless.
+sub = ["Booking built for nail techs.", "Your work is your booking page."]
 yy = 362
 for line in sub:
     d.text((x, yy), line, font=dm(25, 400), fill=MUTED)
