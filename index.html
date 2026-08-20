@@ -1636,7 +1636,9 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
            invisible since the header went white (Anne, 2026-08-03).
            Matches .back-btn now: white pill, hairline border, charcoal
            icon. -->
-      <button id="home-signout-btn" onclick="doSignOut()" title="Sign Out" aria-label="Sign Out" style="display:none;background:white;border:1.5px solid var(--border);box-shadow:0 1px 6px rgba(20,19,23,0.14);width:34px;height:34px;border-radius:50%;align-items:center;justify-content:center;cursor:pointer;padding:0;">
+      <!-- Kept in the DOM but never revealed (see styleHomeHeader): removing
+           the node would break the code that looks it up. 2026-08-17 -->
+      <button id="home-signout-btn" onclick="confirmSignOut()" title="Sign Out" aria-label="Sign Out" style="display:none;background:white;border:1.5px solid var(--border);box-shadow:0 1px 6px rgba(20,19,23,0.14);width:34px;height:34px;border-radius:50%;align-items:center;justify-content:center;cursor:pointer;padding:0;">
         <svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:var(--charcoal);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
       </button>
       <div class="avatar" onclick="navToProfile()" id="home-avatar-btn"><img src="images/mncLogo-round-256.webp?v=2" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" draggable="false"/></div>
@@ -2048,7 +2050,9 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
            link live there). Previously this routed to profile-screen, but
            tech-home has absorbed the profile tabs, so going "in" means
            editing, not navigating to a second page. -->
-      <button type="button" onclick="doSignOut()" title="Sign out" aria-label="Sign out" style="width:36px;height:36px;border-radius:50%;border:1.5px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--charcoal);"><svg viewBox="0 0 24 24" style="width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></button><div class="avatar" onclick="openTechEditFromProfile()" id="tech-dash-avatar" title="Edit your profile"><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;vertical-align:middle;"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></div>
+      <!-- Tech Portal sign-out icon removed 2026-08-17: a 36px round icon in a
+           header is exactly the accidental tap this change exists to stop.
+           Sign out now lives only under Account options on the profile. --><div class="avatar" onclick="openTechEditFromProfile()" id="tech-dash-avatar" title="Edit your profile"><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;vertical-align:middle;"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></div>
     </div>
   </div>
   <div class="scroll-content" style="padding-bottom:80px;">
@@ -3140,11 +3144,23 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       </svg>
       <span style="flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--rose-mid),transparent);"></span>
     </div>
+    <!-- Sign out is DELIBERATELY buried (Anne, 2026-08-17). Phone-only auth
+         means every sign-out costs a fresh Twilio Verify code (~6c) to undo,
+         because sessions otherwise persist indefinitely. Nobody needs to sign
+         out of a personal phone, so a visible button only ever collects
+         accidental taps. Findable if you look, invisible if you are not
+         looking for it. Two header icons were removed in the same change. -->
     <div style="padding:14px 20px 4px;text-align:center;">
-      <button type="button" onclick="doSignOut()" style="padding:10px 22px;border-radius:12px;border:1.5px solid var(--border);background:white;color:var(--muted);font-size:13px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;display:inline-flex;align-items:center;gap:7px;letter-spacing:0.3px;">
-        <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-        Sign Out
+      <button type="button" onclick="toggleAccountActions()" id="acct-more-btn"
+        style="padding:8px 16px;border-radius:12px;border:none;background:none;color:var(--muted);font-size:12.5px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;letter-spacing:0.3px;opacity:0.75;">
+        Account options
       </button>
+      <div id="acct-actions" style="display:none;margin-top:10px;">
+        <button type="button" onclick="confirmSignOut()" style="padding:10px 22px;border-radius:12px;border:1.5px solid var(--border);background:white;color:var(--muted);font-size:13px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;display:inline-flex;align-items:center;gap:7px;letter-spacing:0.3px;">
+          <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Sign Out
+        </button>
+      </div>
     </div>
     <!-- Legal links, Terms of Use (Apple standard EULA) + Privacy Policy.
          Required by Apple Guideline 3.1.2(c) to be reachable "within the
@@ -5334,8 +5350,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.0',     /* __APP_BUILD_NAME__   */
-  android: 559,         /* __APP_BUILD_ANDROID__ */
-  ios:     364,          /* __APP_BUILD_IOS__     */
+  android: 560,         /* __APP_BUILD_ANDROID__ */
+  ios:     365,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -6638,6 +6654,29 @@ function showAuthError(msg) {
   }
   el.textContent = msg;
   el.style.display = 'block';
+}
+
+// Sign-out is a one-way door under phone-only auth: getting back in costs a
+// Twilio Verify code Anne pays for, and a text the user has to wait for. The
+// second line matters as much as the first — the usual reason someone hesitates
+// is fear that signing out loses their work. It does not.
+async function confirmSignOut() {
+  var ok = await showConfirm('Sign out?', {
+    body: 'You will need a new text code to get back in. Your gallery, your calendar and everything you have set up stay exactly as they are.',
+    okLabel: 'Sign out'
+  });
+  if (ok) doSignOut();
+}
+
+// Reveals Sign Out on the profile screen. Collapsed by default so the button
+// is found on purpose rather than hit by a wandering thumb.
+function toggleAccountActions() {
+  var box = document.getElementById('acct-actions');
+  var btn = document.getElementById('acct-more-btn');
+  if (!box) return;
+  var open = box.style.display !== 'none';
+  box.style.display = open ? 'none' : 'block';
+  if (btn) btn.textContent = open ? 'Account options' : 'Hide';
 }
 
 function doSignOut() {
