@@ -2273,6 +2273,12 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
     <div style="margin:26px 20px 0;background:white;border:1.5px solid var(--border);border-bottom:3px solid rgba(125,100,102,0.2);border-radius:16px;overflow:hidden;box-shadow:var(--shadow);">
       <div class="etched-caps" style="padding:13px 16px 9px;font-size:11px;font-weight:700;letter-spacing:1.6px;color:var(--muted);text-transform:uppercase;">Help &amp; Account</div>
       <div onclick="show('how-it-works')" style="display:flex;align-items:center;gap:10px;padding:13px 16px;border-top:1px solid var(--border);cursor:pointer;"><div style="flex:1;font-size:13.5px;font-weight:600;color:var(--charcoal);">How MNC works</div><svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:var(--muted);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg></div>
+      <!-- Reopen the setup list. Until 2026-08-19 there was NO way back to it:
+           dismissing it set a sessionStorage flag and finishing it set
+           _mncSetupDoneCelebrated, and both paths hid the card permanently
+           with nothing anywhere to bring it back. Anne: "i can never get back
+           to the list." -->
+      <div onclick="reopenSetupChecklist()" style="display:flex;align-items:center;gap:10px;padding:13px 16px;border-top:1px solid var(--border);cursor:pointer;"><div style="flex:1;font-size:13.5px;font-weight:600;color:var(--charcoal);">Setup checklist</div><svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:var(--muted);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg></div>
       <div onclick="replayTutorial()" style="display:flex;align-items:center;gap:10px;padding:13px 16px;border-top:1px solid var(--border);cursor:pointer;"><div style="flex:1;font-size:13.5px;font-weight:600;color:var(--charcoal);">Replay the tutorial</div><svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:var(--muted);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg></div>
       <div class="mnc-pw-row" onclick="openChangePasswordFromSettings()" style="display:flex;align-items:center;gap:10px;padding:13px 16px;border-top:1px solid var(--border);cursor:pointer;"><div style="flex:1;font-size:13.5px;font-weight:600;color:var(--charcoal);">Change password</div><svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:var(--muted);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg></div>
       <div onclick="openContactAnne()" style="display:flex;align-items:center;gap:10px;padding:13px 16px;border-top:1px solid var(--border);cursor:pointer;"><div style="flex:1;font-size:13.5px;font-weight:600;color:var(--charcoal);">Get help</div><svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:var(--muted);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg></div>
@@ -5371,8 +5377,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.0',     /* __APP_BUILD_NAME__   */
-  android: 566,         /* __APP_BUILD_ANDROID__ */
-  ios:     371,          /* __APP_BUILD_IOS__     */
+  android: 567,         /* __APP_BUILD_ANDROID__ */
+  ios:     372,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -17058,6 +17064,27 @@ async function setupOpenSchedule() {
 // Explicit dismissal of the finished checklist. Uses the same sessionStorage
 // key the "maybe later" path already used, so it stays gone for the session
 // but returns on a fresh launch if something is genuinely still undone.
+// Bring the list back on demand. Clears BOTH things that hide it — the
+// session dismissal and the celebrated flag — and sets _mncSetupForceList so
+// the completion branch is skipped: reopening should show the STEPS, with
+// their checkmarks, not a "Setup complete" card. The whole point of coming
+// back is usually to revisit a step that is already ticked.
+function reopenSetupChecklist() {
+  try { sessionStorage.removeItem('mnc_setup_later'); } catch(_) {}
+  window._mncSetupDoneCelebrated = false;
+  window._mncSetupForceList = true;
+  try { show('tech-home'); } catch(_) {}
+  try { updateSetupChecklist(); } catch(_) {}
+  var card = document.getElementById('td-setup-checklist');
+  if (card) {
+    card.style.display = 'block';
+    setTimeout(function() {
+      try { card.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+      catch(_) { try { card.scrollIntoView(); } catch(__) {} }
+    }, 80);
+  }
+}
+
 function dismissSetupChecklist() {
   try { sessionStorage.setItem('mnc_setup_later', '1'); } catch(_) {}
   var card = document.getElementById('td-setup-checklist');
@@ -17086,7 +17113,7 @@ function updateSetupChecklist() {
   var steps = _setupStepsState();
   var done = steps.filter(function(st) { return st.done; }).length;
   if (dismissed) { card.style.display = 'none'; return; }
-  if (done === steps.length) {
+  if (done === steps.length && !window._mncSetupForceList) {
     // All five done. Celebrate once instead of vanishing mid-use (the
     // async server-truth checks can complete the list while the tech is
     // still looking at it — reads as "setup kicked me out").
@@ -17161,6 +17188,14 @@ function updateSetupChecklist() {
       (isNext ? '<div style="font-size:11px;font-weight:700;letter-spacing:0.6px;color:var(--rose-dark);text-transform:uppercase;flex-shrink:0;">Start here</div>' : '') +
     '</div>';
   }).join('');
+  // Reopened from Help & Account: the completion branch (and its "Got it")
+  // was skipped, so add the way back out here.
+  if (window._mncSetupForceList) {
+    host.innerHTML += '<button type="button" onclick="window._mncSetupForceList=false;dismissSetupChecklist();" ' +
+      'style="width:100%;margin-top:10px;padding:11px;border-radius:12px;border:1.5px solid var(--border);' +
+      'background:white;color:var(--charcoal);font-size:13.5px;font-weight:600;cursor:pointer;' +
+      'font-family:\'DM Sans\',sans-serif;">Close</button>';
+  }
   card.style.display = 'block';
 }
 
