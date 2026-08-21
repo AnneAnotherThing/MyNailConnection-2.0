@@ -107,3 +107,6 @@ CHANGESET-photos-free.md
 *.bak
 *.bak.*
 punch-list.html
+
+# --- Client correspondence / internal: offline only ---
+legacy-welcome-email.html
