@@ -6915,7 +6915,7 @@ function saveAvailability() {
   // us detect the orphaned-auth case where the PATCH's email=eq filter
   // matches zero rows, which is a silent no-op with return=minimal
   // (Supabase returns 204 and the UI thinks it saved). Anne 2026-04-24
-  // after an orphan account (amwhite1971) kept flipping her toggles
+  // after an orphan account kept flipping her toggles
   // with nothing persisting to the DB.
   fetch(SUPABASE_URL + '/rest/v1/techs?or=(email.eq.' + encodeURIComponent(email) + ',phone.eq.' + encodeURIComponent(email) + ')', {
     method: 'PATCH',
