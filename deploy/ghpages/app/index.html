@@ -5371,8 +5371,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.0',     /* __APP_BUILD_NAME__   */
-  android: 565,         /* __APP_BUILD_ANDROID__ */
-  ios:     370,          /* __APP_BUILD_IOS__     */
+  android: 566,         /* __APP_BUILD_ANDROID__ */
+  ios:     371,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -17055,6 +17055,15 @@ async function setupOpenSchedule() {
 // Deliberately does NOT auto-run the next step action: two of them open a file
 // picker and a native notification prompt, and firing those unasked is worse
 // than the problem being solved.
+// Explicit dismissal of the finished checklist. Uses the same sessionStorage
+// key the "maybe later" path already used, so it stays gone for the session
+// but returns on a fresh launch if something is genuinely still undone.
+function dismissSetupChecklist() {
+  try { sessionStorage.setItem('mnc_setup_later', '1'); } catch(_) {}
+  var card = document.getElementById('td-setup-checklist');
+  if (card) card.style.display = 'none';
+}
+
 function setupAdvance() {
   try { updateSetupChecklist(); } catch(_) {}
   var card = document.getElementById('td-setup-checklist');
@@ -17084,11 +17093,27 @@ function updateSetupChecklist() {
     if (!window._mncSetupDoneCelebrated) {
       window._mncSetupDoneCelebrated = true;
       var host0 = document.getElementById('td-setup-steps');
-      if (host0) host0.innerHTML = '<div style="padding:14px 12px;text-align:center;font-size:13.5px;color:var(--charcoal);">Setup complete — you’re bookable! 🎉<br><span style="font-size:12.5px;color:var(--muted);">This list retires itself now. Everything lives in your portal and Booking Settings.</span></div>';
+      // NO AUTO-HIDE (2026-08-19). This used to vanish itself after 6s, and
+      // _setupStepsState() kicks off _refreshAvailabilityState() and
+      // _refreshPushSubState() in the background — so a tech who already had
+      // hours or push from an earlier attempt watched the list render, flip
+      // to complete on its own a second later, and disappear. Anne: "i can
+      // see very quickly only, that there is a 4th item that says dial in
+      // something - but it's gone FAST."
+      //
+      // The 3c13696 comment already predicted exactly this ("reads as setup
+      // kicked me out") and answered it with a timer, which is still the list
+      // deciding when she is finished looking at it. She dismisses it now.
+      if (host0) host0.innerHTML =
+        '<div style="padding:14px 12px 4px;text-align:center;font-size:13.5px;color:var(--charcoal);">' +
+          'Setup complete — you’re bookable! 🎉' +
+          '<br><span style="font-size:12.5px;color:var(--muted);">Everything still lives in your portal and Booking Settings. ' +
+          'Tap any step above to revisit it.</span>' +
+        '</div>' +
+        '<button type="button" onclick="dismissSetupChecklist()" style="width:100%;margin-top:10px;padding:11px;border-radius:12px;border:1.5px solid var(--border);background:white;color:var(--charcoal);font-size:13.5px;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif;">Got it</button>';
       var prog0 = document.getElementById('td-setup-progress');
       if (prog0) prog0.textContent = done + ' of ' + steps.length;
       card.style.display = 'block';
-      setTimeout(function() { if (card) card.style.display = 'none'; }, 6000);
       return;
     }
     card.style.display = 'none'; return;
