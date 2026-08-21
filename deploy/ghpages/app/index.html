@@ -5371,8 +5371,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.0',     /* __APP_BUILD_NAME__   */
-  android: 562,         /* __APP_BUILD_ANDROID__ */
-  ios:     367,          /* __APP_BUILD_IOS__     */
+  android: 563,         /* __APP_BUILD_ANDROID__ */
+  ios:     368,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -15335,6 +15335,7 @@ async function bkForkSaveLink() {
   bkCloseSetupFork();
   showToast('Set! Clients can book you through your link ✨');
   try { tbLoadDashBadge(); } catch(_){}
+  try { setupAdvance(); } catch(_) {}
 }
 function bkForkCallsOnly() {
   // "Book the way they want to book" (Anne, 2026-08-03): calls/texts-only
@@ -15344,7 +15345,7 @@ function bkForkCallsOnly() {
   try { localStorage.setItem(_bkPrefKey(), 'calls'); } catch(_) {}
   bkCloseSetupFork();
   showToast('Done \u2014 clients will see big Call and Text buttons on your profile.');
-  try { updateSetupChecklist(); } catch(_) {}
+  try { setupAdvance(); } catch(_) {}
   try { tbLoadDashBadge(); } catch(_) {}
 }
 
@@ -15447,7 +15448,7 @@ async function bkForkHoursFinish() {
     if (_bkMyTech) _bkMyTech.booking_enabled = true;
     bkCloseSetupFork();
     try { tbLoadDashBadge(); } catch(_) {}
-    try { updateSetupChecklist(); } catch(_) {}
+    try { setupAdvance(); } catch(_) {}
   } finally {
     if (btn) { btn.disabled = false; btn.textContent = 'Turn on booking'; }
   }
@@ -17038,6 +17039,34 @@ async function _refreshPushSubState() {
 async function setupOpenSchedule() {
   show('tech-booking-settings');
   try { await loadTechBookings(); } catch(_) {}
+}
+
+// Called after a setup step completes. updateSetupChecklist() alone re-renders
+// the card, but that card sits BELOW the fold on the Tech Portal, under the
+// dark Bookings card. So finishing a step closed the modal and dropped the tech
+// on a screen that looked finished - Anne, 2026-08-19: "the onboarding is still
+// broken and after setting my booking preference takes me to the tech portal
+// instead of being able to finish onboarding."
+//
+// Nothing was crashing; all three step-3 branches work. She simply could not
+// SEE that there was more to do. This scrolls the list into view and names
+// what is next.
+//
+// Deliberately does NOT auto-run the next step action: two of them open a file
+// picker and a native notification prompt, and firing those unasked is worse
+// than the problem being solved.
+function setupAdvance() {
+  try { updateSetupChecklist(); } catch(_) {}
+  var card = document.getElementById('td-setup-checklist');
+  if (!card || card.style.display === 'none') return;   // list retired = done
+  var next = null;
+  try { next = _setupStepsState().filter(function(st) { return !st.done; })[0]; } catch(_) {}
+  // Let the modal 220ms close animation finish before moving the page.
+  setTimeout(function() {
+    try { card.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+    catch(_) { try { card.scrollIntoView(); } catch(__) {} }
+    if (next) { try { showToast('Next: ' + next.label); } catch(_) {} }
+  }, 260);
 }
 
 function updateSetupChecklist() {
