@@ -4696,7 +4696,7 @@ const TUTORIALS = {
     {
       icon: '<svg viewBox="0 0 24 24" style="width:60px;height:60px;stroke:var(--rose);fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>',
       title: 'You\u2019re in, welcome.',
-      body: '<p style="margin:0 0 14px;">Taking your craft online is a big move, and we\u2019re so glad you made it with us. Your <b>Tech Portal</b> has a short setup list waiting: five steps, well under ten minutes, and you\u2019re bookable.</p><p style="margin:0;">It saves as you go, so stop any time. A quick tour first, then dive in.</p>'
+      body: '<p style="margin:0 0 14px;">Taking your craft online is a big move, and we\u2019re so glad you made it with us. Your <b>Tech Portal</b> has a short setup list waiting: six steps, well under ten minutes, and you\u2019re bookable.</p><p style="margin:0;">It saves as you go, so stop any time. A quick tour first, then dive in.</p>'
     },
     {
       icon: '<svg viewBox="0 0 24 24" style="width:60px;height:60px;stroke:var(--rose);fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>',
@@ -5377,8 +5377,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.0',     /* __APP_BUILD_NAME__   */
-  android: 567,         /* __APP_BUILD_ANDROID__ */
-  ios:     372,          /* __APP_BUILD_IOS__     */
+  android: 568,         /* __APP_BUILD_ANDROID__ */
+  ios:     373,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -15242,14 +15242,17 @@ async function tbLoadDashBadge() {
   const sub = document.getElementById('td-bookings-sub');
   const badge = document.getElementById('td-bookings-pending');
   try {
-    const r = await fetch(SUPABASE_URL + '/rest/v1/techs?select=id,booking_enabled,booking_link,booking_timezone&or=(email.eq.' +
+    const r = await fetch(SUPABASE_URL + '/rest/v1/techs?select=id,booking_enabled,booking_link,booking_timezone,is_available,is_same_day,accepting_new_clients&or=(email.eq.' +
       encodeURIComponent(currentUserEmail) + ',phone.eq.' + encodeURIComponent(currentUserEmail) + ')', { headers: bkHeaders() });
     if (!r.ok) return; // migration not run yet, leave the default copy
     const t = (await r.json())[0];
     if (!t) return;
     // Remember how this tech takes bookings so tbOpenBookings() can route
     // without a refetch. "Set up" = neither in-app booking nor a link.
-    window._bkSetup = { id: t.id, enabled: !!t.booking_enabled, link: (t.booking_link || '').trim() };
+    window._bkSetup = { id: t.id, enabled: !!t.booking_enabled, link: (t.booking_link || '').trim(),
+      // availOn drives the "Show clients when you're open" checklist step:
+      // any chip on means she has already found them.
+      availOn: !!(t.is_available || t.is_same_day || t.accepting_new_clients) };
     // In-app appointment alerts (2026-08-10): fire-and-forget so the badge
     // logic below never waits on the extra queries.
     try { tdRenderApptAlerts(t); } catch(_) {}
@@ -16977,6 +16980,14 @@ function _setupStepsState() {
     }
   } catch(_) {}
   try { if (window._mncHasAvailability === undefined) _refreshAvailabilityState(); } catch(_) {}
+  // Has she flipped any of the three chips on? _bkSetup is refreshed by
+  // tdRenderBookingsCard; the local ack flag below covers "read it and chose
+  // to leave them off".
+  try {
+    if (window._mncAvailTouched === undefined) {
+      window._mncAvailTouched = (localStorage.getItem('mnc_avail_ack_' + (currentUserEmail || '')) === '1');
+    }
+  } catch(_) {}
   return [
     { label: 'Add your name and photo', sub: 'This is what clients see first \u00b7 1 min',
       done: !!window._setupProfileDone, action: 'openTechEditFromProfile()' },
@@ -16992,6 +17003,21 @@ function _setupStepsState() {
     { label: 'Dial in your schedule', sub: 'Hours, buffer, and notice \u00b7 2 min',
       done: (!bk.enabled && !!(bk.link || _bkCallsOnlyPref())) || !!window._mncHasAvailability,
       action: 'setupOpenSchedule()' },
+    // Availability step (Anne, 2026-08-19): "i don't see a step that
+    // explains/onboards them to get familiar with available today, this
+    // week, new... they should set that for the first time and be told how
+    // important it is to turn it on."
+    //
+    // The three chips at the top of the portal were the one genuinely
+    // high-leverage control nothing walked a tech through. The tutorial
+    // mentions them on slide 4, which she sees once, before she has any
+    // reason to care.
+    //
+    // Done = she has actually flipped at least one on the server, OR has
+    // read the explainer and chosen to leave them off. A tech who is slammed
+    // is right to have all three off, and the list must not nag her for it.
+    { label: 'Show clients when you\u2019re open', sub: 'Your best free advertising \u00b7 30 sec',
+      done: !!(window._mncAvailTouched || bk.availOn), action: 'setupOpenAvailability()' },
     { label: 'Say yes to notifications', sub: 'So bookings ping your phone \u00b7 10 sec',
       done: pushDone, action: 'setupEnablePush()' }
   ];
@@ -17069,6 +17095,39 @@ async function setupOpenSchedule() {
 // the completion branch is skipped: reopening should show the STEPS, with
 // their checkmarks, not a "Setup complete" card. The whole point of coming
 // back is usually to revisit a step that is already ticked.
+// Walks a tech through the three availability chips once, then leaves her on
+// them. Deliberately explains WHY before asking her to flip anything: the
+// chips are the difference between being findable today and being invisible,
+// and nothing in the app had ever said so at a moment she cared.
+async function setupOpenAvailability() {
+  try { show('tech-home'); } catch(_) {}
+  var ok = false;
+  try {
+    ok = await showConfirm('Show clients when you\u2019re open', {
+      body: 'Three taps at the top of your portal, and they are the most valuable thing you can do here.\n\n' +
+            '\u2728 Open today \u2014 you have chair time TODAY. Your photos glow in the Gallery with an Open today banner and you appear in the Open today rail on the home screen. This is your best free advertising.\n\n' +
+            'This week \u2014 the softer signal: you have openings in the next few days.\n\n' +
+            'New clients \u2713 \u2014 tells anyone browsing that you are taking fresh faces.\n\n' +
+            'Flip them off any time you are slammed. Clients only ever see what is true.',
+      okLabel: 'Show me'
+    });
+  } catch(_) { ok = true; }
+  // Either way she has now been told, so stop listing it as outstanding.
+  window._mncAvailTouched = true;
+  try { localStorage.setItem('mnc_avail_ack_' + (currentUserEmail || ''), '1'); } catch(_) {}
+  try { updateSetupChecklist(); } catch(_) {}
+  if (ok) {
+    var chip = document.getElementById('td-hero-now');
+    if (chip) {
+      setTimeout(function() {
+        try { chip.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+        catch(_) { try { chip.scrollIntoView(); } catch(__) {} }
+        try { showToast('Tap a chip to flip it \u2014 they save instantly'); } catch(_) {}
+      }, 120);
+    }
+  }
+}
+
 function reopenSetupChecklist() {
   try { sessionStorage.removeItem('mnc_setup_later'); } catch(_) {}
   window._mncSetupDoneCelebrated = false;
