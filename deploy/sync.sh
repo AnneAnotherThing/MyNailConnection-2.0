@@ -69,11 +69,80 @@ validate_html() {
   fi
 }
 
+# ── JS syntax guard ────────────────────────────────────────────────────────
+# validate_html above only checks for </body> and a >10% line-count drop. A
+# JavaScript syntax error sails straight through both, and this project has
+# been bitten by that blind spot twice:
+#
+#   - sw.js shipped TRUNCATED mid-statement for 251 commits (2026-04-22 to
+#     2026-08-17). The service worker never evaluated, so web push could not
+#     register at all, the PWA was not installable, and every CACHE_NAME bump
+#     was a no-op. Nobody noticed because nothing errors loudly.
+#   - 2026-08-19: an unterminated string literal in index.html was copied
+#     into deploy/ghpages/ by this script and only caught by chance.
+#
+# So: parse the inline <script> blocks of every HTML source, and node --check
+# every standalone .js, BEFORE anything is bumped or copied.
+#
+# If node is unavailable the check is skipped with a warning rather than
+# blocking the sync — a missing toolchain should not stop a deploy, but it
+# should be said out loud.
+validate_js() {
+  local f="$1"
+  if [ ! -f "$f" ]; then return 0; fi
+  if ! command -v node >/dev/null 2>&1; then return 0; fi
+
+  case "$f" in
+    *.js)
+      if ! node --check "$f" >/dev/null 2>&1; then
+        echo "✗ ABORT: $f is not valid JavaScript." >&2
+        node --check "$f" 2>&1 | head -5 >&2
+        echo "  This is how sw.js shipped truncated for 251 commits. Fix before syncing." >&2
+        exit 1
+      fi
+      ;;
+    *.html)
+      # Extract inline scripts (skipping src= includes and JSON-LD) and parse
+      # them as one unit, which is how the browser sees them.
+      if ! node -e '
+        const fs=require("fs"), vm=require("vm");
+        const src=fs.readFileSync(process.argv[1],"utf8");
+        const re=/<script(?![^>]*\ssrc=)(?![^>]*type="application\/ld\+json")(?![^>]*type="module")[^>]*>([\s\S]*?)<\/script>/g;
+        let m,parts=[];
+        while((m=re.exec(src))) parts.push(m[1]);
+        new vm.Script(parts.join("\n;\n"));
+      ' "$f" 2>/dev/null; then
+        echo "✗ ABORT: inline JavaScript in $f does not parse." >&2
+        node -e '
+          const fs=require("fs"), vm=require("vm");
+          const src=fs.readFileSync(process.argv[1],"utf8");
+          const re=/<script(?![^>]*\ssrc=)(?![^>]*type="application\/ld\+json")(?![^>]*type="module")[^>]*>([\s\S]*?)<\/script>/g;
+          let m,parts=[];
+          while((m=re.exec(src))) parts.push(m[1]);
+          try { new vm.Script(parts.join("\n;\n")); } catch(e) { console.error("  " + e.message); }
+        ' "$f" 2>&1 | head -3 >&2
+        echo "  Nothing is copied. Fix the source, then re-run." >&2
+        exit 1
+      fi
+      ;;
+  esac
+}
+
 # Validate every critical HTML source before any cache bump or copy
 for f in index.html marketing-v3.html reset-password.html tech-guide-v3.html \
          privacy.html terms.html 404.html founders.html; do
   validate_html "$f"
+  validate_js "$f"
 done
+
+# Standalone JS. sw.js is the one with history.
+for f in sw.js; do
+  validate_js "$f"
+done
+
+if ! command -v node >/dev/null 2>&1; then
+  echo "⚠  node not found — JS syntax guard SKIPPED. Truncation will not be caught." >&2
+fi
 
 
 APP=deploy/app
