@@ -94,3 +94,15 @@ deploy/staging-v3/
 # Python bytecode from deploy/ scripts
 __pycache__/
 *.pyc
+
+# --- Privacy hardening (this repo is PUBLIC for GitHub Pages) ---
+# Nothing below is served by the site. Keep it off the public repo.
+sql/
+docs/
+leslie-kit/
+CLAUDE.md
+MORNING-CHECKLIST.md
+ideas-parking-lot.md
+CHANGESET-photos-free.md
+*.bak
+*.bak.*
