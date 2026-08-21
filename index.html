@@ -4055,6 +4055,27 @@ async function _refundUnsavedSessionUploads() {
 }
 window._refundUnsavedSessionUploads = _refundUnsavedSessionUploads;
 
+// Reserve N slots in ONE parallel round-trip instead of N serial ones.
+//
+// consume_upload_slot() is atomic and row-locked server-side (see
+// sql/photos-free-3.0.sql), so firing them concurrently is safe: each call
+// either reserves or refuses, and the total can never exceed the cap. The
+// serial version cost a full network round-trip PER PHOTO before anything
+// appeared on screen — five photos meant five sequential RPCs, easily 2-4
+// seconds of dead time on mobile, and it ran BEFORE all the compression and
+// storage work that had already been made async. That was the remaining
+// "why is this so slow" (Anne, 2026-08-19).
+//
+// Callers must SKIP a refused file, never break the loop: refusals land on
+// whichever calls lose the race, so later files may still hold good slots
+// and breaking would burn them without uploading anything.
+async function reserveUploadSlots(count) {
+  if (!count || count < 1) return [];
+  const jobs = [];
+  for (let i = 0; i < count; i++) jobs.push(consumeUploadSlot());
+  return Promise.all(jobs);
+}
+
 // Per-file RPC gate. Calls public.consume_upload_slot(email) which
 // atomically reserves a slot (weekly → credit → free fallback) and
 // returns the resolution. Client uploads proceed only on ok=true.
@@ -5350,8 +5371,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.0',     /* __APP_BUILD_NAME__   */
-  android: 561,         /* __APP_BUILD_ANDROID__ */
-  ios:     366,          /* __APP_BUILD_IOS__     */
+  android: 562,         /* __APP_BUILD_ANDROID__ */
+  ios:     367,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -10039,6 +10060,11 @@ async function techEditAddPhotos(input) {
   // Overlap compression with the slot round-trips below (perf 2026-08-11).
   files.slice(0, 3).forEach(function(f) { try { precompressForUpload(f); } catch(_) {} });
 
+  // All slots in one parallel batch (2026-08-19) instead of one blocking
+  // RPC per file. See reserveUploadSlots.
+  const _slots = await reserveUploadSlots(files.length);
+  let _slotIdx = 0, _capShown = false;
+
   for (const file of files) {
     // AI validation is DISABLED (task #9) — but this path still base64-read
     // the ENTIRE original file (a 10MB phone photo → ~13MB string) just to
@@ -10051,14 +10077,18 @@ async function techEditAddPhotos(input) {
       continue; // skip this file, try next
     }
 
-    // Atomic slot gate (see bulk handler for the rationale). Stop the
-    // batch on cap, credits/weekly slots won't materialize mid-picker.
-    const slot = await consumeUploadSlot();
+    // Slot already reserved above, in parallel. CONTINUE rather than break:
+    // a refusal lands on whichever call lost the race, so a later file may
+    // still hold a good slot and breaking would waste it.
+    const slot = _slots[_slotIdx++] || { ok: false, reason: 'rpc_error' };
     if (!slot.ok) {
-      showToast((slot.reason === 'capped' || slot.reason === 'monthly_cap')
-        ? mncCapMessage(slot.weekly_reset_at)
-        : 'Could not reserve an upload slot, try again');
-      break;
+      if (!_capShown) {
+        _capShown = true;
+        showToast((slot.reason === 'capped' || slot.reason === 'monthly_cap')
+          ? mncCapMessage(slot.weekly_reset_at)
+          : 'Could not reserve an upload slot, try again');
+      }
+      continue;
     }
 
     // ── Save-immediately model (Anne 2026-04-30) ───────────────────────
@@ -10218,6 +10248,12 @@ async function techBulkDropFiles(fileList) {
   // couldn't start until photo 1 finished uploading, and a 10-photo batch
   // took minutes on cell upload speeds ("something choking?").
   const uploadJobs = [];
+  // Same parallel slot reservation as the gallery path (2026-08-19): the
+  // storage POST was parallelised on 2026-08-11 but this RPC stayed serial,
+  // so a 10-photo batch still paid ten sequential round-trips up front.
+  const _bulkSlots = await reserveUploadSlots(files.length);
+  let _bulkSlotIdx = 0;
+
   for (const file of files) {
     // AI validation is DISABLED (task #9): the full-file base64 read that
     // fed the stub cost seconds per phone photo (perf pass 2026-08-10).
@@ -10238,12 +10274,17 @@ async function techBulkDropFiles(fileList) {
     // until the user adds credits / waits for Sunday reset. Pre-flight
     // trimming above usually prevents us from reaching here over-capped,
     // but this is the authoritative guard.
-    const slot = await consumeUploadSlot();
+    const slot = _bulkSlots[_bulkSlotIdx++] || { ok: false, reason: 'rpc_error' };
     if (!slot.ok) {
-      label.textContent = 'Stopped, ' + ((slot.reason === 'capped' || slot.reason === 'monthly_cap')
+      // Skip, do not stop: later files may hold good slots from the batch.
+      skipped++;
+      done++;
+      bar.style.width = Math.round((done / total) * 100) + '%';
+      count.textContent = `${done}/${total}`;
+      label.textContent = (slot.reason === 'capped' || slot.reason === 'monthly_cap')
         ? mncCapMessage(slot.weekly_reset_at)
-        : 'could not reserve an upload slot (' + (slot.reason || 'unknown') + ')');
-      break;
+        : 'Could not reserve a slot for ' + file.name;
+      continue;
     }
 
     // Save-immediately model, pre-compute publicUrl, persist to DB
