@@ -5371,8 +5371,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.0',     /* __APP_BUILD_NAME__   */
-  android: 564,         /* __APP_BUILD_ANDROID__ */
-  ios:     369,          /* __APP_BUILD_IOS__     */
+  android: 565,         /* __APP_BUILD_ANDROID__ */
+  ios:     370,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -17093,6 +17093,28 @@ function updateSetupChecklist() {
     }
     card.style.display = 'none'; return;
   }
+  // PLACEMENT, not routing (2026-08-19). This card ships partway down the
+  // portal, below the greeting, the alerts row, the three availability chips
+  // and the presence stats — 400-500px on a phone, and the edge-to-edge bands
+  // take ~100px more. So it began at or below the fold, and every arrival
+  // looked like a finished screen.
+  //
+  // That is the actual bug behind ~10 commits of routing fixes: 638eb9d,
+  // 5e9f388, 3c13696, f3651b6, a546cd7, a3af598 ("for real"), and three of
+  // mine. Each one patched a different route back to a card that was never
+  // on screen when the tech got there.
+  //
+  // While setup is incomplete the checklist is hoisted to sit directly under
+  // the greeting, above everything a mid-onboarding tech does not need yet.
+  // Then no route can strand her, because there is nowhere to land that does
+  // not show it.
+  try {
+    var anchor = document.getElementById('td-alerts');
+    if (anchor && anchor.parentNode && card.nextElementSibling !== anchor) {
+      anchor.parentNode.insertBefore(card, anchor);
+    }
+  } catch(_) {}
+
   var prog = document.getElementById('td-setup-progress');
   if (prog) prog.textContent = done + ' of ' + steps.length;
   var host = document.getElementById('td-setup-steps');
