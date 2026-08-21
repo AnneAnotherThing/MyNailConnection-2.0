@@ -5371,8 +5371,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.0',     /* __APP_BUILD_NAME__   */
-  android: 563,         /* __APP_BUILD_ANDROID__ */
-  ios:     368,          /* __APP_BUILD_IOS__     */
+  android: 564,         /* __APP_BUILD_ANDROID__ */
+  ios:     369,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -21571,7 +21571,14 @@ async function releaseCurrentWizardPhoto() {
       if (_undone) {
         setTimeout(function() {
           show('tech-home');
-          try { updateSetupChecklist(); } catch(_) {}
+          // setupAdvance, not updateSetupChecklist (2026-08-19). The comment
+          // above has always claimed this lands her "where the checklist
+          // points at the next step", but a plain re-render points at
+          // nothing: the card sits below the fold under the Bookings card,
+          // so she arrived at the top of the portal looking at a screen that
+          // seemed finished. This is the path Anne kept hitting - it fires
+          // after every photo upload, which is most of onboarding.
+          try { setupAdvance(); } catch(_) {}
         }, 700);
       }
     } catch(_) {}
