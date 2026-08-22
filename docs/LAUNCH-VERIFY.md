@@ -30,9 +30,11 @@ Ordered so a failure early doesn't waste time on the things below it.
 
 ---
 
-## 1 · Twilio — blocks everything
+## 1 · Twilio — blocks everything ✅ CLEARED 2026-08-21
 
-Nothing else matters if techs can't sign in.
+Nothing else matters if techs can't sign in. Anne confirmed this section
+passed on 2026-08-21. Left in place because it is the first thing to
+re-check if sign-ins start failing.
 
 - **console.twilio.com** — is there an "Upgrade" banner top-left?
   **Pass:** no banner.
@@ -130,8 +132,14 @@ Splash is confirmed good. These are not:
 > answer is Capacitor 8 — not more plugin config. Worth knowing before you
 > spend a day tuning.
 
-Build stamp must read **561**. If it doesn't, you're testing old code and
-nothing above counts.
+Build stamp must match `APP_BUILD.android` in `index.html` — **572** as of
+2026-08-21. If it doesn't, you're testing old code and nothing above counts.
+
+> This line said **561** until 2026-08-21 and had already gone stale, which
+> would have failed you for the wrong reason. `sync.sh` bumps the build on
+> every edit batch, so any number written here is out of date by the next
+> commit. Read it out of `index.html` instead:
+> `grep -m1 "android:" index.html`
 
 ---
 
