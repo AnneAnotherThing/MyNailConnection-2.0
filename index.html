@@ -5377,8 +5377,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.0',     /* __APP_BUILD_NAME__   */
-  android: 571,         /* __APP_BUILD_ANDROID__ */
-  ios:     376,          /* __APP_BUILD_IOS__     */
+  android: 572,         /* __APP_BUILD_ANDROID__ */
+  ios:     377,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -6764,6 +6764,11 @@ function adminTap(){
 // The first line of `message` becomes the modal title; remaining lines
 // (after the first newline) become the body text. Tones are 'destructive'
 // (rose OK button, trash icon, the default) or 'neutral'.
+// Glyph bodies for #confirm-icon, swapped by tone in showConfirm below.
+// Destructive keeps the original trash can; neutral gets an info circle.
+var CONFIRM_ICON_DESTRUCTIVE = '<polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/>';
+var CONFIRM_ICON_NEUTRAL     = '<circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>';
+
 function showConfirm(message, opts) {
   opts = opts || {};
   return new Promise(function(resolve) {
@@ -6782,15 +6787,25 @@ function showConfirm(message, opts) {
     if (okBtn)    okBtn.textContent    = opts.okLabel || 'Confirm';
     if (cancelBtn) cancelBtn.textContent = opts.cancelLabel || 'Cancel';
     // Neutral tone → sandy gold button; destructive (default) → rose.
+    //
+    // ICON, 2026-08-21: #confirm-icon is a hardcoded trash can in the markup
+    // and nothing ever swapped it, so every one of the 22 confirms in the app
+    // wore a delete glyph — including onboarding's "Show clients when you're
+    // open", which greeted a brand-new tech with a bin. Tone now drives the
+    // glyph as well as the colour, and BOTH branches set it so a neutral
+    // dialog can't leave the trash can swapped out for a later destructive one.
+    var iconEl = document.getElementById('confirm-icon');
     if (okBtn) {
       if (opts.tone === 'neutral') {
         okBtn.style.background = 'linear-gradient(135deg,#C9AEB0,#6B5355)';
         okBtn.style.boxShadow  = '0 2px 8px rgba(160,120,64,0.3)';
         if (iconWrap) iconWrap.style.background = 'var(--gold-light)';
+        if (iconEl) iconEl.innerHTML = CONFIRM_ICON_NEUTRAL;
       } else {
         okBtn.style.background = 'linear-gradient(135deg,#A98B8D,#A2636C)';
         okBtn.style.boxShadow  = '0 2px 8px rgba(125,100,102,0.35)';
         if (iconWrap) iconWrap.style.background = 'var(--rose-light)';
+        if (iconEl) iconEl.innerHTML = CONFIRM_ICON_DESTRUCTIVE;
       }
     }
     modal.style.display = 'flex';
@@ -17096,21 +17111,26 @@ async function setupOpenSchedule() {
 // their checkmarks, not a "Setup complete" card. The whole point of coming
 // back is usually to revisit a step that is already ticked.
 // Walks a tech through the three availability chips once, then leaves her on
-// them. Deliberately explains WHY before asking her to flip anything: the
-// chips are the difference between being findable today and being invisible,
-// and nothing in the app had ever said so at a moment she cared.
+// them. The explainer is deliberately a one-liner: the tutorial slide "Light
+// up when you're open" already teaches all three chips in detail, so this
+// only needs to name them, say they're free for everyone, and get out of the
+// way. Scrolling her to the chips is the point; the copy is the overline.
 async function setupOpenAvailability() {
   try { show('tech-home'); } catch(_) {}
   var ok = false;
   try {
     ok = await showConfirm('Show clients when you\u2019re open', {
-      body: 'Three taps at the top of your portal, and they are the most valuable thing you can do here.\n\n' +
-            '\u2728 Open today \u2014 you have chair time TODAY. Your photos glow in the Gallery with an Open today banner and you appear in the Open today rail on the home screen. This is your best free advertising.\n\n' +
-            'This week \u2014 the softer signal: you have openings in the next few days.\n\n' +
-            'New clients \u2713 \u2014 tells anyone browsing that you are taking fresh faces.\n\n' +
-            'Flip them off any time you are slammed. Clients only ever see what is true.\n\n' +
-            'These work for EVERY tech — whether clients book in the app, through your own link, or just call you. Showing you are open today is free, always.',
-      okLabel: 'Show me'
+      // Deliberately short. The tutorial's "Light up when you're open" slide
+      // already explains all three chips in full, and repeating it here made
+      // a 654-char body — 4x any other confirm in the app, tall enough to
+      // clip its own buttons off a 360x640 screen. The one thing the slide
+      // does NOT say is that these are free for every tech regardless of how
+      // she takes bookings (fb0af35), so that is what survives the trim.
+      body: 'Open today, This week, New clients \u2014 the three chips at the top of your portal.\n\n' +
+            'They are free for every tech, however clients reach you, and they are the fastest way to get found today.\n\n' +
+            'Tap to flip them any time \u2014 they save instantly.',
+      okLabel: 'Show me',
+      tone: 'neutral'
     });
   } catch(_) { ok = true; }
   // Either way she has now been told, so stop listing it as outstanding.
