@@ -5485,8 +5485,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.0',     /* __APP_BUILD_NAME__   */
-  android: 577,         /* __APP_BUILD_ANDROID__ */
-  ios:     382,          /* __APP_BUILD_IOS__     */
+  android: 578,         /* __APP_BUILD_ANDROID__ */
+  ios:     383,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -14510,14 +14510,49 @@ async function ensureBookingNotifications() {
   return false;
 }
 
+// Is the subscription the ONLY thing between this tech and taking bookings?
+//
+// There are three ways to turn booking on and until 2026-08-21 only one of
+// them asked: the Booking Settings toggle. The onboarding fork's two paths
+// (bkForkInApp, bkForkHoursFinish) wrote booking_enabled directly. With the
+// paywall off that is invisible, because everyone is bookable. The moment it
+// is flipped on, a new tech would walk the setup checklist, pick "book in the
+// app", set a service and hours, see "You're bookable!" — and not be. The
+// server computes is_bookable as visible AND paid, so booking_enabled alone
+// does nothing: no Book button for clients, no request to pay, no explanation.
+// Silent, and worst for the newest techs. Anne asked for all three routed here
+// before the paywall goes on.
+//
+// FAILS OPEN. If the row cannot be read, this returns false and the tech is
+// let through. The real gate is is_bookable server-side, so this is only the
+// courtesy that explains WHY; a false block would strand someone who has paid,
+// which is far worse than a missing sheet.
+//
+// !is_visible is deliberately not gated: that means she paused her own
+// listing, which is a different fix and not a paywall problem.
+async function bkSubscriptionBlocks() {
+  var t = (typeof _bkMyTech !== 'undefined') ? _bkMyTech : null;
+  if (!t || t.is_visible === undefined || t.is_bookable === undefined) {
+    var id = (window._bkSetup && window._bkSetup.id) || (t && t.id);
+    if (!id) return false;
+    try {
+      var r = await fetch(SUPABASE_URL + '/rest/v1/techs?select=is_visible,is_bookable&id=eq.' +
+        encodeURIComponent(id), { headers: bkHeaders() });
+      if (!r.ok) return false;
+      t = (await r.json())[0];
+    } catch(_) { return false; }
+  }
+  if (!t) return false;
+  return !!t.is_visible && !t.is_bookable;
+}
+
 async function tbToggleEnabled() {
   if (!_bkMyTech) return;
   const next = !_bkMyTech.booking_enabled;
-  // Turning booking ON is the paid moment. If she is visible but not
-  // bookable, the only thing in the way is the subscription, so open the
-  // sheet instead of letting the toggle fail silently. If she is not visible
-  // she paused herself, which is a different fix and not a paywall problem.
-  if (next && _bkMyTech.is_visible && !_bkMyTech.is_bookable) {
+  // Turning booking ON is the paid moment. See bkSubscriptionBlocks above —
+  // this used to be an inline check here and was the ONLY one of the three
+  // booking-on paths that had it.
+  if (next && await bkSubscriptionBlocks()) {
     openBookingSubscribe();
     return;
   }
@@ -15466,6 +15501,13 @@ function bkForkCallsOnly() {
 }
 
 async function bkForkInApp() {
+  // Paid moment, same as the Settings toggle. Checked FIRST because nothing
+  // has been created yet at this point, so there is no work to preserve.
+  if (await bkSubscriptionBlocks()) {
+    bkCloseSetupFork();
+    openBookingSubscribe();
+    return;
+  }
   // Guided two-step setup (Anne, 2026-08-03): instead of silently
   // seeding defaults, step her through the two things booking needs,
   // one service and her hours, prefilled and editable on the spot.
@@ -15553,6 +15595,19 @@ async function bkForkHoursFinish() {
       body: JSON.stringify(rows)
     });
     if (r2.ok) { window._mncHasAvailability = true; try { updateSetupChecklist(); } catch(_) {} }
+    // Gate AFTER the service and hours are written, not before: that is real
+    // setup work she just typed in, it is valid whether or not she subscribes,
+    // and throwing it away to show a paywall would be hostile. Only the switch
+    // waits.
+    if (await bkSubscriptionBlocks()) {
+      try { localStorage.removeItem(_bkPrefKey()); } catch(_) {}
+      bkCloseSetupFork();
+      try { tbLoadDashBadge(); } catch(_) {}
+      try { updateSetupChecklist(); } catch(_) {}
+      showToast('Saved your service and hours \u2014 one more step to open your book');
+      openBookingSubscribe();
+      return;
+    }
     var ok = await patchBookingField({ booking_enabled: true });
     if (!r1.ok || !r2.ok || !ok) {
       showToast('Something did not save, check your Bookings settings');
