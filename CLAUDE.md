@@ -16,7 +16,7 @@ and some assets but are not the same thing. Do not mix them up.
 ### 2. The app, `index.html`
 - The signed-in product: splash → sign in → client browse / tech
   dashboard / admin. One huge single-page app (~9,200 lines).
-- Talks to Supabase (project `ktiztunuifzbzwzyqrrq`) for auth, data, push.
+- Talks to Supabase (project `nwqnakoongrorbwnrqzc`) for auth, data, push.
 - Companion static page: `reset-password.html` (Supabase password-reset
   landing; references `/mncLogo-transparent.png`, `/privacy.html`,
   `/terms.html` by root-relative paths).
@@ -206,7 +206,14 @@ exclusive, they just represent the two URLs each deploy target serves.
 - `mncLogo.jpeg` ← not referenced anywhere; historical, skip
 
 ## Shared Supabase config
-- Project URL: `https://ktiztunuifzbzwzyqrrq.supabase.co`
+- Project URL: `https://nwqnakoongrorbwnrqzc.supabase.co` (project name
+  "My Nail Connection 3"). **This changed for 3.0.** The old 2.0 project,
+  `ktiztunuifzbzwzyqrrq` ("My Nail Connection DB"), still exists in a
+  different org and still appears in the `supabase link` picker directly
+  below the right one — picking it deploys functions at a database the 3.0
+  app never talks to, which looks like a clean deploy and simply never runs.
+  Corrected 2026-08-21; these lines had named the 2.0 project since the
+  cutover.
 - Anon key is inlined in both `index.html` and `reset-password.html`.
 - Edge functions live under `supabase/functions/` (send-push,
   admin-reset-passwords, stripe-webhook).

@@ -5485,8 +5485,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.0',     /* __APP_BUILD_NAME__   */
-  android: 576,         /* __APP_BUILD_ANDROID__ */
-  ios:     381,          /* __APP_BUILD_IOS__     */
+  android: 577,         /* __APP_BUILD_ANDROID__ */
+  ios:     382,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -17469,12 +17469,6 @@ function reopenSetupChecklist() {
   }
 }
 
-function dismissSetupChecklist() {
-  try { sessionStorage.setItem('mnc_setup_later', '1'); } catch(_) {}
-  var card = document.getElementById('td-setup-checklist');
-  if (card) card.style.display = 'none';
-}
-
 function setupAdvance() {
   try { updateSetupChecklist(); } catch(_) {}
   var card = document.getElementById('td-setup-checklist');
@@ -17618,6 +17612,15 @@ function updateSetupChecklist() {
   card.style.display = 'block';
 }
 
+// Dismissal, from the "I'll do this later" link and the celebration's "Got
+// it". Uses a sessionStorage key so the card stays gone for the session but
+// returns on a fresh launch if something is genuinely still undone. Takes the
+// event so the later-link can stop propagation to the card behind it.
+//
+// There were TWO definitions of this until 2026-08-21 — an argument-less copy
+// added with the reopen work, and this one. The later declaration won by
+// hoisting, so the first was unreachable; identical behaviour, but nothing
+// told a reader which was live.
 function dismissSetupChecklist(ev) {
   if (ev) ev.stopPropagation();
   try { sessionStorage.setItem('mnc_setup_later', '1'); } catch(_) {}

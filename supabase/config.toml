@@ -20,3 +20,18 @@ verify_jwt = false
 
 [functions.broadcast-push]
 # Same as send-push: only our admin UI calls it, with the admin's JWT.
+
+[functions.revenuecat-webhook]
+# MUST stay false. RevenueCat authenticates with a STATIC Authorization
+# header (a shared secret we compare against REVENUECAT_WEBHOOK_AUTH_HEADER),
+# not a Supabase JWT. With verify_jwt on, the gateway 401s every webhook
+# before our handler runs, and the symptom is the quiet one: purchases
+# succeed, Apple takes the money, RevenueCat reports delivered, and
+# techs.subscription_tier never flips to 'paid'.
+#
+# This block was MISSING until 2026-08-21. The function was deployed from the
+# dashboard on 2026-08-17, where the toggle is set in the UI, so it has been
+# fine — but config.toml wins on a CLI deploy, and the CLI is now how these
+# get shipped. Without this, the next `supabase functions deploy
+# revenuecat-webhook` would silently turn verification back on.
+verify_jwt = false
