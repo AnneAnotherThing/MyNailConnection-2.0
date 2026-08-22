@@ -3349,14 +3349,6 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       <!-- Bio + Booking link (MOVED UP, high-visibility profile copy) -->
       <div style="display:grid;gap:10px;margin-bottom:14px;">
         <div><label style="font-size:10px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px;letter-spacing:0.8px;">ABOUT YOU</label><textarea id="te-bio" rows="3" placeholder="Tell clients about this tech style and specialty…" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;resize:none;box-sizing:border-box;"></textarea></div>
-        <div>
-          <label style="font-size:10px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px;letter-spacing:0.8px;">INSTAGRAM / SOCIAL</label>
-          <div style="position:relative;">
-            <div style="position:absolute;left:12px;top:50%;transform:translateY(-50%);pointer-events:none;"><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:var(--muted);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg></div>
-            <input id="te-gallery-link" type="url" placeholder="https://instagram.com/yourhandle" style="width:100%;padding:10px 12px 10px 34px;border:1.5px solid var(--border);border-radius:10px;font-size:13px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;box-sizing:border-box;"/>
-          </div>
-          <div style="font-size:13px;color:var(--muted);margin-top:4px;">📸 Link your Instagram, TikTok, or other gallery so clients can see more of your work.</div>
-        </div>
       </div>
 
       <!-- Tags -->
@@ -5412,8 +5404,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.0',     /* __APP_BUILD_NAME__   */
-  android: 574,         /* __APP_BUILD_ANDROID__ */
-  ios:     379,          /* __APP_BUILD_IOS__     */
+  android: 575,         /* __APP_BUILD_ANDROID__ */
+  ios:     380,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -7654,23 +7646,11 @@ function renderTechContactFooter(tech) {
     </a>`;
   }
 
-  // Gallery / social link button (secondary style, sits below booking)
-  const galleryLink = tech.gallery_link || tech.gallery_url || '';
-  let galleryBtn = '';
-  if (galleryLink) {
-    const gl = galleryLink.toLowerCase();
-    const glabel = gl.includes('instagram') ? 'View on Instagram' :
-                   gl.includes('tiktok') ? 'View on TikTok' :
-                   (gl.includes('facebook') || gl.includes('fb.com')) ? 'View on Facebook' :
-                   gl.includes('pinterest') ? 'View on Pinterest' :
-                   (gl.includes('youtube') || gl.includes('youtu.be')) ? 'View on YouTube' :
-                   'View Gallery';
-    galleryBtn = `<a href="${esc(safeUrl(galleryLink))}" target="_blank" rel="noopener"
-      style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:13px;border-radius:12px;background:var(--cream);border:1.5px solid var(--rose-mid);color:var(--rose-dark);font-size:14px;font-weight:600;text-decoration:none;font-family:'DM Sans',sans-serif;margin-bottom:8px;box-sizing:border-box;">
-      <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
-      ${glabel}
-    </a>`;
-  }
+  // The per-tech Instagram/social link was removed 2026-08-21 (Anne: "the
+  // techs socials link isn't necessary"). techs.gallery_link is deliberately
+  // LEFT IN THE DATABASE — the column and any values techs already saved stay
+  // untouched, so this is a UI removal that can be reversed without data loss.
+  // Nothing reads or writes it from the app any more.
 
   // "Also accepts" (Anne, 2026-08-03): when a booking path is the hero,
   // the quiet Call/Text row gets a small caption so it reads as her
@@ -7678,9 +7658,9 @@ function renderTechContactFooter(tech) {
   const alsoLabel = (_hasBookPath && btns)
     ? '<div style="font-size:11px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin:4px 0 6px;text-align:center;">Also accepts</div>'
     : '';
-  const allBtns = `${nativeBookBtn}${bookingBtn}${galleryBtn}${alsoLabel}<div style="display:flex;gap:8px;">${btns}</div>`;
+  const allBtns = `${nativeBookBtn}${bookingBtn}${alsoLabel}<div style="display:flex;gap:8px;">${btns}</div>`;
   footer.innerHTML = allBtns;
-  footer.style.display = (btns || nativeBookBtn || bookingBtn || galleryBtn) ? '' : 'none';
+  footer.style.display = (btns || nativeBookBtn || bookingBtn) ? '' : 'none';
 }
 
 function showAdminToast(){
@@ -9801,7 +9781,6 @@ function openTechEdit(tech) {
   document.getElementById('te-state').value   = edit.state;
   document.getElementById('te-zip').value     = edit.zip;
   document.getElementById('te-bio').value     = edit.bio;
-  document.getElementById('te-gallery-link').value = edit.gallery_link || tech.gallery_link || '';
   // Tags
   document.querySelectorAll('#te-tags input[type=checkbox]').forEach(cb => {
     cb.checked = edit.tags.includes(cb.value);
@@ -9860,11 +9839,10 @@ async function openTechEditFromProfile() {
       bio: t.bio, tags: t.tags || [], hours_available: t.hours_available,
       imageUrl: t.image_url, photos: t.photos || [],
       contact_methods: t.contact_methods || { call: true, text: true },
-      // gallery_link/joined/bg/color were omitted here, so the self-edit
-      // save blanked the Instagram/TikTok button, could reset the joined
-      // date, and steamrolled custom avatar colors (clobber audit
-      // 2026-08-03). Carry the row's real values through.
-      gallery_link: t.gallery_link || '',
+      // joined/bg/color were omitted here, so the self-edit save could reset
+      // the joined date and steamroll custom avatar colors (clobber audit
+      // 2026-08-03). Carry the row's real values through. gallery_link was
+      // in this list too until the socials link was removed 2026-08-21.
       joined: t.joined || '',
       bg: t.bg || 'linear-gradient(135deg,#F7E2E3,#E6D6D7)', color: t.color || 'var(--rose)'
     });
@@ -11699,7 +11677,6 @@ async function saveTechEdit() {
   edit.state = document.getElementById('te-state').value.trim();
   edit.zip   = document.getElementById('te-zip').value.trim();
   edit.bio   = document.getElementById('te-bio').value.trim();
-  edit.gallery_link = document.getElementById('te-gallery-link').value.trim();
   edit.tags  = Array.from(document.querySelectorAll('#te-tags input:checked')).map(c => c.value);
   edit.contact_methods = {
     call: document.getElementById('te-contact-call')?.checked || false,
@@ -11754,7 +11731,6 @@ async function saveTechEdit() {
       state: edit.state || '',
       zip: edit.zip || '',
       bio: edit.bio || '',
-      gallery_link: edit.gallery_link || '',
       tags: edit.tags || [],
       lat: edit.lat || null,
       lng: edit.lng || null,
@@ -18255,7 +18231,7 @@ function openNewTechModal() {
   av.style.background = currentEditTech.bg;
   av.style.color = currentEditTech.color;
   av.innerHTML = '+';
-  ['te-name','te-shop','te-email','te-phone','te-address','te-city','te-state','te-zip','te-bio','te-booking-link','te-gallery-link'].forEach(id => {
+  ['te-name','te-shop','te-email','te-phone','te-address','te-city','te-state','te-zip','te-bio','te-booking-link'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.value = '';
   });
@@ -20797,7 +20773,6 @@ function _mapTechRow(t) {
         hide_address_public: !!t.hide_address_public,
         contact_methods: t.contact_methods || { call: true, text: true },
         booking_link: t.booking_link || '',
-        gallery_link: t.gallery_link || '',
         // booking_enabled + listing_paused were MISSING here (same class of
         // bug as accepting_new_clients above): openTechDetail() reads
         // `tech.booking_enabled` to decide whether to show the "Book with X"
