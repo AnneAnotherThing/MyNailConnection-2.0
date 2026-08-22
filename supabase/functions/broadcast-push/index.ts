@@ -47,6 +47,41 @@ const supabase = createClient(
   Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
 );
 
+// ── Durable history ─────────────────────────────────────────────────────────
+// Same contract as send-push's recordNotification: a broadcast that was only
+// ever an OS notification becomes unreadable the moment someone swipes it
+// away. One row per distinct recipient so the in-app Notifications screen can
+// show it back.
+//
+// Deduped because someone with a phone AND a tablet has two subscription rows
+// but is still one person who received one message.
+//
+// Never throws — a history failure must not stop the broadcast going out.
+async function recordBroadcast(
+  recipients: string[], title: string, body: string,
+  url: string, tag: string,
+): Promise<number> {
+  try {
+    const unique = [...new Set(
+      recipients.map((r) => String(r || '').trim().toLowerCase()).filter(Boolean),
+    )];
+    if (!unique.length) return 0;
+    const rows = unique.map((recipient) => ({
+      recipient, title, body: body || null,
+      url: url || null, tag: tag || null, source: 'broadcast',
+    }));
+    // Chunked: a broadcast to the whole userbase goes out one statement per
+    // 500 rather than as a single enormous insert PostgREST may reject.
+    for (let i = 0; i < rows.length; i += 500) {
+      await supabase.from('notifications').insert(rows.slice(i, i + 500));
+    }
+    return unique.length;
+  } catch (err) {
+    console.error('broadcast history insert failed (push still sent):', String(err));
+    return 0;
+  }
+}
+
 // ── FCM HTTP v1 ─────────────────────────────────────────────────────────────
 // Google OAuth2 via service-account JWT, minted with WebCrypto (no SDK).
 // Token cached at module scope; edge isolates live long enough for the
@@ -336,6 +371,12 @@ serve(async (req) => {
   const effUrl = url || '/';
   const effTag = tag || ('mnc-broadcast-' + Date.now());
   const payload = JSON.stringify({ title, body, url: effUrl, tag: effTag });
+
+  // History before delivery, and awaited: an edge isolate can be torn down as
+  // soon as the response returns, which would drop a fire-and-forget insert.
+  const recorded = await recordBroadcast(
+    targetSubs.map((sub) => sub.user_id), title, body, effUrl, effTag,
+  );
   let sent = 0, failed = 0, skipped = 0;
   const skipReasons = new Set<string>();
 
@@ -377,7 +418,7 @@ serve(async (req) => {
 
   return jsonResponse(
     skipped
-      ? { sent, failed, skipped, total_subs: targetSubs.length, audience, note: [...skipReasons].join('; ') }
-      : { sent, failed, total_subs: targetSubs.length, audience }
+      ? { sent, failed, skipped, recorded, total_subs: targetSubs.length, audience, note: [...skipReasons].join('; ') }
+      : { sent, failed, recorded, total_subs: targetSubs.length, audience }
   );
 });

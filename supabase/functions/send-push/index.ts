@@ -47,6 +47,39 @@ const supabase = createClient(
   Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 );
 
+// ── Durable history ─────────────────────────────────────────────────────────
+// Anne, 2026-08-21: "i couldn't read the whole contents of one and dismissed
+// it, never to be seen again." An OS notification is not a record — swipe it
+// and the content is gone. Every send now also writes a row the recipient can
+// read back in the app's Notifications screen.
+//
+// Called BEFORE the subscription lookup on purpose, so the message is kept
+// even when delivery is impossible: a user who declined push, whose token has
+// gone stale, or who simply has no device registered still finds it waiting
+// in-app. Delivery and record are separate concerns.
+//
+// Never throws. A history failure must not take down the push it belongs to —
+// the notification arriving matters more than the archive of it.
+async function recordNotification(
+  recipient: string, title: string, body: string,
+  url: string, tag: string, source: string
+): Promise<void> {
+  try {
+    const clean = String(recipient || '').trim().toLowerCase();
+    if (!clean || !title) return;
+    await supabase.from('notifications').insert({
+      recipient: clean,
+      title,
+      body:   body || null,
+      url:    url  || null,
+      tag:    tag  || null,
+      source: source || 'app',
+    });
+  } catch (err) {
+    console.error('notifications insert failed (push still sent):', String(err));
+  }
+}
+
 // ── FCM HTTP v1 ─────────────────────────────────────────────────────────────
 // Google OAuth2 via service-account JWT, minted with WebCrypto (no SDK).
 // Token cached at module scope; edge isolates live long enough for the
@@ -250,11 +283,16 @@ serve(async (req) => {
   }
 
   try {
-    const { user_id, title, body, url, tag } = await req.json();
+    const { user_id, title, body, url, tag, source } = await req.json();
 
     if (!user_id || !title) {
       return jsonResponse({ error: 'user_id and title required' }, 400);
     }
+
+    // History first — see recordNotification above. Awaited rather than
+    // fire-and-forget because an edge isolate can be torn down the moment the
+    // response is returned, which would drop the insert mid-flight.
+    await recordNotification(user_id, title, body || '', url || '/', tag || 'mnc', source || 'app');
 
     // Get all subscriptions for this user
     const { data: subs, error } = await supabase
@@ -263,7 +301,10 @@ serve(async (req) => {
       .eq('user_id', user_id);
 
     if (error || !subs?.length) {
-      return jsonResponse({ sent: 0, reason: 'no subscriptions found' }, 200);
+      // Recorded above, so it is readable in-app even though no device could
+      // be reached. `recorded` tells the caller the difference between
+      // "nothing happened" and "kept, but undeliverable".
+      return jsonResponse({ sent: 0, recorded: 1, reason: 'no subscriptions found' }, 200);
     }
 
     const payload = JSON.stringify({ title, body, url: url || '/', tag: tag || 'mnc' });
@@ -313,7 +354,7 @@ serve(async (req) => {
     }
 
     return jsonResponse({
-      sent, failed,
+      sent, failed, recorded: 1,
       ...(skipped ? { skipped, note: [...skipReasons].join('; ') } : {}),
       ...(errors.length ? { errors } : {}),
     });

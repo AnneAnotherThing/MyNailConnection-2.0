@@ -2272,6 +2272,10 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
          account deletion (5.1.1v). -->
     <div style="margin:26px 20px 0;background:white;border:1.5px solid var(--border);border-bottom:3px solid rgba(125,100,102,0.2);border-radius:16px;overflow:hidden;box-shadow:var(--shadow);">
       <div class="etched-caps" style="padding:13px 16px 9px;font-size:11px;font-weight:700;letter-spacing:1.6px;color:var(--muted);text-transform:uppercase;">Help &amp; Account</div>
+      <!-- Notifications, first row on purpose (2026-08-21). This is where a
+           tech goes looking after a push vanishes off her lock screen, so it
+           sits above everything else in the card rather than under Help. -->
+      <div onclick="openNotifications()" style="display:flex;align-items:center;gap:10px;padding:13px 16px;border-top:1px solid var(--border);cursor:pointer;"><div style="flex:1;font-size:13.5px;font-weight:600;color:var(--charcoal);">Notifications</div><span id="notif-badge-tech" style="display:none;align-items:center;justify-content:center;min-width:19px;height:19px;padding:0 5px;border-radius:10px;background:var(--rose-dark);color:white;font-size:11px;font-weight:700;flex-shrink:0;"></span><svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:var(--muted);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg></div>
       <div onclick="show('how-it-works')" style="display:flex;align-items:center;gap:10px;padding:13px 16px;border-top:1px solid var(--border);cursor:pointer;"><div style="flex:1;font-size:13.5px;font-weight:600;color:var(--charcoal);">How MNC works</div><svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:var(--muted);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg></div>
       <!-- Reopen the setup list. Until 2026-08-19 there was NO way back to it:
            dismissing it set a sessionStorage flag and finishing it set
@@ -2712,6 +2716,34 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
 </div>
 
 <!-- HOW IT WORKS, Tech Reference Screen -->
+<!-- ── Notifications history (2026-08-21) ─────────────────────────
+     Anne, testing the 3.0 APK: "i couldn't read the whole contents of one and
+     dismissed it, never to be seen again. dealbreaker for launch."
+
+     She was right that there was nowhere to look. An OS notification is not a
+     record: swipe it and the content is gone. Nothing user-facing was written
+     when the app pushed — push_subscriptions holds who can be reached, and
+     push_log is admin-only and covers only the database's own cron reminders.
+
+     This screen reads public.notifications, which send-push, broadcast-push
+     and _booking_push now all write to. Bodies render in FULL and untruncated,
+     because being unable to finish reading one is the bug being fixed. -->
+<div class="screen" id="notifications">
+  <div class="header">
+    <button class="back-btn" onclick="backSmart()">←</button>
+    <div style="text-align:center;"><div class="logo-mark" style="font-size:17px;">Notifications</div></div>
+    <div style="width:36px;"></div>
+  </div>
+  <div class="scroll-content" style="padding-bottom:60px;">
+    <div id="notif-toolbar" style="display:none;padding:12px 20px 0;align-items:center;gap:10px;">
+      <div id="notif-count" style="flex:1;font-size:12.5px;color:var(--muted);"></div>
+      <button type="button" onclick="markAllNotificationsRead()" id="notif-markall"
+        style="padding:7px 13px;border-radius:11px;border:1.5px solid var(--border);background:white;color:var(--charcoal);font-size:12.5px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;">Mark all read</button>
+    </div>
+    <div id="notif-list" style="padding:12px 20px 0;"></div>
+  </div>
+</div>
+
 <div class="screen" id="how-it-works">
   <div class="header">
     <button class="back-btn" onclick="backSmart()">←</button>
@@ -3128,6 +3160,9 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
     <div style="margin:26px 20px 8px;">
       <div style="font-size:10px;font-weight:700;letter-spacing:1.3px;text-transform:uppercase;color:var(--muted);margin:0 0 10px 4px;">Help &amp; Account</div>
       <div style="background:var(--cream);border:1.5px solid var(--border);border-radius:16px;overflow:hidden;">
+        <!-- Same entry point for clients: a booking confirmation they swiped
+             away has to be findable somewhere, and this card is it. -->
+        <div onclick="openNotifications()" style="display:flex;align-items:center;justify-content:space-between;padding:13px 16px;cursor:pointer;font-size:13.5px;font-weight:600;color:var(--charcoal);"><span>Notifications</span><span style="display:flex;align-items:center;gap:8px;"><span id="notif-badge-client" style="display:none;align-items:center;justify-content:center;min-width:19px;height:19px;padding:0 5px;border-radius:10px;background:var(--rose-dark);color:white;font-size:11px;font-weight:700;flex-shrink:0;"></span><svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:var(--muted);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg></span></div>
         <div onclick="replayTutorial()" style="display:flex;align-items:center;justify-content:space-between;padding:13px 16px;cursor:pointer;font-size:14px;color:var(--charcoal);border-bottom:1px solid var(--border);"><span>Replay tutorial</span><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:var(--muted);fill:none;stroke-width:2.4;stroke-linecap:round;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg></div>
         <div class="mnc-pw-row" onclick="openChangePasswordFromSettings()" style="display:flex;align-items:center;justify-content:space-between;padding:13px 16px;cursor:pointer;font-size:14px;color:var(--charcoal);border-bottom:1px solid var(--border);"><span>Change password</span><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:var(--muted);fill:none;stroke-width:2.4;stroke-linecap:round;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg></div>
         <div onclick="show('find-us')" style="display:flex;align-items:center;justify-content:space-between;padding:13px 16px;cursor:pointer;font-size:14px;color:var(--charcoal);border-bottom:1px solid var(--border);"><span>Find us on social</span><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:var(--muted);fill:none;stroke-width:2.4;stroke-linecap:round;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg></div>
@@ -5377,8 +5412,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.0',     /* __APP_BUILD_NAME__   */
-  android: 573,         /* __APP_BUILD_ANDROID__ */
-  ios:     378,          /* __APP_BUILD_IOS__     */
+  android: 574,         /* __APP_BUILD_ANDROID__ */
+  ios:     379,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -16959,6 +16994,216 @@ function syncHeroStatus() {
 }
 
 // Tech-home stats row (Photos / Posts / Saved by), three small tappable tiles
+// ── Notifications history (2026-08-21) ──────────────────────────────────
+// Backing store for the screen of the same name. See the markup for why it
+// exists; the short version is that a dismissed push used to be unrecoverable.
+//
+// Addressing: rows are keyed by public.notifications.recipient, which holds
+// exactly what push_subscriptions.user_id holds — the app's pushKeyFor()
+// output. currentUserEmail already IS that string for both email and phone
+// accounts (it is what _refreshPushSubState addresses subscriptions with), so
+// the same key works here. Do not invent a second shape; a tech phone stored
+// raw against a client phone stored normalised already cost one round of
+// silently undelivered reminders.
+function _notifKey() {
+  try { return pushKey(currentUserEmail) || ''; } catch(_) { return ''; }
+}
+function _notifHeaders() {
+  return { apikey: SUPABASE_ANON_KEY,
+           Authorization: 'Bearer ' + (window._mncAccessToken || SUPABASE_ANON_KEY) };
+}
+function _notifEsc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, function(c) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+  });
+}
+// Deliberately coarse. "3d ago" is all anyone needs; an exact timestamp on
+// every row is noise, and anything older than a week shows its date instead.
+function _notifWhen(iso) {
+  try {
+    var t = new Date(iso).getTime();
+    var d = Date.now() - t;
+    if (d < 60000)     return 'just now';
+    if (d < 3600000)   return Math.floor(d / 60000) + 'm ago';
+    if (d < 86400000)  return Math.floor(d / 3600000) + 'h ago';
+    if (d < 604800000) return Math.floor(d / 86400000) + 'd ago';
+    return new Date(iso).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+  } catch(_) { return ''; }
+}
+
+// Fetch + render. Filters by recipient explicitly even though RLS already
+// scopes the rows: the (recipient, created_at desc) index only gets used with
+// the predicate present, and being explicit documents the addressing.
+async function loadNotifications() {
+  var host = document.getElementById('notif-list');
+  if (!host) return;
+  var key = _notifKey();
+  if (!key) {
+    host.innerHTML = '<div style="padding:26px 12px;text-align:center;color:var(--muted);font-size:13px;">Sign in to see your notifications.</div>';
+    return;
+  }
+  host.innerHTML = '<div style="padding:26px 12px;text-align:center;color:var(--muted);font-size:13px;">Loading…</div>';
+  try {
+    var r = await fetch(SUPABASE_URL + '/rest/v1/notifications' +
+      '?select=id,created_at,title,body,url,tag,source,read_at' +
+      '&recipient=eq.' + encodeURIComponent(key) +
+      '&order=created_at.desc&limit=100', { headers: _notifHeaders() });
+    if (!r.ok) {
+      // By far the likeliest cause is the migration not having been run yet.
+      host.innerHTML = '<div style="padding:26px 12px;text-align:center;color:var(--muted);font-size:13px;">Couldn’t load your notifications.<br><span style="font-size:12px;">Head back and try again in a moment.</span></div>';
+      return;
+    }
+    window._mncNotifs = await r.json();
+    renderNotifications();
+  } catch(_) {
+    host.innerHTML = '<div style="padding:26px 12px;text-align:center;color:var(--muted);font-size:13px;">Couldn’t load your notifications.</div>';
+  }
+}
+
+function renderNotifications() {
+  var host = document.getElementById('notif-list');
+  var bar  = document.getElementById('notif-toolbar');
+  if (!host) return;
+  var rows = window._mncNotifs || [];
+  var unread = rows.filter(function(n) { return !n.read_at; }).length;
+
+  if (bar) {
+    bar.style.display = rows.length ? 'flex' : 'none';
+    var cnt = document.getElementById('notif-count');
+    if (cnt) cnt.textContent = rows.length + (rows.length === 1 ? ' notification' : ' notifications') +
+      (unread ? ' · ' + unread + ' unread' : '');
+    var mk = document.getElementById('notif-markall');
+    if (mk) mk.style.display = unread ? '' : 'none';
+  }
+
+  if (!rows.length) {
+    host.innerHTML =
+      '<div style="padding:34px 16px;text-align:center;">' +
+        '<div style="font-size:30px;margin-bottom:10px;opacity:0.55;">🔔</div>' +
+        '<div style="font-size:14px;font-weight:600;color:var(--charcoal);margin-bottom:5px;">Nothing yet</div>' +
+        '<div style="font-size:13px;color:var(--muted);line-height:1.6;">Bookings, confirmations and reminders show up here — and they stay, so you can read them again whenever you want.</div>' +
+      '</div>';
+    return;
+  }
+
+  host.innerHTML = rows.map(function(n) {
+    var isUnread = !n.read_at;
+    // Body is NOT truncated. Being unable to finish reading one is the bug.
+    var body = n.body
+      ? '<div style="font-size:13px;color:var(--muted);line-height:1.6;margin-top:4px;white-space:pre-wrap;">' + _notifEsc(n.body) + '</div>'
+      : '';
+    var chevron = (n.url && n.url !== '/')
+      ? '<svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:var(--muted);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0;margin-top:3px;"><path d="M9 18l6-6-6-6"/></svg>'
+      : '';
+    return '<div onclick="openNotification(' + n.id + ')" style="display:flex;gap:10px;align-items:flex-start;padding:13px 14px;margin-bottom:9px;border-radius:14px;cursor:pointer;' +
+        (isUnread
+          ? 'background:var(--rose-light);border:1px solid var(--rose-mid);'
+          : 'background:white;border:1.5px solid var(--border);') + '">' +
+        '<div style="width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:6px;background:' +
+          (isUnread ? 'var(--rose-dark)' : 'transparent') + ';"></div>' +
+        '<div style="flex:1;min-width:0;">' +
+          '<div style="display:flex;gap:8px;align-items:baseline;">' +
+            '<div style="flex:1;font-size:13.5px;font-weight:' + (isUnread ? '700' : '600') + ';color:var(--charcoal);">' + _notifEsc(n.title) + '</div>' +
+            '<div style="font-size:11.5px;color:var(--muted);flex-shrink:0;">' + _notifWhen(n.created_at) + '</div>' +
+          '</div>' +
+          body +
+        '</div>' + chevron +
+      '</div>';
+  }).join('') +
+  '<div style="padding:14px 0 4px;text-align:center;">' +
+    '<button type="button" onclick="clearNotificationHistory()" style="padding:8px 16px;border-radius:11px;border:none;background:none;color:var(--muted);font-size:12.5px;cursor:pointer;font-family:\'DM Sans\',sans-serif;">Clear all</button>' +
+  '</div>';
+}
+
+// Tapping one marks it read and follows its deep link if it had one. Marking
+// goes through an RPC, not a PATCH: notifications has no update policy, so a
+// client can only ever move read_at, never rewrite what a message said.
+async function openNotification(id) {
+  var rows = window._mncNotifs || [];
+  var n = rows.filter(function(x) { return x.id === id; })[0];
+  if (!n) return;
+  if (!n.read_at) {
+    n.read_at = new Date().toISOString();   // optimistic; the row is ours
+    renderNotifications();
+    try {
+      await fetch(SUPABASE_URL + '/rest/v1/rpc/notifications_mark_read', {
+        method: 'POST',
+        headers: Object.assign({ 'Content-Type': 'application/json' }, _notifHeaders()),
+        body: JSON.stringify({ p_ids: [id] })
+      });
+    } catch(_) {}
+    try { refreshNotifBadge(); } catch(_) {}
+  }
+  // Only follow in-app routes. A notification's url is server-supplied, so
+  // handing it to location.href would let anything that can write a row
+  // navigate the app off-site. Screen ids only, nothing with a scheme.
+  var u = String(n.url || '').trim().replace(/^\//, '');
+  if (u && /^[a-z0-9-]+$/i.test(u) && (SCREEN_DEPTH[u] !== undefined)) {
+    try { show(u); } catch(_) {}
+  }
+}
+
+async function markAllNotificationsRead() {
+  (window._mncNotifs || []).forEach(function(n) {
+    if (!n.read_at) n.read_at = new Date().toISOString();
+  });
+  renderNotifications();
+  try {
+    await fetch(SUPABASE_URL + '/rest/v1/rpc/notifications_mark_all_read', {
+      method: 'POST',
+      headers: Object.assign({ 'Content-Type': 'application/json' }, _notifHeaders()),
+      body: '{}'
+    });
+  } catch(_) {}
+  try { refreshNotifBadge(); } catch(_) {}
+}
+
+async function clearNotificationHistory() {
+  var ok = await showConfirm('Clear all notifications?', {
+    body: 'This empties your notification list on every device. Your bookings, photos and settings are untouched — only the message history goes.',
+    okLabel: 'Clear all'
+  });
+  if (!ok) return;
+  var key = _notifKey();
+  if (!key) return;
+  try {
+    await fetch(SUPABASE_URL + '/rest/v1/notifications?recipient=eq.' + encodeURIComponent(key), {
+      method: 'DELETE', headers: _notifHeaders()
+    });
+  } catch(_) {}
+  window._mncNotifs = [];
+  renderNotifications();
+  try { refreshNotifBadge(); } catch(_) {}
+}
+
+// Unread pip on the entry rows. Cheap: a security-definer RPC over the
+// partial index, so it is fine to call on every portal render.
+async function refreshNotifBadge() {
+  var key = _notifKey();
+  var paint = function(count) {
+    ['notif-badge-tech', 'notif-badge-client'].forEach(function(id) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      el.textContent = count > 99 ? '99+' : String(count);
+      el.style.display = count > 0 ? 'inline-flex' : 'none';
+    });
+  };
+  if (!key) { paint(0); return; }
+  try {
+    var r = await fetch(SUPABASE_URL + '/rest/v1/rpc/notifications_unread_count', {
+      method: 'POST',
+      headers: Object.assign({ 'Content-Type': 'application/json' }, _notifHeaders()),
+      body: '{}'
+    });
+    if (r.ok) paint(Number(await r.json()) || 0);
+  } catch(_) {}
+}
+
+function openNotifications() {
+  try { show('notifications'); } catch(_) {}
+  try { loadNotifications(); } catch(_) {}
+}
+
 // ── Setup checklist (design review punch 02, 2026-07-30) ────────────────
 // The four instructional tutorial slides became this persistent card on
 // the Tech Portal. State comes from data the portal already loads:
@@ -18196,7 +18441,7 @@ const SCREEN_DEPTH = {
   home:2, admin:2, 'tech-home':2, 'how-it-works':3,
   'browse-style':3, 'browse-location':3, messages:3, 'profile-screen':3,
   'tech-detail':4, 'tech-bookings':3, 'tech-booking-settings':3, 'my-appts':4,
-  'my-photos':3, 'find-us':3
+  'my-photos':3, 'find-us':3, notifications:3
 };
 let _currentScreen = 'home';
 let _prevScreen = 'home';
@@ -18370,12 +18615,12 @@ function show(id) {
     }
   }
   if (id === 'browse-location') { renderLocTechCards(); }
-  if (id === 'tech-home') { loadTechDashboard(); }
+  if (id === 'tech-home') { loadTechDashboard(); try { refreshNotifBadge(); } catch(_) {} }
   if (id === 'my-photos') { loadMyPhotosData(); }
   if (id === 'tech-bookings') { loadTechBookings(); }
   if (id === 'tech-booking-settings') { loadTechBookings(); }
   if (id === 'my-appts') { loadMyAppointments(); }
-  if (id === 'profile-screen') { initProfileScreen(); }
+  if (id === 'profile-screen') { initProfileScreen(); try { refreshNotifBadge(); } catch(_) {} }
   if (id === 'browse-style') {
     // Reset radius to Anywhere on every entry
     styleRadius = null;
