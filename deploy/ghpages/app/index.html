@@ -2153,6 +2153,20 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
          nothing to say. -->
     <div id="td-alerts" style="display:none;margin:14px 20px 0;gap:8px;"></div>
 
+    <!-- NOTIFICATIONS, big button (2026-08-21). The unread pip is painted by
+         refreshNotifBadge() on every tech-home render. -->
+    <div onclick="openNotifications()" style="margin:14px 20px 0;padding:15px 16px;background:white;border:1.5px solid var(--rose-mid);border-radius:16px;box-shadow:var(--shadow);cursor:pointer;display:flex;align-items:center;gap:13px;">
+      <div style="width:42px;height:42px;border-radius:13px;background:var(--rose-light);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <svg viewBox="0 0 24 24" style="width:21px;height:21px;stroke:var(--rose-dark);fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+      </div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:15px;font-weight:700;color:var(--charcoal);">Notifications</div>
+        <div style="font-size:12.5px;color:var(--muted);margin-top:2px;line-height:1.4;">Bookings, confirmations and reminders — they stay here</div>
+      </div>
+      <span id="notif-badge-tech" style="display:none;align-items:center;justify-content:center;min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:var(--rose-dark);color:white;font-size:12px;font-weight:700;flex-shrink:0;"></span>
+      <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:var(--muted);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg>
+    </div>
+
     <!-- HERO: status trio, the visual centerpiece -->
     <div style="margin:16px 20px 0;">
       <div style="font-size:11px;font-weight:700;letter-spacing:0.6px;text-transform:uppercase;color:var(--muted);text-align:center;margin-bottom:11px;">Show clients you're open</div>
@@ -2353,10 +2367,6 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
          account deletion (5.1.1v). -->
     <div style="margin:26px 20px 0;background:white;border:1.5px solid var(--border);border-bottom:3px solid rgba(125,100,102,0.2);border-radius:16px;overflow:hidden;box-shadow:var(--shadow);">
       <div class="etched-caps" style="padding:13px 16px 9px;font-size:11px;font-weight:700;letter-spacing:1.6px;color:var(--muted);text-transform:uppercase;">Help &amp; Account</div>
-      <!-- Notifications, first row on purpose (2026-08-21). This is where a
-           tech goes looking after a push vanishes off her lock screen, so it
-           sits above everything else in the card rather than under Help. -->
-      <div onclick="openNotifications()" style="display:flex;align-items:center;gap:10px;padding:13px 16px;border-top:1px solid var(--border);cursor:pointer;"><div style="flex:1;font-size:13.5px;font-weight:600;color:var(--charcoal);">Notifications</div><span id="notif-badge-tech" style="display:none;align-items:center;justify-content:center;min-width:19px;height:19px;padding:0 5px;border-radius:10px;background:var(--rose-dark);color:white;font-size:11px;font-weight:700;flex-shrink:0;"></span><svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:var(--muted);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg></div>
       <div onclick="show('how-it-works')" style="display:flex;align-items:center;gap:10px;padding:13px 16px;border-top:1px solid var(--border);cursor:pointer;"><div style="flex:1;font-size:13.5px;font-weight:600;color:var(--charcoal);">How MNC works</div><svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:var(--muted);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg></div>
       <!-- Reopen the setup list. Until 2026-08-19 there was NO way back to it:
            dismissing it set a sessionStorage flag and finishing it set
@@ -5485,8 +5495,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.0',     /* __APP_BUILD_NAME__   */
-  android: 578,         /* __APP_BUILD_ANDROID__ */
-  ios:     383,          /* __APP_BUILD_IOS__     */
+  android: 579,         /* __APP_BUILD_ANDROID__ */
+  ios:     384,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -15451,6 +15461,25 @@ function bkOpenSetupFork() {
   if (inp) inp.value = (window._bkSetup && window._bkSetup.link) || '';
   m.style.display = 'flex';
   requestAnimationFrame(function(){ m.classList.add('open'); });
+  // Price the in-app option honestly, and only when it actually costs her
+  // something. Until 2026-08-21 this card was labelled "· FREE" — on the one
+  // option of the three that is the paid product. True while
+  // paywall_enabled() was false, a lie the moment it flipped. The other two
+  // options are genuinely free and say so statically; this one asks.
+  //
+  // Async and after the modal is already up, so a slow read never delays the
+  // sheet. Blank while unknown, which is the safe direction: a missing price
+  // is a smaller problem than a wrong one.
+  (async function() {
+    var el = document.getElementById('bkf-inapp-price');
+    if (!el) return;
+    el.textContent = '';
+    try {
+      if (await bkSubscriptionBlocks()) {
+        el.textContent = '· 3 months free, then ' + BOOKING_SUB_PRICE + '/mo';
+      }
+    } catch(_) {}
+  })();
 }
 function bkCloseSetupFork() {
   var m = document.getElementById('booking-setup-modal');
@@ -22621,14 +22650,14 @@ function closeReleaseWizard() {
       <!-- Step 1: the chooser -->
       <div id="bkf-chooser" style="padding:22px 22px 0;">
         <div style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--charcoal);">How do you want to take bookings?</div>
-        <div style="font-size:13px;color:var(--muted);line-height:1.5;margin-top:6px;margin-bottom:20px;">All free. Pick whichever fits how you already work, you can change it anytime.</div>
+        <div style="font-size:13px;color:var(--muted);line-height:1.5;margin-top:6px;margin-bottom:20px;">Pick whichever fits how you already work — you can change it anytime.</div>
 
         <div onclick="bkForkExisting()" style="cursor:pointer;border:1.5px solid var(--border);border-radius:16px;padding:16px;display:flex;gap:14px;align-items:center;margin-bottom:12px;">
           <div style="width:44px;height:44px;border-radius:13px;background:var(--rose-light);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
             <svg viewBox="0 0 24 24" style="width:22px;height:22px;stroke:var(--rose-dark);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;"><path d="M10 13a5 5 0 007 0l3-3a5 5 0 00-7-7l-1 1"/><path d="M14 11a5 5 0 00-7 0l-3 3a5 5 0 007 7l1-1"/></svg>
           </div>
           <div style="flex:1;min-width:0;">
-            <div style="font-size:15px;font-weight:700;color:var(--charcoal);">I already book somewhere</div>
+            <div style="font-size:15px;font-weight:700;color:var(--charcoal);">I already book somewhere <span style="font-size:12.5px;color:var(--muted);font-weight:700;">&#183; free</span></div>
             <div style="font-size:13px;color:var(--muted);line-height:1.45;margin-top:2px;">Vagaro, StyleSeat, your own site. Paste the link and clients book you there. Nothing to switch.</div>
           </div>
           <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--muted);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0;"><polyline points="9 18 15 12 9 6"/></svg>
@@ -22639,7 +22668,7 @@ function closeReleaseWizard() {
             <svg viewBox="0 0 24 24" style="width:22px;height:22px;stroke:white;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
           </div>
           <div style="flex:1;min-width:0;">
-            <div style="font-size:15px;font-weight:700;color:var(--charcoal);">Set up booking here <span style="font-size:13px;color:var(--rose-dark);font-weight:700;">&#183; FREE</span></div>
+            <div style="font-size:15px;font-weight:700;color:var(--charcoal);">Set up booking here <span id="bkf-inapp-price" style="font-size:12.5px;color:var(--rose-dark);font-weight:700;"></span></div>
             <div style="font-size:13px;color:var(--muted);line-height:1.45;margin-top:2px;">Clients book right on your profile. You pick your services and hours, no other app needed.</div>
           </div>
           <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--muted);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0;"><polyline points="9 18 15 12 9 6"/></svg>
@@ -22650,7 +22679,7 @@ function closeReleaseWizard() {
             <svg viewBox="0 0 24 24" style="width:22px;height:22px;stroke:var(--rose-dark);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81a19.79 19.79 0 01-3.07-8.68A2 2 0 012 .9h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 8.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>
           </div>
           <div style="flex:1;min-width:0;">
-            <div style="font-size:15px;font-weight:700;color:var(--charcoal);">Just calls and texts</div>
+            <div style="font-size:15px;font-weight:700;color:var(--charcoal);">Just calls and texts <span style="font-size:12.5px;color:var(--muted);font-weight:700;">&#183; free</span></div>
             <div style="font-size:13px;color:var(--muted);line-height:1.45;margin-top:2px;">No booking system at all. Clients see big Call and Text buttons on your profile and reach you directly.</div>
           </div>
           <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--muted);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0;"><polyline points="9 18 15 12 9 6"/></svg>
