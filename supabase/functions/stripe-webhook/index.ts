@@ -33,9 +33,22 @@ import { serve } from 'https://deno.land/std@0.177.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import Stripe from 'npm:stripe@14';
 
-// Live-mode clients (always required, this is the production path).
-const stripeLive = new Stripe(Deno.env.get('STRIPE_SECRET_KEY')!, { apiVersion: '2023-10-16' });
-const webhookSecretLive = Deno.env.get('STRIPE_WEBHOOK_SECRET')!;
+// Live-mode clients. OPTIONAL since 2026-08-21, and the reason matters:
+// this used to be `new Stripe(Deno.env.get('STRIPE_SECRET_KEY')!, …)` at
+// module scope. The `!` is a TypeScript assertion and does nothing at
+// runtime, so with STRIPE_SECRET_KEY unset the Stripe SDK threw while the
+// module was still loading and the function failed to boot for EVERY
+// request — including test ones. Anne hit exactly that setting up the
+// Android/Stripe run with only test credentials to hand: the test pair was
+// carefully optional while the live pair silently was not.
+//
+// Either pair alone is now enough. Neither is a clear 503 at request time
+// (see below) rather than a dead deployment with no useful log line.
+const STRIPE_SECRET_KEY = Deno.env.get('STRIPE_SECRET_KEY');
+const webhookSecretLive = Deno.env.get('STRIPE_WEBHOOK_SECRET');
+const stripeLive = STRIPE_SECRET_KEY
+  ? new Stripe(STRIPE_SECRET_KEY, { apiVersion: '2023-10-16' })
+  : null;
 
 // Test-mode clients (optional, only populated if the _TEST secrets are
 // set). When present, the verifier falls back to the test signing secret
@@ -124,33 +137,42 @@ serve(async (req) => {
   let stripe: Stripe;
   let modeLabel: string;
   const body = await req.text();
-  try {
-    event = await stripeLive.webhooks.constructEventAsync(body, signature, webhookSecretLive);
-    stripe = stripeLive;
-    modeLabel = 'LIVE';
-  } catch (liveErr) {
-    if (stripeTest && STRIPE_WEBHOOK_SECRET_TEST) {
-      try {
-        // constructEventAsync doesn't actually use the instance's API key, it
-        // only verifies HMAC against the supplied secret, so reusing
-        // stripeLive's verifier with the test secret is fine.
-        event = await stripeLive.webhooks.constructEventAsync(body, signature, STRIPE_WEBHOOK_SECRET_TEST);
-        stripe = stripeTest;
-        modeLabel = 'TEST';
-      } catch (testErr) {
-        console.error('Webhook signature failed (tried live + test):', testErr);
-        return new Response(`Webhook error: ${testErr}`, { status: 400 });
-      }
-    } else {
-      console.error('Webhook signature failed:', liveErr);
-      return new Response(`Webhook error: ${liveErr}`, { status: 400 });
-    }
+
+  // constructEventAsync only verifies an HMAC against the secret it is
+  // handed — it never touches the instance's API key — so any client will
+  // do as the verifier. Whichever one exists.
+  const verifier = stripeLive || stripeTest;
+  const canLive = !!(stripeLive && webhookSecretLive);
+  const canTest = !!(stripeTest && STRIPE_WEBHOOK_SECRET_TEST);
+  if (!verifier || (!canLive && !canTest)) {
+    console.error('No Stripe credentials configured: set STRIPE_SECRET_KEY + ' +
+      'STRIPE_WEBHOOK_SECRET, or STRIPE_SECRET_KEY_TEST + STRIPE_WEBHOOK_SECRET_TEST.');
+    return new Response('Stripe webhook not configured', { status: 503 });
+  }
+
+  const attempts: Array<{ secret: string; client: Stripe; label: string }> = [];
+  if (canLive) attempts.push({ secret: webhookSecretLive!, client: stripeLive!, label: 'LIVE' });
+  if (canTest) attempts.push({ secret: STRIPE_WEBHOOK_SECRET_TEST!, client: stripeTest!, label: 'TEST' });
+
+  let verified = false, lastErr: unknown = null;
+  for (const a of attempts) {
+    try {
+      event = await verifier.webhooks.constructEventAsync(body, signature, a.secret);
+      stripe = a.client;
+      modeLabel = a.label;
+      verified = true;
+      break;
+    } catch (err) { lastErr = err; }
+  }
+  if (!verified) {
+    console.error(`Webhook signature failed (tried ${attempts.map(a => a.label).join(' + ')}):`, lastErr);
+    return new Response(`Webhook error: ${lastErr}`, { status: 400 });
   }
 
   // Belt-and-suspenders: the event's own livemode flag should match the
   // secret that verified it. If not, something's badly misconfigured (e.g.
   // the test secret was set to the live value in supabase secrets).
-  if (event.livemode !== (stripe === stripeLive)) {
+  if (event.livemode !== (modeLabel! === 'LIVE')) {
     console.error(`Mode mismatch: event.livemode=${event.livemode} but verified with ${modeLabel} secret`);
     return new Response('Mode mismatch, check webhook secrets', { status: 400 });
   }
