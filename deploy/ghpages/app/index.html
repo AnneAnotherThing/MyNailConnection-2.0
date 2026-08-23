@@ -5365,8 +5365,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.0',     /* __APP_BUILD_NAME__   */
-  android: 594,         /* __APP_BUILD_ANDROID__ */
-  ios:     399,          /* __APP_BUILD_IOS__     */
+  android: 595,         /* __APP_BUILD_ANDROID__ */
+  ios:     400,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -5414,11 +5414,17 @@ const STRIPE_CONFIG = {
   // $4242-card flows; flip back before any push to the live App Store
   // build, otherwise live customers route to test Stripe links and no
   // real money flows.
-  // 2026-08-23: ON for the Android/Stripe bring-up on the new account.
-  // MUST go back to false before any store build — with it on, real techs
-  // route to the TEST payment link and no money moves. sync.sh cannot catch
-  // this: it is a value, not a syntax error.
-  test_mode: true,
+  // LIVE as of 2026-08-23. Flipped back after the Android/Stripe bring-up on
+  // the MNC account, once Anne confirmed the live payment link carries the
+  // 1-month trial and a LIVE webhook destination exists with its own
+  // STRIPE_WEBHOOK_SECRET. Both had to be true first: without the trial the
+  // first real tech is charged against a written promise of a free month,
+  // and without the live webhook she pays and subscription_tier never flips.
+  //
+  // Re-flip to true ONLY for another round of 4242-card testing, and put it
+  // back before any store build. sync.sh cannot catch this — it is a value,
+  // not a syntax error, so the JS parse guard sails straight past it.
+  test_mode: false,
   // DEAD LINKS (2026-08-23). The four photo-credit URLs below belong to the
   // PREVIOUS Stripe account and are unreachable: purchasePhotos() has no
   // callers left (photos are free in 3.0) and purchaseUnlimited() is blocked
