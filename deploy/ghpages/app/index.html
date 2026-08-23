@@ -5511,8 +5511,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.0',     /* __APP_BUILD_NAME__   */
-  android: 582,         /* __APP_BUILD_ANDROID__ */
-  ios:     387,          /* __APP_BUILD_IOS__     */
+  android: 583,         /* __APP_BUILD_ANDROID__ */
+  ios:     388,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -21545,12 +21545,29 @@ function _stripeWelcomeVariants() {
   // bill) — not period_reset_at, which is the upload-allowance refill from
   // the retired pay-per-photo product. Falls back to a month from today so
   // the copy never lies while the webhook is still landing.
+  // "Renews" is wrong for a tech on the three-month intro offer: she has not
+  // been charged yet, so that date is her FIRST charge, not a renewal. Telling
+  // someone who has paid nothing that something "renews" reads as a bill she
+  // already missed, and it is the sort of small dishonesty that earns a
+  // chargeback.
+  //
+  // Detecting the trial without a schema change: there is no
+  // subscription_status column, and adding one for a line of copy is not worth
+  // a migration. The only plan is $10.99 MONTHLY, so current_period_end is
+  // never more than ~31 days out for a billing subscription, while a 90-day
+  // trial lands ~90 days out. Anything past the threshold is a trial with room
+  // to spare. If that ever stops holding — an annual plan, say — the wording
+  // degrades to "Renews", which is imprecise rather than untrue.
+  var TRIAL_HINT_DAYS = 40;
   var renewDateStr = '';
+  var renewLead = 'Renews ';
   try {
     if (_techTier && _techTier.subscription_expires_at) {
       var rd = new Date(_techTier.subscription_expires_at);
-      if (rd.getTime() > Date.now()) {
+      var msOut = rd.getTime() - Date.now();
+      if (msOut > 0) {
         renewDateStr = rd.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+        if (msOut > TRIAL_HINT_DAYS * 86400000) renewLead = 'First charge ';
       }
     }
     if (!renewDateStr) {
@@ -21597,7 +21614,7 @@ function _stripeWelcomeVariants() {
       body: 'Clients can book you right on your profile now. You set the services, the hours, and whether requests confirm automatically or wait for your yes.',
       statNum: '$0',
       statLabel: 'commission, ever',
-      statSub: 'Renews ' + renewDateStr + ' \u00b7 cancel anytime from your profile',
+      statSub: renewLead + renewDateStr + ' \u00b7 cancel anytime from your profile',
       primaryBtn: 'Check your hours \u2192',
       primaryAction: 'booking'
     },
