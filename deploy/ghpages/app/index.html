@@ -1423,6 +1423,19 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       <div style="text-align:center;margin-top:18px;">
         <span style="font-size:13px;color:var(--muted);cursor:pointer;" onclick="paBack()">&larr; Back</span>
       </div>
+      <!-- Trouble signing in (2026-08-23). The bug reporter only appears once
+           you are signed IN, which left the one screen where the worst bugs
+           happen with no way to report them. Under phone-only auth a tech who
+           never receives her code is at a dead end, and her only recourse is
+           knowing Anne personally. Not hypothetical: Twilio geo permissions, a
+           trial-account number limit or a carrier filter all fail exactly here
+           and look identical to the tech.
+           Contact Anne rather than the feedback modal, because it collects a
+           phone number — the only way to answer someone who cannot get in. -->
+      <div style="text-align:center;margin-top:14px;padding-top:14px;border-top:1px solid var(--border);">
+        <span onclick="openContactAnne()" style="font-size:13px;color:var(--rose-dark);font-weight:600;cursor:pointer;text-decoration:underline;text-underline-offset:3px;">Trouble signing in?</span>
+        <div style="font-size:12px;color:var(--muted);margin-top:4px;">Tell us what happened and we&rsquo;ll text you back.</div>
+      </div>
     </div>
   </div>
 
@@ -5530,8 +5543,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.0',     /* __APP_BUILD_NAME__   */
-  android: 589,         /* __APP_BUILD_ANDROID__ */
-  ios:     394,          /* __APP_BUILD_IOS__     */
+  android: 590,         /* __APP_BUILD_ANDROID__ */
+  ios:     395,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -23283,9 +23296,9 @@ function closeReleaseWizard() {
      Floating chip on every signed-in screen; taps open a modal that
      writes into public.feedback. Auto-captures current screen, user
      agent, and a rolling buffer of console errors/warnings. 2026-04-22. -->
-<button id="feedback-fab" onclick="openFeedbackModal()" aria-label="Send feedback" style="display:none;position:fixed;right:14px;bottom:86px;z-index:850;background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);color:white;border:none;border-radius:100px;padding:10px 16px;font-size:13px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;box-shadow:0 4px 14px rgba(178,110,95,0.35),0 1px 3px rgba(0,0,0,0.18);align-items:center;gap:7px;">
+<button id="feedback-fab" onclick="openFeedbackModal()" aria-label="Report a bug" style="display:none;position:fixed;right:14px;bottom:86px;z-index:850;background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);color:white;border:none;border-radius:100px;padding:10px 16px;font-size:13px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;box-shadow:0 4px 14px rgba(178,110,95,0.35),0 1px 3px rgba(0,0,0,0.18);align-items:center;gap:7px;">
   <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
-  Feedback
+  Report a bug
 </button>
 
 <div id="feedback-modal" class="modal-overlay" style="display:none;position:fixed;inset:0;z-index:9100;background:rgba(20,10,11,0.72);backdrop-filter:blur(4px);align-items:flex-end;justify-content:center;">
