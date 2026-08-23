@@ -5511,8 +5511,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.0',     /* __APP_BUILD_NAME__   */
-  android: 580,         /* __APP_BUILD_ANDROID__ */
-  ios:     385,          /* __APP_BUILD_IOS__     */
+  android: 581,         /* __APP_BUILD_ANDROID__ */
+  ios:     386,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -5560,7 +5560,17 @@ const STRIPE_CONFIG = {
   // $4242-card flows; flip back before any push to the live App Store
   // build, otherwise live customers route to test Stripe links and no
   // real money flows.
-  test_mode: false,
+  // 2026-08-23: ON for the Android/Stripe bring-up on the new account.
+  // MUST go back to false before any store build — with it on, real techs
+  // route to the TEST payment link and no money moves. sync.sh cannot catch
+  // this: it is a value, not a syntax error.
+  test_mode: true,
+  // DEAD LINKS (2026-08-23). The four photo-credit URLs below belong to the
+  // PREVIOUS Stripe account and are unreachable: purchasePhotos() has no
+  // callers left (photos are free in 3.0) and purchaseUnlimited() is blocked
+  // by GLOW_UP_ENABLED = false. Left in place rather than deleted so the
+  // history is legible, but do not trust them — if photo credits ever come
+  // back, recreate the products in the CURRENT account first.
   // Payment link for 1 photo credit ($1), Live
   link_1_photo:   'https://buy.stripe.com/28E4gycjubtr2KA2xtgEg00',
   // Payment link for 10 photo credits ($5 bundle, portfolio-only), Live
@@ -5577,7 +5587,7 @@ const STRIPE_CONFIG = {
   // had been used for internal testing). Success URL on the Payment
   // Link is set to https://mynailconnection.com/app/?welcome=glow-up
   // so returning customers land on the in-app welcome modal.
-  link_glow_up:   'https://buy.stripe.com/8x2fZgabm9ljgBq9ZVgEg04',
+  link_glow_up:   'https://buy.stripe.com/3cI8wO5188Ijc9Y3r05J60w',
   // ── TEST-MODE PAYMENT LINKS ─────────────────────────────────────────────
   // Paste in from Stripe Dashboard → flip "Viewing test data" → Payment
   // Links. Test links start with https://buy.stripe.com/test_... If left
@@ -5588,7 +5598,7 @@ const STRIPE_CONFIG = {
   // Glow Up test link refreshed 2026-04-23 for the new $10.99/mo monthly-
   // cadence product. The earlier test link (…5kk05) was against the
   // old $9/5-weekly model and shouldn't be reused.
-  link_glow_up_test:   'https://buy.stripe.com/test_5kQ6oJ9Yf3OPa7B4h25kk06',
+  link_glow_up_test:   'https://buy.stripe.com/test_7sY7sK8bycDjgoTaWnd3i00',
   // Plan names (for display)
   plan_free: 'Starter',
   plan_credits: 'Spotlight',
