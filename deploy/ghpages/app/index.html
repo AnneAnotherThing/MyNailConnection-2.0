@@ -5525,8 +5525,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.0',     /* __APP_BUILD_NAME__   */
-  android: 585,         /* __APP_BUILD_ANDROID__ */
-  ios:     390,          /* __APP_BUILD_IOS__     */
+  android: 586,         /* __APP_BUILD_ANDROID__ */
+  ios:     391,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -14580,6 +14580,68 @@ async function ensureBookingNotifications() {
 //
 // !is_visible is deliberately not gated: that means she paused her own
 // listing, which is a different fix and not a paywall problem.
+// Can this tech actually take a booking, or would her Book button dead-end?
+//
+// The Book button on a public profile renders on booking_enabled && is_bookable
+// and asks nothing about whether the booking flow can complete. Two ways it
+// could not, and a client meets both AFTER tapping Book:
+//
+//   no services  -> "No bookable services are set up yet."  (at least it says why)
+//   no hours     -> fourteen greyed-out day chips and no explanation at all
+//
+// The second is the worse screen, which is why hours are required too and not
+// just a service. Anne, 2026-08-23: "we just need to require a service before
+// they can go live right?" — a service and the hours, or the button still lies.
+//
+// Reads the loaded arrays when Booking Settings has them and falls back to the
+// server otherwise, because the onboarding fork runs before loadTechBookings.
+// Returns the list of what is missing; empty means ready.
+async function bkMissingForGoLive() {
+  var techId = (window._bkSetup && window._bkSetup.id) ||
+               (typeof _bkMyTech !== 'undefined' && _bkMyTech && _bkMyTech.id) || '';
+  var svcs = (typeof _bkSvcs  !== 'undefined' && Array.isArray(_bkSvcs))  ? _bkSvcs.length  : null;
+  var avail = (typeof _bkAvail !== 'undefined' && Array.isArray(_bkAvail)) ? _bkAvail.length : null;
+  if ((svcs === null || avail === null) && techId) {
+    try {
+      var r = await Promise.all([
+        fetch(SUPABASE_URL + '/rest/v1/tech_services?tech_id=eq.' + encodeURIComponent(techId) +
+              '&active=is.true&select=id&limit=1', { headers: bkHeaders() }),
+        fetch(SUPABASE_URL + '/rest/v1/tech_availability?tech_id=eq.' + encodeURIComponent(techId) +
+              '&select=id&limit=1', { headers: bkHeaders() })
+      ]);
+      if (svcs  === null && r[0].ok) svcs  = ((await r[0].json()) || []).length;
+      if (avail === null && r[1].ok) avail = ((await r[1].json()) || []).length;
+    } catch(_) {}
+  }
+  // Unknown is NOT missing. A failed read must not block a tech who is set up
+  // — the same reasoning as bkSubscriptionBlocks failing open.
+  var missing = [];
+  if (svcs  === 0) missing.push('a service');
+  if (avail === 0) missing.push('your weekly hours');
+  return missing;
+}
+
+// Shared refusal, so all three paths say the same thing and land in the same
+// place. Returns true when she was stopped.
+async function bkBlockedFromGoLive() {
+  var missing = await bkMissingForGoLive();
+  if (!missing.length) return false;
+  var what = missing.join(' and ');
+  var ok = await showConfirm('Add ' + what + ' first', {
+    body: 'Clients would see a Book button that cannot finish \u2014 there is nothing for them to pick. ' +
+          'Add ' + what + ' in Booking Settings and booking turns on right after.',
+    okLabel: 'Set it up',
+    cancelLabel: 'Not now',
+    tone: 'neutral'
+  });
+  if (ok) {
+    try { bkCloseSetupFork(); } catch(_) {}
+    try { show('tech-booking-settings'); } catch(_) {}
+    try { loadTechBookings(); } catch(_) {}
+  }
+  return true;
+}
+
 async function bkSubscriptionBlocks() {
   var t = (typeof _bkMyTech !== 'undefined') ? _bkMyTech : null;
   if (!t || t.is_visible === undefined || t.is_bookable === undefined) {
@@ -14599,6 +14661,10 @@ async function bkSubscriptionBlocks() {
 async function tbToggleEnabled() {
   if (!_bkMyTech) return;
   const next = !_bkMyTech.booking_enabled;
+  // Can she actually be booked? Checked before the paywall deliberately:
+  // services and hours are free to set up, and taking her money for a booking
+  // page that dead-ends is the wrong order to do these two things in.
+  if (next && await bkBlockedFromGoLive()) return;
   // Turning booking ON is the paid moment. See bkSubscriptionBlocks above —
   // this used to be an inline check here and was the ONLY one of the three
   // booking-on paths that had it.
@@ -15678,6 +15744,9 @@ async function bkForkInApp() {
     }
   } catch(_) {}
   if (hasSetup) {
+    // OR above is deliberately loose — it only decides whether to show the
+    // guided two-step. This is the gate that decides whether she can go live.
+    if (await bkBlockedFromGoLive()) return;
     var ok = await patchBookingField({ booking_enabled: true });
     if (!ok) { showToast('Could not turn booking on, try again'); return; }
     try { localStorage.removeItem(_bkPrefKey()); } catch(_) {}
