@@ -4065,8 +4065,43 @@ function _slotsRemainingParts() {
 // wiring needed. This is why the same phrase now lives on tech-home
 // AND inside the edit-tech modal's portfolio section: both elements
 // carry the attribute, and this one function keeps them synced.
+// Is she close enough to the monthly ceiling to need telling?
+//
+// Anne, 2026-08-23, after subscribing: "i uploaded a pic and my gallery shows
+// 150 uploads left this month, refills sept 23 - that shouldn't be there at
+// all." Right — and it was worse for a PAID tech than a free one.
+//
+// The card already throttled itself for free techs, on the reasoning that a
+// number counting down from 50 all month invites rationing. But the throttle
+// was written as "if tier !== 'paid'", so a subscriber got nearCap = true
+// forever and saw the counter every single day. The chip in the edit modal's
+// ADD TO YOUR GALLERY section had no check at all.
+//
+// The monthly cap is an ANTI-ABUSE limit, not a product feature — the SQL
+// says so in as many words. Photos are free in 3.0 and nobody buys uploads,
+// so a tech who just paid for BOOKING should never be shown an upload
+// allowance she did not purchase and cannot spend. Almost nobody reaches
+// 50, let alone 150.
+//
+// Same 80% rule for everyone now. Below that: silence. Above it she still
+// gets a warning before anything blocks her, which is the only reason this
+// display exists.
+function _slotsNearCap() {
+  if (!_techTier) return false;
+  var cap = _techTier.tier === 'paid'
+    ? (_techTier.is_comped
+        ? (_techTier.comp_monthly_limit || STRIPE_CONFIG.monthly_limit || 150)
+        : (STRIPE_CONFIG.monthly_limit || 150))
+    : (STRIPE_CONFIG.free_limit || 50);
+  if (!cap) return false;
+  var used = cap - _periodSlotsRemaining();
+  return used >= Math.ceil(cap * 0.8);
+}
+
 function updateSlotsRemainingDisplay() {
-  const text = _slotsRemainingText();
+  // Silent until she is near the ceiling — see _slotsNearCap.
+  const near = _slotsNearCap();
+  const text = near ? _slotsRemainingText() : '';
   document.querySelectorAll('[data-slots-remaining]').forEach(el => {
     el.textContent = text;
     // Collapse the element when we have nothing to say (no tier loaded
@@ -4080,15 +4115,10 @@ function updateSlotsRemainingDisplay() {
   const parts = _slotsRemainingParts();
   const card = document.getElementById('td-slots-card');
   if (card) {
-    // photos-free-3.0: for free techs the countdown card stays hidden
-    // until ~80% of the monthly allowance is used. A number counting
-    // down from 50 all month invites rationing.
-    let nearCap = true;
-    if (_techTier && _techTier.tier !== 'paid') {
-      const capF = STRIPE_CONFIG.free_limit || 50;
-      nearCap = (capF - _periodSlotsRemaining()) >= Math.ceil(capF * 0.8);
-    }
-    if (!parts || !nearCap) {
+    // Same rule as the chip, for every tier. This used to read
+    // "if tier !== 'paid'", which meant a subscriber was the only person who
+    // saw the counter every day.
+    if (!parts || !_slotsNearCap()) {
       card.style.display = 'none';
       return;
     }
@@ -5543,8 +5573,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.0',     /* __APP_BUILD_NAME__   */
-  android: 590,         /* __APP_BUILD_ANDROID__ */
-  ios:     395,          /* __APP_BUILD_IOS__     */
+  android: 591,         /* __APP_BUILD_ANDROID__ */
+  ios:     396,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
