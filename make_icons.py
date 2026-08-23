@@ -78,6 +78,20 @@ for size in (180, 192, 512, 1024):
 lines.append(out(full_sq, "images/mncLogo-round-256.webp", 256, quality=90, method=6))
 lines.append(out(full_sq, "images/mncLogo-round-512.webp", 512, quality=90, method=6))
 lines.append(out(full_sq, "images/mncLogo-1024.png", 1024, optimize=True))
+# Google Play store icon, 512x512. Emitted here so it cannot drift from the
+# launcher again: the previous one was dated 2026-07-04, BEFORE the 3.0
+# hat-lady art landed (07-16), so the Play listing showed 2.0 branding while
+# phones showed 3.0.
+#
+# WARNING (2026-08-23): running this script no longer reproduces the icons that
+# are committed. Regenerating everything showed a max channel difference of
+# 230-246 against apple-touch-icon.png, favicon-32.png and mncLogo-1024.png --
+# i.e. a real visual change, not compression. Either the source art moved after
+# the icons were cut, or they were touched by hand. Until that is resolved, do
+# NOT run this before a release expecting a no-op; the 512 shipped for Play was
+# downscaled from the committed images/mncLogo-1024.png instead, which matches
+# the launcher pixel for pixel.
+lines.append(out(full_sq, "docs/play-store-assets/mnc-play-icon-512.png", 512, optimize=True))
 
 # --- maskable: padded safe zone ---
 lines.append(out(mask_sq, "images/mncLogo-maskable.webp", 512, quality=90, method=6))
