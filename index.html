@@ -2872,7 +2872,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
         <div style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:white;">Booking, the Heart of MNC</div>
       </div>
       <div style="padding:16px 20px;display:flex;flex-direction:column;gap:12px;">
-        <div style="font-size:13px;color:var(--charcoal);line-height:1.6;">Every tech gets a <b>real booking system</b>, and your first three months are free. Open <b>Bookings</b> on your Tech Portal, add your services (name, time, price) and your weekly hours, and flip it on. A <b>Book</b> button appears on your profile.</div>
+        <div style="font-size:13px;color:var(--charcoal);line-height:1.6;">Every tech gets a <b>real booking system</b>, and your first month is free. Open <b>Bookings</b> on your Tech Portal, add your services (name, time, price) and your weekly hours, and flip it on. A <b>Book</b> button appears on your profile.</div>
         <div style="font-size:13px;color:var(--charcoal);line-height:1.6;">Clients pick a service, a day, and an open time. You <b>confirm or decline</b> every request (or turn on auto-confirm if you prefer), and you both get notified when anything changes. Your whole calendar lives on the Bookings screen.</div>
         <div style="font-size:13px;color:var(--charcoal);line-height:1.6;">Already booking through Vagaro, StyleSeat, Square, or anywhere else? <b>Keep it — and that stays free.</b> Drop your link into your profile and clients get a <b>Book Now</b> button that goes straight there. Your profile, your gallery, your spot in the Gallery and your own link cost nothing; only MNC’s own booking engine is a subscription. MNC is your one home base either way.</div>
       </div>
@@ -2907,9 +2907,9 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
         <div style="border:1.5px solid var(--border);border-radius:14px;padding:14px;">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
             <div style="font-size:15px;font-weight:700;color:var(--charcoal);">$10.99<span style="font-size:13px;font-weight:600;color:var(--muted);">/month</span></div>
-            <div style="font-size:13px;font-weight:600;color:var(--green);background:var(--green-light);padding:3px 10px;border-radius:100px;">3 months free</div>
+            <div style="font-size:13px;font-weight:600;color:var(--green);background:var(--green-light);padding:3px 10px;border-radius:100px;">1 month free</div>
           </div>
-          <div style="font-size:13px;color:var(--muted);line-height:1.5;">Free to set up, and your <b>first three months are free</b>. After that it’s $10.99 a month, <b>locked at that price for life</b> as a founding tech. No commission, <b>no per-booking fee</b>, and <b>never a charge to your clients</b>. Cancel anytime — your gallery and your calendar stay put either way.</div>
+          <div style="font-size:13px;color:var(--muted);line-height:1.5;">Free to set up, and your <b>first month is free</b>. After that it’s $10.99 a month, <b>locked at that price for life</b> as a founding tech. No commission, <b>no per-booking fee</b>, and <b>never a charge to your clients</b>. Cancel anytime — your gallery and your calendar stay put either way.</div>
         </div>
         <div style="font-size:13px;color:var(--muted);text-align:center;padding-top:4px;line-height:1.5;font-style:italic;">Your photos stay free either way — up to 50 looks a month, and they never expire. Almost nobody reaches that limit, and it refills every month.</div>
       </div>
@@ -4600,13 +4600,13 @@ function openBookingSubscribe() {
         + row('<b>No commission, no per-booking fee</b>, and never a charge to your clients')
       + '</div>'
       + '<div style="margin-top:20px;padding:14px;border-radius:14px;background:var(--cream);text-align:center;">'
-        + '<div style="font-size:15px;font-weight:700;color:var(--charcoal);">Free for three months</div>'
+        + '<div style="font-size:15px;font-weight:700;color:var(--charcoal);">Free for your first month</div>'
         + '<div style="font-size:13px;color:var(--muted);margin-top:3px;">then ' + BOOKING_SUB_PRICE + '/month, locked at that price for life as a founding tech</div>'
       + '</div>'
       + '<button onclick="subscribeToBooking()" style="width:100%;margin-top:16px;padding:15px;border:none;'
         + 'border-radius:13px;background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);'
         + 'color:white;font-size:15px;font-weight:700;font-family:\'DM Sans\',sans-serif;cursor:pointer;">'
-        + 'Start my three months free</button>'
+        + 'Start my free month</button>'
       + '<button onclick="closeBookingSubscribe()" style="width:100%;margin-top:9px;padding:15px;border:none;'
         + 'background:none;color:var(--muted);font-size:13.5px;font-family:\'DM Sans\',sans-serif;cursor:pointer;">'
         + 'Not yet</button>'
@@ -4835,7 +4835,7 @@ const TUTORIALS = {
     {
       icon: '<svg viewBox="0 0 24 24" style="width:60px;height:60px;stroke:var(--rose);fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>',
       title: 'Here\u2019s what clients see.',
-      body: '<p style="margin:0 0 14px;">Your profile shows your gallery, your bio, and the ways to reach you that <b>you</b> choose \u2014 <b>Book</b>, <b>Call</b>, <b>Text</b>, or your own booking link. When a client taps Book, they pick a service, a day, and a time. That\u2019s it.</p><p style="margin:0;">Tap <b>Share My Profile</b> on your portal to send your link anywhere \u2014 your bio, your stories, a QR at your station. It\u2019s your booking page now.</p><p style="margin:14px 0 0;padding-top:13px;border-top:1px solid var(--border);font-size:13px;line-height:1.6;color:var(--muted);">Your profile, your gallery and your place in the <b>Gallery</b> are <b>free, always</b>. MNC\u2019s own booking \u2014 the part clients tap <b>Book</b> for \u2014 is <b>free for three months</b>, then <b>$10.99 a month</b>, locked at that price for life as a founding tech. No commission, no per-booking fee, and <b>never a charge to your clients</b>.</p>'
+      body: '<p style="margin:0 0 14px;">Your profile shows your gallery, your bio, and the ways to reach you that <b>you</b> choose \u2014 <b>Book</b>, <b>Call</b>, <b>Text</b>, or your own booking link. When a client taps Book, they pick a service, a day, and a time. That\u2019s it.</p><p style="margin:0;">Tap <b>Share My Profile</b> on your portal to send your link anywhere \u2014 your bio, your stories, a QR at your station. It\u2019s your booking page now.</p><p style="margin:14px 0 0;padding-top:13px;border-top:1px solid var(--border);font-size:13px;line-height:1.6;color:var(--muted);">Your profile, your gallery and your place in the <b>Gallery</b> are <b>free, always</b>. MNC\u2019s own booking \u2014 the part clients tap <b>Book</b> for \u2014 is <b>free for your first month</b>, then <b>$10.99 a month</b>, locked at that price for life as a founding tech. No commission, no per-booking fee, and <b>never a charge to your clients</b>.</p>'
     },
     {
       icon: '<svg viewBox="0 0 24 24" style="width:60px;height:60px;stroke:var(--rose);fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15.5 14"/></svg>',
@@ -5511,8 +5511,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.0',     /* __APP_BUILD_NAME__   */
-  android: 583,         /* __APP_BUILD_ANDROID__ */
-  ios:     388,          /* __APP_BUILD_IOS__     */
+  android: 584,         /* __APP_BUILD_ANDROID__ */
+  ios:     389,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -15562,7 +15562,7 @@ function bkOpenSetupFork() {
     el.textContent = '';
     try {
       if (await bkSubscriptionBlocks()) {
-        el.textContent = '· 3 months free, then ' + BOOKING_SUB_PRICE + '/mo';
+        el.textContent = '· 1 month free, then ' + BOOKING_SUB_PRICE + '/mo';
       }
     } catch(_) {}
   })();
@@ -21545,32 +21545,29 @@ function _stripeWelcomeVariants() {
   // bill) — not period_reset_at, which is the upload-allowance refill from
   // the retired pay-per-photo product. Falls back to a month from today so
   // the copy never lies while the webhook is still landing.
-  // "Renews" is wrong for a tech on the three-month intro offer: she has not
-  // been charged yet, so that date is her FIRST charge, not a renewal. Telling
-  // someone who has paid nothing that something "renews" reads as a bill she
-  // already missed, and it is the sort of small dishonesty that earns a
-  // chargeback.
+  // One phrase, true in both states.
   //
-  // Detecting the trial without a schema change: there is no
-  // subscription_status column, and adding one for a line of copy is not worth
-  // a migration. The only plan is $10.99 MONTHLY, so current_period_end is
-  // never more than ~31 days out for a billing subscription, while a 90-day
-  // trial lands ~90 days out. Anything past the threshold is a trial with room
-  // to spare. If that ever stops holding — an annual plan, say — the wording
-  // degrades to "Renews", which is imprecise rather than untrue.
-  var TRIAL_HINT_DAYS = 40;
+  // This briefly tried to say "First charge" during a trial and "Renews"
+  // otherwise, telling them apart by distance: a 90-day trial ends ~90 days
+  // out, a monthly renewal ~30. That worked only while the trial was three
+  // months. It is now ONE month, so a trial's period end and a renewal's are
+  // the same distance away and no heuristic can separate them — there is no
+  // subscription_status column to consult.
+  //
+  // "Next charge" is accurate whether she is on her free month or her fifth
+  // paid one, so the distinction stops mattering. Wording chosen over
+  // cleverness: the alternative was a migration to store a status, for one
+  // line of copy that reads fine without it.
   var renewDateStr = '';
-  var renewLead = 'Renews ';
   try {
     if (_techTier && _techTier.subscription_expires_at) {
       var rd = new Date(_techTier.subscription_expires_at);
-      var msOut = rd.getTime() - Date.now();
-      if (msOut > 0) {
+      if (rd.getTime() > Date.now()) {
         renewDateStr = rd.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-        if (msOut > TRIAL_HINT_DAYS * 86400000) renewLead = 'First charge ';
       }
     }
     if (!renewDateStr) {
+      // Webhook still landing; approximate rather than claim a date we lack.
       var rapprox = new Date();
       rapprox.setMonth(rapprox.getMonth() + 1);
       renewDateStr = rapprox.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
@@ -21614,7 +21611,7 @@ function _stripeWelcomeVariants() {
       body: 'Clients can book you right on your profile now. You set the services, the hours, and whether requests confirm automatically or wait for your yes.',
       statNum: '$0',
       statLabel: 'commission, ever',
-      statSub: renewLead + renewDateStr + ' \u00b7 cancel anytime from your profile',
+      statSub: 'Next charge ' + renewDateStr + ' \u00b7 cancel anytime from your profile',
       primaryBtn: 'Check your hours \u2192',
       primaryAction: 'booking'
     },

@@ -24,14 +24,14 @@ nail tech,nail booking,nails near me,nail salon,manicure,nail art,book nails,app
 
 **Promotional Text** (162/170)
 ```
-Version 3.0 is here. One Gallery where clients find your work by shape, type and style, booking with no commission, and photos that never expire. Three months free. Nails only.
+Version 3.0 is here. One Gallery where clients find your work by shape, type and style, booking with no commission, and photos that never expire. First month free. Nails only.
 ```
 
 **Description** (1302/4000)
 ```
 Still booking in your DMs? Your work is already why clients pick you. Now it's your booking page too.
 
-My Nail Connection is booking built for nail techs only. No commission, no per-booking fee, and never a charge to your clients. Free to set up, free for three months, then $10.99/month - locked at that price for life as a founding tech.
+My Nail Connection is booking built for nail techs only. No commission, no per-booking fee, and never a charge to your clients. Free to set up, first month free, then $10.99/month - locked at that price for life as a founding tech.
 
 FOR NAIL TECHS
 * Your profile is live the moment you join
@@ -51,7 +51,7 @@ FOR CLIENTS
 * Heart the looks you love and bring them to your appointment
 * See who is open today and book right in the app
 
-Always free for clients. For techs: free to set up, three months free, then $10.99/month at the founding rate.
+Always free for clients. For techs: free to set up, first month free, then $10.99/month at the founding rate.
 ```
 
 **What's New in This Version** (300/4000)
@@ -76,14 +76,14 @@ My Nail Connection: Booking
 
 **Short description** (74/80)
 ```
-Booking built for nail techs. Your work is your booking page. Three months free, then $10.99/month.
+Booking built for nail techs. Your work is your booking page. First month free, then $10.99/month.
 ```
 
 **Full description** (1302/4000)
 ```
 Still booking in your DMs? Your work is already why clients pick you. Now it's your booking page too.
 
-My Nail Connection is booking built for nail techs only. No commission, no per-booking fee, and never a charge to your clients. Free to set up, free for three months, then $10.99/month - locked at that price for life as a founding tech.
+My Nail Connection is booking built for nail techs only. No commission, no per-booking fee, and never a charge to your clients. Free to set up, first month free, then $10.99/month - locked at that price for life as a founding tech.
 
 FOR NAIL TECHS
 * Your profile is live the moment you join
@@ -103,7 +103,7 @@ FOR CLIENTS
 * Heart the looks you love and bring them to your appointment
 * See who is open today and book right in the app
 
-Always free for clients. For techs: free to set up, three months free, then $10.99/month at the founding rate.
+Always free for clients. For techs: free to set up, first month free, then $10.99/month at the founding rate.
 ```
 
 **Release notes** (same as Apple's What's New)
