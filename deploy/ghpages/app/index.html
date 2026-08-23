@@ -2616,6 +2616,22 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
           <button onclick="tbToggleManualAdd()" style="flex:0 0 auto;padding:11px 16px;border-radius:12px;border:1.5px solid var(--border);background:white;color:var(--muted);font-size:14px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;">Cancel</button>
         </div>
       </div>
+      <!-- Client search (2026-08-21, Anne: "techs need a search for their
+           clients - just a simple name or phone # search to filter them").
+           Filters the appointment list in place: name, phone or email, across
+           every section. Hidden until there are enough appointments to be
+           worth filtering — see tbRenderAppts. -->
+      <div id="tb-search-wrap" style="display:none;position:relative;margin-bottom:10px;">
+        <div style="position:absolute;left:12px;top:50%;transform:translateY(-50%);pointer-events:none;">
+          <svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:var(--muted);fill:none;stroke-width:2.1;stroke-linecap:round;stroke-linejoin:round;"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </div>
+        <input id="tb-search" type="search" inputmode="search" autocomplete="off"
+          placeholder="Search clients by name or phone"
+          oninput="tbSetApptQuery(this.value)"
+          style="width:100%;padding:11px 34px 11px 34px;border:1.5px solid var(--border);border-radius:12px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;box-sizing:border-box;color:var(--charcoal);"/>
+        <button type="button" id="tb-search-clear" onclick="tbClearApptQuery()"
+          style="display:none;position:absolute;right:8px;top:50%;transform:translateY(-50%);padding:4px 8px;border:none;background:none;color:var(--muted);font-size:17px;line-height:1;cursor:pointer;">&times;</button>
+      </div>
       <div id="tb-appts"></div>
     </div>
 
@@ -5495,8 +5511,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.0',     /* __APP_BUILD_NAME__   */
-  android: 579,         /* __APP_BUILD_ANDROID__ */
-  ios:     384,          /* __APP_BUILD_IOS__     */
+  android: 580,         /* __APP_BUILD_ANDROID__ */
+  ios:     385,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -15111,6 +15127,39 @@ function tbApptCard(b, buttons) {
   '</div>';
 }
 
+// Does this booking belong to the client being searched for?
+//
+// Two comparisons, because a tech thinks of a client by name OR by number and
+// should not have to care which the app stored. Digits are compared
+// separately so "555 1234", "(555) 1234" and "+15555551234" all match each
+// other — client_phone has drifted across formats through the phone-auth
+// migrations, and a search that only did substring on the raw string would
+// miss the same person depending on when she was added.
+function _tbApptMatches(b, q, qDigits) {
+  if (!b) return false;
+  var hay = ((b.client_name || '') + ' ' + (b.client_email || '')).toLowerCase();
+  if (q && hay.indexOf(q) !== -1) return true;
+  if (qDigits && qDigits.length >= 3) {
+    var pd = String(b.client_phone || '').replace(/\D/g, '');
+    if (pd && pd.indexOf(qDigits) !== -1) return true;
+  }
+  return false;
+}
+
+function tbSetApptQuery(v) {
+  window._bkApptQuery = v || '';
+  var clr = document.getElementById('tb-search-clear');
+  if (clr) clr.style.display = window._bkApptQuery ? 'block' : 'none';
+  tbRenderAppts();
+}
+
+function tbClearApptQuery() {
+  var el = document.getElementById('tb-search');
+  if (el) el.value = '';
+  tbSetApptQuery('');
+  if (el) el.focus();
+}
+
 function tbRenderAppts() {
   const wrap = document.getElementById('tb-appts');
   if (!wrap) return;
@@ -15139,11 +15188,37 @@ function tbRenderAppts() {
     if (!b2 || (!b2.client_email && !b2.client_phone)) return '';
     return '<button onclick="tbBlockFromAppt(\'' + b2.id + '\')" style="flex:0 0 auto;padding:9px 13px;border-radius:12px;border:1.5px solid var(--border);background:white;color:var(--muted);font-size:13px;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif;">Block</button>';
   };
-  const pending  = _bkAppts.filter(function(b) { return b.status === 'pending'; });
-  const upcoming = _bkAppts.filter(function(b) { return b.status === 'confirmed'; });
-  // Was slice(-5), too few to actually clean up a cluttered history.
-  const rest     = _bkAppts.filter(function(b) { return b.status !== 'pending' && b.status !== 'confirmed'; }).slice(-20);
+  // Search first, sections second, so a match is found wherever it lives.
+  var _q = String(window._bkApptQuery || '').trim().toLowerCase();
+  var _qd = _q.replace(/\D/g, '');
+  var _src = _q ? _bkAppts.filter(function(b) { return _tbApptMatches(b, _q, _qd); }) : _bkAppts;
+
+  // Show the box only once there is enough history for filtering to beat
+  // scrolling. Stays visible while a query is active even if it matches
+  // nothing, or clearing it would be impossible.
+  var _sw = document.getElementById('tb-search-wrap');
+  if (_sw) _sw.style.display = (_bkAppts.length >= 6 || _q) ? 'block' : 'none';
+
+  const pending  = _src.filter(function(b) { return b.status === 'pending'; });
+  const upcoming = _src.filter(function(b) { return b.status === 'confirmed'; });
+  // Was slice(-5), too few to actually clean up a cluttered history. While
+  // SEARCHING the cap is lifted: the whole point is finding an old client,
+  // and a 20-row window would hide exactly the ones worth searching for.
+  const rest     = _q
+    ? _src.filter(function(b) { return b.status !== 'pending' && b.status !== 'confirmed'; })
+    : _src.filter(function(b) { return b.status !== 'pending' && b.status !== 'confirmed'; }).slice(-20);
   let html = '';
+  if (_q) {
+    var _n = pending.length + upcoming.length + rest.length;
+    if (!_n) {
+      html += '<div style="padding:22px 12px;text-align:center;color:var(--muted);font-size:13px;line-height:1.6;">' +
+        'No appointments for &ldquo;' + bkEsc(String(window._bkApptQuery).trim()) + '&rdquo;.' +
+        '<br><span style="font-size:12.5px;">Try part of a name, or the last few digits of a phone number.</span></div>';
+    } else {
+      html += '<div style="font-size:12.5px;color:var(--muted);margin:2px 0 8px;">' +
+        _n + (_n === 1 ? ' match' : ' matches') + ' for &ldquo;' + bkEsc(String(window._bkApptQuery).trim()) + '&rdquo;</div>';
+    }
+  }
   if (pending.length) {
     html += '<div style="font-size:12px;font-weight:700;color:var(--rose-dark);letter-spacing:0.4px;text-transform:uppercase;margin:2px 0 6px;">New requests</div>';
     html += pending.map(function(b) {
@@ -15171,9 +15246,10 @@ function tbRenderAppts() {
     html += '<div style="font-size:12px;font-weight:700;color:var(--muted);letter-spacing:0.4px;text-transform:uppercase;margin:10px 0 6px;">Recent</div>';
     html += rest.map(function(b) { return tbApptCard(b, blockBtn(b) + delBtn(b.id)); }).join('');
   }
-  if (_bkStanding.length) {
+  var _standing = _q ? _bkStanding.filter(function(s) { return _tbApptMatches(s, _q, _qd); }) : _bkStanding;
+  if (_standing.length) {
     html += '<div style="font-size:12px;font-weight:700;color:var(--charcoal);letter-spacing:0.4px;text-transform:uppercase;margin:10px 0 6px;">Standing</div>';
-    html += _bkStanding.map(function(s) {
+    html += _standing.map(function(s) {
       const svc = (s.tech_services && s.tech_services.name) || 'Appointment';
       const when = bkFmtStamp(s.anchor_starts_at, _bkMyTech && _bkMyTech.booking_timezone);
       return '<div style="background:white;border:1.5px solid var(--border);border-radius:14px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:8px;">' +
