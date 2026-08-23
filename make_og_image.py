@@ -1,4 +1,11 @@
-# Rebuild og-image.png (1200x630) for MNC 3.0.
+# Rebuild the social card (1200x630) for MNC 3.0.
+#
+# FILENAME IS VERSIONED ON PURPOSE (2026-08-23). iMessage, WhatsApp and
+# Google cache link previews hard, so editing the bytes behind a stable URL
+# often changes nothing for anyone who has already seen the link. Bumping the
+# filename and repointing the meta tags is the only lever that reliably makes
+# a scraper treat it as a new asset. When the card changes again, bump the
+# date in the name and re-point the tags rather than overwriting in place.
 # The old card was fully 2.0: rose-gold hand+flower mark and "Find Your Tech.
 # Love Your Nails." (client-first). The customer is now the TECH, so the card
 # leads with the locked pivot line and the hat-lady identity.
@@ -88,6 +95,6 @@ for c in chips:
 
 d.text((x, 528), "mynailconnection.com", font=dm(23, 700), fill=DEEP)
 
-card.save("og-image.png", optimize=True)
-p = pathlib.Path("og-image.png")
+card.save("og-image-2026-08.png", optimize=True)
+p = pathlib.Path("og-image-2026-08.png")
 print(f"og-image.png  {card.size}  {p.stat().st_size/1024:.0f}KB")

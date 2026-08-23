@@ -367,7 +367,11 @@ copy_if_exists support.html            "$GH/support.html"
 copy_if_exists privacy.html            "$GH/privacy.html"
 copy_if_exists terms.html              "$GH/terms.html"
 copy_if_exists account-deletion.html   "$GH/account-deletion.html"
+# Both names ship: the versioned one is what the meta tags point at, and the
+# bare one stays so a preview cached before 2026-08-23 does not 404 when a
+# client refetches it.
 copy_if_exists og-image.png            "$GH/og-image.png"
+copy_if_exists og-image-2026-08.png    "$GH/og-image-2026-08.png"
 copy_if_exists favicon.ico             "$GH/favicon.ico"
 copy_if_exists favicon-32.png          "$GH/favicon-32.png"
 copy_if_exists apple-touch-icon.png    "$GH/apple-touch-icon.png"
