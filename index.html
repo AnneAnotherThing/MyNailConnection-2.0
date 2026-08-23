@@ -2330,14 +2330,6 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
             Manage &amp; Tag
           </button>
         </div>
-        <!-- Slot meter (near-cap only). Populated by updateSlotsRemainingDisplay() after loadTechTier. -->
-        <div id="td-slots-card" style="display:none;margin-top:12px;padding:13px 16px;border-radius:14px;background:#FAFAFA;border:1px solid rgba(169,139,141,0.22);">
-          <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;">
-            <div id="td-slots-num" style="font-family:'Playfair Display',serif;font-size:34px;font-weight:600;color:var(--rose-dark);line-height:1;">-</div>
-            <div id="td-slots-label" style="font-size:14px;color:var(--charcoal);font-weight:500;">free uploads left this month</div>
-          </div>
-          <div id="td-slots-subtitle" style="font-size:13px;color:var(--muted);margin-top:6px;line-height:1.4;"></div>
-        </div>
       </div>
 
     </div>
@@ -2460,19 +2452,11 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
     <!-- ── Photo uploader, RELOCATED here 2026-07-20 ──────────────────
          Photos now have ONE home: My Gallery. This block moved verbatim
          out of the Manage Profile modal (all element IDs preserved so
-         techBulkDropFiles / renderTePhotoGrid / updateSlotsRemainingDisplay
+         techBulkDropFiles / renderTePhotoGrid
          still resolve). Manage Profile is now profile fields only. -->
       <div style="margin-bottom:14px;">
         <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;">
           <div style="font-size:10px;color:var(--muted);font-weight:600;letter-spacing:0.8px;">ADD TO YOUR GALLERY</div>
-          <!-- Slots-remaining chip. Gets populated by updateSlotsRemainingDisplay()
-               via the data-slots-remaining hook. Sits in-line with the section
-               label so techs know their allowance the moment they're about to
-               upload, avoids the "why isn't this letting me add more photos?"
-               confusion on free tier, and surfaces "5 of 5 weekly · refills Sun"
-               for Glow Up subscribers. 2026-04-23 per Anne. -->
-          <div id="te-slots-remaining" data-slots-remaining
-               style="font-size:14px;font-weight:700;color:white;background:linear-gradient(135deg,var(--rose) 0%,var(--rose-dark) 100%);padding:8px 16px;border-radius:100px;box-shadow:0 3px 10px rgba(169,139,141,0.4);letter-spacing:0.4px;"></div>
         </div>
         <!-- ── File picker / drop zone ──────────────────────────────── -->
         <div id="te-bulk-drop-zone"
@@ -3944,199 +3928,9 @@ function photosRemaining() {
   return _periodSlotsRemaining() + (_techTier.photo_credits || 0);
 }
 
-// Writes the persistent "slots remaining" line on tech-home. Called
-// after loadTechTier so _techTier is populated, and re-called after
-// every upload / tier-refresh so the number stays honest without a
-// reload. Copy differs by tier + state so techs never see the generic
-// "N slots" when there's a more specific story to tell (weekly refill
-// date, zero + has credits, zero + needs upgrade). 2026-04-22 per
-// Anne's "we need to see how many credits are available at any given
-// time" feedback.
-// Builds the tier-aware "slots remaining" copy once per call. Separated
-// from the DOM write so multiple screens can share the exact same text
-// without the logic drifting. Returns '' when we don't yet know the
-// tier, callers can use that as a "hide this line" signal.
-function _slotsRemainingText() {
-  if (!_techTier) return '';
-  const credits = _techTier.photo_credits || 0;
-  if (_techTier.tier === 'paid') {
-    const monthly = _periodSlotsRemaining();
-    const resetAt = _techTier.period_reset_at ? new Date(_techTier.period_reset_at) : null;
-    // 2026-04-23: monthly cadence reset could be weeks out, so render a
-    // specific date ("refills May 23") rather than a weekday alone.
-    let resetStr = 'next month';
-    if (resetAt && resetAt.getTime() > Date.now()) {
-      try { resetStr = resetAt.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }); } catch(_) {}
-    }
-    if (monthly > 0 && credits > 0) return 'You have ' + monthly + ' upload' + (monthly === 1 ? '' : 's') + ' left this month + ' + credits + ' credit' + (credits === 1 ? '' : 's') + ' · refills ' + resetStr;
-    if (monthly > 0)                return 'You have ' + monthly + ' upload' + (monthly === 1 ? '' : 's') + ' left this month · refills ' + resetStr;
-    if (credits > 0)                return 'Monthly limit hit (refills ' + resetStr + ') · ' + credits + ' credit' + (credits === 1 ? '' : 's') + ' available';
-    return 'Monthly limit hit, refills ' + resetStr + ' or add credits';
-  }
-  // photos-free-3.0: photos are free, one sentence for every state.
-  return 'Post up to 50 looks a month, free — on us, forever.';
-}
 
-// Structured variant for the visual slots card on tech-home, returns
-// { number, label, subtitle } so the UI can treat the count as a big
-// headline and the context ("refills Sat", "+ 3 credits") as a subtitle
-// beneath it. Keeps the rendering concern out of the data function.
-// Returns null when tier isn't loaded yet so the caller can hide the
-// card entirely rather than flashing zeroes. 2026-04-23 per Anne:
-// "5 of 5 weekly slots" was ambiguous, need a clearer "YOU HAVE N" UI.
-function _slotsRemainingParts() {
-  if (!_techTier) return null;
-  const credits = _techTier.photo_credits || 0;
-  if (_techTier.tier === 'paid') {
-    const monthly = _periodSlotsRemaining();
-    const resetAt = _techTier.period_reset_at ? new Date(_techTier.period_reset_at) : null;
-    let resetStr = 'next month';
-    if (resetAt && resetAt.getTime() > Date.now()) {
-      try { resetStr = resetAt.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }); } catch(_) {}
-    }
-    if (monthly > 0 && credits > 0) {
-      return {
-        number: String(monthly),
-        label: 'monthly upload' + (monthly === 1 ? '' : 's') + ' left',
-        subtitle: '+ ' + credits + ' credit' + (credits === 1 ? '' : 's') + ' · refills ' + resetStr,
-        tone: 'ok'
-      };
-    }
-    if (monthly > 0) {
-      return {
-        number: String(monthly),
-        label: 'upload' + (monthly === 1 ? '' : 's') + ' left this month',
-        subtitle: 'Refills ' + resetStr,
-        tone: 'ok'
-      };
-    }
-    if (credits > 0) {
-      return {
-        number: String(credits),
-        label: 'credit' + (credits === 1 ? '' : 's') + ' available',
-        subtitle: 'Monthly limit hit · refills ' + resetStr,
-        tone: 'warn'
-      };
-    }
-    return {
-      number: '0',
-      label: 'uploads left',
-      subtitle: 'Refills ' + resetStr + ' · or add credits',
-      tone: 'bad'
-    };
-  }
-  // photos-free-3.0: free techs share the subscribers' monthly window.
-  // The card stays hidden until the tech is near the cap (see
-  // updateSlotsRemainingDisplay); a countdown is a late warning, never
-  // a budget.
-  const freeLeft = _periodSlotsRemaining();
-  const resetAtF = _techTier.period_reset_at ? new Date(_techTier.period_reset_at) : null;
-  let refillStr = 'next month';
-  if (resetAtF && resetAtF.getTime() > Date.now()) {
-    try { refillStr = resetAtF.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }); } catch(_) {}
-  }
-  if (freeLeft > 0) {
-    return {
-      number: String(freeLeft),
-      label: 'free upload' + (freeLeft === 1 ? '' : 's') + ' left this month',
-      subtitle: 'Photos are free. Post your whole portfolio.',
-      tone: 'ok'
-    };
-  }
-  if (credits > 0) {
-    return {
-      number: String(credits),
-      label: 'photo credit' + (credits === 1 ? '' : 's') + ' ready',
-      subtitle: 'Your monthly 50 refill ' + refillStr + ' · credits post right now.',
-      tone: 'ok'
-    };
-  }
-  return {
-    number: '0',
-    label: 'free uploads left this month',
-    subtitle: 'Your next 50 unlock ' + refillStr + ', and everything you have posted stays up.',
-    tone: 'ok'
-  };
-}
 
-// Writes the slots-remaining copy to every element that opts in via the
-// `data-slots-remaining` attribute. Any screen that wants to surface
-// the breakdown just adds that attribute to a placeholder, no extra JS
-// wiring needed. This is why the same phrase now lives on tech-home
-// AND inside the edit-tech modal's portfolio section: both elements
-// carry the attribute, and this one function keeps them synced.
-// Is she close enough to the monthly ceiling to need telling?
-//
-// Anne, 2026-08-23, after subscribing: "i uploaded a pic and my gallery shows
-// 150 uploads left this month, refills sept 23 - that shouldn't be there at
-// all." Right — and it was worse for a PAID tech than a free one.
-//
-// The card already throttled itself for free techs, on the reasoning that a
-// number counting down from 50 all month invites rationing. But the throttle
-// was written as "if tier !== 'paid'", so a subscriber got nearCap = true
-// forever and saw the counter every single day. The chip in the edit modal's
-// ADD TO YOUR GALLERY section had no check at all.
-//
-// The monthly cap is an ANTI-ABUSE limit, not a product feature — the SQL
-// says so in as many words. Photos are free in 3.0 and nobody buys uploads,
-// so a tech who just paid for BOOKING should never be shown an upload
-// allowance she did not purchase and cannot spend. Almost nobody reaches
-// 50, let alone 150.
-//
-// Same 80% rule for everyone now. Below that: silence. Above it she still
-// gets a warning before anything blocks her, which is the only reason this
-// display exists.
-function _slotsNearCap() {
-  if (!_techTier) return false;
-  var cap = _techTier.tier === 'paid'
-    ? (_techTier.is_comped
-        ? (_techTier.comp_monthly_limit || STRIPE_CONFIG.monthly_limit || 150)
-        : (STRIPE_CONFIG.monthly_limit || 150))
-    : (STRIPE_CONFIG.free_limit || 50);
-  if (!cap) return false;
-  var used = cap - _periodSlotsRemaining();
-  return used >= Math.ceil(cap * 0.8);
-}
 
-function updateSlotsRemainingDisplay() {
-  // Silent until she is near the ceiling — see _slotsNearCap.
-  const near = _slotsNearCap();
-  const text = near ? _slotsRemainingText() : '';
-  document.querySelectorAll('[data-slots-remaining]').forEach(el => {
-    el.textContent = text;
-    // Collapse the element when we have nothing to say (no tier loaded
-    // yet) so the empty chip doesn't leave a gap. Callers using inline
-    // styles keep their display when text is present.
-    el.style.display = text ? '' : 'none';
-  });
-  // Rich "You have N" card on tech-home, separate from the short-text
-  // hook because the card has a number/label/subtitle layout that can't
-  // be squeezed into a single textContent write. 2026-04-23.
-  const parts = _slotsRemainingParts();
-  const card = document.getElementById('td-slots-card');
-  if (card) {
-    // Same rule as the chip, for every tier. This used to read
-    // "if tier !== 'paid'", which meant a subscriber was the only person who
-    // saw the counter every day.
-    if (!parts || !_slotsNearCap()) {
-      card.style.display = 'none';
-      return;
-    }
-    card.style.display = '';
-    const numEl = document.getElementById('td-slots-num');
-    const lblEl = document.getElementById('td-slots-label');
-    const subEl = document.getElementById('td-slots-subtitle');
-    if (numEl) numEl.textContent = parts.number;
-    if (lblEl) lblEl.textContent = parts.label;
-    if (subEl) subEl.textContent = parts.subtitle;
-    // Tone drives the number color, ok=rose-dark, warn=amber, bad=deep
-    // rose. Keeps the card readable at a glance without screaming.
-    const toneColor = parts.tone === 'bad'  ? '#B3564E'
-                    : parts.tone === 'warn' ? '#C4876A'
-                    : 'var(--rose-dark)';
-    if (numEl) numEl.style.color = toneColor;
-  }
-}
 
 // Photo autosave helpers, write-through append/remove to public.techs.
 // Photos used to live in techEdits[editKey].photos until the user tapped
@@ -4328,7 +4122,6 @@ async function consumeUploadSlot() {
       }
     }
     // Keep the slot-meter on tech-home honest mid-batch.
-    try { updateSlotsRemainingDisplay(); } catch(_) {}
     return row;
   } catch(e) {
     console.warn('consume_upload_slot error:', e);
@@ -4845,7 +4638,6 @@ function updatePhotoLimitUI() {
   updatePausedPhotosBanner();
   // Keep the always-visible slot meter on tech-home in sync. Cheap,
   // a single DOM write driven off _techTier we already loaded.
-  try { updateSlotsRemainingDisplay(); } catch(_) {}
 }
 
 // Show / hide the "X photos paused" banner on the My Photos screen based on
@@ -5573,8 +5365,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.0',     /* __APP_BUILD_NAME__   */
-  android: 591,         /* __APP_BUILD_ANDROID__ */
-  ios:     396,          /* __APP_BUILD_IOS__     */
+  android: 592,         /* __APP_BUILD_ANDROID__ */
+  ios:     397,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -22135,7 +21927,6 @@ function maybeShowStripeWelcome() {
     try {
       if (currentUserEmail && typeof loadTechTier === 'function') {
         loadTechTier(currentUserEmail).then(function() {
-          try { updateSlotsRemainingDisplay(); } catch(_) {}
         });
       }
     } catch(_) {}
