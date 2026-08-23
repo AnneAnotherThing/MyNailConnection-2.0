@@ -5365,8 +5365,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.0',     /* __APP_BUILD_NAME__   */
-  android: 593,         /* __APP_BUILD_ANDROID__ */
-  ios:     398,          /* __APP_BUILD_IOS__     */
+  android: 594,         /* __APP_BUILD_ANDROID__ */
+  ios:     399,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -19464,6 +19464,49 @@ async function submitContactAnne() {
   // phone. (Validated non-empty above.)
   var whoPhone = phoneVal || null;
 
+  // Signed OUT? The direct insert cannot work: contact_anne_messages grants
+  // INSERT to `authenticated` only, so an anonymous caller gets 42501 —
+  // "new row violates row-level security policy". Anne hit exactly that
+  // (2026-08-23) via the "Trouble signing in?" link, which is for people who
+  // by definition have no session.
+  //
+  // notify-contact-email saves it with the service role instead, so the table
+  // stays closed to the public anon key rather than becoming an unrate-limited
+  // write endpoint.
+  if (!window._mncAccessToken) {
+    try {
+      var anonRes = await fetch(SUPABASE_URL + '/functions/v1/notify-contact-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
+        },
+        body: JSON.stringify({
+          save: true, kind: 'contact',
+          note: note, name: whoName || '', phone: whoPhone || ''
+        })
+      });
+      if (!anonRes.ok) throw new Error('HTTP ' + anonRes.status);
+      succEl.innerHTML = '<strong>Got it!</strong> The developer will text you back shortly.';
+      succEl.style.display = 'block';
+      btn.textContent = 'Sent';
+      setTimeout(function() {
+        closeModal('contact-anne-modal');
+        btn.textContent = 'Send Note';
+        btn.disabled = false;
+        try { document.getElementById('contact-anne-note').value = ''; } catch(_) {}
+        succEl.style.display = 'none';
+      }, 1500);
+    } catch (e) {
+      errEl.textContent = "Couldn't send your note right now. Check your connection and try again.";
+      errEl.style.display = 'block';
+      btn.textContent = 'Send Note';
+      btn.disabled = false;
+    }
+    return;
+  }
+
   // Step 1: persist the message to the DB. This is the source-of-truth for
   // the admin inbox and must succeed, push is best-effort on top of this.
   try {
@@ -21444,6 +21487,40 @@ async function submitFeedback() {
   };
   if (btn) { btn.disabled = true; btn.textContent = 'Sending…'; }
   setStatus('Sending…', 'warn');
+
+  // Signed OUT? public.feedback also grants INSERT to `authenticated` only,
+  // so the row would be refused AND the heads-up email — which only fires
+  // after a successful insert — would never send. Route the whole thing
+  // through the function, which saves with the service role and emails.
+  if (!window._mncAccessToken) {
+    try {
+      var fbRes = await fetch(SUPABASE_URL + '/functions/v1/notify-contact-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
+        },
+        body: JSON.stringify({
+          save: true, kind: 'feedback',
+          note: payload.message, role: payload.category,
+          name: 'Not signed in', screen: payload.current_screen,
+          user_agent: payload.user_agent, app_version: payload.app_version,
+          console_snapshot: payload.console_snapshot
+        })
+      });
+      if (!fbRes.ok) throw new Error('HTTP ' + fbRes.status);
+      setStatus('Sent! Thank you, we read every one. 🌸', 'success');
+      if (btn) { btn.textContent = 'Sent'; }
+      setTimeout(closeFeedbackModal, 1400);
+    } catch (e) {
+      setStatus('Could not send: ' + ((e && e.message) || 'unknown') +
+        '. Your message is still in the box, try again.', 'error');
+      if (btn) { btn.disabled = false; btn.textContent = 'Send feedback'; }
+    }
+    return;
+  }
+
   try {
     var res = await fetch(SUPABASE_URL + '/rest/v1/feedback', {
       method: 'POST',

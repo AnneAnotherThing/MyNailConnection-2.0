@@ -18,10 +18,29 @@
 //        # For a quick test with no domain, use: "onboarding@resend.dev"
 
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY') || '';
 const NOTIFY_TO      = Deno.env.get('NOTIFY_TO') || '';
 const NOTIFY_FROM    = Deno.env.get('NOTIFY_FROM') || 'onboarding@resend.dev';
+
+// Service-role client, used ONLY for anonymous submissions (2026-08-23).
+//
+// Both public.contact_anne_messages and public.feedback grant INSERT to
+// `authenticated` alone, so a signed-out person cannot write to either — they
+// get 42501, "new row violates row-level security policy". That broke the one
+// path that matters most: the "Trouble signing in?" link on the auth screen
+// exists precisely for someone who cannot get a session, and it was refused
+// for the same reason she was stuck.
+//
+// The alternative was an anon INSERT policy on both tables. Rejected: the anon
+// key ships in the client, so that is an unauthenticated, unrate-limited write
+// endpoint on a public key. Doing it here keeps the tables closed and puts the
+// write behind a function that validates first.
+const supabaseAdmin = createClient(
+  Deno.env.get('SUPABASE_URL') ?? '',
+  Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+);
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin':  '*',
@@ -59,6 +78,45 @@ serve(async (req) => {
   const role  = (p.role || '').toString().trim();
   if (!note) return json({ error: 'empty_note' }, 400);
 
+  // Save the row for callers that could not write it themselves. Signed-in
+  // clients still insert directly and do NOT set this, so nothing is written
+  // twice. Failure here does not stop the email: a note that reaches Anne's
+  // inbox but not the table is far better than one that reaches neither.
+  const save = p.save === true || p.save === 'true';
+  let saved = false;
+  if (save) {
+    const kind = (p.kind || 'contact').toString();
+    try {
+      if (kind === 'feedback') {
+        const { error } = await supabaseAdmin.from('feedback').insert({
+          user_email:       email || null,
+          user_role:        null,
+          category:         role || 'Bug',
+          message:          note,
+          current_screen:   (p.screen || null),
+          user_agent:       (p.user_agent || null),
+          app_version:      (p.app_version || null),
+          console_snapshot: Array.isArray(p.console_snapshot) ? p.console_snapshot : null,
+        });
+        saved = !error;
+        if (error) console.error('anon feedback insert failed:', error.message);
+      } else {
+        const { error } = await supabaseAdmin.from('contact_anne_messages').insert({
+          user_email: email || phone || 'anonymous',
+          user_name:  name || null,
+          user_role:  null,
+          body:       note,
+          phone:      phone || null,
+          consent:    true,
+        });
+        saved = !error;
+        if (error) console.error('anon contact insert failed:', error.message);
+      }
+    } catch (e) {
+      console.error('anon insert threw:', String(e));
+    }
+  }
+
   const who = [name, role && '(' + role + ')'].filter(Boolean).join(' ') || 'Someone';
   const contactBits = [
     phone && 'Phone: ' + phone,
@@ -92,7 +150,7 @@ serve(async (req) => {
       const detail = await r.text().catch(() => '');
       return json({ error: 'resend_failed', status: r.status, detail }, 502);
     }
-    return json({ ok: true });
+    return json({ ok: true, saved });
   } catch (e) {
     return json({ error: 'send_error', detail: String(e) }, 500);
   }
