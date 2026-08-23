@@ -5511,8 +5511,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.0',     /* __APP_BUILD_NAME__   */
-  android: 581,         /* __APP_BUILD_ANDROID__ */
-  ios:     386,          /* __APP_BUILD_IOS__     */
+  android: 582,         /* __APP_BUILD_ANDROID__ */
+  ios:     387,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -21540,8 +21540,29 @@ function postUploadGoToFeed() {
 
 // Variant definitions. Each returns the content for the modal.
 function _stripeWelcomeVariants() {
+  // What renews, and when. For the BOOKING subscription the meaningful date
+  // is subscription_expires_at (Stripe's current_period_end, i.e. the next
+  // bill) — not period_reset_at, which is the upload-allowance refill from
+  // the retired pay-per-photo product. Falls back to a month from today so
+  // the copy never lies while the webhook is still landing.
+  var renewDateStr = '';
+  try {
+    if (_techTier && _techTier.subscription_expires_at) {
+      var rd = new Date(_techTier.subscription_expires_at);
+      if (rd.getTime() > Date.now()) {
+        renewDateStr = rd.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+      }
+    }
+    if (!renewDateStr) {
+      var rapprox = new Date();
+      rapprox.setMonth(rapprox.getMonth() + 1);
+      renewDateStr = rapprox.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+    }
+  } catch(_) { renewDateStr = 'next month'; }
+
   // Refill date comes from _techTier if it's been loaded; otherwise we
   // approximate with "about a month from today" so the copy never lies.
+  // Still used by the two retired Spotlight variants below.
   var refillDateStr = '';
   try {
     if (_techTier && _techTier.period_reset_at) {
@@ -21558,16 +21579,33 @@ function _stripeWelcomeVariants() {
   } catch(_) { refillDateStr = 'next month'; }
 
   return {
+    // Rewritten 2026-08-23. This variant still described the RETIRED
+    // pay-per-photo product — "150 uploads this month", "your monthly
+    // refill" — on the screen a tech sees immediately after paying for
+    // BOOKING. Photos are free in 3.0; uploads are not what she bought, and
+    // leading with an upload counter teaches the wrong thing about the
+    // subscription in the one moment she is definitely reading.
+    //
+    // The stat is now the differentiator that actually justifies the price,
+    // and the sub-line carries the renewal date plainly rather than burying
+    // it. The primary action goes to Booking Settings, because the next
+    // useful thing is confirming her hours and services are right — not
+    // posting a photo she could always post for free.
     'glow-up': {
-      eyebrow: 'Welcome to Glow Up',
+      eyebrow: 'Your book is open',
       title: "You're in! \uD83C\uDF38",
-      body: 'Keep your gallery growing all month, with plenty of room for busy weeks. Every upload goes straight to your Gallery for clients browsing your work.',
-      statNum: String((STRIPE_CONFIG && STRIPE_CONFIG.monthly_limit) || 25),
-      statLabel: 'uploads this month',
-      statSub: 'Your monthly refill: ' + refillDateStr,
-      primaryBtn: 'Post your first look \u2192',
-      primaryAction: 'upload'
+      body: 'Clients can book you right on your profile now. You set the services, the hours, and whether requests confirm automatically or wait for your yes.',
+      statNum: '$0',
+      statLabel: 'commission, ever',
+      statSub: 'Renews ' + renewDateStr + ' \u00b7 cancel anytime from your profile',
+      primaryBtn: 'Check your hours \u2192',
+      primaryAction: 'booking'
     },
+    // The two Spotlight variants below are UNREACHABLE (2026-08-23): they
+    // only render for ?welcome=spotlight-*, which only the retired
+    // photo-credit payment links ever set, and those links belong to the
+    // previous Stripe account. Left for history; recreate the products in
+    // the current account before trusting either one again.
     'spotlight-10': {
       eyebrow: 'Spotlight pack added',
       title: '10 photos credited \uD83C\uDF38',
@@ -21888,6 +21926,12 @@ function stripeWelcomePrimary() {
   closeStripeWelcome();
   if (action === 'upload') {
     try { openPhotoUploadFromHome(); } catch(_) {}
+  } else if (action === 'booking') {
+    // Booking Settings, with its data loaded — a bare show() leaves every
+    // control empty because the screen's loader only runs on the My Appts
+    // route. Same trap setupOpenSchedule() hit on 2026-08-10.
+    try { show('tech-booking-settings'); } catch(_) {}
+    try { loadTechBookings(); } catch(_) {}
   }
 }
 
