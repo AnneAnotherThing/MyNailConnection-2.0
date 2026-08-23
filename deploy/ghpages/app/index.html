@@ -2376,6 +2376,10 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       <div onclick="reopenSetupChecklist()" style="display:flex;align-items:center;gap:10px;padding:13px 16px;border-top:1px solid var(--border);cursor:pointer;"><div style="flex:1;font-size:13.5px;font-weight:600;color:var(--charcoal);">Setup checklist</div><svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:var(--muted);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg></div>
       <div onclick="replayTutorial()" style="display:flex;align-items:center;gap:10px;padding:13px 16px;border-top:1px solid var(--border);cursor:pointer;"><div style="flex:1;font-size:13.5px;font-weight:600;color:var(--charcoal);">Replay the tutorial</div><svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:var(--muted);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg></div>
       <div class="mnc-pw-row" onclick="openChangePasswordFromSettings()" style="display:flex;align-items:center;gap:10px;padding:13px 16px;border-top:1px solid var(--border);cursor:pointer;"><div style="flex:1;font-size:13.5px;font-weight:600;color:var(--charcoal);">Change password</div><svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:var(--muted);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg></div>
+      <!-- Report a bug (2026-08-23). The FAB alone is not enough: it is easy
+           to miss, and someone hunting for a way to report a problem looks in
+           a menu, not for a floating button. Same modal either way. -->
+      <div onclick="openFeedbackModal()" style="display:flex;align-items:center;gap:10px;padding:13px 16px;border-top:1px solid var(--border);cursor:pointer;"><div style="flex:1;font-size:13.5px;font-weight:600;color:var(--charcoal);">Report a bug</div><svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:var(--muted);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg></div>
       <div onclick="openContactAnne()" style="display:flex;align-items:center;gap:10px;padding:13px 16px;border-top:1px solid var(--border);cursor:pointer;"><div style="flex:1;font-size:13.5px;font-weight:600;color:var(--charcoal);">Get help</div><svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:var(--muted);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg></div>
     </div>
     <div style="text-align:center;margin:14px 20px 0;font-size:13px;color:var(--muted);line-height:1.7;">
@@ -3287,6 +3291,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
         <div onclick="replayTutorial()" style="display:flex;align-items:center;justify-content:space-between;padding:13px 16px;cursor:pointer;font-size:14px;color:var(--charcoal);border-bottom:1px solid var(--border);"><span>Replay tutorial</span><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:var(--muted);fill:none;stroke-width:2.4;stroke-linecap:round;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg></div>
         <div class="mnc-pw-row" onclick="openChangePasswordFromSettings()" style="display:flex;align-items:center;justify-content:space-between;padding:13px 16px;cursor:pointer;font-size:14px;color:var(--charcoal);border-bottom:1px solid var(--border);"><span>Change password</span><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:var(--muted);fill:none;stroke-width:2.4;stroke-linecap:round;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg></div>
         <div onclick="show('find-us')" style="display:flex;align-items:center;justify-content:space-between;padding:13px 16px;cursor:pointer;font-size:14px;color:var(--charcoal);border-bottom:1px solid var(--border);"><span>Find us on social</span><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:var(--muted);fill:none;stroke-width:2.4;stroke-linecap:round;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg></div>
+        <div onclick="openFeedbackModal()" style="display:flex;align-items:center;justify-content:space-between;padding:13px 16px;cursor:pointer;font-size:14px;color:var(--charcoal);border-bottom:1px solid var(--border);"><span>Report a bug</span><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:var(--muted);fill:none;stroke-width:2.4;stroke-linecap:round;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg></div>
         <div onclick="openContactAnne()" style="display:flex;align-items:center;justify-content:space-between;padding:13px 16px;cursor:pointer;font-size:14px;color:var(--charcoal);"><span>Get help</span><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:var(--muted);fill:none;stroke-width:2.4;stroke-linecap:round;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg></div>
       </div>
     </div>
@@ -5525,8 +5530,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.0',     /* __APP_BUILD_NAME__   */
-  android: 588,         /* __APP_BUILD_ANDROID__ */
-  ios:     393,          /* __APP_BUILD_IOS__     */
+  android: 589,         /* __APP_BUILD_ANDROID__ */
+  ios:     394,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -21488,13 +21493,16 @@ window._mncConsoleBuffer = window._mncConsoleBuffer || [];
 // Show the FAB when a user is signed in, hide when they're not. Called
 // after any auth state change (sign-in, sign-out, session restore).
 //
-// FEEDBACK FAB disabled 2026-04-23 per Anne, parked as phase-2 future
-// enhancement. Everything behind the button (modal, submitFeedback RPC,
-// public.feedback table) still exists and works; we're just keeping the
-// surface off the app until we're ready. To re-enable, delete the early
-// return below. The feature flag keeps the rest of this function honest
-// if it's called from auth state transitions.
-var FEEDBACK_FAB_ENABLED = false;
+// FEEDBACK FAB re-enabled 2026-08-23. Parked on 2026-04-23 as a phase-2
+// enhancement; phase 2 is now, because 3.0 is going to real techs and Anne
+// asked for "a few ways to submit bugs to me".
+//
+// It was always the good one: the modal defaults its category to Bug and
+// attaches the current screen, device info, app version and the console
+// buffer, so a report arrives with the evidence instead of "it didn't work".
+// A tech will not reproduce a bug on request — she is between clients — so
+// whatever is captured at the moment she taps is all anyone will ever get.
+var FEEDBACK_FAB_ENABLED = true;
 function updateFeedbackButtonVisibility() {
   var btn = document.getElementById('feedback-fab');
   if (!btn) return;
@@ -21596,6 +21604,28 @@ async function submitFeedback() {
       if (btn) { btn.disabled = false; btn.textContent = 'Send feedback'; }
       return;
     }
+      // Heads-up email, fire and forget. The row is already saved above, so a
+      // Resend outage costs the notification and never the report. Reuses the
+      // Contact-Anne function rather than a second sender.
+      try {
+        fetch(SUPABASE_URL + '/functions/v1/notify-contact-email', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': 'Bearer ' + (window._mncAccessToken || SUPABASE_ANON_KEY)
+          },
+          body: JSON.stringify({
+            note: '[' + (payload.category || 'Feedback') + '] ' + (payload.message || '') +
+                  '\n\n— screen: ' + (payload.current_screen || '?') +
+                  '\n— build: ' + (payload.app_version || '?') +
+                  '\n— device: ' + (payload.user_agent || '?'),
+            name: payload.user_email || 'A user',
+            email: payload.user_email || '',
+            role: payload.category || 'Feedback'
+          })
+        }).catch(function() {});
+      } catch(_) {}
     setStatus('Sent! Thank you, we read every one. 🌸', 'success');
     if (btn) { btn.textContent = 'Sent'; }
     setTimeout(closeFeedbackModal, 1400);
