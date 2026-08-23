@@ -2601,6 +2601,20 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
           <input id="tb-ma-name" type="text" placeholder="Client name" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;box-sizing:border-box;"/>
           <input id="tb-ma-phone" type="tel" placeholder="Phone (optional, for one-tap text)" oninput="formatPhone(this)" maxlength="17" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;box-sizing:border-box;"/>
           <select id="tb-ma-svc" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;box-sizing:border-box;"></select>
+          <!-- Appointment length (2026-08-23, Anne: "the only available booking
+               is custom, 1 hr... should be a dynamic # of hours"). The RPC
+               already does coalesce(service_duration, p_duration_minutes, 60),
+               so a real service's own length has always won. What was stuck
+               was the CUSTOM case: the client hardcoded p_duration_minutes: 60
+               with no way to say otherwise, so every walk-in and phone booking
+               entered without a saved service blocked exactly one hour —
+               wrong in both directions for a 30-minute fix or a 3-hour set.
+               Shown only when no service is picked; a saved service brings its
+               own duration and this would just contradict it. -->
+          <div id="tb-ma-dur-wrap" style="display:none;">
+            <label for="tb-ma-dur" style="display:block;font-size:11px;font-weight:700;letter-spacing:0.6px;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">How long?</label>
+            <select id="tb-ma-dur" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;box-sizing:border-box;"></select>
+          </div>
           <div style="display:flex;gap:8px;">
             <input id="tb-ma-date" type="date" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;box-sizing:border-box;flex:1;accent-color:var(--rose);"/>
             <!-- Round times only (Anne 2026-08-11): a select instead of
@@ -5511,8 +5525,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.0',     /* __APP_BUILD_NAME__   */
-  android: 584,         /* __APP_BUILD_ANDROID__ */
-  ios:     389,          /* __APP_BUILD_IOS__     */
+  android: 585,         /* __APP_BUILD_ANDROID__ */
+  ios:     390,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -14945,13 +14959,25 @@ function tbToggleManualAdd() {
   // Service dropdown mirrors her current list every time the form opens.
   var sel = document.getElementById('tb-ma-svc');
   if (sel) {
-    var opts = '<option value="">No service / custom (1 hr)</option>';
+    var opts = '<option value="">No service \u00b7 pick a length</option>';
     (_bkSvcs || []).forEach(function(s) {
       opts += '<option value="' + bkEsc(s.id) + '">' + bkEsc(s.name) +
         (s.duration_minutes ? ' \u00b7 ' + bkDur(s.duration_minutes) : '') + '</option>';
     });
     sel.innerHTML = opts;
+    sel.onchange = tbMaSyncDuration;
   }
+  // Lengths that match how nail work actually books: quick fixes at the
+  // short end, full sets and heavy art at the long end. 15-minute steps up
+  // to two hours, then half-hours, because nobody books 2h15.
+  var dsel = document.getElementById('tb-ma-dur');
+  if (dsel && !dsel.options.length) {
+    var mins = [15, 30, 45, 60, 75, 90, 105, 120, 150, 180, 210, 240];
+    dsel.innerHTML = mins.map(function(m) {
+      return '<option value="' + m + '"' + (m === 60 ? ' selected' : '') + '>' + bkDur(m) + '</option>';
+    }).join('');
+  }
+  tbMaSyncDuration();
   var d = document.getElementById('tb-ma-date');
   if (d && !d.value) { try { d.value = new Date().toISOString().slice(0, 10); } catch(_) {} }
   // Round times only: half-hour steps, 5:00 AM – 10:00 PM. Built once.
@@ -14970,6 +14996,15 @@ function tbToggleManualAdd() {
   f.style.display = 'block';
   var n = document.getElementById('tb-ma-name');
   if (n) { try { n.focus(); } catch(_) {} }
+}
+
+// A saved service carries its own duration and the RPC prefers it, so
+// offering a length alongside one would present a choice that gets ignored.
+function tbMaSyncDuration() {
+  var sel  = document.getElementById('tb-ma-svc');
+  var wrap = document.getElementById('tb-ma-dur-wrap');
+  if (!wrap) return;
+  wrap.style.display = (sel && sel.value) ? 'none' : 'block';
 }
 
 async function tbSubmitManualAdd(force) {
@@ -14996,7 +15031,12 @@ async function tbSubmitManualAdd(force) {
         p_tech_id: _bkMyTech.id,
         p_starts_at: starts.toISOString(),
         p_service_id: svcId || null,
-        p_duration_minutes: 60,
+        // Null when a service was picked: the RPC does coalesce(service
+        // duration, this, 60) so the service already wins, but shipping a
+        // stale picker value next to it would make the payload claim a length
+        // nobody chose the moment that ordering changes.
+        p_duration_minutes: svcId ? null
+          : (parseInt((document.getElementById('tb-ma-dur') || {}).value, 10) || 60),
         p_client_name: name,
         p_client_phone: phone.replace(/\D/g, '') || null,
         p_force: !!force
