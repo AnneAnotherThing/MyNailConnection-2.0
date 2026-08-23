@@ -1,7 +1,7 @@
 # MNC 3.0, 14-Day Launch Campaign
 **Audience:** Nail techs, named out loud in every asset and caption.
 **Voice:** Blunt, confident, a little sassy. Every day is a demand
-granted: "Free booking? Fine." No vague teasers, techs get it straight.
+granted: "No commission? Fine." No vague teasers, techs get it straight.
 Never "rebuilt" or anything implying 2.0 failed.
 **Arc:** You asked → We built it → Your move
 **CTA on everything:** Get on the list at www.mynailconnection.com
@@ -38,7 +38,7 @@ for Leslie at campaign-assets/mnc-3-countdown-kit.zip.
 ## PHASE 1, YOU ASKED (Days 14–10)
 
 ### Day 14
-> Free booking? Fine.
+> No commission? Fine.
 >
 > MNC 3.0 is coming. 14 days.
 >
@@ -107,7 +107,7 @@ for Leslie at campaign-assets/mnc-3-countdown-kit.zip.
 ### Day 7
 > Halfway. Quick recap:
 >
-> Free booking. Your gallery. Your clients. One app. 7 days.
+> Your booking page. Your gallery. Your clients. One app. 7 days.
 >
 > Nail techs: get on the list → www.mynailconnection.com
 >
@@ -125,7 +125,9 @@ for Leslie at campaign-assets/mnc-3-countdown-kit.zip.
 ### Day 5
 > Free.
 >
-> No trial. No tier. No catch. Booking is free for nail techs, forever.
+> Free.
+>
+> Your gallery. No tier, no catch, and nothing you post ever expires.
 > 5 days.
 >
 > Get on the list → www.mynailconnection.com
@@ -157,7 +159,7 @@ for Leslie at campaign-assets/mnc-3-countdown-kit.zip.
 ### Day 2
 > Two days.
 >
-> Free booking. Gallery attached. Clients included.
+> Your booking page. Gallery attached. Clients included.
 >
 > Nail techs: get on the list → www.mynailconnection.com
 >
@@ -194,7 +196,7 @@ logo-3.png beside it, both in the kit). Record it like the day pages.
 
 > It's here.
 >
-> Free booking, every nail tech, forever.
+> Your own booking page, first month free.
 > Your gallery: live, growing, permanent.
 > Your clients: already scrolling.
 >
@@ -217,9 +219,12 @@ logo-3.png beside it, both in the kit). Record it like the day pages.
   vanishing feeds), never at MNC.
 - **Logo reveal:** the melt page shows Day 9 (or drop day) and the new
   mark owns every visual from there.
-- **Free-for-everyone rule:** booking is free for EVERY tech, never
-  "for new techs" only, and paid photos apply to uploads, never photos
-  already posted.
+- **Free vs paid rule (updated 2026-08-23):** being SEEN is free forever -
+  her profile, her whole gallery, her place in the Gallery, 50 looks a
+  month. Being BOOKED is paid: MNC's own booking is free for the first
+  month, then $10.99/month. Never say booking is free without naming the
+  month, never pair "forever" with booking, and never say "no trial" - the
+  offer IS a free month. Photos already posted are never affected.
 
 ## THE LIST (do before Day 14)
 
