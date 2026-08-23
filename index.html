@@ -5365,8 +5365,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.0',     /* __APP_BUILD_NAME__   */
-  android: 592,         /* __APP_BUILD_ANDROID__ */
-  ios:     397,          /* __APP_BUILD_IOS__     */
+  android: 593,         /* __APP_BUILD_ANDROID__ */
+  ios:     398,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -6211,6 +6211,29 @@ async function initCapacitorDeepLinks() {
     if (!rawUrl) return;
     var qs;
     try { qs = new URL(rawUrl).searchParams; } catch(_) { return; }
+    // ── Stripe hand-back (2026-08-23) ──────────────────────────────────
+    // The checkout return page redirects to com.mynailconnection.app://app/
+    // ?welcome=<variant> to pull the tech out of Chrome and back in here.
+    // Handled BEFORE the auth-link guard below, which returns early on
+    // anything lacking token_hash and would otherwise swallow this.
+    //
+    // The tier is re-read rather than trusted: she has just paid, and the
+    // RevenueCat/Stripe webhook may still be in flight. _armTierRefreshOnReturn
+    // was armed before the browser opened and also polls on visibilitychange,
+    // so this is the belt to its braces — whichever notices first wins and the
+    // other is a no-op.
+    var welcome = qs.get('welcome');
+    if (welcome) {
+      try { await loadTechTier(); } catch(_) {}
+      try {
+        if (_stripeWelcomeApplyVariant(welcome)) {
+          var wm = document.getElementById('stripe-welcome-modal');
+          if (wm) wm.style.display = 'flex';
+        }
+      } catch(_) {}
+      return;
+    }
+
     var tokenHash = qs.get('token_hash');
     var type      = qs.get('type');
     if (!tokenHash || !type) return; // not an auth link, leave other deep links alone
@@ -21903,11 +21926,78 @@ async function shareMyProfile() {
   showToast('Your link: ' + url);
 }
 
+// Send a phone back into the app after a Stripe checkout.
+//
+// Anne, 2026-08-23: "after i paid on droid it popped me out of the app to the
+// website application."
+//
+// Android has no in-app purchase path here — RevenueCat is iOS-only — so
+// _stripeLaunch does window.open() and checkout happens in Chrome. Stripe's
+// success URL is https://mynailconnection.com/app/?welcome=glow-up, which is
+// a WEB page, so she finishes paying and is left looking at a browser copy of
+// MNC while the real app sits open behind it.
+//
+// The app IS registered for https://mynailconnection.com/app via an App Links
+// intent-filter with autoVerify, and assetlinks.json is served correctly — but
+// App Links fire on a link TAP or an intent, not on a redirect Chrome follows
+// inside its own session, which is exactly what a checkout return is. (A
+// sideloaded APK signed with the upload key rather than the Play key would
+// also fail verification silently, so relying on it is doubly fragile.)
+//
+// So hand back explicitly, through the custom scheme the app already answers
+// to. Android routes com.mynailconnection.app:// straight to the app.
+//
+// Deliberately narrow:
+//   * native shells return immediately — they never left, and redirecting to
+//     our own scheme from inside ourselves is how you build a loop
+//   * desktop returns immediately — there is no app to hand back to, and a
+//     failed scheme navigation shows the user an ugly error
+//   * only fires when ?welcome= is present, so ordinary web visits are untouched
+//
+// The visible button matters as much as the auto-hop: Chrome blocks
+// scheme navigations that did not come from a user gesture often enough that
+// silence would strand exactly the people this exists for.
+function mncHandBackToApp() {
+  try {
+    var isNative = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+    if (isNative) return false;
+    var params = new URLSearchParams(window.location.search);
+    var variant = params.get('welcome');
+    if (!variant) return false;
+    var ua = navigator.userAgent || '';
+    if (!/Android|iPhone|iPad|iPod/i.test(ua)) return false;
+
+    var deep = 'com.mynailconnection.app://app/?welcome=' + encodeURIComponent(variant);
+
+    var wrap = document.createElement('div');
+    wrap.id = 'mnc-handback';
+    wrap.style.cssText = 'position:fixed;inset:0;z-index:100002;background:var(--cream,#FBF8F8);' +
+      'display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:32px 26px;text-align:center;';
+    wrap.innerHTML =
+      '<div style="font-family:\'Playfair Display\',serif;font-size:26px;font-weight:600;color:var(--charcoal,#141317);line-height:1.2;">Payment complete</div>' +
+      '<div style="font-size:14.5px;color:var(--muted,#6D6068);line-height:1.55;max-width:32ch;">Taking you back to My Nail Connection\u2026</div>' +
+      '<a id="mnc-handback-btn" href="' + deep + '" style="display:inline-block;margin-top:6px;padding:14px 26px;border-radius:100px;' +
+        'background:linear-gradient(135deg,#A98B8D,#A2636C);color:white;font-size:15px;font-weight:700;text-decoration:none;' +
+        'font-family:\'DM Sans\',sans-serif;box-shadow:0 2px 10px rgba(125,100,102,0.35);">Back to the app</a>' +
+      '<div onclick="var w=document.getElementById(\'mnc-handback\'); if(w) w.remove();" ' +
+        'style="font-size:13px;color:var(--muted,#6D6068);cursor:pointer;text-decoration:underline;text-underline-offset:3px;">Continue in this browser</div>';
+    document.body.appendChild(wrap);
+
+    // Auto-hop. If the app opens, this page is backgrounded and nothing else
+    // happens; if the scheme is refused, the button above is already on screen.
+    setTimeout(function() { try { window.location.href = deep; } catch(_) {} }, 350);
+    return true;
+  } catch(_) { return false; }
+}
+
 function maybeShowStripeWelcome() {
   try {
     var params = new URLSearchParams(window.location.search);
     var variant = params.get('welcome');
     if (!variant) return;
+    // On a phone in a browser, hand back to the app instead of showing the
+    // modal here — the app will show it when the deep link opens it.
+    if (mncHandBackToApp()) return;
     var applied = _stripeWelcomeApplyVariant(variant);
     if (!applied) return;
     var modal = document.getElementById('stripe-welcome-modal');
