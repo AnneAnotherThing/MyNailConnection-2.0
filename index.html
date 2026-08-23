@@ -5525,8 +5525,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.0',     /* __APP_BUILD_NAME__   */
-  android: 587,         /* __APP_BUILD_ANDROID__ */
-  ios:     392,          /* __APP_BUILD_IOS__     */
+  android: 588,         /* __APP_BUILD_ANDROID__ */
+  ios:     393,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -15018,10 +15018,23 @@ async function tbDeleteBlocked(id) {
 // (sql/tech-manual-booking-migration.sql) inserts it as CONFIRMED with
 // client_id NULL — the typed name/phone are the client. Overlapping times
 // warn first and book anyway only on her say-so.
-function tbToggleManualAdd() {
+async function tbToggleManualAdd() {
   var f = document.getElementById('tb-manual-add');
   if (!f) return;
   if (f.style.display !== 'none') { f.style.display = 'none'; return; }
+  // Manual bookings are a paid feature (2026-08-23). Anne: "i was able to
+  // manually book someone - but i didn't have booking set up."
+  //
+  // tech_create_booking checked only whether the row was hers, so any free
+  // tech could run her whole book here by hand — with private notes and
+  // automatic client reminders, both of which the subscribe sheet sells as
+  // reasons to pay. A tech using them free for a month then hits a paywall
+  // listing things she already has, which is how a price feels arbitrary.
+  //
+  // sql/gate-manual-booking.sql is the enforcement; this is the explanation.
+  // Opening the sheet beats letting her fill the whole form and meet a
+  // "not_subscribed" error at the save button.
+  if (await bkSubscriptionBlocks()) { openBookingSubscribe(); return; }
   // Service dropdown mirrors her current list every time the form opens.
   var sel = document.getElementById('tb-ma-svc');
   if (sel) {
@@ -15116,6 +15129,8 @@ async function tbSubmitManualAdd(force) {
           if (btn) { btn.disabled = false; btn.textContent = 'Add to calendar'; }
           return tbSubmitManualAdd(true);
         }
+      } else if (out && out.error === 'not_subscribed') {
+        openBookingSubscribe();
       } else {
         showToast('Could not add it (' + ((out && out.error) || ('HTTP ' + r.status)) + ')');
       }
