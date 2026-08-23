@@ -67,6 +67,39 @@ const supabase = createClient(
   Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 );
 
+// Period end for a subscription, whichever API version shaped it.
+//
+// Stripe's "Basil" API versions (2025-03-31.basil onward) REMOVED
+// current_period_end from the Subscription object and moved it onto each
+// subscription item. A webhook endpoint created today defaults to a Basil
+// version, so customer.subscription.updated arrives without the top-level
+// field — and the old code did new Date(undefined * 1000).toISOString(),
+// which is new Date(NaN).toISOString(), which THROWS RangeError.
+//
+// That would have 500'd every monthly renewal: Stripe retries, keeps
+// failing, subscription_expires_at never moves forward, and the
+// resume_paused_photos call below it never runs. The first purchase would
+// have looked fine, because that path retrieves the subscription through our
+// own pinned 2023-10-16 client and gets the old shape. A bug that appears a
+// month after launch. 2026-08-23.
+//
+// Returns a unix timestamp, or null when neither shape carries one — callers
+// must leave expires_at ALONE rather than writing null, which would read as
+// an expired subscription.
+function subPeriodEnd(sub: Stripe.Subscription): number | null {
+  const top = (sub as unknown as { current_period_end?: unknown }).current_period_end;
+  if (typeof top === 'number' && Number.isFinite(top)) return top;
+  const items = (sub as unknown as { items?: { data?: Array<{ current_period_end?: unknown }> } }).items?.data;
+  if (Array.isArray(items)) {
+    const ends = items
+      .map((i) => i?.current_period_end)
+      .filter((n): n is number => typeof n === 'number' && Number.isFinite(n));
+    // Latest item wins: a multi-item sub is covered until its last period ends.
+    if (ends.length) return Math.max(...ends);
+  }
+  return null;
+}
+
 // One-month-from-now timestamp. Used to initialize / refresh
 // techs.period_reset_at when a Glow Up subscription activates or
 // renews. Replaces nextSundayUtcMidnight() from the 2026-04-22 weekly
@@ -212,7 +245,9 @@ serve(async (req) => {
       // Pull the sub so we can store current_period_end as the real
       // expires_at (authoritative source, beats computing +1 month).
       const sub = await stripe.subscriptions.retrieve(session.subscription as string);
-      const expiresAt = new Date(sub.current_period_end * 1000);
+      const periodEnd = subPeriodEnd(sub);
+      const expiresAt = periodEnd ? new Date(periodEnd * 1000) : null;
+      if (!periodEnd) console.warn(`No current_period_end on sub ${sub.id} (checkout); leaving expires_at unset`);
       const customerId = session.customer as string;
       // Initialize Glow Up monthly allowance: 40 uploads, refills on the
       // rolling 1-month anniversary of this activation. On re-subscription
@@ -222,13 +257,13 @@ serve(async (req) => {
       const periodResetAt = nextMonthFromNow();
       const { error } = await supabase.from('techs').update({
         subscription_tier: 'paid',
-        subscription_expires_at: expiresAt.toISOString(),
+        ...(expiresAt ? { subscription_expires_at: expiresAt.toISOString() } : {}),
         stripe_customer_id: customerId,
         period_upload_count: 0,
         period_reset_at: periodResetAt.toISOString(),
       }).eq('id', techId);
       if (error) console.error(`techs.update failed for ${techId}:`, error);
-      else console.log(`Set paid tier for tech ${techId} until ${expiresAt.toISOString()}; monthly refill at ${periodResetAt.toISOString()}`);
+      else console.log(`Set paid tier for tech ${techId} until ${expiresAt ? expiresAt.toISOString() : '(unknown)'}; monthly refill at ${periodResetAt.toISOString()}`);
 
       // If this is a re-subscribe after a previous cancellation, restore
       // any photos we paused on the way out. Safe no-op when nothing paused.
@@ -271,7 +306,9 @@ serve(async (req) => {
   if (event.type === 'customer.subscription.updated') {
     const sub = event.data.object as Stripe.Subscription;
     const customerId = sub.customer as string;
-    const expiresAt = new Date(sub.current_period_end * 1000);
+    const periodEnd = subPeriodEnd(sub);
+    const expiresAt = periodEnd ? new Date(periodEnd * 1000) : null;
+    if (!periodEnd) console.warn(`No current_period_end on sub ${sub.id} (updated); leaving expires_at as-is`);
     const isActive = sub.status === 'active' || sub.status === 'trialing';
 
     // On transition to active (renewal, reactivation from past_due /
@@ -282,7 +319,11 @@ serve(async (req) => {
     // consume_upload_slot handles normal rollovers).
     const updatePayload: Record<string, unknown> = {
       subscription_tier: isActive ? 'paid' : 'free',
-      subscription_expires_at: isActive ? expiresAt.toISOString() : null,
+      // Not active -> null is correct. Active but no period end -> omit the
+      // key entirely, so a missing field never reads as "expired".
+      ...(isActive
+        ? (expiresAt ? { subscription_expires_at: expiresAt.toISOString() } : {})
+        : { subscription_expires_at: null }),
     };
     if (isActive) {
       // Look up current period_reset_at to decide whether to overwrite.
@@ -301,7 +342,7 @@ serve(async (req) => {
     const { error } = await supabase.from('techs').update(updatePayload).eq('stripe_customer_id', customerId);
 
     if (error) console.error(`techs.update failed for customer ${customerId}:`, error);
-    else console.log(`Sub updated for ${customerId}: status=${sub.status}, expires=${expiresAt.toISOString()}`);
+    else console.log(`Sub updated for ${customerId}: status=${sub.status}, expires=${expiresAt ? expiresAt.toISOString() : '(unchanged)'}`);
 
     // When the subscription transitions back to active (reactivation,
     // dunning recovery, trial end, etc.), restore any previously paused
