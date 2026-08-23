@@ -5525,8 +5525,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.0',     /* __APP_BUILD_NAME__   */
-  android: 586,         /* __APP_BUILD_ANDROID__ */
-  ios:     391,          /* __APP_BUILD_IOS__     */
+  android: 587,         /* __APP_BUILD_ANDROID__ */
+  ios:     392,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -15695,9 +15695,25 @@ function bkForkBackToChooser() {
 }
 async function bkForkSaveLink() {
   var inp = document.getElementById('bkf-link');
-  var url = safeUrl((inp && inp.value || '').trim());
-  if (!url) { showToast('Paste your booking link first'); return; }
-  if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+  var raw = (inp && inp.value || '').trim();
+  // Normalise BEFORE validating. Anne, 2026-08-23: typing www.something.com
+  // answered "Paste your booking link first" — safeUrl() returns '' for any
+  // string without an http(s) scheme, so the empty-check fired on a link she
+  // had just pasted, and the line below that adds the scheme sat unreachable
+  // for precisely the inputs it existed to fix. Nobody types "https://" on a
+  // phone keyboard; every real paste from Vagaro, StyleSeat or an Instagram
+  // bio arrives bare.
+  if (!raw) { showToast('Paste your booking link first'); return; }
+  if (!/^https?:\/\//i.test(raw)) raw = 'https://' + raw;
+  var url = safeUrl(raw);
+  // A bare word becomes https://word — a valid URL and a dead link. Require
+  // a dot and no spaces so "hello" is caught here, not by a client tapping
+  // Book and landing nowhere.
+  var host = url.replace(/^https?:\/\//i, '').split(/[\/?#]/)[0];
+  if (!url || !/^[^\s]+\.[a-z]{2,}$/i.test(host)) {
+    showToast('That doesn’t look like a link — try something like vagaro.com/yourname');
+    return;
+  }
   var ok = await patchBookingField({ booking_link: url });
   if (!ok) { showToast('Could not save, try again'); return; }
   try { localStorage.removeItem(_bkPrefKey()); } catch(_) {}
