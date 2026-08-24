@@ -3,54 +3,215 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>MNC 3.0 — Marketing Kit for Leslie</title>
+<title>MNC 3.0 Marketing Kit</title>
 <meta name="robots" content="noindex, nofollow"/>
 <link rel="icon" href="favicon-32.png"/>
 <link rel="apple-touch-icon" href="apple-touch-icon.png"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
 <style>
 :root{
-  --rose:#DEB3B5; --rose-light:#F7E2E3; --rose-mid:#D0A3A5; --rose-dark:#A2636C;
-  --cream:#FAF7F2; --charcoal:#141317; --muted:#7A6E78;
-  --border:rgba(191,166,168,0.35);
-  --ink-1:#4A4A4F; --ink-2:#2A2A2E; --ink-3:#141317;
-  --shadow:0 1px 2px rgba(11,11,13,0.09),0 5px 14px rgba(11,11,13,0.08),0 14px 30px rgba(11,11,13,0.06);
+  --ink:#2C2C31; --ink-soft:#45454B; --muted:#6B6B70;
+  --rose:#C0687B; --rose-deep:#6B3A47; --rose-pale:#E7B6C0;
+  --blush:#F1E4E0; --cream:#FAF7F4; --paper:#FFFFFF;
+  --line:rgba(44,44,49,0.13);
+  --go:#3F7350; --go-bg:#EAF2EC; --warn:#8A6420; --warn-bg:#F8F0DD;
+  --shadow:0 1px 2px rgba(44,44,49,.07), 0 6px 16px rgba(44,44,49,.07), 0 18px 40px rgba(44,44,49,.05);
+  --shadow-sm:0 1px 2px rgba(44,44,49,.06), 0 4px 10px rgba(44,44,49,.06);
 }
 *{box-sizing:border-box;}
-body{margin:0;background:var(--cream);color:var(--charcoal);font-family:'DM Sans',sans-serif;font-size:16px;line-height:1.65;-webkit-font-smoothing:antialiased;}
-.wrap{max-width:880px;margin:0 auto;padding:0 22px;}
-.serif{font-family:'Playfair Display',serif;}
-.serif-i{font-family:'Playfair Display',serif;font-style:italic;color:var(--rose-dark);}
-.hero{background:linear-gradient(165deg,#FBF8F8 0%,var(--rose-light) 55%,#EFCFD2 100%);text-align:center;padding:74px 22px 64px;}
-.hero .mark{font-family:'Playfair Display',serif;font-style:italic;font-size:30px;color:var(--rose-dark);}
-.hero .tag{font-size:12px;font-weight:700;letter-spacing:4px;color:var(--rose-mid);margin-top:6px;text-transform:uppercase;}
-.hero h1{font-family:'Playfair Display',serif;font-weight:600;font-size:clamp(34px,6vw,54px);line-height:1.15;margin:26px 0 14px;}
-.hero .lede{max-width:560px;margin:0 auto;color:var(--muted);font-size:17px;}
-.kicker{font-size:11px;font-weight:700;letter-spacing:2.4px;text-transform:uppercase;color:var(--rose-dark);margin-bottom:8px;}
-section{padding:56px 0 8px;}
-h2{font-family:'Playfair Display',serif;font-weight:600;font-size:clamp(26px,4vw,36px);line-height:1.2;margin:0 0 10px;}
-.sub{color:var(--muted);max-width:640px;margin:0 0 26px;}
-.card{background:white;border:1.5px solid var(--border);border-radius:20px;padding:26px 26px 22px;box-shadow:var(--shadow);margin-bottom:18px;}
-.card h3{font-family:'Playfair Display',serif;font-size:22px;font-weight:600;margin:0 0 10px;}
-.card p{margin:0 0 12px;}
-.card p:last-child{margin-bottom:0;}
-.chip{display:inline-block;background:var(--rose-light);border:1px solid var(--rose-mid);color:var(--rose-dark);font-size:12.5px;font-weight:700;border-radius:100px;padding:5px 13px;margin:3px 4px 3px 0;}
-.btn{display:inline-flex;align-items:center;gap:9px;padding:14px 22px;border-radius:14px;text-decoration:none;font-weight:700;font-size:15px;font-family:'DM Sans',sans-serif;}
-.btn-ink{background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);color:white;border-bottom:3px solid rgba(43,41,39,0.5);box-shadow:0 3px 12px rgba(125,100,102,0.35);}
-.btn-ghost{background:white;color:var(--rose-dark);border:1.5px solid var(--rose);}
-.grid5{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:18px 0 6px;}
-.grid5 img{width:100%;height:auto;border-radius:12px;border:1.5px solid var(--border);box-shadow:var(--shadow);display:block;}
-ul.brief{margin:0 0 12px;padding-left:22px;}
-ul.brief li{margin-bottom:7px;}
-.dont{background:var(--rose-light);border:1px solid var(--rose-mid);border-radius:14px;padding:16px 18px;font-size:14.5px;}
-.mono{background:var(--cream);border:1.5px dashed var(--rose-mid);border-radius:10px;padding:3px 10px;font-size:14px;color:var(--rose-dark);font-weight:600;white-space:nowrap;}
-.outro{background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);color:white;text-align:center;padding:64px 22px;margin-top:64px;}
-.outro h3{font-family:'Playfair Display',serif;font-size:28px;font-weight:600;margin:0 0 10px;}
-.outro p{color:rgba(255,255,255,0.75);max-width:520px;margin:0 auto 8px;}
-.outro .sig{font-family:'Playfair Display',serif;font-style:italic;font-size:19px;color:#F7DEE1;margin-top:22px;}
-@media(max-width:640px){.grid5{grid-template-columns:repeat(3,1fr);}.grid5 img:nth-child(n+4){display:none;}}
+html{-webkit-text-size-adjust:100%;}
+body{
+  margin:0; background:var(--cream); color:var(--ink);
+  font-family:'DM Sans',system-ui,-apple-system,sans-serif;
+  font-size:16.5px; line-height:1.65; -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:900px;margin:0 auto;padding:0 24px;}
+.pf{font-family:'Playfair Display',Georgia,serif;}
+em.pf{font-style:italic;color:var(--rose-deep);}
+a{color:var(--rose-deep);text-underline-offset:3px;}
+
+/* hero */
+.hero{
+  background:
+    radial-gradient(120% 90% at 82% 6%, rgba(231,182,192,.55) 0%, rgba(231,182,192,0) 62%),
+    linear-gradient(168deg,#FDFBFA 0%, var(--blush) 62%, #E8D2CE 100%);
+  border-bottom:1px solid var(--line);
+  padding:78px 24px 62px; text-align:center;
+}
+.hero .mark{font-family:'Playfair Display',serif;font-style:italic;font-size:29px;color:var(--rose-deep);line-height:1;}
+.hero .tag{font-size:11px;font-weight:700;letter-spacing:4.5px;text-transform:uppercase;color:var(--rose);margin-top:9px;}
+.hero h1{
+  font-family:'Playfair Display',serif;font-weight:500;
+  font-size:clamp(36px,7vw,60px);line-height:1.1;letter-spacing:-.01em;
+  margin:28px 0 16px;text-wrap:balance;
+}
+.hero .lede{max-width:56ch;margin:0 auto;color:var(--ink-soft);font-size:17.5px;}
+.jump{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:34px auto 0;max-width:640px;}
+.jump a{
+  font-size:12.5px;font-weight:600;text-decoration:none;color:var(--rose-deep);
+  background:rgba(255,255,255,.75);border:1px solid rgba(107,58,71,.2);
+  border-radius:999px;padding:8px 16px;transition:background .15s,transform .15s;
+}
+.jump a:hover{background:#fff;transform:translateY(-1px);}
+
+/* structure */
+section{padding:66px 0 0;}
+.kicker{font-size:10.5px;font-weight:700;letter-spacing:3.2px;text-transform:uppercase;color:var(--rose);margin:0 0 11px;}
+h2{font-family:'Playfair Display',serif;font-weight:500;font-size:clamp(27px,5vw,40px);line-height:1.16;margin:0 0 14px;text-wrap:balance;}
+h3{font-size:11px;font-weight:700;letter-spacing:2.4px;text-transform:uppercase;color:var(--muted);margin:44px 0 16px;
+   padding-bottom:9px;border-bottom:1px solid var(--line);}
+h3 .n{color:var(--rose);font-weight:700;}
+p{max-width:66ch;margin:0 0 16px;}
+.lede{color:var(--ink-soft);max-width:62ch;font-size:17px;}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;color:var(--muted);word-break:break-word;}
+
+/* mockups: every piece at its true aspect ratio */
+.pieces{display:grid;gap:20px;}
+.pieces.two{grid-template-columns:repeat(2,minmax(0,1fr));}
+.pieces.three{grid-template-columns:repeat(auto-fit,minmax(210px,1fr));}
+.piece{display:flex;flex-direction:column;gap:11px;min-width:0;}
+.mock{
+  background:var(--paper);border:1px solid var(--line);border-radius:12px;
+  box-shadow:var(--shadow);overflow:hidden;position:relative;
+  display:flex;flex-direction:column;justify-content:center;
+  padding:9%; container-type:inline-size;
+}
+.sq{aspect-ratio:1/1;}
+.story{aspect-ratio:9/16;}
+.flyer{aspect-ratio:8.5/11;}
+.card35{aspect-ratio:3.5/2;}
+.station{aspect-ratio:4/6;}
+.ad{aspect-ratio:1200/628;}
+.lb{aspect-ratio:728/90;}
+.mr{aspect-ratio:300/250;}
+
+.mock .eyebrow{font-size:6.5cqw;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--rose);line-height:1.3;}
+.mock .h{font-family:'Playfair Display',serif;font-weight:500;font-size:13cqw;line-height:1.12;margin:.5em 0 0;color:var(--ink);}
+.mock .h em{font-style:italic;color:var(--rose-deep);}
+.mock .b{font-size:6cqw;line-height:1.45;color:var(--muted);margin:.7em 0 0;max-width:none;}
+.mock .price{font-size:6.4cqw;font-weight:700;color:var(--rose-deep);margin:.75em 0 0;max-width:none;}
+.mock .photo{
+  position:absolute;inset:0;
+  background:linear-gradient(150deg,#EFDDDA 0%,#E0C3C4 48%,#CFAAB0 100%);
+}
+.mock .photo::after{
+  content:'your work here';position:absolute;left:0;right:0;top:34%;text-align:center;
+  font-size:4.6cqw;letter-spacing:.22em;text-transform:uppercase;color:rgba(107,58,71,.45);font-weight:700;
+}
+.mock.overlay{padding:0;justify-content:flex-end;}
+.mock.overlay .inner{
+  position:relative;z-index:1;padding:9%;
+  background:linear-gradient(to top,rgba(250,247,244,.97) 58%,rgba(250,247,244,0) 100%);
+}
+.mock.bold{background:var(--rose-deep);}
+.mock.bold .eyebrow{color:var(--rose-pale);}
+.mock.bold .h{color:#fff;}
+.mock.bold .h em{color:var(--rose-pale);}
+.mock.bold .b{color:rgba(255,255,255,.78);}
+.mock.dark{background:var(--ink);}
+.mock.dark .h{color:#fff;}
+.mock.dark .b{color:rgba(255,255,255,.72);}
+.mock.dark .eyebrow{color:var(--rose-pale);}
+.mock .rule{height:1px;background:var(--line);margin:.9em 0;}
+.mock ol{margin:.8em 0 0;padding:0;list-style:none;counter-reset:pt;}
+.mock ol li{
+  counter-increment:pt;font-size:5cqw;line-height:1.4;color:var(--ink-soft);
+  padding-left:2.4em;position:relative;margin-bottom:.55em;
+}
+.mock ol li::before{
+  content:counter(pt);position:absolute;left:0;top:0;
+  font-family:'Playfair Display',serif;font-size:1.15em;color:var(--rose);font-weight:600;
+}
+.mock .qr{
+  width:22cqw;height:22cqw;border-radius:2cqw;margin-top:8%;align-self:flex-start;flex:none;
+  background:
+    repeating-linear-gradient(90deg,var(--ink) 0 12%,transparent 12% 24%),
+    repeating-linear-gradient(0deg,var(--ink) 0 12%,transparent 12% 24%),
+    #fff;
+  opacity:.8;
+}
+.mock .row{display:flex;align-items:center;gap:5cqw;height:100%;}
+
+/* the flyer carries the most copy, so it sets its own smaller scale */
+.mock.flyer{justify-content:flex-start;}
+.mock.flyer .eyebrow{font-size:4.4cqw;}
+.mock.flyer .h{font-size:8.6cqw;margin-top:.35em;}
+.mock.flyer .rule{margin:.55em 0;}
+.mock.flyer ol{margin-top:.4em;}
+.mock.flyer ol li{font-size:3.6cqw;margin-bottom:.4em;}
+.mock.flyer .price{font-size:4.4cqw;margin-top:.5em;}
+.mock.flyer .qr{width:13cqw;height:13cqw;margin-top:4%;}
+.piece .meta{display:flex;align-items:baseline;justify-content:space-between;gap:12px;}
+.piece .name{font-size:14.5px;font-weight:700;}
+.piece .dim{font-size:11.5px;font-weight:600;letter-spacing:.06em;color:var(--rose);white-space:nowrap;}
+.piece .cap{font-size:14px;color:var(--muted);margin:0;max-width:none;}
+
+/* cards, chips, callouts */
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px;}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:20px 22px;box-shadow:var(--shadow-sm);}
+.card h4{margin:0 0 8px;font-size:16px;font-weight:700;}
+.card p{margin:0;font-size:14.5px;color:var(--muted);max-width:none;}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:0;padding:0;list-style:none;}
+.chips li{background:var(--blush);color:var(--rose-deep);border:1px solid rgba(107,58,71,.16);
+          border-radius:999px;padding:7px 15px;font-size:13.5px;font-weight:600;}
+.pill{display:inline-block;font-size:10px;font-weight:700;letter-spacing:1.3px;text-transform:uppercase;
+      padding:3px 9px;border-radius:999px;vertical-align:middle;}
+.pill.go{color:var(--go);background:var(--go-bg);}
+.pill.warn{color:var(--warn);background:var(--warn-bg);}
+.note,.dont{border-radius:0 12px 12px 0;padding:16px 20px;margin:22px 0 0;}
+.note{border-left:3px solid var(--rose);background:#FBF1F1;}
+.dont{border-left:3px solid var(--warn);background:var(--warn-bg);}
+.note p,.dont p{margin:0;font-size:14.5px;max-width:70ch;}
+
+/* five-day reveal */
+.days{display:grid;gap:10px;}
+.day{
+  background:var(--paper);border:1px solid var(--line);border-radius:14px;
+  padding:16px 20px;box-shadow:var(--shadow-sm);
+  display:grid;grid-template-columns:76px 1fr;gap:16px;align-items:start;
+}
+.day .n{
+  font-family:'Playfair Display',serif;font-size:15px;font-weight:600;color:var(--rose-deep);
+  border-right:1px solid var(--line);padding-right:12px;line-height:1.3;
+}
+.day .n small{display:block;font-family:'DM Sans',sans-serif;font-size:9.5px;font-weight:700;
+              letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin-top:3px;}
+.day .h{font-family:'Playfair Display',serif;font-size:19.5px;font-weight:500;line-height:1.25;margin:0;}
+.day .s{color:var(--muted);font-size:14.5px;margin:4px 0 0;max-width:none;}
+.day.payoff{border-color:var(--rose-pale);background:linear-gradient(150deg,#fff 0%,#FDF4F4 100%);}
+.day.payoff .h{color:var(--rose-deep);}
+
+.caption{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:18px 20px;box-shadow:var(--shadow-sm);}
+.caption .lbl{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--rose);margin-bottom:10px;}
+.caption .txt{font-size:14.5px;line-height:1.62;white-space:pre-wrap;margin:0;max-width:none;}
+
+ul.plain{list-style:none;padding:0;margin:0;}
+ul.plain li{padding:11px 0 11px 22px;position:relative;border-top:1px solid var(--line);font-size:15.5px;max-width:70ch;}
+ul.plain li:first-child{border-top:0;}
+ul.plain li::before{content:'';position:absolute;left:3px;top:20px;width:6px;height:6px;border-radius:50%;background:var(--rose-pale);}
+
+.dl{
+  display:inline-flex;align-items:center;gap:8px;margin-top:14px;
+  background:linear-gradient(150deg,var(--ink-soft) 0%,var(--ink) 70%);
+  color:#fff;text-decoration:none;font-weight:700;font-size:14px;
+  padding:12px 20px;border-radius:999px;box-shadow:var(--shadow-sm);
+}
+.dl:hover{background:linear-gradient(150deg,var(--ink) 0%,#000 90%);}
+
+.outro{margin:70px 0 0;padding:34px 0 78px;border-top:1px solid var(--line);color:var(--muted);font-size:15px;text-align:center;}
+.outro p{max-width:58ch;margin:0 auto;}
+.sig{font-family:'Playfair Display',serif;font-style:italic;color:var(--rose-deep);font-size:20px;margin-top:14px;}
+
+@media (max-width:560px){
+  .pieces.two,.pieces.three{grid-template-columns:1fr;}
+}
+@media (max-width:520px){
+  .day{grid-template-columns:1fr;gap:8px;}
+  .day .n{border-right:0;border-bottom:1px solid var(--line);padding:0 0 8px;}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none !important;}}
 </style>
 </head>
 <body>
@@ -58,106 +219,391 @@ ul.brief li{margin-bottom:7px;}
 <header class="hero">
   <div class="mark">My Nail Connection</div>
   <div class="tag">Find &middot; Connect &middot; Glow</div>
-  <h1>Leslie, meet <span class="serif-i">3.0.</span></h1>
-  <p class="lede">New brand, new strategy, new kit. Everything on this page is current — the old campaign page is retired, colors and all. Two zips at the bottom carry every asset.</p>
+  <h1>Leslie, meet <em class="pf">3.0.</em></h1>
+  <p class="lede">
+    New brand, new pricing, and a kit that's already built &mdash; posts, stories,
+    a flyer, cards, ads, and two countdown campaigns. Everything on this page is
+    current and safe to put in front of a nail tech. It just needs you.
+  </p>
+  <nav class="jump">
+    <a href="#kit">The kit</a>
+    <a href="#reveal">5-day reveal</a>
+    <a href="#countdown">14-day countdown</a>
+    <a href="#truth">What's true</a>
+    <a href="#strategy">Where links go</a>
+    <a href="#assets">Downloads</a>
+  </nav>
 </header>
 
 <div class="wrap">
 
-<section>
-  <div class="kicker">The strategy</div>
-  <h2>Installs we can <span class="serif-i">count.</span></h2>
-  <div class="card">
-    <p>The web-preview era is over — <strong>mynailconnection.com/app is now a download page</strong>, full stop. Every link and QR we put into the world lands people on it, and when the link comes from a tech's own <strong>Share My Profile</strong> button, the page shows <em>her</em> photo, her work, and her name with the store buttons right underneath. Her own little billboard.</p>
-    <p>And it's all measured: every visit is logged with where it came from, every store-button tap is counted, and Android installs attribute back to the exact link that drove them. When we spend money on ads later, we'll know what worked.</p>
+<section id="kit">
+  <p class="kicker">The kit</p>
+  <h2>Pick a hero direction. <em class="pf">Everything follows it.</em></h2>
+  <p class="lede">
+    Two ways in &mdash; the same offer, two temperaments. Whichever you choose,
+    the rest of the kit flips to match. Every blush panel below is a slot for a
+    real gallery photo.
+  </p>
+
+  <h3><span class="n">01</span> &nbsp;Hero &mdash; choose one</h3>
+  <div class="pieces two">
+    <div class="piece">
+      <div class="mock sq overlay">
+        <div class="photo"></div>
+        <div class="inner">
+          <div class="eyebrow">My Nail Connection</div>
+          <p class="h">Your work is your <em>booking page.</em></p>
+          <p class="b">Clients find your nails and book you in one tap. No commission, ever.</p>
+        </div>
+      </div>
+      <div class="meta"><span class="name">1a &middot; Editorial</span><span class="dim">1080&times;1080</span></div>
+      <p class="cap">Quieter, grown-up, leads with the idea. Best for the feed.</p>
+    </div>
+    <div class="piece">
+      <div class="mock sq bold">
+        <div class="eyebrow">For nail techs</div>
+        <p class="h">First month <em>free.</em></p>
+        <p class="b">Then just $10.99/mo. No commission. No per-booking fee. Not one charge to your clients.</p>
+      </div>
+      <div class="meta"><span class="name">1b &middot; Bold offer</span><span class="dim">1080&times;1080</span></div>
+      <p class="cap">Loud, price-forward, stops a thumb. Better as a paid ad.</p>
+    </div>
+  </div>
+
+  <h3><span class="n">02</span> &nbsp;Feature posts &mdash; run all three</h3>
+  <div class="pieces three">
+    <div class="piece">
+      <div class="mock sq">
+        <div class="eyebrow">Open today</div>
+        <p class="h">Turn an empty 2&nbsp;o'clock back into a <em>booking.</em></p>
+        <p class="b">Flip the switch and your work glows in the Gallery. Two seconds. No cost.</p>
+      </div>
+      <div class="meta"><span class="name">Open Today</span><span class="dim">1080&times;1080</span></div>
+      <p class="cap">The cancellation-filler. Techs feel this one hardest.</p>
+    </div>
+    <div class="piece">
+      <div class="mock sq">
+        <div class="eyebrow">The Gallery</div>
+        <p class="h">Get found by clients <em>near you.</em></p>
+        <p class="b">They browse real work on a map and filter by shape, type and style.</p>
+      </div>
+      <div class="meta"><span class="name">Get found nearby</span><span class="dim">1080&times;1080</span></div>
+      <p class="cap">Only tagged photos come back &mdash; so tag everything.</p>
+    </div>
+    <div class="piece">
+      <div class="mock sq bold">
+        <div class="eyebrow">0% commission</div>
+        <p class="h">Not now, <em>not ever.</em></p>
+        <p class="b">No per-booking fee. Never a charge to your clients. Cancel anytime &mdash; your gallery stays.</p>
+      </div>
+      <div class="meta"><span class="name">No commission</span><span class="dim">1080&times;1080</span></div>
+      <p class="cap">The differentiator. Everyone else takes a cut.</p>
+    </div>
+  </div>
+
+  <h3><span class="n">03</span> &nbsp;Story &amp; in-salon</h3>
+  <div class="pieces three">
+    <div class="piece">
+      <div class="mock story overlay">
+        <div class="photo"></div>
+        <div class="inner">
+          <div class="eyebrow">My Nail Connection</div>
+          <p class="h">Still booking in <em>your DMs?</em></p>
+          <p class="b">Your work is already why clients pick you. Now it's your booking page too.</p>
+          <p class="price">First month free, then $10.99/mo</p>
+        </div>
+      </div>
+      <div class="meta"><span class="name">Story / Reel</span><span class="dim">1080&times;1920</span></div>
+      <p class="cap">Full-bleed photo, words in the bottom third above the swipe-up.</p>
+    </div>
+    <div class="piece">
+      <div class="mock station">
+        <div class="eyebrow">Scan to book</div>
+        <p class="h">Book me in <em>one tap.</em></p>
+        <p class="b">My latest work, my openings, my standing spots &mdash; all in one place.</p>
+        <div class="qr"></div>
+      </div>
+      <div class="meta"><span class="name">Station card</span><span class="dim">4&times;6 in</span></div>
+      <p class="cap">Lives at the station, where she's already holding her phone.</p>
+    </div>
+    <div class="piece">
+      <div class="mock card35">
+        <div class="row">
+          <div style="flex:1;min-width:0;">
+            <div class="eyebrow">Scan to book me</div>
+            <p class="h" style="font-size:11cqw;">Find my latest <em>work.</em></p>
+          </div>
+          <div class="qr" style="width:26cqw;height:26cqw;margin:0;"></div>
+        </div>
+      </div>
+      <div class="meta"><span class="name">Business card, back</span><span class="dim">3.5&times;2 in</span></div>
+      <p class="cap">The front carries her name; the back does the work.</p>
+    </div>
+  </div>
+
+  <h3><span class="n">04</span> &nbsp;Print &amp; paid</h3>
+  <div class="pieces two">
+    <div class="piece">
+      <div class="mock flyer">
+        <div class="eyebrow">My Nail Connection</div>
+        <p class="h">Booking built <em>just for you.</em></p>
+        <div class="rule"></div>
+        <ol>
+          <li>No commission, and no per-booking fee. Ever.</li>
+          <li>Get found on the map by clients nearby.</li>
+          <li>Fill last-minute gaps with Open Today.</li>
+          <li>Standing appointments that repeat themselves.</li>
+        </ol>
+        <p class="price">First month free &middot; then $10.99/mo</p>
+        <div class="qr"></div>
+      </div>
+      <div class="meta"><span class="name">One-page flyer</span><span class="dim">Letter</span></div>
+      <p class="cap">The salon-drop piece. The QR scans straight to the download page.</p>
+    </div>
+    <div class="piece">
+      <div class="mock ad dark">
+        <div class="eyebrow" style="font-size:3.4cqw;">For nail techs</div>
+        <p class="h" style="font-size:8.5cqw;">Your work is your <em>booking page.</em></p>
+        <p class="b" style="font-size:3.6cqw;">First month free, then $10.99/mo. No commission.</p>
+      </div>
+      <div class="meta"><span class="name">Feed ad</span><span class="dim">1200&times;628</span></div>
+      <p class="cap">Paid social and anywhere a wide slot needs filling.</p>
+    </div>
+    <div class="piece">
+      <div class="mock mr">
+        <div class="eyebrow" style="font-size:5cqw;">0% commission</div>
+        <p class="h" style="font-size:13cqw;">First month <em>free.</em></p>
+        <p class="b" style="font-size:5cqw;">Then $10.99/mo.</p>
+      </div>
+      <div class="meta"><span class="name">Medium rectangle</span><span class="dim">300&times;250</span></div>
+      <p class="cap">The standard display unit. Price does the talking.</p>
+    </div>
+    <div class="piece">
+      <div class="mock lb" style="padding:2% 3.5%;">
+        <div class="row">
+          <p class="h" style="font-size:4.4cqw;flex:1;margin:0;">Booking built for nail techs. <em>First month free.</em></p>
+          <span class="price" style="font-size:2.8cqw;margin:0;flex:none;">mynailconnection.com</span>
+        </div>
+      </div>
+      <div class="meta"><span class="name">Leaderboard</span><span class="dim">728&times;90</span></div>
+      <p class="cap">Top-of-page banner. One line, one promise.</p>
+    </div>
+  </div>
+  <p class="mono" style="margin-top:22px;">
+    Full kit with every layout: <span style="color:var(--rose-deep);">campaign-assets/marketing-kit/</span>
+  </p>
+</section>
+
+<section id="reveal">
+  <p class="kicker">Campaign one</p>
+  <h2>Five days, <em class="pf">one image.</em></h2>
+  <p class="lede">
+    Her eyes are already hidden by the hat brim, so she does the withholding for
+    us. Same artwork every day with the curtain dropping a little further, so the
+    grid reads as one story instead of five unrelated posts.
+  </p>
+  <div class="days">
+    <div class="day"><div class="n">Day 5<small>the tease</small></div><div>
+      <p class="h">Five things change for nail techs.</p>
+      <p class="s">One revealed every day. The last one is the price. <span class="pill go">ready</span></p></div></div>
+    <div class="day"><div class="n">Day 4<small>one of five</small></div><div>
+      <p class="h">A booking page of your own.</p>
+      <p class="s">Clients pick a service, a day, a time. No DMs. <span class="pill go">ready</span></p></div></div>
+    <div class="day"><div class="n">Day 3<small>two of five</small></div><div>
+      <p class="h">Nobody takes a cut.</p>
+      <p class="s">Not from your bookings. Not from your clients. <span class="pill go">ready</span></p></div></div>
+    <div class="day"><div class="n">Day 2<small>three of five</small></div><div>
+      <p class="h">Photos that never expire.</p>
+      <p class="s">Post once. Nothing vanishes in 24 hours. <span class="pill go">ready</span></p></div></div>
+    <div class="day"><div class="n">Day 1<small>four + the hook</small></div><div>
+      <p class="h">Found by your actual work.</p>
+      <p class="s">Tomorrow: what it costs. <span class="pill go">ready</span></p></div></div>
+    <div class="day payoff"><div class="n">Day 0<small>the payoff</small></div><div>
+      <p class="h">First month free.</p>
+      <p class="s">Then $10.99 a month. Nobody takes a cut. <span class="pill warn">re-export</span></p></div></div>
+  </div>
+
+  <h3>The launch caption</h3>
+  <div class="caption">
+    <div class="lbl">Day 0 &middot; ready to paste</div>
+    <p class="txt">Your first month is free.
+
+Then $10.99. Your profile, your gallery and 50 looks a month stay free forever &mdash; being found never costs you anything. The $10.99 is your booking page, and that is the whole bill: no commission on your bookings, and not one fee added to your clients, ever.
+
+Everybody else takes a cut of what you earn. We take none of it.
+
+My Nail Connection 3.0 is live &mdash; mynailconnection.com
+
+#nailtech #nailtechlife #nailtechbusiness #nocommission #nailsofinstagram #licensednailtech</p>
+  </div>
+
+  <h3>How to run it</h3>
+  <ul class="plain">
+    <li>Story each morning, feed square the same day &mdash; anyone who catches only one still gets the build.</li>
+    <li>Save every story to a Highlight called <strong>3.0</strong>. The curtain only reads as a sequence, and it's lost if they expire.</li>
+    <li>On launch day, post <strong>all six squares as one carousel</strong>. A week's story in a ten-second swipe.</li>
+    <li><strong>Don't answer the price in the comments before launch day.</strong> Someone will guess, someone will argue, and that argument is the campaign working.</li>
+  </ul>
+
+  <div class="note">
+    <p><strong>Day 0 needs re-exporting.</strong> Its words are corrected in the
+    source, but the exported image still shows the old payoff. The other five
+    days are good to post as they are.</p>
   </div>
 </section>
 
-<section>
-  <div class="kicker">The flyer brief</div>
-  <h2>The flyer, <span class="serif-i">thought out.</span></h2>
-  <p class="sub">Everything a designer needs. All claims below are true in the shipping app and safe to print.</p>
+<section id="countdown">
+  <p class="kicker">Campaign two</p>
+  <h2>The <em class="pf">14-day</em> countdown.</h2>
+  <p class="lede">
+    A longer run for the wider launch, in three movements &mdash; <em>You asked</em>,
+    then <em>We built it</em>, then <em>Your move</em>. An animated page per day
+    plus feed and story stills. It counts days-out rather than dates, so it starts
+    whenever Anne says go.
+  </p>
+  <ul class="chips">
+    <li>15 days</li><li>32 images</li><li>Animated pages</li><li>Logo reveal</li><li>Captions written</li>
+  </ul>
+  <div class="note">
+    <p>Five days carried the old pricing and are corrected in the source. Those
+    five &mdash; <strong>14, 7, 5, 2 and 0</strong> &mdash; still need their images
+    re-exported. The other ten are ready as they are.</p>
+  </div>
+  <p class="mono" style="margin-top:16px;">
+    campaign-assets/countdown/ &nbsp;&middot;&nbsp; captions live in 14day-campaign.md
+  </p>
+</section>
 
-  <div class="card">
-    <h3>The one-liner</h3>
-    <p style="font-size:19px;font-family:'Playfair Display',serif;">Booking built for nail techs. <span class="serif-i">No commission. No per-booking fee. Ever.</span></p>
+<section id="truth">
+  <p class="kicker">The brief</p>
+  <h2>Everything that's <em class="pf">safe to print.</em></h2>
+  <p class="lede">All of it verified against the shipping app.</p>
+
+  <h3>The one-liner</h3>
+  <div class="card" style="background:linear-gradient(150deg,#fff 0%,#FDF4F4 100%);border-color:var(--rose-pale);">
+    <p class="pf" style="font-size:clamp(23px,4.4vw,32px);font-weight:500;line-height:1.2;margin:0;">
+      Booking built for nail techs.
+    </p>
+    <p style="margin:10px 0 0;color:var(--ink-soft);font-size:16px;">
+      No commission. No per-booking fee. Ever.
+    </p>
   </div>
 
-  <div class="card">
-    <h3>Headline options</h3>
-    <span class="chip">Still booking in your DMs?</span>
-    <span class="chip">Your work is your booking page now.</span>
-    <span class="chip">First month free, then $10.99/mo</span>
-    <span class="chip">Find the look. Find the tech. Book them.</span>
-  </div>
+  <h3>Headlines to pull from</h3>
+  <ul class="plain">
+    <li>Still booking in your DMs?</li>
+    <li>Your work is your booking page now.</li>
+    <li>First month free, then $10.99/mo.</li>
+    <li>Find the look. Find the tech. Book them.</li>
+  </ul>
 
-  <div class="card">
-    <h3>The pitch</h3>
-    <p>My Nail Connection puts your work where clients are already looking. Post your sets, tag them by shape, type and style, and clients browsing the Gallery find <strong>you</strong> — then book you right in the app. No commission, no per-booking fee, and never a charge to your clients. First month free, then $10.99/mo. Already booking on Vagaro or GlossGenius? Keep your link — MNC sends clients to it, free. You only pay if you want MNC's own booking engine.</p>
-  </div>
+  <h3>The pitch, in one paragraph</h3>
+  <p>
+    My Nail Connection puts your work where clients are already looking. Post
+    your sets, tag them by shape, type and style, and clients browsing the
+    Gallery find <em>you</em> &mdash; then book you right in the app. No
+    commission, no per-booking fee, and never a charge to your clients. First
+    month free, then $10.99/mo. Already booking on Vagaro or GlossGenius? Keep
+    your link &mdash; MNC sends clients straight to it, free. You only pay if you
+    want MNC's own booking engine.
+  </p>
 
-  <div class="card">
-    <h3>Bullets to pull from</h3>
-    <ul class="brief">
-      <li><strong>Real booking, built in</strong> — clients pick a service, a day, a time. You confirm, or auto-confirm.</li>
-      <li><strong>Your own link + QR</strong> — Share My Profile puts your page in your IG bio, your stories, or a QR at your station.</li>
-      <li><strong>Your whole book in your pocket</strong> — requests and your next appointment greet you on your portal; walk-ins go on the calendar with Add Appointment.</li>
-      <li><strong>Private client notes</strong> — polish colors, allergies, no-show history. Only you ever see them.</li>
-      <li><strong>Standing appointments</strong> — your every-3-weeks regular is booked out automatically.</li>
-      <li><strong>50 free photos a month, forever</strong> — and they never expire. Your share of the Gallery grows with your photo count.</li>
-      <li><strong>Open Today</strong> — one switch and same-day clients see you first.</li>
-    </ul>
-  </div>
-
-  <div class="card">
-    <h3>Safe to print</h3>
-    <span class="chip">Founding rate, locked for life</span>
-    <span class="chip">0% commission</span>
-    <span class="chip">$0 per booking</span>
-    <span class="chip">$0 monthly</span>
-    <span class="chip">App Store + Google Play</span>
-    <p style="margin-top:14px;">Flyer QR should point at <span class="mono">mynailconnection.com/?src=qr-flyer</span> — scans get tracked.</p>
-  </div>
+  <h3>Claims you can print</h3>
+  <ul class="chips">
+    <li>Founding rate, locked for life</li>
+    <li>0% commission</li>
+    <li>$0 per booking</li>
+    <li>$0 charged to clients</li>
+    <li>First month free, then $10.99/mo</li>
+    <li>50 free photos a month, forever</li>
+    <li>App Store + Google Play</li>
+  </ul>
 
   <div class="dont">
-    <strong>Don'ts:</strong> no &ldquo;use it in your browser&rdquo; (the web is download-only now) &middot; no email-signup mention (it&rsquo;s phone sign-in) &middot; no SMS-reminder promises (reminders are push notifications).
+    <p><strong>Never print:</strong> &ldquo;use it in your browser&rdquo; &mdash;
+    the web is a download page now &middot; anything about email sign-up &mdash;
+    it's phone sign-in &middot; SMS reminders &mdash; reminders are push
+    notifications &middot; <strong>&ldquo;free booking&rdquo;</strong> without
+    naming the month &middot; <strong>&ldquo;forever&rdquo;</strong> anywhere near
+    the word booking &middot; and <strong>&ldquo;no trial&rdquo;</strong> &mdash;
+    the offer <em>is</em> a free month.</p>
   </div>
 </section>
 
-<section>
-  <div class="kicker">The assets</div>
-  <h2>Two zips, <span class="serif-i">everything in them.</span></h2>
-  <p class="sub">Sizes are in every filename, so nothing needs guessing. These five panels are the store screenshots — same art in every size:</p>
-  <div class="grid5">
-    <img src="campaign-assets/kit-previews/panel-1.jpg" alt="Panel 1 — Still booking in your DMs?"/>
-    <img src="campaign-assets/kit-previews/panel-2.jpg" alt="Panel 2 — Home"/>
-    <img src="campaign-assets/kit-previews/panel-3.jpg" alt="Panel 3 — Gallery"/>
-    <img src="campaign-assets/kit-previews/panel-4.jpg" alt="Panel 4 — Map"/>
-    <img src="campaign-assets/kit-previews/panel-5.jpg" alt="Panel 5 — Find the look"/>
-  </div>
-
-  <div class="card">
-    <h3>Store kit <span class="serif-i">(rebuild-the-store zip)</span></h3>
-    <p>The five screenshot panels in all three store sizes (1290&times;2796, 1242&times;2688, 1080&times;1920), both app icons (1024 + 512), the Play feature graphic (1024&times;500), and <strong>STORE-CONTENT.md</strong> — the complete listing copy for both stores, every field inside its character limit, ready to paste.</p>
-    <a class="btn btn-ink" href="campaign-assets/mnc-store-assets-3.0.zip" download>&#8595; Store kit (zip, 11&nbsp;MB)</a>
-  </div>
-
-  <div class="card">
-    <h3>Brand kit</h3>
-    <p>Logos (transparent PNG + round marks), the 3.0 illustration art (the lady), the raw un-framed app screenshots, and <strong>BRAND-COLORS.txt</strong> with the exact palette and fonts — Playfair Display + DM Sans, rose <span class="mono">#DEB3B5</span> to ink <span class="mono">#141317</span>.</p>
-    <a class="btn btn-ink" href="campaign-assets/mnc-brand-assets-3.0.zip" download>&#8595; Brand kit (zip, 3&nbsp;MB)</a>
-    <a class="btn btn-ghost" href="campaign-assets/flyer-brief-techs.md" download style="margin-left:8px;">&#8595; Flyer brief (text)</a>
+<section id="strategy">
+  <p class="kicker">Where the links go</p>
+  <h2>Installs we can <em class="pf">count.</em></h2>
+  <p>
+    The web-preview era is over &mdash; <strong>mynailconnection.com/app is a
+    download page</strong>, full stop. Every link and QR we put into the world
+    lands there, and when the link came from a tech's own <strong>Share My
+    Profile</strong> button, the page shows <em>her</em> photo, her work and her
+    name with the store buttons right underneath. Her own little billboard.
+  </p>
+  <p>
+    And it's measured: every visit is logged with where it came from, every
+    store-button tap is counted, and Android installs attribute back to the exact
+    link that drove them. When we start spending on ads, we'll know what worked.
+  </p>
+  <div class="note">
+    <p>Put <span class="mono">?src=</span> on everything &mdash; the flyer QR
+    points at <span class="mono">mynailconnection.com/?src=qr-flyer</span>, the
+    story link at <span class="mono">?src=ig-story</span>. Scans and taps get
+    counted separately.</p>
   </div>
 </section>
+
+<section id="assets">
+  <p class="kicker">The files</p>
+  <h2>Everything, <em class="pf">downloadable.</em></h2>
+  <p class="lede">Sizes are baked into every filename, so nothing needs guessing.</p>
+  <div class="grid">
+    <div class="card">
+      <h4>Store kit</h4>
+      <p>The five screenshot panels in all three store sizes (1290&times;2796,
+      1242&times;2688, 1080&times;1920), both app icons (1024 + 512), the Play
+      feature graphic (1024&times;500), and <span class="mono">STORE-CONTENT.md</span>
+      &mdash; the complete listing copy for both stores, every field inside its limit.</p>
+      <a class="dl" href="campaign-assets/mnc-store-assets-3.0.zip">&#8595;&nbsp; Store kit &middot; 11 MB</a>
+    </div>
+    <div class="card">
+      <h4>Brand kit</h4>
+      <p>Logos (transparent PNG + round marks), the 3.0 illustration art, the raw
+      un-framed app screenshots, and <span class="mono">BRAND-COLORS.txt</span>
+      with the exact palette and fonts &mdash; Playfair Display and DM Sans, rose
+      <span class="mono">#C0687B</span> through ink <span class="mono">#2C2C31</span>.</p>
+      <a class="dl" href="campaign-assets/mnc-brand-assets-3.0.zip">&#8595;&nbsp; Brand kit &middot; 3 MB</a>
+    </div>
+    <div class="card">
+      <h4>Countdown kit</h4>
+      <p>Both campaigns, every animated page and every still: the 14-day run and
+      the 5-day reveal, feed and story sizes throughout, captions included.</p>
+      <a class="dl" href="campaign-assets/mnc-3-countdown-kit.zip">&#8595;&nbsp; Countdown kit &middot; 19 MB</a>
+    </div>
+    <div class="card">
+      <h4>Flyer brief</h4>
+      <p>The plain-text version of the section above &mdash; one-liner, headlines,
+      pitch, approved claims and don'ts &mdash; for handing straight to a printer
+      or a designer.</p>
+      <a class="dl" href="campaign-assets/flyer-brief-techs.md">&#8595;&nbsp; Flyer brief &middot; text</a>
+    </div>
+  </div>
+</section>
+
+<footer class="outro">
+  <p>
+    The hard part is done. The app is live on both stores, every tech gets her
+    first month free, and everyone who joins now keeps the founding rate for
+    life. Now we make sure they hear about it.
+  </p>
+  <div class="sig">Love, Anne</div>
+  <p style="margin-top:18px;font-size:13.5px;">
+    <a href="https://mynailconnection.com/">mynailconnection.com</a>
+    &nbsp;&middot;&nbsp; Find. Connect. Glow.
+  </p>
+</footer>
 
 </div>
-
-<section class="outro">
-  <h3>We did the hard part.</h3>
-  <p>The app is live on both stores, every tech gets their first month free, and everyone who joins now keeps the founding rate for life. Now we make sure they hear about it.</p>
-  <p><a href="https://mynailconnection.com/" style="color:#F7DEE1;">mynailconnection.com</a> &nbsp;&middot;&nbsp; Find. Connect. Glow.</p>
-  <div class="sig">Love, Anne</div>
-</section>
-
 </body>
 </html>
