@@ -1306,38 +1306,6 @@
     @media (max-width: 480px) {
               }
 
-  /* ── Pop-in waitlist card (bottom-right slide) ── */
-
-  /* ── Launch-list chip (2026-07-21) ───────────────────────────────────
-     Replaces the auto-opening 340px card. Same footprint on desktop and
-     mobile: a compact pill in the lower-right that expands on tap. */
-  .wl-chip {
-    position: fixed; right: 18px; bottom: 18px; z-index: 121;
-    display: none; align-items: center; gap: 8px;
-    padding: 11px 17px; border-radius: 100px;
-    background: linear-gradient(140deg, #4A4A4F 0%, #2A2A2E 60%, #141317 100%);
-    color: #fff; border: 1px solid rgba(38,26,32,0.42);
-    font-family: 'DM Sans', sans-serif; font-size: 13.5px; font-weight: 700; letter-spacing: 0.2px; white-space: nowrap;
-    box-shadow: 0 8px 22px rgba(49,34,42,0.34), inset 0 1px 1px rgba(255,255,255,0.18);
-    cursor: pointer; transition: transform 0.18s ease, box-shadow 0.18s ease;
-  }
-  .wl-chip.is-shown { display: inline-flex; }
-  .wl-chip:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(49,34,42,0.4); }
-  .wl-chip:active { transform: translateY(0) scale(0.97); }
-  .wl-chip-dot {
-    width: 8px; height: 8px; border-radius: 50%; background: #F7E2E3;
-    box-shadow: 0 0 0 0 rgba(247,226,227,0.7); animation: wlPulse 2s ease-out infinite; flex-shrink: 0;
-  }
-  @keyframes wlPulse {
-    0%   { box-shadow: 0 0 0 0 rgba(247,226,227,0.6); }
-    70%  { box-shadow: 0 0 0 7px rgba(247,226,227,0); }
-    100% { box-shadow: 0 0 0 0 rgba(247,226,227,0); }
-  }
-  @media (max-width: 480px) {
-    .wl-chip { right: 12px; bottom: 12px; padding: 10px 14px; font-size: 12.5px; gap: 7px; }
-  }
-  @media (prefers-reduced-motion: reduce) { .wl-chip-dot { animation: none; } }
-
   .popin {
     position: fixed;
     right: 24px; bottom: 24px;
@@ -2184,10 +2152,15 @@
 </script>
 
 
-<!-- Email-capture pop-in removed 2026-05-04, app is live, the ~5 emails
-     captured pre-launch get treated as non-loaded founders (see
-     send-to-original-founders.html). The launch_waitlist table itself is
-     left in place so existing rows survive; nothing writes to it now. -->
+<!-- Email capture removed twice, and it should stay removed. First on
+     2026-05-04 (2.0 launch): the ~5 emails caught pre-launch were treated
+     as non-loaded founders, see send-to-original-founders.html. A second
+     "Tell me when it launches!" chip went up 2026-07-17 for the 3.0
+     launch and came down 2026-08-24, once 3.0 was live on both stores,
+     because it was inviting visitors to wait for something they could
+     already download. The launch_waitlist table is left in place so the
+     rows from both rounds survive; nothing writes to it now. If a third
+     pre-launch capture is ever wanted, delete it the day the thing ships. -->
 
 <!-- ── De-PWA cleanup for returning visitors ────────────────────────────
      Before 2026-04-23 the app registered /sw.js with scope '/', which
@@ -2446,112 +2419,6 @@
     }, { threshold: 0.25 });
     io.observe(sec);
   })();
-</script>
-
-<!-- Pre-launch waitlist pop-in (2026-07-17). Slides in bottom-right ~5s after
-     load, shows ONCE per visitor (respects dismissal + prior join via
-     localStorage). Writes public.launch_waitlist on the 3.0 project, source
-     'marketing-v3'. Backend verified: insert 201, dupe 409 (= already on list),
-     anon SELECT blocked by RLS. Reuses the existing .popin* styles. -->
-<style>
-  .popin-form { display:flex; gap:8px; margin-bottom:4px; }
-  .popin-form input[type=email] {
-    flex:1; min-width:0; padding:11px 13px; border-radius:12px;
-    border:1.5px solid rgba(191,166,168,0.42); background:#fff;
-    font-family:'DM Sans',sans-serif; font-size:14px; color:var(--charcoal); outline:none;
-  }
-  .popin-form input[type=email]:focus { border-color:var(--rose); box-shadow:0 0 0 3px rgba(191,166,168,0.18); }
-  .popin-form button {
-    flex-shrink:0; padding:11px 16px; border-radius:12px; border:none; cursor:pointer;
-    background:linear-gradient(160deg,#34303A 0%,#141317 100%); color:#F7E2E3;
-    font-family:'DM Sans',sans-serif; font-size:14px; font-weight:600; letter-spacing:0.2px;
-    transition:transform 0.12s ease, opacity 0.15s ease;
-  }
-  .popin-form button:hover { transform:translateY(-1px); }
-  .popin-form button:disabled { opacity:0.65; cursor:default; transform:none; }
-  .popin-msg { font-size:12px; min-height:1em; color:var(--muted); }
-  .popin-msg.error { color:#B23A48; }
-  @keyframes waitlist-pop { 0% { transform:scale(0.94); opacity:0; } 100% { transform:scale(1); opacity:1; } }
-</style>
-
-<!-- Collapsed state: a small floating chip. The full card only opens when
-     tapped, it was 340px wide and swallowed a phone screen on auto-open. -->
-<button class="wl-chip" id="wl-chip" type="button" aria-label="Tell me when My Nail Connection 3.0 launches">
-  <span class="wl-chip-dot" aria-hidden="true"></span>
-  <span>Tell me when it launches!</span>
-</button>
-<div class="popin" id="wl-popin" role="dialog" aria-label="Join the launch list" aria-hidden="true">
-  <button class="popin-close" id="wl-close" type="button" aria-label="Close">&times;</button>
-  <div id="wl-form-state">
-    <div class="popin-bloom" aria-hidden="true">&#10024;</div>
-    <div class="popin-title">Be the <em>first</em> to know</div>
-    <div class="popin-sub">The new My Nail Connection is almost here. Leave your email and you'll be first through the door.</div>
-    <form class="popin-form" id="wl-form" novalidate>
-      <input id="wl-email" type="email" autocomplete="email" placeholder="you@email.com" aria-label="Your email"/>
-      <button id="wl-btn" type="submit">Notify me</button>
-    </form>
-    <div class="popin-msg" id="wl-msg" role="status" aria-live="polite"></div>
-    <div class="popin-hint">No spam, just one note the day we launch.</div>
-  </div>
-  <div class="popin-success" id="wl-success" style="display:none;">You're on the list! <svg viewBox="0 0 24 24" width="15" height="15" style="vertical-align:-2px;" aria-hidden="true"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="#A2636C"/></svg> We'll be in touch.</div>
-</div>
-
-<script>
-(function(){
-  var SB_URL = 'https://nwqnakoongrorbwnrqzc.supabase.co';
-  var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im53cW5ha29vbmdyb3Jid25ycXpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNzczMjUsImV4cCI6MjA5ODk1MzMyNX0.TFFMlg9VjB0cyJwbgmVbeatFYQFaF1Ri0nrH0GwhHJs';
-  var LS = 'mnc_wl_v3';
-  var WL_HEART = '<svg viewBox="0 0 24 24" width="15" height="15" style="vertical-align:-2px;" aria-hidden="true"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="#A2636C"/></svg>';
-  var popin = document.getElementById('wl-popin');
-  if (!popin) return;
-  var closeBtn = document.getElementById('wl-close');
-  var form = document.getElementById('wl-form');
-  var emailInput = document.getElementById('wl-email');
-  var btn = document.getElementById('wl-btn');
-  var msg = document.getElementById('wl-msg');
-  var successEl = document.getElementById('wl-success');
-  var formState = document.getElementById('wl-form-state');
-  function stored(){ try { return localStorage.getItem(LS); } catch(_) { return null; } }
-  function setStored(v){ try { localStorage.setItem(LS, v); } catch(_){} }
-  var chip = document.getElementById('wl-chip');
-  function showChip(){ if (chip) chip.classList.add('is-shown'); }
-  function hideChip(){ if (chip) chip.classList.remove('is-shown'); }
-  function openPop(){ hideChip(); popin.classList.add('is-open'); popin.setAttribute('aria-hidden','false');
-                      var e=document.getElementById('wl-email'); if(e) setTimeout(function(){ try{e.focus();}catch(_){} },320); }
-  function closePop(){ popin.classList.remove('is-open'); popin.setAttribute('aria-hidden','true'); }
-  function showSuccess(dupe){
-    formState.style.display = 'none';
-    successEl.style.display = 'block';
-    if (dupe) { successEl.classList.add('is-dupe'); successEl.innerHTML = "You're already on the list, love. " + WL_HEART; }
-    setStored('joined');
-    hideChip();
-  }
-  closeBtn.addEventListener('click', function(){ closePop(); if (stored() !== 'joined') showChip(); });
-  if (chip) chip.addEventListener('click', openPop);
-  form.addEventListener('submit', function(e){
-    e.preventDefault();
-    var email = (emailInput.value||'').trim().toLowerCase();
-    msg.className = 'popin-msg'; msg.textContent = '';
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
-      msg.className = 'popin-msg error'; msg.textContent = 'That email does not look right. One more try?'; return;
-    }
-    btn.disabled = true; btn.textContent = 'Saving…';
-    fetch(SB_URL + '/rest/v1/launch_waitlist', {
-      method:'POST',
-      headers:{ 'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'return=minimal' },
-      body: JSON.stringify({ email: email, source: 'marketing-v3' })
-    }).then(function(r){
-      if (r.status === 409) { showSuccess(true); }
-      else if (r.ok) { showSuccess(false); }
-      else { throw new Error('status '+r.status); }
-    }).catch(function(){
-      btn.disabled = false; btn.textContent = 'Notify me';
-      msg.className = 'popin-msg error'; msg.textContent = 'Something hiccuped. Try again in a second?';
-    });
-  });
-  var flag = stored();
-  if (flag !== 'joined') { setTimeout(showChip, 3000); }
-})();
 </script>
 
 </body>
