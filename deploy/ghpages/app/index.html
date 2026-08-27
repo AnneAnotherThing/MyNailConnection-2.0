@@ -5365,8 +5365,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.0',     /* __APP_BUILD_NAME__   */
-  android: 597,         /* __APP_BUILD_ANDROID__ */
-  ios:     402,          /* __APP_BUILD_IOS__     */
+  android: 598,         /* __APP_BUILD_ANDROID__ */
+  ios:     403,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -17811,6 +17811,19 @@ async function setupEnablePush() {
   // Native shells: the OS prompt comes from the Capacitor plugin.
   if (window.Capacitor && window.Capacitor.isNativePlatform()) {
     try { await initCapacitorPush(); localStorage.setItem('mnc_push_done', '1'); } catch(_) {}
+    // Re-ask the SERVER rather than trusting the cached answer. Anne,
+    // 2026-08-25, Leslie's iPhone: "the last checkmark would not flip to
+    // complete" with iOS notifications plainly on. _setupStepsState latches
+    // pushDone on window._mncHasPushSub the first time that lookup answers,
+    // and on a cold native start the answer lands BEFORE the registration
+    // listener has written the row -- that listener waits up to 20s for the
+    // session to restore. Latched false, nothing ever re-queried it, so the
+    // step could not tick and tapping it again only re-ran a prompt iOS had
+    // already granted. Clearing the cache makes this tap mean "go look
+    // again". If the lookup fails it stays undefined, and the next render
+    // falls back to the mnc_push_done flag set on the line above.
+    window._mncHasPushSub = undefined;
+    try { await _refreshPushSubState(); } catch(_) {}
     updateSetupChecklist();
     return;
   }
@@ -21545,11 +21558,16 @@ async function submitFeedback() {
       if (btn) { btn.disabled = false; btn.textContent = 'Send feedback'; }
       return;
     }
-      // Heads-up email, fire and forget. The row is already saved above, so a
-      // Resend outage costs the notification and never the report. Reuses the
-      // Contact-Anne function rather than a second sender.
+      // Heads-up email. The row is already saved above, so a Resend outage
+      // costs the notification and never the report -- but it must not cost
+      // the DIAGNOSIS too. This was fire-and-forget behind an empty .catch(),
+      // so when Anne filed two bug reports on 2026-08-25 and no email came,
+      // the reason had already been thrown away in the browser. The function
+      // returns Resend's own rejection ({error:'resend_failed',status,detail}).
+      // Keep it, log it, and show it when an admin is the one reporting.
+      var _fbMailErr = '';
       try {
-        fetch(SUPABASE_URL + '/functions/v1/notify-contact-email', {
+        var _fbMailRes = await fetch(SUPABASE_URL + '/functions/v1/notify-contact-email', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -21565,11 +21583,29 @@ async function submitFeedback() {
             email: payload.user_email || '',
             role: payload.category || 'Feedback'
           })
-        }).catch(function() {});
-      } catch(_) {}
-    setStatus('Sent! Thank you, we read every one. 🌸', 'success');
-    if (btn) { btn.textContent = 'Sent'; }
-    setTimeout(closeFeedbackModal, 1400);
+        });
+        if (!_fbMailRes.ok) {
+          var _fbMailJson = await _fbMailRes.json().catch(function() { return {}; });
+          _fbMailErr = String(_fbMailJson.detail || _fbMailJson.error ||
+                              ('HTTP ' + _fbMailRes.status)).slice(0, 160);
+        }
+      } catch (e) {
+        _fbMailErr = (e && e.message) || 'network error';
+      }
+      if (_fbMailErr) {
+        try { console.warn('[MNC] feedback saved, alert email failed:', _fbMailErr); } catch(_) {}
+      }
+    // A tech does not need to hear about our mail plumbing -- her report is
+    // filed either way. Anne does, because for her the email IS the delivery.
+    if (_fbMailErr && window._mncCurrentRole === 'admin') {
+      setStatus('Saved — but the alert email failed: ' + _fbMailErr, 'warn');
+      if (btn) { btn.textContent = 'Saved'; }
+      setTimeout(closeFeedbackModal, 8000);
+    } else {
+      setStatus('Sent! Thank you, we read every one. 🌸', 'success');
+      if (btn) { btn.textContent = 'Sent'; }
+      setTimeout(closeFeedbackModal, 1400);
+    }
   } catch (e) {
     setStatus('Network hiccup: ' + ((e && e.message) || 'unknown') +
       '. Message kept, try once more.', 'error');
