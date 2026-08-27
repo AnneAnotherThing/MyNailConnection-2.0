@@ -17,6 +17,14 @@
 
 
 -- ----------------------------------------------------------------------------
+-- ⚠ BUCKET A IS OBSOLETE AND UNSAFE AS OF 2026-07-23. DO NOT ACT ON IT.
+--   It resolves profiles by email only. A phone signup has au.email = NULL,
+--   so lower(au.email) is NULL, so the join never matches, so EVERY phone
+--   account is listed as an orphan even when its profile row is fine.
+--   The 2026-08-27 run returned 11 such rows, one of which had signed in
+--   that same minute. Use sql/auth-orphan-audit-phone-aware.sql instead.
+--   Buckets below that key off email are equally blind; check before using.
+-- ----------------------------------------------------------------------------
 -- BUCKET A, ORPHAN AUTH  (auth user with NO profile in techs OR users)
 -- These accounts can sign in but have nothing in the app tables.
 -- This is the silent-PATCH-no-op failure mode.
