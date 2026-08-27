@@ -5365,8 +5365,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.0',     /* __APP_BUILD_NAME__   */
-  android: 598,         /* __APP_BUILD_ANDROID__ */
-  ios:     403,          /* __APP_BUILD_IOS__     */
+  android: 599,         /* __APP_BUILD_ANDROID__ */
+  ios:     404,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -14804,6 +14804,33 @@ async function tbTogglePaused() {
   showToast(next ? 'Listing paused. Enjoy the break \u2728' : 'Welcome back! Your photos are live again');
 }
 
+// The blocklist key must be digit-identical to what current_phone() derives
+// from the JWT, because every enforcement point (get_open_slots,
+// _booking_gate) compares them with = rather than a last-10 match. Supabase's
+// phone claim is 1 + area code + number, e.g. '16025551234'. This stored the
+// bare 10 digits until 2026-08-25 -- '6025551234' -- which could never equal
+// it, so blocking a phone client silently did nothing at all: the tech saw
+// "Blocked", the row was written, and the client kept seeing every opening.
+// Leslie hit exactly this. E.164 gives 11 digits and matches how users.phone
+// and techs.phone are already stored.
+function bkBlockKey(raw) {
+  var s = String(raw == null ? '' : raw).trim();
+  if (!s) return '';
+  if (s.indexOf('@') > 0) return s.toLowerCase();
+  return bkNormalizePhone(s) || '';
+}
+
+// Rows written before that fix are bare 10 digits; new ones are +1XXXXXXXXXX.
+// Show both as (602) 555-1234, and leave email entries alone.
+function bkPrettyBlocked(v) {
+  var raw = String(v == null ? '' : v);
+  if (raw.indexOf('@') > 0) return raw;
+  var d = raw.replace(/\D/g, '');
+  if (d.length === 11 && d[0] === '1') d = d.slice(1);
+  if (d.length === 10) return '(' + d.slice(0, 3) + ') ' + d.slice(3, 6) + '-' + d.slice(6);
+  return raw;
+}
+
 function tbRenderBlocked() {
   const wrap = document.getElementById('tb-blocked-list');
   if (!wrap) return;
@@ -14812,7 +14839,7 @@ function tbRenderBlocked() {
     return;
   }
   wrap.innerHTML = _bkBlocked.map(function(b) {
-    return '<span style="display:inline-flex;align-items:center;gap:6px;background:var(--cream);border:1.5px solid var(--border);color:var(--charcoal);font-size:13px;font-weight:600;border-radius:100px;padding:4px 10px;margin:2px 4px 2px 0;">' + bkEsc(/^\d{10}$/.test(b.client_email || '') ? '(' + b.client_email.slice(0,3) + ') ' + b.client_email.slice(3,6) + '-' + b.client_email.slice(6) : b.client_email) +
+    return '<span style="display:inline-flex;align-items:center;gap:6px;background:var(--cream);border:1.5px solid var(--border);color:var(--charcoal);font-size:13px;font-weight:600;border-radius:100px;padding:4px 10px;margin:2px 4px 2px 0;">' + bkEsc(bkPrettyBlocked(b.client_email)) +
       '<span onclick="tbDeleteBlocked(\'' + b.id + '\')" style="cursor:pointer;font-size:14px;line-height:1;color:var(--muted);">&times;</span></span>';
   }).join('');
 }
@@ -14820,16 +14847,10 @@ function tbRenderBlocked() {
 async function tbAddBlocked() {
   if (!_bkMyTech) return;
   const el = document.getElementById('tb-block-email');
-  // Clients are phone-first now: accept a phone number OR an email.
-  // Phones are stored as bare 10 digits; get_open_slots matches either.
+  // Accepts a phone number OR an email. See bkBlockKey: the stored digits
+  // have to match the JWT phone claim exactly or the block does nothing.
   const raw = (el.value || '').trim();
-  let email = '';
-  if (raw.indexOf('@') > 0) email = raw.toLowerCase();
-  else {
-    let d = raw.replace(/\D/g, '');
-    if (d.length === 11 && d[0] === '1') d = d.slice(1);
-    if (d.length === 10) email = d;
-  }
+  const email = bkBlockKey(raw);
   if (!email) { showToast('Enter the client\u2019s phone number or email'); return; }
   const r = await fetch(SUPABASE_URL + '/rest/v1/blocked_clients', {
     method: 'POST',
@@ -14847,15 +14868,10 @@ async function tbAddBlocked() {
 async function tbBlockFromAppt(id) {
   const b = _bkAppts.find(function(x) { return x.id === id; });
   if (!b || !_bkMyTech) return;
-  // Blocklist key: email for email clients, bare 10 digits for phone
-  // clients (Stage D stores digits; get_open_slots matches either).
-  let blockKey = '';
-  if (b.client_email) blockKey = String(b.client_email).toLowerCase();
-  else if (b.client_phone) {
-    let d = String(b.client_phone).replace(/\D/g, '');
-    if (d.length === 11 && d[0] === '1') d = d.slice(1);
-    if (d.length === 10) blockKey = d;
-  }
+  // Email for email clients, E.164 for phone clients. Routed through the
+  // same normaliser because bookings.client_email can itself hold a phone
+  // string for phone-identity clients.
+  const blockKey = bkBlockKey(b.client_email || b.client_phone || '');
   if (!blockKey) { showToast('No contact info to block this client by'); return; }
   const who = b.client_name || b.client_email || b.client_phone;
   if (!(await showConfirm('Block ' + who + '?', { body: 'They are never told. They simply never see an opening with you again.', okLabel: 'Block' }))) return;
