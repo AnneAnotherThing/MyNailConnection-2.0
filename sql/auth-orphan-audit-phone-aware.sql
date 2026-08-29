@@ -94,3 +94,51 @@ from auth.users
 where last_sign_in_at is null
 group by 1
 order by 1 desc;
+
+
+-- ── 2B. THE SPLIT IDENTITY SECTION 2 CANNOT SEE  (added 2026-08-28) ─────────
+-- Section 2 groups on public.phone_digits(au.phone) and drops every row where
+-- that is null. But the Leslie 2026-07-24 case had exactly ONE row with a
+-- phone. Her other row was the 2.0-era EMAIL account, and og-auth-bulk-create
+-- .sql never wrote a phone column at all -- grep it, there is no `phone` in
+-- the insert. So her two rows could never group together, and section 2 is
+-- structurally blind to the failure mode it is named after.
+--
+-- This also explains why section 2 may well return nothing while the problem
+-- is real: auth.users carries a UNIQUE constraint on phone, so two LIVE rows
+-- can never hold the identical phone string. A same-number duplicate can only
+-- exist if the two rows disagree on format, or if one of them has phone NULL.
+-- The NULL case is the common one, and it is this query.
+--
+-- Reads: an email-era auth row and a phone-era auth row that resolve to the
+-- SAME human, via a profile row carrying both an email and a phone.
+select
+  p.name,
+  p.email                                    as profile_email,
+  p.phone                                    as profile_phone,
+  a_mail.id                                  as email_auth_id,
+  a_mail.created_at::timestamp(0)            as email_row_created,
+  coalesce(a_mail.last_sign_in_at::timestamp(0)::text, 'never') as email_row_last_seen,
+  a_phone.id                                 as phone_auth_id,
+  a_phone.created_at::timestamp(0)           as phone_row_created,
+  coalesce(a_phone.last_sign_in_at::timestamp(0)::text, 'never') as phone_row_last_seen,
+  'TWO auth rows, one person — phone login could not see the email row'
+                                             as verdict
+from (
+  select name, email, phone from public.users where email is not null and phone is not null
+  union all
+  select name, email, phone from public.techs where email is not null and phone is not null
+) p
+join auth.users a_mail
+  on lower(a_mail.email) = lower(p.email)
+ and a_mail.phone is null
+join auth.users a_phone
+  on a_phone.email is null
+ and right(public.phone_digits(a_phone.phone), 10) = right(public.phone_digits(p.phone), 10)
+order by a_phone.created_at desc;
+
+-- If this returns rows, do NOT blind-delete the phone row: on a normalized
+-- database the app resolves the profile by email OR phone (loadOwnUserRow),
+-- so the person is probably landing on their real dashboard already, just
+-- under a second auth id. Deleting the WRONG one takes their history with it.
+-- Decide per row by which id owns their bookings and push_subscriptions.
