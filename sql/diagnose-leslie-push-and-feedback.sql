@@ -16,6 +16,9 @@
 -- ============================================================================
 
 
+-- NOTE (2026-08-27): push_subscriptions has updated_at, NOT created_at --
+-- the row is rewritten on every re-registration. Sections 3 and 4 below
+-- query feedback / contact_anne_messages, which do have created_at.
 -- ── 1. DOES SHE HAVE A PUSH ROW, AND UNDER WHICH KEY? ───────────────────────
 -- The app keys push_subscriptions.user_id off mncIdentity(): the auth email
 -- when there is one, otherwise E.164. Leslie's real rows carry an email
@@ -35,7 +38,7 @@ select
   ps.auth                             as platform,
   case when ps.p256dh = 'native' then 'native token' else 'web push' end as kind,
   left(ps.endpoint, 18) || '…'        as token_head,
-  ps.created_at                       as subscribed_at,
+  ps.updated_at                       as last_registered,
   case
     when ps.user_id is null then 'NO ROW — checkbox cannot tick, nothing to send to'
     when t.email is not null and lower(ps.user_id) <> lower(t.email)
@@ -58,8 +61,7 @@ select
   coalesce(auth, 'web/unknown')                    as platform,
   count(*)                                         as rows,
   count(distinct user_id)                          as people,
-  min(created_at)                                  as first,
-  max(created_at)                                  as latest
+  max(updated_at)                                  as newest
 from public.push_subscriptions
 group by 1
 order by 2 desc;
