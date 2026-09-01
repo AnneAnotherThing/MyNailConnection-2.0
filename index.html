@@ -5185,22 +5185,29 @@ window.restoreIAPPurchases = restoreIAPPurchases;
 // Stripe, but harmless if they do). Added 2026-05-01 as part of the
 // 5.1.1(v) cleanup pass after the second App Review rejection.
 function openSubscriptionManagement() {
+  // Corrected 2026-08-27. This sent Android to Play and web to Apple, which
+  // was right when both stores did the billing. Since the 2026-08-23 Stripe
+  // bring-up, Android and web are BOTH Stripe -- so both were being handed a
+  // subscriptions screen that has no record of them and no cancel button.
+  // Only iOS still genuinely bills through the store.
   try {
     if (typeof isIOS === 'function' && isIOS()) {
       window.location.href = 'itms-apps://apps.apple.com/account/subscriptions';
       return;
     }
-    var plat = (window.Capacitor && window.Capacitor.getPlatform) ? window.Capacitor.getPlatform() : '';
-    if (plat === 'android') {
-      window.location.href = 'https://play.google.com/store/account/subscriptions';
-      return;
+    var portal = (STRIPE_CONFIG.test_mode ? STRIPE_CONFIG.portal_link_test
+                                          : STRIPE_CONFIG.portal_link) || '';
+    if (portal) { window.open(portal, '_blank', 'noopener'); return; }
+    // No portal link pasted yet. Say so plainly rather than deep-linking to a
+    // store that will show an empty list -- an honest dead end beats a
+    // confident wrong turn, and this one ends in a cancellation not happening.
+    if (typeof showToast === 'function') {
+      showToast('To cancel, email hello@mynailconnection.com and we will take care of it right away.', 7000);
     }
-    // Web fallback, opens the App Store subscriptions page in a new tab.
-    window.open('https://apps.apple.com/account/subscriptions', '_blank', 'noopener');
   } catch (e) {
-    // If anything throws (rare, usually a sandboxed WebView with no
-    // navigation rights), fall back to opening the App Store URL.
-    window.open('https://apps.apple.com/account/subscriptions', '_blank', 'noopener');
+    if (typeof showToast === 'function') {
+      showToast('To cancel, email hello@mynailconnection.com and we will take care of it right away.', 7000);
+    }
   }
 }
 window.openSubscriptionManagement = openSubscriptionManagement;
@@ -5365,8 +5372,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.1',     /* __APP_BUILD_NAME__   */
-  android: 600,         /* __APP_BUILD_ANDROID__ */
-  ios:     405,          /* __APP_BUILD_IOS__     */
+  android: 601,         /* __APP_BUILD_ANDROID__ */
+  ios:     406,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -5425,6 +5432,24 @@ const STRIPE_CONFIG = {
   // back before any store build. sync.sh cannot catch this — it is a value,
   // not a syntax error, so the JS parse guard sails straight past it.
   test_mode: false,
+
+  // ── CANCEL / MANAGE (2026-08-27) ────────────────────────────────────────
+  // Stripe's no-code Customer Portal login link. Android and web both bill
+  // through Stripe, so Apple and Google have NO record of those
+  // subscriptions and their subscription screens show an empty list -- a
+  // Stripe subscriber had no way to cancel from inside the app at all.
+  //
+  // Get it from: Stripe Dashboard -> Settings -> Billing -> Customer portal
+  // -> activate, then copy the login link (looks like
+  // https://billing.stripe.com/p/login/XXXXXXXX). The customer types their
+  // email, Stripe emails a magic link, and they cancel there. No secret key
+  // and no edge function, which is why this is a pasted link and not a
+  // create-portal-session call.
+  //
+  // LIVE and TEST portals are separate links; the test one is only reachable
+  // while test_mode is true.
+  portal_link:      '',
+  portal_link_test: '',
   // DEAD LINKS (2026-08-23). The four photo-credit URLs below belong to the
   // PREVIOUS Stripe account and are unreachable: purchasePhotos() has no
   // callers left (photos are free in 3.0) and purchaseUnlimited() is blocked
