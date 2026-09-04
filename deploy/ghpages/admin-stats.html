@@ -721,7 +721,31 @@
           <div style="font-size:10.5px;opacity:0.88;margin-top:4px;" id="stat-sc-google-recent">-</div>
         </div>
       </div>
-      <div class="mh-disclaimer">Counts taps on the App Store / Google Play buttons on the marketing site, a proxy for interest. Real installs are recorded below.</div>
+      <div class="mh-disclaimer">Counts taps on the App Store / Google Play buttons on the marketing site AND the /app download gate (gate taps logged here since 2026-09-04; earlier gate taps live only in the legacy log noted below). A proxy for interest, real installs are recorded below.</div>
+    </div>
+
+    <!-- Where download taps come from (store_clicks attribution) -->
+    <div class="panel">
+      <div class="panel-head">
+        <div class="panel-title">Download taps · where from</div>
+        <div class="panel-meta">last 30 days</div>
+      </div>
+      <div style="display:flex;gap:10px;margin-bottom:14px;">
+        <div class="mh-card" style="flex:1;text-align:center;">
+          <div class="mh-label">🌐 Marketing site</div>
+          <div class="mh-num" id="stat-src-marketing">-</div>
+        </div>
+        <div class="mh-card" style="flex:1;text-align:center;">
+          <div class="mh-label">📲 App download gate</div>
+          <div class="mh-num" id="stat-src-appgate">-</div>
+        </div>
+      </div>
+      <div id="stat-src-channels"><div class="empty">Loading…</div></div>
+      <div class="mh-recent-head">Top referring techs · shared-profile links</div>
+      <div id="stat-src-techs" class="mh-recent" style="max-height:220px;">
+        <div class="empty">Loading…</div>
+      </div>
+      <div class="mh-disclaimer" id="stat-src-legacy-note">The techs list counts store taps that arrived through a tech's shared profile link (?tech=…), her downloads, attributed. Gate taps before 2026-09-04 were logged without source detail and appear only in the legacy total shown here once loaded.</div>
     </div>
 
     <!-- App downloads, true installs (manual ledger from the consoles) -->
@@ -1367,6 +1391,104 @@
       (gTd == null ? '-' : gTd) + ' today · ' + (g7 == null ? '-' : g7) + ' this week');
   }
 
+  // ── Where download taps come from (store_clicks, 30d) ─────────────
+  // Splits taps by surface (marketing page vs /app download gate), by
+  // acquisition channel, and attributes shared-profile taps to the tech
+  // whose link drove them (store_clicks.utm_campaign carries her uuid;
+  // names resolved via an admin read of public.techs). Also surfaces the
+  // legacy all-time app-gate tap count from marketing_hits — gate taps
+  // only started writing store_clicks on 2026-09-04.
+  async function loadStoreSources() {
+    const since = new Date(Date.now() - 30 * 86400000).toISOString();
+    let rows = [];
+    try {
+      const url = SUPABASE_URL + '/rest/v1/store_clicks'
+                + '?select=platform,page,entry_channel,utm_campaign&created_at=gte.'
+                + encodeURIComponent(since) + '&order=created_at.desc&limit=5000';
+      const r = await fetch(url, { headers: authHeaders() });
+      if (!r.ok) { if (r.status === 401 || r.status === 403) handleAuthExpired(); return; }
+      rows = await r.json();
+    } catch (e) { return; }
+
+    let nMkt = 0, nApp = 0;
+    const ch = {}, techTaps = {};
+    (rows || []).forEach(function (row) {
+      if (row.page === 'app') nApp++; else nMkt++;
+      const c = row.entry_channel || 'direct';
+      ch[c] = (ch[c] || 0) + 1;
+      const camp = String(row.utm_campaign || '');
+      if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(camp)) {
+        techTaps[camp] = techTaps[camp] || { n: 0, apple: 0, google: 0 };
+        techTaps[camp].n++;
+        if (row.platform === 'apple') techTaps[camp].apple++; else techTaps[camp].google++;
+      }
+    });
+    setTxt('stat-src-marketing', fmt(nMkt));
+    setTxt('stat-src-appgate',   fmt(nApp));
+
+    // Channel bars, same treatment as the arrivals panel.
+    const order  = ['qr','social','search','referral','campaign','direct'];
+    const labels = { qr:'QR code', social:'Social', search:'Search', referral:'Referral', campaign:'Shared link / UTM', direct:'Direct' };
+    const icons  = { qr:'🔳', social:'💬', search:'🔍', referral:'🔗', campaign:'🏷️', direct:'➡️' };
+    const keys = order.filter(function (k) { return ch[k]; })
+      .concat(Object.keys(ch).filter(function (k) { return order.indexOf(k) < 0; }));
+    if (!keys.length) {
+      setHtml('stat-src-channels', '<div class="empty">No store taps in the last 30 days yet.</div>');
+    } else {
+      const max = Math.max.apply(null, [1].concat(keys.map(function (k) { return ch[k]; })));
+      const total = keys.reduce(function (a, k) { return a + ch[k]; }, 0);
+      setHtml('stat-src-channels', keys.map(function (k) {
+        const pct   = Math.round((ch[k] / max) * 100);
+        const share = total ? Math.round((ch[k] / total) * 100) : 0;
+        return '<div style="margin-bottom:11px;">'
+          +   '<div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;">'
+          +     '<span>' + (icons[k] || '•') + ' ' + escHtml(labels[k] || k) + '</span>'
+          +     '<strong>' + ch[k] + ' <span style="color:var(--muted);font-weight:400;">(' + share + '%)</span></strong>'
+          +   '</div>'
+          +   '<div style="height:8px;border-radius:4px;background:rgba(196,120,106,0.12);overflow:hidden;">'
+          +     '<div style="height:100%;width:' + pct + '%;background:linear-gradient(90deg,var(--rose),var(--rose-dark));border-radius:4px;"></div>'
+          +   '</div>'
+          + '</div>';
+      }).join(''));
+    }
+
+    // Top referring techs: resolve uuids to names (admin can read techs).
+    const ids = Object.keys(techTaps).sort(function (a, b) { return techTaps[b].n - techTaps[a].n; }).slice(0, 10);
+    if (!ids.length) {
+      setHtml('stat-src-techs', '<div class="empty">No shared-link taps yet. When a tech’s shared profile drives a store tap, she shows up here.</div>');
+    } else {
+      const names = {};
+      try {
+        const r2 = await fetch(SUPABASE_URL + '/rest/v1/techs?id=in.(' + ids.join(',') + ')&select=id,name', { headers: authHeaders() });
+        if (r2.ok) (await r2.json() || []).forEach(function (t) { names[t.id] = t.name; });
+      } catch (e) {}
+      setHtml('stat-src-techs', ids.map(function (id) {
+        const t = techTaps[id];
+        return '<div class="mh-row">'
+          +   '<div class="mh-left"><span class="mh-page">' + escHtml(names[id] || ('tech ' + id.slice(0, 8) + '…')) + '</span>'
+          +     '<span class="mh-ref">' + t.apple + ' Apple · ' + t.google + ' Android</span></div>'
+          +   '<span class="mh-when">' + fmt(t.n) + ' tap' + (t.n === 1 ? '' : 's') + '</span>'
+          + '</div>';
+      }).join(''));
+    }
+
+    // Legacy context: all-time app-surface taps from the old marketing_hits log.
+    try {
+      const r3 = await fetch(SUPABASE_URL + '/rest/v1/marketing_hits?select=id&utm_medium=like.store_tap_*', {
+        method: 'HEAD',
+        headers: Object.assign({}, authHeaders(), { 'Prefer': 'count=exact', 'Range-Unit': 'items', 'Range': '0-0' })
+      });
+      if (r3.ok) {
+        const n = parseInt(((r3.headers.get('content-range') || '').split('/')[1] || '0'), 10);
+        if (!isNaN(n)) {
+          const el = $('stat-src-legacy-note');
+          if (el) el.textContent = 'The techs list counts store taps that arrived through a tech’s shared profile link (?tech=…), her downloads, attributed. '
+            + 'Legacy log: ' + fmt(n) + ' app-surface tap' + (n === 1 ? '' : 's') + ' all-time (includes taps before 2026-09-04, when the gate logged no source detail).';
+        }
+      }
+    } catch (e) {}
+  }
+
   // ── App downloads, true installs (manual app_downloads ledger) ────
   async function loadAppDownloads() {
     let rows = [];
@@ -1448,6 +1570,7 @@
     loadMarketingHits().catch(e => console.warn('marketing hits:', e));
     loadArrivals().catch(e => console.warn('arrivals:', e));
     loadStoreClicks().catch(e => console.warn('store clicks:', e));
+    loadStoreSources().catch(e => console.warn('store sources:', e));
     loadAppDownloads().catch(e => console.warn('app downloads:', e));
 
     const now = new Date();

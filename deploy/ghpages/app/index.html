@@ -5382,8 +5382,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.3',     /* __APP_BUILD_NAME__   */
-  android: 606,         /* __APP_BUILD_ANDROID__ */
-  ios:     411,          /* __APP_BUILD_IOS__     */
+  android: 607,         /* __APP_BUILD_ANDROID__ */
+  ios:     412,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -22062,21 +22062,60 @@ async function maybeOpenSharedProfile() {
 }
 
 // Store-tap tracking (2026-08-11): each App Store / Google Play tap from the
-// get-the-app banner writes a marketing_hits row (utm_medium =
-// store_tap_<platform>, utm_campaign = the shared tech's id) so stats can
-// count taps per platform and per sharing tech. Android installs also carry
-// the Play install-referrer for real install attribution in Play Console;
-// iOS install attribution needs Apple Search Ads wiring later.
+// get-the-app banner OR the /app download gate writes a marketing_hits row
+// (utm_medium = store_tap_<platform>, utm_campaign = the shared tech's id)
+// so stats can count taps per platform and per sharing tech. Android
+// installs also carry the Play install-referrer for real install
+// attribution in Play Console; iOS install attribution needs Apple Search
+// Ads wiring later.
+//
+// 2026-09-04: ALSO writes public.store_clicks — the table the admin-stats
+// dashboard's download-intent panel actually reads. Until now only the
+// marketing page wrote there, so every tap from the download gate and the
+// shared-profile banner was invisible on the dashboard. Attribution is
+// taken from the real arrival (utm params + referrer), not hardcoded:
+// a share arrival (?tech=…/src=profile_share) reads as campaign, a link
+// from another site as referral, everything else as direct.
 function trackStoreTap(platform) {
+  var sid = (function() { try { return localStorage.getItem('mnc_anon_sid') || 'anon'; } catch(_) { return 'anon'; } })();
+  var device = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent || '') ? 'mobile' : 'desktop';
+  var q = null;
+  try { q = new URLSearchParams(location.search); } catch(_) {}
+  var utmSource   = (q && (q.get('utm_source') || q.get('src'))) || (window._mncGetAppTech ? 'profile_share' : null);
+  var utmMedium   = (q && q.get('utm_medium')) || null;
+  var utmCampaign = (q && q.get('utm_campaign')) || String(window._mncGetAppTech || '') || null;
+  var ref = String(document.referrer || '');
+  var refExternal = ref && ref.indexOf(location.hostname) === -1;
+  var channel = (window._mncGetAppTech || utmSource) ? 'campaign'
+              : (refExternal ? (/google\.|bing\.|duckduckgo\./i.test(ref) ? 'search' : 'referral') : 'direct');
+  var postHeaders = { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY,
+                      'Authorization': 'Bearer ' + SUPABASE_ANON_KEY, 'Prefer': 'return=minimal' };
+  try {
+    fetch(SUPABASE_URL + '/rest/v1/store_clicks', {
+      method: 'POST',
+      headers: postHeaders,
+      body: JSON.stringify({
+        session_id: sid,
+        platform: platform === 'ios' ? 'apple' : 'google',   // store_clicks vocab
+        page: 'app',
+        entry_channel: channel,
+        device_type: device,
+        referrer: ref.slice(0, 300) || null,
+        utm_source: utmSource,
+        utm_medium: utmMedium || ('store_tap_' + platform),
+        utm_campaign: utmCampaign
+      }),
+      keepalive: true
+    }).catch(function() {});
+  } catch(_) {}
   try {
     fetch(SUPABASE_URL + '/rest/v1/marketing_hits', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY,
-                 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY, 'Prefer': 'return=minimal' },
+      headers: postHeaders,
       body: JSON.stringify({
-        session_id: (function() { try { return localStorage.getItem('mnc_anon_sid') || 'anon'; } catch(_) { return 'anon'; } })(),
+        session_id: sid,
         page: 'app',
-        device_type: /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent || '') ? 'mobile' : 'desktop',
+        device_type: device,
         entry_channel: 'campaign',
         user_agent: String(navigator.userAgent || '').slice(0, 500),
         utm_source: 'profile_share',
