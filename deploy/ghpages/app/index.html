@@ -5382,8 +5382,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.3',     /* __APP_BUILD_NAME__   */
-  android: 605,         /* __APP_BUILD_ANDROID__ */
-  ios:     410,          /* __APP_BUILD_IOS__     */
+  android: 606,         /* __APP_BUILD_ANDROID__ */
+  ios:     411,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -7074,7 +7074,13 @@ function isInspoSaved(url) {
 // grid's "Tech: Sarah" labels. Callers should pass both; saves missing
 // techEmail still work but will be excluded from per-tech aggregates
 // (those show up as 'orphaned' rows in the user_inspo migration diagnostic).
-async function toggleInspoPhoto(url, techName, techEmail) {
+// techEmail doubles as the popularity KEY: the tech's email when she has
+// one, else her phone (the batch/count RPCs resolve either). techId is the
+// techs.id uuid — the real owner key user_inspo stores since
+// sql/feed-hearts-phone-techs.sql; without it a heart on a phone-only
+// tech's photo was written with tech_email NULL and could never be
+// attributed to her.
+async function toggleInspoPhoto(url, techName, techEmail, techId) {
   if (!currentUserEmail) { showToast('Sign in to save inspo'); startPhoneAuth('signin'); return; }
   // OPTIMISTIC UPDATE: mutate the local cache BEFORE firing the network
   // request, so any caller that re-reads state synchronously after this
@@ -7121,7 +7127,11 @@ async function toggleInspoPhoto(url, techName, techEmail) {
       const res = await fetch(`${SUPABASE_URL}/rest/v1/user_inspo`, {
         method: 'POST',
         headers: { 'Content-Type':'application/json','apikey': SUPABASE_ANON_KEY,'Authorization': `Bearer ${window._mncAccessToken || SUPABASE_ANON_KEY}`,'Prefer':'return=minimal' },
-        body: JSON.stringify({ user_id: currentUserId(), user_email: currentUserEmail, photo_url: url, tech_name: techName || '', tech_email: techEmail || null })
+        body: JSON.stringify({ user_id: currentUserId(), user_email: currentUserEmail, photo_url: url, tech_name: techName || '',
+          // tech_email keeps EMAILS only (a phone key stays out of an
+          // email column); tech_id is what the counts aggregate on.
+          tech_email: (techEmail && techEmail.indexOf('@') > 0) ? techEmail : null,
+          tech_id: techId || null })
       });
       if (!res.ok) throw new Error('insert failed: ' + res.status);
     } catch(e) {
@@ -7136,8 +7146,8 @@ async function toggleInspoPhoto(url, techName, techEmail) {
   // ♥ N updates immediately when a user hearts a photo. No-op if a
   // different screen is showing, renderTechPopularity bails cleanly
   // when td-popularity isn't visible.
-  if (typeof currentTech !== 'undefined' && currentTech && currentTech.email
-      && techEmail && String(currentTech.email).toLowerCase() === String(techEmail).toLowerCase()) {
+  if (typeof currentTech !== 'undefined' && currentTech && techEmail
+      && String(currentTech.email || currentTech.phone || '').toLowerCase() === String(techEmail).toLowerCase()) {
     try { renderTechPopularity(currentTech); } catch(_){}
   }
 }
@@ -7193,7 +7203,7 @@ async function loadInspoPhotos() {
     (function(photo, btn, cellEl) {
       btn.onclick = function(e) {
         e.stopPropagation();
-        toggleInspoPhoto(photo.photo_url, photo.tech_name || '', photo.tech_email || null);
+        toggleInspoPhoto(photo.photo_url, photo.tech_name || '', photo.tech_email || null, photo.tech_id || null);
         // Animate out then reload
         cellEl.style.transition = 'opacity 0.2s';
         cellEl.style.opacity = '0';
@@ -7470,9 +7480,9 @@ async function renderTechPopularity(tech) {
   row.style.display = 'none';
   // email OR phone (audit 2026-08-03): the email-only gate hid this row on
   // every phone-only tech's profile. Favorites resolve via the v2 RPC
-  // (email-or-phone); hearts are still keyed on tech_email in user_inspo so
-  // they honestly show 0 for email-less techs until that table gets a
-  // tech_id column.
+  // (email-or-phone); hearts resolve the same way since
+  // sql/feed-hearts-phone-techs.sql re-keyed user_inspo on tech_id and
+  // taught tech_heart_count to take an email-or-phone key.
   if (!tech || (!tech.email && !tech.phone)) return;
   const _favVia = tech.email
     ? getTechFavCount(tech.email)
@@ -7487,7 +7497,7 @@ async function renderTechPopularity(tech) {
   try {
     const [favCount, heartCount, joined] = await Promise.all([
       _favVia,
-      tech.email ? getTechHeartCount(tech.email) : Promise.resolve(0),
+      getTechHeartCount(tech.email || tech.phone),
       getTechJoinedDate(tech.email || tech.phone)
     ]);
     const html = popularityRowHTML(favCount, heartCount, joined);
@@ -8930,9 +8940,10 @@ function renderTechCards(query, filteredList) {
     // Popularity chip slot, empty on first paint, hydrated async by
     // hydrateGridPopularityChips() using a single batched RPC pair.
     // data-tech-email carries the key so the hydrator doesn't need to
-    // re-parse the onclick JSON. tech.email can be absent for older
-    // records; fall back to name so at least the hydrator skip is clean.
-    const popKey = (t.email || '').toString().trim().toLowerCase();
+    // re-parse the onclick JSON. The key is email OR phone — the batch
+    // RPCs resolve either (sql/feed-hearts-phone-techs.sql); email-only
+    // keying left every phone-only tech's card chipless.
+    const popKey = (t.email || t.phone || '').toString().trim().toLowerCase();
 
     return `<div class="tech-card" onclick="openTechDetail(${JSON.stringify(t).replace(/"/g,'&quot;')})">
       <div class="tech-card-photos">${photoSlots}</div>
@@ -9151,7 +9162,8 @@ function openTechDetail(tech) {
     galleryCount.textContent = photos.length + ' photo' + (photos.length > 1 ? 's' : '');
     galleryEmpty.style.display = 'none';
     var techNameForInspo = tech.name || '';
-    var techEmailForInspo = tech.email || '';
+    var techEmailForInspo = tech.email || tech.phone || '';  // popularity key: email or phone
+    var techIdForInspo = tech.id || null;                     // real owner key for the write
     photos.forEach(function(p, idx) {
       var photoUrl = p.url || p;
       var div = document.createElement('div');
@@ -9180,7 +9192,7 @@ function openTechDetail(tech) {
       refreshHeart();
       heart.onclick = function(e) {
         e.stopPropagation();
-        toggleInspoPhoto(photoUrl, techNameForInspo, techEmailForInspo);
+        toggleInspoPhoto(photoUrl, techNameForInspo, techEmailForInspo, techIdForInspo);
         // Tiny pop-out animation when tapped
         heart.style.transform = 'scale(1.25)';
         setTimeout(function() { heart.style.transform = ''; }, 180);
@@ -12611,8 +12623,12 @@ function prependHomeFeedCards(newPosts) {
   // stays symmetric, otherwise the wrap would skip one "set" of the new
   // content.
   newPosts.forEach(function(p) {
+    // uuid key first (phone-only techs have no email); legacy posts
+    // predate tech_uuid and still match by email.
     var tech = techs.find(function(t) {
-      return t && t.email && t.email.toLowerCase() === String(p.tech_id || '').toLowerCase();
+      if (!t) return false;
+      if (p.tech_uuid && t.id === p.tech_uuid) return true;
+      return !!(t.email && t.email.toLowerCase() === String(p.tech_id || '').toLowerCase());
     });
     if (!tech) return;
     if (_homeFeedRadius > 0 && haveUserLoc && tech.lat != null && tech.lng != null) {
@@ -12646,10 +12662,13 @@ function renderHomeFeedFromCache() {
   // them twice (for the seamless auto-scroll loop) without re-filtering.
   var pairs = [];
   (_homeFeedPosts || []).forEach(function(p) {
-    // Look up tech by email (tech_id is the tech's email).
+    // Look up tech by uuid first (tech_uuid, works for phone-only techs);
+    // legacy posts predate the column and match by email in tech_id.
     // ALL_TECHS is declared `const` at module scope, reference directly.
     var tech = (typeof ALL_TECHS !== 'undefined' ? ALL_TECHS : []).find(function(t) {
-      return t && t.email && t.email.toLowerCase() === String(p.tech_id || '').toLowerCase();
+      if (!t) return false;
+      if (p.tech_uuid && t.id === p.tech_uuid) return true;
+      return !!(t.email && t.email.toLowerCase() === String(p.tech_id || '').toLowerCase());
     });
     if (!tech) return;
     // Radius filter, best-effort. Apply distance gate ONLY when we have
@@ -13033,7 +13052,7 @@ function renderStyleGrid() {
       heart.title = 'Save to inspo';
       (function(photo, btn) {
         function refresh() { btn.innerHTML = isInspoSaved(photo.url) ? heartFilled : heartEmpty; }
-        btn.onclick = function(e) { e.stopPropagation(); toggleInspoPhoto(photo.url, photo.tech.name, photo.tech.email); refresh(); };
+        btn.onclick = function(e) { e.stopPropagation(); toggleInspoPhoto(photo.url, photo.tech.name, photo.tech.email || photo.tech.phone, photo.tech.id); refresh(); };
         refresh();
       })(p, heart);
       div.appendChild(heart);
@@ -17973,8 +17992,15 @@ async function loadTechHomeStats() {
 
   // Posts, count=exact via HEAD-ish trick (Prefer: count=exact + Range)
   try {
+    // Count by uuid AND legacy email key: phone-only techs only have uuid
+    // posts, email-era techs may have rows under either. The techs-row
+    // fetch above seeded window._bkSetup.id.
+    var _postsTechId = (window._bkSetup && window._bkSetup.id) || '';
+    var _postsFilter = _postsTechId
+      ? 'or=(tech_id.eq.' + encodeURIComponent(email) + ',tech_uuid.eq.' + encodeURIComponent(_postsTechId) + ')'
+      : 'tech_id=eq.' + encodeURIComponent(email);
     var r2 = await fetch(
-      SUPABASE_URL + '/rest/v1/board_posts?tech_id=eq.' + encodeURIComponent(email) + '&select=id',
+      SUPABASE_URL + '/rest/v1/board_posts?' + _postsFilter + '&select=id',
       {
         headers: {
           apikey: SUPABASE_ANON_KEY,
@@ -22506,11 +22532,12 @@ async function releaseCurrentWizardPhoto() {
   // now post to board_posts. Stagger logic still applies so a bulk
   // batch of 10 photos doesn't dump on the feed at once. slot_type is
   // still tracked elsewhere for quota accounting.
-  // Phone-only techs (email null) skip this leg: board_posts.tech_id is
-  // keyed on email and its RLS can't admit an email-less tech. Tags are
-  // already saved above, which is what gates Gallery visibility — the
-  // 3.0 one-gallery surface. 2026-08-03.
-  if (st.techEmail) {
+  // tech_uuid is the real key (sql/feed-hearts-phone-techs.sql) so
+  // phone-only techs post to the feed like everyone else; tech_id (the
+  // legacy email column) rides along when we have one so old builds and
+  // old rows keep matching. Until 2026-09-04 phone-only techs skipped
+  // this leg entirely and were invisible on the home feed.
+  if (st.techEmail || st.techId) {
     const HOUR_MS = 3600000;
     const publishAt = new Date(Date.now() + st.releasedCount * HOUR_MS).toISOString();
     try {
@@ -22523,7 +22550,8 @@ async function releaseCurrentWizardPhoto() {
           'Prefer': 'return=minimal'
         },
         body: JSON.stringify({
-          tech_id: st.techEmail,
+          tech_id: st.techEmail || null,
+          tech_uuid: st.techId || null,
           type: 'inspo',
           body: caption || tags.join(' \u00b7 '),
           image_url: url,

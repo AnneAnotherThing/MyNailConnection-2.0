@@ -200,7 +200,8 @@ order by created desc nulls last;
 --     where lower(coalesce(user_email,'')) in (select email_l from mails)
 --        or user_id in (select id from ids) returning 1),
 -- d_board as (delete from public.board_posts
---     where lower(coalesce(tech_id,'')) in (select email_l from mails) returning 1),
+--     where lower(coalesce(tech_id,'')) in (select email_l from mails)
+--        or tech_uuid in (select id from junk_techs) returning 1),
 --
 -- -- ── Push / notifications / analytics ────────────────────────────────
 -- d_push as (delete from public.push_subscriptions
