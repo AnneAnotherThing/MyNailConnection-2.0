@@ -465,10 +465,16 @@
     <h2>Admin sign-in</h2>
     <p class="hint">Pour a coffee. The numbers are right past this door.</p>
     <form id="auth-form" autocomplete="on">
-      <label for="auth-email">Email</label>
-      <input id="auth-email" type="email" placeholder="you@mynailconnection.com" required autocomplete="email"/>
-      <label for="auth-password">Password</label>
-      <input id="auth-password" type="password" placeholder="••••••••" required autocomplete="current-password"/>
+      <label for="auth-email">Email or phone</label>
+      <input id="auth-email" type="text" placeholder="you@mynailconnection.com or (602) 555-1234" required autocomplete="username"/>
+      <div id="auth-pw-wrap">
+        <label for="auth-password">Password</label>
+        <input id="auth-password" type="password" placeholder="••••••••" autocomplete="current-password"/>
+      </div>
+      <div id="auth-code-wrap" style="display:none;">
+        <label for="auth-code">Code we texted you</label>
+        <input id="auth-code" type="text" inputmode="numeric" placeholder="123456" autocomplete="one-time-code"/>
+      </div>
       <button id="auth-btn" type="submit">Sign in</button>
     </form>
     <div id="auth-error"></div>
@@ -855,22 +861,96 @@
     return data.access_token;
   }
 
+  // Phone sign-in (2026-09-04): the phone-only cutover means the working
+  // admin identity is often a phone with SMS-OTP and NO password — this page
+  // only spoke email+password and answered "invalid credentials" to the
+  // person who owns it. An identifier with no "@" now runs the same
+  // /auth/v1/otp → /auth/v1/verify flow the app uses. is_admin() accepts a
+  // phone-only session since sql/sweep-fixes-2026-09-04.sql, so the RLS
+  // side already works; the users row for that phone must carry role Admin.
+  let _pendingPhone = null;
+  function _normPhone(raw) {
+    const d = String(raw || '').replace(/\D/g, '');
+    const ten = d.slice(-10);
+    return ten.length === 10 ? '+1' + ten : null;
+  }
+  $('auth-email').addEventListener('input', function() {
+    const isEmail = this.value.indexOf('@') > -1;
+    $('auth-pw-wrap').style.display = isEmail ? 'block' : 'none';
+    if (isEmail && _pendingPhone) {
+      _pendingPhone = null;
+      $('auth-code-wrap').style.display = 'none';
+      $('auth-btn').textContent = 'Sign in';
+    } else if (!isEmail && !_pendingPhone) {
+      $('auth-btn').textContent = 'Text me a code';
+    }
+  });
+
+  async function sendSmsCode(phone) {
+    const r = await fetch(SUPABASE_URL + '/auth/v1/otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY },
+      body: JSON.stringify({ phone: phone })
+    });
+    if (!r.ok) {
+      const data = await r.json().catch(function(){ return {}; });
+      throw new Error((data && (data.error_description || data.msg || data.message)) || 'Could not send the code.');
+    }
+  }
+  async function verifySmsCode(phone, code) {
+    const r = await fetch(SUPABASE_URL + '/auth/v1/verify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY },
+      body: JSON.stringify({ type: 'sms', phone: phone, token: code })
+    });
+    const data = await r.json().catch(function(){ return {}; });
+    if (!r.ok || !data.access_token) {
+      throw new Error((data && (data.error_description || data.msg || data.message)) || 'Wrong code, try again.');
+    }
+    return data.access_token;
+  }
+
   $('auth-form').addEventListener('submit', async function(e) {
     e.preventDefault();
     clearAuthError();
-    const email = $('auth-email').value.trim();
-    const password = $('auth-password').value;
+    const ident = $('auth-email').value.trim();
     const btn = $('auth-btn');
-    btn.disabled = true; btn.textContent = 'Signing in…';
+    btn.disabled = true; const oldLabel = btn.textContent; btn.textContent = 'Working…';
     try {
-      token = await signIn(email, password);
+      if (ident.indexOf('@') > -1) {
+        // Email + password, unchanged.
+        const password = $('auth-password').value;
+        if (!password) throw new Error('Enter your password.');
+        token = await signIn(ident, password);
+      } else {
+        const phone = _normPhone(ident);
+        if (!phone) throw new Error('Enter an email, or a 10-digit phone number.');
+        if (!_pendingPhone) {
+          // Step 1: text the code.
+          await sendSmsCode(phone);
+          _pendingPhone = phone;
+          $('auth-code-wrap').style.display = 'block';
+          $('auth-btn').textContent = 'Verify code';
+          try { $('auth-code').focus(); } catch(_){}
+          btn.disabled = false; btn.textContent = 'Verify code';
+          return;
+        }
+        // Step 2: verify it.
+        const code = $('auth-code').value.trim();
+        if (!code) throw new Error('Enter the code from the text.');
+        token = await verifySmsCode(_pendingPhone, code);
+        _pendingPhone = null;
+        $('auth-code-wrap').style.display = 'none';
+        $('auth-code').value = '';
+      }
       try { localStorage.setItem(TOKEN_KEY, token); } catch(_){}
       showDash(true);
       await renderStats();
     } catch (err) {
-      showAuthError(err.message || 'Sign-in failed. Check the email + password.');
+      showAuthError(err.message || 'Sign-in failed.');
     } finally {
-      btn.disabled = false; btn.textContent = 'Sign in';
+      btn.disabled = false;
+      btn.textContent = _pendingPhone ? 'Verify code' : (token ? 'Sign in' : oldLabel);
     }
   });
 
