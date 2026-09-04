@@ -306,10 +306,16 @@
         <h2>Admin sign-in</h2>
         <p>This page is for MNC admins only.</p>
         <form id="signinForm" class="signin-form">
-          <label for="signin-email">Email</label>
-          <input type="email" id="signin-email" required autocomplete="email" />
-          <label for="signin-pass">Password</label>
-          <input type="password" id="signin-pass" required autocomplete="current-password" />
+          <label for="signin-email">Email or phone</label>
+          <input type="text" id="signin-email" required autocomplete="username" placeholder="you@… or (602) 555-1234" />
+          <div id="signin-pw-wrap">
+            <label for="signin-pass">Password</label>
+            <input type="password" id="signin-pass" autocomplete="current-password" />
+          </div>
+          <div id="signin-code-wrap" style="display:none;">
+            <label for="signin-code">Code we texted you</label>
+            <input type="text" id="signin-code" inputmode="numeric" autocomplete="one-time-code" placeholder="123456" />
+          </div>
           <button type="submit" id="signinBtn">Sign in</button>
           <p class="signin-err" id="signinErr" aria-live="polite"></p>
         </form>
@@ -749,25 +755,71 @@
     // Hide-resolved toggle
     $('hideResolved').addEventListener('change', renderFeedback);
 
-    // Sign-in form
+    // Sign-in form. Email+password, OR phone + SMS code exactly like the
+    // app login (2026-09-04: the phone-only cutover left the working admin
+    // identity with no password, and this page answered "invalid
+    // credentials" to its owner). No "@" in the identifier = phone mode:
+    // first submit texts the code via signInWithOtp, second verifies it.
+    let pendingPhone = null;
+    function normPhone(raw) {
+      const d = String(raw || '').replace(/\D/g, '');
+      const ten = d.slice(-10);
+      return ten.length === 10 ? '+1' + ten : null;
+    }
+    $('signin-email').addEventListener('input', function () {
+      const isEmail = this.value.indexOf('@') > -1;
+      $('signin-pw-wrap').style.display = isEmail ? 'block' : 'none';
+      if (isEmail && pendingPhone) {
+        pendingPhone = null;
+        $('signin-code-wrap').style.display = 'none';
+        $('signinBtn').textContent = 'Sign in';
+      } else if (!isEmail && !pendingPhone) {
+        $('signinBtn').textContent = 'Text me a code';
+      }
+    });
+
     $('signinForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       $('signinErr').textContent = '';
       $('signinBtn').disabled = true;
-      $('signinBtn').textContent = 'Signing in…';
+      $('signinBtn').textContent = 'Working…';
 
-      const email = $('signin-email').value.trim();
-      const password = $('signin-pass').value;
-      const { error } = await supa.auth.signInWithPassword({ email, password });
-
-      if (error) {
-        $('signinErr').textContent = error.message || 'Sign-in failed.';
+      const ident = $('signin-email').value.trim();
+      try {
+        if (ident.indexOf('@') > -1) {
+          const password = $('signin-pass').value;
+          if (!password) throw new Error('Enter your password.');
+          const { error } = await supa.auth.signInWithPassword({ email: ident, password });
+          if (error) throw error;
+          $('signin-pass').value = '';
+        } else {
+          const phone = normPhone(ident);
+          if (!phone) throw new Error('Enter an email, or a 10-digit phone number.');
+          if (!pendingPhone) {
+            const { error } = await supa.auth.signInWithOtp({ phone });
+            if (error) throw error;
+            pendingPhone = phone;
+            $('signin-code-wrap').style.display = 'block';
+            $('signinBtn').disabled = false;
+            $('signinBtn').textContent = 'Verify code';
+            try { $('signin-code').focus(); } catch (_) {}
+            return;
+          }
+          const code = $('signin-code').value.trim();
+          if (!code) throw new Error('Enter the code from the text.');
+          const { error } = await supa.auth.verifyOtp({ phone: pendingPhone, token: code, type: 'sms' });
+          if (error) throw error;
+          pendingPhone = null;
+          $('signin-code').value = '';
+          $('signin-code-wrap').style.display = 'none';
+        }
+      } catch (err) {
+        $('signinErr').textContent = (err && err.message) || 'Sign-in failed.';
         $('signinBtn').disabled = false;
-        $('signinBtn').textContent = 'Sign in';
+        $('signinBtn').textContent = pendingPhone ? 'Verify code' : (ident.indexOf('@') > -1 ? 'Sign in' : 'Text me a code');
         return;
       }
 
-      $('signin-pass').value = '';
       $('signinBtn').disabled = false;
       $('signinBtn').textContent = 'Sign in';
       showOnly('loading');
