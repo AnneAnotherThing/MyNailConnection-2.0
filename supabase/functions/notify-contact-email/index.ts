@@ -89,7 +89,11 @@ serve(async (req) => {
     try {
       if (kind === 'feedback') {
         const { error } = await supabaseAdmin.from('feedback').insert({
-          user_email:       email || null,
+          // email, else phone — same fallback the contact branch below has
+          // always had. Without it every phone-only reporter arrived
+          // anonymous (seen live: Leslie's two untraceable bug reports,
+          // sql/diagnose-leslie-push-and-feedback.sql).
+          user_email:       email || phone || null,
           user_role:        null,
           category:         role || 'Bug',
           message:          note,

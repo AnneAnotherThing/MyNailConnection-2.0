@@ -266,9 +266,11 @@ function jsonResponse(body: unknown, status = 200) {
 }
 
 // Verify the caller is an admin. Expects a Bearer JWT from the signed-in
-// user. We decode the email claim and check public.users for role='admin'.
-// If this check fails, return 403, never deliver a broadcast to an
-// unauthenticated / non-admin caller.
+// user. Resolves the caller's users row by email OR phone (2026-09-04:
+// the old check hard-required an email claim, locking out any phone-only
+// admin session, and compared role === 'admin' lowercase against rows the
+// admin migration seeds as 'Admin' — two independent ways to 403 a real
+// admin). Role compare is case-insensitive now.
 async function callerIsAdmin(req: Request): Promise<boolean> {
   try {
     const authHeader = req.headers.get('authorization') || '';
@@ -276,14 +278,20 @@ async function callerIsAdmin(req: Request): Promise<boolean> {
     if (!token) return false;
     // Use supabase.auth.getUser with the token to pull the user object.
     const { data, error } = await supabase.auth.getUser(token);
-    if (error || !data?.user?.email) return false;
-    const email = data.user.email.toLowerCase();
-    const { data: rows } = await supabase
-      .from('users')
-      .select('role')
-      .eq('email', email)
-      .limit(1);
-    return !!(rows && rows[0] && rows[0].role === 'admin');
+    if (error || !data?.user) return false;
+    const email = String(data.user.email || '').toLowerCase();
+    const phoneDigits = String(data.user.phone || '').replace(/\D/g, '');
+    const last10 = phoneDigits.slice(-10);
+
+    let rows: Array<{ role: string | null }> | null = null;
+    if (email) {
+      ({ data: rows } = await supabase.from('users').select('role').eq('email', email).limit(1));
+    }
+    if ((!rows || !rows.length) && last10.length === 10) {
+      ({ data: rows } = await supabase.from('users').select('role')
+        .in('phone', ['+1' + last10, '1' + last10, last10, phoneDigits]).limit(1));
+    }
+    return !!(rows && rows[0] && String(rows[0].role || '').toLowerCase() === 'admin');
   } catch (_) {
     return false;
   }
@@ -318,10 +326,19 @@ serve(async (req) => {
   if (!title) return jsonResponse({ error: 'title required' }, 400);
   if (!body)  return jsonResponse({ error: 'body required'  }, 400);
 
-  // ── Resolve target auth.user_ids from audience ─────────────────────────
+  // ── Resolve target push keys from audience ─────────────────────────────
   // 'all' → every row in push_subscriptions.
-  // role-scoped audiences → lookup emails in public.users, then map to
-  // auth.users.id, then filter subscriptions by user_id.
+  // role-scoped audiences → users with that role, mapped to their PUSH KEYS.
+  //
+  // 2026-09-04 rewrite: the old path mapped role → email → auth.users.id →
+  // .in('user_id', uuids). But push_subscriptions.user_id has NEVER held an
+  // auth uuid — it holds pushKey() output, a lowercased email or
+  // '+1' + last-ten-digits (see sql/notifications-history.sql). The uuid
+  // compare matched zero rows, so every 'techs'/'clients'/'admins'
+  // broadcast since launch reported sent: 0. It also dropped phone-only
+  // users at the email step. We now build each user's possible key shapes
+  // directly from their users row and skip auth entirely. Role compare is
+  // case-insensitive ('Admin' vs 'admin' seeding drift).
   let targetSubs: Array<{ endpoint: string; p256dh: string; auth: string; user_id: string }> = [];
 
   if (audience === 'all') {
@@ -332,33 +349,30 @@ serve(async (req) => {
     targetSubs = data || [];
   } else {
     const role = audience === 'techs' ? 'tech' : audience === 'clients' ? 'client' : 'admin';
-    // Step 1: emails of users with the target role.
     const { data: users, error: uerr } = await supabase
       .from('users')
-      .select('email')
-      .eq('role', role);
+      .select('email, phone')
+      .ilike('role', role);   // case-insensitive equality (no wildcards in `role`)
     if (uerr) return jsonResponse({ error: 'could not load users', detail: String(uerr) }, 500);
-    const emails = (users || []).map(u => String(u.email || '').toLowerCase()).filter(Boolean);
-    if (!emails.length) return jsonResponse({ sent: 0, failed: 0, total_subs: 0, reason: 'no users match audience' });
 
-    // Step 2: auth.users.id for each email.
-    // Supabase admin API is the cleanest path here.
-    const userIds: string[] = [];
-    for (const email of emails) {
-      try {
-        // paginate-by-email isn't supported directly; use listUsers with filter.
-        // For modest N this is fine; at scale consider indexing.
-        const { data: au, error } = await supabase.auth.admin.listUsers({ page: 1, perPage: 1, email });
-        if (!error && au?.users?.length) userIds.push(au.users[0].id);
-      } catch (_) { /* continue */ }
-    }
-    if (!userIds.length) return jsonResponse({ sent: 0, failed: 0, total_subs: 0, reason: 'no auth users match' });
+    const keys = new Set<string>();
+    (users || []).forEach((u) => {
+      const email = String(u.email || '').trim().toLowerCase();
+      if (email) keys.add(email);
+      const digits = String(u.phone || '').replace(/\D/g, '');
+      const ten = digits.slice(-10);
+      if (ten.length === 10) {
+        // Every shape the app has historically stored as a push key.
+        keys.add('+1' + ten); keys.add('1' + ten); keys.add(ten);
+        if (digits) keys.add(digits);
+      }
+    });
+    if (!keys.size) return jsonResponse({ sent: 0, failed: 0, total_subs: 0, reason: 'no users match audience' });
 
-    // Step 3: push_subscriptions for those user_ids.
     const { data: subs, error: serr } = await supabase
       .from('push_subscriptions')
       .select('endpoint, p256dh, auth, user_id')
-      .in('user_id', userIds);
+      .in('user_id', Array.from(keys));
     if (serr) return jsonResponse({ error: 'could not load subscriptions', detail: String(serr) }, 500);
     targetSubs = subs || [];
   }

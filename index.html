@@ -4505,6 +4505,10 @@ async function subscribeToBooking() {
     }
     return;
   }
+  // Remember that this Stripe launch was the BOOKING subscribe (not a photo
+  // top-up) so the return handler can continue into booking setup, the same
+  // walk-into-service-and-hours the iOS IAP path got on 2026-09-04.
+  window._mncStripeBookingIntent = true;
   _stripeLaunch(_stripeLink('link_glow_up', 'link_glow_up_test'),
                'Complete payment in browser, then return here');
 }
@@ -4583,7 +4587,18 @@ function _armTierRefreshOnReturn() {
     try { _hideCreditLoadingBanner(); } catch(_){}
     if (typeof updatePhotoLimitUI === 'function') updatePhotoLimitUI();
     if (detected === 'tier') {
-      showToast("You're on Glow Up, keep your gallery growing all month!");
+      // If this payment started from the BOOKING subscribe sheet, keep the
+      // momentum and walk into setup (service + hours, or Settings) — the
+      // same continuation the iOS IAP path has. Refresh the cached tech
+      // row first so the fork's subscription gate sees is_bookable=true.
+      if (window._mncStripeBookingIntent) {
+        window._mncStripeBookingIntent = false;
+        showToast('You’re all set — your book is open ✨');
+        try { await loadTechBookings(); } catch(_) {}
+        try { bkOpenSetupFork(); await bkForkInApp(); } catch(_) {}
+      } else {
+        showToast("You're on Glow Up, keep your gallery growing all month!");
+      }
     } else if (detected === 'credits') {
       const added = ((_techTier && _techTier.photo_credits) || 0) - beforeCredits;
       showToast(`Added ${added} photo credit${added !== 1 ? 's' : ''}, you're all set.`);
@@ -5382,8 +5397,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.3',     /* __APP_BUILD_NAME__   */
-  android: 607,         /* __APP_BUILD_ANDROID__ */
-  ios:     412,          /* __APP_BUILD_IOS__     */
+  android: 608,         /* __APP_BUILD_ANDROID__ */
+  ios:     413,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────

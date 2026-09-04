@@ -124,6 +124,51 @@ serve(async (req) => {
     // up with that number next).
     await bestEffortDeleteIn('push_subscriptions', 'user_id', pushKeys);
 
+    // notifications: recipient uses the same push-key shapes. Left behind
+    // until 2026-09-04, which meant the next person to sign up with a
+    // recycled phone number inherited the deleted user's entire
+    // notification history (RLS matches recipient by phone digits).
+    await bestEffortDeleteIn('notifications', 'recipient', pushKeys);
+
+    // Cancel any ACTIVE Stripe subscription before the techs row (and its
+    // stripe_customer_id) disappears — otherwise Stripe keeps billing a
+    // card for an account that no longer exists, and renewal webhooks
+    // update zero rows. Apple subscriptions can't be canceled server-side
+    // (the user cancels in iOS Settings); Stripe can, so we do. Best
+    // effort: a Stripe hiccup must not block the deletion Apple requires.
+    try {
+      const stripeKey = Deno.env.get('STRIPE_SECRET_KEY');
+      if (stripeKey) {
+        let custId: string | null = null;
+        if (userEmail) {
+          const { data } = await admin.from('techs').select('stripe_customer_id')
+            .eq('email', userEmail).limit(1).maybeSingle();
+          custId = data?.stripe_customer_id || null;
+        }
+        if (!custId && last10.length === 10) {
+          const { data } = await admin.from('techs').select('stripe_customer_id')
+            .in('phone', ['+1' + last10, '1' + last10, last10]).limit(1).maybeSingle();
+          custId = data?.stripe_customer_id || null;
+        }
+        if (custId) {
+          const listRes = await fetch(
+            'https://api.stripe.com/v1/subscriptions?customer=' + encodeURIComponent(custId) + '&status=active&limit=10',
+            { headers: { Authorization: 'Bearer ' + stripeKey } });
+          const list = listRes.ok ? await listRes.json() : null;
+          for (const sub of (list?.data || [])) {
+            const cancelRes = await fetch('https://api.stripe.com/v1/subscriptions/' + sub.id, {
+              method: 'DELETE',
+              headers: { Authorization: 'Bearer ' + stripeKey },
+            });
+            if (!cancelRes.ok) warnings.push('stripe cancel ' + sub.id + ': HTTP ' + cancelRes.status);
+            else console.log('canceled Stripe subscription', sub.id, 'for deleted account');
+          }
+        }
+      }
+    } catch (e) {
+      warnings.push('stripe cancel: ' + String(e));
+    }
+
     // board_posts: owner column is tech_id (holds the email), NOT
     // tech_email — the old delete targeted a column that doesn't exist.
     if (userEmail) await bestEffortDelete('board_posts', 'tech_id', userEmail);
