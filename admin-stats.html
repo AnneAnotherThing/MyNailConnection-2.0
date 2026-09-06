@@ -535,6 +535,18 @@
       <div class="live-num" id="stat-live">-</div>
     </div>
 
+    <!-- Bug reports & feedback (2026-09-06, Anne: "let's just give me a
+         table on the admin screen" — the ladybug reports, right here,
+         instead of depending on the alert email or a second page). -->
+    <div class="panel">
+      <div class="panel-head">
+        <div class="panel-title">Bug reports &amp; feedback</div>
+        <div class="panel-meta">newest first · <a href="/admin-feedback.html" style="color:var(--rose-dark);">full inbox →</a></div>
+      </div>
+      <div id="fb-list" class="mh-recent" style="max-height:340px;"><div class="empty">Loading reports…</div></div>
+      <div class="mh-disclaimer">Everything submitted through the in-app ladybug lands here the moment it's sent — whether or not the alert email works. Tap a row's message to expand it.</div>
+    </div>
+
     <!-- Marketing site hits -->
     <div class="panel">
       <div class="panel-head">
@@ -1335,6 +1347,55 @@
     }
   }
 
+  // ── Bug reports & feedback table (2026-09-06) ──────────────────────
+  // Latest 25 rows of public.feedback, rendered as a table on the dash so
+  // reports are visible even when the alert email is broken. Messages
+  // render clamped to two lines; clicking a row toggles the full text.
+  async function loadFeedback() {
+    try {
+      const url = SUPABASE_URL + '/rest/v1/feedback'
+                + '?select=created_at,user_email,user_role,category,message,current_screen,app_version'
+                + '&order=created_at.desc&limit=25';
+      const r = await fetch(url, { headers: authHeaders() });
+      if (!r.ok) {
+        if (r.status === 401 || r.status === 403) handleAuthExpired();
+        else setHtml('fb-list', '<div class="empty">Could not load feedback (HTTP ' + r.status + ').</div>');
+        return;
+      }
+      const rows = await r.json();
+      if (!rows || !rows.length) {
+        setHtml('fb-list', '<div class="empty">No reports yet — the ladybug is unclicked. 🐞</div>');
+        return;
+      }
+      function when(iso) {
+        try {
+          const d = new Date(iso);
+          return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+               + ' ' + d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+        } catch(_) { return '—'; }
+      }
+      setHtml('fb-list',
+        '<table class="tp-table"><thead><tr>'
+        + '<th>When</th><th>Who</th><th>Category</th><th>Message</th><th>Screen</th>'
+        + '</tr></thead><tbody>'
+        + rows.map(function (f) {
+            const who = f.user_email || (f.user_role ? '(' + f.user_role + ')' : 'anonymous');
+            return '<tr>'
+              + '<td class="tp-joined">' + when(f.created_at) + '</td>'
+              + '<td style="white-space:nowrap;max-width:140px;overflow:hidden;text-overflow:ellipsis;" title="' + escHtml(who) + '">' + escHtml(who) + '</td>'
+              + '<td style="white-space:nowrap;">' + escHtml(f.category || '—') + '</td>'
+              + '<td style="min-width:180px;cursor:pointer;" onclick="this.style.whiteSpace=this.style.whiteSpace===\'normal\'?\'\':\'normal\'">'
+              +   '<div style="max-width:340px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;line-height:1.45;">' + escHtml(f.message || '') + '</div>'
+              + '</td>'
+              + '<td class="tp-joined" title="build ' + escHtml(f.app_version || '?') + '">' + escHtml(f.current_screen || '—') + '</td>'
+              + '</tr>';
+          }).join('')
+        + '</tbody></table>');
+    } catch (e) {
+      setHtml('fb-list', '<div class="empty">Could not load feedback.</div>');
+    }
+  }
+
   // ── Marketing site hits ────────────────────────────────────────────
   async function loadMarketingHits() {
     const todayStart = new Date(); todayStart.setHours(0,0,0,0);
@@ -1711,6 +1772,7 @@
     // Fan out, each panel is independent so a slow query doesn't block others.
     await loadHeadline();
     if (!token) return;  // headline may have triggered auth-expired
+    loadFeedback().catch(e => console.warn('feedback:', e));
     loadPeopleAndPhotos().catch(e => console.warn('people/photos:', e));
     loadSubscriptions().catch(e => console.warn('subscriptions:', e));
     loadAppHits().catch(e => console.warn('app hits:', e));
