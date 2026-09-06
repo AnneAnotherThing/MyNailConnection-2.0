@@ -400,13 +400,20 @@
   .people-legend .dot.t { background: #2D6A4F; }
   .people-legend b { color: var(--charcoal); font-weight: 700; }
 
-  /* Tech-photo roster rows */
-  .tp-row {
-    display: flex; align-items: center; justify-content: space-between;
-    gap: 8px; padding: 8px 12px; border-bottom: 1px solid var(--border);
+  /* Tech roster table (2026-09-06, Anne: "get join dates for the techs,
+     make the techs a table"). Replaced the flex rows. */
+  .tp-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .tp-table th {
+    text-align: left; font-size: 10.5px; font-weight: 700; letter-spacing: 0.6px;
+    text-transform: uppercase; color: var(--muted);
+    padding: 8px 12px 6px; border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; background: white; z-index: 1;
   }
-  .tp-row:last-child { border-bottom: none; }
-  .tp-row.none { background: rgba(192,57,43,0.05); }
+  .tp-table td { padding: 8px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  .tp-table tr:last-child td { border-bottom: none; }
+  .tp-table tr.none { background: rgba(192,57,43,0.05); }
+  .tp-table th.num, .tp-table td.num { text-align: right; }
+  .tp-joined { white-space: nowrap; color: var(--muted); }
   .tp-name {
     font-weight: 600; color: var(--charcoal);
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0;
@@ -561,7 +568,7 @@
           <div class="mh-num" id="tp-avatar">-</div>
         </div>
       </div>
-      <div class="mh-recent-head">Per tech · most photos first</div>
+      <div class="mh-recent-head">Every tech · newest join first</div>
       <div id="tp-list" class="mh-recent"><div class="empty">Loading techs…</div></div>
       <div class="mh-disclaimer">“Photos” counts portfolio uploads on each tech profile. 🟢 = profile pic (avatar) set, ⚪ = none. Techs with no photos are flagged so they’re easy to follow up with.</div>
     </div>
@@ -822,8 +829,53 @@
   const SPOT10_PRICE  = 4.99;
 
   // ── State ──────────────────────────────────────────────────────────
-  let token = null;
-  try { token = localStorage.getItem(TOKEN_KEY); } catch(_){}
+  // Session persistence (2026-09-06, Anne: "so i don't have to burn texts
+  // each time i want to login"). The old code stored only the ACCESS token,
+  // which Supabase expires after ~1 hour — so any visit past that bounced
+  // to the login card and cost a fresh Twilio SMS. Now the whole session
+  // (access + refresh token) is stored and silently refreshed, the same way
+  // the app and admin-feedback.html (supabase-js) already behave: one text
+  // per browser, then never again until Sign out.
+  let token = null;         // current access token (~1h lifetime)
+  let refreshTok = null;    // long-lived rotating refresh token
+  try {
+    const _raw = localStorage.getItem(TOKEN_KEY);
+    if (_raw && _raw.charAt(0) === '{') {
+      const _s = JSON.parse(_raw);
+      token = _s.access_token || null;
+      refreshTok = _s.refresh_token || null;
+    }
+    // A legacy plain-string value (pre-2026-09-06) is a bare access token
+    // that expired within an hour of being written; ignore it and let the
+    // login flow run one last time.
+  } catch(_){}
+
+  function saveSession(data) {
+    token = data.access_token || null;
+    // Supabase rotates refresh tokens on every use; always keep the newest.
+    refreshTok = data.refresh_token || refreshTok || null;
+    try {
+      localStorage.setItem(TOKEN_KEY, JSON.stringify({ access_token: token, refresh_token: refreshTok }));
+    } catch(_){}
+  }
+
+  let _refreshInFlight = false;
+  async function tryRefresh() {
+    if (!refreshTok || _refreshInFlight) return false;
+    _refreshInFlight = true;
+    try {
+      const r = await fetch(SUPABASE_URL + '/auth/v1/token?grant_type=refresh_token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY },
+        body: JSON.stringify({ refresh_token: refreshTok })
+      });
+      const data = await r.json().catch(function(){ return {}; });
+      if (!r.ok || !data.access_token) return false;
+      saveSession(data);
+      return true;
+    } catch(_) { return false; }
+    finally { _refreshInFlight = false; }
+  }
 
   // ── DOM helpers ────────────────────────────────────────────────────
   const $ = id => document.getElementById(id);
@@ -858,7 +910,7 @@
       const err = (data && (data.error_description || data.msg || data.message)) || 'Sign-in failed.';
       throw new Error(err);
     }
-    return data.access_token;
+    return data;   // whole session: access_token + refresh_token
   }
 
   // Phone sign-in (2026-09-04): the phone-only cutover means the working
@@ -907,7 +959,7 @@
     if (!r.ok || !data.access_token) {
       throw new Error((data && (data.error_description || data.msg || data.message)) || 'Wrong code, try again.');
     }
-    return data.access_token;
+    return data;   // whole session: access_token + refresh_token
   }
 
   $('auth-form').addEventListener('submit', async function(e) {
@@ -921,7 +973,7 @@
         // Email + password, unchanged.
         const password = $('auth-password').value;
         if (!password) throw new Error('Enter your password.');
-        token = await signIn(ident, password);
+        saveSession(await signIn(ident, password));
       } else {
         const phone = _normPhone(ident);
         if (!phone) throw new Error('Enter an email, or a 10-digit phone number.');
@@ -938,12 +990,11 @@
         // Step 2: verify it.
         const code = $('auth-code').value.trim();
         if (!code) throw new Error('Enter the code from the text.');
-        token = await verifySmsCode(_pendingPhone, code);
+        saveSession(await verifySmsCode(_pendingPhone, code));
         _pendingPhone = null;
         $('auth-code-wrap').style.display = 'none';
         $('auth-code').value = '';
       }
-      try { localStorage.setItem(TOKEN_KEY, token); } catch(_){}
       showDash(true);
       await renderStats();
     } catch (err) {
@@ -956,6 +1007,7 @@
 
   $('signout-btn').addEventListener('click', function() {
     token = null;
+    refreshTok = null;
     try { localStorage.removeItem(TOKEN_KEY); } catch(_){}
     showDash(false);
     $('auth-password').value = '';
@@ -993,11 +1045,23 @@
     } catch (e) { return null; }
   }
 
-  function handleAuthExpired() {
+  async function handleAuthExpired() {
+    // Silent refresh first (2026-09-06): a 401 usually just means the 1-hour
+    // access token aged out. Renders fire many queries in parallel, so several
+    // 401s can land at once — tryRefresh's in-flight guard makes sure only
+    // the first one actually hits the refresh endpoint (Supabase rotates
+    // refresh tokens; a stampede of refreshes with the same token would
+    // revoke the whole session). The winner re-renders; the rest no-op.
+    if (refreshTok) {
+      if (_refreshInFlight) return;
+      const ok = await tryRefresh();
+      if (ok) { renderStats(); return; }
+    }
     showAuthError('Session expired or this account isn’t flagged as admin. Sign in again.');
     showDash(false);
     try { localStorage.removeItem(TOKEN_KEY); } catch(_){}
     token = null;
+    refreshTok = null;
   }
 
   // ── Headline cards + sparkline ─────────────────────────────────────
@@ -1094,7 +1158,7 @@
     let techs = [];
     try {
       const url = SUPABASE_URL + '/rest/v1/techs'
-                + '?select=id,name,image_url,photos,is_available&limit=5000';
+                + '?select=id,name,image_url,photos,is_available,created_at&limit=5000';
       const r = await fetch(url, { headers: authHeaders() });
       if (!r.ok) { if (r.status === 401 || r.status === 403) handleAuthExpired(); return; }
       techs = await r.json();
@@ -1108,8 +1172,8 @@
       if (n > 0) withPhotos++;
       if (t.image_url) avatars++;
       if (t.is_available === true) live++;
-      return { name: (t.name || 'Unnamed tech'), count: n, avatar: !!t.image_url };
-    }).sort(function (a, b) { return (b.count - a.count) || a.name.localeCompare(b.name); });
+      return { name: (t.name || 'Unnamed tech'), count: n, avatar: !!t.image_url, joined: t.created_at || '' };
+    }).sort(function (a, b) { return b.joined.localeCompare(a.joined) || a.name.localeCompare(b.name); });
 
     // Headline cards
     setTxt('stat-techs',  fmt(techCount));
@@ -1131,17 +1195,26 @@
       setHtml('tp-list', '<div class="empty">No techs in the book yet.</div>');
       return;
     }
-    setHtml('tp-list', roster.map(function (t) {
-      const none = t.count === 0;
-      return '<div class="tp-row' + (none ? ' none' : '') + '">'
-        +   '<span class="tp-name">' + escHtml(t.name) + '</span>'
-        +   '<span class="tp-meta">'
-        +     '<span class="tp-av" title="' + (t.avatar ? 'profile pic set' : 'no profile pic') + '">' + (t.avatar ? '🟢' : '⚪') + '</span>'
-        +     (none ? '<span class="tp-zero">no pics</span>'
-                    : '<span class="tp-count">' + t.count + ' 📷</span>')
-        +   '</span>'
-        + '</div>';
-    }).join(''));
+    function fmtJoin(iso) {
+      if (!iso) return '—';
+      try { return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }); }
+      catch(_) { return '—'; }
+    }
+    setHtml('tp-list',
+      '<table class="tp-table"><thead><tr>'
+      + '<th>Tech</th><th>Joined</th><th class="num">Photos</th><th class="num">Pic</th>'
+      + '</tr></thead><tbody>'
+      + roster.map(function (t) {
+          const none = t.count === 0;
+          return '<tr' + (none ? ' class="none"' : '') + '>'
+            + '<td><span class="tp-name">' + escHtml(t.name) + '</span></td>'
+            + '<td class="tp-joined">' + fmtJoin(t.joined) + '</td>'
+            + '<td class="num">' + (none ? '<span class="tp-zero">no pics</span>'
+                                         : '<span class="tp-count">' + t.count + '</span>') + '</td>'
+            + '<td class="num"><span class="tp-av" title="' + (t.avatar ? 'profile pic set' : 'no profile pic') + '">' + (t.avatar ? '🟢' : '⚪') + '</span></td>'
+            + '</tr>';
+        }).join('')
+      + '</tbody></table>');
   }
 
   // ── App page hits, external entrances to /app (marketing_hits, page=app) ─
@@ -1659,7 +1732,21 @@
   }
 
   // ── Bootstrap ──────────────────────────────────────────────────────
-  if (token) {
+  // With a stored refresh token, refresh up front so a stale access token
+  // never wastes the first render (and the login card never flashes for a
+  // returning session). Only a dead/revoked refresh token lands on login.
+  if (refreshTok) {
+    showDash(true);
+    tryRefresh().then(function(ok) {
+      if (ok) { renderStats(); }
+      else {
+        showDash(false);
+        showAuthError('Session expired. Sign in once and this browser stays signed in.');
+        token = null; refreshTok = null;
+        try { localStorage.removeItem(TOKEN_KEY); } catch(_){}
+      }
+    });
+  } else if (token) {
     showDash(true);
     renderStats();
   } else {
