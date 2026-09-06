@@ -467,8 +467,20 @@
     <div id="updated-line" class="updated-chip">Updated <span id="stats-updated">just now</span></div>
   </header>
 
-  <!-- ── Auth gate ───────────────────────────────────────────────────── -->
-  <div id="auth-card">
+  <!-- ── Quiet decoy (2026-09-06, Anne: "forget the login and instead give
+       me a tricky way to click into it"). Anyone landing on this URL signed
+       out sees a bland card and nothing else — no form, no hint. Tapping the
+       card 7 times within 2.5s gaps reveals the real sign-in below. Once a
+       session is stored, boots go straight to the dashboard and neither card
+       ever shows. Security is unchanged: the gesture only reveals a login
+       that still requires the SMS code + is_admin() RLS. -->
+  <div id="quiet-card" style="display:none;background:white;border:1px solid var(--border);border-radius:20px;padding:52px 24px;text-align:center;box-shadow:0 6px 24px rgba(20,19,23,0.06);">
+    <div style="font-family:'Playfair Display',serif;font-style:italic;font-size:22px;color:var(--charcoal);">My Nail Connection</div>
+    <div style="font-size:13px;color:var(--muted);margin-top:8px;">Nothing to see here.</div>
+  </div>
+
+  <!-- ── Auth gate (revealed only by the quiet-card gesture) ─────────── -->
+  <div id="auth-card" style="display:none;">
     <h2>Admin sign-in</h2>
     <p class="hint">Pour a coffee. The numbers are right past this door.</p>
     <form id="auth-form" autocomplete="on">
@@ -523,151 +535,6 @@
       <div class="live-num" id="stat-live">-</div>
     </div>
 
-    <!-- Who's in the book: clients vs techs -->
-    <div class="panel">
-      <div class="panel-head">
-        <div class="panel-title">Who's in the book</div>
-        <div class="panel-meta">clients vs techs</div>
-      </div>
-      <div class="people-split">
-        <div class="people-col clients">
-          <div class="people-k">Clients</div>
-          <div class="people-v" id="ppl-clients">-</div>
-          <div class="people-sub" id="ppl-clients-week">accounts</div>
-        </div>
-        <div class="people-col techs">
-          <div class="people-k">Techs</div>
-          <div class="people-v" id="ppl-techs">-</div>
-          <div class="people-sub" id="ppl-techs-sub">profiles</div>
-        </div>
-      </div>
-      <div class="people-bar" id="ppl-bar" aria-hidden="true"></div>
-      <div class="people-legend">
-        <span><i class="dot c"></i>Clients <b id="ppl-clients-pct">-</b></span>
-        <span><i class="dot t"></i>Techs <b id="ppl-techs-pct">-</b></span>
-      </div>
-    </div>
-
-    <!-- Techs & photos: who has pics and how many -->
-    <div class="panel">
-      <div class="panel-head">
-        <div class="panel-title">Techs &amp; photos</div>
-        <div class="panel-meta" id="tp-summary">who has pics</div>
-      </div>
-      <div class="mh-grid">
-        <div class="mh-card">
-          <div class="mh-label">With photos</div>
-          <div class="mh-num" id="tp-with">-</div>
-        </div>
-        <div class="mh-card">
-          <div class="mh-label">No photos</div>
-          <div class="mh-num" id="tp-without">-</div>
-        </div>
-        <div class="mh-card">
-          <div class="mh-label">Profile pic set</div>
-          <div class="mh-num" id="tp-avatar">-</div>
-        </div>
-      </div>
-      <div class="mh-recent-head">Every tech · newest join first</div>
-      <div id="tp-list" class="mh-recent"><div class="empty">Loading techs…</div></div>
-      <div class="mh-disclaimer">“Photos” counts portfolio uploads on each tech profile. 🟢 = profile pic (avatar) set, ⚪ = none. Techs with no photos are flagged so they’re easy to follow up with.</div>
-    </div>
-
-    <!-- 14d signup trend -->
-    <div class="panel">
-      <div class="panel-head">
-        <div class="panel-title">New signups · last 14 days</div>
-        <div class="panel-meta" id="stat-trend-total">-</div>
-      </div>
-      <svg id="stat-spark" viewBox="0 0 600 92" preserveAspectRatio="none" aria-hidden="true"></svg>
-      <div class="spark-axis"><span>14d ago</span><span>today</span></div>
-    </div>
-
-    <!-- Subscriptions by source -->
-    <div class="panel">
-      <div class="panel-head">
-        <div class="panel-title">Subscriptions by source</div>
-        <div class="panel-meta">where the Glow Ups come from</div>
-      </div>
-      <div class="src-grid">
-        <div class="src-card stripe">
-          <div class="src-label">Stripe (web/Android)</div>
-          <div class="src-num" id="stat-sub-stripe">-</div>
-        </div>
-        <div class="src-card apple">
-          <div class="src-label">Apple IAP</div>
-          <div class="src-num" id="stat-sub-apple">-</div>
-        </div>
-        <div class="src-card google">
-          <div class="src-label">Google Play</div>
-          <div class="src-num" id="stat-sub-google">-</div>
-        </div>
-        <div class="src-card comp">
-          <div class="src-label">Comped</div>
-          <div class="src-num" id="stat-sub-comp">-</div>
-        </div>
-      </div>
-      <div class="sub-total-line" id="stat-sub-total"><b>-</b> active Glow Up subscribers total</div>
-    </div>
-
-    <!-- Lifetime purchases -->
-    <div class="panel">
-      <div class="panel-head">
-        <div class="panel-title">Lifetime purchases</div>
-        <div class="panel-meta">all-time, all sources</div>
-      </div>
-      <div class="pur-row glow">
-        <div>
-          <div class="pur-title">Glow Up months billed</div>
-          <div class="pur-meta">est. <span id="stat-glow-up-revenue">$, </span> gross</div>
-        </div>
-        <div class="pur-num" id="stat-glow-up-months">-</div>
-      </div>
-      <div class="pur-row spot">
-        <div>
-          <div class="pur-title">Spotlight: 1 Photo</div>
-          <div class="pur-meta">$0.99 each · est. <span id="stat-spot1-revenue">$, </span> gross</div>
-        </div>
-        <div class="pur-num" id="stat-spot1-count">-</div>
-      </div>
-      <div class="pur-row spot">
-        <div>
-          <div class="pur-title">Spotlight: 10 Photos</div>
-          <div class="pur-meta">$4.99 each · est. <span id="stat-spot10-revenue">$, </span> gross</div>
-        </div>
-        <div class="pur-num" id="stat-spot10-count">-</div>
-      </div>
-      <div class="pur-disclaimer">Gross estimates do not subtract Stripe (~3%) or Apple/Google (15–30%) fees.</div>
-    </div>
-
-    <!-- App page hits: external entrances to /app -->
-    <div class="panel">
-      <div class="panel-head">
-        <div class="panel-title">App page hits · from outside</div>
-        <div class="panel-meta">/app entrances, not internal clicks</div>
-      </div>
-      <div class="mh-grid">
-        <div class="mh-card">
-          <div class="mh-label">Today</div>
-          <div class="mh-num" id="stat-app-today">-</div>
-        </div>
-        <div class="mh-card">
-          <div class="mh-label">Last 7d</div>
-          <div class="mh-num" id="stat-app-week">-</div>
-        </div>
-        <div class="mh-card">
-          <div class="mh-label">All-time</div>
-          <div class="mh-num" id="stat-app-total">-</div>
-        </div>
-      </div>
-      <div id="stat-app-breakdown" class="mh-chips"></div>
-      <div class="mh-recent-head">Recent entrances</div>
-      <div id="stat-app-recent" class="mh-recent">
-        <div class="empty">Loading…</div>
-      </div>
-      <div class="mh-disclaimer">Counts visits that land on mynailconnection.com/app from <b>outside</b> the site, a link, search, QR, social, or a typed/bookmarked URL. Internal clicks from the marketing pages and native-app opens are not counted. One visitor per 30 minutes; bots skipped.</div>
-    </div>
-
     <!-- Marketing site hits -->
     <div class="panel">
       <div class="panel-head">
@@ -695,7 +562,6 @@
       </div>
       <div class="mh-disclaimer">Counts each visitor once every 30 minutes. Search-engine bots are skipped. Only admins can read this table.</div>
     </div>
-
     <!-- How marketing visitors arrive: channel + device -->
     <div class="panel">
       <div class="panel-head">
@@ -715,7 +581,33 @@
       </div>
       <div class="mh-disclaimer">QR = arrived from a tagged QR link (mynailconnection.com/?src=qr-…). Channel is best-effort from the QR tag, campaign (UTM) tags, and the referring site.</div>
     </div>
-
+    <!-- App page hits: external entrances to /app -->
+    <div class="panel">
+      <div class="panel-head">
+        <div class="panel-title">App page hits · from outside</div>
+        <div class="panel-meta">/app entrances, not internal clicks</div>
+      </div>
+      <div class="mh-grid">
+        <div class="mh-card">
+          <div class="mh-label">Today</div>
+          <div class="mh-num" id="stat-app-today">-</div>
+        </div>
+        <div class="mh-card">
+          <div class="mh-label">Last 7d</div>
+          <div class="mh-num" id="stat-app-week">-</div>
+        </div>
+        <div class="mh-card">
+          <div class="mh-label">All-time</div>
+          <div class="mh-num" id="stat-app-total">-</div>
+        </div>
+      </div>
+      <div id="stat-app-breakdown" class="mh-chips"></div>
+      <div class="mh-recent-head">Recent entrances</div>
+      <div id="stat-app-recent" class="mh-recent">
+        <div class="empty">Loading…</div>
+      </div>
+      <div class="mh-disclaimer">Counts visits that land on mynailconnection.com/app from <b>outside</b> the site, a link, search, QR, social, or a typed/bookmarked URL. Internal clicks from the marketing pages and native-app opens are not counted. One visitor per 30 minutes; bots skipped.</div>
+    </div>
     <!-- Store badge taps, download intent (NOT installs) -->
     <div class="panel">
       <div class="panel-head">
@@ -736,7 +628,6 @@
       </div>
       <div class="mh-disclaimer">Counts taps on the App Store / Google Play buttons on the marketing site AND the /app download gate (gate taps logged here since 2026-09-04; earlier gate taps live only in the legacy log noted below). A proxy for interest, real installs are recorded below.</div>
     </div>
-
     <!-- Where download taps come from (store_clicks attribution) -->
     <div class="panel">
       <div class="panel-head">
@@ -760,7 +651,6 @@
       </div>
       <div class="mh-disclaimer" id="stat-src-legacy-note">The techs list counts store taps that arrived through a tech's shared profile link (?tech=…), her downloads, attributed. Gate taps before 2026-09-04 were logged without source detail and appear only in the legacy total shown here once loaded.</div>
     </div>
-
     <!-- App downloads, true installs (manual ledger from the consoles) -->
     <div class="panel">
       <div class="panel-head">
@@ -801,6 +691,89 @@
       </details>
       <div class="mh-disclaimer">Apple: App Store Connect → Analytics → Total Downloads. Android: Play Console → Statistics → Acquisition (or Users acquired). Enter a running total or a period whenever you check, the latest number per platform shows above.</div>
     </div>
+    <!-- 14d signup trend -->
+    <div class="panel">
+      <div class="panel-head">
+        <div class="panel-title">New signups · last 14 days</div>
+        <div class="panel-meta" id="stat-trend-total">-</div>
+      </div>
+      <svg id="stat-spark" viewBox="0 0 600 92" preserveAspectRatio="none" aria-hidden="true"></svg>
+      <div class="spark-axis"><span>14d ago</span><span>today</span></div>
+    </div>
+    <!-- Who's in the book: clients vs techs -->
+    <div class="panel">
+      <div class="panel-head">
+        <div class="panel-title">Who's in the book</div>
+        <div class="panel-meta">clients vs techs</div>
+      </div>
+      <div class="people-split">
+        <div class="people-col clients">
+          <div class="people-k">Clients</div>
+          <div class="people-v" id="ppl-clients">-</div>
+          <div class="people-sub" id="ppl-clients-week">accounts</div>
+        </div>
+        <div class="people-col techs">
+          <div class="people-k">Techs</div>
+          <div class="people-v" id="ppl-techs">-</div>
+          <div class="people-sub" id="ppl-techs-sub">profiles</div>
+        </div>
+      </div>
+      <div class="people-bar" id="ppl-bar" aria-hidden="true"></div>
+      <div class="people-legend">
+        <span><i class="dot c"></i>Clients <b id="ppl-clients-pct">-</b></span>
+        <span><i class="dot t"></i>Techs <b id="ppl-techs-pct">-</b></span>
+      </div>
+    </div>
+    <!-- Techs & photos: who has pics and how many -->
+    <div class="panel">
+      <div class="panel-head">
+        <div class="panel-title">Techs &amp; photos</div>
+        <div class="panel-meta" id="tp-summary">who has pics</div>
+      </div>
+      <div class="mh-grid">
+        <div class="mh-card">
+          <div class="mh-label">With photos</div>
+          <div class="mh-num" id="tp-with">-</div>
+        </div>
+        <div class="mh-card">
+          <div class="mh-label">No photos</div>
+          <div class="mh-num" id="tp-without">-</div>
+        </div>
+        <div class="mh-card">
+          <div class="mh-label">Profile pic set</div>
+          <div class="mh-num" id="tp-avatar">-</div>
+        </div>
+      </div>
+      <div class="mh-recent-head">Every tech · newest join first</div>
+      <div id="tp-list" class="mh-recent"><div class="empty">Loading techs…</div></div>
+      <div class="mh-disclaimer">“Photos” counts portfolio uploads on each tech profile. 🟢 = profile pic (avatar) set, ⚪ = none. Techs with no photos are flagged so they’re easy to follow up with.</div>
+    </div>
+    <!-- Subscriptions by source -->
+    <div class="panel">
+      <div class="panel-head">
+        <div class="panel-title">Subscriptions by source</div>
+        <div class="panel-meta">where the Glow Ups come from</div>
+      </div>
+      <div class="src-grid">
+        <div class="src-card stripe">
+          <div class="src-label">Stripe (web/Android)</div>
+          <div class="src-num" id="stat-sub-stripe">-</div>
+        </div>
+        <div class="src-card apple">
+          <div class="src-label">Apple IAP</div>
+          <div class="src-num" id="stat-sub-apple">-</div>
+        </div>
+        <div class="src-card google">
+          <div class="src-label">Google Play</div>
+          <div class="src-num" id="stat-sub-google">-</div>
+        </div>
+        <div class="src-card comp">
+          <div class="src-label">Comped</div>
+          <div class="src-num" id="stat-sub-comp">-</div>
+        </div>
+      </div>
+      <div class="sub-total-line" id="stat-sub-total"><b>-</b> active Glow Up subscribers total</div>
+    </div>
 
     <!-- Buttons -->
     <div class="bottom-row">
@@ -823,10 +796,10 @@
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im53cW5ha29vbmdyb3Jid25ycXpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNzczMjUsImV4cCI6MjA5ODk1MzMyNX0.TFFMlg9VjB0cyJwbgmVbeatFYQFaF1Ri0nrH0GwhHJs';
   const TOKEN_KEY = 'mnc_admin_stats_token';
 
-  // Pricing constants, keep in sync with index.html loadSubscriptionStats()
+  // Pricing constant, keep in sync with index.html loadSubscriptionStats().
+  // (Spotlight pack prices removed 2026-09-06 with the Lifetime-purchases
+  // panel — photo packs are no longer sold; photos are free.)
   const GLOW_UP_PRICE = 10.99;
-  const SPOT1_PRICE   = 0.99;
-  const SPOT10_PRICE  = 4.99;
 
   // ── State ──────────────────────────────────────────────────────────
   // Session persistence (2026-09-06, Anne: "so i don't have to burn texts
@@ -885,12 +858,30 @@
     if (n === null || n === undefined || Number.isNaN(n)) return '-';
     return Number(n).toLocaleString();
   }
+  // _authRevealed: the quiet-card 7-tap gesture flips this; until then a
+  // signed-out visit shows only the decoy (2026-09-06).
+  let _authRevealed = false;
   function showDash(yes) {
-    $('auth-card').style.display = yes ? 'none' : 'block';
+    $('auth-card').style.display  = (!yes && _authRevealed)  ? 'block' : 'none';
+    $('quiet-card').style.display = (!yes && !_authRevealed) ? 'block' : 'none';
     $('dash').classList.toggle('visible', yes);
     $('dash').style.display = yes ? 'block' : 'none';
     $('updated-line').style.display = yes ? 'inline-flex' : 'none';
   }
+  (function() {
+    let n = 0, timer = null;
+    $('quiet-card').addEventListener('click', function() {
+      n++;
+      clearTimeout(timer);
+      timer = setTimeout(function() { n = 0; }, 2500);
+      if (n >= 7) {
+        n = 0;
+        _authRevealed = true;
+        showDash(false);
+        try { $('auth-email').focus(); } catch(_){}
+      }
+    });
+  })();
   function showAuthError(msg) {
     const el = $('auth-error');
     el.textContent = msg;
@@ -1307,12 +1298,13 @@
     }).join(''));
   }
 
-  // ── Subscription source + lifetime purchases ───────────────────────
+  // ── Subscription source (2026-09-06: Lifetime-purchases panel retired —
+  // Spotlight photo packs are no longer sold. Glow Up months + gross now
+  // ride the subscriptions total line instead of their own panel.) ─────
   async function loadSubscriptions() {
     try {
       const url = SUPABASE_URL + '/rest/v1/techs'
-                + '?select=subscription_source,subscription_tier,glow_up_months_purchased,'
-                + 'spotlight_1_purchased_count,spotlight_10_purchased_count';
+                + '?select=subscription_source,subscription_tier,glow_up_months_purchased';
       const r = await fetch(url, { headers: authHeaders() });
       if (!r.ok) {
         if (r.status === 401 || r.status === 403) { handleAuthExpired(); return; }
@@ -1321,7 +1313,7 @@
       }
       const techs = await r.json();
       const sources = { stripe: 0, apple_iap: 0, google_play: 0, comp: 0 };
-      let glowMonths = 0, spot1 = 0, spot10 = 0, paidTotal = 0;
+      let glowMonths = 0, paidTotal = 0;
       (techs || []).forEach(t => {
         if (t.subscription_tier === 'paid') {
           paidTotal++;
@@ -1329,20 +1321,15 @@
           if (sources.hasOwnProperty(src)) sources[src]++;
         }
         glowMonths += (t.glow_up_months_purchased || 0);
-        spot1      += (t.spotlight_1_purchased_count || 0);
-        spot10     += (t.spotlight_10_purchased_count || 0);
       });
       setTxt('stat-sub-stripe', fmt(sources.stripe));
       setTxt('stat-sub-apple',  fmt(sources.apple_iap));
       setTxt('stat-sub-google', fmt(sources.google_play));
       setTxt('stat-sub-comp',   fmt(sources.comp));
-      setHtml('stat-sub-total', '<b>' + fmt(paidTotal) + '</b> active Glow Up subscribers total');
-      setTxt('stat-glow-up-months', fmt(glowMonths));
-      setTxt('stat-spot1-count',    fmt(spot1));
-      setTxt('stat-spot10-count',   fmt(spot10));
-      setTxt('stat-glow-up-revenue', '$' + (glowMonths * GLOW_UP_PRICE).toFixed(2));
-      setTxt('stat-spot1-revenue',   '$' + (spot1      * SPOT1_PRICE  ).toFixed(2));
-      setTxt('stat-spot10-revenue',  '$' + (spot10     * SPOT10_PRICE ).toFixed(2));
+      setHtml('stat-sub-total',
+        '<b>' + fmt(paidTotal) + '</b> active Glow Up subscribers'
+        + ' · ' + fmt(glowMonths) + ' month' + (glowMonths === 1 ? '' : 's') + ' billed all-time'
+        + ' · est. $' + (glowMonths * GLOW_UP_PRICE).toFixed(2) + ' gross (before store fees)');
     } catch (e) {
       setTxt('stat-sub-total', 'Could not load subscription stats');
     }
@@ -1440,11 +1427,18 @@
     const html = rows.map(r => {
       const label = pretty[r.page] || r.page || '?';
       const dev = r.device_type === 'mobile' ? '📱' : (r.device_type === 'desktop' ? '💻' : '·');
+      // "From where": referrer host when there is one; QR/campaign links land
+      // with an empty referrer but carry UTM tags, so fall back to those
+      // before giving up and calling it direct. 2026-09-06.
+      let via = shortRef(r.referrer);
+      if (via === 'direct' && r.utm_source) {
+        via = r.utm_source + (r.utm_campaign ? ' · ' + r.utm_campaign : '');
+      }
       return '<div class="mh-row">'
            +   '<div class="mh-left">'
            +     '<span style="flex-shrink:0;">' + dev + '</span>'
            +     '<span class="mh-page">' + esc(label) + '</span>'
-           +     '<span class="mh-ref">via ' + esc(shortRef(r.referrer)) + '</span>'
+           +     '<span class="mh-ref">via ' + esc(via) + '</span>'
            +   '</div>'
            +   '<span class="mh-when">' + relTime(r.created_at) + '</span>'
            + '</div>';
