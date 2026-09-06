@@ -5431,8 +5431,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.4',     /* __APP_BUILD_NAME__   */
-  android: 614,         /* __APP_BUILD_ANDROID__ */
-  ios:     419,          /* __APP_BUILD_IOS__     */
+  android: 615,         /* __APP_BUILD_ANDROID__ */
+  ios:     420,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -15671,16 +15671,21 @@ async function tbLoadDashBadge() {
   } catch(e) {}
 }
 
-// ── Daily availability nudge (2026-09-06, Anne) ─────────────────────────────
-// The walkthrough's "Show clients when you're open" step now stays done after
-// the first time (see the latch in _setupStepsState). This owns the reminder
-// job instead: when an ONBOARDED tech lands on her portal with all three chips
-// off, ask once per day whether she's open — today first, this week as the
-// gentler follow-up. Any answer (including "no") stamps the day, so it is one
-// question per day, never a loop.
+// ── Daily availability nudge (2026-09-06, Anne; sharpened same day) ─────────
+// The walkthrough's "Show clients when you're open" step stays done after the
+// first time (see the latch in _setupStepsState). This owns the reminder job:
+// "Open today" clears itself EVERY midnight, so any day a tech lands on her
+// portal with it off, ask once whether she's open — and teach the chip
+// lifecycle while we're at it (Anne: "tell them whether this week or new
+// clients sets itself or they should go in and set it too"):
+//   Open today   → self-clears nightly  → the DAILY ritual, this prompt's job
+//   This week    → self-clears Sunday   → follow-up prompt when it's off
+//   New clients  → never self-clears    → defaults ON at signup
+//     (sql/default-open-week-new-clients.sql), hers to turn off
+// Any answer (including "no") stamps the day: one ask per day, never a loop.
 async function maybeDailyAvailPrompt(t) {
   if (!t) return;
-  if (t.is_available || t.is_same_day || t.accepting_new_clients) return;
+  if (t.is_available) return;   // already open today — nothing to ask
   // Brand-new techs are the walkthrough's job; only nudge once onboarding has
   // acked the chips (the _setupStepsState latch writes this same key).
   var acked = false;
@@ -15693,7 +15698,7 @@ async function maybeDailyAvailPrompt(t) {
   // re-entry) can't stack two modals.
   try { localStorage.setItem(stampKey, '1'); } catch(_) {}
   var openToday = await showConfirm('Are you open for clients today?', {
-    body: 'All three of your chips are off, so clients can’t tell you’re taking anyone. Flip one on and you’re back in today’s searches.',
+    body: '“Open today” turns itself off every night, so clients only ever see what’s true. Pop in each day you have chair time and flip it on — that’s what shows you as bookable right now.\n\n(“This week” resets Sundays; “New clients” stays however you set it.)',
     okLabel: 'Yes — open today',
     cancelLabel: 'Not today',
     tone: 'neutral'
@@ -15701,17 +15706,20 @@ async function maybeDailyAvailPrompt(t) {
   if (openToday) {
     heroToggle('now');
     try { showToast('You’re showing as open today 💅'); } catch(_) {}
-    return;
   }
-  var openWeek = await showConfirm('Open later this week?', {
-    body: 'No pressure — “This week” just tells clients you’ve got room in the next few days.',
-    okLabel: 'Open this week',
-    cancelLabel: 'Not this time',
-    tone: 'neutral'
-  });
-  if (openWeek) {
-    heroToggle('week');
-    try { showToast('You’re showing as open this week 💅'); } catch(_) {}
+  // "This week" cleared itself Sunday night (or was turned off). At most one
+  // extra question, and only on days it's actually off.
+  if (!t.is_same_day) {
+    var openWeek = await showConfirm('Show as open this week too?', {
+      body: '“This week” cleared itself over the weekend — it resets every Sunday night. Flip it back on if you’ve got room in the next few days.',
+      okLabel: 'Open this week',
+      cancelLabel: 'Not this time',
+      tone: 'neutral'
+    });
+    if (openWeek) {
+      heroToggle('week');
+      try { showToast('You’re showing as open this week 💅'); } catch(_) {}
+    }
   }
 }
 
