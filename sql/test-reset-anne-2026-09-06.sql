@@ -280,9 +280,20 @@ select
 -- too. Expect "UPDATE 1" (or 2 if you made both an email and a phone
 -- account).
 -- ════════════════════════════════════════════════════════════════════════
-update public.users
-   set role = 'Admin'
- where lower(coalesce(email,'')) = 'annewilson1021@gmail.com'
-    or right(public.phone_digits(coalesce(phone,'')),10) = '4806996166';
--- Then sign OUT and back IN on admin-stats.html / admin-feedback.html so
--- the session re-evaluates is_admin(), and the numbers come back.
+-- (2026-09-06, learned live: role must be LOWERCASE 'admin' — users_role_check
+-- rejects 'Admin' — and if the app signup never finished its profile step,
+-- there is no users row to update at all. This upsert handles both: updates
+-- the row when it exists, creates it admin-ready when it doesn't.)
+insert into public.users (name, phone, role, joined)
+values ('Anne Wilson', '+14806996166', 'admin', now())
+on conflict (phone) do update set role = 'admin'
+returning id, name, phone, role;
+-- Expect one row back with role 'admin'. Then just refresh the dashboards —
+-- is_admin() re-evaluates on every query, no re-login needed.
+-- (If the insert errors on the conflict target — no unique index on phone —
+-- fall back to running the plain update, then the insert only if it said
+-- zero rows:
+--   update public.users set role = 'admin'
+--    where right(public.phone_digits(coalesce(phone,'')),10) = '4806996166'
+--   returning id, name, phone, role;
+-- )
