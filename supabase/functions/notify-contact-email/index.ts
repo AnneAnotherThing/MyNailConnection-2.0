@@ -73,10 +73,21 @@ serve(async (req) => {
 
   const note  = (p.note || p.body || '').toString().trim();
   const name  = (p.name || '').toString().trim();
-  const phone = (p.phone || '').toString().trim();
-  const email = (p.email || '').toString().trim();
+  let phone   = (p.phone || '').toString().trim();
+  let email   = (p.email || '').toString().trim();
   const role  = (p.role || '').toString().trim();
   if (!note) return json({ error: 'empty_note' }, 400);
+
+  // Phone-only auth (2026-08 cutover) left the signed-in identifier as a
+  // phone number, and the app passes it in the email slot. Resend rejects a
+  // phone as reply_to with a 422 validation_error, which killed every
+  // feedback alert email from a phone-signed-in user (seen 2026-09-14).
+  // Reclassify: no @ means not an email; if it reads as a phone and the
+  // phone slot is empty, use it there so the SMS button still renders.
+  if (email && !email.includes('@')) {
+    if (!phone && /^\+?[\d\s().-]{7,}$/.test(email)) phone = email;
+    email = '';
+  }
 
   // Save the row for callers that could not write it themselves. Signed-in
   // clients still insert directly and do NOT set this, so nothing is written

@@ -5431,8 +5431,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.4',     /* __APP_BUILD_NAME__   */
-  android: 615,         /* __APP_BUILD_ANDROID__ */
-  ios:     420,          /* __APP_BUILD_IOS__     */
+  android: 616,         /* __APP_BUILD_ANDROID__ */
+  ios:     421,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -21832,7 +21832,11 @@ async function submitFeedback() {
                   '\n— build: ' + (payload.app_version || '?') +
                   '\n— device: ' + (payload.user_agent || '?'),
             name: payload.user_email || 'A user',
-            email: payload.user_email || '',
+            // Phone-only auth: user_email may hold a phone number. Send it
+            // in the right slot or Resend 422s the reply_to and the alert
+            // email dies (the "Saved - but the alert email failed" toast).
+            email: (payload.user_email && payload.user_email.indexOf('@') !== -1) ? payload.user_email : '',
+            phone: (payload.user_email && payload.user_email.indexOf('@') === -1) ? payload.user_email : '',
             role: payload.category || 'Feedback'
           })
         });
