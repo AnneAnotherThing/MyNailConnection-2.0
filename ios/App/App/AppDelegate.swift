@@ -47,18 +47,25 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     // MARK: - Push notification token forwarding (Capacitor PushNotifications plugin)
+    //
+    // These MUST post under Capacitor's own Notification.Name constants. The
+    // PushNotifications plugin's addObserver listens for
+    // `.capacitorDidRegisterForRemoteNotifications`
+    // (rawValue "CapacitorDidRegisterForRemoteNotificationsNotification") — see
+    // node_modules/@capacitor/{ios,push-notifications}. A raw string like
+    // "didRegisterForRemoteNotificationsWithDeviceToken" matches nothing, so
+    // the token iOS hands us is broadcast to an empty room, the plugin's JS
+    // `registration` event never fires, and push_subscriptions never gets an
+    // ios row. That was the bug behind every silent iPhone: register()
+    // succeeded, the token arrived here, and it was posted under a name no one
+    // observed. Android never uses this path, which is why only iOS was dark.
+    // Confirmed on-device 2026-09-18 with PUSH_DIAGNOSTIC_MODE.
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
-        NotificationCenter.default.post(
-            name: Notification.Name(rawValue: "didRegisterForRemoteNotificationsWithDeviceToken"),
-            object: deviceToken
-        )
+        NotificationCenter.default.post(name: .capacitorDidRegisterForRemoteNotifications, object: deviceToken)
     }
 
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
-        NotificationCenter.default.post(
-            name: Notification.Name(rawValue: "didFailToRegisterForRemoteNotificationsWithError"),
-            object: error
-        )
+        NotificationCenter.default.post(name: .capacitorDidFailToRegisterForRemoteNotifications, object: error)
     }
 
 }
