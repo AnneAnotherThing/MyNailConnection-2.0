@@ -5015,6 +5015,28 @@ const IAP_PRODUCT_SPOTLIGHT_10= 'com.mynailconnection.app.spotlight_10';
 const IAP_DIAGNOSTIC_FAILURE_MODE = false;
 const IAP_DIAGNOSTIC_SUCCESS_MODE = false;
 
+// PUSH_DIAGNOSTIC_MODE, when true, fires a native alert() at every stage of
+// the iOS/Android push registration so a TestFlight tester can see EXACTLY
+// where the chain goes silent. Built 2026-09-18 because iPhone push never
+// registers (0 ios rows in push_subscriptions vs many android) with all the
+// Apple config, keys, secrets and repo code confirmed correct — the failure
+// is in the shipped binary and the only way to see it is on the device.
+// The alerts name the stage so the suspects separate cleanly:
+//   "plugin MISSING"          -> the CapacitorPushNotifications pod is not in
+//                                 the build (cap sync / regeneration problem).
+//   permission value          -> a denied/undetermined prompt.
+//   "calling register()" then silence with no registration/registrationError
+//                             -> the AppDelegate token-forwarding is missing
+//                                 from the build (native project regenerated).
+//   registrationError <detail>-> Apple refused the token; detail says why.
+//   registration token len    -> the token arrived; the save path follows.
+// FLIP BACK TO false before any App Store production submission (same rule as
+// the IAP flags in the pre-ship checklist).
+const PUSH_DIAGNOSTIC_MODE = true;
+function _pushDiag(msg) {
+  try { if (PUSH_DIAGNOSTIC_MODE) alert('PUSH DIAG: ' + msg); } catch(_) {}
+}
+
 // Platform check: TRUE only when running inside the iOS Capacitor shell
 // (not Safari on iPhone, not the PWA). All Apple IAP routing keys off this.
 function isIOS() {
@@ -5430,9 +5452,9 @@ function maybeShowTutorial(role) {
 // __APP_BUILD_*__ below are how sync.sh finds and rewrites the values.
 // Don't reorder or rename them.
 const APP_BUILD = {
-  name:    '3.0.4',     /* __APP_BUILD_NAME__   */
-  android: 617,         /* __APP_BUILD_ANDROID__ */
-  ios:     422,          /* __APP_BUILD_IOS__     */
+  name:    '3.0.5',     /* __APP_BUILD_NAME__   */
+  android: 618,         /* __APP_BUILD_ANDROID__ */
+  ios:     423,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -6383,15 +6405,19 @@ const NATIVE_PUSH_REGISTER_ENABLED = true;
 async function initCapacitorPush() {
   if (!PUSH_ENABLED) return;
   // Only runs if inside a Capacitor native app shell
-  if (!window.Capacitor || !window.Capacitor.isNativePlatform()) return;
+  if (!window.Capacitor || !window.Capacitor.isNativePlatform()) { _pushDiag('not a native shell, skipping'); return; }
+
+  _pushDiag('init start on ' + (window.Capacitor.getPlatform && window.Capacitor.getPlatform()));
 
   const { PushNotifications } = window.Capacitor.Plugins;
-  if (!PushNotifications) return;
+  if (!PushNotifications) { _pushDiag('PushNotifications plugin MISSING from this build — the pod did not ship. This is the bug if you see it.'); return; }
+  _pushDiag('plugin present');
 
   // requestPermissions is safe, it just resolves the OS permission state
   // and doesn't touch Firebase. Keep it inside try/catch anyway.
   try {
     const perm = await PushNotifications.requestPermissions();
+    _pushDiag('permission = ' + (perm && perm.receive));
     if (perm.receive !== 'granted') return;
     // Storage audit 2026-08-03: only setupEnablePush wrote this flag, so
     // after a reinstall the checklist nagged "Say yes to notifications"
@@ -6420,8 +6446,11 @@ async function initCapacitorPush() {
   }
 
   try {
+    _pushDiag('calling register() — if this is the last message you see, the AppDelegate token-forwarding is not in the build');
     await PushNotifications.register();
+    _pushDiag('register() returned; waiting for the registration event from iOS');
   } catch (e) {
+    _pushDiag('register() THREW: ' + ((e && e.message) || e));
     console.warn('Capacitor push register failed, continuing without push:', e);
     showToast('Notification setup hit a snag (register: ' + ((e && e.message) || e) + ')', 5000);
     return;
@@ -6430,12 +6459,14 @@ async function initCapacitorPush() {
 
 function wireCapacitorPushListeners(PushNotifications) {
   PushNotifications.addListener('registrationError', (err) => {
+    _pushDiag('registrationError from Apple/OS: ' + (JSON.stringify(err) || '').slice(0, 200));
     console.warn('Native push registrationError:', err);
-    showToast('Notification setup hit a snag (FCM: ' + (JSON.stringify(err) || '').slice(0, 90) + ')', 5000);
+    showToast('Notification setup hit a snag (push: ' + (JSON.stringify(err) || '').slice(0, 90) + ')', 5000);
   });
 
   // Get the device token and save to Supabase
   PushNotifications.addListener('registration', async (token) => {
+    _pushDiag('registration event fired — token received (len ' + ((token && token.value && token.value.length) || 0) + '). Native layer works.');
     if (window.__MNC_DEV__) console.log('Native push token:', token.value);
     // Boot race (seen live 2026-08-03, 'native save' snag toast): the
     // registration event can beat the session restore, so the save went out
@@ -6453,13 +6484,16 @@ function wireCapacitorPushListeners(PushNotifications) {
     // matches neither, so that fallback wrote nothing but 403s.
     const userId = pushKey(currentUserEmail || mncIdentity(currentUser));
     if (!userId) {
+      _pushDiag('token arrived but NO signed-in identity yet — row not saved');
       showToast('Notification setup hit a snag (no signed-in identity yet)', 5000);
       return;
     }
     if (!window._mncAccessToken) {
+      _pushDiag('token arrived but session not ready — row not saved');
       showToast('Notification setup hit a snag (session not ready)', 5000);
       return;
     }
+    _pushDiag('saving row: user_id=' + userId + ' platform=' + window.Capacitor.getPlatform());
     const saved = await savePushSubscription({
       user_id: userId,
       endpoint: token.value,               // device token acts as endpoint
@@ -6467,8 +6501,10 @@ function wireCapacitorPushListeners(PushNotifications) {
       auth: window.Capacitor.getPlatform() // 'ios' or 'android'
     });
     if (!saved.ok) {
+      _pushDiag('save FAILED: ' + (saved.detail || saved.status));
       showToast('Notification setup hit a snag (native save: ' + (saved.detail || saved.status) + ')', 8000);
     } else {
+      _pushDiag('save OK — the ios row is now in push_subscriptions. Done.');
       window._mncHasPushSub = true;
       try { updateSetupChecklist(); } catch(_) {}
       showToast('Notifications are on 💅');
