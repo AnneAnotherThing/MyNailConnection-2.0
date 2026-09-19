@@ -67,6 +67,18 @@ const supabase = createClient(
   Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 );
 
+// Billing identifiers moved OFF public.techs into public.tech_billing
+// (service-role only) on 2026-09-18, because techs is readable with the
+// anon key and was leaking stripe_customer_id to guest browse. See
+// sql/tech-billing-split.sql. Every customer-id lookup resolves through
+// tech_billing now; techs rows are addressed by id.
+async function techIdByStripeCustomer(customerId: string): Promise<string | null> {
+  const { data } = await supabase.from('tech_billing')
+    .select('tech_id').eq('stripe_customer_id', customerId)
+    .limit(1).maybeSingle();
+  return (data?.tech_id as string) || null;
+}
+
 // Period end for a subscription, whichever API version shaped it.
 //
 // Stripe's "Basil" API versions (2025-03-31.basil onward) REMOVED
@@ -258,11 +270,14 @@ serve(async (req) => {
       const { error } = await supabase.from('techs').update({
         subscription_tier: 'paid',
         ...(expiresAt ? { subscription_expires_at: expiresAt.toISOString() } : {}),
-        stripe_customer_id: customerId,
         period_upload_count: 0,
         period_reset_at: periodResetAt.toISOString(),
       }).eq('id', techId);
       if (error) console.error(`techs.update failed for ${techId}:`, error);
+      const { error: billErr } = await supabase.from('tech_billing').upsert(
+        { tech_id: techId, stripe_customer_id: customerId, updated_at: new Date().toISOString() },
+        { onConflict: 'tech_id' });
+      if (billErr) console.error(`tech_billing upsert failed for ${techId}:`, billErr);
       else console.log(`Set paid tier for tech ${techId} until ${expiresAt ? expiresAt.toISOString() : '(unknown)'}; monthly refill at ${periodResetAt.toISOString()}`);
 
       // If this is a re-subscribe after a previous cancellation, restore
@@ -325,12 +340,19 @@ serve(async (req) => {
         ? (expiresAt ? { subscription_expires_at: expiresAt.toISOString() } : {})
         : { subscription_expires_at: null }),
     };
+    const updTechId = await techIdByStripeCustomer(customerId);
+    if (!updTechId) {
+      console.warn(`No tech_billing row for customer ${customerId}; subscription.updated ignored`);
+      return new Response(JSON.stringify({ received: true }), {
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
     if (isActive) {
       // Look up current period_reset_at to decide whether to overwrite.
       const { data: cur } = await supabase
         .from('techs')
         .select('period_reset_at')
-        .eq('stripe_customer_id', customerId)
+        .eq('id', updTechId)
         .limit(1)
         .maybeSingle();
       const existing = cur?.period_reset_at ? new Date(cur.period_reset_at as string) : null;
@@ -339,7 +361,7 @@ serve(async (req) => {
         updatePayload.period_reset_at = nextMonthFromNow().toISOString();
       }
     }
-    const { error } = await supabase.from('techs').update(updatePayload).eq('stripe_customer_id', customerId);
+    const { error } = await supabase.from('techs').update(updatePayload).eq('id', updTechId);
 
     if (error) console.error(`techs.update failed for customer ${customerId}:`, error);
     else console.log(`Sub updated for ${customerId}: status=${sub.status}, expires=${expiresAt ? expiresAt.toISOString() : '(unchanged)'}`);
@@ -367,13 +389,18 @@ serve(async (req) => {
     const sub = event.data.object as Stripe.Subscription;
     const customerId = sub.customer as string;
 
-    const { error } = await supabase.from('techs').update({
-      subscription_tier: 'free',
-      subscription_expires_at: null,
-    }).eq('stripe_customer_id', customerId);
+    const delTechId = await techIdByStripeCustomer(customerId);
+    if (!delTechId) {
+      console.warn(`No tech_billing row for customer ${customerId}; subscription.deleted ignored`);
+    } else {
+      const { error } = await supabase.from('techs').update({
+        subscription_tier: 'free',
+        subscription_expires_at: null,
+      }).eq('id', delTechId);
 
-    if (error) console.error(`techs.update failed for customer ${customerId}:`, error);
-    else console.log(`Reverted customer ${customerId} to free tier (photos stay up, 3.0 permanence)`);
+      if (error) console.error(`techs.update failed for customer ${customerId}:`, error);
+      else console.log(`Reverted customer ${customerId} to free tier (photos stay up, 3.0 permanence)`);
+    }
   }
 
   return new Response(JSON.stringify({ received: true }), {

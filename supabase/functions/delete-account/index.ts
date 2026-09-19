@@ -139,15 +139,24 @@ serve(async (req) => {
     try {
       const stripeKey = Deno.env.get('STRIPE_SECRET_KEY');
       if (stripeKey) {
+        // stripe_customer_id moved to tech_billing (service-role only,
+        // sql/tech-billing-split.sql 2026-09-18): resolve the techs row
+        // first, then read the billing row by tech id.
         let custId: string | null = null;
+        let billTechId: string | null = null;
         if (userEmail) {
-          const { data } = await admin.from('techs').select('stripe_customer_id')
+          const { data } = await admin.from('techs').select('id')
             .eq('email', userEmail).limit(1).maybeSingle();
-          custId = data?.stripe_customer_id || null;
+          billTechId = data?.id || null;
         }
-        if (!custId && last10.length === 10) {
-          const { data } = await admin.from('techs').select('stripe_customer_id')
+        if (!billTechId && last10.length === 10) {
+          const { data } = await admin.from('techs').select('id')
             .in('phone', ['+1' + last10, '1' + last10, last10]).limit(1).maybeSingle();
+          billTechId = data?.id || null;
+        }
+        if (billTechId) {
+          const { data } = await admin.from('tech_billing').select('stripe_customer_id')
+            .eq('tech_id', billTechId).limit(1).maybeSingle();
           custId = data?.stripe_customer_id || null;
         }
         if (custId) {

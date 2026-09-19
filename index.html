@@ -5431,8 +5431,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.4',     /* __APP_BUILD_NAME__   */
-  android: 616,         /* __APP_BUILD_ANDROID__ */
-  ios:     421,          /* __APP_BUILD_IOS__     */
+  android: 617,         /* __APP_BUILD_ANDROID__ */
+  ios:     422,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -11579,8 +11579,11 @@ async function bulkGeocode() {
 
   try {
     // Fetch all techs that have address/city but no coords
+    // Admin utility: use the signed-in bearer, not the anon key. Email and
+    // address will leave the anon-readable set when the guest-lane privacy
+    // work lands, and this query must keep working for admins after that.
     const res = await fetch(SUPABASE_URL + '/rest/v1/techs?select=id,name,email,address,city,state,zip,lat,lng&order=name.asc', {
-      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY }
+      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + (window._mncAccessToken || SUPABASE_ANON_KEY) }
     });
     const techs = await res.json();
 
@@ -11677,8 +11680,9 @@ async function previewTechCleanup() {
   preview.innerHTML = '<div style="font-size:13px;color:var(--muted);text-align:center;padding:8px;">Loading techs…</div>';
 
   try {
+    // Admin utility: signed-in bearer for the same reason as bulkGeocode.
     const res = await fetch(SUPABASE_URL + '/rest/v1/techs?select=id,name,email,image_url,photos&order=name.asc', {
-      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY }
+      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + (window._mncAccessToken || SUPABASE_ANON_KEY) }
     });
     const techs = await res.json();
 

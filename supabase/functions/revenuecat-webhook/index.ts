@@ -187,14 +187,21 @@ serve(async (req) => {
   async function resolveTech(candidateId: string): Promise<TechRef | null> {
     if (!candidateId) return null;
 
-    // 1. A previous webhook hit already stamped revenuecat_app_user_id on the
-    //    techs row, so this finds the tech even if public.users no longer matches.
+    // 1. A previous webhook hit already stamped revenuecat_app_user_id in
+    //    tech_billing (moved off techs 2026-09-18, sql/tech-billing-split.sql,
+    //    because techs is anon-readable), so this finds the tech even if
+    //    public.users no longer matches.
     {
-      const { data } = await admin
-        .from('techs').select('id, email, phone')
+      const { data: bill } = await admin
+        .from('tech_billing').select('tech_id')
         .eq('revenuecat_app_user_id', candidateId).limit(1).maybeSingle();
-      const ref = asRef(data || null);
-      if (ref) return ref;
+      if (bill?.tech_id) {
+        const { data } = await admin
+          .from('techs').select('id, email, phone')
+          .eq('id', bill.tech_id).limit(1).maybeSingle();
+        const ref = asRef(data || null);
+        if (ref) return ref;
+      }
     }
 
     // 2. public.users by id. We pass auth.users.id as the App User ID at
@@ -286,11 +293,13 @@ serve(async (req) => {
     console.log('TRANSFER: granting subscription to tech', toTech.label, 'app_user_id', toAppUserId);
     await admin.from('techs').update({
       subscription_source: sourceLabel,
-      revenuecat_app_user_id: toAppUserId,
       subscription_tier: 'paid',
       subscription_expires_at: null,
       period_reset_at: null,
     }).eq('id', toTech.id);
+    await admin.from('tech_billing').upsert(
+      { tech_id: toTech.id, revenuecat_app_user_id: toAppUserId, updated_at: new Date().toISOString() },
+      { onConflict: 'tech_id' });
     return new Response('ok (transfer applied)', { status: 200 });
   }
 
@@ -310,15 +319,26 @@ serve(async (req) => {
 
   // Stamp the source identifiers on every event, keeps the row queryable
   // even for events that don't mutate tier (BILLING_ISSUE, etc).
+  // subscription_source stays on techs (it drives UI labels); the store
+  // identifiers live in tech_billing (service-role only) since 2026-09-18.
   const sourceUpdate: Record<string, any> = {
     subscription_source: sourceLabel,
+  };
+  const billingUpdate: Record<string, any> = {
+    tech_id: techId,
     revenuecat_app_user_id: appUserId,
+    updated_at: new Date().toISOString(),
   };
   if (sourceLabel === 'apple_iap' && originalTransactionId) {
-    sourceUpdate.apple_original_transaction_id = originalTransactionId;
+    billingUpdate.apple_original_transaction_id = originalTransactionId;
   }
   if (sourceLabel === 'google_play' && purchaseToken) {
-    sourceUpdate.google_purchase_token = purchaseToken;
+    billingUpdate.google_purchase_token = purchaseToken;
+  }
+  {
+    const { error: billErr } = await admin.from('tech_billing')
+      .upsert(billingUpdate, { onConflict: 'tech_id' });
+    if (billErr) console.error(`tech_billing upsert failed for ${techId}:`, billErr);
   }
 
   // Branch on event type. Subscription lifecycle events vs. consumables
