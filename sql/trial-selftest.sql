@@ -38,8 +38,9 @@ begin
   v_tmpl.name                   := 'ZZ trial selftest (auto-deletes)';
   v_tmpl.phone                  := '+15550000199';
   v_tmpl.email                  := null;
-  v_tmpl.paused_by_tech         := false;   -- visible
-  v_tmpl.founder_free           := false;   -- not grandfathered
+  v_tmpl.paused_by_tech         := false;   -- visible (founder_free was dropped
+                                            -- in tech-paywall-no-founders.sql, so
+                                            -- there is nothing to grandfather here)
   v_tmpl.booking_enabled        := false;   -- booking OFF at signup
   v_tmpl.subscription_tier      := 'free';
   v_tmpl.subscription_source    := null;
