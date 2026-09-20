@@ -535,6 +535,35 @@
       <div class="live-num" id="stat-live">-</div>
     </div>
 
+    <!-- Appointments · booking activity (2026-09-20) -->
+    <div class="panel">
+      <div class="panel-head">
+        <div class="panel-title">Appointments</div>
+        <div class="panel-meta">MNC's own booking engine</div>
+      </div>
+      <div class="mh-grid">
+        <div class="mh-card"><div class="mh-label">Total booked</div><div class="mh-num" id="bk-total">-</div></div>
+        <div class="mh-card"><div class="mh-label">Upcoming</div><div class="mh-num" id="bk-upcoming">-</div></div>
+        <div class="mh-card"><div class="mh-label">Next 7 days</div><div class="mh-num" id="bk-next7">-</div></div>
+        <div class="mh-card"><div class="mh-label">Booked this week</div><div class="mh-num" id="bk-week">-</div></div>
+        <div class="mh-card"><div class="mh-label">Completed</div><div class="mh-num" id="bk-done">-</div></div>
+        <div class="mh-card"><div class="mh-label">No-shows</div><div class="mh-num" id="bk-noshow">-</div></div>
+      </div>
+      <div class="mh-disclaimer" id="bk-sub">Every appointment booked through MNC's own booking.</div>
+    </div>
+
+    <!-- Techs & comps: grant free booking, no charge (2026-09-20) -->
+    <div class="panel">
+      <div class="panel-head">
+        <div class="panel-title">Techs &amp; comps</div>
+        <div class="panel-meta">comp = free booking, no charge</div>
+      </div>
+      <input id="comp-search" oninput="renderCompList()" placeholder="Search techs by name or number"
+             style="width:100%;box-sizing:border-box;padding:9px 12px;border:1.5px solid var(--border,#e4d9da);border-radius:10px;font:inherit;font-size:14px;margin-bottom:10px;">
+      <div id="comp-list" class="mh-recent" style="max-height:440px;"><div class="empty">Loading techs…</div></div>
+      <div class="mh-disclaimer">Comp turns a tech's booking free forever, no card, no charge. Un-comp only affects comped techs, it never cancels a paying or free-month sub.</div>
+    </div>
+
     <!-- Bug reports & feedback (2026-09-06, Anne: "let's just give me a
          table on the admin screen" — the ladybug reports, right here,
          instead of depending on the alert email or a second page). -->
@@ -1766,6 +1795,97 @@
     }
   }
 
+  // ── Appointments + comps panel (2026-09-20) ────────────────────────
+  function _ce(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function(c) {
+      return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c];
+    });
+  }
+
+  async function loadBookingStats() {
+    try {
+      const r = await fetch(SUPABASE_URL + '/rest/v1/rpc/admin_booking_stats', {
+        method: 'POST',
+        headers: Object.assign({}, authHeaders(), { 'Content-Type': 'application/json' }),
+        body: '{}'
+      });
+      if (!r.ok) { if (r.status === 401 || r.status === 403) handleAuthExpired(); return; }
+      const d = await r.json().catch(function () { return {}; });
+      setTxt('bk-total',    fmt(d.total));
+      setTxt('bk-upcoming', fmt(d.upcoming));
+      setTxt('bk-next7',    fmt(d.next_7_days));
+      setTxt('bk-week',     fmt(d.this_week));
+      setTxt('bk-done',     fmt(d.completed));
+      setTxt('bk-noshow',   fmt(d.no_show));
+      setHtml('bk-sub', (d.active_booking_techs || 0) + ' techs took bookings in the last 60 days · ' +
+        fmt(d.pending) + ' pending · ' + fmt(d.cancelled) + ' cancelled');
+    } catch (e) { /* leave dashes */ }
+  }
+
+  async function loadComps() {
+    try {
+      const url = SUPABASE_URL + '/rest/v1/techs' +
+        '?select=id,name,email,phone,subscription_tier,subscription_source,booking_enabled,trial_started_at' +
+        '&order=name.asc&limit=5000';
+      const r = await fetch(url, { headers: authHeaders() });
+      if (!r.ok) { if (r.status === 401 || r.status === 403) handleAuthExpired(); return; }
+      window._compTechs = await r.json();
+      renderCompList();
+    } catch (e) { setHtml('comp-list', '<div class="empty">Could not load techs.</div>'); }
+  }
+
+  function renderCompList() {
+    const techs = window._compTechs || [];
+    const q = (($('comp-search') || {}).value || '').trim().toLowerCase();
+    const qd = q.replace(/\D/g, '');
+    const rows = techs.filter(function (t) {
+      if (!q) return true;
+      const hay = ((t.name || '') + ' ' + (t.email || '')).toLowerCase();
+      if (hay.indexOf(q) !== -1) return true;
+      if (qd.length >= 3) { const pd = String(t.phone || '').replace(/\D/g, ''); if (pd && pd.indexOf(qd) !== -1) return true; }
+      return false;
+    });
+    if (!rows.length) { setHtml('comp-list', '<div class="empty">No techs match.</div>'); return; }
+    setHtml('comp-list', rows.map(function (t) {
+      const src = t.subscription_source || '';
+      const comped = src === 'comp';
+      var badge, bcolor;
+      if (comped) { badge = 'Comped'; bcolor = '#2D6A4F'; }
+      else if (src === 'trial') { badge = 'Free month'; bcolor = '#8A6A2F'; }
+      else if (t.subscription_tier === 'paid') { badge = 'Paying'; bcolor = '#4A6274'; }
+      else { badge = 'Free'; bcolor = '#8B7E70'; }
+      const contact = t.email || t.phone || 'no contact';
+      return '<div style="display:flex;align-items:center;gap:10px;padding:9px 4px;border-bottom:1px solid var(--border,#eee);">' +
+        '<div style="flex:1;min-width:0;">' +
+          '<div style="font-size:14px;font-weight:700;color:#141317;">' + _ce(t.name || 'Unnamed tech') + '</div>' +
+          '<div style="font-size:12px;color:#8B7E70;">' + _ce(contact) + (t.booking_enabled ? ' · booking on' : '') + '</div>' +
+        '</div>' +
+        '<span style="font-size:11px;font-weight:700;color:' + bcolor + ';background:rgba(0,0,0,0.05);border-radius:100px;padding:3px 9px;white-space:nowrap;">' + badge + '</span>' +
+        '<button onclick="adminToggleComp(\'' + t.id + '\',' + (!comped) + ')" style="padding:7px 13px;border-radius:10px;border:1.5px solid ' +
+          (comped ? '#E4D9DA' : '#2D6A4F') + ';background:' + (comped ? '#fff' : '#2D6A4F') + ';color:' + (comped ? '#8B7E70' : '#fff') +
+          ';font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;">' + (comped ? 'Un-comp' : 'Comp') + '</button>' +
+      '</div>';
+    }).join(''));
+  }
+
+  async function adminToggleComp(techId, on) {
+    try {
+      const r = await fetch(SUPABASE_URL + '/rest/v1/rpc/admin_set_tech_comp', {
+        method: 'POST',
+        headers: Object.assign({}, authHeaders(), { 'Content-Type': 'application/json' }),
+        body: JSON.stringify({ p_tech_id: techId, p_on: on })
+      });
+      const data = await r.json().catch(function () { return {}; });
+      if (!r.ok) { alert('Could not update: ' + (data.message || ('error ' + r.status))); return; }
+      const t = (window._compTechs || []).find(function (x) { return x.id === techId; });
+      if (t) { t.subscription_source = data.source; t.subscription_tier = data.tier; }
+      renderCompList();
+      loadBookingStats();
+    } catch (e) { alert('Network error, please try again'); }
+  }
+  window.renderCompList = renderCompList;
+  window.adminToggleComp = adminToggleComp;
+
   // ── Top-level renderer ─────────────────────────────────────────────
   async function renderStats() {
     if (!token) return;
@@ -1781,6 +1901,8 @@
     loadStoreClicks().catch(e => console.warn('store clicks:', e));
     loadStoreSources().catch(e => console.warn('store sources:', e));
     loadAppDownloads().catch(e => console.warn('app downloads:', e));
+    loadBookingStats().catch(e => console.warn('booking stats:', e));
+    loadComps().catch(e => console.warn('comps:', e));
 
     const now = new Date();
     const pad2 = n => n < 10 ? '0' + n : '' + n;
