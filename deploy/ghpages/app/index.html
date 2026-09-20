@@ -5453,8 +5453,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.5',     /* __APP_BUILD_NAME__   */
-  android: 620,         /* __APP_BUILD_ANDROID__ */
-  ios:     425,          /* __APP_BUILD_IOS__     */
+  android: 621,         /* __APP_BUILD_ANDROID__ */
+  ios:     426,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -14322,7 +14322,8 @@ const BK_STATUS_CHIP = {
   declined:            ['#F5F0EE', '#8A7A74', 'Declined'],
   cancelled_by_client: ['#FDE8EC', '#8B2035', 'Client cancelled'],
   cancelled_by_tech:   ['#FDE8EC', '#8B2035', 'Cancelled'],
-  completed:           ['#E8EEF2', '#4A6274', 'Done']
+  completed:           ['#E8EEF2', '#4A6274', 'Done'],
+  no_show:             ['#F3EEF0', '#7A5560', 'No-show']
 };
 
 function bkEsc(s) {
@@ -15368,6 +15369,11 @@ function tbRenderAppts() {
   const delBtn = function(id) {
     return '<button onclick="tbDeleteBooking(\'' + id + '\')" style="flex:0 0 auto;padding:9px 6px;border:none;background:none;color:var(--muted);font-size:12.5px;font-weight:500;cursor:pointer;font-family:\'DM Sans\',sans-serif;text-decoration:underline;text-underline-offset:3px;opacity:0.8;">Delete</button>';
   };
+  // No-show: a private record on an upcoming appointment. Subtle text link
+  // like Delete so it never competes with Reschedule/Cancel.
+  const noShowBtn = function(id) {
+    return '<button onclick="tbSetStatus(\'' + id + '\',\'no_show\')" style="flex:0 0 auto;padding:9px 6px;border:none;background:none;color:var(--muted);font-size:12.5px;font-weight:500;cursor:pointer;font-family:\'DM Sans\',sans-serif;text-decoration:underline;text-underline-offset:3px;opacity:0.8;">No-show</button>';
+  };
   // Block straight from an appointment card (Anne, 2026-08-03; extended to
   // EVERY section 2026-08-11 — "i don't see the way to block a client on
   // the appt card" — because it only rendered under Recent). You block
@@ -15427,7 +15433,9 @@ function tbRenderAppts() {
       // Make standing removed from this screen (Anne, 2026-08-03): the
       // confirm/decline surface stays clean. Existing standing series
       // still show + end below; tbOpenStanding kept for a future home.
+      bs += btn('Reschedule', "tbReschedule('" + b.id + "')", false);
       bs += btn('Cancel', "tbSetStatus('" + b.id + "','cancelled_by_tech')", false);
+      bs += noShowBtn(b.id);
       bs += blockBtn(b);
       bs += delBtn(b.id);
       return tbApptCard(b, bs);
@@ -15487,9 +15495,16 @@ async function tbSetStatus(id, status) {
   const q = {
     confirmed: ['Confirm this appointment?', 'Confirm'],
     declined: ['Decline this request?', 'Decline'],
-    cancelled_by_tech: ['Cancel this appointment?', 'Cancel it']
+    cancelled_by_tech: ['Cancel this appointment?', 'Cancel it'],
+    no_show: ['Mark as a no-show?', 'Mark no-show']
   }[status] || ['Update this appointment?', 'Yes'];
-  if (!(await showConfirm(q[0], { body: 'The client will be notified.', okLabel: q[1] }))) return;
+  // no_show is a private record, not a message: the client is not pushed
+  // (it's absent from the msgs map below), so the confirm copy must not
+  // promise a notification.
+  const _sbody = status === 'no_show'
+    ? 'Records this in your history as a no-show. The client is not notified.'
+    : 'The client will be notified.';
+  if (!(await showConfirm(q[0], { body: _sbody, okLabel: q[1] }))) return;
   // return=representation instead of minimal: RLS filtering the row out
   // yields 200 + empty array, which minimal would report as success while
   // the row never changed (the "Confirm does nothing" trap, 2026-08-03).
@@ -16175,6 +16190,18 @@ function bkPickSlot(ts) {
   _bkFlow.slot = ts;
   const s = _bkFlow.svc;
   const meta = [bkDur(s.duration_minutes), bkPrice(s.price)].filter(Boolean).join(' · ');
+  // Reschedule mode: same service, new time. No note step — just confirm
+  // the move. bkConfirm() branches on _bkFlow.rescheduleId.
+  if (_bkFlow.rescheduleId) {
+    bkBody(bkHeader('Confirm new time', "bkPickDay('" + _bkFlow.day + "')") +
+      '<div style="background:var(--cream);border:1.5px solid var(--border);border-radius:14px;padding:14px;margin-bottom:12px;">' +
+        '<div style="font-size:15px;font-weight:700;color:var(--charcoal);">' + bkEsc(s.name) + '</div>' +
+        '<div style="font-size:13px;color:var(--muted);margin-top:3px;">' + meta + '</div>' +
+        '<div style="font-size:14px;font-weight:600;color:var(--rose-dark);margin-top:8px;">' + bkFmtStamp(_bkFlow.slot, _bkFlow.tz) + '</div>' +
+      '</div>' +
+      '<button class="btn btn-rose" id="bk-confirm-btn" onclick="bkConfirm()" style="margin-top:6px;">Move to this time</button>');
+    return;
+  }
   bkBody(bkHeader('Confirm', "bkPickDay('" + _bkFlow.day + "')") +
     '<div style="background:var(--cream);border:1.5px solid var(--border);border-radius:14px;padding:14px;margin-bottom:12px;">' +
       '<div style="font-size:15px;font-weight:700;color:var(--charcoal);">' + bkEsc(s.name) + '</div>' +
@@ -16527,6 +16554,8 @@ async function bkVerifyCode() {
 
 async function bkConfirm() {
   if (!_bkFlow) return; // modal closed / no active booking flow
+  // Reschedule reuses this button but takes a different write path.
+  if (_bkFlow.rescheduleId) { return bkDoReschedule(); }
   // Capture the note before any body swap (the verify step replaces the DOM).
   const noteEl = document.getElementById('bk-note');
   if (noteEl) _bkFlow.note = noteEl.value || '';
@@ -16677,7 +16706,10 @@ async function loadMyAppointments() {
       '</div>' +
       contact +
       (cancellable
-        ? '<div style="display:flex;margin-top:8px;"><button onclick="bkCancelMine(\'' + b.id + '\')" style="flex:1;padding:9px;border-radius:12px;border:1.5px solid var(--border);background:white;color:var(--muted);font-size:13px;font-weight:700;cursor:pointer;">Cancel</button></div>'
+        ? '<div style="display:flex;gap:8px;margin-top:8px;">' +
+            '<button onclick="maReschedule(\'' + b.id + '\')" style="flex:1;padding:9px;border-radius:12px;border:1.5px solid var(--rose-mid);background:var(--rose-light);color:var(--rose-dark);font-size:13px;font-weight:700;cursor:pointer;">Reschedule</button>' +
+            '<button onclick="bkCancelMine(\'' + b.id + '\')" style="flex:1;padding:9px;border-radius:12px;border:1.5px solid var(--border);background:white;color:var(--muted);font-size:13px;font-weight:700;cursor:pointer;">Cancel</button>' +
+          '</div>'
         : '') +
     '</div>';
   }).join('');
@@ -16725,6 +16757,115 @@ async function bkCancelMine(id) {
   }
   showToast('Cancelled');
   loadMyAppointments();
+}
+
+// ── Change an existing appointment: reschedule (client + tech) ──────────────
+// Reuses the whole book-modal flow (days -> open slots -> confirm) with the
+// tech + service preset from the existing booking. bkConfirm() branches to
+// bkDoReschedule() when _bkFlow.rescheduleId is set. Cancel already lives in
+// bkCancelMine (client) and tbSetStatus (tech); this is the "move it" path,
+// backed by the reschedule_booking RPC (sql/booking-change-migration.sql).
+async function bkStartReschedule(opts) {
+  _bkFlow = {
+    tech: opts.tech,
+    tz: (opts.tech && opts.tech.booking_timezone) || 'America/Phoenix',
+    svcs: [opts.svc], dows: {}, timeOff: [],
+    svc: opts.svc, day: null, slot: null, note: '',
+    clientName: '', clientPhone: '',
+    rescheduleId: opts.bookingId,
+    reschedRole: opts.role,               // 'client' | 'tech'
+    clientPush: opts.clientPush || null   // {email, phone} for the tech path
+  };
+  const m = document.getElementById('book-modal');
+  if (m) { m.style.display = 'flex'; m.classList.add('open'); }
+  bkLoadingBody('Reschedule');
+  try {
+    const results = await Promise.all([
+      fetch(SUPABASE_URL + '/rest/v1/tech_availability?tech_id=eq.' + _bkFlow.tech.id +
+            '&select=day_of_week', { headers: bkHeaders() }),
+      fetch(SUPABASE_URL + '/rest/v1/tech_time_off?tech_id=eq.' + _bkFlow.tech.id +
+            '&select=start_date,end_date', { headers: bkHeaders() })
+    ]);
+    (results[0].ok ? await results[0].json() : []).forEach(function(a) { _bkFlow.dows[a.day_of_week] = true; });
+    _bkFlow.timeOff = results[1].ok ? await results[1].json() : [];
+  } catch (e) {}
+  bkStepDays();
+}
+
+// Client taps Reschedule on their own appointment card.
+function maReschedule(id) {
+  const b = (_maRows || []).find(function(x) { return x.id === id; });
+  if (!b) { showToast('Could not load that appointment'); return; }
+  const et = b.techs || (window.ALL_TECHS || []).find(function(t) { return t.id === b.tech_id; }) || {};
+  const svcRow = b.tech_services || {};
+  bkStartReschedule({
+    bookingId: id,
+    tech: { id: b.tech_id, name: et.name || 'your tech', booking_timezone: et.booking_timezone, email: et.email, phone: et.phone },
+    svc: { id: b.service_id, name: svcRow.name || 'Appointment', duration_minutes: svcRow.duration_minutes, price: svcRow.price },
+    role: 'client'
+  });
+}
+
+// Tech taps Reschedule on an upcoming appointment.
+function tbReschedule(id) {
+  const b = (_bkAppts || []).find(function(x) { return x.id === id; });
+  if (!b || !_bkMyTech) { showToast('Could not load that appointment'); return; }
+  const svcRow = b.tech_services || {};
+  bkStartReschedule({
+    bookingId: id,
+    tech: { id: _bkMyTech.id, name: _bkMyTech.name, booking_timezone: _bkMyTech.booking_timezone, email: _bkMyTech.email, phone: _bkMyTech.phone },
+    svc: { id: b.service_id, name: svcRow.name || 'Appointment', duration_minutes: svcRow.duration_minutes, price: svcRow.price },
+    role: 'tech',
+    clientPush: { email: b.client_email, phone: b.client_phone }
+  });
+}
+
+// Write path for a reschedule: reschedule_booking re-validates the slot under
+// the per-tech lock and re-applies auto-confirm. Then notify the OTHER party
+// and refresh whichever list is open. Captures _bkFlow first (closeBookModal
+// nulls it).
+async function bkDoReschedule() {
+  const f = _bkFlow;
+  if (!f || !f.rescheduleId || !f.slot) return;
+  const btn = document.getElementById('bk-confirm-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Moving…'; }
+  try {
+    const r = await fetch(SUPABASE_URL + '/rest/v1/rpc/reschedule_booking', {
+      method: 'POST',
+      headers: bkHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ p_booking_id: f.rescheduleId, p_new_start: f.slot })
+    });
+    const data = await r.json().catch(function() { return {}; });
+    if (!r.ok) {
+      const msg = data.message || 'Could not move it, please try again';
+      showToast(msg);
+      if (/not open|just taken/i.test(msg)) { bkPickDay(f.day); }
+      else if (btn) { btn.disabled = false; btn.textContent = 'Move to this time'; }
+      return;
+    }
+    const when = bkFmtStamp(f.slot, f.tz);
+    const confirmed = data.status === 'confirmed';
+    if (f.reschedRole === 'client') {
+      const t = (window.ALL_TECHS || []).find(function(x) { return x.id === f.tech.id; }) || f.tech;
+      const key = pushKeyFor(t.email, t.phone);
+      if (key) {
+        const who = ((currentUserName.first || '') + ' ' + (currentUserName.last || '')).trim() || 'A client';
+        sendPushToUser(key, { title: 'Appointment moved', body: who + ' moved to ' + when + '.', url: '/app/', tag: 'booking-' + f.rescheduleId });
+      }
+    } else {
+      const cp = f.clientPush || {};
+      const key = pushKeyFor(cp.email, cp.phone);
+      const techName = (_bkMyTech && _bkMyTech.name) || 'Your tech';
+      if (key) sendPushToUser(key, { title: 'Appointment moved', body: techName + ' moved your appointment to ' + when + '.', url: '/app/', tag: 'booking-' + f.rescheduleId });
+    }
+    closeBookModal();
+    showToast(confirmed ? 'Moved to ' + when : 'Requested ' + when + ' — waiting on confirmation');
+    try { loadMyAppointments(); } catch (_) {}
+    try { loadTechBookings(); } catch (_) {}
+  } catch (e) {
+    showToast('Network hiccup, please try again');
+    if (btn) { btn.disabled = false; btn.textContent = 'Move to this time'; }
+  }
 }
 
 // ── My board posts ────────────────────────────────────────────────────────────
