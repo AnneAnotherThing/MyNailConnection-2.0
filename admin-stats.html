@@ -1864,11 +1864,18 @@
 
   async function loadComps() {
     try {
+      // Only columns guaranteed to exist regardless of which migrations have
+      // run (trial_started_at is added by the trial migration and isn't needed
+      // here — the badge derives from subscription_source).
       const url = SUPABASE_URL + '/rest/v1/techs' +
-        '?select=id,name,email,phone,subscription_tier,subscription_source,booking_enabled,trial_started_at' +
+        '?select=id,name,email,phone,subscription_tier,subscription_source,booking_enabled' +
         '&order=name.asc&limit=5000';
       const r = await fetch(url, { headers: authHeaders() });
-      if (!r.ok) { if (r.status === 401 || r.status === 403) handleAuthExpired(); return; }
+      if (!r.ok) {
+        if (r.status === 401 || r.status === 403) { handleAuthExpired(); return; }
+        setHtml('comp-list', '<div class="empty">Could not load techs (HTTP ' + r.status + ').</div>');
+        return;
+      }
       window._compTechs = await r.json();
       renderCompList();
     } catch (e) { setHtml('comp-list', '<div class="empty">Could not load techs.</div>'); }
