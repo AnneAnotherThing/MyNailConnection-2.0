@@ -3,289 +3,224 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Founders - My Nail Connection</title>
-  <meta name="description" content="A welcome and feedback page for MNC founding nail techs." />
+  <title>You were here first - My Nail Connection</title>
+  <meta name="description" content="A welcome for the original My Nail Connection techs: what changed from the old app to 3.0, and how to get back in." />
   <meta name="robots" content="noindex" />
+  <meta name="color-scheme" content="light" />
   <link rel="icon" href="/favicon.ico" />
   <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600;1,700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --bg: #FAF7F4;
-      --paper: #FFFFFF;
-      --ink: #3D1F1A;
-      --ink-soft: #9C7A60;
-      --accent: #C4786A;
-      --accent-soft: #F5EDE8;
-      --border: #EDD0C8;
+      --page: #F4EEEE;
+      --card: #FFFFFF;
+      --ink: #141317;
+      --muted: #6D6068;
+      --rose: #A2636C;
+      --blush: #F7E2E3;
+      --paper: #FAF7F2;
+      --rule: #E4D7D8;
+      --gold: #8C7E76;
+      --ink-grad: linear-gradient(140deg,#4A4A4F 0%,#2A2A2E 60%,#141317 100%);
     }
     * { box-sizing: border-box; }
     html, body { margin: 0; padding: 0; }
     body {
-      background: var(--bg);
+      background: var(--page);
       color: var(--ink);
-      font-family: Georgia, 'Times New Roman', serif;
-      line-height: 1.6;
+      font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+      line-height: 1.62;
       -webkit-font-smoothing: antialiased;
     }
-    a { color: var(--accent); }
-    main {
-      max-width: 640px;
-      margin: 0 auto;
-      padding: 32px 20px 60px;
+    .wrap { max-width: 620px; margin: 0 auto; padding: 0 16px; }
+    .serif { font-family: 'Playfair Display', Georgia, serif; }
+    .eyebrow {
+      font-size: 12px; font-weight: 700; letter-spacing: 2px;
+      text-transform: uppercase; color: var(--rose);
     }
-    .card {
-      background: var(--paper);
-      border-radius: 14px;
-      box-shadow: 0 2px 14px rgba(61, 31, 26, 0.07);
-      overflow: hidden;
+    a { color: var(--rose); }
+
+    /* Hero */
+    .hero { text-align: center; padding: 44px 0 30px; }
+    .hero img { width: 58px; height: 58px; border-radius: 15px; display: block; margin: 0 auto 16px; }
+    .hero .mark {
+      font-family: 'Playfair Display', Georgia, serif; font-style: italic;
+      font-size: 20px; font-weight: 600; letter-spacing: 0.3px; color: var(--ink);
     }
-    header {
-      background: var(--ink);
-      color: var(--bg);
-      padding: 32px 32px 28px;
-      text-align: center;
+    .hero h1 {
+      font-family: 'Playfair Display', Georgia, serif; font-weight: 700;
+      font-size: 40px; line-height: 1.08; letter-spacing: 0.2px; margin: 18px 0 0;
     }
-    header img {
-      display: block;
-      max-width: 140px;
-      height: auto;
-      margin: 0 auto 14px;
+    .hero h1 em { font-style: italic; color: var(--rose); }
+    .hero p { font-size: 16px; color: var(--ink); margin: 16px auto 0; max-width: 460px; }
+
+    /* Reassurance band */
+    .band {
+      background: var(--blush); border-radius: 20px;
+      padding: 22px 24px; text-align: center; margin: 8px 0 6px;
     }
-    header h1 {
-      margin: 0;
-      font-weight: normal;
-      font-size: 32px;
-      line-height: 1.2;
+    .band .line { font-family: 'Playfair Display', Georgia, serif; font-size: 20px; font-weight: 600; line-height: 1.3; }
+    .band .sub { font-size: 14px; color: var(--muted); margin-top: 6px; }
+
+    section { padding: 34px 0 8px; }
+    .sec-label {
+      font-size: 12px; font-weight: 700; letter-spacing: 1.8px;
+      text-transform: uppercase; color: var(--muted); text-align: center; margin-bottom: 20px;
     }
-    header .eyebrow {
-      margin: 0 0 4px;
-      font-size: 12px;
-      letter-spacing: 4px;
-      text-transform: uppercase;
-      color: var(--border);
+
+    /* Then / Now */
+    .tn { background: var(--card); border: 1px solid var(--rule); border-radius: 18px; overflow: hidden; box-shadow: 0 6px 26px rgba(20,19,23,0.06); }
+    .tn-row { display: grid; grid-template-columns: 1fr 1fr; }
+    .tn-row + .tn-row { border-top: 1px solid var(--rule); }
+    .tn-cell { padding: 16px 18px; }
+    .tn-then { background: var(--paper); border-right: 1px solid var(--rule); }
+    .tn-tag { font-size: 11px; font-weight: 700; letter-spacing: 1.4px; text-transform: uppercase; margin-bottom: 5px; }
+    .tn-then .tn-tag { color: var(--gold); }
+    .tn-now .tn-tag { color: var(--rose); }
+    .tn-then .tn-text { color: var(--muted); font-size: 14px; }
+    .tn-now .tn-text { color: var(--ink); font-size: 14px; font-weight: 500; }
+
+    /* Highlights */
+    .cards { display: grid; gap: 12px; }
+    .card { background: var(--card); border: 1px solid var(--rule); border-radius: 16px; padding: 17px 19px; box-shadow: 0 4px 18px rgba(20,19,23,0.05); }
+    .card h3 { font-family: 'Playfair Display', Georgia, serif; font-size: 18px; font-weight: 600; margin: 0 0 4px; }
+    .card p { margin: 0; font-size: 14px; color: var(--muted); }
+
+    /* Steps */
+    .steps { counter-reset: step; display: grid; gap: 12px; }
+    .step { display: grid; grid-template-columns: 34px 1fr; align-items: start; gap: 12px; }
+    .step .n {
+      counter-increment: step; width: 34px; height: 34px; border-radius: 100px;
+      background: var(--ink-grad); color: #fff; font-weight: 700; font-size: 15px;
+      display: flex; align-items: center; justify-content: center;
     }
-    .body { padding: 32px 32px 36px; }
-    .lede {
-      font-size: 18px;
-      margin: 0 0 18px;
+    .step .n::before { content: counter(step); }
+    .step .t { font-size: 15px; padding-top: 5px; }
+    .step .t strong { font-weight: 700; }
+
+    /* Buttons */
+    .cta-stack { display: grid; gap: 12px; max-width: 340px; margin: 22px auto 0; }
+    .btn {
+      display: block; text-align: center; text-decoration: none; border-radius: 13px;
+      padding: 15px 22px; font-size: 15px; font-weight: 700; letter-spacing: 0.4px;
     }
-    .lede strong { color: var(--accent); }
-    .callout {
-      background: var(--accent-soft);
-      border-left: 4px solid var(--accent);
-      padding: 18px 22px;
-      border-radius: 6px;
-      margin: 22px 0 28px;
-      font-size: 16px;
+    .btn-ink { background: var(--ink-grad); color: #fff; }
+    .btn-out { background: var(--card); color: var(--ink); border: 1.5px solid var(--rule); }
+    .btn small { display: block; font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; opacity: 0.7; margin-bottom: 2px; }
+
+    /* Anne note */
+    .note { background: var(--card); border: 1px solid var(--rule); border-radius: 20px; padding: 26px 26px 24px; box-shadow: 0 6px 26px rgba(20,19,23,0.06); }
+    .note .from { font-size: 12px; font-weight: 700; letter-spacing: 1.6px; text-transform: uppercase; color: var(--rose); margin-bottom: 10px; }
+    .note p { margin: 0 0 12px; font-size: 15px; }
+    .note .sign { font-family: 'Playfair Display', Georgia, serif; font-style: italic; font-size: 17px; color: var(--rose); margin: 4px 0 0; }
+    .note .email-btn {
+      display: inline-block; margin-top: 16px; text-decoration: none; border-radius: 12px;
+      padding: 13px 24px; font-size: 15px; font-weight: 700; background: var(--ink-grad); color: #fff;
     }
-    .callout p { margin: 0; }
-    h2 {
-      font-size: 22px;
-      font-weight: normal;
-      margin: 0 0 14px;
+
+    footer { text-align: center; padding: 34px 0 44px; color: var(--muted); font-size: 12px; }
+    footer a { color: var(--rose); text-decoration: none; font-weight: 600; }
+
+    @media (max-width: 480px) {
+      .hero h1 { font-size: 32px; }
+      .tn-cell { padding: 13px 14px; }
     }
-    form { display: block; }
-    .field { margin: 0 0 18px; }
-    .field label {
-      display: block;
-      font-size: 13px;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      color: var(--ink-soft);
-      margin-bottom: 6px;
-    }
-    .field input,
-    .field select,
-    .field textarea {
-      display: block;
-      width: 100%;
-      font-family: inherit;
-      font-size: 16px;
-      padding: 12px 14px;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      background: #FFFBF9;
-      color: var(--ink);
-      outline: none;
-      transition: border-color .15s ease;
-    }
-    .field input:focus,
-    .field select:focus,
-    .field textarea:focus { border-color: var(--accent); }
-    .field textarea { min-height: 120px; resize: vertical; }
-    button.primary {
-      background: var(--accent);
-      color: #FFFFFF;
-      font-family: inherit;
-      font-size: 17px;
-      font-weight: bold;
-      letter-spacing: .5px;
-      padding: 14px 28px;
-      border: 0;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: filter .15s ease;
-    }
-    button.primary:hover:not([disabled]) { filter: brightness(.95); }
-    button.primary[disabled] { opacity: .6; cursor: not-allowed; }
-    .err {
-      color: #A9665D;
-      font-size: 14px;
-      margin: 10px 0 0;
-      min-height: 1em;
-    }
-    .thanks {
-      text-align: center;
-      padding: 8px 0 4px;
-    }
-    .thanks h2 {
-      color: var(--accent);
-      font-size: 28px;
-      margin: 0 0 14px;
-    }
-    .thanks p { font-size: 17px; margin: 0 0 18px; }
-    .secondary-link {
-      display: inline-block;
-      margin-top: 8px;
-      color: var(--accent);
-      text-decoration: underline;
-    }
-    footer {
-      text-align: center;
-      font-size: 13px;
-      color: var(--ink-soft);
-      margin-top: 24px;
-    }
-    footer a { color: var(--ink-soft); }
-    .hidden { display: none !important; }
   </style>
 </head>
 <body>
+  <div class="wrap">
 
-  <main>
-    <div class="card">
-      <header>
-        <img src="/images/mncLogo-email.png" alt="My Nail Connection" />
-        <p class="eyebrow">Founders</p>
-        <h1>Welcome, Founder.</h1>
-      </header>
-
-      <div class="body">
-
-        <!-- WELCOME / FEEDBACK FORM -->
-        <section id="formSection">
-          <p class="lede">You signed up early. You trusted MNC before there was much to show. That trust is why we&rsquo;re here today.</p>
-
-          <p class="lede">Anything you share with us, early, lands with <strong>so much appreciation</strong>. Help us make MNC perfect.</p>
-
-          <div class="callout">
-            <p>Bugs, wish-lists, things that feel off, things that feel right, tell us. Anne reads every one.</p>
-          </div>
-
-          <h2>Your feedback</h2>
-          <p style="margin:-8px 0 18px; font-size:14px; color:var(--ink-soft);">Fill in any of the prompts below, one&rsquo;s plenty, all three is a gift.</p>
-
-          <form id="feedbackForm" novalidate>
-            <div class="field">
-              <label for="name">Your name</label>
-              <input type="text" id="name" name="name" required autocomplete="name" />
-            </div>
-
-            <div class="field">
-              <label for="email">Your email</label>
-              <input type="email" id="email" name="email" required autocomplete="email" />
-            </div>
-
-            <div class="field">
-              <label for="wish_to_add">Something you&rsquo;d add?</label>
-              <textarea id="wish_to_add" name="wish_to_add" placeholder="A feature, a tweak, a wish, anything you'd love to see."></textarea>
-            </div>
-
-            <div class="field">
-              <label for="annoyance">Something annoying?</label>
-              <textarea id="annoyance" name="annoyance" placeholder="A bug, friction, confusion, whatever made you sigh."></textarea>
-            </div>
-
-            <div class="field">
-              <label for="message">Anything else?</label>
-              <textarea id="message" name="message" placeholder="Praise, observations, anything we didn't ask about."></textarea>
-            </div>
-
-            <button type="submit" class="primary" id="submitBtn">Send to Anne &amp; Leslie</button>
-            <p class="err" id="errMsg" aria-live="polite"></p>
-          </form>
-        </section>
-
-        <!-- POST-SUBMIT -->
-        <section id="thanksSection" class="thanks hidden" aria-live="polite">
-          <h2>Got it. Thank you.</h2>
-          <p>We read every one. If it&rsquo;s a bug, we&rsquo;ll fix it. If it&rsquo;s a wish, we&rsquo;ll consider it.</p>
-          <p>Now go open the app and post some nails.</p>
-        </section>
-
-      </div>
+    <!-- Hero -->
+    <div class="hero">
+      <img src="/images/mncLogo-email.png" alt="My Nail Connection" />
+      <div class="mark">My Nail Connection</div>
+      <div class="eyebrow" style="margin-top:6px;">For our founding techs</div>
+      <h1>You were here first.<br /><em>Look what it became.</em></h1>
+      <p>You believed in My Nail Connection before it was this. Version 3.0 is here, and everything you built is still yours. Here is what changed, and how to walk back in.</p>
     </div>
 
+    <!-- Reassurance -->
+    <div class="band">
+      <div class="line">Your gallery is exactly where you left it.</div>
+      <div class="sub">Every photo, every tag, your whole profile. Nothing was lost in the rebuild.</div>
+    </div>
+
+    <!-- Then / Now -->
+    <section>
+      <div class="sec-label">The old app, and the new one</div>
+      <div class="tn">
+        <div class="tn-row">
+          <div class="tn-cell tn-then"><div class="tn-tag">Then</div><div class="tn-text">Sign in with an email and a password to forget.</div></div>
+          <div class="tn-cell tn-now"><div class="tn-tag">Now</div><div class="tn-text">Sign in with your phone. We text you a code. No password.</div></div>
+        </div>
+        <div class="tn-row">
+          <div class="tn-cell tn-then"><div class="tn-tag">Then</div><div class="tn-text">A gallery to show your work.</div></div>
+          <div class="tn-cell tn-now"><div class="tn-tag">Now</div><div class="tn-text">A gallery clients search. They filter by shape, type and style, and find you.</div></div>
+        </div>
+        <div class="tn-row">
+          <div class="tn-cell tn-then"><div class="tn-tag">Then</div><div class="tn-text">Clients found you, then booked in your DMs.</div></div>
+          <div class="tn-cell tn-now"><div class="tn-tag">Now</div><div class="tn-text">Clients book you right from the set they fell for. No DMs.</div></div>
+        </div>
+        <div class="tn-row">
+          <div class="tn-cell tn-then"><div class="tn-tag">Then</div><div class="tn-text">No calendar of your own.</div></div>
+          <div class="tn-cell tn-now"><div class="tn-tag">Now</div><div class="tn-text">A full book. Standing regulars, reschedules, no-shows and private notes.</div></div>
+        </div>
+        <div class="tn-row">
+          <div class="tn-cell tn-then"><div class="tn-tag">Then</div><div class="tn-text">Pay for photos, a few at a time.</div></div>
+          <div class="tn-cell tn-now"><div class="tn-tag">Now</div><div class="tn-text">Up to 50 photos a month, free, and they never expire.</div></div>
+        </div>
+        <div class="tn-row">
+          <div class="tn-cell tn-then"><div class="tn-tag">Then</div><div class="tn-text">A subscription that started ticking the day you signed up.</div></div>
+          <div class="tn-cell tn-now"><div class="tn-tag">Now</div><div class="tn-text">A free month that starts when you turn booking on, not before.</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Highlights -->
+    <section>
+      <div class="sec-label">The part worth saying plainly</div>
+      <div class="cards">
+        <div class="card"><h3>No commission. No per-booking fee.</h3><p>You keep your prices and your money. Your clients are never charged a cent to book you.</p></div>
+        <div class="card"><h3>One flat price, only for booking.</h3><p>Booking is $10.99 a month after your free month. Your profile, your gallery and your own booking link stay free, always.</p></div>
+        <div class="card"><h3>Your work stays put.</h3><p>Nothing autodeletes and nothing scrolls into the void. It is your portfolio, and it is still there next year.</p></div>
+      </div>
+    </section>
+
+    <!-- How to get in -->
+    <section>
+      <div class="sec-label">Getting back in takes a minute</div>
+      <div class="steps">
+        <div class="step"><div class="n"></div><div class="t">Download the app below, or open it if you already have it.</div></div>
+        <div class="step"><div class="n"></div><div class="t">Tap <strong>sign in</strong> and enter the phone number on your profile.</div></div>
+        <div class="step"><div class="n"></div><div class="t">We text you a 6-digit code. Type it in, and your gallery is right there.</div></div>
+      </div>
+      <div class="cta-stack">
+        <a class="btn btn-ink" href="https://apps.apple.com/app/id6764125663"><small>Download on the</small>App Store</a>
+        <a class="btn btn-out" href="https://play.google.com/store/apps/details?id=com.mynailconnection.app"><small>Get it on</small>Google Play</a>
+      </div>
+    </section>
+
+    <!-- A note from Anne -->
+    <section>
+      <div class="note">
+        <div class="from">A note from Anne</div>
+        <p>I rebuilt My Nail Connection by hand, for you and for the techs coming after you. It is brand new, which means we are still smoothing out edges, and I would rather hear about a rough one from you than have you quietly walk away.</p>
+        <p>So please, reach out. A question, a bug, a photo that will not tag, a booking that acted up, anything. We are working through every issue we find to give you the best gallery and booking we can, and your note goes straight to me.</p>
+        <p class="sign">Anne</p>
+        <a class="email-btn" href="mailto:anne@mynailconnection.com?subject=My%20Nail%20Connection">Email Anne directly</a>
+      </div>
+    </section>
+
     <footer>
-      <p>My Nail Connection &middot; <a href="https://mynailconnection.com">mynailconnection.com</a></p>
+      <a href="https://mynailconnection.com/">mynailconnection.com</a>
+      &nbsp;&middot;&nbsp;
+      <a href="https://mynailconnection.com/tech-guide-v3.html">Setup guide</a>
+      &nbsp;&middot;&nbsp;
+      <a href="mailto:anne@mynailconnection.com">anne@mynailconnection.com</a>
     </footer>
-  </main>
 
-  <script type="module">
-    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-
-    const SUPABASE_URL = 'https://nwqnakoongrorbwnrqzc.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im53cW5ha29vbmdyb3Jid25ycXpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNzczMjUsImV4cCI6MjA5ODk1MzMyNX0.TFFMlg9VjB0cyJwbgmVbeatFYQFaF1Ri0nrH0GwhHJs';
-
-    const supa = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-    const form = document.getElementById('feedbackForm');
-    const btn = document.getElementById('submitBtn');
-    const err = document.getElementById('errMsg');
-    const formSection = document.getElementById('formSection');
-    const thanksSection = document.getElementById('thanksSection');
-
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      err.textContent = '';
-
-      const fd = new FormData(form);
-      const payload = {
-        name: (fd.get('name') || '').toString().trim(),
-        email: (fd.get('email') || '').toString().trim(),
-        wish_to_add: (fd.get('wish_to_add') || '').toString().trim() || null,
-        annoyance: (fd.get('annoyance') || '').toString().trim() || null,
-        message: (fd.get('message') || '').toString().trim() || null,
-        user_agent: navigator.userAgent || null
-      };
-
-      if (!payload.name || !payload.email) {
-        err.textContent = 'Please fill in your name and email.';
-        return;
-      }
-      if (!payload.wish_to_add && !payload.annoyance && !payload.message) {
-        err.textContent = 'Please fill in at least one of the prompts below.';
-        return;
-      }
-
-      btn.disabled = true;
-      btn.textContent = 'Sending...';
-
-      const { error } = await supa.from('founders_feedback').insert(payload);
-
-      if (error) {
-        console.error('Founder feedback insert failed:', error);
-        err.textContent = "Couldn't send, please email anne@mynailconnection.com instead.";
-        btn.disabled = false;
-        btn.textContent = 'Send to Anne & Leslie';
-        return;
-      }
-
-      formSection.classList.add('hidden');
-      thanksSection.classList.remove('hidden');
-      thanksSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    });
-  </script>
-
+  </div>
 </body>
 </html>
