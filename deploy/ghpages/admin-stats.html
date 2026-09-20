@@ -877,6 +877,18 @@
 
   let _refreshInFlight = false;
   async function tryRefresh() {
+    // Re-read the freshest refresh token from storage first: Supabase rotates
+    // it on every use, so if another tab (or an earlier refresh here) already
+    // rotated it, our in-memory copy is stale and reusing it revokes the whole
+    // session — the classic "it keeps logging me out" cause. 2026-09-18.
+    try {
+      const _raw = localStorage.getItem(TOKEN_KEY);
+      if (_raw && _raw.charAt(0) === '{') {
+        const _s = JSON.parse(_raw);
+        if (_s.refresh_token) refreshTok = _s.refresh_token;
+        if (_s.access_token && !token) token = _s.access_token;
+      }
+    } catch(_){}
     if (!refreshTok || _refreshInFlight) return false;
     _refreshInFlight = true;
     try {
@@ -2024,6 +2036,18 @@
   setInterval(function() {
     if (token && document.visibilityState === 'visible') renderStats();
   }, 60000);
+
+  // Proactively renew the token every 45 min (access tokens live ~1h), so a
+  // long-open tab never lapses mid-use and the stored session stays fresh.
+  // Also renew when the tab is brought back to the foreground after a while.
+  setInterval(function() {
+    if (refreshTok && document.visibilityState === 'visible') tryRefresh();
+  }, 45 * 60 * 1000);
+  document.addEventListener('visibilitychange', function() {
+    if (document.visibilityState === 'visible' && refreshTok) {
+      tryRefresh().then(function(ok) { if (ok) renderStats(); });
+    }
+  });
 })();
 </script>
 </body>
