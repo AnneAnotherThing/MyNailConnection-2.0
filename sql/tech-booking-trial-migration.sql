@@ -24,6 +24,15 @@
 drop trigger  if exists grant_signup_trial_on_tech_insert_trg on public.techs;
 drop function if exists public.grant_signup_trial_on_tech_insert();
 
+-- ── 0b. Allow 'trial' as a subscription_source ──────────────────────────────
+-- The techs_subscription_source_check constraint predates the trial and did
+-- not list 'trial', so the trigger's source='trial' would violate it and no
+-- tech could turn booking on. Recreate the constraint with the full set.
+alter table public.techs drop constraint if exists techs_subscription_source_check;
+alter table public.techs add constraint techs_subscription_source_check
+  check (subscription_source is null
+         or subscription_source in ('stripe','apple_iap','google_play','comp','trial'));
+
 -- ── 1. Mark when a tech's free month started (null = never) ──────────────────
 alter table public.techs
   add column if not exists trial_started_at timestamptz;
