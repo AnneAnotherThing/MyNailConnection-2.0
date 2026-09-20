@@ -5453,8 +5453,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.6',     /* __APP_BUILD_NAME__   */
-  android: 622,         /* __APP_BUILD_ANDROID__ */
-  ios:     427,          /* __APP_BUILD_IOS__     */
+  android: 623,         /* __APP_BUILD_ANDROID__ */
+  ios:     428,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -14385,7 +14385,7 @@ async function loadTechBookings() {
   const note = document.getElementById('tb-migration-note');
   try {
     const r = await fetch(SUPABASE_URL +
-      '/rest/v1/techs?select=id,name,email,booking_enabled,booking_auto_confirm,booking_timezone,booking_buffer_minutes,booking_min_notice_hours,listing_paused,paused_by_tech,is_visible,is_bookable&or=(email.eq.' +
+      '/rest/v1/techs?select=id,name,email,booking_enabled,booking_auto_confirm,booking_timezone,booking_buffer_minutes,booking_min_notice_hours,listing_paused,paused_by_tech,is_visible,is_bookable,trial_started_at&or=(email.eq.' +
       encodeURIComponent(currentUserEmail) + ',phone.eq.' + encodeURIComponent(currentUserEmail) + ')', { headers: bkHeaders() });
     if (!r.ok) {
       // Almost always means the migration hasn't been run (unknown column).
@@ -14415,7 +14415,7 @@ async function loadTechBookings() {
       if (_fallbackId) {
         try {
           const r2 = await fetch(SUPABASE_URL +
-            '/rest/v1/techs?select=id,name,email,booking_enabled,booking_auto_confirm,booking_timezone,booking_buffer_minutes,booking_min_notice_hours,listing_paused,paused_by_tech,is_visible,is_bookable&id=eq.' +
+            '/rest/v1/techs?select=id,name,email,booking_enabled,booking_auto_confirm,booking_timezone,booking_buffer_minutes,booking_min_notice_hours,listing_paused,paused_by_tech,is_visible,is_bookable,trial_started_at&id=eq.' +
             encodeURIComponent(_fallbackId), { headers: bkHeaders() });
           if (r2.ok) _bkMyTech = ((await r2.json()) || [])[0] || null;
         } catch(_) {}
@@ -14689,17 +14689,26 @@ async function bkBlockedFromGoLive() {
 
 async function bkSubscriptionBlocks() {
   var t = (typeof _bkMyTech !== 'undefined') ? _bkMyTech : null;
-  if (!t || t.is_visible === undefined || t.is_bookable === undefined) {
+  if (!t || t.is_visible === undefined || t.is_bookable === undefined ||
+      t.trial_started_at === undefined) {
     var id = (window._bkSetup && window._bkSetup.id) || (t && t.id);
     if (!id) return false;
     try {
-      var r = await fetch(SUPABASE_URL + '/rest/v1/techs?select=is_visible,is_bookable&id=eq.' +
+      var r = await fetch(SUPABASE_URL + '/rest/v1/techs?select=is_visible,is_bookable,trial_started_at&id=eq.' +
         encodeURIComponent(id), { headers: bkHeaders() });
       if (!r.ok) return false;
       t = (await r.json())[0];
     } catch(_) { return false; }
   }
   if (!t) return false;
+  // The free month starts when booking is first turned on, not at signup, so a
+  // tech who has NEVER trialed must be let through here: the write flips
+  // booking_enabled true, the server-side grant_booking_trial trigger stamps a
+  // 30-day paid window on the same row, and is_bookable comes back true. Block
+  // only once that trial has been used (trial_started_at set) and lapsed, which
+  // is the real "time to subscribe" moment. See sql/tech-booking-trial-migration.sql.
+  // trial_started_at undefined = pre-migration read, treated as "not yet trialed".
+  if (!t.trial_started_at) return false;
   return !!t.is_visible && !t.is_bookable;
 }
 
