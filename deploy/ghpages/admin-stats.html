@@ -550,6 +550,8 @@
         <div class="mh-card"><div class="mh-label">No-shows</div><div class="mh-num" id="bk-noshow">-</div></div>
       </div>
       <div class="mh-disclaimer" id="bk-sub">Every appointment booked through MNC's own booking.</div>
+      <button id="bk-expand-btn" onclick="toggleBookingDetail()" style="margin-top:8px;border:1px solid var(--border,#e4d9da);background:#fff;border-radius:100px;padding:6px 14px;font-size:12.5px;font-weight:600;color:#6B5F66;cursor:pointer;">See the appointments ▾</button>
+      <div id="bk-detail" style="display:none;margin-top:10px;"></div>
     </div>
 
     <!-- Techs & comps: grant free booking, no charge (2026-09-20) -->
@@ -1383,47 +1385,85 @@
   async function loadFeedback() {
     try {
       const url = SUPABASE_URL + '/rest/v1/feedback'
-                + '?select=created_at,user_email,user_role,category,message,current_screen,app_version'
-                + '&order=created_at.desc&limit=25';
+                + '?select=id,status,created_at,user_email,user_role,category,message,current_screen,app_version'
+                + '&order=created_at.desc&limit=60';
       const r = await fetch(url, { headers: authHeaders() });
       if (!r.ok) {
         if (r.status === 401 || r.status === 403) handleAuthExpired();
         else setHtml('fb-list', '<div class="empty">Could not load feedback (HTTP ' + r.status + ').</div>');
         return;
       }
-      const rows = await r.json();
-      if (!rows || !rows.length) {
-        setHtml('fb-list', '<div class="empty">No reports yet — the ladybug is unclicked. 🐞</div>');
-        return;
-      }
-      function when(iso) {
-        try {
-          const d = new Date(iso);
-          return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-               + ' ' + d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-        } catch(_) { return '—'; }
-      }
-      setHtml('fb-list',
-        '<table class="tp-table"><thead><tr>'
-        + '<th>When</th><th>Who</th><th>Category</th><th>Message</th><th>Screen</th>'
-        + '</tr></thead><tbody>'
-        + rows.map(function (f) {
-            const who = f.user_email || (f.user_role ? '(' + f.user_role + ')' : 'anonymous');
-            return '<tr>'
-              + '<td class="tp-joined">' + when(f.created_at) + '</td>'
-              + '<td style="white-space:nowrap;max-width:140px;overflow:hidden;text-overflow:ellipsis;" title="' + escHtml(who) + '">' + escHtml(who) + '</td>'
-              + '<td style="white-space:nowrap;">' + escHtml(f.category || '—') + '</td>'
-              + '<td style="min-width:180px;cursor:pointer;" onclick="this.style.whiteSpace=this.style.whiteSpace===\'normal\'?\'\':\'normal\'">'
-              +   '<div style="max-width:340px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;line-height:1.45;">' + escHtml(f.message || '') + '</div>'
-              + '</td>'
-              + '<td class="tp-joined" title="build ' + escHtml(f.app_version || '?') + '">' + escHtml(f.current_screen || '—') + '</td>'
-              + '</tr>';
-          }).join('')
-        + '</tbody></table>');
+      _fbRows = await r.json() || [];
+      renderFeedback();
     } catch (e) {
       setHtml('fb-list', '<div class="empty">Could not load feedback.</div>');
     }
   }
+
+  // Bug reports: filter to open by default, one-tap Done (status=handled) to
+  // clear a report (e.g. the test notes), Reopen to bring one back, and a
+  // Show-closed toggle. Admins can UPDATE feedback.status (feedback_update_admin).
+  let _fbRows = [];
+  let _fbShowClosed = false;
+  function fbToggleClosed() { _fbShowClosed = !_fbShowClosed; renderFeedback(); }
+  function renderFeedback() {
+    function when(iso) {
+      try {
+        const d = new Date(iso);
+        return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+             + ' ' + d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+      } catch (_) { return '—'; }
+    }
+    const all = _fbRows || [];
+    const openCount = all.filter(function (f) { return (f.status || 'new') !== 'handled'; }).length;
+    const closedCount = all.length - openCount;
+    const rows = _fbShowClosed ? all : all.filter(function (f) { return (f.status || 'new') !== 'handled'; });
+    const head = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:12.5px;color:#8B7E70;">'
+      + '<span>' + openCount + ' open · ' + closedCount + ' closed</span>'
+      + '<button onclick="fbToggleClosed()" style="border:1px solid #E4D9DA;background:#fff;border-radius:100px;padding:3px 12px;font-size:12px;font-weight:600;color:#6B5F66;cursor:pointer;">' + (_fbShowClosed ? 'Hide closed' : 'Show closed') + '</button>'
+      + '</div>';
+    if (!rows.length) {
+      setHtml('fb-list', head + '<div class="empty">' + (all.length ? 'All caught up — nothing open. 🐞' : 'No reports yet — the ladybug is unclicked. 🐞') + '</div>');
+      return;
+    }
+    setHtml('fb-list', head
+      + '<table class="tp-table"><thead><tr>'
+      + '<th>When</th><th>Who</th><th>Category</th><th>Message</th><th>Screen</th><th></th>'
+      + '</tr></thead><tbody>'
+      + rows.map(function (f) {
+          const who = f.user_email || (f.user_role ? '(' + f.user_role + ')' : 'anonymous');
+          const closed = (f.status || 'new') === 'handled';
+          const actionBtn = closed
+            ? '<button onclick="fbSetStatus(\'' + f.id + '\',\'new\')" style="border:1px solid #E4D9DA;background:#fff;border-radius:8px;padding:5px 10px;font-size:12px;font-weight:600;color:#8B7E70;cursor:pointer;white-space:nowrap;">Reopen</button>'
+            : '<button onclick="fbSetStatus(\'' + f.id + '\',\'handled\')" style="border:none;background:#2D6A4F;border-radius:8px;padding:5px 12px;font-size:12px;font-weight:700;color:#fff;cursor:pointer;white-space:nowrap;">Done</button>';
+          return '<tr' + (closed ? ' style="opacity:0.5;"' : '') + '>'
+            + '<td class="tp-joined">' + when(f.created_at) + '</td>'
+            + '<td style="white-space:nowrap;max-width:140px;overflow:hidden;text-overflow:ellipsis;" title="' + escHtml(who) + '">' + escHtml(who) + '</td>'
+            + '<td style="white-space:nowrap;">' + escHtml(f.category || '—') + '</td>'
+            + '<td style="min-width:180px;cursor:pointer;" onclick="this.style.whiteSpace=this.style.whiteSpace===\'normal\'?\'\':\'normal\'">'
+            +   '<div style="max-width:340px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;line-height:1.45;">' + escHtml(f.message || '') + '</div>'
+            + '</td>'
+            + '<td class="tp-joined" title="build ' + escHtml(f.app_version || '?') + '">' + escHtml(f.current_screen || '—') + '</td>'
+            + '<td>' + actionBtn + '</td>'
+            + '</tr>';
+        }).join('')
+      + '</tbody></table>');
+  }
+  async function fbSetStatus(id, status) {
+    try {
+      const r = await fetch(SUPABASE_URL + '/rest/v1/feedback?id=eq.' + id, {
+        method: 'PATCH',
+        headers: Object.assign({}, authHeaders(), { 'Content-Type': 'application/json', 'Prefer': 'return=minimal' }),
+        body: JSON.stringify({ status: status })
+      });
+      if (!r.ok) { alert('Could not update (HTTP ' + r.status + '). If it says RLS, the admin update policy needs a look.'); return; }
+      const f = _fbRows.find(function (x) { return x.id === id; });
+      if (f) f.status = status;
+      renderFeedback();
+    } catch (e) { alert('Network error, please try again'); }
+  }
+  window.fbToggleClosed = fbToggleClosed;
+  window.fbSetStatus = fbSetStatus;
 
   // ── Marketing site hits ────────────────────────────────────────────
   async function loadMarketingHits() {
@@ -1885,6 +1925,48 @@
   }
   window.renderCompList = renderCompList;
   window.adminToggleComp = adminToggleComp;
+
+  // Expand the Appointments numbers into the real rows, so a number can be
+  // eyeballed for test vs legit. Loads admin_recent_bookings on first open.
+  async function toggleBookingDetail() {
+    const box = $('bk-detail'), btn = $('bk-expand-btn');
+    if (!box) return;
+    if (box.style.display !== 'none') { box.style.display = 'none'; if (btn) btn.textContent = 'See the appointments ▾'; return; }
+    box.style.display = 'block'; if (btn) btn.textContent = 'Hide appointments ▴';
+    box.innerHTML = '<div class="empty">Loading…</div>';
+    try {
+      const r = await fetch(SUPABASE_URL + '/rest/v1/rpc/admin_recent_bookings', {
+        method: 'POST',
+        headers: Object.assign({}, authHeaders(), { 'Content-Type': 'application/json' }),
+        body: JSON.stringify({ p_limit: 60 })
+      });
+      if (!r.ok) { box.innerHTML = '<div class="empty">Could not load (HTTP ' + r.status + '). Run sql/admin-panel-detail.sql.</div>'; return; }
+      const rows = await r.json();
+      if (!rows || !rows.length) { box.innerHTML = '<div class="empty">No appointments in the book yet.</div>'; return; }
+      function when(iso) {
+        try { const d = new Date(iso); return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ' ' + d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }); }
+        catch (_) { return '—'; }
+      }
+      const chip = {
+        pending: ['#FFF6E5', '#8A6A2F', 'Pending'], confirmed: ['#EAF3EC', '#2D6A4F', 'Confirmed'],
+        completed: ['#E8EEF2', '#4A6274', 'Done'], no_show: ['#F3EEF0', '#7A5560', 'No-show'],
+        cancelled_by_client: ['#FDE8EC', '#8B2035', 'Client cancelled'], cancelled_by_tech: ['#FDE8EC', '#8B2035', 'Cancelled'],
+        declined: ['#F5F0EE', '#8A7A74', 'Declined']
+      };
+      box.innerHTML = '<table class="tp-table"><thead><tr><th>When</th><th>Tech</th><th>Client</th><th>Service</th><th>Status</th></tr></thead><tbody>' +
+        rows.map(function (b) {
+          const c = chip[b.status] || ['#eee', '#666', b.status || '—'];
+          return '<tr>' +
+            '<td class="tp-joined">' + when(b.starts_at) + '</td>' +
+            '<td style="white-space:nowrap;">' + escHtml(b.tech_name || '—') + '</td>' +
+            '<td style="white-space:nowrap;">' + escHtml(b.client_name || b.client_email || '—') + '</td>' +
+            '<td>' + escHtml(b.service_name || '—') + '</td>' +
+            '<td><span style="background:' + c[0] + ';color:' + c[1] + ';font-size:11px;font-weight:700;border-radius:100px;padding:2px 8px;white-space:nowrap;">' + c[2] + '</span></td>' +
+          '</tr>';
+        }).join('') + '</tbody></table>';
+    } catch (e) { box.innerHTML = '<div class="empty">Network error.</div>'; }
+  }
+  window.toggleBookingDetail = toggleBookingDetail;
 
   // ── Top-level renderer ─────────────────────────────────────────────
   async function renderStats() {
