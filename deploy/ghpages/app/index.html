@@ -2716,6 +2716,15 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
   </div>
   <div class="scroll-content" style="padding-bottom:80px;">
 
+    <!-- Free-month countdown. Shown only while a tech is on the card-free
+         booking trial (subscription_source = 'trial'), counting down to
+         period_reset_at, the 30-day mark. Populated by tbRenderTrialBanner()
+         from tbRenderSettings. Hidden for free, comped, and paid techs. -->
+    <div id="tb-trial-banner" style="display:none;margin:16px 20px 0;padding:13px 15px;background:linear-gradient(140deg,#FFF3E9 0%,#FDE8EC 100%);border:1.5px solid var(--rose-mid);border-radius:14px;">
+      <div id="tb-trial-title" style="font-size:14px;font-weight:700;color:var(--charcoal);"></div>
+      <div id="tb-trial-sub" style="font-size:13px;color:var(--muted);margin-top:3px;"></div>
+    </div>
+
     <div style="margin:16px 20px 0;background:white;border:1.5px solid var(--border);border-radius:16px;padding:16px;">
       <div style="display:flex;align-items:center;gap:10px;">
         <div style="flex:1;min-width:0;">
@@ -5453,8 +5462,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.6',     /* __APP_BUILD_NAME__   */
-  android: 623,         /* __APP_BUILD_ANDROID__ */
-  ios:     428,          /* __APP_BUILD_IOS__     */
+  android: 624,         /* __APP_BUILD_ANDROID__ */
+  ios:     429,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -14385,7 +14394,7 @@ async function loadTechBookings() {
   const note = document.getElementById('tb-migration-note');
   try {
     const r = await fetch(SUPABASE_URL +
-      '/rest/v1/techs?select=id,name,email,booking_enabled,booking_auto_confirm,booking_timezone,booking_buffer_minutes,booking_min_notice_hours,listing_paused,paused_by_tech,is_visible,is_bookable,trial_started_at&or=(email.eq.' +
+      '/rest/v1/techs?select=id,name,email,booking_enabled,booking_auto_confirm,booking_timezone,booking_buffer_minutes,booking_min_notice_hours,listing_paused,paused_by_tech,is_visible,is_bookable,trial_started_at,subscription_source,period_reset_at&or=(email.eq.' +
       encodeURIComponent(currentUserEmail) + ',phone.eq.' + encodeURIComponent(currentUserEmail) + ')', { headers: bkHeaders() });
     if (!r.ok) {
       // Almost always means the migration hasn't been run (unknown column).
@@ -14415,7 +14424,7 @@ async function loadTechBookings() {
       if (_fallbackId) {
         try {
           const r2 = await fetch(SUPABASE_URL +
-            '/rest/v1/techs?select=id,name,email,booking_enabled,booking_auto_confirm,booking_timezone,booking_buffer_minutes,booking_min_notice_hours,listing_paused,paused_by_tech,is_visible,is_bookable,trial_started_at&id=eq.' +
+            '/rest/v1/techs?select=id,name,email,booking_enabled,booking_auto_confirm,booking_timezone,booking_buffer_minutes,booking_min_notice_hours,listing_paused,paused_by_tech,is_visible,is_bookable,trial_started_at,subscription_source,period_reset_at&id=eq.' +
             encodeURIComponent(_fallbackId), { headers: bkHeaders() });
           if (r2.ok) _bkMyTech = ((await r2.json()) || [])[0] || null;
         } catch(_) {}
@@ -14495,8 +14504,41 @@ function tbPill(id, on) {
   b.style.borderColor = on ? 'var(--rose)' : 'var(--border)';
 }
 
+// Free-month countdown banner. Shows only while a tech is on the card-free
+// booking trial (subscription_source = 'trial'), counting whole days down to
+// period_reset_at (the 30-day mark, before the 3-day grace). Silent for free,
+// comped, and paid techs. See sql/tech-booking-trial-migration.sql.
+function tbRenderTrialBanner() {
+  var el = document.getElementById('tb-trial-banner');
+  if (!el) return;
+  var t = _bkMyTech;
+  var end = (t && t.period_reset_at) ? new Date(t.period_reset_at) : null;
+  if (!t || t.subscription_source !== 'trial' || !end || isNaN(end.getTime())) {
+    el.style.display = 'none';
+    return;
+  }
+  var days = Math.ceil((end.getTime() - Date.now()) / 86400000);
+  var title = document.getElementById('tb-trial-title');
+  var sub   = document.getElementById('tb-trial-sub');
+  var ends  = end.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  if (days >= 2) {
+    if (title) title.textContent = 'Your free month: ' + days + ' days left';
+    if (sub)   sub.textContent = 'Booking is on and free through ' + ends +
+      '. No card until then, and your clients are never charged to book you.';
+  } else if (days === 1) {
+    if (title) title.textContent = 'Your free month: 1 day left';
+    if (sub)   sub.textContent = 'Free through ' + ends +
+      '. After that it is $10.99 a month to keep taking bookings.';
+  } else {
+    if (title) title.textContent = 'Your free month has ended';
+    if (sub)   sub.textContent = 'Subscribe to keep booking on. Turning it on again will ask you to start your $10.99 a month.';
+  }
+  el.style.display = 'block';
+}
+
 function tbRenderSettings() {
   if (!_bkMyTech) return;
+  tbRenderTrialBanner();
   tbPill('tb-enabled-btn', !!_bkMyTech.booking_enabled);
   tbPill('tb-autoconfirm-btn', !!_bkMyTech.booking_auto_confirm);
   tbPill('tb-paused-btn', !!_bkMyTech.paused_by_tech);

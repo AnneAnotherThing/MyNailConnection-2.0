@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="robots" content="noindex, nofollow"/>
+<title>Introducing New - MNC 3.0 campaign kit</title>
+<link rel="icon" href="../favicon.ico" sizes="any"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --rose:#DEB3B5; --rose-dark:#A2636C; --rose-light:#F7E2E3; --rose-mid:#D0A3A5;
+    --gold:#8A7879; --gold-light:#EDE7E6; --cream:#FAF7F2; --charcoal:#0B0B0D;
+    --muted:#7A6E78; --white:#fff; --border:rgba(191,166,168,0.28);
+    --ink-1:#4A4A4F; --ink-2:#2A2A2E; --ink-3:#141317;
+  }
+  body{font-family:'DM Sans',sans-serif;background:var(--white);color:var(--charcoal);-webkit-font-smoothing:antialiased;line-height:1.6}
+
+  header{background:linear-gradient(160deg,#1C1A19 0%,#242221 34%,#32302E 66%,#1C1A19 100%);padding:56px 24px 48px;text-align:center;position:relative;overflow:hidden}
+  header::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(200,170,172,0.4) 0%,transparent 62%)}
+  .hin{position:relative;z-index:1;max-width:760px;margin:0 auto}
+  .badge{display:inline-flex;align-items:center;gap:9px;border:1px solid rgba(191,166,168,0.5);background:rgba(191,166,168,0.16);border-radius:100px;padding:7px 18px;font-size:10.5px;font-weight:700;color:#DEB3B5;letter-spacing:2px;text-transform:uppercase;margin-bottom:22px}
+  .dot{width:6px;height:6px;border-radius:50%;background:#DEB3B5}
+  header h1{font-family:'Playfair Display',serif;font-size:clamp(30px,5.4vw,50px);font-weight:700;line-height:1.1;color:rgba(245,237,232,0.95);letter-spacing:-0.8px;margin-bottom:14px}
+  header h1 em{font-style:italic;color:#DEB3B5}
+  header p{font-size:16px;color:rgba(245,237,232,0.6);line-height:1.65;max-width:600px;margin:0 auto}
+
+  .wrap{max-width:1000px;margin:0 auto;padding:0 24px}
+  section{padding:56px 0;border-bottom:1px solid var(--border)}
+  section:last-of-type{border-bottom:none}
+  .lab{font-size:11px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--rose-dark);margin-bottom:10px}
+  h2{font-family:'Playfair Display',serif;font-size:clamp(24px,3.4vw,34px);font-weight:700;line-height:1.2;letter-spacing:-0.4px;margin-bottom:12px}
+  h2 em{font-style:italic;color:var(--rose-dark)}
+  .sub{font-size:15px;color:var(--muted);line-height:1.7;max-width:640px;margin-bottom:32px}
+
+  /* run sheet */
+  .run{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px}
+  .wk{background:var(--cream);border:1px solid rgba(191,166,168,0.18);border-bottom:3px solid rgba(191,166,168,0.22);border-radius:18px;padding:22px 22px 20px}
+  .wk .n{font-family:'Playfair Display',serif;font-size:32px;font-weight:700;color:var(--rose-light);line-height:1;margin-bottom:6px}
+  .wk h3{font-family:'Playfair Display',serif;font-size:17px;font-weight:600;margin-bottom:8px;line-height:1.3}
+  .wk p{font-size:13.5px;color:var(--muted);line-height:1.65}
+  .wk .em{display:block;margin-top:10px;font-size:12px;color:var(--rose-dark);font-weight:600}
+
+  /* asset blocks */
+  .item{border:1px solid var(--border);border-radius:18px;overflow:hidden;margin-bottom:18px;background:var(--white)}
+  .item > .head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:16px 20px;background:var(--cream);border-bottom:1px solid var(--border)}
+  .pill{font-size:9.5px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;padding:3.5px 11px;border-radius:100px;background:var(--rose-light);color:var(--rose-dark);white-space:nowrap}
+  .pill.tech{background:#E7F0E8;color:#3F6B4D}
+  .pill.client{background:#E8ECF1;color:#4A5D77}
+  .pill.email{background:var(--gold-light);color:#5E5049}
+  .item .head h3{font-family:'Playfair Display',serif;font-size:17px;font-weight:600;flex:1;min-width:180px;line-height:1.3}
+  .body{padding:18px 20px 20px}
+  .row{margin-bottom:16px}
+  .row:last-child{margin-bottom:0}
+  .k{font-size:10px;font-weight:700;letter-spacing:1.6px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;display:flex;align-items:center;gap:10px}
+  .copy{border:none;background:none;font-family:'DM Sans',sans-serif;font-size:10px;font-weight:700;letter-spacing:0.6px;text-transform:uppercase;color:var(--rose-dark);cursor:pointer;padding:2px 8px;border:1.5px solid var(--border);border-radius:100px;transition:all .18s}
+  .copy:hover{border-color:var(--rose-mid);background:var(--rose-light)}
+  .copy.done{background:#E7F0E8;border-color:#A8CBB2;color:#3F6B4D}
+  .v{font-size:14.5px;line-height:1.7;white-space:pre-wrap;background:var(--cream);border:1px solid rgba(191,166,168,0.18);border-radius:12px;padding:14px 16px}
+  .v.tags{font-size:13px;color:var(--rose-dark);font-weight:500}
+  .brief{font-size:13.5px;color:var(--muted);line-height:1.7;background:var(--white);border-left:3px solid var(--rose-mid);padding:2px 0 2px 14px}
+
+  /* facts */
+  .facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:14px}
+  .fact{background:var(--cream);border:1px solid rgba(191,166,168,0.18);border-radius:14px;padding:16px 18px}
+  .fact .ft{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--rose-dark);margin-bottom:6px}
+  .fact p{font-size:13.5px;color:var(--charcoal);line-height:1.65}
+  .warn{background:#FDF6EC;border:1px solid #E5CFA8;border-radius:14px;padding:16px 18px;margin-top:18px}
+  .warn .ft{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#8A6A2F;margin-bottom:6px}
+  .warn p{font-size:13.5px;line-height:1.65;color:#5E4A24}
+
+  .links{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+  .links a{font-size:13px;font-weight:500;color:var(--rose-dark);text-decoration:none;border:1.5px solid var(--border);border-radius:100px;padding:7px 14px;transition:all .18s}
+  .links a:hover{border-color:var(--rose-mid);background:var(--rose-light)}
+
+  footer{background:var(--cream);border-top:1px solid var(--border);padding:32px 24px;text-align:center;font-size:13px;color:var(--muted)}
+  footer .fw{font-family:'Playfair Display',serif;font-style:italic;font-size:17px;font-weight:600;color:var(--charcoal);margin-bottom:8px}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hin">
+    <div class="badge"><span class="dot"></span> Campaign kit</div>
+    <h1>Introducing New.<br/><em>Everything 3.0 added while they were working.</em></h1>
+    <p>Eight emails, thirteen social posts and one page, all built from claims that are already live on the site or shipping in the app. Nothing here is invented.</p>
+  </div>
+</header>
+
+<div class="wrap">
+
+<!-- ─────────── RUN SHEET ─────────── -->
+<section>
+  <div class="lab">How to run it</div>
+  <h2>Eight weeks, one idea a week.</h2>
+  <p class="sub">The order matters. Tagging comes first because it is the highest-return ten minutes a tech can spend and it makes every later email worth more. Price comes late, once they have seen what they are paying for. Send the email, then post its social the same week so the two reinforce each other.</p>
+  <div class="run">
+    <div class="wk"><div class="n">1</div><h3>The whole thing is new</h3><p>Set the frame and let them know more is coming, so nothing feels like a one-off blast.</p><span class="em">Email 01 · Social 1</span></div>
+    <div class="wk"><div class="n">2</div><h3>Your gallery gets you found</h3><p>The tagging push. This is the week that changes their numbers.</p><span class="em">Email 02 · Social 2, 5</span></div>
+    <div class="wk"><div class="n">3</div><h3>Fill the chair today</h3><p>Open today. The fastest win in the app and free on every plan.</p><span class="em">Email 03 · Social 3</span></div>
+    <div class="wk"><div class="n">4</div><h3>Standing appointments</h3><p>The feature the paid tools charge monthly for. Lead with that.</p><span class="em">Email 04 · Social 4</span></div>
+    <div class="wk"><div class="n">5</div><h3>Your whole book</h3><p>Walk-ins, reschedules, private notes, quiet blocking.</p><span class="em">Email 05 · Social 7</span></div>
+    <div class="wk"><div class="n">6</div><h3>Your link and QR</h3><p>Give them somewhere to put it. Station cards are the easy yes.</p><span class="em">Email 06 · Social 6</span></div>
+    <div class="wk"><div class="n">7</div><h3>What it costs</h3><p>The free tier and the trial that starts when they flip booking on.</p><span class="em">Email 07 · Social 8, 9, 10</span></div>
+    <div class="wk"><div class="n">8</div><h3>Your work stays put</h3><p>Close on the thing no competitor can copy: a portfolio that compounds.</p><span class="em">Email 08 · Social 11</span></div>
+  </div>
+</section>
+
+<!-- ─────────── EMAILS ─────────── -->
+<section>
+  <div class="lab">The emails</div>
+  <h2>Eight HTML files, <em>Resend ready.</em></h2>
+  <p class="sub">Built in the 3.0 design system: white card, ink gradient buttons, Playfair and DM Sans. Table layout with every critical style inlined, so they hold up in Outlook. Each carries a preheader and a <code>{{{RESEND_UNSUBSCRIBE_URL}}}</code> token in the footer.</p>
+
+  <div class="item">
+    <div class="head"><span class="pill email">01</span><h3>Introducing: everything that changed while you were working</h3></div>
+    <div class="body">
+      <div class="row"><div class="k">Preheader</div><div class="v">Version 3.0 is here. Your gallery, your chair, your book, your link.</div></div>
+      <div class="row"><div class="k">File</div><div class="brief">campaign/emails/01-introducing-3-0.html</div></div>
+    </div>
+  </div>
+
+  <div class="item">
+    <div class="head"><span class="pill email">02</span><h3>Did you know your gallery is a search engine?</h3></div>
+    <div class="body">
+      <div class="row"><div class="k">Preheader</div><div class="v">Untagged photos are invisible. Tagging is two taps and it auto-saves.</div></div>
+      <div class="row"><div class="k">File</div><div class="brief">campaign/emails/02-gallery-is-how-you-get-found.html</div></div>
+    </div>
+  </div>
+
+  <div class="item">
+    <div class="head"><span class="pill email">03</span><h3>That empty two o'clock can still be a booking</h3></div>
+    <div class="body">
+      <div class="row"><div class="k">Preheader</div><div class="v">Open today puts your work in front of the clients who need nails today.</div></div>
+      <div class="row"><div class="k">File</div><div class="brief">campaign/emails/03-fill-the-chair-today.html</div></div>
+    </div>
+  </div>
+
+  <div class="item">
+    <div class="head"><span class="pill email">04</span><h3>Your every-three-weeks regular should not have to rebook every three weeks</h3></div>
+    <div class="body">
+      <div class="row"><div class="k">Preheader</div><div class="v">Standing appointments book the whole series and top it up automatically.</div></div>
+      <div class="row"><div class="k">File</div><div class="brief">campaign/emails/04-standing-appointments.html</div></div>
+    </div>
+  </div>
+
+  <div class="item">
+    <div class="head"><span class="pill email">05</span><h3>Walk-ins, reschedules and the note only you can see</h3></div>
+    <div class="body">
+      <div class="row"><div class="k">Preheader</div><div class="v">Your whole book lives in your pocket now, not in three different places.</div></div>
+      <div class="row"><div class="k">File</div><div class="brief">campaign/emails/05-your-whole-book.html</div></div>
+    </div>
+  </div>
+
+  <div class="item">
+    <div class="head"><span class="pill email">06</span><h3>Your booking link goes anywhere. So does the QR code.</h3></div>
+    <div class="body">
+      <div class="row"><div class="k">Preheader</div><div class="v">Instagram bio, a story, a card at your station. And every install is counted.</div></div>
+      <div class="row"><div class="k">File</div><div class="brief">campaign/emails/06-your-own-link-and-qr.html</div></div>
+    </div>
+  </div>
+
+  <div class="item">
+    <div class="head"><span class="pill email">07</span><h3>What MNC costs, and the long list of what it does not</h3></div>
+    <div class="body">
+      <div class="row"><div class="k">Preheader</div><div class="v">Free if you book elsewhere. Your free month starts when you turn booking on.</div></div>
+      <div class="row"><div class="k">File</div><div class="brief">campaign/emails/07-what-it-costs.html</div></div>
+    </div>
+  </div>
+
+  <div class="item">
+    <div class="head"><span class="pill email">08</span><h3>The ombre you did last spring is still there next spring</h3></div>
+    <div class="body">
+      <div class="row"><div class="k">Preheader</div><div class="v">Nothing autodeletes. Nothing scrolls into the void. It is your archive.</div></div>
+      <div class="row"><div class="k">File</div><div class="brief">campaign/emails/08-your-work-stays-put.html</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────── SOCIAL ─────────── -->
+<section>
+  <div class="lab">The social posts</div>
+  <h2>Thirteen posts. <em>Copy, paste, publish.</em></h2>
+  <p class="sub">Ten for techs, three for clients. Every caption opens with the hook and puts the ask on its own line at the end. The Canva brief under each one says what the graphic needs to show; all of them sit inside the 3.0 palette, so a single template carries the whole run.</p>
+
+  <div class="item">
+    <div class="head"><span class="pill tech">Tech · 1</span><h3>The whole thing is new</h3></div>
+    <div class="body">
+      <div class="row"><div class="k">Caption <button class="copy">Copy</button></div><div class="v">Your profile got a lot busier. You did not have to do a thing.
+
+MNC 3.0 is live, and it is not a fresh coat of paint. There is a whole booking engine behind your gallery now, plus a handful of things you can switch on in under a minute that most techs still have not found.
+
+We are walking through all of it, one at a time, over the next few weeks.
+
+Start wherever you like. Link in bio.</div></div>
+      <div class="row"><div class="k">Hashtags <button class="copy">Copy</button></div><div class="v tags">#nailtech #nailtechlife #nailtechsofinstagram #licensednailtech #nailbusiness #bookingapp #mynailconnection</div></div>
+      <div class="row"><div class="k">Canva brief</div><div class="brief">Dark hero ground (#1C1A19 to #32302E), the VERSION 3.0 pill in blush at the top, headline in Playfair 700 with the second line italic in #DEB3B5. No screenshot; this one is a title card.</div></div>
+    </div>
+  </div>
+
+  <div class="item">
+    <div class="head"><span class="pill tech">Tech · 2</span><h3>Your gallery is a search engine</h3></div>
+    <div class="body">
+      <div class="row"><div class="k">Caption <button class="copy">Copy</button></div><div class="v">Did you know your gallery is not a scrapbook?
+
+Clients do not scroll hoping to stumble on you. They filter. Shape, type, style. And when they filter, only tagged photos come back.
+
+Which means an untagged photo is a beautiful set that nobody will ever see.
+
+Tag five photos and you are in five searches you were not in before. Untagged ones float to the top of My Gallery, so you do not even have to hunt for them.
+
+Ten minutes. That is the whole job.</div></div>
+      <div class="row"><div class="k">Hashtags <button class="copy">Copy</button></div><div class="v tags">#nailtech #nailtechtips #nailportfolio #nailart #getbooked #nailtechbusiness #mynailconnection</div></div>
+      <div class="row"><div class="k">Canva brief</div><div class="brief">Carousel. Slide 1: the question in Playfair on white. Slide 2: a filter row of style chips (Square, Coffin, Chrome, French) with one tapped. Slide 3: the same gallery grid, most photos greyed out, caption "this is what untagged looks like". Slide 4: the ask.</div></div>
+    </div>
+  </div>
+
+  <div class="item">
+    <div class="head"><span class="pill tech">Tech · 3</span><h3>Fill the chair today</h3></div>
+    <div class="body">
+      <div class="row"><div class="k">Caption <button class="copy">Copy</button></div><div class="v">Did you know you can fill a cancellation in two seconds?
+
+A last-minute no-show used to just be money gone. Now it is a toggle.
+
+Flip Open today and your work glows in the Gallery right when the clients who need nails today are looking. They have their own Open today filter, so you land straight in the view they are already using.
+
+That empty two o'clock turns back into a booking.
+
+No cost. Every plan, including the free one.</div></div>
+      <div class="row"><div class="k">Hashtags <button class="copy">Copy</button></div><div class="v tags">#nailtech #lastminuteappointment #nailsalon #nailtechlife #sameday #nailtechtips #mynailconnection</div></div>
+      <div class="row"><div class="k">Canva brief</div><div class="brief">Reel or static: the Open today toggle flipping on, with a green live dot. Blush ground, ink toggle in the on state. One line of copy: "two seconds, no cost".</div></div>
+    </div>
+  </div>
+
+  <div class="item">
+    <div class="head"><span class="pill tech">Tech · 4</span><h3>Standing appointments</h3></div>
+    <div class="body">
+      <div class="row"><div class="k">Caption <button class="copy">Copy</button></div><div class="v">Your every-three-weeks regular should not have to rebook every three weeks.
+
+Turn any appointment into a standing appointment and MNC books the whole series for you. Every 1 to 4 weeks, topped up automatically, so the chair is always held out in front of you.
+
+Your regulars stop slipping through the cracks. You stop chasing them.
+
+This is the part the paid booking tools charge you monthly for.</div></div>
+      <div class="row"><div class="k">Hashtags <button class="copy">Copy</button></div><div class="v tags">#nailtech #nailtechlife #regularclients #nailbusiness #bookingsoftware #salonowner #mynailconnection</div></div>
+      <div class="row"><div class="k">Canva brief</div><div class="brief">A calendar month with the same slot marked on four Thursdays, each one a blush pill. One arrow looping back on itself. Playfair headline: "Set once, then forget."</div></div>
+    </div>
+  </div>
+
+  <div class="item">
+    <div class="head"><span class="pill tech">Tech · 5</span><h3>Presence tracks your work, not your budget</h3></div>
+    <div class="body">
+      <div class="row"><div class="k">Caption <button class="copy">Copy</button></div><div class="v">No boosting. No pay-to-rank. No mystery math.
+
+Your share of the Gallery grows exactly with your photo count. That is the whole algorithm, and we are happy to print it.
+
+Nobody can outspend you into invisibility here. The only thing that moves you up is the work you already did.
+
+Post the whole portfolio. Up to 50 looks a month, free.</div></div>
+      <div class="row"><div class="k">Hashtags <button class="copy">Copy</button></div><div class="v tags">#nailtech #nailartist #nailportfolio #nailtechsupport #smallbusiness #nailtechlife #mynailconnection</div></div>
+      <div class="row"><div class="k">Canva brief</div><div class="brief">Two simple bars side by side: "your budget" flat and grey, "your photo count" rising in blush. Nothing else on the card.</div></div>
+    </div>
+  </div>
+
+  <div class="item">
+    <div class="head"><span class="pill tech">Tech · 6</span><h3>Your own link and QR</h3></div>
+    <div class="body">
+      <div class="row"><div class="k">Caption <button class="copy">Copy</button></div><div class="v">Did you know you have your own booking link?
+
+Tap Share My Profile in your Tech Portal and it goes anywhere you want it. Your bio, a story, a text to a regular.
+
+Drop that same link into any free QR generator and print it for your station. One scan while their top coat cures and they have you saved.
+
+And it is measured. Every visit and every install your link brings home is counted, so you are not guessing whether it was worth posting.</div></div>
+      <div class="row"><div class="k">Hashtags <button class="copy">Copy</button></div><div class="v tags">#nailtech #linkinbio #nailtechtips #qrcode #nailbusiness #marketingfornailtechs #mynailconnection</div></div>
+      <div class="row"><div class="k">Canva brief</div><div class="brief">A station-card mockup: small printed card propped by a lamp, QR block in charcoal on cream, the tech's name in Playfair above it. Warm photo treatment, no stock office imagery.</div></div>
+    </div>
+  </div>
+
+  <div class="item">
+    <div class="head"><span class="pill tech">Tech · 7</span><h3>Your whole book</h3></div>
+    <div class="body">
+      <div class="row"><div class="k">Caption <button class="copy">Copy</button></div><div class="v">Did you know you can change an appointment without a single DM?
+
+Reschedule it, mark a no-show, or cancel. Wired on both sides, so everyone gets told and nobody has to chase a thread.
+
+While you are in there: add your walk-ins and phone clients yourself, keep a private note on any booking that only you can ever see, and if someone needs to go, block them quietly. They are never told.
+
+One calendar. Everyone on it.</div></div>
+      <div class="row"><div class="k">Hashtags <button class="copy">Copy</button></div><div class="v tags">#nailtech #nailtechlife #salonlife #bookingsoftware #nailtechtips #clientcare #mynailconnection</div></div>
+      <div class="row"><div class="k">Canva brief</div><div class="brief">Carousel of four app cards: Add Appointment, Reschedule, Private note, Block. Each on white with the 1.5px hairline border and one blush accent. Screens, not illustrations.</div></div>
+    </div>
+  </div>
+
+  <div class="item">
+    <div class="head"><span class="pill tech">Tech · 8</span><h3>The trial starts when you are ready</h3></div>
+    <div class="body">
+      <div class="row"><div class="k">Caption <button class="copy">Copy</button></div><div class="v">Your free month no longer starts the day you signed up.
+
+It starts the moment you turn booking on.
+
+So if you are still building your gallery, still deciding, still getting your hours right, you are not burning a trial while you do it. Nothing is ticking. No card to start.
+
+Turn booking on when you are ready and the month starts then.</div></div>
+      <div class="row"><div class="k">Hashtags <button class="copy">Copy</button></div><div class="v tags">#nailtech #freetrial #nailbusiness #nailtechlife #bookingapp #smallbusiness #mynailconnection</div></div>
+      <div class="row"><div class="k">Canva brief</div><div class="brief">A stopwatch that has not been started, or simply the words "not ticking" in Playfair over blush. Keep it quiet; the idea is relief, not urgency.</div></div>
+    </div>
+  </div>
+
+  <div class="item">
+    <div class="head"><span class="pill tech">Tech · 9</span><h3>Free if you book elsewhere</h3></div>
+    <div class="body">
+      <div class="row"><div class="k">Caption <button class="copy">Copy</button></div><div class="v">Already on Vagaro, GlossGenius or StyleSeat? Or you just take calls?
+
+Then MNC is free.
+
+Your profile, your gallery, your place in the Gallery, your own booking link and Open today cost nothing, ever. Add your existing booking link and a Book Now button appears on your profile automatically.
+
+The $10.99 is only for MNC's own booking engine. If you do not need it, you do not pay for it.</div></div>
+      <div class="row"><div class="k">Hashtags <button class="copy">Copy</button></div><div class="v tags">#nailtech #nailtechlife #nailbusiness #freeforever #nailportfolio #nailtechtips #mynailconnection</div></div>
+      <div class="row"><div class="k">Canva brief</div><div class="brief">Two columns on cream: "Free, forever" listing the five free things, and "$10.99/mo" listing only the booking engine. Deliberately lopsided. No crossed-out prices.</div></div>
+    </div>
+  </div>
+
+  <div class="item">
+    <div class="head"><span class="pill tech">Tech · 10</span><h3>No commission, ever</h3></div>
+    <div class="body">
+      <div class="row"><div class="k">Caption <button class="copy">Copy</button></div><div class="v">No commission. No per-booking fee. And never a charge to your clients.
+
+Booking you through MNC is always free for them, which means nobody is quietly taking a cut of the set you just spent three hours on.
+
+One flat price if you use our booking engine. Cancel anytime and your gallery and calendar stay put either way.
+
+That is the whole price list.</div></div>
+      <div class="row"><div class="k">Hashtags <button class="copy">Copy</button></div><div class="v tags">#nailtech #nocommission #nailbusiness #smallbusiness #nailtechlife #supportnailtechs #mynailconnection</div></div>
+      <div class="row"><div class="k">Canva brief</div><div class="brief">Three short lines, each on its own row with a blush dot: no commission, no per-booking fee, no charge to your clients. Playfair, generous leading, plenty of white.</div></div>
+    </div>
+  </div>
+
+  <div class="item">
+    <div class="head"><span class="pill tech">Tech · 11</span><h3>Your work stays put</h3></div>
+    <div class="body">
+      <div class="row"><div class="k">Caption <button class="copy">Copy</button></div><div class="v">This is not a social feed.
+
+Nothing autodeletes. Nothing scrolls into the void. No algorithm decides today that your best set from March is finished being seen.
+
+The ombre you did last spring is still there next spring, still working for you.
+
+Instagram rents attention. Here, you own a billboard.</div></div>
+      <div class="row"><div class="k">Hashtags <button class="copy">Copy</button></div><div class="v tags">#nailtech #nailportfolio #nailartist #nailart #nailtechlife #buildyourbrand #mynailconnection</div></div>
+      <div class="row"><div class="k">Canva brief</div><div class="brief">A gallery grid where the oldest row is as crisp as the newest, with a small date stamp on each. Caption sits underneath, not over the photos.</div></div>
+    </div>
+  </div>
+
+  <div class="item">
+    <div class="head"><span class="pill client">Client · 12</span><h3>Browse by style</h3></div>
+    <div class="body">
+      <div class="row"><div class="k">Caption <button class="copy">Copy</button></div><div class="v">Stop scrolling Instagram hoping to find a local tech.
+
+Filter by shape, type and style and see real sets from real techs near you. Tap any photo to visit that tech and book her.
+
+Find the look. Find the tech. Book them.</div></div>
+      <div class="row"><div class="k">Hashtags <button class="copy">Copy</button></div><div class="v tags">#nails #nailinspo #nailsofinstagram #nailideas #nailart #findyournailtech #mynailconnection</div></div>
+      <div class="row"><div class="k">Canva brief</div><div class="brief">Real nail photography with the filter chips floating over it. Photos carry the colour; the interface stays white.</div></div>
+    </div>
+  </div>
+
+  <div class="item">
+    <div class="head"><span class="pill client">Client · 13</span><h3>Saved looks and same-day</h3></div>
+    <div class="body">
+      <div class="row"><div class="k">Caption <button class="copy">Copy</button></div><div class="v">No more lost screenshots.
+
+Heart any set you love and it lands in your Saved looks. Bring it to your appointment and show your tech exactly what you want.
+
+Need nails today? Tap Open today and see which techs are open right now. No calling around, no waiting for replies.</div></div>
+      <div class="row"><div class="k">Hashtags <button class="copy">Copy</button></div><div class="v tags">#nails #nailinspo #naildesign #sameday #nailappointment #nailsofinstagram #mynailconnection</div></div>
+      <div class="row"><div class="k">Canva brief</div><div class="brief">Split card: left, a saved-looks grid with hearts; right, the Open today filter with a green live dot. One line under each.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────── CLAIMS ─────────── -->
+<section>
+  <div class="lab">Claims you can print</div>
+  <h2>Everything above traces back <em>to something live.</em></h2>
+  <p class="sub">Checked against mynailconnection.com and the shipping app on 20 September 2026. If a number changes, change it here first and the rest of the kit follows.</p>
+  <div class="facts">
+    <div class="fact"><div class="ft">Price</div><p>$10.99 a month for MNC's own booking engine. One flat price; nothing scales with how busy you get.</p></div>
+    <div class="fact"><div class="ft">Free tier</div><p>Profile, gallery, place in the Gallery, own booking link and Open today are free forever if you book elsewhere or take calls.</p></div>
+    <div class="fact"><div class="ft">Trial</div><p>First month free, no card. It starts when booking is turned on, not at signup.</p></div>
+    <div class="fact"><div class="ft">Fees</div><p>No commission, no per-booking fee, and never a charge to clients. Cancel anytime; gallery and calendar stay put.</p></div>
+    <div class="fact"><div class="ft">Photos</div><p>Up to 50 looks a month, free. They never expire and nothing autodeletes.</p></div>
+    <div class="fact"><div class="ft">Ranking</div><p>Share of the Gallery grows with photo count. No boosting and no paid placement.</p></div>
+    <div class="fact"><div class="ft">Standing appointments</div><p>Every 1 to 4 weeks, topped up automatically.</p></div>
+    <div class="fact"><div class="ft">Profile photo</div><p>A face or brand photo makes clients three times more likely to reach out. This figure comes from the live site; confirm the source before using it in paid advertising.</p></div>
+  </div>
+  <div class="warn">
+    <div class="ft">Blockers, settle these before a single send</div>
+    <p><strong>1. Email deliverability is not signed off.</strong> Every line of the Site Launch Checklist mail block is still open on the MNC punchlist: SPF, DKIM, DMARC, Resend domain verification, and a from-address on mynailconnection.com. Sending eight marketing emails from an unverified domain lands them in spam and spends sending reputation you cannot get back. This is the one hard stop.</p>
+    <p style="margin-top:10px;"><strong>2. "Founding tech, locked for life" has been removed from this kit.</strong> The live home page still prints it, but the punchlist records Anne's 2026-08-17 decision of no founder carve-outs. A lifetime price promise is not something to repeat across eight emails while the two sources disagree. Put it back everywhere if the live page is right; correct the live page if the punchlist is.</p>
+    <p style="margin-top:10px;"><strong>3. The home page does not say when the free month starts.</strong> The app stamps the trial when booking is switched on, not at signup. Emails 01 and 07 and social post 8 lead on that, so the home page needs the same sentence or a tech reads two stories in one week.</p>
+    <p style="margin-top:10px;"><strong>4. Open booking bugs.</strong> The punchlist flags listing_paused reading true for all 32 techs, and a RevenueCat reset that leaves Leslie paid but unbookable, both marked "before any booking push". This campaign is a booking push. Driving techs to turn booking on while those are live means they hit the bug, not the feature.</p>
+    <p style="margin-top:10px;"><strong>5. The waggle is not at 100%.</strong> Standing rule: nothing goes live until it is.</p>
+  </div>
+</section>
+
+<!-- ─────────── LINKS ─────────── -->
+<section>
+  <div class="lab">Where everything lives</div>
+  <h2>The pieces.</h2>
+  <div class="links">
+    <a href="../whats-new.html">What's New page</a>
+    <a href="emails/01-introducing-3-0.html">Email 01</a>
+    <a href="emails/02-gallery-is-how-you-get-found.html">Email 02</a>
+    <a href="emails/03-fill-the-chair-today.html">Email 03</a>
+    <a href="emails/04-standing-appointments.html">Email 04</a>
+    <a href="emails/05-your-whole-book.html">Email 05</a>
+    <a href="emails/06-your-own-link-and-qr.html">Email 06</a>
+    <a href="emails/07-what-it-costs.html">Email 07</a>
+    <a href="emails/08-your-work-stays-put.html">Email 08</a>
+    <a href="../tech-guide-v3.html">Setup guide</a>
+  </div>
+</section>
+
+</div>
+
+<footer>
+  <div class="fw">My Nail Connection</div>
+  <div>Internal campaign kit. Not linked from the site and set to noindex.</div>
+</footer>
+
+<script>
+  // Copy the sibling value block. Plain clipboard write, no dependencies.
+  document.addEventListener('click', function (e) {
+    var btn = e.target.closest('.copy');
+    if (!btn) return;
+    var val = btn.closest('.row').querySelector('.v');
+    if (!val) return;
+    navigator.clipboard.writeText(val.innerText.trim()).then(function () {
+      var old = btn.textContent;
+      btn.textContent = 'Copied';
+      btn.classList.add('done');
+      setTimeout(function () { btn.textContent = old; btn.classList.remove('done'); }, 1400);
+    }).catch(function () { btn.textContent = 'Select it'; });
+  });
+</script>
+</body>
+</html>

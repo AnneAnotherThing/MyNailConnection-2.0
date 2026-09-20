@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<meta name="color-scheme" content="light"/>
+<meta name="format-detection" content="telephone=no"/>
+
+<title>What's New in 3.0 - My Nail Connection</title>
+<meta name="description" content="Everything that changed in My Nail Connection 3.0: a tagged Gallery that gets you found, Open today to fill a cancellation, standing appointments, your own booking link and QR, your whole book in your pocket, and a free month that starts when you turn booking on."/>
+<link rel="canonical" href="https://mynailconnection.com/whats-new.html"/>
+<meta name="robots" content="index, follow, max-image-preview:large"/>
+
+<link rel="icon" href="favicon.ico" sizes="any"/>
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png"/>
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png"/>
+<meta name="theme-color" content="#4A4A4F"/>
+
+<meta property="og:type" content="website"/>
+<meta property="og:site_name" content="My Nail Connection"/>
+<meta property="og:title" content="What's New in My Nail Connection 3.0"/>
+<meta property="og:description" content="Your gallery is how you get found. Open today fills a cancellation. Standing appointments book themselves. And your free month starts when you turn booking on."/>
+<meta property="og:url" content="https://mynailconnection.com/whats-new.html"/>
+<meta property="og:image" content="https://mynailconnection.com/og-image-2026-08.png"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content="What's New in My Nail Connection 3.0"/>
+<meta name="twitter:image" content="https://mynailconnection.com/og-image-2026-08.png"/>
+
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+
+<style>
+  /* My Nail Connection 3.0 design system. Marketing surface, so the
+     marketing palette: marketing-charcoal, marketing-muted, the 1px
+     marketing hairline and the bottom-heavy card border. */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --rose: #DEB3B5;
+    --rose-dark: #A2636C;
+    --rose-light: #F7E2E3;
+    --rose-mid: #D0A3A5;
+    --gold: #8A7879;
+    --gold-light: #EDE7E6;
+    --cream: #FAF7F2;
+    --charcoal: #0B0B0D;
+    --muted: #7A6E78;
+    --white: #ffffff;
+    --border: rgba(191,166,168,0.2);
+    --hero-1: #1C1A19;
+    --hero-2: #32302E;
+  }
+
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--white);
+    color: var(--charcoal);
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(250,247,244,0.92);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 40px; height: 68px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .nav-brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+  .nav-brand img { width: 38px; height: 38px; border-radius: 10px; }
+  .nav-brand span {
+    font-family: 'Playfair Display', serif;
+    font-size: 17px; font-weight: 600; color: var(--charcoal); letter-spacing: -0.3px;
+  }
+  .nav-links { display: flex; align-items: center; gap: 28px; }
+  .nav-links a { font-size: 14px; font-weight: 500; color: var(--muted); text-decoration: none; transition: color 0.2s; }
+  .nav-links a:hover { color: var(--rose-dark); }
+  .nav-cta {
+    background: linear-gradient(160deg, #34303A 0%, #141317 62%, #0B0B0D 100%);
+    color: white !important; padding: 9px 22px; border-radius: 10px;
+    font-weight: 600 !important; font-size: 13px !important;
+    box-shadow: 0 3px 12px rgba(20,19,23,0.28);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .nav-cta:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(20,19,23,0.34); color: white !important; }
+  @media (max-width: 760px) {
+    nav { padding: 0 20px; }
+    .nav-links a:not(.nav-cta) { display: none; }
+  }
+
+  /* ── HERO ── */
+  .hero {
+    background: linear-gradient(160deg, var(--hero-1) 0%, #242221 30%, var(--hero-2) 60%, #242221 100%);
+    padding: 96px 24px 88px; text-align: center; position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(200,170,172,0.45) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 70%, rgba(180,110,90,0.14) 0%, transparent 45%);
+  }
+  .hero-inner { position: relative; z-index: 1; max-width: 780px; margin: 0 auto; }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: linear-gradient(135deg, rgba(191,166,168,0.25), rgba(191,166,168,0.1));
+    border: 1px solid rgba(191,166,168,0.5); border-radius: 100px;
+    padding: 8px 20px; font-size: 11px; font-weight: 700; color: #DEB3B5;
+    letter-spacing: 2px; text-transform: uppercase; margin-bottom: 28px;
+  }
+  .hero-badge-dot { width: 6px; height: 6px; border-radius: 50%; background: #DEB3B5; box-shadow: 0 0 8px rgba(210,185,187,0.8); }
+  .hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(36px, 6.4vw, 64px); font-weight: 700; line-height: 1.1;
+    color: rgba(245,237,232,0.94); letter-spacing: -1px; margin-bottom: 20px;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.35);
+  }
+  .hero h1 em { font-style: italic; color: #DEB3B5; }
+  .hero p {
+    font-size: clamp(15px, 2.2vw, 19px); color: rgba(245,237,232,0.6);
+    line-height: 1.65; max-width: 620px; margin: 0 auto 32px;
+  }
+  .hero-note {
+    font-size: 13px; color: rgba(245,237,232,0.45); letter-spacing: 0.3px;
+  }
+
+  /* ── JUMP NAV ── */
+  .jump { background: var(--cream); border-bottom: 1px solid var(--border); padding: 20px 24px; }
+  .jump-inner {
+    max-width: 1100px; margin: 0 auto;
+    display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;
+  }
+  .jump a {
+    font-size: 13px; font-weight: 500; color: var(--muted); text-decoration: none;
+    border: 1.5px solid var(--border); background: var(--white);
+    padding: 7px 15px; border-radius: 100px; transition: all 0.2s cubic-bezier(0.34,1.3,0.64,1);
+    white-space: nowrap;
+  }
+  .jump a:hover { border-color: var(--rose-mid); color: var(--rose-dark); transform: translateY(-1px); }
+
+  /* ── SECTIONS ── */
+  section { padding: 80px 24px; }
+  .section-inner { max-width: 1100px; margin: 0 auto; }
+  .section-label {
+    font-size: 11px; font-weight: 700; letter-spacing: 2.5px;
+    text-transform: uppercase; color: var(--rose-dark); margin-bottom: 12px;
+  }
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(28px, 4.4vw, 44px); font-weight: 700; line-height: 1.15;
+    color: var(--charcoal); margin-bottom: 14px; letter-spacing: -0.5px;
+  }
+  .section-title em { font-style: italic; color: var(--rose-dark); }
+  .section-sub { font-size: 16px; color: var(--muted); line-height: 1.7; max-width: 620px; margin-bottom: 44px; }
+
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+  .card {
+    background: var(--cream); border-radius: 18px; padding: 30px 28px;
+    border: 1px solid rgba(191,166,168,0.18);
+    border-bottom: 3px solid rgba(191,166,168,0.22);
+    box-shadow: 0 2px 12px rgba(191,166,168,0.07), inset 0 1px 0 rgba(255,255,255,0.8);
+    transition: box-shadow 0.2s, transform 0.2s;
+  }
+  .card:hover { box-shadow: 0 10px 32px rgba(191,166,168,0.14), inset 0 1px 0 rgba(255,255,255,0.8); transform: translateY(-4px); }
+  .card-tag {
+    display: inline-block; font-size: 9.5px; font-weight: 700; letter-spacing: 1.2px;
+    text-transform: uppercase; padding: 3px 10px; border-radius: 100px;
+    background: var(--rose-light); color: var(--rose-dark); margin-bottom: 14px;
+  }
+  .card-tag.free { background: #E7F0E8; color: #3F6B4D; }
+  .card-tag.paid { background: var(--gold-light); color: #5E5049; }
+  .card h3 {
+    font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 600;
+    color: var(--charcoal); margin-bottom: 10px; line-height: 1.3;
+  }
+  .card p { font-size: 14px; color: var(--muted); line-height: 1.7; }
+  .card p + p { margin-top: 10px; }
+  .card strong { color: var(--charcoal); font-weight: 600; }
+
+  .alt { background: var(--cream); }
+  .alt .card { background: var(--white); }
+
+  /* ── PRICE STRIP ── */
+  .price-strip {
+    background: linear-gradient(160deg, var(--hero-1), var(--charcoal));
+    border-radius: 28px; padding: 48px 40px; color: white; text-align: center;
+    box-shadow: 0 16px 48px rgba(11,11,13,0.3);
+  }
+  .price-strip h2 {
+    font-family: 'Playfair Display', serif; font-size: clamp(26px, 3.6vw, 38px);
+    font-weight: 700; line-height: 1.2; margin-bottom: 14px; letter-spacing: -0.5px;
+  }
+  .price-strip h2 em { font-style: italic; color: #DEB3B5; }
+  .price-strip > p { font-size: 15px; line-height: 1.75; color: rgba(255,255,255,0.72); max-width: 620px; margin: 0 auto 30px; }
+  .price-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; text-align: left; }
+  .price-cell {
+    background: rgba(255,255,255,0.06); border: 1px solid rgba(191,166,168,0.22);
+    border-radius: 16px; padding: 20px;
+  }
+  .price-cell .k {
+    font-size: 10px; font-weight: 700; letter-spacing: 1.6px; text-transform: uppercase;
+    color: var(--rose); margin-bottom: 8px;
+  }
+  .price-cell .v { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 700; margin-bottom: 6px; }
+  .price-cell .d { font-size: 13px; line-height: 1.6; color: rgba(255,255,255,0.68); }
+
+  /* ── CLOSE ── */
+  .close { text-align: center; }
+  .close .section-title { margin-bottom: 16px; }
+  .store-row { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin-top: 30px; }
+  .store-btn {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: var(--white); border: 1.5px solid var(--border);
+    border-radius: 100px; padding: 11px 24px; text-decoration: none;
+    color: var(--charcoal); transition: all 0.2s cubic-bezier(0.34,1.3,0.64,1);
+    box-shadow: 0 2px 10px rgba(191,166,168,0.12);
+  }
+  .store-btn:hover { transform: translateY(-2px); border-color: var(--rose-mid); box-shadow: 0 6px 18px rgba(191,166,168,0.2); }
+  .store-btn .sm { display: block; font-size: 9px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); }
+  .store-btn .lg { display: block; font-size: 15px; font-weight: 600; }
+  .guide-link {
+    display: inline-block; margin-top: 22px; font-size: 14px; font-weight: 600;
+    color: var(--rose-dark); text-decoration: none;
+  }
+  .guide-link:hover { text-decoration: underline; }
+
+  /* ── FOOTER ── */
+  footer { background: var(--cream); border-top: 1px solid var(--border); padding: 40px 24px; text-align: center; }
+  footer .fw { font-family: 'Playfair Display', serif; font-style: italic; font-size: 18px; font-weight: 600; color: var(--charcoal); }
+  footer .fl { margin-top: 14px; font-size: 13px; color: var(--muted); }
+  footer .fl a { color: var(--muted); text-decoration: none; margin: 0 8px; }
+  footer .fl a:hover { color: var(--rose-dark); }
+  footer .fc { margin-top: 16px; font-size: 12px; color: var(--muted); }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .card, .store-btn, .jump a, .nav-cta { transition: none; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="/">
+    <img src="images/mncLogo-192.webp" width="38" height="38" alt=""/>
+    <span>My Nail Connection</span>
+  </a>
+  <div class="nav-links">
+    <a href="/#for-techs">For Techs</a>
+    <a href="/#for-clients">For Clients</a>
+    <a href="tech-guide-v3.html">Setup guide</a>
+    <a class="nav-cta" href="/app/">Open the app</a>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-badge"><span class="hero-badge-dot"></span> Version 3.0</div>
+    <h1>Your profile got a lot busier.<br/><em>You did not have to do a thing.</em></h1>
+    <p>Version 3.0 is not a fresh coat of paint. There is a whole booking engine behind your gallery now, plus a handful of things you can turn on in under a minute that most techs still have not found.</p>
+    <div class="hero-note">Everything below is live in the app today.</div>
+  </div>
+</div>
+
+<div class="jump">
+  <div class="jump-inner">
+    <a href="#found">Get found</a>
+    <a href="#chair">Fill the chair</a>
+    <a href="#booking">Take the booking</a>
+    <a href="#book">Your whole book</a>
+    <a href="#reach">Your own reach</a>
+    <a href="#price">What it costs</a>
+    <a href="#app">The app itself</a>
+  </div>
+</div>
+
+<!-- ── GET FOUND ── -->
+<section id="found">
+  <div class="section-inner">
+    <div class="section-label">Get found</div>
+    <h2 class="section-title">Your gallery is not a scrapbook.<br/><em>It is how clients find you.</em></h2>
+    <p class="section-sub">Clients do not scroll MNC hoping to stumble on you. They filter. When they filter, only tagged photos come back, which means an untagged photo is a beautiful set nobody will ever see.</p>
+    <div class="cards">
+      <div class="card">
+        <span class="card-tag free">Free</span>
+        <h3>One Gallery, filtered by style</h3>
+        <p>Real sets from real techs, in one place. Clients filter by <strong>shape, type and style</strong>, and only tagged photos come back.</p>
+      </div>
+      <div class="card">
+        <span class="card-tag">Do this first</span>
+        <h3>Tag every photo</h3>
+        <p>Tags are the whole mechanic. Tag five photos and you are in five searches you were not in before.</p>
+        <p>In <strong>My Gallery</strong>, untagged photos float to the top so you never have to hunt for them, and your changes auto-save as you tap.</p>
+      </div>
+      <div class="card">
+        <span class="card-tag free">Free</span>
+        <h3>Photos never expire</h3>
+        <p>This is not a social feed. Nothing autodeletes and nothing scrolls into the void. The ombre you did last spring is still working for you next spring.</p>
+        <p>Up to <strong>50 looks a month</strong>, free on every plan.</p>
+      </div>
+      <div class="card">
+        <span class="card-tag">No pay-to-rank</span>
+        <h3>Presence tracks your work, not your budget</h3>
+        <p>Your share of the Gallery grows exactly with your photo count. No boosting, no mystery math, and nobody can outspend you into invisibility.</p>
+      </div>
+      <div class="card">
+        <span class="card-tag">Profile</span>
+        <h3>A profile that gets you found</h3>
+        <p>Shop name, full address, bio and a profile photo. Clients use the map to find techs near them, and <strong>no address means invisible on the map</strong>.</p>
+        <p>A face or brand photo makes clients three times more likely to reach out.</p>
+      </div>
+      <div class="card">
+        <span class="card-tag">Privacy</span>
+        <h3>Mobile techs stay private</h3>
+        <p>Tag yourself <strong>Mobile</strong> and your street address is kept private automatically. Clients see your service area, not your home base.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FILL THE CHAIR ── -->
+<section id="chair" class="alt">
+  <div class="section-inner">
+    <div class="section-label">Fill the chair</div>
+    <h2 class="section-title">Had a cancellation?<br/><em>Fill it today.</em></h2>
+    <p class="section-sub">A last-minute no-show used to just be money gone. Now it is a toggle, it takes two seconds, and it costs nothing on any plan.</p>
+    <div class="cards">
+      <div class="card">
+        <span class="card-tag free">Free</span>
+        <h3>Open today</h3>
+        <p>Flip it and your work glows in the Gallery right when the clients who need nails today are looking. That empty two o'clock turns back into a booking.</p>
+        <p>Clients have their own <strong>Open today</strong> filter, so flipping it moves you straight into the view they are already using.</p>
+      </div>
+      <div class="card">
+        <span class="card-tag free">Free</span>
+        <h3>Open this week</h3>
+        <p>For the slower gaps that are not quite an emergency. Same toggle, wider window.</p>
+      </div>
+      <div class="card">
+        <span class="card-tag">Always yours</span>
+        <h3>No slow-patch penalty</h3>
+        <p>You do not pay to stay active and you are never quietly demoted for a quiet month. <strong>You are active until you take yourself down.</strong></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── TAKE THE BOOKING ── -->
+<section id="booking">
+  <div class="section-inner">
+    <div class="section-label">Take the booking</div>
+    <h2 class="section-title">Clients book you<br/><em>right in the app.</em></h2>
+    <p class="section-sub">They find your work in the Gallery and book you directly. No third-party platform to learn, and no guessing how to reach you.</p>
+    <div class="cards">
+      <div class="card">
+        <span class="card-tag paid">Booking engine</span>
+        <h3>In-app booking</h3>
+        <p>Clients book you without leaving MNC. Add your phone number and they can call or text instead, whichever they prefer.</p>
+      </div>
+      <div class="card">
+        <span class="card-tag free">Free</span>
+        <h3>Already on another platform?</h3>
+        <p>On Vagaro, GlossGenius or StyleSeat? Add your booking link and a <strong>Book Now</strong> button appears on your profile automatically. Every path still leads to you.</p>
+      </div>
+      <div class="card">
+        <span class="card-tag paid">Booking engine</span>
+        <h3>Standing appointments</h3>
+        <p>Your every-three-weeks regular should not have to rebook every three weeks. Turn any appointment into a standing one and MNC books the whole series, <strong>every 1 to 4 weeks</strong>, topped up automatically so the chair is always held.</p>
+        <p>This is the part the paid booking tools charge you monthly for.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── YOUR WHOLE BOOK ── -->
+<section id="book" class="alt">
+  <div class="section-inner">
+    <div class="section-label">Your whole book</div>
+    <h2 class="section-title">Everyone on one calendar,<br/><em>in your pocket.</em></h2>
+    <p class="section-sub">Half your clients came through the app. The other half texted you, called you, or walked in. Your book should hold all of them.</p>
+    <div class="cards">
+      <div class="card">
+        <span class="card-tag paid">Booking engine</span>
+        <h3>Add Appointment</h3>
+        <p>Walk-in or phone client, you add them yourself and they land on your calendar instantly.</p>
+      </div>
+      <div class="card">
+        <span class="card-tag">New in 3.0</span>
+        <h3>Reschedule, no-show, cancel</h3>
+        <p>Change an appointment without a single DM. Wired on both sides, so moving a booking is a tap instead of a thread, and everyone gets told.</p>
+      </div>
+      <div class="card">
+        <span class="card-tag">Private</span>
+        <h3>Notes only you can see</h3>
+        <p>Keep a private note on any booking: polish colours, allergies, no-show history. <strong>Only you can ever see them.</strong></p>
+      </div>
+      <div class="card">
+        <span class="card-tag">Private</span>
+        <h3>Block someone quietly</h3>
+        <p>If someone needs to go, block them. They are never told.</p>
+      </div>
+      <div class="card">
+        <span class="card-tag">Tech Portal</span>
+        <h3>Requests greet you on arrival</h3>
+        <p>New requests and your next appointment sit right on your Tech Portal, <strong>in the app</strong>, not just a push you might swipe away.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── YOUR OWN REACH ── -->
+<section id="reach">
+  <div class="section-inner">
+    <div class="section-label">Your own reach</div>
+    <h2 class="section-title">Your own link.<br/><em>Your own QR.</em></h2>
+    <p class="section-sub">Tap Share My Profile in your Tech Portal and your personal booking link goes anywhere you want it.</p>
+    <div class="cards">
+      <div class="card">
+        <span class="card-tag free">Free</span>
+        <h3>A link that goes anywhere</h3>
+        <p>Your Instagram bio, your stories, a text to a regular. It lands clients on a page that is all you: your photo, your work, your name, with the app download right there.</p>
+      </div>
+      <div class="card">
+        <span class="card-tag free">Free</span>
+        <h3>A QR code for your station</h3>
+        <p>Drop that same link into any free QR generator and print it. One scan while their top coat cures and they have you saved.</p>
+      </div>
+      <div class="card">
+        <span class="card-tag">Measured</span>
+        <h3>You can see it working</h3>
+        <p>Every visit and every install your link brings home is counted, with the source attributed. You are not guessing whether it is worth posting.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── PRICE ── -->
+<section id="price" class="alt">
+  <div class="section-inner">
+    <div class="price-strip">
+      <h2>Your free month starts<br/><em>when you are ready.</em></h2>
+      <p>This is the change most techs have not heard yet. Your free month no longer starts ticking the day you signed up. It starts the moment you <strong>turn booking on</strong>, so nobody burns a trial while they are still building their gallery. No card to start.</p>
+      <div class="price-grid">
+        <div class="price-cell">
+          <div class="k">If you book elsewhere</div>
+          <div class="v">Free</div>
+          <div class="d">Your profile, your gallery, your place in the Gallery, your own booking link and Open today cost nothing, ever.</div>
+        </div>
+        <div class="price-cell">
+          <div class="k">MNC booking engine</div>
+          <div class="v">$10.99/mo</div>
+          <div class="d">First month free, and it starts when you turn booking on. One flat price, with nothing that scales as you get busier.</div>
+        </div>
+        <div class="price-cell">
+          <div class="k">What you never pay</div>
+          <div class="v">No commission</div>
+          <div class="d">No per-booking fee, and never a charge to your clients. Cancel anytime; your gallery and calendar stay put either way.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── THE APP ── -->
+<section id="app">
+  <div class="section-inner">
+    <div class="section-label">The app itself</div>
+    <h2 class="section-title">On your phone properly,<br/><em>not just in a browser.</em></h2>
+    <p class="section-sub">3.0 ships as a real app on both stores, with the small things that make it feel like one.</p>
+    <div class="cards">
+      <div class="card">
+        <span class="card-tag">New in 3.0</span>
+        <h3>App Store and Google Play</h3>
+        <p>Download it properly on iPhone or Android. Push notifications land the moment a booking comes in.</p>
+      </div>
+      <div class="card">
+        <span class="card-tag">New in 3.0</span>
+        <h3>Sign in with your phone</h3>
+        <p>No password to forget. Enter your number, get a code by text, and you are in.</p>
+      </div>
+      <div class="card">
+        <span class="card-tag">Reach us</span>
+        <h3>Report a bug from anywhere</h3>
+        <p>Three ways to report something broken, from inside the app or from the sign-in screen, and every one of them reaches a real inbox that a person reads.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CLOSE ── -->
+<section class="alt close">
+  <div class="section-inner">
+    <h2 class="section-title">Your talent was already there.<br/><em>We just make sure clients can find it.</em></h2>
+    <p class="section-sub" style="margin:0 auto 0;">Start wherever you like. Tagging your photos is the highest-return ten minutes in the whole app.</p>
+    <div class="store-row">
+      <a class="store-btn" href="https://apps.apple.com/app/id6764125663">
+        <span><span class="sm">Download on the</span><span class="lg">App Store</span></span>
+      </a>
+      <a class="store-btn" href="https://play.google.com/store/apps/details?id=com.mynailconnection.app">
+        <span><span class="sm">Get it on</span><span class="lg">Google Play</span></span>
+      </a>
+    </div>
+    <a class="guide-link" href="tech-guide-v3.html">Read the complete setup guide &rarr;</a>
+  </div>
+</section>
+
+<footer>
+  <div class="fw">My Nail Connection</div>
+  <div class="fl">
+    <a href="/">Home</a> ·
+    <a href="tech-guide-v3.html">Setup guide</a> ·
+    <a href="privacy.html">Privacy</a> ·
+    <a href="terms.html">Terms</a>
+  </div>
+  <div class="fc">&copy; 2026 My Nail Connection. All rights reserved.</div>
+</footer>
+
+</body>
+</html>
