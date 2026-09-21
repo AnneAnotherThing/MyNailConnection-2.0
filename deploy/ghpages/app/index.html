@@ -2723,13 +2723,14 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
     <div id="tb-trial-banner" style="display:none;margin:16px 20px 0;padding:13px 15px;background:linear-gradient(140deg,#FFF3E9 0%,#FDE8EC 100%);border:1.5px solid var(--rose-mid);border-radius:14px;">
       <div id="tb-trial-title" style="font-size:14px;font-weight:700;color:var(--charcoal);"></div>
       <div id="tb-trial-sub" style="font-size:13px;color:var(--muted);margin-top:3px;"></div>
+      <button id="tb-trial-cta" onclick="openBookingSubscribe()" style="display:none;margin-top:11px;width:100%;padding:11px;border:none;border-radius:11px;background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);color:white;font-size:14px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;">Subscribe, $10.99/month</button>
     </div>
 
     <div style="margin:16px 20px 0;background:white;border:1.5px solid var(--border);border-radius:16px;padding:16px;">
       <div style="display:flex;align-items:center;gap:10px;">
         <div style="flex:1;min-width:0;">
           <div style="font-size:15px;font-weight:600;color:var(--charcoal);">Take bookings on MNC</div>
-          <div id="tb-enabled-sub" style="font-size:13px;color:var(--muted);margin-top:2px;">Free, always. Clients book you right from your profile.</div>
+          <div id="tb-enabled-sub" style="font-size:13px;color:var(--muted);margin-top:2px;">Clients book you right from your profile.</div>
         </div>
         <button id="tb-enabled-btn" onclick="tbToggleEnabled()" style="min-width:56px;padding:8px 14px;border-radius:100px;font-size:13px;font-weight:700;cursor:pointer;border:1.5px solid var(--border);background:white;color:var(--muted);">Off</button>
       </div>
@@ -5462,8 +5463,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.6',     /* __APP_BUILD_NAME__   */
-  android: 624,         /* __APP_BUILD_ANDROID__ */
-  ios:     429,          /* __APP_BUILD_IOS__     */
+  android: 625,         /* __APP_BUILD_ANDROID__ */
+  ios:     430,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -14512,26 +14513,31 @@ function tbRenderTrialBanner() {
   var el = document.getElementById('tb-trial-banner');
   if (!el) return;
   var t = _bkMyTech;
-  var end = (t && t.period_reset_at) ? new Date(t.period_reset_at) : null;
-  if (!t || t.subscription_source !== 'trial' || !end || isNaN(end.getTime())) {
-    el.style.display = 'none';
-    return;
-  }
-  var days = Math.ceil((end.getTime() - Date.now()) / 86400000);
+  if (!t || t.subscription_source !== 'trial') { el.style.display = 'none'; return; }
   var title = document.getElementById('tb-trial-title');
   var sub   = document.getElementById('tb-trial-sub');
-  var ends  = end.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-  if (days >= 2) {
-    if (title) title.textContent = 'Your free month: ' + days + ' days left';
-    if (sub)   sub.textContent = 'Booking is on and free through ' + ends +
-      '. No card until then, and your clients are never charged to book you.';
-  } else if (days === 1) {
-    if (title) title.textContent = 'Your free month: 1 day left';
-    if (sub)   sub.textContent = 'Free through ' + ends +
-      '. After that it is $10.99 a month to keep taking bookings.';
+  var cta   = document.getElementById('tb-trial-cta');
+  var end   = t.period_reset_at ? new Date(t.period_reset_at) : null;
+  var ends  = (end && !isNaN(end.getTime())) ? end.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
+  // is_bookable is the truth: it stays true through the 30 days (and the 3-day
+  // grace), then flips false. Drive the ended state off it, not the raw day
+  // count, so the copy and the toggle can never disagree.
+  if (t.is_bookable) {
+    if (cta) cta.style.display = 'none';
+    var days = end ? Math.ceil((end.getTime() - Date.now()) / 86400000) : 0;
+    if (days >= 2) {
+      if (title) title.textContent = 'Your free month: ' + days + ' days left';
+      if (sub)   sub.textContent = 'Booking is on and free through ' + ends +
+        '. No card until then, and your clients are never charged to book you.';
+    } else {
+      if (title) title.textContent = (days === 1) ? 'Your free month: 1 day left' : 'Your free month ends today';
+      if (sub)   sub.textContent = 'Free through ' + ends +
+        '. After that it is $10.99 a month to keep taking bookings.';
+    }
   } else {
     if (title) title.textContent = 'Your free month has ended';
-    if (sub)   sub.textContent = 'Subscribe to keep booking on. Turning it on again will ask you to start your $10.99 a month.';
+    if (sub)   sub.textContent = 'Subscribe to keep taking bookings. Your gallery and profile stay exactly as they are.';
+    if (cta) cta.style.display = 'block';
   }
   el.style.display = 'block';
 }
@@ -14548,10 +14554,20 @@ function tbRenderSettings() {
   if (buf) buf.value = String(_bkMyTech.booking_buffer_minutes || 0);
   // State copy (Anne, 2026-08-03): each toggle's sub-line says what is
   // true RIGHT NOW, not an on-means/off-means legend.
+  // Tell the truth about whether clients can actually book. booking_enabled is
+  // the tech's intent; is_bookable is whether it is live. A lapsed trial leaves
+  // enabled=true but bookable=false, so a plain "Booking is on" would lie and
+  // contradict the trial banner right above. Three honest states instead.
   const enSub = document.getElementById('tb-enabled-sub');
-  if (enSub) enSub.textContent = _bkMyTech.booking_enabled
-    ? 'Booking is on \u2014 clients book you right from your profile.'
-    : 'Booking is off \u2014 clients see your other contact options.';
+  if (enSub) {
+    if (!_bkMyTech.booking_enabled) {
+      enSub.textContent = 'Booking is off. Clients see your other contact options.';
+    } else if (_bkMyTech.is_bookable) {
+      enSub.textContent = 'Booking is on. Clients book you right from your profile.';
+    } else {
+      enSub.textContent = 'Booking is paused until you subscribe. Clients cannot book you right now.';
+    }
+  }
   const acSub = document.getElementById('tb-autoconfirm-sub');
   if (acSub) acSub.textContent = _bkMyTech.booking_auto_confirm
     ? 'Requests book straight onto your calendar \u2014 clients will be counting on you, keep an eye on your schedule!'
