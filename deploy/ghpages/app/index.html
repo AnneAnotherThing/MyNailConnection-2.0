@@ -5463,8 +5463,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.6',     /* __APP_BUILD_NAME__   */
-  android: 626,         /* __APP_BUILD_ANDROID__ */
-  ios:     431,          /* __APP_BUILD_IOS__     */
+  android: 627,         /* __APP_BUILD_ANDROID__ */
+  ios:     432,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -7888,9 +7888,16 @@ function saveAvailability() {
     },
     body: JSON.stringify({ is_available: nowOn, is_same_day: todayOn, accepting_new_clients: newOn })
   }).then(function(r) {
-    if (!r.ok) { console.warn('saveAvailability failed:', r.status); return null; }
+    if (!r.ok) { console.warn('saveAvailability failed:', r.status); return { __failed: true }; }
     return r.json().catch(function() { return null; });
   }).then(function(rows) {
+    if (rows && rows.__failed) {
+      // The PATCH did not persist. Do NOT fall through to the success toast,
+      // which used to fire here and tell her it saved when it had not. The
+      // chip re-syncs to server truth on the next load. 2026-09-20.
+      showToast("Couldn't save that just now, check your connection and try again");
+      return;
+    }
     if (rows && Array.isArray(rows) && rows.length === 0) {
       // Zero rows matched, this user has no techs row. Happens for
       // orphan auth accounts whose signup-profile RPC never ran.
@@ -7933,7 +7940,10 @@ function saveAvailability() {
     // Anne asked for this 2026-04-22, she was seeing "No availability set"
     // on her own profile right after flipping the hero chips on.
     try { loadTechsFromSupabase(); } catch(e) {}
-  }).catch(function(e) { console.warn('saveAvailability error:', e); });
+  }).catch(function(e) {
+    console.warn('saveAvailability error:', e);
+    showToast("Couldn't save that just now, check your connection and try again");
+  });
 }
 
 // ── Auto-reset logic ────────────────────────────────────────────
@@ -15853,7 +15863,11 @@ async function maybeDailyAvailPrompt(t) {
 // matters: do you already book somewhere, or set it up here? 2026-07-22, Anne.
 function tbOpenBookings() {
   var st = window._bkSetup || {};
-  if (st.enabled || st.link) { show('tech-bookings'); return; }
+  // A tech who has booking set up (enabled, or has her own external link) OR
+  // who deliberately chose calls-and-texts only goes straight to the calendar.
+  // Without the calls-only check she was re-thrown the entire 3-way setup fork
+  // every single time she opened My Appointments. 2026-09-20.
+  if (st.enabled || st.link || _bkCallsOnlyPref()) { show('tech-bookings'); return; }
   bkOpenSetupFork();
 }
 function bkOpenSetupFork() {
