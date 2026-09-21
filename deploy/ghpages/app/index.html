@@ -2227,6 +2227,13 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
          updateSetupChecklist(); hides once every step is done or
          after "I'll do this later" (for the rest of the session). -->
     <div id="td-setup-checklist" style="display:none;margin:16px 20px 0;background:white;border:1px solid var(--rose-mid);border-radius:16px;padding:16px;box-shadow:var(--shadow);">
+      <!-- Monica, the MNC host (2026-09-20). The lady in the hat gets a name
+           and a first-person voice so the app feels like a person is guiding
+           the tech, not a system. Portrait rides every message she "says". -->
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+        <img src="images/mncLogo-round-256.webp" alt="Monica" width="38" height="38" style="width:38px;height:38px;border-radius:50%;flex-shrink:0;box-shadow:0 1px 4px rgba(20,19,23,0.15);"/>
+        <div style="font-size:12.5px;color:var(--muted);line-height:1.45;"><b style="color:var(--rose-dark);">Monica</b> here, your host at My Nail Connection. Let me get you set up.</div>
+      </div>
       <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:4px;">
         <div id="td-setup-title" style="font-family:'Playfair Display',serif;font-size:17px;font-weight:600;color:var(--rose-dark);">Let&rsquo;s get you bookable</div>
         <div id="td-setup-progress" style="font-size:13px;color:var(--muted);font-weight:600;"></div>
@@ -2587,11 +2594,9 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
          on this screen. 2026-04-23: old copy told techs to "head to your
          profile" which is no longer necessary. -->
     <div id="myph-empty" class="empty-state" style="display:none;">
-      <div class="empty-state-icon">
-        <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-      </div>
-      <div class="empty-state-title">No photos yet</div>
-      <div class="empty-state-sub" style="margin-bottom:16px;">Tap below to add your first set, you'll tag and caption each one before it goes live.</div>
+      <img src="images/mncLogo-round-256.webp" alt="Monica" style="width:64px;height:64px;border-radius:50%;margin:0 auto 8px;display:block;box-shadow:0 2px 10px rgba(20,19,23,0.16);"/>
+      <div class="empty-state-title">Show me your first set</div>
+      <div class="empty-state-sub" style="margin-bottom:16px;">I&rsquo;m Monica, your host at My Nail Connection. Post your work and I&rsquo;ll get you in front of clients searching for your style. Tag each one and it goes live.</div>
       <button type="button" onclick="openPhotoUploadFromHome()"
         style="padding:12px 22px;border-radius:12px;border:none;background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);color:white;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:8px;box-shadow:0 2px 8px rgba(169,139,141,0.22);">
         <svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;">
@@ -5474,8 +5479,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.6',     /* __APP_BUILD_NAME__   */
-  android: 628,         /* __APP_BUILD_ANDROID__ */
-  ios:     433,          /* __APP_BUILD_IOS__     */
+  android: 629,         /* __APP_BUILD_ANDROID__ */
+  ios:     434,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -18361,7 +18366,7 @@ function updateSetupChecklist() {
   var ld = document.getElementById('td-setup-lede');
   if (ld) {
     ld.style.display = '';
-    ld.textContent = steps.length + ' steps, well under ten minutes. Stop any time \u2014 it saves as you go.';
+    ld.textContent = steps.length + ' quick things and you\u2019re bookable. I\u2019ll save as you go, so stop any time.';
   }
   var lt = document.getElementById('td-setup-later');
   if (lt) lt.style.display = '';

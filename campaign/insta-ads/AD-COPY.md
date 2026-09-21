@@ -39,3 +39,35 @@ Any frame runs alone. The strongest solo frames:
 - Competitors are not named in the ad frames except frame 04, where naming them is the feature (the Book Now button links out to them).
 - "Founding tech, locked for life" is left out, same as the email series, until the live page and the 2026-08-17 decision agree.
 - No frame claims MNC is the only app with a marketplace. StyleSeat, Booksy, Fresha and Vagaro all have one.
+
+---
+
+# Set 2: Open today
+
+Six frames, same two formats, files `png/feed-open-*` and `png/story-open-*`.
+
+**Primary text:**
+
+> Had a cancellation? Flip Open today and every one of your photos glows in the Gallery, you land in the Open today rail on the home screen, and you show up twice as often until midnight. No discount, no fee, free on every plan.
+>
+> We're filling the Gallery with techs first so clients never open an empty app. Client marketing comes next, and your photos never expire, so what you post now is still working when they arrive.
+
+**Headline:** Your work glows when you're open
+
+**Description:** Free to join. Open today is free, always.
+
+**Call to action button:** Download
+
+## What Open today actually does (from the app, 2026-09-20)
+
+- Every photo gets a green ring and an OPEN TODAY banner in the Gallery (`.avail-glow-tile`).
+- The tech appears in the Open today rail on the client home screen.
+- Gallery weight doubles while it is on (`index.html`, availability boost, 2026-08-03).
+- It clears itself every midnight. Open this week resets Sunday.
+- If a tech flips it on with call, text and instant booking all off, the app warns her that today's clients have no way to reach her.
+
+## Claim check, set 2
+
+- Frame 4 compares ways of filling a gap, not named apps. Last-minute discounts: Booksy and Fresha. Automated waitlists: StyleSeat and Vagaro. Neither reaches new clients without a marketplace, which is where the 20% to 30% new-client fees apply.
+- Frame 5 promises client marketing "next" with no date. That is a public commitment; Anne should be ready to point at it.
+- The ad never says Open today fills a chair today. With the client side still small, it says the switch works and gets louder as clients arrive.
