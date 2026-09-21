@@ -28,6 +28,8 @@ body{font-family:'DM Sans',sans-serif;color:var(--ink);-webkit-font-smoothing:an
 .slide{width:1080px;height:var(--H);position:relative;overflow:hidden;display:flex;flex-direction:column;padding:84px 88px 84px}
 .light{background:#fff}
 .blush{background:linear-gradient(170deg,#FBEEEE 0%,var(--blush) 100%)}
+body:has(.blush){background:var(--blush)}
+body:has(.dark){background:#1C1A19}
 .dark{background:linear-gradient(160deg,var(--h1) 0%,#242221 34%,var(--h2) 66%,var(--h1) 100%);color:var(--hink)}
 .dark::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% -10%,rgba(200,170,172,0.42) 0%,transparent 60%);pointer-events:none}
 .slide>*{position:relative;z-index:1}
