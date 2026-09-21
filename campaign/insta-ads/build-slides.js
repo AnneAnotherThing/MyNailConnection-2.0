@@ -269,13 +269,129 @@ const slides = [
   }
 ];
 
+/* ─────────────────────────────────────────────────────────────────────
+   Set 2: Open today. The availability toggle as a perk, how it differs
+   from the discount and waitlist tools elsewhere, and the honest frame:
+   the Gallery is being filled with techs before client marketing starts.
+   The glow matches the app: a green ring (rgba(74,122,90,.8)) and a green
+   gradient banner reading OPEN TODAY (index.html .avail-glow-tile).
+   ───────────────────────────────────────────────────────────────────── */
+const CSS2 = `
+.gtile{position:relative;aspect-ratio:1;border-radius:20px;overflow:hidden;background-size:cover;background-position:center}
+.gtile.glow{box-shadow:0 0 0 5px rgba(74,122,90,.85),0 0 34px 6px rgba(95,155,114,.55)}
+.gtile .ban{position:absolute;left:0;right:0;bottom:0;padding:40px 8px 14px;background:linear-gradient(transparent,rgba(45,106,79,.92));color:#fff;text-align:center;font-size:20px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase;display:flex;align-items:center;justify-content:center;gap:8px}
+.gtile.quiet{filter:saturate(.55) brightness(.92)}
+.spark{width:18px;height:18px;flex:none}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:auto}
+.toggle{display:inline-flex;align-self:flex-start;align-items:center;gap:22px;margin-top:40px;background:rgba(255,255,255,.08);border:1.5px solid rgba(222,179,181,.35);border-radius:100px;padding:16px 30px 16px 18px}
+.sw{width:96px;height:54px;border-radius:100px;background:#4A7A5A;position:relative;box-shadow:inset 0 0 0 2px rgba(255,255,255,.18)}
+.sw::after{content:'';position:absolute;top:6px;left:48px;width:42px;height:42px;border-radius:50%;background:#fff}
+.toggle span{font-size:30px;font-weight:700;color:var(--hink)}
+.perks{display:flex;flex-direction:column;gap:22px;margin-top:52px;flex:1;justify-content:space-between}
+.perk{flex:1;display:flex;gap:30px;align-items:center;border-radius:28px;padding:34px 38px;background:var(--cream);border:1.5px solid var(--border)}
+.pic{flex:none;width:84px;height:84px;border-radius:24px;background:#E7F0E8;display:flex;align-items:center;justify-content:center}
+.pic svg{width:44px;height:44px;stroke:#3F6B4D;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.perk h3{font-family:'Playfair Display',serif;font-size:42px;font-weight:700;line-height:1.15;margin-bottom:6px}
+.perk p{font-size:27px;line-height:1.45;color:var(--muted)}
+.clock{display:flex;gap:22px;margin-top:44px;flex:1}
+.cday{flex:1;border-radius:28px;padding:36px 30px;display:flex;flex-direction:column;justify-content:space-between}
+.cday.on{background:#fff;box-shadow:0 14px 36px rgba(20,19,23,.12)}
+.cday.off{background:rgba(255,255,255,.45);border:1.5px dashed var(--rose-mid)}
+.cday .t{font-family:'Playfair Display',serif;font-size:82px;line-height:1;font-weight:700}
+.cday .d{font-size:31px;line-height:1.45;color:var(--muted);margin-top:22px}
+.state{display:inline-flex;align-items:center;gap:12px;font-size:28px;font-weight:700;padding:10px 20px;border-radius:100px;align-self:flex-start}
+.state.on{background:#E7F0E8;color:#3F6B4D}.state.off{background:#fff;color:var(--muted)}
+.state i{width:13px;height:13px;border-radius:50%;background:#5F9B72}
+.state.off i{background:#C9BDB6}
+.ways{display:flex;flex-direction:column;gap:18px;margin-top:50px;flex:1;justify-content:space-between}
+.way{flex:1;display:grid;grid-template-columns:1fr auto;align-items:center;gap:20px;border-radius:26px;padding:30px 36px;background:var(--cream);border:1.5px solid var(--border)}
+.way h3{font-family:'Playfair Display',serif;font-size:38px;font-weight:700;line-height:1.2}
+.way p{font-size:25px;color:var(--muted);line-height:1.4;margin-top:6px}
+.way .cost{font-size:21px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#9A8B90;text-align:right;white-space:nowrap;line-height:1.4}
+.way.us{background:var(--grad);border:none;box-shadow:0 18px 40px rgba(20,19,23,.28)}
+.way.us h3{color:#fff}.way.us p{color:rgba(255,255,255,.75)}.way.us .cost{color:var(--rose)}
+.pledge{margin-top:48px;display:flex;flex-direction:column;gap:26px;flex:1}
+.pl{display:flex;gap:24px;align-items:flex-start;font-size:30px;line-height:1.45;color:rgba(245,237,232,.8)}
+.pl b{color:var(--hink);font-weight:700}
+.pl .n{flex:none;font-family:'Playfair Display',serif;font-style:italic;font-size:44px;line-height:1;color:var(--rose);width:44px}
+.story .g3{margin-top:60px}
+.story .perks,.story .clock,.story .ways,.story .pledge{flex:0 0 auto}
+.story .perk,.story .way{flex:0 0 auto}
+.story .clock{height:540px}
+`;
+
+const SPARK = '<svg class="spark" viewBox="0 0 24 24"><path fill="#fff" d="M12 2l2.2 6.6L21 11l-6.8 2.4L12 20l-2.2-6.6L3 11l6.8-2.4z"/></svg>';
+const gtile = (n, on) => `<div class="gtile ${on ? 'glow' : 'quiet'}" style="background-image:url(${G(n)})">${on ? `<div class="ban">${SPARK}Open today</div>` : ''}</div>`;
+const IC = {
+  glow: '<svg viewBox="0 0 24 24"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/><circle cx="12" cy="12" r="3.2"/></svg>',
+  rail: '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M3 10h18M8 15h3"/></svg>',
+  two:  '<svg viewBox="0 0 24 24"><path d="M4 17l5-5 4 4 7-8"/><path d="M15 8h5v5"/></svg>'
+};
+const T2 = 6;
+const slides2 = [
+  { id: 'open-01-hook', cls: 'dark', body: n => `${top(n, T2)}
+      <div class="eyebrow">Had a cancellation?</div>
+      <h1>Flip one switch.<br><em>Your work glows.</em></h1>
+      <div class="toggle"><div class="sw"></div><span>Open today</span></div>
+      <div class="g3">${gtile(12, true)}${gtile(5, false)}${gtile(21, true)}${gtile(18, false)}${gtile(9, true)}${gtile(3, false)}</div>` },
+  { id: 'open-02-what-happens', cls: 'light', body: n => `${top(n, T2)}
+      <div class="eyebrow">What Open today does</div>
+      <h1>Three things happen<br><em>the second you flip it.</em></h1>
+      <div class="perks">
+        <div class="perk"><div class="pic">${IC.glow}</div><div><h3>Every photo glows</h3><p>A green ring and an Open today banner on each of your sets in the Gallery.</p></div></div>
+        <div class="perk"><div class="pic">${IC.rail}</div><div><h3>You land on the home screen</h3><p>In the Open today rail, the first thing a same-day client taps.</p></div></div>
+        <div class="perk"><div class="pic">${IC.two}</div><div><h3>You show up twice as often</h3><p>Open techs get double the Gallery presence while the switch is on.</p></div></div>
+      </div>` },
+  { id: 'open-03-always-true', cls: 'blush', body: n => `${top(n, T2)}
+      <div class="eyebrow">Honest by design</div>
+      <h1>It turns itself off<br><em>at midnight.</em></h1>
+      <div class="sub">So when a client sees Open today, it means today. They learn to trust the glow, and that trust is what makes it work.</div>
+      <div class="clock">
+        <div class="cday on"><div><div class="t">2:14 pm</div><div class="d">Your two o'clock cancels. You flip it on between clients.</div></div><div class="state on"><i></i>Open today</div></div>
+        <div class="cday off"><div><div class="t">12:00 am</div><div class="d">It clears itself. Chair free tomorrow? Flip it again.</div></div><div class="state off"><i></i>Off</div></div>
+      </div>` },
+  { id: 'open-04-compare', cls: 'light', body: n => `${top(n, T2)}
+      <div class="eyebrow">How other apps fill a gap</div>
+      <h1>Other apps fill it<br><em>one of two ways.</em></h1>
+      <div class="ways">
+        <div class="way"><div><h3>Last-minute discount</h3><p>You drop your price so the slot sells.</p></div><div class="cost">Costs you<br>your rate</div></div>
+        <div class="way"><div><h3>Waitlist text</h3><p>Only reaches people who already book you.</p></div><div class="cost">No new<br>clients</div></div>
+        <div class="way us"><div><h3>Open today</h3><p>Shows your work to new clients nearby, at your full price.</p></div><div class="cost">Free on<br>every plan</div></div>
+      </div>` },
+  { id: 'open-05-honest', cls: 'dark', body: n => `${top(n, T2)}
+      <div class="eyebrow">The honest part</div>
+      <h1>We're filling the<br>Gallery first.<br><em>Clients come next.</em></h1>
+      <div class="pledge">
+        <div class="pl"><span class="n">1</span><div>A client app with no techs in it is an empty room. <b>So techs come first.</b></div></div>
+        <div class="pl"><span class="n">2</span><div>As the Gallery fills, <b>we market it to clients</b>, and every set you've posted is already there.</div></div>
+        <div class="pl"><span class="n">3</span><div>Your photos never expire. <b>What you post this week is still working the week they arrive.</b></div></div>
+      </div>
+      <div class="foot" style="margin-top:28px">Early on, Open today reaches the clients already here. It gets louder as more arrive. Thank you for building it with us.</div>` },
+  { id: 'open-06-cta', cls: 'dark', body: n => `${top(n, T2)}
+      <h1>Get your work in<br>before the clients<br><em>get there.</em></h1>
+      <div class="stores">
+        <div class="store"><small>Download on the</small><span>App Store</span></div>
+        <div class="store"><small>Get it on</small><span>Google Play</span></div>
+      </div>
+      <div class="url">Free to join. Open today is free, always.</div>
+      <div class="strip">
+        <div class="ph" style="background-image:url(${G(14)})"></div>
+        <div class="ph" style="background-image:url(${G(7)})"></div>
+        <div class="ph" style="background-image:url(${G(19)})"></div>
+      </div>` }
+];
+
 const FORMATS = { feed: 1350, story: 1920 };
 fs.mkdirSync(SRC, { recursive: true });
+let count = 0;
 for (const [fmt, H] of Object.entries(FORMATS)) {
-  slides.forEach((s, i) => {
-    const html = `<!DOCTYPE html><html class="${fmt}"><head><meta charset="utf-8"><link rel="stylesheet" href="../fonts/fonts.css"><style>:root{--H:${H}px}${CSS}</style></head>
+  for (const set of [slides, slides2]) {
+    set.forEach((s, i) => {
+      const html = `<!DOCTYPE html><html class="${fmt}"><head><meta charset="utf-8"><link rel="stylesheet" href="../fonts/fonts.css"><style>:root{--H:${H}px}${CSS}${CSS2}</style></head>
 <body class="${fmt}"><div class="slide ${s.cls}">${s.body(fmt === 'feed' ? i + 1 : 0)}</div></body></html>`;
-    fs.writeFileSync(path.join(SRC, `${fmt}-${s.id}.html`), html);
-  });
+      fs.writeFileSync(path.join(SRC, `${fmt}-${s.id}.html`), html);
+      count++;
+    });
+  }
 }
-console.log('wrote', slides.length * 2, 'slide sources');
+console.log('wrote', count, 'slide sources');

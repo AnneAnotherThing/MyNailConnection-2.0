@@ -2162,6 +2162,17 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       <div style="font-size:13px;color:var(--muted);margin-top:4px;" id="tech-dash-subtle">Your business, at a glance</div>
     </div>
 
+    <!-- Portal find-anything search (2026-09-20): jump to any screen or
+         setting by name, Booking Settings controls included. A tech should
+         never have to remember which menu holds "buffer" or "time off". -->
+    <div style="margin:10px 20px 0;position:relative;">
+      <svg viewBox="0 0 24 24" style="position:absolute;left:12px;top:21px;transform:translateY(-50%);width:15px;height:15px;stroke:var(--muted);fill:none;stroke-width:2.1;stroke-linecap:round;stroke-linejoin:round;pointer-events:none;"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input id="portal-search" type="search" inputmode="search" autocomplete="off"
+        placeholder="Find a setting or screen" oninput="portalSearch(this.value)"
+        style="width:100%;padding:11px 12px 11px 36px;border:1.5px solid var(--border);border-radius:12px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--charcoal);outline:none;box-sizing:border-box;"/>
+      <div id="portal-search-results" style="display:none;margin-top:6px;background:white;border:1px solid var(--rose-mid);border-radius:12px;overflow:hidden;box-shadow:var(--shadow);"></div>
+    </div>
+
     <!-- IN-APP APPOINTMENT ALERTS (2026-08-10, Anne): a push can be missed,
          swiped away, or turned off entirely, so the portal itself announces
          what needs attention: pending booking requests first (rose, pulsing,
@@ -5463,8 +5474,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.6',     /* __APP_BUILD_NAME__   */
-  android: 627,         /* __APP_BUILD_ANDROID__ */
-  ios:     432,          /* __APP_BUILD_IOS__     */
+  android: 628,         /* __APP_BUILD_ANDROID__ */
+  ios:     433,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -15869,6 +15880,86 @@ function tbOpenBookings() {
   // every single time she opened My Appointments. 2026-09-20.
   if (st.enabled || st.link || _bkCallsOnlyPref()) { show('tech-bookings'); return; }
   bkOpenSetupFork();
+}
+
+// ── Portal find-anything search (2026-09-20) ─────────────────────────────
+// A menu-heavy app: booking controls live on Booking Settings, account
+// controls on My Settings, availability on the portal itself. This lets a
+// tech type a word and jump straight there, scrolling to and flashing the
+// exact control where one exists. Index-driven so onclick never eval's copy.
+var PORTAL_NAV = [
+  { label:'My Gallery', hint:'Your photos and portfolio', kw:'photos portfolio upload tag looks work pictures images', run:function(){ openMyPhotos(); } },
+  { label:'My Appointments', hint:'Requests, calendar, walk-ins', kw:'bookings calendar schedule requests upcoming history add walk-in reschedule no-show', run:function(){ tbOpenBookings(); } },
+  { label:'Booking Settings', hint:'How clients book you', kw:'booking setup', run:function(){ portalGo('tech-booking-settings'); } },
+  { label:'Turn booking on or off', hint:'Booking Settings', kw:'go live enable disable take bookings', run:function(){ portalGo('tech-booking-settings','tb-enabled-btn'); } },
+  { label:'Auto-confirm bookings', hint:'Booking Settings', kw:'automatic approve instant confirm', run:function(){ portalGo('tech-booking-settings','tb-autoconfirm-btn'); } },
+  { label:'Minimum notice', hint:'Booking Settings', kw:'lead time last minute notice hours', run:function(){ portalGo('tech-booking-settings','tb-minnotice-row'); } },
+  { label:'Buffer between appointments', hint:'Booking Settings', kw:'gap break cleanup time buffer', run:function(){ portalGo('tech-booking-settings','tb-buffer'); } },
+  { label:'Pause my page', hint:'Booking Settings', kw:'hide vacation break time off pause hidden away', run:function(){ portalGo('tech-booking-settings','tb-paused-btn'); } },
+  { label:'Time zone', hint:'Booking Settings', kw:'timezone tz', run:function(){ portalGo('tech-booking-settings','tb-tz-label'); } },
+  { label:'Services and prices', hint:'Booking Settings', kw:'service price menu offerings add service cost', run:function(){ portalGo('tech-booking-settings'); } },
+  { label:'Weekly hours', hint:'Booking Settings', kw:'hours availability schedule days open weekly', run:function(){ portalGo('tech-booking-settings'); } },
+  { label:'Set yourself available', hint:'Open today, this week, new clients', kw:'available open today week new clients fill chair status advertise show', run:function(){ var el=document.getElementById('td-hero-now'); if(el){ try{el.scrollIntoView({behavior:'smooth',block:'center'});}catch(_){ el.scrollIntoView(); } portalFlash(el.parentNode||el);} } },
+  { label:'Edit profile', hint:'Name, photo, bio, booking link', kw:'name photo picture bio about link edit profile', run:function(){ openTechEditFromProfile(); } },
+  { label:'Share my profile', hint:'Your link and QR code', kw:'share link qr code url promote instagram', run:function(){ shareMyProfile(); } },
+  { label:'See what clients see', hint:'Preview your public profile', kw:'preview public view client profile', run:function(){ viewMyProfileAsClient(); } },
+  { label:'Notifications', hint:'Where new bookings land', kw:'notifications alerts push messages', run:function(){ openNotifications(); } },
+  { label:'How it works', hint:'The guide', kw:'help guide how it works learn faq', run:function(){ show('how-it-works'); } },
+  { label:'Setup checklist', hint:'Finish getting set up', kw:'onboarding setup checklist steps get started', run:function(){ reopenSetupChecklist(); } },
+  { label:'Change password', hint:'My Settings', kw:'password security login', run:function(){ openChangePasswordFromSettings(); } },
+  { label:'Contact Anne', hint:'Questions, help, a bug', kw:'contact anne support help bug issue problem', run:function(){ openContactAnne(); } },
+  { label:'Send feedback', hint:'Tell us what you think', kw:'feedback suggestion idea report', run:function(){ openFeedbackModal(); } },
+  { label:'Legal', hint:'Terms and privacy', kw:'terms privacy legal policy', run:function(){ openLegal(); } },
+  { label:'Sign out', hint:'', kw:'sign out log out logout leave', run:function(){ confirmSignOut(); } }
+];
+function portalFlash(el){
+  try {
+    var prev = el.style.boxShadow, prevT = el.style.transition;
+    el.style.transition = 'box-shadow .2s ease';
+    el.style.boxShadow = '0 0 0 3px var(--rose)';
+    setTimeout(function(){ el.style.boxShadow = prev || ''; setTimeout(function(){ el.style.transition = prevT || ''; }, 300); }, 1100);
+  } catch(_) {}
+}
+function portalGo(screen, anchor){
+  try { if (screen) show(screen); } catch(_) {}
+  if (!anchor) return;
+  setTimeout(function(){
+    var el = document.getElementById(anchor);
+    if (!el) return;
+    try { el.scrollIntoView({ behavior:'smooth', block:'center' }); } catch(_) { try { el.scrollIntoView(); } catch(__) {} }
+    portalFlash(el);
+  }, 200);
+}
+function portalClearSearch(){
+  var i = document.getElementById('portal-search'); if (i) i.value = '';
+  var r = document.getElementById('portal-search-results'); if (r) { r.style.display = 'none'; r.innerHTML = ''; }
+}
+function portalRun(i){
+  portalClearSearch();
+  try { if (PORTAL_NAV[i]) PORTAL_NAV[i].run(); } catch(_) {}
+}
+function portalSearch(q){
+  var box = document.getElementById('portal-search-results');
+  if (!box) return;
+  q = (q || '').trim().toLowerCase();
+  if (!q) { box.style.display = 'none'; box.innerHTML = ''; return; }
+  var terms = q.split(/\s+/);
+  var out = [];
+  for (var i = 0; i < PORTAL_NAV.length && out.length < 8; i++) {
+    var e = PORTAL_NAV[i];
+    var hay = (e.label + ' ' + (e.hint || '') + ' ' + (e.kw || '')).toLowerCase();
+    if (terms.every(function(t){ return hay.indexOf(t) !== -1; })) {
+      out.push('<div onclick="portalRun(' + i + ')" style="display:flex;align-items:center;gap:10px;padding:11px 14px;' +
+        (out.length ? 'border-top:1px solid var(--border);' : '') + 'cursor:pointer;">' +
+        '<div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:600;color:var(--charcoal);">' + e.label + '</div>' +
+        (e.hint ? '<div style="font-size:12px;color:var(--muted);">' + e.hint + '</div>' : '') + '</div>' +
+        '<svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:var(--muted);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg>' +
+      '</div>');
+    }
+  }
+  box.innerHTML = out.length ? out.join('') :
+    '<div style="padding:12px 14px;font-size:13px;color:var(--muted);">No match. Try buffer, hours, notifications, or gallery.</div>';
+  box.style.display = 'block';
 }
 function bkOpenSetupFork() {
   var m = document.getElementById('booking-setup-modal');
