@@ -2227,12 +2227,13 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
          updateSetupChecklist(); hides once every step is done or
          after "I'll do this later" (for the rest of the session). -->
     <div id="td-setup-checklist" style="display:none;margin:16px 20px 0;background:white;border:1px solid var(--rose-mid);border-radius:16px;padding:16px;box-shadow:var(--shadow);">
-      <!-- Monica, the MNC host (2026-09-20). The lady in the hat gets a name
-           and a first-person voice so the app feels like a person is guiding
-           the tech, not a system. Portrait rides every message she "says". -->
+      <!-- The MNC host (2026-09-20): the lady in the hat, kept nameless (Leslie
+           wants the mystery) but given a warm first-person voice so the app
+           feels like a person is guiding the tech. Her portrait rides her
+           messages. Refer to her only as "your host". -->
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
-        <img src="images/mncLogo-round-256.webp" alt="Monica" width="38" height="38" style="width:38px;height:38px;border-radius:50%;flex-shrink:0;box-shadow:0 1px 4px rgba(20,19,23,0.15);"/>
-        <div style="font-size:12.5px;color:var(--muted);line-height:1.45;"><b style="color:var(--rose-dark);">Monica</b> here, your host at My Nail Connection. Let me get you set up.</div>
+        <img src="images/mncLogo-round-256.webp" alt="My Nail Connection host" width="38" height="38" style="width:38px;height:38px;border-radius:50%;flex-shrink:0;box-shadow:0 1px 4px rgba(20,19,23,0.15);"/>
+        <div style="font-size:12.5px;color:var(--muted);line-height:1.45;">I&rsquo;m your host at My Nail Connection. Let me get you set up.</div>
       </div>
       <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:4px;">
         <div id="td-setup-title" style="font-family:'Playfair Display',serif;font-size:17px;font-weight:600;color:var(--rose-dark);">Let&rsquo;s get you bookable</div>
@@ -2594,9 +2595,9 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
          on this screen. 2026-04-23: old copy told techs to "head to your
          profile" which is no longer necessary. -->
     <div id="myph-empty" class="empty-state" style="display:none;">
-      <img src="images/mncLogo-round-256.webp" alt="Monica" style="width:64px;height:64px;border-radius:50%;margin:0 auto 8px;display:block;box-shadow:0 2px 10px rgba(20,19,23,0.16);"/>
+      <img src="images/mncLogo-round-256.webp" alt="My Nail Connection host" style="width:64px;height:64px;border-radius:50%;margin:0 auto 8px;display:block;box-shadow:0 2px 10px rgba(20,19,23,0.16);"/>
       <div class="empty-state-title">Show me your first set</div>
-      <div class="empty-state-sub" style="margin-bottom:16px;">I&rsquo;m Monica, your host at My Nail Connection. Post your work and I&rsquo;ll get you in front of clients searching for your style. Tag each one and it goes live.</div>
+      <div class="empty-state-sub" style="margin-bottom:16px;">I&rsquo;m your host at My Nail Connection. Post your work and I&rsquo;ll get you in front of clients searching for your style. Tag each one and it goes live.</div>
       <button type="button" onclick="openPhotoUploadFromHome()"
         style="padding:12px 22px;border-radius:12px;border:none;background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);color:white;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:8px;box-shadow:0 2px 8px rgba(169,139,141,0.22);">
         <svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;">
@@ -5479,8 +5480,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.6',     /* __APP_BUILD_NAME__   */
-  android: 629,         /* __APP_BUILD_ANDROID__ */
-  ios:     434,          /* __APP_BUILD_IOS__     */
+  android: 630,         /* __APP_BUILD_ANDROID__ */
+  ios:     435,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -7917,7 +7918,7 @@ function saveAvailability() {
     if (rows && Array.isArray(rows) && rows.length === 0) {
       // Zero rows matched, this user has no techs row. Happens for
       // orphan auth accounts whose signup-profile RPC never ran.
-      showToast("We couldn't save that, your tech profile is missing. Please contact Anne.");
+      showToast("We couldn't save that, your tech profile is missing. Please contact the team.");
       console.warn('saveAvailability: PATCH matched 0 rows for', email);
       return;
     }
@@ -12030,7 +12031,7 @@ async function saveTechEdit() {
     if (_ident && !_isAdminEditor) {
       if (_ident.indexOf('@') > 0) {
         if ((techData.email || '').trim().toLowerCase() !== _ident) {
-          showToast('Your email is how you sign in, so it can\u2019t change here. Message Anne from Get help to move your account.');
+          showToast('Your email is how you sign in, so it can\u2019t change here. Message the team from Get help to move your account.');
           restoreSaveBtns();
           var _teEm = document.getElementById('te-email');
           if (_teEm) { _teEm.value = currentEditTech.email || _ident; _teEm.focus(); }
@@ -12040,7 +12041,7 @@ async function saveTechEdit() {
         var _identDigits = _ident.replace(/\D/g, '').slice(-10);
         var _newDigits = (techData.phone || '').replace(/\D/g, '').slice(-10);
         if (_identDigits && _newDigits !== _identDigits) {
-          showToast('Your phone number is how you sign in, so it can\u2019t change here. Message Anne from Get help to move your account.');
+          showToast('Your phone number is how you sign in, so it can\u2019t change here. Message the team from Get help to move your account.');
           restoreSaveBtns();
           var _tePh = document.getElementById('te-phone');
           if (_tePh) { _tePh.value = currentEditTech.phone || ''; _tePh.focus(); }
@@ -15912,7 +15913,7 @@ var PORTAL_NAV = [
   { label:'How it works', hint:'The guide', kw:'help guide how it works learn faq', run:function(){ show('how-it-works'); } },
   { label:'Setup checklist', hint:'Finish getting set up', kw:'onboarding setup checklist steps get started', run:function(){ reopenSetupChecklist(); } },
   { label:'Change password', hint:'My Settings', kw:'password security login', run:function(){ openChangePasswordFromSettings(); } },
-  { label:'Contact Anne', hint:'Questions, help, a bug', kw:'contact anne support help bug issue problem', run:function(){ openContactAnne(); } },
+  { label:'Get help', hint:'Questions, a bug, or an idea', kw:'contact anne team developer support help bug issue problem get help', run:function(){ openContactAnne(); } },
   { label:'Send feedback', hint:'Tell us what you think', kw:'feedback suggestion idea report', run:function(){ openFeedbackModal(); } },
   { label:'Legal', hint:'Terms and privacy', kw:'terms privacy legal policy', run:function(){ openLegal(); } },
   { label:'Sign out', hint:'', kw:'sign out log out logout leave', run:function(){ confirmSignOut(); } }
@@ -23413,7 +23414,7 @@ function closeReleaseWizard() {
   <div class="modal">
     <div class="modal-handle"></div>
     <div style="font-family:'Playfair Display',serif;font-size:22px;font-weight:600;color:var(--rose-dark);margin-bottom:4px;">Get help</div>
-    <div style="font-size:13.5px;color:var(--muted);margin-bottom:18px;line-height:1.55;">A bug, a question, or an idea for your own app or website, send it here and the developer will text you back.</div>
+    <div style="font-size:13.5px;color:var(--muted);margin-bottom:18px;line-height:1.55;">A bug, a question, or an idea for your own app or website, send it here and the development team will text you back.</div>
     <div id="contact-anne-success" style="display:none;background:#EAF3EC;border:1px solid #A8D5B0;border-radius:10px;padding:12px 14px;font-size:13px;color:#2D6A4F;margin-bottom:16px;line-height:1.55;"></div>
     <div id="contact-anne-error" style="display:none;background:#FDE8EC;border:1px solid #F0B0BC;border-radius:10px;padding:10px 14px;font-size:13px;color:#8B2035;margin-bottom:14px;"></div>
     <div class="input-group" style="margin-bottom:10px;">
