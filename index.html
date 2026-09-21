@@ -2615,7 +2615,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
   <div class="scroll-content" style="padding-bottom:80px;" id="tb-body">
 
     <div id="tb-migration-note" style="display:none;margin:16px 20px 0;padding:12px 14px;background:#FDE8EC;border:1px solid #F0B0BC;border-radius:12px;font-size:13px;color:#8B2035;">
-      Booking isn't installed on the database yet. Run <b>sql/booking-system-migration.sql</b> in the Supabase SQL editor, then reopen this screen.
+      Booking is temporarily unavailable. Please try again in a moment.
     </div>
 
     <!-- Settings -->
@@ -5463,8 +5463,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.6',     /* __APP_BUILD_NAME__   */
-  android: 625,         /* __APP_BUILD_ANDROID__ */
-  ios:     430,          /* __APP_BUILD_IOS__     */
+  android: 626,         /* __APP_BUILD_ANDROID__ */
+  ios:     431,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -16049,6 +16049,14 @@ async function bkForkHoursFinish() {
       body: JSON.stringify(rows)
     });
     if (r2.ok) { window._mncHasAvailability = true; try { updateSetupChecklist(); } catch(_) {} }
+    // If the service or the hours did not save, do NOT go live. Enabling booking
+    // now would hand clients a Book button that dead-ends on the very thing that
+    // failed to save, which is exactly what the go-live gate exists to prevent.
+    // Bail and let her retry; nothing is enabled, nothing is cached as on.
+    if (!r1.ok || !r2.ok) {
+      showToast('Something did not save, check your Bookings settings and try again');
+      return;
+    }
     // Gate AFTER the service and hours are written, not before: that is real
     // setup work she just typed in, it is valid whether or not she subscribes,
     // and throwing it away to show a paywall would be hostile. Only the switch
@@ -16063,11 +16071,11 @@ async function bkForkHoursFinish() {
       return;
     }
     var ok = await patchBookingField({ booking_enabled: true });
-    if (!r1.ok || !r2.ok || !ok) {
-      showToast('Something did not save, check your Bookings settings');
-    } else {
-      showToast('You\u2019re bookable! ' + name + ' \u00b7 ' + dur + ' min' + (priceRaw ? ' \u00b7 $' + priceRaw : '') + ' \u2014 tweak anytime in Settings.');
+    if (!ok) {
+      showToast('Could not turn booking on, try again');
+      return;
     }
+    showToast('You\u2019re bookable! ' + name + ' \u00b7 ' + dur + ' min' + (priceRaw ? ' \u00b7 $' + priceRaw : '') + ' \u2014 tweak anytime in Settings.');
     try { localStorage.removeItem(_bkPrefKey()); } catch(_) {}
     window._bkSetup = window._bkSetup || {}; window._bkSetup.enabled = true;
     if (_bkMyTech) _bkMyTech.booking_enabled = true;
