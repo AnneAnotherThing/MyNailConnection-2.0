@@ -2507,7 +2507,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
          out of the Manage Profile modal (all element IDs preserved so
          techBulkDropFiles / renderTePhotoGrid
          still resolve). Manage Profile is now profile fields only. -->
-      <div style="margin-bottom:14px;">
+      <div id="myph-uploader" style="margin-bottom:14px;">
         <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;">
           <div style="font-size:10px;color:var(--muted);font-weight:600;letter-spacing:0.8px;">ADD TO YOUR GALLERY</div>
         </div>
@@ -5480,8 +5480,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.6',     /* __APP_BUILD_NAME__   */
-  android: 631,         /* __APP_BUILD_ANDROID__ */
-  ios:     436,          /* __APP_BUILD_IOS__     */
+  android: 632,         /* __APP_BUILD_ANDROID__ */
+  ios:     437,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -10906,10 +10906,17 @@ function renderMyPhotos() {
   const filterBar = document.getElementById('myph-filter-bar');
   const filterEmpty = document.getElementById('myph-filter-empty');
 
+  const uploader = document.getElementById('myph-uploader');
+
   if (!allPhotos.length) {
     if (summary)  summary.style.display = 'none';
     if (gridWrap) gridWrap.style.display = 'none';
     if (filterBar) filterBar.style.display = 'none';
+    // One prompt on an empty gallery: the host's empty-state card carries the
+    // upload button, so hide the standing "Add to your gallery" drop zone here
+    // to avoid two add-photo sections stacked (Anne, 2026-09-20). It returns
+    // the moment she has a photo.
+    if (uploader) uploader.style.display = 'none';
     if (emptyEl)  emptyEl.style.display = 'block';
     return;
   }
@@ -10917,6 +10924,7 @@ function renderMyPhotos() {
   // Apply filter
   const visible = _applyMyPhotosFilter(allPhotos);
 
+  if (uploader) uploader.style.display = 'block';
   if (emptyEl)  emptyEl.style.display = 'none';
   if (summary) {
     summary.style.display = 'block';
