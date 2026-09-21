@@ -2180,6 +2180,17 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
          card). Both tap through to Bookings. Populated by
          tdRenderApptAlerts() out of tbLoadDashBadge(); hidden when there is
          nothing to say. -->
+    <!-- Lapsed-booking renew banner (2026-09-20, Anne): when a trial or a paid
+         sub ends, the public Book button vanishes but nothing on the portal
+         said why or how to renew, so a tech had to guess her way into Booking
+         Settings. Populated by tdRenderLapseBanner() out of tbLoadDashBadge;
+         hidden unless booking is on but is_bookable is false. -->
+    <div id="td-lapse-banner" style="display:none;margin:14px 20px 0;padding:14px 16px;background:linear-gradient(140deg,#FDECEF 0%,#FCE3D8 100%);border:1.5px solid var(--rose-mid);border-radius:16px;box-shadow:var(--shadow);">
+      <div id="td-lapse-head" style="font-size:14px;font-weight:700;color:var(--charcoal);"></div>
+      <div id="td-lapse-body" style="font-size:13px;color:var(--muted);margin-top:3px;line-height:1.45;"></div>
+      <button onclick="openBookingSubscribe()" style="margin-top:11px;padding:11px 16px;border:none;border-radius:11px;background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);color:white;font-size:13.5px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;">Subscribe, $10.99/month</button>
+    </div>
+
     <div id="td-alerts" style="display:none;margin:14px 20px 0;gap:8px;"></div>
 
     <!-- Notifications big button moved to the My Settings screen in the
@@ -5480,8 +5491,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.6',     /* __APP_BUILD_NAME__   */
-  android: 632,         /* __APP_BUILD_ANDROID__ */
-  ios:     437,          /* __APP_BUILD_IOS__     */
+  android: 633,         /* __APP_BUILD_ANDROID__ */
+  ios:     438,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -15773,16 +15784,39 @@ async function tdRenderApptAlerts(t) {
   } catch(e) { console.warn('tdRenderApptAlerts', e); }
 }
 
+// Portal renew banner. When booking is enabled but is_bookable is false, the
+// trial or subscription has lapsed: the public Book button is already gone, so
+// surface it here on the portal with a one-tap route to subscribe, instead of
+// making her guess her way into Booking Settings (Anne, 2026-09-20).
+function tdRenderLapseBanner(t) {
+  var el = document.getElementById('td-lapse-banner');
+  if (!el) return;
+  var lapsed = !!(t && t.booking_enabled && t.is_bookable === false);
+  if (!lapsed) { el.style.display = 'none'; return; }
+  var wasTrial = (t.subscription_source === 'trial');
+  var head = document.getElementById('td-lapse-head');
+  var body = document.getElementById('td-lapse-body');
+  if (head) head.textContent = wasTrial ? 'Your free month has ended' : 'Your booking is paused';
+  if (body) body.textContent = wasTrial
+    ? 'Clients cannot book you right now. Subscribe to keep taking bookings, $10.99 a month.'
+    : 'Your subscription lapsed, so clients cannot book you right now. Subscribe to turn booking back on.';
+  el.style.display = 'block';
+}
+
 async function tbLoadDashBadge() {
   if (!currentUserEmail) return;
   const sub = document.getElementById('td-bookings-sub');
   const badge = document.getElementById('td-bookings-pending');
   try {
-    const r = await fetch(SUPABASE_URL + '/rest/v1/techs?select=id,booking_enabled,booking_link,booking_timezone,is_available,is_same_day,accepting_new_clients&or=(email.eq.' +
+    const r = await fetch(SUPABASE_URL + '/rest/v1/techs?select=id,booking_enabled,booking_link,booking_timezone,is_available,is_same_day,accepting_new_clients,is_bookable,subscription_source,period_reset_at&or=(email.eq.' +
       encodeURIComponent(currentUserEmail) + ',phone.eq.' + encodeURIComponent(currentUserEmail) + ')', { headers: bkHeaders() });
     if (!r.ok) return; // migration not run yet, leave the default copy
     const t = (await r.json())[0];
     if (!t) return;
+    // Lapsed-booking renew banner: she wants booking on but is not bookable
+    // (trial ended or sub lapsed). Without this the Book button just vanishes
+    // and nothing on the portal says why or how to renew (Anne, 2026-09-20).
+    try { tdRenderLapseBanner(t); } catch(_) {}
     // Remember how this tech takes bookings so tbOpenBookings() can route
     // without a refetch. "Set up" = neither in-app booking nor a link.
     window._bkSetup = { id: t.id, enabled: !!t.booking_enabled, link: (t.booking_link || '').trim(),
