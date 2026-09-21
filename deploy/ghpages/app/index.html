@@ -2415,6 +2415,10 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
     <div class="etched-caps" style="font-size:11px;font-weight:700;letter-spacing:1.6px;color:var(--muted);text-transform:uppercase;margin:20px 20px 8px 24px;">Booking</div>
     <div style="margin:0 20px;background:white;border:1.5px solid var(--border);border-radius:16px;overflow:hidden;box-shadow:var(--shadow);">
       <div onclick="show('tech-booking-settings')" style="display:flex;align-items:center;gap:10px;padding:14px 16px;cursor:pointer;"><div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:var(--charcoal);">Booking settings</div><div style="font-size:12px;color:var(--muted);margin-top:1px;">Services, hours, auto-confirm, blocking</div></div><svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:var(--muted);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg></div>
+      <div style="display:flex;align-items:center;gap:10px;padding:14px 16px;border-top:1px solid var(--border);">
+        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:var(--charcoal);">Daily open-today reminder</div><div style="font-size:12px;color:var(--muted);margin-top:1px;">A morning nudge to show clients you&rsquo;re open</div></div>
+        <button id="ts-nudge-btn" onclick="tsToggleDailyNudge()" style="min-width:56px;padding:8px 14px;border-radius:100px;font-size:13px;font-weight:700;cursor:pointer;border:1.5px solid var(--rose);background:var(--rose);color:white;flex-shrink:0;">On</button>
+      </div>
     </div>
 
     <div class="etched-caps" style="font-size:11px;font-weight:700;letter-spacing:1.6px;color:var(--muted);text-transform:uppercase;margin:20px 20px 8px 24px;">Account</div>
@@ -5491,8 +5495,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.6',     /* __APP_BUILD_NAME__   */
-  android: 633,         /* __APP_BUILD_ANDROID__ */
-  ios:     438,          /* __APP_BUILD_IOS__     */
+  android: 634,         /* __APP_BUILD_ANDROID__ */
+  ios:     439,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -15808,7 +15812,7 @@ async function tbLoadDashBadge() {
   const sub = document.getElementById('td-bookings-sub');
   const badge = document.getElementById('td-bookings-pending');
   try {
-    const r = await fetch(SUPABASE_URL + '/rest/v1/techs?select=id,booking_enabled,booking_link,booking_timezone,is_available,is_same_day,accepting_new_clients,is_bookable,subscription_source,period_reset_at&or=(email.eq.' +
+    const r = await fetch(SUPABASE_URL + '/rest/v1/techs?select=id,booking_enabled,booking_link,booking_timezone,is_available,is_same_day,accepting_new_clients,is_bookable,subscription_source,period_reset_at,daily_avail_nudge_off&or=(email.eq.' +
       encodeURIComponent(currentUserEmail) + ',phone.eq.' + encodeURIComponent(currentUserEmail) + ')', { headers: bkHeaders() });
     if (!r.ok) return; // migration not run yet, leave the default copy
     const t = (await r.json())[0];
@@ -15823,6 +15827,10 @@ async function tbLoadDashBadge() {
       // availOn drives the "Show clients when you're open" checklist step:
       // any chip on means she has already found them.
       availOn: !!(t.is_available || t.is_same_day || t.accepting_new_clients) };
+    // Account-level daily-reminder preference, cached so My Settings can paint
+    // its toggle without a refetch (Anne, 2026-09-20).
+    window._mncDailyNudgeOff = !!t.daily_avail_nudge_off;
+    try { renderNudgePref(); } catch(_) {}
     // In-app appointment alerts (2026-08-10): fire-and-forget so the badge
     // logic below never waits on the extra queries.
     try { tdRenderApptAlerts(t); } catch(_) {}
@@ -15862,6 +15870,40 @@ async function tbLoadDashBadge() {
   } catch(e) {}
 }
 
+// My Settings toggle for the daily open-today reminder. Reminder ON means the
+// nudge fires (daily_avail_nudge_off = false). Account-level, so it follows the
+// tech across devices and will also govern the morning push. (Anne, 2026-09-20)
+function renderNudgePref() {
+  var b = document.getElementById('ts-nudge-btn');
+  if (!b) return;
+  var on = !window._mncDailyNudgeOff;
+  b.textContent = on ? 'On' : 'Off';
+  b.style.background = on ? 'var(--rose)' : 'white';
+  b.style.color = on ? 'white' : 'var(--muted)';
+  b.style.borderColor = on ? 'var(--rose)' : 'var(--border)';
+}
+async function tsToggleDailyNudge() {
+  var email = currentUserEmail;
+  if (!email) return;
+  var newOff = !window._mncDailyNudgeOff;
+  window._mncDailyNudgeOff = newOff;   // optimistic
+  renderNudgePref();
+  try {
+    var r = await fetch(SUPABASE_URL + '/rest/v1/techs?or=(email.eq.' + encodeURIComponent(email) +
+      ',phone.eq.' + encodeURIComponent(email) + ')', {
+      method: 'PATCH',
+      headers: bkHeaders({ 'Content-Type': 'application/json', 'Prefer': 'return=minimal' }),
+      body: JSON.stringify({ daily_avail_nudge_off: newOff })
+    });
+    if (!r.ok) throw new Error('patch ' + r.status);
+    showToast(newOff ? 'Daily reminder turned off' : 'Daily reminder turned on');
+  } catch (e) {
+    window._mncDailyNudgeOff = !newOff;   // revert on failure
+    renderNudgePref();
+    showToast("Couldn't save that, try again");
+  }
+}
+
 // ── Daily availability nudge (2026-09-06, Anne; sharpened same day) ─────────
 // The walkthrough's "Show clients when you're open" step stays done after the
 // first time (see the latch in _setupStepsState). This owns the reminder job:
@@ -15876,6 +15918,7 @@ async function tbLoadDashBadge() {
 // Any answer (including "no") stamps the day: one ask per day, never a loop.
 async function maybeDailyAvailPrompt(t) {
   if (!t) return;
+  if (t.daily_avail_nudge_off) return;   // she turned the daily reminder off (My Settings)
   if (t.is_available) return;   // already open today — nothing to ask
   // Brand-new techs are the walkthrough's job; only nudge once onboarding has
   // acked the chips (the _setupStepsState latch writes this same key).
@@ -19567,6 +19610,12 @@ function show(id) {
   if (id === 'my-photos') { loadMyPhotosData(); }
   if (id === 'tech-bookings') { loadTechBookings(); }
   if (id === 'tech-booking-settings') { loadTechBookings(); }
+  if (id === 'tech-settings') {
+    // Paint the daily-reminder toggle. tech-home normally loads this first;
+    // if she deep-linked here, tbLoadDashBadge fetches it and renders.
+    if (typeof window._mncDailyNudgeOff === 'undefined') { try { tbLoadDashBadge(); } catch(_) {} }
+    else { try { renderNudgePref(); } catch(_) {} }
+  }
   if (id === 'my-appts') { loadMyAppointments(); }
   if (id === 'profile-screen') { initProfileScreen(); try { refreshNotifBadge(); } catch(_) {} }
   if (id === 'browse-style') {
