@@ -68,8 +68,8 @@ begin
 
     perform public._booking_push(
       public.push_identity(rec.email, rec.phone),
-      'Taking clients today? 💅',
-      'Flip Open today on so clients looking right now can find you. Tap to set it.',
+      'Morning 💅',
+      'Got chair time today? Flip on Open today and your work glows for the clients looking right now. Tap and I''ll take you right there.',
       'avail-am-' || to_char(v_localdt, 'YYYYMMDD'),
       'avail-am'
     );

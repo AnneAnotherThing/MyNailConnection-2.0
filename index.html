@@ -5564,8 +5564,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.6',     /* __APP_BUILD_NAME__   */
-  android: 654,         /* __APP_BUILD_ANDROID__ */
-  ios:     459,          /* __APP_BUILD_IOS__     */
+  android: 655,         /* __APP_BUILD_ANDROID__ */
+  ios:     460,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -6630,6 +6630,23 @@ function wireCapacitorPushListeners(PushNotifications) {
   // Handle notification tap
   PushNotifications.addListener('pushNotificationActionPerformed', (action) => {
     const data = action.notification.data || {};
+    const tag = String(data.tag || '');
+    // Morning "are you open today?" reminder (2026-09-21): drop her right on the
+    // portal where the Open today chips live, and flash them so the tap has an
+    // obvious destination instead of the generic app front door.
+    if (tag.indexOf('avail-am') === 0) {
+      show('tech-home');
+      try {
+        setTimeout(function () {
+          var el = document.getElementById('td-hero-now');
+          if (el) {
+            try { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (_) {}
+            try { portalFlash(el.parentNode || el); } catch (_) {}
+          }
+        }, 500);
+      } catch (_) {}
+      return;
+    }
     if (data.screen === 'messages') show('home'); // no messages screen; land on home rather than dead-end
     else if (data.screen === 'tech-home') show('tech-home');
   });
