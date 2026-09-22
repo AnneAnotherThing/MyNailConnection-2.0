@@ -5523,8 +5523,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.6',     /* __APP_BUILD_NAME__   */
-  android: 646,         /* __APP_BUILD_ANDROID__ */
-  ios:     451,          /* __APP_BUILD_IOS__     */
+  android: 647,         /* __APP_BUILD_ANDROID__ */
+  ios:     452,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -10112,7 +10112,7 @@ function closeTechEdit() {
 // still owns the commit path (Save Changes button), which is important
 // because saveTechEdit is the only place photos get persisted to
 // public.techs.photos. Added 2026-04-22 per Anne.
-async function openPhotoUploadFromHome() {
+async function openPhotoUploadFromHome(autoPick) {
   if (!currentUserEmail) { showToast('Please sign in first'); return; }
   // Photos have ONE home now (My Gallery). This used to open the Manage
   // Profile modal and auto-click its picker, which is why "Upload Photos"
@@ -10121,6 +10121,11 @@ async function openPhotoUploadFromHome() {
   try { myPhotosTab('work'); } catch(_) {}
   try { await loadMyPhotosData(); } catch(_) {}
   await _seedEditTechFromCurrentUser();
+  // Only auto-open the native picker when she explicitly asked to upload (the
+  // empty-state Upload button). From the setup checklist we land her on the
+  // gallery so she sees the host's "Show me your first set" card first, instead
+  // of the picker popping over it before she can read it. Anne, 2026-09-21.
+  if (autoPick === false) return;
   setTimeout(function() {
     var picker = document.getElementById('te-bulk-files');
     if (picker) picker.click();
@@ -18268,7 +18273,7 @@ function _setupStepsState() {
     { label: 'Add your name and photo', sub: 'This is what clients see first \u00b7 1 min',
       done: !!window._setupProfileDone, action: 'openTechEditFromProfile()' },
     { label: 'Post your first set', sub: 'Photos are free, always \u00b7 1 min',
-      done: (window._setupPhotoCount || 0) > 0, action: 'openPhotoUploadFromHome()' },
+      done: (window._setupPhotoCount || 0) > 0, action: 'openPhotoUploadFromHome(false)' },
     { label: 'Choose how clients reach you', sub: 'Call, text, your booking link, or ours \u00b7 2 min',
       done: !!(bk.enabled || bk.link || _bkCallsOnlyPref()), action: 'tbOpenBookings()' },
     // Schedule step (Anne, 2026-08-10): walk new techs into Booking
