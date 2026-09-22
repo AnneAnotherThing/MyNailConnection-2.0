@@ -5523,8 +5523,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.6',     /* __APP_BUILD_NAME__   */
-  android: 644,         /* __APP_BUILD_ANDROID__ */
-  ios:     449,          /* __APP_BUILD_IOS__     */
+  android: 645,         /* __APP_BUILD_ANDROID__ */
+  ios:     450,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -18655,7 +18655,10 @@ async function loadTechHomeStats() {
     // Setup checklist (punch 02): stash state for updateSetupChecklist.
     // The old first-post nudge card was absorbed by the checklist.
     window._setupPhotoCount = n;
-    window._setupProfileDone = !!((((d1[0] || {}).image_url || '') + '').trim() || (((d1[0] || {}).bio || '') + '').trim());
+    // Require the photo, not a bio (Anne, 2026-09-21): the step is "Add your
+    // name and photo", and name is captured at signup, so the photo is the real
+    // gate. A bio alone used to check it off despite no photo.
+    window._setupProfileDone = !!(((d1[0] || {}).image_url || '') + '').trim();
     // Count untagged, photo can be legacy string URL (treat as untagged)
     // or {url, tags:[...]} object.
     var untagged = rawPhotos.filter(function(p) {
