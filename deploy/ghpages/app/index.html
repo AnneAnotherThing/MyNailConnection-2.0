@@ -5523,8 +5523,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.6',     /* __APP_BUILD_NAME__   */
-  android: 642,         /* __APP_BUILD_ANDROID__ */
-  ios:     447,          /* __APP_BUILD_IOS__     */
+  android: 643,         /* __APP_BUILD_ANDROID__ */
+  ios:     448,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -18253,17 +18253,13 @@ function _setupStepsState() {
       window._mncAvailTouched = (localStorage.getItem('mnc_avail_ack_' + (currentUserEmail || '')) === '1');
     }
   } catch(_) {}
-  // Latch (2026-09-06, Anne): completing this step by flipping a chip ON never
-  // persisted the ack — only reading the explainer did — so a tech who later
-  // turned herself OFF saw the walkthrough resurrect "Show clients when you're
-  // open" every single time. Seen on once = done forever on this device; the
-  // daily nudge in maybeDailyAvailPrompt() owns the reminder job from then on.
-  try {
-    if (bk.availOn && !window._mncAvailTouched) {
-      window._mncAvailTouched = true;
-      localStorage.setItem('mnc_avail_ack_' + (currentUserEmail || ''), '1');
-    }
-  } catch(_) {}
+  // The availability step completes ONLY when she has actually read the
+  // explainer (setupOpenAvailability sets the ack), NOT when the chips happen
+  // to be on. New techs default to "new clients" (and this-week) ON
+  // (sql/default-open-week-new-clients.sql), so the old auto-ack-on-availOn
+  // latch marked this step done before she was ever taught the chips (Anne,
+  // 2026-09-21). The ack persists once read, so turning chips off later never
+  // resurrects the step, which is what that latch was originally guarding.
   return [
     { label: 'Add your name and photo', sub: 'This is what clients see first \u00b7 1 min',
       done: !!window._setupProfileDone, action: 'openTechEditFromProfile()' },
@@ -18292,8 +18288,8 @@ function _setupStepsState() {
     // Done = she has actually flipped at least one on the server, OR has
     // read the explainer and chosen to leave them off. A tech who is slammed
     // is right to have all three off, and the list must not nag her for it.
-    { label: 'Show clients when you\u2019re open', sub: 'Your best free advertising \u00b7 30 sec',
-      done: !!(window._mncAvailTouched || bk.availOn), action: 'setupOpenAvailability()' },
+    { label: 'Show clients when you\u2019re open', sub: 'Learn the Open today, this week and new-clients chips \u00b7 30 sec',
+      done: !!window._mncAvailTouched, action: 'setupOpenAvailability()' },
     { label: 'Turn on notifications', sub: 'So you hear when a client reaches out \u00b7 10 sec',
       done: pushDone, action: 'setupEnablePush()' }
   ];
@@ -18387,9 +18383,9 @@ async function setupOpenAvailability() {
       // clip its own buttons off a 360x640 screen. The one thing the slide
       // does NOT say is that these are free for every tech regardless of how
       // she takes bookings (fb0af35), so that is what survives the trim.
-      body: 'Open today, This week, New clients \u2014 the three chips at the top of your portal.\n\n' +
+      body: 'Open today, This week, New clients: the three chips at the top of your portal.\n\n' +
             'They are free for every tech, however clients reach you, and they are the fastest way to get found today.\n\n' +
-            'Tap to flip them any time \u2014 they save instantly.',
+            'Tap to flip them any time, they save instantly.',
       okLabel: 'Show me',
       tone: 'neutral'
     });
