@@ -4991,6 +4991,17 @@ async function confirmDeleteAccount() {
     // Success, clear all local state and route out.
     try { localStorage.removeItem('mnc_session'); } catch(_) {}
     try { localStorage.removeItem('mnc_persisted_role'); } catch(_) {}
+    // Onboarding acks are device-local, and account deletion used to leave them
+    // behind, so a re-add on the same phone inherited a half-done checklist and
+    // a pre-answered availability step (Anne, 2026-09-21). Sweep them so a
+    // re-created account starts as a true first-timer.
+    try {
+      var _pfx = ['mnc_avail_ack', 'mnc_avail_prompt', 'mnc_booking_pref', 'mnc_tutorial_seen', 'mnc_push_done'];
+      for (var _i = localStorage.length - 1; _i >= 0; _i--) {
+        var _k = localStorage.key(_i);
+        if (_k && _pfx.some(function(p){ return _k.indexOf(p) === 0; })) localStorage.removeItem(_k);
+      }
+    } catch(_) {}
     try { sessionStorage.clear(); } catch(_) {}
     window._mncAccessToken = null;
     currentUserEmail = '';
@@ -5512,8 +5523,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.6',     /* __APP_BUILD_NAME__   */
-  android: 640,         /* __APP_BUILD_ANDROID__ */
-  ios:     445,          /* __APP_BUILD_IOS__     */
+  android: 641,         /* __APP_BUILD_ANDROID__ */
+  ios:     446,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
