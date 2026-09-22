@@ -5523,8 +5523,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.6',     /* __APP_BUILD_NAME__   */
-  android: 643,         /* __APP_BUILD_ANDROID__ */
-  ios:     448,          /* __APP_BUILD_IOS__     */
+  android: 644,         /* __APP_BUILD_ANDROID__ */
+  ios:     449,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -18239,8 +18239,12 @@ function _setupStepsState() {
     if (window._mncHasPushSub !== undefined) {
       pushDone = !!window._mncHasPushSub;
     } else {
-      pushDone = (window.Notification && Notification.permission === 'granted') ||
-                 localStorage.getItem('mnc_push_done') === '1';
+      // Do NOT optimistically mark done from device permission or a leftover
+      // local flag: neither means THIS account has a push subscription, so they
+      // pre-checked the step on a brand-new or re-added account (same class as
+      // the availability-step bug). Stay not-done until the server answers.
+      // Anne, 2026-09-21.
+      pushDone = false;
       _refreshPushSubState(); // answers async, then re-renders the checklist
     }
   } catch(_) {}
