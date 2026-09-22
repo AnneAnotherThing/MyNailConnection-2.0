@@ -1044,7 +1044,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
      for life. Populated by renderTrialPill() from tbLoadDashBadge; a fixed
      child of .device so it survives screen changes. Bottom-right to clear the
      headers. Hidden for free, comped and paid techs. Tap = details / renew. -->
-<div id="trial-pill" onclick="trialPillTap()" style="display:none;position:absolute;bottom:78px;right:14px;z-index:9500;padding:6px 12px;border-radius:100px;font-family:'DM Sans',sans-serif;font-size:11.5px;font-weight:700;cursor:pointer;box-shadow:0 3px 10px rgba(20,19,23,0.22);"></div>
+<div id="trial-pill" onclick="trialPillTap()" style="display:none;position:absolute;bottom:92px;left:14px;z-index:9500;padding:5px 11px;border-radius:100px;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;cursor:pointer;box-shadow:0 3px 10px rgba(20,19,23,0.22);"></div>
 
 <!-- PUSH PERMISSION BANNER, push is used for MNC → user announcements
      (new features, important updates, launches), NOT for tech→client
@@ -5523,8 +5523,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.6',     /* __APP_BUILD_NAME__   */
-  android: 641,         /* __APP_BUILD_ANDROID__ */
-  ios:     446,          /* __APP_BUILD_IOS__     */
+  android: 642,         /* __APP_BUILD_ANDROID__ */
+  ios:     447,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -10513,6 +10513,16 @@ async function techBulkDropFiles(fileList) {
   const bar   = document.getElementById('te-bulk-progress-bar');
   const label = document.getElementById('te-bulk-progress-label');
   const count = document.getElementById('te-bulk-progress-count');
+  // The uploader block holds this progress bar, but it's hidden while the
+  // gallery is empty (the one-prompt empty state), so a first upload showed no
+  // progress and looked stuck. Reveal it and drop the empty-state card while
+  // uploading, and pop an immediate toast so there is instant feedback either
+  // way. Anne, 2026-09-21.
+  try { showToast('Uploading your photos…'); } catch(_) {}
+  var _uplBox = document.getElementById('myph-uploader');
+  if (_uplBox) _uplBox.style.display = 'block';
+  var _emptyBox = document.getElementById('myph-empty');
+  if (_emptyBox) _emptyBox.style.display = 'none';
   wrap.style.display = 'block';
 
   let done = 0, skipped = 0, failed = 0;
