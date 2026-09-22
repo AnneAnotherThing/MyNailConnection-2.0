@@ -5523,8 +5523,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.6',     /* __APP_BUILD_NAME__   */
-  android: 647,         /* __APP_BUILD_ANDROID__ */
-  ios:     452,          /* __APP_BUILD_IOS__     */
+  android: 648,         /* __APP_BUILD_ANDROID__ */
+  ios:     453,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -6939,6 +6939,16 @@ function doSignOut() {
   window._mncCurrentRole = null;
   window._mncHasPushSub = undefined; // next account re-checks the server
   window._mncHasAvailability = undefined;
+  // Missed until 2026-09-21 (Anne: "show clients when you're open is already
+  // checked on a fresh user"). These are session flags that decide checklist
+  // steps; not clearing them let a prior user's state pre-complete the new
+  // user's list. Reset so each account re-seeds from its own data.
+  window._mncAvailTouched = undefined;
+  window._mncAvailCheckInflight = false;
+  window._mncPushSubCheckInflight = false;
+  window._setupProfileDone = undefined;
+  window._setupPhotoCount = undefined;
+  window._mncTrial = undefined;
   // Per-user device flags (storage audit 2026-08-03): none are namespaced
   // by user, so on a shared device account A's state leaked into account
   // B — "push done" claimed for a user with no subscription, A's booking
@@ -6955,7 +6965,9 @@ function doSignOut() {
     // account's setup list (2026-08-11).
     for (var _i = localStorage.length - 1; _i >= 0; _i--) {
       var _k = localStorage.key(_i);
-      if (_k && _k.indexOf('mnc_booking_pref') === 0) localStorage.removeItem(_k);
+      if (_k && (_k.indexOf('mnc_booking_pref') === 0 ||
+                 _k.indexOf('mnc_avail_ack') === 0 ||
+                 _k.indexOf('mnc_avail_prompt') === 0)) localStorage.removeItem(_k);
     }
     sessionStorage.clear();
   } catch(_) {}
