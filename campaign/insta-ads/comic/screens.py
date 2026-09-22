@@ -193,24 +193,26 @@ def paste_screen(base, screen, quad, radius=0.07, keep=None):
 if __name__ == '__main__':
     src = Image.open(HERE / 'source-chatgpt.png').convert('RGB')
     out = src.copy()
+    import json
+    Q = json.load(open(HERE / 'screens.json'))   # measured by fit_screens.py
 
     profile = render('profile', 440, 880, PROFILE_CSS, PROFILE)
     thread = render('thread', 440, 800, THREAD_CSS, THREAD)
     menu = render('menu', 560, 720, MENU_CSS, MENU)
 
     # Panel 5, left phone: tech profile.
-    paste_screen(out, profile, [(450, 570), (610, 563), (650, 917), (458, 920)], radius=0.08)
+    paste_screen(out, profile, [tuple(p) for p in Q['profile']], radius=0.06)
     # Panel 5, right phone: text thread + booking notification.
-    paste_screen(out, thread, [(667, 568), (842, 580), (850, 912), (662, 910)], radius=0.08,
+    paste_screen(out, thread, [tuple(p) for p in Q['thread']], radius=0.06,
                  keep=[[(650, 740), (668, 735), (672, 900), (650, 905)]])
     # Panel 3: home menu. The phone runs off the bottom of the panel, so the
     # warp is clipped to the panel and the fingers on the right are kept.
-    paste_screen(out, menu, [(1100, 240), (1236, 267), (1214, 470), (1068, 440)], radius=0.06,
+    paste_screen(out, menu, [tuple(p) for p in Q['menu']], radius=0.06,
                  keep=[[(1195, 345), (1240, 330), (1240, 440), (1190, 440)],
                        [(1060, 422), (1086, 424), (1086, 449), (1060, 449)],
-                       [(1060, 449), (1254, 449), (1254, 480), (1060, 480)]])
+                       [(1020, 449), (1254, 449), (1254, 520), (1020, 520)]])
     # restore the panel-3 frame edge below the phone (original pixels)
-    out.paste(src.crop((1058, 448, 1254, 458)), (1058, 448))
+    out.paste(src.crop((1020, 447, 1254, 460)), (1020, 447))
 
     # Panel 6 caption: the hot-pink brush strip becomes an ink ribbon.
     strip = render('strip', 1480, 240, STRIP_CSS, STRIP)

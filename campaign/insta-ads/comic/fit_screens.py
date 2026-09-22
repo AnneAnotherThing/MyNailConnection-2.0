@@ -16,11 +16,11 @@ L = np.asarray(src.convert('L')).astype(int)
 H, W = L.shape
 DARK = 60
 
-def run_dark(vals, i, step, need=3):
+def run_dark(vals, i, step, need=3, dark=DARK):
     """Walk from index i by step; return first index starting a dark run of `need`."""
     n = len(vals)
     while 0 <= i < n:
-        if all(0 <= i + k * step < n and vals[i + k * step] < DARK for k in range(need)):
+        if all(0 <= i + k * step < n and vals[i + k * step] < dark for k in range(need)):
             return i
         i += step
     return None
@@ -75,14 +75,13 @@ def side_points(cx, cy, rows=None, cols=None, dirn=None, through_dark=False):
         step = -1 if dirn == 'up' else 1
         for x in cols:
             col = L[:, x]
-            y = run_dark(col, cy, step)
+            if through_dark:
+                # skip the screen's own dark header: only the bezel is near-black
+                y = run_dark(col, cy, step, dark=12)
+            else:
+                y = run_dark(col, cy, step)
             if y is None:
                 continue
-            if through_dark:
-                y = run_light(col, y, step)
-                if y is None:
-                    continue
-                y -= step
             pts.append((x, y - step))
     return pts
 
@@ -94,8 +93,7 @@ def measure(name, cx, cy, rows, cols, top_through_dark=False, bezel=None):
         # The screen's own header bar is black and touches the bezel, so the
         # top scan runs through header + bezel to the phone's outer edge,
         # then steps back in by the bezel thickness measured on the sides.
-        outer = fit(side_points(cx, cy, cols=cols, dirn='up', through_dark=True), 'y')
-        top = (outer[0], outer[1] + bezel, outer[2], outer[3])
+        top = fit(side_points(cx, cy, cols=cols, dirn='up', through_dark=True), 'y')
     else:
         top = fit(side_points(cx, cy, cols=cols, dirn='up'), 'y')
     quad = [corner(left, top), corner(right, top), corner(right, bottom), corner(left, bottom)]
@@ -124,9 +122,27 @@ out['profile'] = measure('profile', 555, 760, range(640, 900, 2), range(480, 620
 # Panel 5, right phone: white screen all the way up.
 out['thread'] = measure('thread', 755, 760, range(600, 900, 2), range(690, 820, 2))
 
+# Panel 3: tilted phone that runs off the panel's bottom frame (y=449).
+# Left, right and top are measured; the bottom is a line parallel to the
+# top, placed below the frame so the warp is clipped by the frame instead.
+left = fit(side_points(1150, 360, rows=range(300, 430, 2), dirn='left'), 'x')
+right = fit(side_points(1150, 360, rows=range(300, 430, 2), dirn='right'), 'x')
+top = fit(side_points(1150, 360, cols=range(1090, 1220, 2), dirn='up', through_dark=True), 'y')
+print(f'menu     inliers  L {left[2]}/{left[3]}  R {right[2]}/{right[3]}  T {top[2]}/{top[3]}')
+tl, tr = corner(left, top), corner(right, top)
+# screen aspect on this phone ~ 0.52 wide : 1 tall; place the bottom that far down along the sides
+w = ((tr[0]-tl[0])**2 + (tr[1]-tl[1])**2) ** .5
+drop = w / 0.52
+def along(xl, y0, d):   # move d px down a side line x = a*y + b
+    a = xl[0]; dy = d / (1 + a*a) ** .5; y = y0 + dy; return (a*y + xl[1], y)
+bl, br = along(left, tl[1], drop), along(right, tr[1], drop)
+out['menu'] = [tl, tr, br, bl]
+print('         quad', [(round(x,1), round(y,1)) for x,y in out['menu']])
+
 json.dump(out, open(HERE / 'screens.json', 'w'), indent=1)
 dbg = src.copy(); d = ImageDraw.Draw(dbg)
 for q in out.values():
     d.polygon([tuple(p) for p in q], outline=(0, 255, 0))
 dbg.crop((420, 530, 900, 960)).resize((960, 860)).save(HERE / 'debug-fit.png')
+dbg.crop((1040, 200, 1254, 460)).resize((642, 780)).save(HERE / 'debug-fit-p3.png')
 print('wrote screens.json, debug-fit.png')
