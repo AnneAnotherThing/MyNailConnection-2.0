@@ -2200,17 +2200,6 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
 
     <div id="td-alerts" style="display:none;margin:14px 20px 0;gap:8px;"></div>
 
-    <!-- "Ready to book through MNC?" (Anne, 2026-09-21): a calm, always-there
-         way for a calls/text-only or external-link tech to add MNC's own
-         booking without digging into Settings. Opens the same quick setup fork
-         from onboarding. Populated by tdRenderMncBookingCta() out of
-         tbLoadDashBadge; hidden for techs already booking through MNC. -->
-    <div id="td-mnc-booking-cta" style="display:none;margin:14px 20px 0;padding:15px 16px;background:linear-gradient(140deg,#FFF7F0 0%,#FDECEF 100%);border:1.5px solid var(--rose-mid);border-radius:16px;box-shadow:var(--shadow);">
-      <div style="font-family:'Playfair Display',serif;font-size:16px;font-weight:600;color:var(--charcoal);">Ready to book through MNC?</div>
-      <div style="font-size:13px;color:var(--muted);margin-top:4px;line-height:1.45;">Let clients tap Book right on your profile. Pick your services and hours, about a minute, and your first month is free. Keep your calls and texts either way.</div>
-      <button onclick="bkOpenSetupFork()" style="margin-top:11px;padding:10px 16px;border:none;border-radius:11px;background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);color:white;font-size:13.5px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;">Set it up</button>
-    </div>
-
     <!-- Notifications big button moved to the My Settings screen in the
          2026-09-06 hub redesign (Anne: "one landing page... right now it's
          all over the place"). #notif-badge-tech lives there now;
@@ -2382,7 +2371,18 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
          to the My Settings screen (hub redesign 2026-09-06). Apple-required
          links (Terms/Privacy 3.1.2c, deletion 5.1.1v) stay reachable there,
          one tap from this screen. -->
-    <div style="text-align:center;margin:18px 20px 0;font-size:12px;color:var(--muted);">Chips save instantly &mdash; flip them any time.</div>
+    <div style="text-align:center;margin:18px 20px 0;font-size:12px;color:var(--muted);">Chips save instantly, flip them any time.</div>
+
+    <!-- The host at the bottom of the portal: a calm, personal "ready to book
+         through MNC?" from the lady in the hat, for calls/text or external-link
+         techs. Personality, not a sales pitch (Anne, 2026-09-21). Shown/hidden
+         by tdRenderMncBookingCta() out of tbLoadDashBadge. -->
+    <div id="td-mnc-booking-cta" style="display:none;margin:22px 20px 0;padding:18px 18px 20px;background:linear-gradient(140deg,#FFF7F0 0%,#FDECEF 100%);border:1.5px solid var(--rose-mid);border-radius:18px;box-shadow:var(--shadow);text-align:center;">
+      <img src="images/mncLogo-round-256.webp" alt="My Nail Connection host" style="width:52px;height:52px;border-radius:50%;margin:0 auto 10px;display:block;box-shadow:0 2px 8px rgba(20,19,23,0.14);"/>
+      <div style="font-family:'Playfair Display',serif;font-size:17px;font-weight:600;color:var(--charcoal);">Ready to book through MNC?</div>
+      <div style="font-size:13px;color:var(--muted);margin-top:5px;line-height:1.5;">Whenever you want clients to book you right here, I&rsquo;ll walk you through it, about a minute, and your first month is free. Your calls and texts keep working either way. No rush.</div>
+      <button onclick="bkOpenSetupFork()" style="margin-top:13px;padding:10px 18px;border:none;border-radius:11px;background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);color:white;font-size:13.5px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;">Show me how</button>
+    </div>
     <div style="height:24px;"></div>
 
   </div>
@@ -5534,8 +5534,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.6',     /* __APP_BUILD_NAME__   */
-  android: 649,         /* __APP_BUILD_ANDROID__ */
-  ios:     454,          /* __APP_BUILD_IOS__     */
+  android: 650,         /* __APP_BUILD_ANDROID__ */
+  ios:     455,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -17972,9 +17972,15 @@ async function loadTechDashboard() {
   var subtle = document.getElementById('tech-dash-subtle');
   if (subtle) {
     var h = new Date().getHours();
-    subtle.textContent = h < 12
-      ? 'Your canvas awaits.'
-      : (h < 17 ? 'Right in your rhythm.' : 'A day well made.');
+    // A small rotating set per time of day, picked at random each render, so
+    // the portal has a little personality instead of one fixed line (Anne,
+    // 2026-09-21).
+    var _greet = h < 12
+      ? ['Your canvas awaits.', 'Fresh coat, fresh day.', 'Let’s make something today.', 'Ready when you are.']
+      : (h < 17
+          ? ['Right in your rhythm.', 'In the flow.', 'Mid-day, mid-masterpiece.', 'Looking good in here.']
+          : ['A day well made.', 'Cuticles down, feet up.', 'Beautiful work today.', 'You earned this evening.']);
+    subtle.textContent = _greet[Math.floor(Math.random() * _greet.length)];
   }
 }
 
