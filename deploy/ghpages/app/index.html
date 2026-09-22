@@ -2465,7 +2465,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       <div style="display:flex;align-items:center;gap:10px;padding:14px 16px;border-top:1px solid var(--border);">
         <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:var(--charcoal);">Morning reminder on your phone</div><div style="font-size:12px;color:var(--muted);margin-top:1px;">A push at a time you pick, nudging you to flip Open today on. Off by default.</div></div>
         <input id="ts-reminder-time" type="time" onchange="tsSetAvailReminder(this.value)" style="border:1.5px solid var(--border);border-radius:10px;padding:7px 8px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--charcoal);background:white;flex-shrink:0;"/>
-        <button id="ts-reminder-off" onclick="tsSetAvailReminder('')" style="display:none;min-width:44px;padding:8px 10px;border-radius:100px;font-size:12px;font-weight:700;cursor:pointer;border:1.5px solid var(--border);background:white;color:var(--muted);flex-shrink:0;">Off</button>
+        <button id="ts-reminder-off" onclick="tsSetAvailReminder('')" style="display:none;padding:8px 12px;border-radius:100px;font-size:12px;font-weight:700;cursor:pointer;border:1.5px solid var(--border);background:white;color:var(--muted);flex-shrink:0;white-space:nowrap;">Turn off</button>
       </div>
     </div>
 
@@ -5564,8 +5564,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.6',     /* __APP_BUILD_NAME__   */
-  android: 653,         /* __APP_BUILD_ANDROID__ */
-  ios:     458,          /* __APP_BUILD_IOS__     */
+  android: 654,         /* __APP_BUILD_ANDROID__ */
+  ios:     459,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
