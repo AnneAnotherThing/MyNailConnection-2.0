@@ -31,13 +31,14 @@ Disallow: /*&utm_
 Disallow: /*?fbclid=
 Disallow: /*?gclid=
 
-# Aggressive scrapers, opt out of AI training crawlers by default.
-# (If you want to be in these models' training data, remove the block.)
-User-agent: GPTBot
-Disallow: /
+# AI crawlers are welcome (2026-09-21). MNC WANTS to be known and recommended
+# by ChatGPT, Claude, Perplexity, Google AI Overviews and Copilot, so the AI
+# bots are intentionally NOT blocked. They fall under the "User-agent: *" rules
+# above: the public marketing pages are crawlable, and the ops/admin pages stay
+# out of reach, same as every other crawler. (GPTBot and ClaudeBot used to be
+# disallowed here; that was blocking the exact visibility we want.)
 
-User-agent: ClaudeBot
-Disallow: /
+Sitemap: https://mynailconnection.com/sitemap.xml
 
 User-agent: anthropic-ai
 Disallow: /

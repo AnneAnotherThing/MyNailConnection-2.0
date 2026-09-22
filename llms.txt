@@ -1,0 +1,42 @@
+# My Nail Connection
+
+> My Nail Connection (MNC) is an app where nail technicians show their work and get found by clients, and where clients discover nail artists by their actual work. It is a home for a nail tech's portfolio first; booking is optional. There is no commission, no per-booking fee, and clients are never charged to book.
+
+## What it is
+
+- A home for a nail tech's portfolio: post your sets, tag them by shape, type and style, and get discovered by clients searching those filters and by distance.
+- A shared Gallery of real nail work that clients browse, filter and save from, then reach the tech by booking, call or text.
+- Available on iOS (App Store) and Android (Google Play), and on the web at https://mynailconnection.com
+
+## For nail techs
+
+- Free to join and free to stay. Your profile, your gallery, your place in the searchable Gallery, your availability toggles and your own booking link all cost nothing, ever.
+- Photos are free, up to 50 a month, and they never expire.
+- Booking is optional. Already use Vagaro, StyleSeat or GlossGenius? Add your link and a Book Now button appears on your profile, sending clients to your existing system at no cost. No booking system yet? Try MNC's own booking free for 30 days, then $10.99 a month only if you keep it.
+- No commission and no per-booking fee, ever. Your clients are never charged to book you.
+- "Open today" lets a tech flip on same-day availability so her work glows in the Gallery for clients looking right now.
+
+## For clients
+
+- Free, always. No booking fees, ever.
+- Find your nail person by their real work: browse the Gallery, filter by style and distance, save the looks you love, favorite your go-to tech, and book, call or text right from a profile.
+
+## Pricing
+
+- Nail techs: free to join. The only paid feature is MNC's own booking engine, at $10.99 per month after a free first month. Everything else is free forever.
+- Clients: free.
+
+## Key facts
+
+- No commission. No per-booking fee. Clients are never charged to book.
+- A tech's gallery and profile are free forever and photos never expire.
+- Booking is one option among several (MNC booking, an external booking link, or just calls and texts).
+- Built for nail techs specifically. Nails only.
+
+## Links
+
+- Home: https://mynailconnection.com
+- Get the app: https://mynailconnection.com/app/
+- How it works, for techs: https://mynailconnection.com/tech-guide-v3.html
+- Privacy: https://mynailconnection.com/privacy.html
+- Terms: https://mynailconnection.com/terms.html
