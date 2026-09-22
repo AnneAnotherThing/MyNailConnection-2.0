@@ -5564,8 +5564,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.6',     /* __APP_BUILD_NAME__   */
-  android: 652,         /* __APP_BUILD_ANDROID__ */
-  ios:     457,          /* __APP_BUILD_IOS__     */
+  android: 653,         /* __APP_BUILD_ANDROID__ */
+  ios:     458,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -18801,9 +18801,15 @@ async function setupEnablePush() {
 // paints the reach card. Book taps fold MNC's own booking and any external
 // booking-link taps together. Silent + hidden if the migration isn't run yet
 // or there's nothing to show.
+// Feature flag (2026-09-21, Anne): the per-tech "Clients reaching you" card is
+// OFF for now. The taps still LOG the whole time (see logTechTap), so the data
+// accrues from day one — this only controls whether techs SEE the card. Flip to
+// true and re-run deploy/sync.sh when you decide to show it to techs.
+var TECH_REACH_CARD_ENABLED = false;
 async function loadTechReach(techId) {
   var card = document.getElementById('td-reach');
   if (!card || !techId) return;
+  if (!TECH_REACH_CARD_ENABLED) { card.style.display = 'none'; return; }
   try {
     var r = await fetch(SUPABASE_URL + '/rest/v1/rpc/tech_tap_summary', {
       method: 'POST',

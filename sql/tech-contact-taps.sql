@@ -100,6 +100,45 @@ end $$;
 
 grant execute on function public.tech_tap_summary(uuid) to authenticated;
 
+
+-- ── Admin per-tech rollup (for admin-stats.html) ──────────────────────────
+-- One row per tech that has at least one tap, newest-activity context included.
+-- Admin-only: the is_admin() predicate means a non-admin caller simply gets
+-- zero rows. Books folds MNC's own booking; book_links is the external-link
+-- taps, kept separate so the dashboard can show or combine them.
+create or replace function public.admin_tech_tap_counts()
+returns table (
+  tech_id    uuid,
+  tech_name  text,
+  calls      int,
+  texts      int,
+  books      int,
+  book_links int,
+  total      int,
+  last_30    int,
+  last_tap   timestamptz
+)
+language sql
+security definer
+set search_path = public
+as $$
+  select t.id, t.name,
+         coalesce(sum((tp.kind = 'call')::int), 0)::int,
+         coalesce(sum((tp.kind = 'text')::int), 0)::int,
+         coalesce(sum((tp.kind = 'book')::int), 0)::int,
+         coalesce(sum((tp.kind = 'book_link')::int), 0)::int,
+         count(tp.*)::int,
+         coalesce(sum((tp.created_at >= now() - interval '30 days')::int), 0)::int,
+         max(tp.created_at)
+    from public.techs t
+    join public.tech_taps tp on tp.tech_id = t.id
+   where public.is_admin()
+   group by t.id, t.name
+   order by count(tp.*) desc, max(tp.created_at) desc;
+$$;
+
+grant execute on function public.admin_tech_tap_counts() to authenticated;
+
 commit;
 
 -- ── Verify ────────────────────────────────────────────────────────────────
