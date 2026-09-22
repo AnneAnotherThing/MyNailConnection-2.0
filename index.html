@@ -2352,6 +2352,31 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
            pitch survives as my-photos' own empty state. -->
     </div>
 
+    <!-- CLIENTS REACHING YOU (2026-09-21, Anne): the tech's own engagement.
+         One tile per contact type a client can tap on her public profile.
+         Hidden until there's at least one tap; populated by loadTechReach()
+         from tech_tap_summary(). Counts are last-30-days. -->
+    <div id="td-reach" style="display:none;margin:16px 20px 0;background:white;border:1.5px solid var(--border);border-radius:18px;padding:16px;box-shadow:var(--shadow);">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:12px;">
+        <div style="font-family:'Playfair Display',serif;font-size:16px;font-weight:600;color:var(--charcoal);">Clients reaching you</div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:0.6px;text-transform:uppercase;color:var(--muted);">Last 30 days</div>
+      </div>
+      <div style="display:flex;gap:10px;">
+        <div style="flex:1;text-align:center;background:var(--cream);border-radius:12px;padding:12px 6px;">
+          <div id="td-reach-book" style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--rose-dark);">0</div>
+          <div style="font-size:11.5px;color:var(--muted);margin-top:2px;">Book taps</div>
+        </div>
+        <div style="flex:1;text-align:center;background:var(--cream);border-radius:12px;padding:12px 6px;">
+          <div id="td-reach-call" style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--rose-dark);">0</div>
+          <div style="font-size:11.5px;color:var(--muted);margin-top:2px;">Calls</div>
+        </div>
+        <div style="flex:1;text-align:center;background:var(--cream);border-radius:12px;padding:12px 6px;">
+          <div id="td-reach-text" style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--rose-dark);">0</div>
+          <div style="font-size:11.5px;color:var(--muted);margin-top:2px;">Texts</div>
+        </div>
+      </div>
+    </div>
+
     <!-- MANAGE PROFILE, full-width button that opens the tech-edit modal.
          Replaces the old portfolio preview strip (2026-04-23): the gallery
          screen (my-photos) is already the "portfolio view" surface, so
@@ -2434,8 +2459,13 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
     <div style="margin:0 20px;background:white;border:1.5px solid var(--border);border-radius:16px;overflow:hidden;box-shadow:var(--shadow);">
       <div onclick="show('tech-booking-settings')" style="display:flex;align-items:center;gap:10px;padding:14px 16px;cursor:pointer;"><div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:var(--charcoal);">Booking settings</div><div style="font-size:12px;color:var(--muted);margin-top:1px;">Services, hours, auto-confirm, blocking</div></div><svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:var(--muted);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg></div>
       <div style="display:flex;align-items:center;gap:10px;padding:14px 16px;border-top:1px solid var(--border);">
-        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:var(--charcoal);">Daily open-today reminder</div><div style="font-size:12px;color:var(--muted);margin-top:1px;">A morning nudge to show clients you&rsquo;re open</div></div>
+        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:var(--charcoal);">Open-today check-in</div><div style="font-size:12px;color:var(--muted);margin-top:1px;">When you open the app, we ask once a day if you&rsquo;re open</div></div>
         <button id="ts-nudge-btn" onclick="tsToggleDailyNudge()" style="min-width:56px;padding:8px 14px;border-radius:100px;font-size:13px;font-weight:700;cursor:pointer;border:1.5px solid var(--rose);background:var(--rose);color:white;flex-shrink:0;">On</button>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;padding:14px 16px;border-top:1px solid var(--border);">
+        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:var(--charcoal);">Morning reminder on your phone</div><div style="font-size:12px;color:var(--muted);margin-top:1px;">A push at a time you pick, nudging you to flip Open today on. Off by default.</div></div>
+        <input id="ts-reminder-time" type="time" onchange="tsSetAvailReminder(this.value)" style="border:1.5px solid var(--border);border-radius:10px;padding:7px 8px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--charcoal);background:white;flex-shrink:0;"/>
+        <button id="ts-reminder-off" onclick="tsSetAvailReminder('')" style="display:none;min-width:44px;padding:8px 10px;border-radius:100px;font-size:12px;font-weight:700;cursor:pointer;border:1.5px solid var(--border);background:white;color:var(--muted);flex-shrink:0;">Off</button>
       </div>
     </div>
 
@@ -5534,8 +5564,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.6',     /* __APP_BUILD_NAME__   */
-  android: 651,         /* __APP_BUILD_ANDROID__ */
-  ios:     456,          /* __APP_BUILD_IOS__     */
+  android: 652,         /* __APP_BUILD_ANDROID__ */
+  ios:     457,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -7808,6 +7838,28 @@ function refreshPhotoHeartBadgeDOM(photoUrl, count) {
   });
 }
 
+// ── Client-contact tap analytics (2026-09-21) ──────────────────────────────
+// One fire-and-forget row per tap on a way to reach a tech from her public
+// profile (Call / Text / Book / external Book link). keepalive lets the POST
+// survive the tel:/sms: navigation that fires right after. No client identity
+// is written — just which button, which tech, when. The tech reads her own
+// totals via tech_tap_summary(); see sql/tech-contact-taps.sql.
+function logTechTap(kind, techId) {
+  try {
+    if (!techId || !kind) return;
+    var sid;
+    try {
+      sid = localStorage.getItem('mnc_sid');
+      if (!sid) { sid = (self.crypto && crypto.randomUUID) ? crypto.randomUUID() : (String(Date.now()) + Math.random()); localStorage.setItem('mnc_sid', sid); }
+    } catch(_) {}
+    fetch(SUPABASE_URL + '/rest/v1/tech_taps', {
+      method: 'POST', keepalive: true,
+      headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + (window._mncAccessToken || SUPABASE_ANON_KEY), 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+      body: JSON.stringify({ tech_id: techId, kind: kind, session_id: sid || null })
+    }).catch(function(){});
+  } catch(_) {}
+}
+
 // ── Message history ───────────────────────────────────────────────────────────
 function renderTechContactFooter(tech) {
   const footer = document.getElementById('td-contact-footer');
@@ -7842,13 +7894,13 @@ function renderTechContactFooter(tech) {
 
   let btns = '';
   if (showCall) {
-    btns += `<a href="tel:${(phone.trim().charAt(0) === '+' ? '+' : '') + phone.replace(/\D/g,'')}" style="${cardStyle}">
+    btns += `<a href="tel:${(phone.trim().charAt(0) === '+' ? '+' : '') + phone.replace(/\D/g,'')}" onclick="logTechTap('call','${tech.id}')" style="${cardStyle}">
       <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;vertical-align:middle;"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81a19.79 19.79 0 01-3.07-8.68A2 2 0 012 .9h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 8.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>
       Call
     </a>`;
   }
   if (showText) {
-    btns += `<a href="sms:${(phone.trim().charAt(0) === '+' ? '+' : '') + phone.replace(/\D/g,'')}" style="${cardStyle}">
+    btns += `<a href="sms:${(phone.trim().charAt(0) === '+' ? '+' : '') + phone.replace(/\D/g,'')}" onclick="logTechTap('text','${tech.id}')" style="${cardStyle}">
       <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;vertical-align:middle;"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/><line x1="9" y1="10" x2="15" y2="10"/><line x1="9" y1="14" x2="13" y2="14"/></svg>
       Text
     </a>`;
@@ -7860,7 +7912,7 @@ function renderTechContactFooter(tech) {
   let nativeBookBtn = '';
   if (_canBookNative) {
     const bkFirst = ((tech.name || '').trim().split(/\s+/)[0]) || 'Now';
-    nativeBookBtn = `<button onclick="openBookModal()"
+    nativeBookBtn = `<button onclick="logTechTap('book','${tech.id}');openBookModal()"
       style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px;border-radius:12px;background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);border:1px solid rgba(96,76,77,0.3);border-bottom:3px solid rgba(43,41,39,0.5);box-shadow:0 3px 12px rgba(125,100,102,0.35);color:white;font-size:14px;font-weight:600;font-family:'DM Sans',sans-serif;margin-bottom:8px;box-sizing:border-box;cursor:pointer;">
       <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:white;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
       Book ${bkFirst}
@@ -7890,7 +7942,7 @@ function renderTechContactFooter(tech) {
       ? "display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:13px;border-radius:12px;background:white;border:1.5px solid var(--border);color:var(--charcoal);font-size:14px;font-weight:600;text-decoration:none;font-family:'DM Sans',sans-serif;margin-bottom:8px;box-sizing:border-box;"
       : "display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px;border-radius:12px;background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);border:1px solid rgba(96,76,77,0.3);border-bottom:3px solid rgba(43,41,39,0.5);box-shadow:0 3px 12px rgba(125,100,102,0.35);color:white;font-size:14px;font-weight:600;text-decoration:none;font-family:'DM Sans',sans-serif;margin-bottom:8px;box-sizing:border-box;";
     bookingBtn = `<a href="${esc(safeUrl(bookingLink))}" target="_blank" rel="noopener"
-      style="${extStyle}">
+      onclick="logTechTap('book_link','${tech.id}')" style="${extStyle}">
       <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
       ${label}
     </a>`;
@@ -15930,7 +15982,7 @@ async function tbLoadDashBadge() {
   const sub = document.getElementById('td-bookings-sub');
   const badge = document.getElementById('td-bookings-pending');
   try {
-    const r = await fetch(SUPABASE_URL + '/rest/v1/techs?select=id,booking_enabled,booking_link,booking_timezone,is_available,is_same_day,accepting_new_clients,is_bookable,subscription_source,period_reset_at,daily_avail_nudge_off&or=(email.eq.' +
+    const r = await fetch(SUPABASE_URL + '/rest/v1/techs?select=id,booking_enabled,booking_link,booking_timezone,is_available,is_same_day,accepting_new_clients,is_bookable,subscription_source,period_reset_at,daily_avail_nudge_off,avail_reminder_time&or=(email.eq.' +
       encodeURIComponent(currentUserEmail) + ',phone.eq.' + encodeURIComponent(currentUserEmail) + ')', { headers: bkHeaders() });
     if (!r.ok) return; // migration not run yet, leave the default copy
     const t = (await r.json())[0];
@@ -15953,7 +16005,10 @@ async function tbLoadDashBadge() {
     // Account-level daily-reminder preference, cached so My Settings can paint
     // its toggle without a refetch (Anne, 2026-09-20).
     window._mncDailyNudgeOff = !!t.daily_avail_nudge_off;
+    // Morning phone-reminder time (2026-09-21). Stored as 'HH:MM:SS' or null.
+    window._mncAvailReminderTime = t.avail_reminder_time || '';
     try { renderNudgePref(); } catch(_) {}
+    try { renderReminderPref(); } catch(_) {}
     // In-app appointment alerts (2026-08-10): fire-and-forget so the badge
     // logic below never waits on the extra queries.
     try { tdRenderApptAlerts(t); } catch(_) {}
@@ -16023,6 +16078,61 @@ async function tsToggleDailyNudge() {
   } catch (e) {
     window._mncDailyNudgeOff = !newOff;   // revert on failure
     renderNudgePref();
+    showToast("Couldn't save that, try again");
+  }
+}
+
+// Morning phone-reminder time picker (2026-09-21, Anne). Setting a time turns
+// the daily push on; clearing it turns it off. The tz is captured in-browser so
+// the server cron fires at her real wall-clock time, and avail_reminded_on is
+// cleared so a time set earlier today can still fire this morning. It only
+// reminds — it never flips availability for her. See sql/avail-morning-reminder.sql.
+function _fmtReminderTime(hhmm) {
+  try {
+    var p = (hhmm || '').split(':'); var h = parseInt(p[0], 10); var m = p[1] || '00';
+    var ap = h < 12 ? 'AM' : 'PM'; var h12 = h % 12; if (h12 === 0) h12 = 12;
+    return h12 + ':' + m + ' ' + ap;
+  } catch(_) { return hhmm; }
+}
+function renderReminderPref() {
+  var inp = document.getElementById('ts-reminder-time');
+  var off = document.getElementById('ts-reminder-off');
+  if (!inp) return;
+  var v = (window._mncAvailReminderTime || '').slice(0, 5);   // 'HH:MM:SS' -> 'HH:MM'
+  inp.value = v;
+  if (off) off.style.display = v ? '' : 'none';
+}
+async function tsSetAvailReminder(val) {
+  var email = currentUserEmail;
+  if (!email) return;
+  var prev = window._mncAvailReminderTime || '';
+  var time = (val || '').trim();   // '' clears the reminder
+  window._mncAvailReminderTime = time ? (time.length === 5 ? time + ':00' : time) : '';
+  renderReminderPref();
+  var tz = null;
+  try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || null; } catch(_) {}
+  var body = time
+    ? { avail_reminder_time: window._mncAvailReminderTime, avail_reminder_tz: tz, avail_reminded_on: null }
+    : { avail_reminder_time: null };
+  try {
+    var r = await fetch(SUPABASE_URL + '/rest/v1/techs?or=(email.eq.' + encodeURIComponent(email) +
+      ',phone.eq.' + encodeURIComponent(email) + ')', {
+      method: 'PATCH',
+      headers: bkHeaders({ 'Content-Type': 'application/json', 'Prefer': 'return=minimal' }),
+      body: JSON.stringify(body)
+    });
+    if (!r.ok) throw new Error('patch ' + r.status);
+    if (time) {
+      showToast('Morning reminder set for ' + _fmtReminderTime(time));
+      // A reminder is worthless without notification permission. If push isn't
+      // on yet, walk her through turning it on now.
+      if (!window._mncHasPushSub) { try { await setupEnablePush(); } catch(_) {} }
+    } else {
+      showToast('Morning reminder turned off');
+    }
+  } catch (e) {
+    window._mncAvailReminderTime = prev;   // revert on failure
+    renderReminderPref();
     showToast("Couldn't save that, try again");
   }
 }
@@ -18686,6 +18796,38 @@ async function setupEnablePush() {
   updateSetupChecklist();
 }
 
+// ── "Clients reaching you" tile (2026-09-21) ───────────────────────────────
+// Reads the tech's OWN 30-day contact-tap totals via the owner-gated RPC and
+// paints the reach card. Book taps fold MNC's own booking and any external
+// booking-link taps together. Silent + hidden if the migration isn't run yet
+// or there's nothing to show.
+async function loadTechReach(techId) {
+  var card = document.getElementById('td-reach');
+  if (!card || !techId) return;
+  try {
+    var r = await fetch(SUPABASE_URL + '/rest/v1/rpc/tech_tap_summary', {
+      method: 'POST',
+      headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + (window._mncAccessToken || SUPABASE_ANON_KEY), 'Content-Type': 'application/json' },
+      body: JSON.stringify({ p_tech_id: techId })
+    });
+    if (!r.ok) return;
+    var d = await r.json();
+    if (!d || !d.ok) return;
+    var w = d.last_30 || {};
+    var books = (w.book || 0) + (w.book_link || 0);
+    var calls = w.call || 0, texts = w.text || 0;
+    var bEl = document.getElementById('td-reach-book');
+    var cEl = document.getElementById('td-reach-call');
+    var tEl = document.getElementById('td-reach-text');
+    if (bEl) bEl.textContent = String(books);
+    if (cEl) cEl.textContent = String(calls);
+    if (tEl) tEl.textContent = String(texts);
+    // Only surface it once there's at least one tap — an all-zero card on a
+    // brand-new tech's portal reads as failure, not "no clients yet".
+    card.style.display = (books + calls + texts) > 0 ? '' : 'none';
+  } catch(_) {}
+}
+
 async function loadTechHomeStats() {
   var email = currentUserEmail;
   if (!email) return;
@@ -18715,6 +18857,7 @@ async function loadTechHomeStats() {
         if (!window._bkSetup.id) window._bkSetup.id = _t0.id;
         if (window._bkSetup.enabled === undefined) window._bkSetup.enabled = !!_t0.booking_enabled;
         if (window._bkSetup.link === undefined) window._bkSetup.link = (_t0.booking_link || '').trim();
+        try { loadTechReach(_t0.id); } catch(_) {}
       }
     } catch(_) {}
     var rawPhotos = (d1 && d1[0] && Array.isArray(d1[0].photos)) ? d1[0].photos : [];
