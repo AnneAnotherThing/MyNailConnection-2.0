@@ -1039,6 +1039,13 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
 <body>
 <div class="device">
 
+<!-- Persistent free-month pill (Anne, 2026-09-21): rides every tech screen
+     while a tech is on the card-free trial, so booking never reads as free
+     for life. Populated by renderTrialPill() from tbLoadDashBadge; a fixed
+     child of .device so it survives screen changes. Bottom-right to clear the
+     headers. Hidden for free, comped and paid techs. Tap = details / renew. -->
+<div id="trial-pill" onclick="trialPillTap()" style="display:none;position:absolute;bottom:78px;right:14px;z-index:9500;padding:6px 12px;border-radius:100px;font-family:'DM Sans',sans-serif;font-size:11.5px;font-weight:700;cursor:pointer;box-shadow:0 3px 10px rgba(20,19,23,0.22);"></div>
+
 <!-- PUSH PERMISSION BANNER, push is used for MNC → user announcements
      (new features, important updates, launches), NOT for tech→client
      messaging. Copy reflects that intent so users opt in with accurate
@@ -5505,8 +5512,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.6',     /* __APP_BUILD_NAME__   */
-  android: 639,         /* __APP_BUILD_ANDROID__ */
-  ios:     444,          /* __APP_BUILD_IOS__     */
+  android: 640,         /* __APP_BUILD_ANDROID__ */
+  ios:     445,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -15806,6 +15813,37 @@ async function tdRenderApptAlerts(t) {
   } catch(e) { console.warn('tdRenderApptAlerts', e); }
 }
 
+// Persistent free-month pill on every tech screen during the trial, so booking
+// never reads as free-for-life. Reads the cached trial state set by
+// tbLoadDashBadge; the element is a fixed child of .device. (Anne, 2026-09-21)
+function renderTrialPill() {
+  var el = document.getElementById('trial-pill');
+  if (!el) return;
+  var t = window._mncTrial;
+  if (!t || t.source !== 'trial') { el.style.display = 'none'; return; }
+  if (t.bookable) {
+    var end = t.reset ? new Date(t.reset) : null;
+    var days = (end && !isNaN(end.getTime())) ? Math.max(0, Math.ceil((end.getTime() - Date.now()) / 86400000)) : 0;
+    el.textContent = (days <= 1) ? 'Free month: last day' : 'Free month: ' + days + 'd left';
+    el.style.background = 'linear-gradient(140deg,#FFF3E9 0%,#FDE8EC 100%)';
+    el.style.color = 'var(--charcoal)';
+    el.style.border = '1.5px solid var(--rose-mid)';
+    el.setAttribute('data-mode', 'active');
+  } else {
+    el.textContent = 'Free month ended · Renew';
+    el.style.background = 'var(--rose-dark)';
+    el.style.color = 'white';
+    el.style.border = 'none';
+    el.setAttribute('data-mode', 'lapsed');
+  }
+  el.style.display = 'block';
+}
+function trialPillTap() {
+  var el = document.getElementById('trial-pill');
+  if (el && el.getAttribute('data-mode') === 'lapsed') { try { openBookingSubscribe(); } catch(_) {} }
+  else { try { show('tech-booking-settings'); } catch(_) {} }
+}
+
 // Portal renew banner. When booking is enabled but is_bookable is false, the
 // trial or subscription has lapsed: the public Book button is already gone, so
 // surface it here on the portal with a one-tap route to subscribe, instead of
@@ -15839,6 +15877,10 @@ async function tbLoadDashBadge() {
     // (trial ended or sub lapsed). Without this the Book button just vanishes
     // and nothing on the portal says why or how to renew (Anne, 2026-09-20).
     try { tdRenderLapseBanner(t); } catch(_) {}
+    // Cache the trial state so the persistent free-month pill can paint on any
+    // screen without a refetch, then render it.
+    window._mncTrial = { source: t.subscription_source, reset: t.period_reset_at, bookable: !!t.is_bookable };
+    try { renderTrialPill(); } catch(_) {}
     // Remember how this tech takes bookings so tbOpenBookings() can route
     // without a refetch. "Set up" = neither in-app booking nor a link.
     window._bkSetup = { id: t.id, enabled: !!t.booking_enabled, link: (t.booking_link || '').trim(),
