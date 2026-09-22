@@ -2200,6 +2200,17 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
 
     <div id="td-alerts" style="display:none;margin:14px 20px 0;gap:8px;"></div>
 
+    <!-- "Ready to book through MNC?" (Anne, 2026-09-21): a calm, always-there
+         way for a calls/text-only or external-link tech to add MNC's own
+         booking without digging into Settings. Opens the same quick setup fork
+         from onboarding. Populated by tdRenderMncBookingCta() out of
+         tbLoadDashBadge; hidden for techs already booking through MNC. -->
+    <div id="td-mnc-booking-cta" style="display:none;margin:14px 20px 0;padding:15px 16px;background:linear-gradient(140deg,#FFF7F0 0%,#FDECEF 100%);border:1.5px solid var(--rose-mid);border-radius:16px;box-shadow:var(--shadow);">
+      <div style="font-family:'Playfair Display',serif;font-size:16px;font-weight:600;color:var(--charcoal);">Ready to book through MNC?</div>
+      <div style="font-size:13px;color:var(--muted);margin-top:4px;line-height:1.45;">Let clients tap Book right on your profile. Pick your services and hours, about a minute, and your first month is free. Keep your calls and texts either way.</div>
+      <button onclick="bkOpenSetupFork()" style="margin-top:11px;padding:10px 16px;border:none;border-radius:11px;background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);color:white;font-size:13.5px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;">Set it up</button>
+    </div>
+
     <!-- Notifications big button moved to the My Settings screen in the
          2026-09-06 hub redesign (Anne: "one landing page... right now it's
          all over the place"). #notif-badge-tech lives there now;
@@ -5523,8 +5534,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.6',     /* __APP_BUILD_NAME__   */
-  android: 648,         /* __APP_BUILD_ANDROID__ */
-  ios:     453,          /* __APP_BUILD_IOS__     */
+  android: 649,         /* __APP_BUILD_ANDROID__ */
+  ios:     454,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -15886,6 +15897,19 @@ function trialPillTap() {
 // trial or subscription has lapsed: the public Book button is already gone, so
 // surface it here on the portal with a one-tap route to subscribe, instead of
 // making her guess her way into Booking Settings (Anne, 2026-09-20).
+// "Ready to book through MNC?" card. Shows for a tech who takes calls/text or
+// uses an external booking link but has NOT turned on MNC's own booking, so she
+// has a calm, always-there path to add it without digging into Settings. Hidden
+// for techs already booking through MNC. (Anne, 2026-09-21)
+function tdRenderMncBookingCta(t) {
+  var el = document.getElementById('td-mnc-booking-cta');
+  if (!el) return;
+  var callsOnly = false;
+  try { callsOnly = _bkCallsOnlyPref(); } catch(_) {}
+  var showIt = !!(t && !t.booking_enabled && ((t.booking_link || '').trim() || callsOnly));
+  el.style.display = showIt ? 'block' : 'none';
+}
+
 function tdRenderLapseBanner(t) {
   var el = document.getElementById('td-lapse-banner');
   if (!el) return;
@@ -15919,6 +15943,7 @@ async function tbLoadDashBadge() {
     // screen without a refetch, then render it.
     window._mncTrial = { source: t.subscription_source, reset: t.period_reset_at, bookable: !!t.is_bookable };
     try { renderTrialPill(); } catch(_) {}
+    try { tdRenderMncBookingCta(t); } catch(_) {}
     // Remember how this tech takes bookings so tbOpenBookings() can route
     // without a refetch. "Set up" = neither in-app booking nor a link.
     window._bkSetup = { id: t.id, enabled: !!t.booking_enabled, link: (t.booking_link || '').trim(),
