@@ -2463,9 +2463,8 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
         <button id="ts-nudge-btn" onclick="tsToggleDailyNudge()" style="min-width:56px;padding:8px 14px;border-radius:100px;font-size:13px;font-weight:700;cursor:pointer;border:1.5px solid var(--rose);background:var(--rose);color:white;flex-shrink:0;">On</button>
       </div>
       <div style="display:flex;align-items:center;gap:10px;padding:14px 16px;border-top:1px solid var(--border);">
-        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:var(--charcoal);">Morning reminder on your phone</div><div style="font-size:12px;color:var(--muted);margin-top:1px;">A push at a time you pick, nudging you to flip Open today on. Off by default.</div></div>
-        <input id="ts-reminder-time" type="time" onchange="tsSetAvailReminder(this.value)" style="border:1.5px solid var(--border);border-radius:10px;padding:7px 8px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--charcoal);background:white;flex-shrink:0;"/>
-        <button id="ts-reminder-off" onclick="tsSetAvailReminder('')" style="display:none;padding:8px 12px;border-radius:100px;font-size:12px;font-weight:700;cursor:pointer;border:1.5px solid var(--border);background:white;color:var(--muted);flex-shrink:0;white-space:nowrap;">Turn off</button>
+        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:var(--charcoal);">Morning reminder on your phone</div><div style="font-size:12px;color:var(--muted);margin-top:1px;">A gentle nudge to flip Open today on. Off by default.</div></div>
+        <select id="ts-reminder-time" onchange="tsSetAvailReminder(this.value)" style="border:1.5px solid var(--border);border-radius:100px;padding:8px 30px 8px 14px;font-size:13px;font-weight:700;font-family:'DM Sans',sans-serif;color:var(--charcoal);background:white url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%2212%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%238B7E70%22 stroke-width=%223%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><path d=%22M6 9l6 6 6-6%22/></svg>') no-repeat right 12px center;-webkit-appearance:none;appearance:none;cursor:pointer;flex-shrink:0;"></select>
       </div>
     </div>
 
@@ -5564,8 +5563,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.6',     /* __APP_BUILD_NAME__   */
-  android: 655,         /* __APP_BUILD_ANDROID__ */
-  ios:     460,          /* __APP_BUILD_IOS__     */
+  android: 656,         /* __APP_BUILD_ANDROID__ */
+  ios:     461,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -6636,15 +6635,9 @@ function wireCapacitorPushListeners(PushNotifications) {
     // obvious destination instead of the generic app front door.
     if (tag.indexOf('avail-am') === 0) {
       show('tech-home');
-      try {
-        setTimeout(function () {
-          var el = document.getElementById('td-hero-now');
-          if (el) {
-            try { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (_) {}
-            try { portalFlash(el.parentNode || el); } catch (_) {}
-          }
-        }, 500);
-      } catch (_) {}
+      // Pop the one-tap "are you open today?" prompt right on the portal, so the
+      // reminder is answerable in a tap without her hunting for the chip.
+      try { setTimeout(function () { try { askOpenTodayFromPush(); } catch (_) {} }, 650); } catch (_) {}
       return;
     }
     if (data.screen === 'messages') show('home'); // no messages screen; land on home rather than dead-end
@@ -16111,13 +16104,26 @@ function _fmtReminderTime(hhmm) {
     return h12 + ':' + m + ' ' + ap;
   } catch(_) { return hhmm; }
 }
+function _populateReminderTimes(sel) {
+  var html = '<option value="">Off</option>';
+  // 5:00 AM through noon, half-hour steps, friendly AM/PM labels.
+  for (var h = 5; h <= 12; h++) {
+    for (var m = 0; m < 60; m += 30) {
+      var hh = (h < 10 ? '0' : '') + h;
+      var mm = (m === 0 ? '00' : '30');
+      var ap = h < 12 ? 'AM' : 'PM';
+      var h12 = h % 12; if (h12 === 0) h12 = 12;
+      html += '<option value="' + hh + ':' + mm + '">' + h12 + ':' + mm + ' ' + ap + '</option>';
+      if (h === 12) break;   // stop at 12:00 PM, no 12:30
+    }
+  }
+  sel.innerHTML = html;
+}
 function renderReminderPref() {
-  var inp = document.getElementById('ts-reminder-time');
-  var off = document.getElementById('ts-reminder-off');
-  if (!inp) return;
-  var v = (window._mncAvailReminderTime || '').slice(0, 5);   // 'HH:MM:SS' -> 'HH:MM'
-  inp.value = v;
-  if (off) off.style.display = v ? '' : 'none';
+  var sel = document.getElementById('ts-reminder-time');
+  if (!sel) return;
+  if (!sel.options || !sel.options.length) _populateReminderTimes(sel);
+  sel.value = (window._mncAvailReminderTime || '').slice(0, 5);   // 'HH:MM:SS' -> 'HH:MM', '' = Off
 }
 async function tsSetAvailReminder(val) {
   var email = currentUserEmail;
@@ -16166,6 +16172,24 @@ async function tsSetAvailReminder(val) {
 //   New clients  → never self-clears    → defaults ON at signup
 //     (sql/default-open-week-new-clients.sql), hers to turn off
 // Any answer (including "no") stamps the day: one ask per day, never a loop.
+// Tapping the morning push lands here (via pushNotificationActionPerformed).
+// Unlike maybeDailyAvailPrompt this has NO guards — she deliberately tapped the
+// reminder, so always ask, and flip Open today on a yes. (2026-09-21, Anne)
+async function askOpenTodayFromPush() {
+  try {
+    var openToday = await showConfirm('Are you open for clients today?', {
+      body: '“Open today” turns itself off every night, so clients only ever see what’s true. Flip it on and your work glows for the clients looking right now.',
+      okLabel: 'Yes — open today',
+      cancelLabel: 'Not today',
+      tone: 'neutral'
+    });
+    if (openToday) {
+      try { heroToggle('now'); } catch(_) {}
+      try { showToast('You’re showing as open today 💅'); } catch(_) {}
+    }
+  } catch(_) {}
+}
+
 async function maybeDailyAvailPrompt(t) {
   if (!t) return;
   if (t.daily_avail_nudge_off) return;   // she turned the daily reminder off (My Settings)
