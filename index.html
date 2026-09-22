@@ -48,7 +48,7 @@
   });
 </script>
 <!-- maximum-scale=1 (2026-08-03): iOS zooms the whole app when a sub-16px
-     input gets focus, and an installed PWA often stays stuck zoomed-in —
+     input gets focus, and an installed PWA often stays stuck zoomed-in
      "can't see the whole thing" (Leslie). max-scale stops the focus
      auto-zoom; iOS still allows accessibility pinch-zoom regardless. -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover"/>
@@ -76,7 +76,7 @@
 <meta property="og:type" content="website"/>
 <meta property="og:site_name" content="My Nail Connection"/>
 <meta property="og:title" content="My Nail Connection"/>
-<meta property="og:description" content="Find your nail tech, see their work, and book in seconds. Always free for clients. Booking built for nail techs — no commission, no per-booking fee."/>
+<meta property="og:description" content="Find your nail tech, see their work, and book in seconds. Always free for clients. Booking built for nail techs, no commission, no per-booking fee."/>
 <meta property="og:url" content="https://mynailconnection.com/app/"/>
 <meta property="og:image" content="https://mynailconnection.com/og-image-2026-08.png"/>
 <meta property="og:image:secure_url" content="https://mynailconnection.com/og-image-2026-08.png"/>
@@ -112,7 +112,7 @@
    fits in screen, no scrolling on any device"). 100dvh tracks the REAL
    visible height on mobile (URL bars, home indicator) with 100vh as the
    older-browser fallback; overflow:hidden kills page-level scrolling and
-   rubber-banding — every screen scrolls internally via .scroll-content. */
+   rubber-banding, every screen scrolls internally via .scroll-content. */
 html,body{margin:0;padding:0;height:100vh;height:100dvh;overflow:hidden;overscroll-behavior:none;}
 body{font-family:'DM Sans',sans-serif;background:#FFFFFF;display:flex;justify-content:center;align-items:flex-start;}
 
@@ -664,7 +664,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
    message to keep an eye on their notifications."
 
    The old completion state was one line of text where the step list had
-   been — the same visual weight as a step, for the moment the whole list
+   been, the same visual weight as a step, for the moment the whole list
    is finished. This is the payoff for six steps of work, so it gets a
    drawn checkmark, a confetti burst and staggered copy.
 
@@ -680,7 +680,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
 @keyframes mncCelebDraw {
   to { stroke-dashoffset: 0; }
 }
-/* One ring, expanding outward and fading. Runs twice — a heartbeat, not a
+/* One ring, expanding outward and fading. Runs twice, a heartbeat, not a
    loop, so a finished list doesn't pulse at her forever. */
 @keyframes mncCelebRing {
   0%   { transform: scale(0.8); opacity: 0.55; }
@@ -796,7 +796,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
 .tech-card-photo-slot{overflow:hidden;display:flex;align-items:center;justify-content:center;background:var(--cream);}
 .tech-card-photo-slot img{width:100%;height:100%;object-fit:cover;object-position:center;}
 .tech-card-body{padding:8px 12px 10px;display:flex;align-items:center;gap:8px;}
-/* 32px → 56px (Anne, 2026-08-03): "the tech pics are still very short" —
+/* 32px → 56px (Anne, 2026-08-03): "the tech pics are still very short"
    the earlier fix resized the NAIL strip, but this avatar is the tech's
    actual photo and at 32px you couldn't see a face. */
 .tech-thumb{width:56px;height:56px;border-radius:12px;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;border:2px solid white;box-shadow:0 1px 6px rgba(0,0,0,0.12);}
@@ -1358,12 +1358,12 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
            the image. The art's own ivory matches the splash bg, so contain
            letterboxes invisibly. -->
       <!-- translateX(-7%): the lips sit at ~57% of the art's width
-           (measured on the pink pixels — an earlier hat-based measurement
+           (measured on the pink pixels, an earlier hat-based measurement
            overshot badly), so a small left nudge centers them. Anne,
            2026-08-03. -->
       <!-- Lips-centering with full bleed (Anne, 2026-08-03, third pass):
            the lips sit at 57% of the art's width, so centering them needs
-           a leftward shift — but a bare shift leaves the right side empty
+           a leftward shift, but a bare shift leaves the right side empty
            (her review note). scale(1.18) grows the art just enough that,
            shifted, it still bleeds past BOTH screen edges: lips at the
            exact centerline, no gaps, no feather needed. Wrapper clips the
@@ -1404,13 +1404,13 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
   </div>
 </div>
 
-<!-- AUTH / SIGN IN — REMOVED 2026-08-14 (phone-only cutover).
+<!-- AUTH / SIGN IN, REMOVED 2026-08-14 (phone-only cutover).
      The email + password sign-in screen (#auth) lived here. MNC is
      phone-identity now: the splash routes both Sign In and Create a
      Free Account straight to #phone-auth (SMS code), so this screen was
      the last place in the app that asked anyone for an email address.
 
-     signInWithEmail() is deliberately KEPT in the JS below — the dev
+     signInWithEmail() is deliberately KEPT in the JS below, the dev
      test-account login still uses it, and it is not reachable from any
      UI. lower(email) also remains the internal identity key for
      push_subscriptions and every RLS policy (current_email()); that is a
@@ -1438,7 +1438,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
            trial-account number limit or a carrier filter all fail exactly here
            and look identical to the tech.
            Contact Anne rather than the feedback modal, because it collects a
-           phone number — the only way to answer someone who cannot get in. -->
+           phone number, the only way to answer someone who cannot get in. -->
       <div style="text-align:center;margin-top:14px;padding-top:14px;border-top:1px solid var(--border);">
         <span onclick="openContactAnne()" style="font-size:13px;color:var(--rose-dark);font-weight:600;cursor:pointer;text-decoration:underline;text-underline-offset:3px;">Trouble signing in?</span>
         <div style="font-size:12px;color:var(--muted);margin-top:4px;">Tell us what happened and we&rsquo;ll text you back.</div>
@@ -1446,7 +1446,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
     </div>
   </div>
 
-<!-- SIGN UP Step 1 (name / email / password) — REMOVED 2026-08-14.
+<!-- SIGN UP Step 1 (name / email / password), REMOVED 2026-08-14.
      Phone signup (#phone-auth → create_signup_profile_phone, p_email:null)
      collects name, role and ZIP in #pa-body and lands the user straight on
      their home screen, so this screen and its email + password fields were
@@ -1521,7 +1521,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
         </label>
       </div>
       <button class="btn btn-rose" style="margin-top:12px;" onclick="completeSignup()">Create My Account</button>
-      <!-- Spans had cursor:pointer but no onclick — dead links since day
+      <!-- Spans had cursor:pointer but no onclick, dead links since day
            one. Wired to openLegal (audit follow-up 2026-08-03). -->
       <div style="text-align:center;margin-top:14px;font-size:13px;color:var(--muted);line-height:1.6;">By joining, you agree to our <span onclick="openLegal('terms','Terms of Use')" style="color:var(--rose);cursor:pointer;text-decoration:underline;">Terms of Service</span> and <span onclick="openLegal('privacy','Privacy Policy')" style="color:var(--rose);cursor:pointer;text-decoration:underline;">Privacy Policy</span>. We take care of our community. No spam, ever.</div>
     </div>
@@ -1733,7 +1733,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
            since the bottom-nav Sign Out slot was repurposed for My
            Gallery. Non-techs still have Sign Out in their nav and don't
            see this icon. 2026-04-22 per Anne. -->
-      <!-- Was white-on-white ghost styling from the dark-header era —
+      <!-- Was white-on-white ghost styling from the dark-header era
            invisible since the header went white (Anne, 2026-08-03).
            Matches .back-btn now: white pill, hairline border, charcoal
            icon. -->
@@ -2115,13 +2115,13 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
   <!-- Sticky footer, contact buttons rendered dynamically -->
   <!-- Get-the-app banner (2026-08-11, Anne: "we don't want them on the PWA
        if we can help it"). Shown ONLY to WEB visitors who arrived through a
-       shared profile link (?tech=...) — natives never see it (they already
+       shared profile link (?tech=...), natives never see it (they already
        have the app, and the stores reject cross-links). Filled + displayed
        by openTechDetail() when _mncSharedArrival is set. The Play link
        carries an install-referrer so Android installs attribute to
        profile shares in Play Console; both taps log to marketing_hits. -->
   <div id="td-get-app" style="display:none;margin:0 16px 12px;padding:13px 14px;background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);border-radius:14px;color:white;box-shadow:var(--shadow);">
-    <div style="font-size:13.5px;font-weight:700;">Keep <span id="td-get-app-name">your tech</span> one tap away &mdash; get the app</div>
+    <div style="font-size:13.5px;font-weight:700;">Keep <span id="td-get-app-name">your tech</span> one tap away, get the app</div>
     <div style="font-size:12.5px;opacity:0.85;margin-top:2px;">Book faster, get reminders, and never lose this page.</div>
     <div style="display:flex;gap:8px;margin-top:10px;">
       <a id="td-get-app-ios" target="_blank" rel="noopener" onclick="trackStoreTap('ios')" style="flex:1;text-align:center;padding:9px;border-radius:10px;background:white;color:var(--charcoal);font-size:13px;font-weight:700;text-decoration:none;">App&nbsp;Store</a>
@@ -2162,7 +2162,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
     <div style="padding:18px 20px 4px;">
       <!-- Secret admin entrance (2026-09-06, Anne: "i need a secret login
            for admin, like click somewhere specific"): 7 quick taps on the
-           greeting opens admin-stats.html. No role gate needed — the
+           greeting opens admin-stats.html. No role gate needed, the
            dashboard has its own SMS sign-in and is_admin() RLS; the
            gesture is just the hidden doorknob. -->
       <div onclick="adminSecretTap()" style="font-family:'Playfair Display',serif;font-size:24px;color:var(--charcoal);line-height:1.2;cursor:default;" id="tech-dash-greeting">Good morning!</div>
@@ -2292,7 +2292,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
          (photos, free). One job per card. Cohesion pass 2026-08-10: each
          zone opens with the same etched-caps label so the portal reads as
          one page instead of stacked widgets. -->
-    <!-- ── THE HUB (2026-09-06, Anne): three doors — Gallery, Appointments,
+    <!-- ── THE HUB (2026-09-06, Anne): three doors, Gallery, Appointments,
          Settings. Replaces the stacked bookings/gallery/profile cards; the
          dash calendar (td-cal) retired with the dark card, renderDashCalendar
          null-guards its absence. Subtitle/badge ids preserved so
@@ -2434,7 +2434,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
 <!-- MY SETTINGS (hub redesign 2026-09-06, Anne: "one landing page that
      gives them the ability to manage gallery, manage appts, manage
      settings"). Absorbs the old tech-home profile buttons, Help & Account
-     card, legal/store links, account deletion — and gives techs a findable
+     card, legal/store links, account deletion, and gives techs a findable
      Sign Out. Apple-required links live here now: Terms/Privacy (3.1.2c),
      account deletion (5.1.1v), both one tap from the Tech Portal. -->
 <div class="screen" id="tech-settings">
@@ -2470,7 +2470,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
 
     <div class="etched-caps" style="font-size:11px;font-weight:700;letter-spacing:1.6px;color:var(--muted);text-transform:uppercase;margin:20px 20px 8px 24px;">Account</div>
     <div style="margin:0 20px;background:white;border:1.5px solid var(--border);border-radius:16px;overflow:hidden;box-shadow:var(--shadow);">
-      <div onclick="openNotifications()" style="display:flex;align-items:center;gap:10px;padding:14px 16px;cursor:pointer;"><div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:var(--charcoal);">Notifications</div><div style="font-size:12px;color:var(--muted);margin-top:1px;">Bookings and reminders &mdash; they stay here</div></div><span id="notif-badge-tech" style="display:none;align-items:center;justify-content:center;min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:var(--rose-dark);color:white;font-size:12px;font-weight:700;flex-shrink:0;"></span><svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:var(--muted);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg></div>
+      <div onclick="openNotifications()" style="display:flex;align-items:center;gap:10px;padding:14px 16px;cursor:pointer;"><div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:var(--charcoal);">Notifications</div><div style="font-size:12px;color:var(--muted);margin-top:1px;">Bookings and reminders, they stay here</div></div><span id="notif-badge-tech" style="display:none;align-items:center;justify-content:center;min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:var(--rose-dark);color:white;font-size:12px;font-weight:700;flex-shrink:0;"></span><svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:var(--muted);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg></div>
       <div class="mnc-pw-row" onclick="openChangePasswordFromSettings()" style="display:flex;align-items:center;gap:10px;padding:14px 16px;border-top:1px solid var(--border);cursor:pointer;"><div style="flex:1;font-size:13.5px;font-weight:600;color:var(--charcoal);">Change password</div><svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:var(--muted);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg></div>
     </div>
 
@@ -2505,7 +2505,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
     <div id="settings-build-tag" style="text-align:center;margin:16px 20px 0;font-size:11px;color:var(--muted);opacity:0.85;"></div>
 
     <!-- Sign Out: findable at last (Anne, 2026-09-06: "no way to log out").
-         Still deliberate — one calm button at the very bottom of Settings,
+         Still deliberate, one calm button at the very bottom of Settings,
          behind the usual confirm, with microcopy reminding techs that
          signing back in costs a fresh Twilio text code. This replaces the
          2026-08-17 bury for techs; accidental taps still have to get
@@ -2538,7 +2538,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
 
   <!-- My Work / Inspo tabs (hub redesign 2026-09-06, Anne: "techs don't
        have inspo pages and should"). The inspo pane reuses the client-side
-       user_inspo machinery — same table, same heart-to-save flow — keyed on
+       user_inspo machinery, same table, same heart-to-save flow, keyed on
        currentUserId(), which works identically for a signed-in tech. -->
   <div style="display:flex;gap:8px;padding:14px 16px 0;">
     <div id="myph-tab-work" onclick="myPhotosTab('work')" style="display:flex;align-items:center;padding:10px 16px;border-radius:100px;background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);border:1.5px solid var(--ink-3);color:white;font-size:13px;font-weight:600;cursor:pointer;">My Work</div>
@@ -2553,7 +2553,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
        the grid via loadInspoPhotos('myph-inspo-grid'). -->
   <div class="scroll-content" id="myph-inspo-pane" style="display:none;padding:14px 16px 100px;">
     <div style="padding:12px 14px;background:linear-gradient(160deg,#FFFBF5 0%,var(--cream) 100%);border:1px dashed var(--rose-mid);border-radius:14px;font-size:12.5px;color:var(--muted);line-height:1.5;margin-bottom:14px;">
-      Save looks you love &mdash; tap the heart on any photo in the app and it lands here.
+      Save looks you love, tap the heart on any photo in the app and it lands here.
     </div>
     <div id="myph-inspo-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;"></div>
   </div>
@@ -2615,7 +2615,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
         </div>
         <div style="flex:1;min-width:0;">
           <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px;"><span id="myph-paused-count">0</span> photos paused</div>
-          <div style="font-size:13px;color:var(--charcoal);line-height:1.5;">These were paused under the old pricing. Nothing is deleted — photos are free now, and we're restoring paused galleries. Yours will be back shortly, no action needed.</div>
+          <div style="font-size:13px;color:var(--charcoal);line-height:1.5;">These were paused under the old pricing. Nothing is deleted, photos are free now, and we're restoring paused galleries. Yours will be back shortly, no action needed.</div>
         </div>
       </div>
     </div>
@@ -2726,7 +2726,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
                so a real service's own length has always won. What was stuck
                was the CUSTOM case: the client hardcoded p_duration_minutes: 60
                with no way to say otherwise, so every walk-in and phone booking
-               entered without a saved service blocked exactly one hour —
+               entered without a saved service blocked exactly one hour
                wrong in both directions for a 30-minute fix or a 3-hour set.
                Shown only when no service is picked; a saved service brings its
                own duration and this would just contradict it. -->
@@ -2737,12 +2737,12 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
           <div style="display:flex;gap:8px;">
             <input id="tb-ma-date" type="date" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;box-sizing:border-box;flex:1;accent-color:var(--rose);"/>
             <!-- Round times only (Anne 2026-08-11): a select instead of
-                 input type=time — the native Android clock dialog came up
+                 input type=time, the native Android clock dialog came up
                  system-green and un-themeable, and freeform minutes weren't
                  wanted anyway. Populated by tbToggleManualAdd(). -->
             <select id="tb-ma-time" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;box-sizing:border-box;flex:1;"></select>
           </div>
-          <textarea id="tb-ma-note" rows="2" placeholder="Private note (optional — only you see it)" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;box-sizing:border-box;resize:vertical;"></textarea>
+          <textarea id="tb-ma-note" rows="2" placeholder="Private note (optional, only you see it)" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);outline:none;box-sizing:border-box;resize:vertical;"></textarea>
         </div>
         <div style="display:flex;gap:8px;margin-top:10px;">
           <button onclick="tbSubmitManualAdd()" id="tb-ma-save" style="flex:1;padding:11px;border-radius:12px;border:none;background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);color:white;font-size:14px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;">Add to calendar</button>
@@ -2753,7 +2753,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
            clients - just a simple name or phone # search to filter them").
            Filters the appointment list in place: name, phone or email, across
            every section. Hidden until there are enough appointments to be
-           worth filtering — see tbRenderAppts. -->
+           worth filtering, see tbRenderAppts. -->
       <div id="tb-search-wrap" style="display:none;position:relative;margin-bottom:10px;">
         <div style="position:absolute;left:12px;top:50%;transform:translateY(-50%);pointer-events:none;">
           <svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:var(--muted);fill:none;stroke-width:2.1;stroke-linecap:round;stroke-linejoin:round;"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -2772,7 +2772,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
          saves the moment you change it, but a scrolled-deep tech still
          needs a clear way home. One labeled door at the bottom. -->
     <div style="margin:8px 20px 28px;">
-      <button onclick="show('tech-home')" class="btn btn-rose" style="width:100%;">Done &mdash; back to Tech Portal</button>
+      <button onclick="show('tech-home')" class="btn btn-rose" style="width:100%;">Done, back to Tech Portal</button>
       <div style="font-size:12.5px;color:var(--muted);text-align:center;margin-top:8px;">Everything on this page saves as you change it.</div>
     </div>
   </div>
@@ -2821,7 +2821,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       <div style="display:flex;align-items:center;gap:10px;margin-top:14px;padding-top:14px;border-top:1px solid var(--border);">
         <div style="flex:1;min-width:0;">
           <div style="font-size:14px;font-weight:600;color:var(--charcoal);">Auto-confirm bookings</div>
-          <div id="tb-autoconfirm-sub" style="font-size:13px;color:var(--muted);margin-top:2px;">You approve each request before it books &mdash; stay near your phone!</div>
+          <div id="tb-autoconfirm-sub" style="font-size:13px;color:var(--muted);margin-top:2px;">You approve each request before it books, stay near your phone!</div>
         </div>
         <button id="tb-autoconfirm-btn" onclick="tbToggleAutoConfirm()" style="min-width:56px;padding:8px 14px;border-radius:100px;font-size:13px;font-weight:700;cursor:pointer;border:1.5px solid var(--border);background:white;color:var(--muted);">Off</button>
       </div>
@@ -2844,7 +2844,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       <div style="display:flex;align-items:center;gap:10px;margin-top:14px;padding-top:14px;border-top:1px solid var(--border);">
         <div style="flex:1;min-width:0;">
           <div style="font-size:14px;font-weight:600;color:var(--charcoal);">Pause my page</div>
-          <div id="tb-paused-sub" style="font-size:13px;color:var(--muted);margin-top:2px;">You&rsquo;re live &mdash; photos in the Gallery, booking on your profile.</div>
+          <div id="tb-paused-sub" style="font-size:13px;color:var(--muted);margin-top:2px;">You&rsquo;re live, photos in the Gallery, booking on your profile.</div>
         </div>
         <button id="tb-paused-btn" onclick="tbTogglePaused()" style="min-width:56px;padding:8px 14px;border-radius:100px;font-size:13px;font-weight:700;cursor:pointer;border:1.5px solid var(--border);background:white;color:var(--muted);">Off</button>
       </div>
@@ -2924,10 +2924,10 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
          saves the moment you change it, but a scrolled-deep tech still
          needs a clear way home. One labeled door at the bottom. -->
     <div style="margin:8px 20px 28px;">
-      <button onclick="show('tech-home')" class="btn btn-rose" style="width:100%;">Done &mdash; back to Tech Portal</button>
+      <button onclick="show('tech-home')" class="btn btn-rose" style="width:100%;">Done, back to Tech Portal</button>
       <div style="font-size:12.5px;color:var(--muted);text-align:center;margin-top:8px;">Everything on this page saves as you change it.</div>
     </div>
-  </div><!-- /.scroll-content — this close and the screen close below were
+  </div><!-- /.scroll-content, this close and the screen close below were
        missing since the 2026-08-03 screen split (4065f60), so every screen
        and modal defined after this point in the file (incl. #confirm-modal)
        parsed as a CHILD of this display:none screen. Fixed 2026-08-03:
@@ -2972,7 +2972,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
 
      She was right that there was nowhere to look. An OS notification is not a
      record: swipe it and the content is gone. Nothing user-facing was written
-     when the app pushed — push_subscriptions holds who can be reached, and
+     when the app pushed, push_subscriptions holds who can be reached, and
      push_log is admin-only and covers only the database's own cron reminders.
 
      This screen reads public.notifications, which send-push, broadcast-push
@@ -3017,7 +3017,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       <div style="padding:16px 20px;display:flex;flex-direction:column;gap:12px;">
         <div style="font-size:13px;color:var(--charcoal);line-height:1.6;">Every tech gets a <b>real booking system</b>, and your first month is free. Open <b>Bookings</b> on your Tech Portal, add your services (name, time, price) and your weekly hours, and flip it on. A <b>Book</b> button appears on your profile.</div>
         <div style="font-size:13px;color:var(--charcoal);line-height:1.6;">Clients pick a service, a day, and an open time. You <b>confirm or decline</b> every request (or turn on auto-confirm if you prefer), and you both get notified when anything changes. Your whole calendar lives on the Bookings screen.</div>
-        <div style="font-size:13px;color:var(--charcoal);line-height:1.6;">Already booking through Vagaro, StyleSeat, Square, or anywhere else? <b>Keep it — and that stays free.</b> Drop your link into your profile and clients get a <b>Book Now</b> button that goes straight there. Your profile, your gallery, your spot in the Gallery and your own link cost nothing; only MNC’s own booking engine is a subscription. MNC is your one home base either way.</div>
+        <div style="font-size:13px;color:var(--charcoal);line-height:1.6;">Already booking through Vagaro, StyleSeat, Square, or anywhere else? <b>Keep it, and that stays free.</b> Drop your link into your profile and clients get a <b>Book Now</b> button that goes straight there. Your profile, your gallery, your spot in the Gallery and your own link cost nothing; only MNC’s own booking engine is a subscription. MNC is your one home base either way.</div>
       </div>
     </div>
 
@@ -3040,7 +3040,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
     </div>
 
     <!-- ── Section: What it costs. One tier, one number. Photos are NOT the
-         paid thing — the subscription buys being bookable. ───────────── -->
+         paid thing, the subscription buys being bookable. ───────────── -->
     <div style="margin:16px 20px 0;background:white;border:1.5px solid var(--border);border-radius:18px;overflow:hidden;">
       <div style="background:linear-gradient(135deg,var(--rose-dark),var(--rose));padding:16px 20px;display:flex;align-items:center;gap:12px;">
         <svg viewBox="0 0 24 24" style="width:22px;height:22px;stroke:white;fill:none;stroke-width:1.8;stroke-linecap:round;flex-shrink:0;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
@@ -3052,9 +3052,9 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
             <div style="font-size:15px;font-weight:700;color:var(--charcoal);">$10.99<span style="font-size:13px;font-weight:600;color:var(--muted);">/month</span></div>
             <div style="font-size:13px;font-weight:600;color:var(--green);background:var(--green-light);padding:3px 10px;border-radius:100px;">1 month free</div>
           </div>
-          <div style="font-size:13px;color:var(--muted);line-height:1.5;">Free to set up, and your <b>first month is free</b>. After that it’s $10.99 a month, <b>locked at that price for life</b> as a founding tech. No commission, <b>no per-booking fee</b>, and <b>never a charge to your clients</b>. Cancel anytime — your gallery and your calendar stay put either way.</div>
+          <div style="font-size:13px;color:var(--muted);line-height:1.5;">Free to set up, and your <b>first month is free</b>. After that it’s $10.99 a month, <b>locked at that price for life</b> as a founding tech. No commission, <b>no per-booking fee</b>, and <b>never a charge to your clients</b>. Cancel anytime, your gallery and your calendar stay put either way.</div>
         </div>
-        <div style="font-size:13px;color:var(--muted);text-align:center;padding-top:4px;line-height:1.5;font-style:italic;">Your photos stay free either way — up to 50 looks a month, and they never expire. Almost nobody reaches that limit, and it refills every month.</div>
+        <div style="font-size:13px;color:var(--muted);text-align:center;padding-top:4px;line-height:1.5;font-style:italic;">Your photos stay free either way, up to 50 looks a month, and they never expire. Almost nobody reaches that limit, and it refills every month.</div>
       </div>
     </div>
 
@@ -3317,7 +3317,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
 
     <!-- My Appointments entry (3.0 booking). Promoted from a quiet white
          row to a real button (Anne, 2026-08-03: "my appointments can be a
-         button too") — same ink-gradient family as the app's primary CTAs. -->
+         button too"), same ink-gradient family as the app's primary CTAs. -->
     <button onclick="show('my-appts')" type="button" style="margin:14px 20px 0;width:calc(100% - 40px);padding:13px 16px;border:none;border-radius:12px;background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);color:white;cursor:pointer;display:flex;align-items:center;gap:12px;font-family:'DM Sans',sans-serif;box-shadow:0 4px 14px rgba(199,125,130,0.32),0 1px 3px rgba(0,0,0,0.12);">
       <svg viewBox="0 0 24 24" style="width:20px;height:20px;stroke:white;fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0;"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
       <div style="flex:1;text-align:left;font-size:14px;font-weight:600;letter-spacing:0.3px;">My Appointments</div>
@@ -4185,7 +4185,7 @@ window._refundUnsavedSessionUploads = _refundUnsavedSessionUploads;
 // sql/photos-free-3.0.sql), so firing them concurrently is safe: each call
 // either reserves or refuses, and the total can never exceed the cap. The
 // serial version cost a full network round-trip PER PHOTO before anything
-// appeared on screen — five photos meant five sequential RPCs, easily 2-4
+// appeared on screen, five photos meant five sequential RPCs, easily 2-4
 // seconds of dead time on mobile, and it ran BEFORE all the compression and
 // storage work that had already been made async. That was the remaining
 // "why is this so slow" (Anne, 2026-08-19).
@@ -4271,7 +4271,7 @@ function mncCapMessage(resetIso) {
   if (at && at.getTime() > Date.now()) {
     try { when = at.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }); } catch(_) {}
   }
-  return 'That\'s your ' + cap + ' for this month — your next ' + cap + ' unlock on ' + when + '.';
+  return 'That\'s your ' + cap + ' for this month, your next ' + cap + ' unlock on ' + when + '.';
 }
 
 function showUpgradeModal() {
@@ -4539,7 +4539,7 @@ window._hideCreditLoadingBanner = _hideCreditLoadingBanner;
 
 // ── Booking subscription ($10.99/mo) ───────────────────────────────────────
 // The paid thing is MNC's own booking engine. Being SEEN stays free, so
-// nothing here promises new clients — see sql/tech-paywall-split.sql and
+// nothing here promises new clients, see sql/tech-paywall-split.sql and
 // CHANGESET-tech-paywall.md for why. Every feature named below works on day
 // one with the clients she already has; a discovery promise we cannot keep
 // yet is what makes a tech cancel the day the trial ends.
@@ -4603,7 +4603,7 @@ function openBookingSubscribe() {
 
 // Routes the same way purchaseUnlimited does: Apple IAP on iOS (required by
 // guideline 3.1.1), Stripe everywhere else. Deliberately NOT gated on
-// GLOW_UP_ENABLED — that flag belongs to the retired pay-per-photo product,
+// GLOW_UP_ENABLED, that flag belongs to the retired pay-per-photo product,
 // and this subscription is a different thing that happens to reuse the SKU.
 async function subscribeToBooking() {
   closeBookingSubscribe();
@@ -4618,7 +4618,7 @@ async function subscribeToBooking() {
       // fork's gate doesn't bounce her straight back into this sheet.
       try { await loadTechBookings(); } catch(_) {}
       if (upgraded) {
-        showToast('You\u2019re all set \u2014 your book is open \u2728');
+        showToast('You\u2019re all set, your book is open \u2728');
         // Keep the momentum: she just paid for booking, so walk her straight
         // into setting it up (service + hours, or Settings if she has them)
         // instead of dropping her back on the dashboard to find the card
@@ -4648,7 +4648,7 @@ async function purchaseUnlimited() {
   // here, so we belt-and-suspenders it. Toast explains so users whose banner
   // still shows don't just silently see nothing happen.
   if (!GLOW_UP_ENABLED) {
-    showToast("Glow Up is paused right now — and photos are free, up to 50 a month.");
+    showToast("Glow Up is paused right now, and photos are free, up to 50 a month.");
     return;
   }
   // iOS: route through Apple IAP via RevenueCat (required by Apple 3.1.1)
@@ -4716,12 +4716,12 @@ function _armTierRefreshOnReturn() {
     if (typeof updatePhotoLimitUI === 'function') updatePhotoLimitUI();
     if (detected === 'tier') {
       // If this payment started from the BOOKING subscribe sheet, keep the
-      // momentum and walk into setup (service + hours, or Settings) — the
+      // momentum and walk into setup (service + hours, or Settings), the
       // same continuation the iOS IAP path has. Refresh the cached tech
       // row first so the fork's subscription gate sees is_bookable=true.
       if (window._mncStripeBookingIntent) {
         window._mncStripeBookingIntent = false;
-        showToast('You’re all set — your book is open ✨');
+        showToast('You’re all set, your book is open ✨');
         try { await loadTechBookings(); } catch(_) {}
         try { bkOpenSetupFork(); await bkForkInApp(); } catch(_) {}
       } else {
@@ -5093,7 +5093,7 @@ window.closeDeleteAccountModal = closeDeleteAccountModal;
 //     ^ CONFIRMED against App Store Connect 2026-08-15. This comment used to
 //       read glow_up_monthly, which was never the live product ID and did not
 //       match IAP_PRODUCT_GLOW_UP below. Do not "fix" the constant to match a
-//       stale comment — the constant is the correct one.
+//       stale comment, the constant is the correct one.
 //   com.mynailconnection.app.spotlight_1      ($0.99 consumable)
 //   com.mynailconnection.app.spotlight_10     ($4.99 consumable)
 //
@@ -5129,7 +5129,7 @@ const IAP_DIAGNOSTIC_SUCCESS_MODE = false;
 // the iOS/Android push registration so a TestFlight tester can see EXACTLY
 // where the chain goes silent. Built 2026-09-18 because iPhone push never
 // registers (0 ios rows in push_subscriptions vs many android) with all the
-// Apple config, keys, secrets and repo code confirmed correct — the failure
+// Apple config, keys, secrets and repo code confirmed correct, the failure
 // is in the shipped binary and the only way to see it is on the device.
 // The alerts name the stage so the suspects separate cleanly:
 //   "plugin MISSING"          -> the CapacitorPushNotifications pod is not in
@@ -5491,7 +5491,7 @@ function _renderTutorialSlide() {
 // so it fires exactly once per browser. Techs can always re-open via
 // "Replay tutorial" on their profile.
 function maybeShowTutorial(role) {
-  // Was: if (role !== 'tech') return;  — which silently disabled the CLIENT
+  // Was: if (role !== 'tech') return; , which silently disabled the CLIENT
   // and ADMIN tutorials entirely. TUTORIALS.client has three slides that
   // could only ever be reached through the manual replay button under Saved
   // looks; a brand-new client never saw them. Anne found it 2026-08-17 by
@@ -5505,7 +5505,7 @@ function maybeShowTutorial(role) {
   } catch(e) { /* storage blocked, show tutorial anyway */ }
   // Account-aware gate (Anne hit it 2026-08-03: fresh install replayed the
   // tutorial at her on login). The seen-flag lives in localStorage, which a
-  // reinstall wipes — so before showing, check the ACCOUNT: someone whose
+  // reinstall wipes, so before showing, check the ACCOUNT: someone whose
   // row predates today has plainly been here before. Mark seen and skip.
   // Offline/fetch failure falls through to showing, which is the safe
   // default for a genuinely new account.
@@ -5563,8 +5563,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.6',     /* __APP_BUILD_NAME__   */
-  android: 656,         /* __APP_BUILD_ANDROID__ */
-  ios:     461,          /* __APP_BUILD_IOS__     */
+  android: 657,         /* __APP_BUILD_ANDROID__ */
+  ios:     462,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -5620,7 +5620,7 @@ const STRIPE_CONFIG = {
   // and without the live webhook she pays and subscription_tier never flips.
   //
   // Re-flip to true ONLY for another round of 4242-card testing, and put it
-  // back before any store build. sync.sh cannot catch this — it is a value,
+  // back before any store build. sync.sh cannot catch this, it is a value,
   // not a syntax error, so the JS parse guard sails straight past it.
   test_mode: false,
 
@@ -5645,7 +5645,7 @@ const STRIPE_CONFIG = {
   // PREVIOUS Stripe account and are unreachable: purchasePhotos() has no
   // callers left (photos are free in 3.0) and purchaseUnlimited() is blocked
   // by GLOW_UP_ENABLED = false. Left in place rather than deleted so the
-  // history is legible, but do not trust them — if photo credits ever come
+  // history is legible, but do not trust them, if photo credits ever come
   // back, recreate the products in the CURRENT account first.
   // Payment link for 1 photo credit ($1), Live
   link_1_photo:   'https://buy.stripe.com/28E4gycjubtr2KA2xtgEg00',
@@ -5772,7 +5772,7 @@ function scheduleProactiveRefresh(session) {
     if (!fresh) {
       window._mncAccessToken = null;
       // refreshSession only clears the stored session on a definitive
-      // 400/401/403. If the session survived, this was transient — keep
+      // 400/401/403. If the session survived, this was transient, keep
       // retrying quietly instead of stranding a signed-in user who would
       // otherwise need a brand new SMS code to get back in. 2026-08-15
       if (loadSession()) {
@@ -5814,8 +5814,8 @@ async function refreshSession() {
   if (!s || !s.refresh_token) { clearSession(); return null; }
 
   // A transient failure must NOT sign the user out. Until 2026-08-15 ANY
-  // non-ok response called clearSession(), so a single 500 — or the July
-  // Supabase degradation that served 47-second auth and timed-out REST —
+  // non-ok response called clearSession(), so a single 500, or the July
+  // Supabase degradation that served 47-second auth and timed-out REST
   // silently logged people out, and phone-only auth means the only way
   // back in is a fresh SMS code Anne pays for. Now only a definitive
   // rejection from GoTrue (400 / 401 / 403) clears the session; 5xx, 429,
@@ -5830,7 +5830,7 @@ async function refreshSession() {
         body: JSON.stringify({ refresh_token: s.refresh_token })
       });
     } catch (e) {
-      res = null;   // offline / DNS / TLS — transient, handled below
+      res = null;   // offline / DNS / TLS, transient, handled below
     }
 
     if (res && res.ok) {
@@ -6098,7 +6098,7 @@ function pushKeyFor(email, phone) {
 // Falls back to the old direct upsert if the RPC isn't deployed yet (404 /
 // PGRST202), so this is safe to ship before the SQL is run.
 //
-// Returns { ok, status, detail } — detail is the Postgres code + message, not
+// Returns { ok, status, detail }, detail is the Postgres code + message, not
 // a bare status number. The bare number cost hours: '403' alone can't tell
 // "wrote with the anon bearer" from "RLS said no" from "endpoint owned by
 // someone else", and all three land here.
@@ -6237,7 +6237,7 @@ async function showPushPrompt(userId) {
   // Native shell (Anne, 2026-08-10: client "never got the option, defaulted
   // to off"): the web-push machinery below silently no-ops inside
   // Capacitor, and only the TECH setup checklist ever called
-  // initCapacitorPush — so clients were never asked at all. Route every
+  // initCapacitorPush, so clients were never asked at all. Route every
   // prompt call to the native register flow, which shows the standard OS
   // permission dialog and saves the token.
   if (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) {
@@ -6259,7 +6259,7 @@ async function showPushPrompt(userId) {
     return;
   }
   if (Notification.permission !== 'default') {
-    // 'denied'. Say so once per app open — the launch lap (2026-08-03) proved
+    // 'denied'. Say so once per app open, the launch lap (2026-08-03) proved
     // this state is otherwise indistinguishable from "working fine" on a
     // phone, and on iOS the OS-level toggle doesn't always clear it (the sure
     // reset is remove + re-add the Home Screen icon, then Allow when asked).
@@ -6442,7 +6442,7 @@ async function initCapacitorDeepLinks() {
     // The tier is re-read rather than trusted: she has just paid, and the
     // RevenueCat/Stripe webhook may still be in flight. _armTierRefreshOnReturn
     // was armed before the browser opened and also polls on visibilitychange,
-    // so this is the belt to its braces — whichever notices first wins and the
+    // so this is the belt to its braces, whichever notices first wins and the
     // other is a no-op.
     var welcome = qs.get('welcome');
     if (welcome) {
@@ -6509,7 +6509,7 @@ async function initCapacitorDeepLinks() {
 // Flipped true 2026-08-03: android/app/google-services.json is committed
 // (Firebase project my-nail-connection-31404), so the gradle conditional
 // applies com.google.gms.google-services in every build from this commit
-// on — register() can no longer hit the missing-Firebase crash.
+// on, register() can no longer hit the missing-Firebase crash.
 const NATIVE_PUSH_REGISTER_ENABLED = true;
 
 async function initCapacitorPush() {
@@ -6520,7 +6520,7 @@ async function initCapacitorPush() {
   _pushDiag('init start on ' + (window.Capacitor.getPlatform && window.Capacitor.getPlatform()));
 
   const { PushNotifications } = window.Capacitor.Plugins;
-  if (!PushNotifications) { _pushDiag('PushNotifications plugin MISSING from this build — the pod did not ship. This is the bug if you see it.'); return; }
+  if (!PushNotifications) { _pushDiag('PushNotifications plugin MISSING from this build, the pod did not ship. This is the bug if you see it.'); return; }
   _pushDiag('plugin present');
 
   // requestPermissions is safe, it just resolves the OS permission state
@@ -6545,7 +6545,7 @@ async function initCapacitorPush() {
     return;
   }
 
-  // Listeners BEFORE register() — the registration event fires as soon as
+  // Listeners BEFORE register(), the registration event fires as soon as
   // FCM hands back the token, which on Android beats the old post-register
   // addListener to the punch: the event fired into the void and the token
   // was never saved (the empty-push_subscriptions mystery, 2026-08-03).
@@ -6556,7 +6556,7 @@ async function initCapacitorPush() {
   }
 
   try {
-    _pushDiag('calling register() — if this is the last message you see, the AppDelegate token-forwarding is not in the build');
+    _pushDiag('calling register(), if this is the last message you see, the AppDelegate token-forwarding is not in the build');
     await PushNotifications.register();
     _pushDiag('register() returned; waiting for the registration event from iOS');
   } catch (e) {
@@ -6576,11 +6576,11 @@ function wireCapacitorPushListeners(PushNotifications) {
 
   // Get the device token and save to Supabase
   PushNotifications.addListener('registration', async (token) => {
-    _pushDiag('registration event fired — token received (len ' + ((token && token.value && token.value.length) || 0) + '). Native layer works.');
+    _pushDiag('registration event fired, token received (len ' + ((token && token.value && token.value.length) || 0) + '). Native layer works.');
     if (window.__MNC_DEV__) console.log('Native push token:', token.value);
     // Boot race (seen live 2026-08-03, 'native save' snag toast): the
     // registration event can beat the session restore, so the save went out
-    // with the anon bearer and RLS rejected it. Wait for the access token —
+    // with the anon bearer and RLS rejected it. Wait for the access token
     // and for the identity, which lands on the same restore. 20s, because a
     // cold native start on a slow connection routinely blows past 5s and the
     // old code just gave up and fired an anon-bearer write that could only
@@ -6590,16 +6590,16 @@ function wireCapacitorPushListeners(PushNotifications) {
     }
     // NEVER fall back to currentUser.id here. push_subscriptions.user_id is
     // keyed on lowercased email (or E.164 for phone accounts) and the RLS
-    // policies compare it to current_email() / current_phone() — a UUID
+    // policies compare it to current_email() / current_phone(), a UUID
     // matches neither, so that fallback wrote nothing but 403s.
     const userId = pushKey(currentUserEmail || mncIdentity(currentUser));
     if (!userId) {
-      _pushDiag('token arrived but NO signed-in identity yet — row not saved');
+      _pushDiag('token arrived but NO signed-in identity yet, row not saved');
       showToast('Notification setup hit a snag (no signed-in identity yet)', 5000);
       return;
     }
     if (!window._mncAccessToken) {
-      _pushDiag('token arrived but session not ready — row not saved');
+      _pushDiag('token arrived but session not ready, row not saved');
       showToast('Notification setup hit a snag (session not ready)', 5000);
       return;
     }
@@ -6614,7 +6614,7 @@ function wireCapacitorPushListeners(PushNotifications) {
       _pushDiag('save FAILED: ' + (saved.detail || saved.status));
       showToast('Notification setup hit a snag (native save: ' + (saved.detail || saved.status) + ')', 8000);
     } else {
-      _pushDiag('save OK — the ios row is now in push_subscriptions. Done.');
+      _pushDiag('save OK, the ios row is now in push_subscriptions. Done.');
       window._mncHasPushSub = true;
       try { updateSetupChecklist(); } catch(_) {}
       showToast('Notifications are on 💅');
@@ -6840,7 +6840,7 @@ async function doChangePassword() {
     var email = currentUserEmail;
     if (email) {
       // or=(email,phone) on users too (audit 2026-08-03: the techs leg had
-      // it, users was missed), and the signed-in bearer — anon writes are
+      // it, users was missed), and the signed-in bearer, anon writes are
       // RLS-rejected silently.
       await fetch(SUPABASE_URL + '/rest/v1/users?or=(email.eq.' + encodeURIComponent(email) + ',phone.eq.' + encodeURIComponent(email) + ')', {
         method: 'PATCH',
@@ -6953,7 +6953,7 @@ function showAuthError(msg) {
 
 // Sign-out is a one-way door under phone-only auth: getting back in costs a
 // Twilio Verify code Anne pays for, and a text the user has to wait for. The
-// second line matters as much as the first — the usual reason someone hesitates
+// second line matters as much as the first, the usual reason someone hesitates
 // is fear that signing out loses their work. It does not.
 async function confirmSignOut() {
   var ok = await showConfirm('Sign out?', {
@@ -7002,7 +7002,7 @@ function doSignOut() {
   window._mncTrial = undefined;
   // Per-user device flags (storage audit 2026-08-03): none are namespaced
   // by user, so on a shared device account A's state leaked into account
-  // B — "push done" claimed for a user with no subscription, A's booking
+  // B, "push done" claimed for a user with no subscription, A's booking
   // choice checked off B's checklist, A's tutorial suppressing B's, A's
   // feed radius filtering B's home. Drop them at sign-out; sessionStorage
   // too (the checklist "maybe later" dismissal).
@@ -7070,7 +7070,7 @@ function showConfirm(message, opts) {
     //
     // ICON, 2026-08-21: #confirm-icon is a hardcoded trash can in the markup
     // and nothing ever swapped it, so every one of the 22 confirms in the app
-    // wore a delete glyph — including onboarding's "Show clients when you're
+    // wore a delete glyph, including onboarding's "Show clients when you're
     // open", which greeted a brand-new tech with a bin. Tone now drives the
     // glyph as well as the colour, and BOTH branches set it so a neutral
     // dialog can't leave the trash can swapped out for a later destructive one.
@@ -7294,7 +7294,7 @@ function isInspoSaved(url) {
 // (those show up as 'orphaned' rows in the user_inspo migration diagnostic).
 // techEmail doubles as the popularity KEY: the tech's email when she has
 // one, else her phone (the batch/count RPCs resolve either). techId is the
-// techs.id uuid — the real owner key user_inspo stores since
+// techs.id uuid, the real owner key user_inspo stores since
 // sql/feed-hearts-phone-techs.sql; without it a heart on a phone-only
 // tech's photo was written with tech_email NULL and could never be
 // attributed to her.
@@ -7852,7 +7852,7 @@ function refreshPhotoHeartBadgeDOM(photoUrl, count) {
 // One fire-and-forget row per tap on a way to reach a tech from her public
 // profile (Call / Text / Book / external Book link). keepalive lets the POST
 // survive the tel:/sms: navigation that fires right after. No client identity
-// is written — just which button, which tech, when. The tech reads her own
+// is written, just which button, which tech, when. The tech reads her own
 // totals via tech_tap_summary(); see sql/tech-contact-taps.sql.
 function logTechTap(kind, techId) {
   try {
@@ -7893,7 +7893,7 @@ function renderTechContactFooter(tech) {
   // Book button. When calls/texts ARE how she books, they get the dark
   // hero treatment, a call-me tech's contact row is never second-class.
   // MNC's own booking engine is the paid feature, so it needs BOTH her
-  // switch and her subscription. Her external booking_link stays free —
+  // switch and her subscription. Her external booking_link stays free
   // a tech on Vagaro who lists MNC as her portfolio still fills the Gallery,
   // and charging her for a link-out would earn nothing.
   const _canBookNative = !!(tech.booking_enabled && tech.is_bookable);
@@ -7960,7 +7960,7 @@ function renderTechContactFooter(tech) {
 
   // The per-tech Instagram/social link was removed 2026-08-21 (Anne: "the
   // techs socials link isn't necessary"). techs.gallery_link is deliberately
-  // LEFT IN THE DATABASE — the column and any values techs already saved stay
+  // LEFT IN THE DATABASE, the column and any values techs already saved stay
   // untouched, so this is a UI removal that can be reversed without data loss.
   // Nothing reads or writes it from the app any more.
 
@@ -9225,7 +9225,7 @@ function renderTechCards(query, filteredList) {
     // Popularity chip slot, empty on first paint, hydrated async by
     // hydrateGridPopularityChips() using a single batched RPC pair.
     // data-tech-email carries the key so the hydrator doesn't need to
-    // re-parse the onclick JSON. The key is email OR phone — the batch
+    // re-parse the onclick JSON. The key is email OR phone, the batch
     // RPCs resolve either (sql/feed-hearts-phone-techs.sql); email-only
     // keying left every phone-only tech's card chipless.
     const popKey = (t.email || t.phone || '').toString().trim().toLowerCase();
@@ -10093,7 +10093,7 @@ function openTechEdit(tech) {
   // users never get asked for one.
   // 2026-08-14, phone-only cutover: now nobody is, except admins. The old
   // condition also showed the field to email-identity accounts on the
-  // grounds that "it's their login" — that stopped being true when email
+  // grounds that "it's their login", that stopped being true when email
   // sign-in was removed. Admins keep it because lower(email) is still the
   // internal identity key behind push_subscriptions and every RLS policy,
   // so Anne needs to be able to see and correct it on legacy accounts.
@@ -10293,8 +10293,8 @@ async function uploadThumb(filePath, srcFile) {
 
 // Decode a File to something drawable WITHOUT a base64 round-trip.
 // The old path did readAsDataURL (a ~13MB string for a 12MP phone photo)
-// and this ran TWICE per upload — once for the full image, once for the
-// thumb — which is what made a single photo crawl (Anne, 2026-08-11).
+// and this ran TWICE per upload, once for the full image, once for the
+// thumb, which is what made a single photo crawl (Anne, 2026-08-11).
 // createImageBitmap decodes straight from the blob (often off the main
 // thread); the object-URL fallback covers older browsers. The decode is
 // memoized per File so the upload and its thumb share one decode.
@@ -10438,7 +10438,7 @@ async function techEditAddPhotos(input) {
   let _slotIdx = 0, _capShown = false;
 
   for (const file of files) {
-    // AI validation is DISABLED (task #9) — but this path still base64-read
+    // AI validation is DISABLED (task #9), but this path still base64-read
     // the ENTIRE original file (a 10MB phone photo → ~13MB string) just to
     // hand it to the stub. That dead read was most of the "one photo
     // chokes" lag (Anne, 2026-08-10). Skip straight past until validation
@@ -10582,7 +10582,7 @@ async function techBulkDropFiles(fileList) {
       showToast('Only ' + remaining + ' upload' + (remaining === 1 ? '' : 's') +
         ' left this month (' + monthlyLeft + ' monthly + ' + credits + ' credits). The rest can go up after the next refill.');
     } else {
-      showToast('Only ' + remaining + ' free upload' + (remaining === 1 ? '' : 's') + ' left this month — the rest can go up after the refill.');
+      showToast('Only ' + remaining + ' free upload' + (remaining === 1 ? '' : 's') + ' left this month, the rest can go up after the refill.');
     }
   }
 
@@ -10624,8 +10624,8 @@ async function techBulkDropFiles(fileList) {
 
   // ── Phase 1, serial + fast: validate, reserve a slot, persist the DB
   // record, and queue the storage upload for each file. Serial because
-  // consumeUploadSlot is an atomic counter RPC. The slow part — the
-  // storage upload itself — is queued here and parallelized in phase 2.
+  // consumeUploadSlot is an atomic counter RPC. The slow part, the
+  // storage upload itself, is queued here and parallelized in phase 2.
   // Until 2026-08-11 the POST was awaited inside this loop, so photo 2
   // couldn't start until photo 1 finished uploading, and a 10-photo batch
   // took minutes on cell upload speeds ("something choking?").
@@ -11672,8 +11672,8 @@ async function saveMyPhotos() {
     // Merge-with-DB before writing (clobber audit 2026-08-03; the same
     // pattern _rwPatchPhoto uses). The local state was a lossy snapshot
     // ({url,tags} only, taken at screen entry), so PATCHing it verbatim
-    // (a) DELETED photos uploaded during the same visit — the uploader
-    // writes straight to the DB, never into _myPhotosState — and
+    // (a) DELETED photos uploaded during the same visit, the uploader
+    // writes straight to the DB, never into _myPhotosState, and
     // (b) stripped slot_type/pending_feed/caption from every photo,
     // breaking credit accounting and Release Wizard state.
     // Rules: local order wins for photos it knows; local tags overwrite;
@@ -12051,9 +12051,9 @@ async function saveTechEdit() {
   // both back on, so a tech who only wants in-app bookings could never hide
   // her Call/Text buttons. The client profile handles {call:false,text:false}
   // fine, and the dashboard already nudges when she's Open with no instant
-  // way in — so just tell her what the empty state means and let it save.
+  // way in, so just tell her what the empty state means and let it save.
   if (!edit.contact_methods.call && !edit.contact_methods.text) {
-    showToast('Call and Text hidden — clients reach you through booking only');
+    showToast('Call and Text hidden, clients reach you through booking only');
   }
   edit.hours = teSerializeHours();
 
@@ -12110,7 +12110,7 @@ async function saveTechEdit() {
       contact_methods: edit.contact_methods || { call: true, text: true }
     };
     // The modal doesn't manage availability or the joined date, and
-    // openTechEditFromProfile doesn't load them — so on UPDATE, echoing
+    // openTechEditFromProfile doesn't load them, so on UPDATE, echoing
     // them PATCHes availability to false and joined to today (Anne's
     // "saved contact prefs, vanished from browse" bug, 2026-08-03).
     // Send them only on INSERT, where the row needs initial values.
@@ -13505,7 +13505,7 @@ function renderLocTechCards() {
     return `<div data-tech-name="${esc(t.name)}"
       style="flex-shrink:0;width:180px;background:white;border-radius:16px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.08);cursor:pointer;">
       <!-- 72px → 150px (Anne, 2026-08-03): at 72px the tech's portrait was
-           a letterbox sliver — "can't see tech's pics on the map screen". -->
+           a letterbox sliver, "can't see tech's pics on the map screen". -->
       <div style="height:150px;background:${t.bg||'linear-gradient(135deg,#F7E2E3,#E6D6D7)'};display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;">
         ${avatar}
         <div style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,0.35);border-radius:100px;padding:2px 7px;font-size:13px;color:white;">${esc(formatJoinedBadge(t.joined))}</div>
@@ -13670,7 +13670,7 @@ function showExistingAccountPrompt(opts) {
 
 // Phone-only cutover 2026-08-14. Both of these used to drive the email
 // sign-in form: one prefilled it, the other opened the password-reset modal.
-// Neither exists now — sign-in is a texted code — so both collapse to the
+// Neither exists now, sign-in is a texted code, so both collapse to the
 // same action. The `email` parameter is kept so the existing-account modal's
 // wiring doesn't need touching, and "forgot" is kept as its own name because
 // the modal still labels a button that way.
@@ -14620,7 +14620,7 @@ async function loadTechBookings() {
     if (!_bkMyTech) {
       // Do NOT bounce to the portal. Landing back on the dashboard with a
       // toast that has already faded is indistinguishable from "the button
-      // did nothing" — which is exactly how this was reported (Anne,
+      // did nothing", which is exactly how this was reported (Anne,
       // 2026-08-17: "after i set booking i still don't get to finish the
       // rest of the setup list, it brings me to the dashboard instead").
       // Stay put and say what is actually wrong, including the identity we
@@ -14756,12 +14756,12 @@ function tbRenderSettings() {
   }
   const acSub = document.getElementById('tb-autoconfirm-sub');
   if (acSub) acSub.textContent = _bkMyTech.booking_auto_confirm
-    ? 'Requests book straight onto your calendar \u2014 clients will be counting on you, keep an eye on your schedule!'
-    : 'You approve each request before it books \u2014 stay near your phone!';
+    ? 'Requests book straight onto your calendar, clients will be counting on you, keep an eye on your schedule!'
+    : 'You approve each request before it books, stay near your phone!';
   const pSub = document.getElementById('tb-paused-sub');
   if (pSub) pSub.textContent = _bkMyTech.paused_by_tech
-    ? 'Your page is hidden and booking is paused \u2014 flip off and everything comes back.'
-    : 'You\u2019re live \u2014 photos in the Gallery, booking on your profile.';
+    ? 'Your page is hidden and booking is paused, flip off and everything comes back.'
+    : 'You\u2019re live, photos in the Gallery, booking on your profile.';
   // Minimum notice: only meaningful while requests confirm themselves.
   const mnRow = document.getElementById('tb-minnotice-row');
   if (mnRow) mnRow.style.display = _bkMyTech.booking_auto_confirm ? 'flex' : 'none';
@@ -14856,7 +14856,7 @@ async function ensureBookingNotifications() {
 // (bkForkInApp, bkForkHoursFinish) wrote booking_enabled directly. With the
 // paywall off that is invisible, because everyone is bookable. The moment it
 // is flipped on, a new tech would walk the setup checklist, pick "book in the
-// app", set a service and hours, see "You're bookable!" — and not be. The
+// app", set a service and hours, see "You're bookable!", and not be. The
 // server computes is_bookable as visible AND paid, so booking_enabled alone
 // does nothing: no Book button for clients, no request to pay, no explanation.
 // Silent, and worst for the newest techs. Anne asked for all three routed here
@@ -14880,7 +14880,7 @@ async function ensureBookingNotifications() {
 //
 // The second is the worse screen, which is why hours are required too and not
 // just a service. Anne, 2026-08-23: "we just need to require a service before
-// they can go live right?" — a service and the hours, or the button still lies.
+// they can go live right?", a service and the hours, or the button still lies.
 //
 // Reads the loaded arrays when Booking Settings has them and falls back to the
 // server otherwise, because the onboarding fork runs before loadTechBookings.
@@ -14903,7 +14903,7 @@ async function bkMissingForGoLive() {
     } catch(_) {}
   }
   // Unknown is NOT missing. A failed read must not block a tech who is set up
-  // — the same reasoning as bkSubscriptionBlocks failing open.
+  //, the same reasoning as bkSubscriptionBlocks failing open.
   var missing = [];
   if (svcs  === 0) missing.push('a service');
   if (avail === 0) missing.push('your weekly hours');
@@ -14917,7 +14917,7 @@ async function bkBlockedFromGoLive() {
   if (!missing.length) return false;
   var what = missing.join(' and ');
   var ok = await showConfirm('Add ' + what + ' first', {
-    body: 'Clients would see a Book button that cannot finish \u2014 there is nothing for them to pick. ' +
+    body: 'Clients would see a Book button that cannot finish, there is nothing for them to pick. ' +
           'Add ' + what + ' in Booking Settings and booking turns on right after.',
     okLabel: 'Set it up',
     cancelLabel: 'Not now',
@@ -14963,7 +14963,7 @@ async function tbToggleEnabled() {
   // services and hours are free to set up, and taking her money for a booking
   // page that dead-ends is the wrong order to do these two things in.
   if (next && await bkBlockedFromGoLive()) return;
-  // Turning booking ON is the paid moment. See bkSubscriptionBlocks above —
+  // Turning booking ON is the paid moment. See bkSubscriptionBlocks above
   // this used to be an inline check here and was the ONLY one of the three
   // booking-on paths that had it.
   if (next && await bkSubscriptionBlocks()) {
@@ -14987,7 +14987,7 @@ async function tbToggleAutoConfirm() {
   if (!(await tbPatchTech({ booking_auto_confirm: !_bkMyTech.booking_auto_confirm }))) return;
   tbRenderSettings();
   showToast(_bkMyTech.booking_auto_confirm
-    ? 'Auto-confirm on \u2014 clients book instantly and they\u2019ll be counting on you!'
+    ? 'Auto-confirm on, clients book instantly and they\u2019ll be counting on you!'
     : 'You approve each request before it books');
 }
 
@@ -15330,7 +15330,7 @@ async function tbDeleteBlocked(id) {
 // themselves." Walk-ins, phone clients, DM bookings: + Add appointment on
 // My Appts opens the form; tech_create_booking
 // (sql/tech-manual-booking-migration.sql) inserts it as CONFIRMED with
-// client_id NULL — the typed name/phone are the client. Overlapping times
+// client_id NULL, the typed name/phone are the client. Overlapping times
 // warn first and book anyway only on her say-so.
 async function tbToggleManualAdd() {
   var f = document.getElementById('tb-manual-add');
@@ -15340,7 +15340,7 @@ async function tbToggleManualAdd() {
   // manually book someone - but i didn't have booking set up."
   //
   // tech_create_booking checked only whether the row was hers, so any free
-  // tech could run her whole book here by hand — with private notes and
+  // tech could run her whole book here by hand, with private notes and
   // automatic client reminders, both of which the subscribe sheet sells as
   // reasons to pay. A tech using them free for a month then hits a paywall
   // listing things she already has, which is how a price feels arbitrary.
@@ -15479,7 +15479,7 @@ async function tbSubmitManualAdd(force) {
 // ── Tech-private booking notes (2026-08-11, Anne) ───────────────────────────
 // "please give us a notes section for each booking." Notes live in
 // booking_notes (sql/booking-notes-migration.sql), a separate table with
-// tech-only RLS — deliberately NOT a column on bookings, because the client
+// tech-only RLS, deliberately NOT a column on bookings, because the client
 // leg of the bookings policies lets a client select their own row, and a
 // note like "always reschedules twice" must never ride along in that
 // payload. Loaded into _bkNotes by loadTechBookings; edited inline on each
@@ -15501,7 +15501,7 @@ function tbEditNote(id) {
   var wrap = document.getElementById('tb-note-' + id);
   if (!wrap) return;
   wrap.innerHTML =
-    '<textarea id="tb-note-input-' + id + '" rows="3" placeholder="Only you can see this — polish colors, allergies, reschedule history, anything." ' +
+    '<textarea id="tb-note-input-' + id + '" rows="3" placeholder="Only you can see this, polish colors, allergies, reschedule history, anything." ' +
       'style="width:100%;box-sizing:border-box;padding:9px 11px;border:1.5px solid var(--rose-mid);border-radius:10px;font-size:13px;font-family:\'DM Sans\',sans-serif;background:white;outline:none;resize:vertical;">' +
       bkEsc(_bkNotes[id] || '') + '</textarea>' +
     '<div style="display:flex;gap:8px;margin-top:6px;">' +
@@ -15539,9 +15539,9 @@ async function tbSaveNote(id) {
     if (!r.ok) throw new Error('note-save-' + r.status);
     if (v) _bkNotes[id] = v; else delete _bkNotes[id];
     if (wrap) wrap.innerHTML = tbNoteView(id);
-    showToast(v ? 'Note saved \u2014 only you can see it' : 'Note removed');
+    showToast(v ? 'Note saved, only you can see it' : 'Note removed');
   } catch(e) {
-    showToast('Could not save the note \u2014 if this keeps up, the booking-notes migration may not be run yet');
+    showToast('Could not save the note, if this keeps up, the booking-notes migration may not be run yet');
   }
 }
 
@@ -15577,7 +15577,7 @@ function tbApptCard(b, buttons) {
 // Two comparisons, because a tech thinks of a client by name OR by number and
 // should not have to care which the app stored. Digits are compared
 // separately so "555 1234", "(555) 1234" and "+15555551234" all match each
-// other — client_phone has drifted across formats through the phone-auth
+// other, client_phone has drifted across formats through the phone-auth
 // migrations, and a search that only did substring on the raw string would
 // miss the same person depending on when she was added.
 function _tbApptMatches(b, q, qDigits) {
@@ -15628,8 +15628,8 @@ function tbRenderAppts() {
     return '<button onclick="tbSetStatus(\'' + id + '\',\'no_show\')" style="flex:0 0 auto;padding:9px 6px;border:none;background:none;color:var(--muted);font-size:12.5px;font-weight:500;cursor:pointer;font-family:\'DM Sans\',sans-serif;text-decoration:underline;text-underline-offset:3px;opacity:0.8;">No-show</button>';
   };
   // Block straight from an appointment card (Anne, 2026-08-03; extended to
-  // EVERY section 2026-08-11 — "i don't see the way to block a client on
-  // the appt card" — because it only rendered under Recent). You block
+  // EVERY section 2026-08-11, "i don't see the way to block a client on
+  // the appt card", because it only rendered under Recent). You block
   // someone you dealt with, and the card already knows who they are.
   const blockBtn = function(b2) {
     // email OR phone (audit follow-up 2026-08-03): phone-only clients have
@@ -15768,7 +15768,7 @@ async function tbSetStatus(id, status) {
   });
   if (!r.ok) { showToast('Could not update (error ' + r.status + '), try again'); return; }
   const updated = await r.json().catch(function() { return []; });
-  if (!updated.length) { showToast('Could not update — the change was blocked. Tell Anne: RLS.'); return; }
+  if (!updated.length) { showToast('Could not update, the change was blocked. Tell Anne: RLS.'); return; }
   const b = _bkAppts.find(function(x) { return x.id === id; });
   if (b) b.status = status;
   tbRenderAppts();
@@ -15793,10 +15793,10 @@ async function tbSetStatus(id, status) {
       sendPushToUser(pushKeyFor(b.client_email, b.client_phone), { title: m.title, body: m.body, url: '/app/', tag: 'booking-' + id })
         .then(function(pr) {
           showToast(pr && pr.sent > 0
-            ? 'Updated ✓ — client notified'
-            : 'Updated ✓ — saved, but the client can’t be pushed (no notifications on their device' + (pr && pr.error ? ': ' + pr.error : '') + ')');
+            ? 'Updated ✓, client notified'
+            : 'Updated ✓, saved, but the client can’t be pushed (no notifications on their device' + (pr && pr.error ? ': ' + pr.error : '') + ')');
         })
-        .catch(function() { showToast('Updated ✓ — saved, push failed to send'); });
+        .catch(function() { showToast('Updated ✓, saved, push failed to send'); });
       return;
     }
   }
@@ -16022,7 +16022,7 @@ async function tbLoadDashBadge() {
     // In-app appointment alerts (2026-08-10): fire-and-forget so the badge
     // logic below never waits on the extra queries.
     try { tdRenderApptAlerts(t); } catch(_) {}
-    // Daily "are you open?" nudge — fire-and-forget, never blocks the badge.
+    // Daily "are you open?" nudge, fire-and-forget, never blocks the badge.
     try { maybeDailyAvailPrompt(t); } catch(_) {}
     if (!t.booking_enabled) {
       if (badge) badge.style.display = 'none';
@@ -16034,7 +16034,7 @@ async function tbLoadDashBadge() {
           sub.innerHTML = 'Clients book through your link';
           sub.style.color = 'var(--muted)';
         } else if (_bkCallsOnlyPref()) {
-          sub.innerHTML = 'Clients call or text you \u2014 your choice';
+          sub.innerHTML = 'Clients call or text you, your choice';
           sub.style.color = 'var(--muted)';
         } else {
           sub.innerHTML = 'Booking is off &#183; <b style="color:var(--rose-dark);">tap to set up</b>';
@@ -16096,7 +16096,7 @@ async function tsToggleDailyNudge() {
 // the daily push on; clearing it turns it off. The tz is captured in-browser so
 // the server cron fires at her real wall-clock time, and avail_reminded_on is
 // cleared so a time set earlier today can still fire this morning. It only
-// reminds — it never flips availability for her. See sql/avail-morning-reminder.sql.
+// reminds, it never flips availability for her. See sql/avail-morning-reminder.sql.
 function _fmtReminderTime(hhmm) {
   try {
     var p = (hhmm || '').split(':'); var h = parseInt(p[0], 10); var m = p[1] || '00';
@@ -16164,7 +16164,7 @@ async function tsSetAvailReminder(val) {
 // The walkthrough's "Show clients when you're open" step stays done after the
 // first time (see the latch in _setupStepsState). This owns the reminder job:
 // "Open today" clears itself EVERY midnight, so any day a tech lands on her
-// portal with it off, ask once whether she's open — and teach the chip
+// portal with it off, ask once whether she's open, and teach the chip
 // lifecycle while we're at it (Anne: "tell them whether this week or new
 // clients sets itself or they should go in and set it too"):
 //   Open today   → self-clears nightly  → the DAILY ritual, this prompt's job
@@ -16173,13 +16173,13 @@ async function tsSetAvailReminder(val) {
 //     (sql/default-open-week-new-clients.sql), hers to turn off
 // Any answer (including "no") stamps the day: one ask per day, never a loop.
 // Tapping the morning push lands here (via pushNotificationActionPerformed).
-// Unlike maybeDailyAvailPrompt this has NO guards — she deliberately tapped the
+// Unlike maybeDailyAvailPrompt this has NO guards, she deliberately tapped the
 // reminder, so always ask, and flip Open today on a yes. (2026-09-21, Anne)
 async function askOpenTodayFromPush() {
   try {
     var openToday = await showConfirm('Are you open for clients today?', {
       body: '“Open today” turns itself off every night, so clients only ever see what’s true. Flip it on and your work glows for the clients looking right now.',
-      okLabel: 'Yes — open today',
+      okLabel: 'Yes, open today',
       cancelLabel: 'Not today',
       tone: 'neutral'
     });
@@ -16193,7 +16193,7 @@ async function askOpenTodayFromPush() {
 async function maybeDailyAvailPrompt(t) {
   if (!t) return;
   if (t.daily_avail_nudge_off) return;   // she turned the daily reminder off (My Settings)
-  if (t.is_available) return;   // already open today — nothing to ask
+  if (t.is_available) return;   // already open today, nothing to ask
   // Brand-new techs are the walkthrough's job; only nudge once onboarding has
   // acked the chips (the _setupStepsState latch writes this same key).
   var acked = false;
@@ -16206,8 +16206,8 @@ async function maybeDailyAvailPrompt(t) {
   // re-entry) can't stack two modals.
   try { localStorage.setItem(stampKey, '1'); } catch(_) {}
   var openToday = await showConfirm('Are you open for clients today?', {
-    body: '“Open today” turns itself off every night, so clients only ever see what’s true. Pop in each day you have chair time and flip it on — that’s what shows you as bookable right now.\n\n(“This week” resets Sundays; “New clients” stays however you set it.)',
-    okLabel: 'Yes — open today',
+    body: '“Open today” turns itself off every night, so clients only ever see what’s true. Pop in each day you have chair time and flip it on, that’s what shows you as bookable right now.\n\n(“This week” resets Sundays; “New clients” stays however you set it.)',
+    okLabel: 'Yes, open today',
     cancelLabel: 'Not today',
     tone: 'neutral'
   });
@@ -16219,7 +16219,7 @@ async function maybeDailyAvailPrompt(t) {
   // extra question, and only on days it's actually off.
   if (!t.is_same_day) {
     var openWeek = await showConfirm('Show as open this week too?', {
-      body: '“This week” cleared itself over the weekend — it resets every Sunday night. Flip it back on if you’ve got room in the next few days.',
+      body: '“This week” cleared itself over the weekend, it resets every Sunday night. Flip it back on if you’ve got room in the next few days.',
       okLabel: 'Open this week',
       cancelLabel: 'Not this time',
       tone: 'neutral'
@@ -16338,7 +16338,7 @@ function bkOpenSetupFork() {
   m.style.display = 'flex';
   requestAnimationFrame(function(){ m.classList.add('open'); });
   // Price the in-app option honestly, and only when it actually costs her
-  // something. Until 2026-08-21 this card was labelled "· FREE" — on the one
+  // something. Until 2026-08-21 this card was labelled "· FREE", on the one
   // option of the three that is the paid product. True while
   // paywall_enabled() was false, a lie the moment it flipped. The other two
   // options are genuinely free and say so statically; this one asks.
@@ -16381,7 +16381,7 @@ async function bkForkSaveLink() {
   var inp = document.getElementById('bkf-link');
   var raw = (inp && inp.value || '').trim();
   // Normalise BEFORE validating. Anne, 2026-08-23: typing www.something.com
-  // answered "Paste your booking link first" — safeUrl() returns '' for any
+  // answered "Paste your booking link first", safeUrl() returns '' for any
   // string without an http(s) scheme, so the empty-check fired on a link she
   // had just pasted, and the line below that adds the scheme sat unreachable
   // for precisely the inputs it existed to fix. Nobody types "https://" on a
@@ -16390,12 +16390,12 @@ async function bkForkSaveLink() {
   if (!raw) { showToast('Paste your booking link first'); return; }
   if (!/^https?:\/\//i.test(raw)) raw = 'https://' + raw;
   var url = safeUrl(raw);
-  // A bare word becomes https://word — a valid URL and a dead link. Require
+  // A bare word becomes https://word, a valid URL and a dead link. Require
   // a dot and no spaces so "hello" is caught here, not by a client tapping
   // Book and landing nowhere.
   var host = url.replace(/^https?:\/\//i, '').split(/[\/?#]/)[0];
   if (!url || !/^[^\s]+\.[a-z]{2,}$/i.test(host)) {
-    showToast('That doesn’t look like a link — try something like vagaro.com/yourname');
+    showToast('That doesn’t look like a link, try something like vagaro.com/yourname');
     return;
   }
   var ok = await patchBookingField({ booking_link: url });
@@ -16416,7 +16416,7 @@ function bkForkCallsOnly() {
   // the setup checklist counts this step done.
   try { localStorage.setItem(_bkPrefKey(), 'calls'); } catch(_) {}
   bkCloseSetupFork();
-  showToast('Done \u2014 clients will see big Call and Text buttons on your profile.');
+  showToast('Done, clients will see big Call and Text buttons on your profile.');
   try { setupAdvance(); } catch(_) {}
   try { tbLoadDashBadge(); } catch(_) {}
 }
@@ -16444,7 +16444,7 @@ async function bkForkInApp() {
     }
   } catch(_) {}
   if (hasSetup) {
-    // OR above is deliberately loose — it only decides whether to show the
+    // OR above is deliberately loose, it only decides whether to show the
     // guided two-step. This is the gate that decides whether she can go live.
     if (await bkBlockedFromGoLive()) return;
     var ok = await patchBookingField({ booking_enabled: true });
@@ -16536,7 +16536,7 @@ async function bkForkHoursFinish() {
       bkCloseSetupFork();
       try { tbLoadDashBadge(); } catch(_) {}
       try { updateSetupChecklist(); } catch(_) {}
-      showToast('Saved your service and hours \u2014 one more step to open your book');
+      showToast('Saved your service and hours, one more step to open your book');
       openBookingSubscribe();
       return;
     }
@@ -16545,7 +16545,7 @@ async function bkForkHoursFinish() {
       showToast('Could not turn booking on, try again');
       return;
     }
-    showToast('You\u2019re bookable! ' + name + ' \u00b7 ' + dur + ' min' + (priceRaw ? ' \u00b7 $' + priceRaw : '') + ' \u2014 tweak anytime in Settings.');
+    showToast('You\u2019re bookable! ' + name + ' \u00b7 ' + dur + ' min' + (priceRaw ? ' \u00b7 $' + priceRaw : '') + ', tweak anytime in Settings.');
     try { localStorage.removeItem(_bkPrefKey()); } catch(_) {}
     window._bkSetup = window._bkSetup || {}; window._bkSetup.enabled = true;
     if (_bkMyTech) _bkMyTech.booking_enabled = true;
@@ -16735,7 +16735,7 @@ function bkPickSlot(ts) {
   _bkFlow.slot = ts;
   const s = _bkFlow.svc;
   const meta = [bkDur(s.duration_minutes), bkPrice(s.price)].filter(Boolean).join(' · ');
-  // Reschedule mode: same service, new time. No note step — just confirm
+  // Reschedule mode: same service, new time. No note step, just confirm
   // the move. bkConfirm() branches on _bkFlow.rescheduleId.
   if (_bkFlow.rescheduleId) {
     bkBody(bkHeader('Confirm new time', "bkPickDay('" + _bkFlow.day + "')") +
@@ -16900,8 +16900,8 @@ function paRenderProfile() {
     // signup friction lowest. Techs can add one later if a feature ever
     // needs it.
     // Liability acknowledgment (Anne, 2026-08-03): the email-era signup
-    // screens required this, but the phone flow — the door every real user
-    // takes — skipped it entirely. Same copy and version tags
+    // screens required this, but the phone flow, the door every real user
+    // takes, skipped it entirely. Same copy and version tags
     // (client-v1 / tech-v1) as the original screens; acceptance is stored
     // versioned + timestamped on the account via the RPC.
     '<div style="margin-top:14px;padding:14px 14px;background:var(--rose-light);border:1px solid rgba(224,168,152,0.3);border-radius:12px;display:flex;align-items:flex-start;gap:10px;">' +
@@ -17161,13 +17161,13 @@ async function bkConfirm() {
         '<div style="font-family:\'Playfair Display\',serif;font-size:22px;color:var(--charcoal);margin-bottom:6px;">' +
           (confirmed ? "You're booked!" : 'Request sent!') + '</div>' +
         (confirmed
-          ? '<div style="display:inline-block;background:var(--green-light);color:var(--green);font-size:12px;font-weight:700;letter-spacing:0.6px;text-transform:uppercase;border-radius:100px;padding:4px 12px;margin-bottom:10px;">Confirmed &mdash; you\'re on the calendar</div>'
+          ? '<div style="display:inline-block;background:var(--green-light);color:var(--green);font-size:12px;font-weight:700;letter-spacing:0.6px;text-transform:uppercase;border-radius:100px;padding:4px 12px;margin-bottom:10px;">Confirmed, you\'re on the calendar</div>'
           : '<div style="display:inline-block;background:#FFF4DE;color:#7A5A00;font-size:12px;font-weight:700;letter-spacing:0.6px;text-transform:uppercase;border-radius:100px;padding:4px 12px;margin-bottom:10px;">Waiting for ' + bkEsc(techName) + ' to confirm</div>') +
         '<div style="font-size:14px;color:var(--muted);line-height:1.6;margin-bottom:' + (confirmed ? '18px' : '12px') + ';">' +
           bkEsc(_bkFlow.svc.name) + ' with ' + bkEsc(techName) + '<br>' + when + '</div>' +
         (confirmed ? '' :
           '<div style="background:#FFF8E8;border:1px solid #F0D890;border-radius:12px;padding:10px 14px;font-size:13px;color:#7A5A00;line-height:1.5;margin:0 8px 18px;">' +
-            'Nothing is booked yet &mdash; this time is requested, not reserved. You\'ll get a notification the moment ' + bkEsc(techName) + ' confirms.' +
+            'Nothing is booked yet, this time is requested, not reserved. You\'ll get a notification the moment ' + bkEsc(techName) + ' confirms.' +
           '</div>') +
         '<button class="btn btn-rose" onclick="closeBookModal()">Done</button>' +
         '<div onclick="closeBookModal();show(\'my-appts\')" style="margin-top:12px;font-size:13px;color:var(--rose-dark);font-weight:600;cursor:pointer;">View my appointments</div>' +
@@ -17269,7 +17269,7 @@ async function maOpenTech(techId) {
   if (tech) { openTechDetail(tech); return; }
   // Not in the browse cache (stale load or filtered): fetch the full row
   // and run it through the SAME mapper the browse grid uses, so the
-  // profile opens complete — gallery, availability, Book button, all of
+  // profile opens complete, gallery, availability, Book button, all of
   // it (Anne, 2026-08-03: the earlier minimal object opened a bare shell).
   try {
     const r = await fetch(SUPABASE_URL + '/rest/v1/techs?id=eq.' + encodeURIComponent(techId) + '&select=*',
@@ -17404,7 +17404,7 @@ async function bkDoReschedule() {
       if (key) sendPushToUser(key, { title: 'Appointment moved', body: techName + ' moved your appointment to ' + when + '.', url: '/app/', tag: 'booking-' + f.rescheduleId });
     }
     closeBookModal();
-    showToast(confirmed ? 'Moved to ' + when : 'Requested ' + when + ' — waiting on confirmation');
+    showToast(confirmed ? 'Moved to ' + when : 'Requested ' + when + ', waiting on confirmation');
     try { loadMyAppointments(); } catch (_) {}
     try { loadTechBookings(); } catch (_) {}
   } catch (e) {
@@ -17762,7 +17762,7 @@ function styleNavForRole() {
   });
 
   // "My Appts" tab for CLIENTS too (Anne, 2026-08-03: "a button in the
-  // nav screen") — same one-tap reach the techs got, but pointing at the
+  // nav screen"), same one-tap reach the techs got, but pointing at the
   // client my-appts screen and sitting after My Saves. Signed-in
   // non-techs only: anonymous browsers have nothing booked, techs have
   // their own slot above.
@@ -17792,7 +17792,7 @@ function styleNavForRole() {
 
   // Phone-OTP accounts have no password, so "Change password" is a trap:
   // it sets a password that no sign-in path ever uses (audit 2026-08-03).
-  // currentUserEmail holds the phone string for phone sessions — no '@'.
+  // currentUserEmail holds the phone string for phone sessions, no '@'.
   try {
     var _hasPw = (currentUserEmail || '').indexOf('@') > 0;
     document.querySelectorAll('.mnc-pw-row').forEach(function(el) {
@@ -17845,7 +17845,7 @@ function styleNavForRole() {
   // signed-in role, not just techs. (Clients also have the Sign Out
   // button on their profile screen.)
   // Home header sign-out icon retired (Anne, 2026-08-03: "we don't need
-  // 2, keep just one") — it was invisible white-on-white for weeks, and
+  // 2, keep just one"), it was invisible white-on-white for weeks, and
   // the moment it became visible it duplicated the profile-screen Sign
   // Out. One door: profile/portal.
   var signoutBtn = document.getElementById('home-signout-btn');
@@ -17896,7 +17896,7 @@ function backFromAuth() {
 // two <button> sign-out variants (home header, profile screen) are on
 // signed-in-only surfaces and are left alone. 2026-07-17.
 // styleAuthNav only wires authNav() onto the slot while anonymous, so the
-// signed-in branch is a stale-state path — the button still says "Sign In".
+// signed-in branch is a stale-state path, the button still says "Sign In".
 // It must not silently sign someone out; route it through the confirm like
 // everything else (2026-08-21, same sweep as the ensureSignOutNav removal).
 function authNav() { if (currentUserEmail) { confirmSignOut(); } else { startPhoneAuth('signin'); } }
@@ -17938,12 +17938,12 @@ function styleAuthNav() {
 // Exactly right. Three defects had stacked up on one node:
 //
 //   1. 069a09c swept the raw markup's "Sign Out" labels to "Gallery" and the
-//      sweep also caught this function's innerHTML string — so the injected
+//      sweep also caught this function's innerHTML string, so the injected
 //      item READ "Gallery" while its onclick stayed doSignOut(). Every screen
 //      carried two tabs labelled Gallery and the right-hand one signed you out.
 //   2. It called doSignOut() directly, so it never asked. 365b501's message
 //      claims "every path now routes through confirmSignOut(), never
-//      doSignOut() directly" — that claim was untrue, this path was missed.
+//      doSignOut() directly", that claim was untrue, this path was missed.
 //   3. It existed at all. 365b501 was Anne asking to bury sign out to one
 //      collapsed entry point precisely because, under phone-only auth, an
 //      accidental tap costs her a Twilio Verify code and costs the user a
@@ -18198,7 +18198,7 @@ function syncHeroStatus() {
 // exists; the short version is that a dismissed push used to be unrecoverable.
 //
 // Addressing: rows are keyed by public.notifications.recipient, which holds
-// exactly what push_subscriptions.user_id holds — the app's pushKeyFor()
+// exactly what push_subscriptions.user_id holds, the app's pushKeyFor()
 // output. currentUserEmail already IS that string for both email and phone
 // accounts (it is what _refreshPushSubState addresses subscriptions with), so
 // the same key works here. Do not invent a second shape; a tech phone stored
@@ -18280,7 +18280,7 @@ function renderNotifications() {
       '<div style="padding:34px 16px;text-align:center;">' +
         '<div style="font-size:30px;margin-bottom:10px;opacity:0.55;">🔔</div>' +
         '<div style="font-size:14px;font-weight:600;color:var(--charcoal);margin-bottom:5px;">Nothing yet</div>' +
-        '<div style="font-size:13px;color:var(--muted);line-height:1.6;">Bookings, confirmations and reminders show up here — and they stay, so you can read them again whenever you want.</div>' +
+        '<div style="font-size:13px;color:var(--muted);line-height:1.6;">Bookings, confirmations and reminders show up here, and they stay, so you can read them again whenever you want.</div>' +
       '</div>';
     return;
   }
@@ -18359,7 +18359,7 @@ async function markAllNotificationsRead() {
 
 async function clearNotificationHistory() {
   var ok = await showConfirm('Clear all notifications?', {
-    body: 'This empties your notification list on every device. Your bookings, photos and settings are untouched — only the message history goes.',
+    body: 'This empties your notification list on every device. Your bookings, photos and settings are untouched, only the message history goes.',
     okLabel: 'Clear all'
   });
   if (!ok) return;
@@ -18416,7 +18416,7 @@ function _bkPrefKey() {
   // Per-account key (Anne, 2026-08-11: setup 'dropped me early'). This flag
   // was a single global 'mnc_booking_pref', so a choice made while testing
   // ANOTHER account marked the booking AND schedule steps done for a
-  // brand-new tech — the list hit 5/5 and retired itself mid-setup. Same
+  // brand-new tech, the list hit 5/5 and retired itself mid-setup. Same
   // disease as the pre-checked notifications box.
   var id = '';
   try { id = (typeof pushKey === 'function' ? (pushKey(currentUserEmail) || '') : (currentUserEmail || '')); } catch(_) {}
@@ -18429,7 +18429,7 @@ function _bkCallsOnlyPref() {
 function _setupStepsState() {
   var bk = window._bkSetup || {};
   // Server truth first (Anne, 2026-08-03: the checkbox showed pre-checked
-  // for a brand-new account — device permission + a leftover local flag
+  // for a brand-new account, device permission + a leftover local flag
   // from the previous account, neither of which means THIS account can be
   // pushed to). When the subscription lookup has answered, it decides;
   // device state is only the pre-fetch fallback.
@@ -18574,8 +18574,8 @@ async function setupOpenSchedule() {
 // Explicit dismissal of the finished checklist. Uses the same sessionStorage
 // key the "maybe later" path already used, so it stays gone for the session
 // but returns on a fresh launch if something is genuinely still undone.
-// Bring the list back on demand. Clears BOTH things that hide it — the
-// session dismissal and the celebrated flag — and sets _mncSetupForceList so
+// Bring the list back on demand. Clears BOTH things that hide it, the
+// session dismissal and the celebrated flag, and sets _mncSetupForceList so
 // the completion branch is skipped: reopening should show the STEPS, with
 // their checkmarks, not a "Setup complete" card. The whole point of coming
 // back is usually to revisit a step that is already ticked.
@@ -18591,7 +18591,7 @@ async function setupOpenAvailability() {
     ok = await showConfirm('Here\u2019s your fastest way to get found', {
       // Deliberately short. The tutorial's "Light up when you're open" slide
       // already explains all three chips in full, and repeating it here made
-      // a 654-char body — 4x any other confirm in the app, tall enough to
+      // a 654-char body, 4x any other confirm in the app, tall enough to
       // clip its own buttons off a 360x640 screen. The one thing the slide
       // does NOT say is that these are free for every tech regardless of how
       // she takes bookings (fb0af35), so that is what survives the trim.
@@ -18613,7 +18613,7 @@ async function setupOpenAvailability() {
       setTimeout(function() {
         try { chip.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
         catch(_) { try { chip.scrollIntoView(); } catch(__) {} }
-        try { showToast('Tap a chip to flip it \u2014 they save instantly'); } catch(_) {}
+        try { showToast('Tap a chip to flip it, they save instantly'); } catch(_) {}
       }, 120);
     }
   }
@@ -18660,7 +18660,7 @@ function updateSetupChecklist() {
   if (done === steps.length && !window._mncSetupForceList) {
     // All five done. Celebrate once instead of vanishing mid-use (the
     // async server-truth checks can complete the list while the tech is
-    // still looking at it — reads as "setup kicked me out").
+    // still looking at it, reads as "setup kicked me out").
     if (!window._mncSetupDoneCelebrated) {
       window._mncSetupDoneCelebrated = true;
       var host0 = document.getElementById('td-setup-steps');
@@ -18672,7 +18672,7 @@ function updateSetupChecklist() {
       if (later0) later0.style.display = 'none';
       // NO AUTO-HIDE (2026-08-19). This used to vanish itself after 6s, and
       // _setupStepsState() kicks off _refreshAvailabilityState() and
-      // _refreshPushSubState() in the background — so a tech who already had
+      // _refreshPushSubState() in the background, so a tech who already had
       // hours or push from an earlier attempt watched the list render, flip
       // to complete on its own a second later, and disappear. Anne: "i can
       // see very quickly only, that there is a 4th item that says dial in
@@ -18699,7 +18699,7 @@ function updateSetupChecklist() {
           '<div class="mnc-celeb-note" onclick="openNotifications()" style="margin-top:12px;padding:11px 13px;border-radius:13px;background:var(--rose-light);border:1px solid var(--rose-mid);cursor:pointer;display:flex;align-items:center;gap:9px;text-align:left;">' +
             '<span style="font-size:16px;flex-shrink:0;">\uD83D\uDD14</span>' +
             '<span style="flex:1;font-size:12.5px;color:var(--charcoal);line-height:1.5;">' +
-              '<b>Keep an eye on your notifications.</b> New bookings land there \u2014 and they stay, so nothing gets lost if you miss the pop-up.' +
+              '<b>Keep an eye on your notifications.</b> New bookings land there, and they stay, so nothing gets lost if you miss the pop-up.' +
             '</span>' +
             '<svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:var(--rose-dark);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg>' +
           '</div>' +
@@ -18715,7 +18715,7 @@ function updateSetupChecklist() {
   }
   // PLACEMENT, not routing (2026-08-19). This card ships partway down the
   // portal, below the greeting, the alerts row, the three availability chips
-  // and the presence stats — 400-500px on a phone, and the edge-to-edge bands
+  // and the presence stats, 400-500px on a phone, and the edge-to-edge bands
   // take ~100px more. So it began at or below the fold, and every arrival
   // looked like a finished screen.
   //
@@ -18783,7 +18783,7 @@ function updateSetupChecklist() {
 // returns on a fresh launch if something is genuinely still undone. Takes the
 // event so the later-link can stop propagation to the card behind it.
 //
-// There were TWO definitions of this until 2026-08-21 — an argument-less copy
+// There were TWO definitions of this until 2026-08-21, an argument-less copy
 // added with the reopen work, and this one. The later declaration won by
 // hoisting, so the first was unreachable; identical behaviour, but nothing
 // told a reader which was live.
@@ -18844,7 +18844,7 @@ async function setupEnablePush() {
 // or there's nothing to show.
 // Feature flag (2026-09-21, Anne): the per-tech "Clients reaching you" card is
 // OFF for now. The taps still LOG the whole time (see logTechTap), so the data
-// accrues from day one — this only controls whether techs SEE the card. Flip to
+// accrues from day one, this only controls whether techs SEE the card. Flip to
 // true and re-run deploy/sync.sh when you decide to show it to techs.
 var TECH_REACH_CARD_ENABLED = false;
 async function loadTechReach(techId) {
@@ -18869,7 +18869,7 @@ async function loadTechReach(techId) {
     if (bEl) bEl.textContent = String(books);
     if (cEl) cEl.textContent = String(calls);
     if (tEl) tEl.textContent = String(texts);
-    // Only surface it once there's at least one tap — an all-zero card on a
+    // Only surface it once there's at least one tap, an all-zero card on a
     // brand-new tech's portal reads as failure, not "no clients yet".
     card.style.display = (books + calls + texts) > 0 ? '' : 'none';
   } catch(_) {}
@@ -18888,7 +18888,7 @@ async function loadTechHomeStats() {
   try {
     // id/booking_enabled/booking_link joined in (2026-08-11): the setup
     // checklist read booking state from window._bkSetup, which ONLY
-    // loadTechBookings populates — so until the tech happened to open the
+    // loadTechBookings populates, so until the tech happened to open the
     // Bookings screen, steps 3 and 4 showed not-done even when booking was
     // already on, and the schedule lookup had no tech id to query with.
     // The portal already fetches this row, so seed it here.
@@ -20288,7 +20288,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     var label;
     if (platform === 'android')      label = 'v' + APP_BUILD.name + ' · build ' + APP_BUILD.android + ' · android';
     else if (platform === 'ios')     label = 'v' + APP_BUILD.name + ' · build ' + APP_BUILD.ios + ' · ios';
-    // Web rides the same android counter — sync.sh bumps it on every app
+    // Web rides the same android counter, sync.sh bumps it on every app
     // change, so it's an accurate monotone build id there too (was just
     // "· web", useless for "which version am I on?", Anne 2026-08-03).
     else                              label = 'v' + APP_BUILD.name + ' · build ' + APP_BUILD.android + ' · web';
@@ -20536,7 +20536,7 @@ async function submitContactAnne() {
   var whoPhone = phoneVal || null;
 
   // Signed OUT? The direct insert cannot work: contact_anne_messages grants
-  // INSERT to `authenticated` only, so an anonymous caller gets 42501 —
+  // INSERT to `authenticated` only, so an anonymous caller gets 42501
   // "new row violates row-level security policy". Anne hit exactly that
   // (2026-08-23) via the "Trouble signing in?" link, which is for people who
   // by definition have no session.
@@ -20842,8 +20842,8 @@ let ueGalleryPhotos = [];
 // render/add/remove code all indexes it that way. That flattening is what ate
 // Anne's tags (2026-08-14, "logged into 4804402314 as tech and my tags are
 // gone"): saving a tech from the admin user-edit modal rebuilt photos as
-// `{url, tags: []}`, so ANY admin edit — changing a role, fixing a phone,
-// touching a bio — silently wiped every photo tag that tech had ever set.
+// `{url, tags: []}`, so ANY admin edit, changing a role, fixing a phone,
+// touching a bio, silently wiped every photo tag that tech had ever set.
 // Tags are how clients filter, so a wiped tech drops out of every search.
 // Keep the originals here and re-attach on save.
 let ueGalleryMeta = {};
@@ -21084,7 +21084,7 @@ async function saveUserEdit() {
     email: document.getElementById('ue-email').value.trim(),
     // E.164, NOT digits-only. This field wrote '4804402314' while phone
     // signup (create_signup_profile_phone) wrote '+14804402314', and every
-    // lookup in this app is an exact `phone.eq.<mncIdentity()>` — which
+    // lookup in this app is an exact `phone.eq.<mncIdentity()>`, which
     // always produces the +1 form. So any tech saved through this modal
     // became invisible to themselves: their own techs row stopped resolving,
     // and profile, photos and tags all read as empty. Second half of Anne's
@@ -21169,7 +21169,7 @@ async function saveUserEdit() {
     showToast('Saved locally (offline)');
   }
 
-  // restoreSaveBtns is function-scoped INSIDE saveTechEdit — calling it
+  // restoreSaveBtns is function-scoped INSIDE saveTechEdit, calling it
   // here threw a ReferenceError on every admin save, so the modal never
   // closed and the list never refreshed (clobber audit 2026-08-03).
   if (typeof restoreSaveBtns === 'function') { try { restoreSaveBtns(); } catch(_) {} }
@@ -21638,7 +21638,7 @@ async function loadSubscriptionStats(headers) {
 
 async function loadUserAvailability(email) {
   try {
-    // or=(email,phone) — audit 2026-08-03: email-only meant a phone-only
+    // or=(email,phone), audit 2026-08-03: email-only meant a phone-only
     // tech's hero toggles always rendered OFF, and tapping one then SAVED
     // that wrong state, silently flipping her availability off.
     const res = await fetch(
@@ -22137,7 +22137,7 @@ async function loadTechsFromSupabase() {
 
 // Extracted 2026-08-03 (audit follow-up): maOpenTech needs the SAME row
 // mapping when it fetches a tech that isn't in ALL_TECHS yet, otherwise
-// the profile opens sparse — no gallery, no availability, no Book button.
+// the profile opens sparse, no gallery, no availability, no Book button.
 function _mapTechRow(t) {
       return {
         // id is REQUIRED, without it, map pin routing falls back to
@@ -22194,7 +22194,7 @@ function _mapTechRow(t) {
         // Being SEEN is free; being BOOKED is the paid thing.
         // NOTE: PostgREST does NOT return computed columns for select=*, so
         // both tech queries above name them explicitly. Drop either name and
-        // the value arrives undefined — and !undefined is true, which would
+        // the value arrives undefined, and !undefined is true, which would
         // hide every tech from the Map and the Gallery at once.
         is_visible:  !!t.is_visible,
         is_bookable: !!t.is_bookable,
@@ -22472,7 +22472,7 @@ window._mncConsoleBuffer = window._mncConsoleBuffer || [];
 // It was always the good one: the modal defaults its category to Bug and
 // attaches the current screen, device info, app version and the console
 // buffer, so a report arrives with the evidence instead of "it didn't work".
-// A tech will not reproduce a bug on request — she is between clients — so
+// A tech will not reproduce a bug on request, she is between clients, so
 // whatever is captured at the moment she taps is all anyone will ever get.
 var FEEDBACK_FAB_ENABLED = true;
 function updateFeedbackButtonVisibility() {
@@ -22560,8 +22560,8 @@ async function submitFeedback() {
   setStatus('Sending…', 'warn');
 
   // Signed OUT? public.feedback also grants INSERT to `authenticated` only,
-  // so the row would be refused AND the heads-up email — which only fires
-  // after a successful insert — would never send. Route the whole thing
+  // so the row would be refused AND the heads-up email, which only fires
+  // after a successful insert, would never send. Route the whole thing
   // through the function, which saves with the service role and emails.
   if (!window._mncAccessToken) {
     try {
@@ -22628,9 +22628,9 @@ async function submitFeedback() {
           },
           body: JSON.stringify({
             note: '[' + (payload.category || 'Feedback') + '] ' + (payload.message || '') +
-                  '\n\n— screen: ' + (payload.current_screen || '?') +
-                  '\n— build: ' + (payload.app_version || '?') +
-                  '\n— device: ' + (payload.user_agent || '?'),
+                  '\n\n- screen: ' + (payload.current_screen || '?') +
+                  '\n- build: ' + (payload.app_version || '?') +
+                  '\n- device: ' + (payload.user_agent || '?'),
             name: payload.user_email || 'A user',
             // Phone-only auth: user_email may hold a phone number. Send it
             // in the right slot or Resend 422s the reply_to and the alert
@@ -22654,7 +22654,7 @@ async function submitFeedback() {
     // A tech does not need to hear about our mail plumbing -- her report is
     // filed either way. Anne does, because for her the email IS the delivery.
     if (_fbMailErr && window._mncCurrentRole === 'admin') {
-      setStatus('Saved — but the alert email failed: ' + _fbMailErr, 'warn');
+      setStatus('Saved, but the alert email failed: ' + _fbMailErr, 'warn');
       if (btn) { btn.textContent = 'Saved'; }
       setTimeout(closeFeedbackModal, 8000);
     } else {
@@ -22745,7 +22745,7 @@ function postUploadGoToFeed() {
 function _stripeWelcomeVariants() {
   // What renews, and when. For the BOOKING subscription the meaningful date
   // is subscription_expires_at (Stripe's current_period_end, i.e. the next
-  // bill) — not period_reset_at, which is the upload-allowance refill from
+  // bill), not period_reset_at, which is the upload-allowance refill from
   // the retired pay-per-photo product. Falls back to a month from today so
   // the copy never lies while the webhook is still landing.
   // One phrase, true in both states.
@@ -22754,7 +22754,7 @@ function _stripeWelcomeVariants() {
   // otherwise, telling them apart by distance: a 90-day trial ends ~90 days
   // out, a monthly renewal ~30. That worked only while the trial was three
   // months. It is now ONE month, so a trial's period end and a renewal's are
-  // the same distance away and no heuristic can separate them — there is no
+  // the same distance away and no heuristic can separate them, there is no
   // subscription_status column to consult.
   //
   // "Next charge" is accurate whether she is on her free month or her fifth
@@ -22797,8 +22797,8 @@ function _stripeWelcomeVariants() {
 
   return {
     // Rewritten 2026-08-23. This variant still described the RETIRED
-    // pay-per-photo product — "150 uploads this month", "your monthly
-    // refill" — on the screen a tech sees immediately after paying for
+    // pay-per-photo product, "150 uploads this month", "your monthly
+    // refill", on the screen a tech sees immediately after paying for
     // BOOKING. Photos are free in 3.0; uploads are not what she bought, and
     // leading with an upload counter teaches the wrong thing about the
     // subscription in the one moment she is definitely reading.
@@ -22806,7 +22806,7 @@ function _stripeWelcomeVariants() {
     // The stat is now the differentiator that actually justifies the price,
     // and the sub-line carries the renewal date plainly rather than burying
     // it. The primary action goes to Booking Settings, because the next
-    // useful thing is confirming her hours and services are right — not
+    // useful thing is confirming her hours and services are right, not
     // posting a photo she could always post for free.
     'glow-up': {
       eyebrow: 'Your book is open',
@@ -22866,12 +22866,12 @@ function _stripeWelcomeApplyVariant(variant) {
 }
 
 // ── Web download gate (2026-08-11, Anne: "remove access to the app from
-// /app — have this be only for generating downloads") ───────────────────────
+// /app, have this be only for generating downloads") ───────────────────────
 // On the open web, /app no longer serves the product. Every browser visitor
 // gets a full-screen download page instead: store installs ARE the product
 // now, and installs are what ads can attribute. The gate stays OFF for:
 //   • native Capacitor shells (they are the app)
-//   • dev mode (__MNC_DEV__: localhost, or ?mncdev=<key> — Anne's web door,
+//   • dev mode (__MNC_DEV__: localhost, or ?mncdev=<key>, Anne's web door,
 //     sticky via localStorage)
 //   • Stripe checkout returns (?welcome=) and auth-token links, which must
 //     finish their flows in the browser.
@@ -22938,7 +22938,7 @@ function mncRenderDownloadGate(t) {
 
   var techCard = '';
   var headline = 'Your next nail tech is in here';
-  var sub = 'Real local artists, their real work, and open spots you can book in seconds \u2014 all in the app.';
+  var sub = 'Real local artists, their real work, and open spots you can book in seconds, all in the app.';
   if (t) {
     var first = ((t.name || '').trim().split(/\s+/)[0]) || 'She';
     headline = bkEsc(first) + ' is booking on My Nail Connection';
@@ -23006,7 +23006,7 @@ function mncRenderDownloadGate(t) {
 // src/utm params; _mncSharedArrival turns on the get-the-app banner on
 // tech-detail for web visitors.
 async function maybeOpenSharedProfile() {
-  // Web visitors never reach the app anymore — the download gate owns the
+  // Web visitors never reach the app anymore, the download gate owns the
   // screen and renders the tech itself. This opener now serves the native
   // shells (store-app deep links), where the gate never engages.
   if (window._mncDownloadGateOn) return;
@@ -23024,7 +23024,7 @@ async function maybeOpenSharedProfile() {
     if (!ALL_TECHS.length) { try { await loadTechsFromSupabase(); } catch(_) {} }
     var t = ALL_TECHS.find(function(x) { return String(x.id) === String(techId); });
     if (!t) {
-      // Not in the browse cache (new tech, filtered, cache miss) — fetch solo.
+      // Not in the browse cache (new tech, filtered, cache miss), fetch solo.
       try {
         var r = await fetch(SUPABASE_URL + '/rest/v1/techs?id=eq.' + encodeURIComponent(techId) + '&select=*', {
           headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + (window._mncAccessToken || SUPABASE_ANON_KEY) }
@@ -23048,7 +23048,7 @@ async function maybeOpenSharedProfile() {
 // attribution in Play Console; iOS install attribution needs Apple Search
 // Ads wiring later.
 //
-// 2026-09-04: ALSO writes public.store_clicks — the table the admin-stats
+// 2026-09-04: ALSO writes public.store_clicks, the table the admin-stats
 // dashboard's download-intent panel actually reads. Until now only the
 // marketing page wrote there, so every tap from the download gate and the
 // shared-profile banner was invisible on the dashboard. Attribution is
@@ -23124,7 +23124,7 @@ async function shareMyProfile() {
   }
   if (!id) { showToast('Finish your profile first, then share it'); return; }
   var url = 'https://mynailconnection.com/app/?tech=' + encodeURIComponent(id) + '&src=profile_share&utm_medium=share';
-  var data = { title: 'Book me on My Nail Connection', text: 'My work, my openings, and my book \u2014 all right here \ud83d\udc85', url: url };
+  var data = { title: 'Book me on My Nail Connection', text: 'My work, my openings, and my book, all right here \ud83d\udc85', url: url };
   try {
     if (navigator.share) { await navigator.share(data); return; }
   } catch(e) {
@@ -23133,7 +23133,7 @@ async function shareMyProfile() {
   try {
     if (navigator.clipboard && navigator.clipboard.writeText) {
       await navigator.clipboard.writeText(url);
-      showToast('Your profile link is copied \u2014 paste it anywhere!');
+      showToast('Your profile link is copied, paste it anywhere!');
       return;
     }
   } catch(_) {}
@@ -23145,14 +23145,14 @@ async function shareMyProfile() {
 // Anne, 2026-08-23: "after i paid on droid it popped me out of the app to the
 // website application."
 //
-// Android has no in-app purchase path here — RevenueCat is iOS-only — so
+// Android has no in-app purchase path here, RevenueCat is iOS-only, so
 // _stripeLaunch does window.open() and checkout happens in Chrome. Stripe's
 // success URL is https://mynailconnection.com/app/?welcome=glow-up, which is
 // a WEB page, so she finishes paying and is left looking at a browser copy of
 // MNC while the real app sits open behind it.
 //
 // The app IS registered for https://mynailconnection.com/app via an App Links
-// intent-filter with autoVerify, and assetlinks.json is served correctly — but
+// intent-filter with autoVerify, and assetlinks.json is served correctly, but
 // App Links fire on a link TAP or an intent, not on a redirect Chrome follows
 // inside its own session, which is exactly what a checkout return is. (A
 // sideloaded APK signed with the upload key rather than the Play key would
@@ -23162,9 +23162,9 @@ async function shareMyProfile() {
 // to. Android routes com.mynailconnection.app:// straight to the app.
 //
 // Deliberately narrow:
-//   * native shells return immediately — they never left, and redirecting to
+//   * native shells return immediately, they never left, and redirecting to
 //     our own scheme from inside ourselves is how you build a loop
-//   * desktop returns immediately — there is no app to hand back to, and a
+//   * desktop returns immediately, there is no app to hand back to, and a
 //     failed scheme navigation shows the user an ugly error
 //   * only fires when ?welcome= is present, so ordinary web visits are untouched
 //
@@ -23210,7 +23210,7 @@ function maybeShowStripeWelcome() {
     var variant = params.get('welcome');
     if (!variant) return;
     // On a phone in a browser, hand back to the app instead of showing the
-    // modal here — the app will show it when the deep link opens it.
+    // modal here, the app will show it when the deep link opens it.
     if (mncHandBackToApp()) return;
     var applied = _stripeWelcomeApplyVariant(variant);
     if (!applied) return;
@@ -23249,7 +23249,7 @@ function stripeWelcomePrimary() {
   if (action === 'upload') {
     try { openPhotoUploadFromHome(); } catch(_) {}
   } else if (action === 'booking') {
-    // Booking Settings, with its data loaded — a bare show() leaves every
+    // Booking Settings, with its data loaded, a bare show() leaves every
     // control empty because the screen's loader only runs on the My Appts
     // route. Same trap setupOpenSchedule() hit on 2026-08-10.
     try { show('tech-booking-settings'); } catch(_) {}
@@ -23694,7 +23694,7 @@ function closeReleaseWizard() {
       </div>
       <div id="upgrade-eyebrow" style="font-size:11px;font-weight:700;letter-spacing:2px;color:var(--rose);text-transform:uppercase;margin-bottom:6px;">Your gallery</div>
       <div id="upgrade-headline" style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--charcoal);margin-bottom:6px;">Monthly allowance used</div>
-      <div id="upgrade-body" style="font-size:14px;color:var(--muted);line-height:1.5;">That's your <b id="upgrade-limit-text">50</b> free looks this month — they refill monthly, and everything you have posted stays up.</div>
+      <div id="upgrade-body" style="font-size:14px;color:var(--muted);line-height:1.5;">That's your <b id="upgrade-limit-text">50</b> free looks this month, they refill monthly, and everything you have posted stays up.</div>
     </div>
 
     <!-- Options -->
@@ -23775,7 +23775,7 @@ function closeReleaseWizard() {
   </div>
 </div>
 
-<!-- RESET PASSWORD modal — REMOVED 2026-08-14 (phone-only cutover).
+<!-- RESET PASSWORD modal, REMOVED 2026-08-14 (phone-only cutover).
      This was the last email input left in the app. There is no password to
      reset any more: sign-in is a texted code, so "I can't get in" is solved
      by requesting another code, not by an emailed link.
@@ -24157,7 +24157,7 @@ function closeReleaseWizard() {
       <div id="bkf-svcstep" style="display:none;padding:22px 22px 0;">
         <div onclick="bkForkSvcBack()" style="font-size:13px;color:var(--muted);cursor:pointer;margin-bottom:12px;display:inline-flex;align-items:center;gap:5px;"><svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;"><polyline points="15 18 9 12 15 6"/></svg> Back</div>
         <div style="font-family:'Playfair Display',serif;font-size:21px;font-weight:700;color:var(--charcoal);">Your first service</div>
-        <div style="font-size:13px;color:var(--muted);line-height:1.5;margin-top:6px;margin-bottom:16px;">Step 1 of 2 &middot; We started you with a common one &mdash; change anything.</div>
+        <div style="font-size:13px;color:var(--muted);line-height:1.5;margin-top:6px;margin-bottom:16px;">Step 1 of 2 &middot; We started you with a common one, change anything.</div>
         <label style="font-size:11px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:5px;">Service name</label>
         <input id="bkf-svc-name" type="text" value="Full set" style="width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:12px;font-size:15px;font-family:'DM Sans',sans-serif;box-sizing:border-box;background:white;margin-bottom:14px;"/>
         <div style="display:flex;gap:10px;">
