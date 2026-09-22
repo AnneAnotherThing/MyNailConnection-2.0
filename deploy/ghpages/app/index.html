@@ -5523,8 +5523,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.6',     /* __APP_BUILD_NAME__   */
-  android: 645,         /* __APP_BUILD_ANDROID__ */
-  ios:     450,          /* __APP_BUILD_IOS__     */
+  android: 646,         /* __APP_BUILD_ANDROID__ */
+  ios:     451,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -18345,6 +18345,15 @@ async function _refreshPushSubState() {
 // screen's loader only runs on the My Appts route (found 2026-08-10 when
 // Anne's setup run went sideways here).
 async function setupOpenSchedule() {
+  // Host intro so this step doesn't drop her onto Booking Settings cold, with a
+  // suggested starting point (Anne, 2026-09-21).
+  try {
+    await showConfirm('Let’s set your hours', {
+      body: 'Tell me the days and times clients can book you. I’ll open your Booking Settings, where you add your weekly hours, a buffer between sets, and how much notice you need.\n\nA good start is the days you usually work, say 9 to 5, then tweak from there. Only techs who book through MNC need this.',
+      okLabel: 'Set my hours',
+      tone: 'neutral'
+    });
+  } catch(_) {}
   show('tech-booking-settings');
   try { await loadTechBookings(); } catch(_) {}
 }
@@ -18380,16 +18389,16 @@ async function setupOpenAvailability() {
   try { show('tech-home'); } catch(_) {}
   var ok = false;
   try {
-    ok = await showConfirm('Show clients when you\u2019re open', {
+    ok = await showConfirm('Here\u2019s your fastest way to get found', {
       // Deliberately short. The tutorial's "Light up when you're open" slide
       // already explains all three chips in full, and repeating it here made
       // a 654-char body — 4x any other confirm in the app, tall enough to
       // clip its own buttons off a 360x640 screen. The one thing the slide
       // does NOT say is that these are free for every tech regardless of how
       // she takes bookings (fb0af35), so that is what survives the trim.
-      body: 'Open today, This week, New clients: the three chips at the top of your portal.\n\n' +
-            'They are free for every tech, however clients reach you, and they are the fastest way to get found today.\n\n' +
-            'Tap to flip them any time, they save instantly.',
+      body: 'The three chips at the top of your portal, Open today, This week and New clients, are how clients spot you right now.\n\n' +
+            'Flip Open today when you have chair time and your work glows in the Gallery. They are free for every tech, however you take bookings, and they save the instant you tap.\n\n' +
+            'I’ll take you to them.',
       okLabel: 'Show me',
       tone: 'neutral'
     });
@@ -18586,6 +18595,16 @@ function dismissSetupChecklist(ev) {
 }
 
 async function setupEnablePush() {
+  // Friendly primer before the OS pop-up (Anne, 2026-09-21): explain the why in
+  // the host voice so she opts in, and don't fire the system prompt at all if
+  // she says not now, a hard deny is hard to undo.
+  var _go = await showConfirm('Let me ping you when a booking comes in', {
+    body: 'Say yes to the next pop-up and I’ll let you know the moment a client books, reschedules or cancels. Just your bookings, nothing else, and you can turn it off in Settings anytime.',
+    okLabel: 'Sounds good',
+    cancelLabel: 'Not now',
+    tone: 'neutral'
+  });
+  if (!_go) return;
   // Native shells: the OS prompt comes from the Capacitor plugin.
   if (window.Capacitor && window.Capacitor.isNativePlatform()) {
     try { await initCapacitorPush(); localStorage.setItem('mnc_push_done', '1'); } catch(_) {}
@@ -18610,7 +18629,7 @@ async function setupEnablePush() {
     if (ok) {
       try { await subscribeToPush(pushKey(currentUserEmail)); } catch(_) {}
       try { localStorage.setItem('mnc_push_done', '1'); } catch(_) {}
-      showToast('Notifications on \u2014 new bookings will ping your phone');
+      showToast('You\u2019re set. I\u2019ll ping you when a booking comes in.');
     } else {
       showToast('Notifications are blocked in your browser settings');
     }
@@ -23846,7 +23865,7 @@ function closeReleaseWizard() {
       <!-- Step 1: the chooser -->
       <div id="bkf-chooser" style="padding:22px 22px 0;">
         <div style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--charcoal);">How do you want to take bookings?</div>
-        <div style="font-size:13px;color:var(--muted);line-height:1.5;margin-top:6px;margin-bottom:20px;">Pick whichever fits how you already work — you can change it anytime.</div>
+        <div style="font-size:13px;color:var(--muted);line-height:1.5;margin-top:6px;margin-bottom:20px;">Pick whichever fits how you already work, you can change it anytime.</div>
 
         <div onclick="bkForkExisting()" style="cursor:pointer;border:1.5px solid var(--border);border-radius:16px;padding:16px;display:flex;gap:14px;align-items:center;margin-bottom:12px;">
           <div style="width:44px;height:44px;border-radius:13px;background:var(--rose-light);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
