@@ -5495,8 +5495,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.6',     /* __APP_BUILD_NAME__   */
-  android: 634,         /* __APP_BUILD_ANDROID__ */
-  ios:     439,          /* __APP_BUILD_IOS__     */
+  android: 635,         /* __APP_BUILD_ANDROID__ */
+  ios:     440,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -7952,7 +7952,15 @@ function saveAvailability() {
       if (nowOn && row0) {
         var _cm = row0.contact_methods || {};
         var _instant = !!(_cm.call || _cm.text || row0.booking_auto_confirm);
-        if (!_instant) {
+        // Hold this nudge while she is still onboarding (the tutorial is up, or
+        // the setup checklist is still showing). Booking is opt-in and can wait
+        // until she has looked around. Anne, 2026-09-21: it fired mid-tutorial
+        // and pressured her to get bookable before she had even oriented.
+        var _tutEl = document.getElementById('tutorial-overlay');
+        var _setupEl = document.getElementById('td-setup-checklist');
+        var _onboarding = (_tutEl && getComputedStyle(_tutEl).display !== 'none') ||
+                          (_setupEl && getComputedStyle(_setupEl).display !== 'none');
+        if (!_instant && !_onboarding) {
           setTimeout(async function() {
             var go = await showConfirm('Same-day clients move fast!', {
               body: 'You\u2019re showing Open today, but there\u2019s no instant way in: Call and Text are off, and bookings wait for your approval. Turn one on so today\u2019s clients can actually reach you today.',
