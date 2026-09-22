@@ -2459,11 +2459,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
     <div style="margin:0 20px;background:white;border:1.5px solid var(--border);border-radius:16px;overflow:hidden;box-shadow:var(--shadow);">
       <div onclick="show('tech-booking-settings')" style="display:flex;align-items:center;gap:10px;padding:14px 16px;cursor:pointer;"><div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:var(--charcoal);">Booking settings</div><div style="font-size:12px;color:var(--muted);margin-top:1px;">Services, hours, auto-confirm, blocking</div></div><svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:var(--muted);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg></div>
       <div style="display:flex;align-items:center;gap:10px;padding:14px 16px;border-top:1px solid var(--border);">
-        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:var(--charcoal);">Open-today check-in</div><div style="font-size:12px;color:var(--muted);margin-top:1px;">When you open the app, we ask once a day if you&rsquo;re open</div></div>
-        <button id="ts-nudge-btn" onclick="tsToggleDailyNudge()" style="min-width:56px;padding:8px 14px;border-radius:100px;font-size:13px;font-weight:700;cursor:pointer;border:1.5px solid var(--rose);background:var(--rose);color:white;flex-shrink:0;">On</button>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;padding:14px 16px;border-top:1px solid var(--border);">
-        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:var(--charcoal);">Morning reminder on your phone</div><div style="font-size:12px;color:var(--muted);margin-top:1px;">A gentle nudge to flip Open today on. Off by default.</div></div>
+        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:var(--charcoal);">Daily open-today reminder</div><div style="font-size:12px;color:var(--muted);margin-top:1px;">A once-a-day nudge to flip Open today on. Pick a time for a phone push, or just when you open the app.</div></div>
         <select id="ts-reminder-time" onchange="tsSetAvailReminder(this.value)" style="border:1.5px solid var(--border);border-radius:100px;padding:8px 30px 8px 14px;font-size:13px;font-weight:700;font-family:'DM Sans',sans-serif;color:var(--charcoal);background:white url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%2212%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%238B7E70%22 stroke-width=%223%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><path d=%22M6 9l6 6 6-6%22/></svg>') no-repeat right 12px center;-webkit-appearance:none;appearance:none;cursor:pointer;flex-shrink:0;"></select>
       </div>
     </div>
@@ -5563,8 +5559,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.6',     /* __APP_BUILD_NAME__   */
-  android: 657,         /* __APP_BUILD_ANDROID__ */
-  ios:     462,          /* __APP_BUILD_IOS__     */
+  android: 658,         /* __APP_BUILD_ANDROID__ */
+  ios:     463,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -16105,7 +16101,8 @@ function _fmtReminderTime(hhmm) {
   } catch(_) { return hhmm; }
 }
 function _populateReminderTimes(sel) {
-  var html = '<option value="">Off</option>';
+  var html = '<option value="">Off</option>' +
+             '<option value="inapp">When I open the app</option>';
   // 5:00 AM through noon, half-hour steps, friendly AM/PM labels.
   for (var h = 5; h <= 12; h++) {
     for (var m = 0; m < 60; m += 30) {
@@ -16119,24 +16116,38 @@ function _populateReminderTimes(sel) {
   }
   sel.innerHTML = html;
 }
+// One control, three states (2026-09-21, Anne consolidated the two rows):
+//   ''      Off            → no push, no in-app ask
+//   'inapp' When I open... → in-app ask only (the long-standing default)
+//   'HH:MM' a time         → phone push at that time, plus the in-app ask
+// The in-app ask is gated on daily_avail_nudge_off; the push on
+// avail_reminder_time. This maps both onto the single dropdown.
+function _reminderStateValue() {
+  if (window._mncAvailReminderTime) return (window._mncAvailReminderTime || '').slice(0, 5);
+  return window._mncDailyNudgeOff ? '' : 'inapp';
+}
 function renderReminderPref() {
   var sel = document.getElementById('ts-reminder-time');
   if (!sel) return;
   if (!sel.options || !sel.options.length) _populateReminderTimes(sel);
-  sel.value = (window._mncAvailReminderTime || '').slice(0, 5);   // 'HH:MM:SS' -> 'HH:MM', '' = Off
+  sel.value = _reminderStateValue();
 }
 async function tsSetAvailReminder(val) {
   var email = currentUserEmail;
   if (!email) return;
-  var prev = window._mncAvailReminderTime || '';
-  var time = (val || '').trim();   // '' clears the reminder
-  window._mncAvailReminderTime = time ? (time.length === 5 ? time + ':00' : time) : '';
+  var prevTime = window._mncAvailReminderTime || '';
+  var prevOff  = !!window._mncDailyNudgeOff;
+  var choice = (val || '').trim();
+  var isTime = choice && choice !== 'inapp';
+  // Optimistic local state
+  window._mncAvailReminderTime = isTime ? (choice.length === 5 ? choice + ':00' : choice) : '';
+  window._mncDailyNudgeOff = (choice === '');   // only "Off" silences the in-app ask
   renderReminderPref();
   var tz = null;
   try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || null; } catch(_) {}
-  var body = time
-    ? { avail_reminder_time: window._mncAvailReminderTime, avail_reminder_tz: tz, avail_reminded_on: null }
-    : { avail_reminder_time: null };
+  var body = isTime
+    ? { avail_reminder_time: window._mncAvailReminderTime, avail_reminder_tz: tz, avail_reminded_on: null, daily_avail_nudge_off: false }
+    : { avail_reminder_time: null, daily_avail_nudge_off: (choice === '') };
   try {
     var r = await fetch(SUPABASE_URL + '/rest/v1/techs?or=(email.eq.' + encodeURIComponent(email) +
       ',phone.eq.' + encodeURIComponent(email) + ')', {
@@ -16145,16 +16156,18 @@ async function tsSetAvailReminder(val) {
       body: JSON.stringify(body)
     });
     if (!r.ok) throw new Error('patch ' + r.status);
-    if (time) {
-      showToast('Morning reminder set for ' + _fmtReminderTime(time));
-      // A reminder is worthless without notification permission. If push isn't
-      // on yet, walk her through turning it on now.
+    if (isTime) {
+      showToast('Reminder set for ' + _fmtReminderTime(choice));
+      // A push reminder is worthless without notification permission.
       if (!window._mncHasPushSub) { try { await setupEnablePush(); } catch(_) {} }
+    } else if (choice === 'inapp') {
+      showToast('We’ll ask when you open the app');
     } else {
-      showToast('Morning reminder turned off');
+      showToast('Daily reminder turned off');
     }
   } catch (e) {
-    window._mncAvailReminderTime = prev;   // revert on failure
+    window._mncAvailReminderTime = prevTime;   // revert on failure
+    window._mncDailyNudgeOff = prevOff;
     renderReminderPref();
     showToast("Couldn't save that, try again");
   }
