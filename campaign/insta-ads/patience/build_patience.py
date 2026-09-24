@@ -59,6 +59,19 @@ for name, img in (('menu', menu), ('profile', profile)):
     S.paste_screen(out, img, q, radius=0.05)
     out = Image.composite(src, out, hand_mask(q))
     pd.polygon(q, fill=255)
+# panel 1: the search box said "Surprise, AZ"; the set is for anywhere in the
+# US, so the pill reads "Your city" in the same weight and tilt.
+from PIL import ImageFont
+paper = np.asarray(src.crop((366, 296, 378, 312))).reshape(-1, 3)
+tone = tuple(int(v) for v in np.median(paper, axis=0))
+poly = [(278, 289), (366, 284), (366, 313), (278, 318)]
+cover = Image.new('L', (W, H), 0); ImageDraw.Draw(cover).polygon(poly, fill=255)
+noise = np.random.default_rng(3).normal(0, 3, (H, W, 1))
+canvas = Image.fromarray((np.full((H, W, 3), tone, float) + noise).clip(0, 255).astype('uint8'))
+out = Image.composite(canvas, out, cover.filter(ImageFilter.GaussianBlur(0.5)))
+font = ImageFont.truetype(r'C:\Windows\Fonts\comicbd.ttf', 19)
+txt = Image.new('RGBA', (120, 40), (0, 0, 0, 0)); ImageDraw.Draw(txt).text((2, 4), 'Your city', font=font, fill=(20, 19, 23, 255))
+txt = txt.rotate(3.7, resample=Image.BICUBIC, expand=True); out.paste(txt, (281, 285), txt)   # not added to `placed`: the grain pass would print the old letters back through
 # the blank strip under the panels carries the wordmark
 strip_css = """body{background:#fff}.s{width:100%;height:100%;display:flex;align-items:center;justify-content:center;gap:28px}
 .w{font-family:'Playfair Display',serif;font-style:italic;font-weight:600;font-size:56px;color:#141317}
