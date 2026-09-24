@@ -14,7 +14,7 @@ Run from this folder:  python build_patience.py
 """
 import json, os, pathlib, sys, zipfile
 import numpy as np
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFilter
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / 'comic'))
 import screens as S                       # renderers and the warp helper from the first comic
 
@@ -34,27 +34,31 @@ feed = Image.new('RGB', (1080, 1350), BLUSH); feed.paste(single.resize((1080, 10
 
 # ── the comic: real 3.0 screens on the two blank phones ───────────────────
 src = Image.open(HERE / 'source-comic.png').convert('RGB'); W, H = src.size
-def screen_quad(seed):
-    im = src.copy(); ImageDraw.floodfill(im, seed, (0, 255, 0), thresh=55)
-    m = np.all(np.asarray(im) == (0, 255, 0), axis=2); ys, xs = np.nonzero(m)
-    y0, y1, x0, x1 = ys.min(), ys.max(), xs.min(), xs.max(); h, w = y1 - y0, x1 - x0
-    rows = range(int(y0 + .15 * h), int(y1 - .15 * h)); cols = range(int(x0 + .15 * w), int(x1 - .15 * w))
-    def fit(pts, axis):
-        p = np.array(pts, float); t, v = (p[:, 1], p[:, 0]) if axis == 'x' else (p[:, 0], p[:, 1])
-        a, b = np.polyfit(t, v, 1); return a, b
-    L = fit([(np.nonzero(m[y])[0].min(), y) for y in rows], 'x'); R = fit([(np.nonzero(m[y])[0].max(), y) for y in rows], 'x')
-    T = fit([(x, np.nonzero(m[:, x])[0].min()) for x in cols], 'y'); B = fit([(x, np.nonzero(m[:, x])[0].max()) for x in cols], 'y')
-    def c(xl, yl):
-        y = (yl[0] * xl[1] + yl[1]) / (1 - xl[0] * yl[0]); return (float(xl[0] * y + xl[1]), float(y))
-    return [c(L, T), c(R, T), c(R, B), c(L, B)], (w, h)
+# The two blank phones, corners measured by hand on a 4x grid of the source
+# (TL, TR, BR, BL). The screen bottoms sit under the hands, so the quads run
+# to where the phone body ends and the hand is restored afterwards.
+QUADS = {
+    'menu':    [(678, 352), (760, 350), (735, 478), (648, 478)],   # panel 2
+    'profile': [(630, 967), (692, 965), (673, 1050), (608, 1050)], # panel 5
+}
+def hand_mask(quad):
+    """Base pixels inside the quad that are not blank paper: skin, nails,
+    outlines. Those come back on top of the pasted screen."""
+    poly = Image.new('L', (W, H), 0); ImageDraw.Draw(poly).polygon(quad, fill=255)
+    a = np.asarray(src).astype(int); sat = a.max(2) - a.min(2); lo = a.min(2)
+    m = ((sat > 22) | (lo < 150)) & (np.asarray(poly) > 0)
+    k = Image.fromarray((m * 255).astype('uint8')).filter(ImageFilter.MaxFilter(3)).filter(ImageFilter.GaussianBlur(0.8))
+    return k
 out = src.copy()
 grain = np.asarray(src.convert('L')).astype(float) / 255.0
 placed = Image.new('L', (W, H), 0); pd = ImageDraw.Draw(placed)
-menu = S.render('menu', 440, 740, S.MENU_CSS, S.MENU)          # panel 2: "Wait, this is new"
-profile = S.render('profile', 440, 760, S.PROFILE_CSS, S.PROFILE)  # panel 5: checking back, a tech found
-for seed, img in (((700, 400), menu), ((660, 1010), profile)):
-    q, size = screen_quad(seed); print('screen at', seed, 'is', size)
-    S.paste_screen(out, img, [tuple(p) for p in q], radius=0.05); pd.polygon([tuple(p) for p in q], fill=255)
+menu = S.render('menu', 440, 680, S.MENU_CSS, S.MENU)          # panel 2: "Wait, this is new"
+profile = S.render('profile', 440, 600, S.PROFILE_CSS, S.PROFILE)  # panel 5: checking back, a tech found
+for name, img in (('menu', menu), ('profile', profile)):
+    q = QUADS[name]
+    S.paste_screen(out, img, q, radius=0.05)
+    out = Image.composite(src, out, hand_mask(q))
+    pd.polygon(q, fill=255)
 # the blank strip under the panels carries the wordmark
 strip_css = """body{background:#fff}.s{width:100%;height:100%;display:flex;align-items:center;justify-content:center;gap:28px}
 .w{font-family:'Playfair Display',serif;font-style:italic;font-weight:600;font-size:56px;color:#141317}
