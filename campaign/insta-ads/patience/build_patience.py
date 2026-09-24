@@ -34,44 +34,92 @@ feed = Image.new('RGB', (1080, 1350), BLUSH); feed.paste(single.resize((1080, 10
 
 # ── the comic: real 3.0 screens on the two blank phones ───────────────────
 src = Image.open(HERE / 'source-comic.png').convert('RGB'); W, H = src.size
-# The two blank phones, corners measured by hand on a 4x grid of the source
+from PIL import ImageFont
+FONT = r'C:\Windows\Fonts\comicbd.ttf'
+INK = (20, 19, 23, 255)
+# Every phone is drawn as its back: the characters look at their screens, so
+# the reader sees the back (Anne, 2026-09-24: with screens facing out they all
+# looked held backwards). PATIENCE_SCREENS=1 puts the real 3.0 app on the two
+# blank screens instead.
+BACKS = os.environ.get('PATIENCE_SCREENS') != '1'
+# Phone screens, corners measured by hand on a 4x grid of the source
 # (TL, TR, BR, BL). The screen bottoms sit under the hands, so the quads run
 # to where the phone body ends and the hand is restored afterwards.
 QUADS = {
+    'p1':      [(171, 360), (232, 355), (214, 470), (145, 470)],   # panel 1, blank in the art
     'menu':    [(678, 352), (760, 350), (735, 478), (648, 478)],   # panel 2
     'profile': [(630, 967), (692, 965), (673, 1050), (608, 1050)], # panel 5
+    'p6':      [(860, 892), (907, 891), (939, 1000), (876, 1000)], # panel 6, blank in the art
 }
-def hand_mask(quad):
+def hand_mask(quad, sat_min=22, lo_max=150):
     """Base pixels inside the quad that are not blank paper: skin, nails,
-    outlines. Those come back on top of the pasted screen."""
+    outlines. Those come back on top of whatever was pasted. The dark backs
+    need the strict thresholds or the paper's halftone dots come back too."""
     poly = Image.new('L', (W, H), 0); ImageDraw.Draw(poly).polygon(quad, fill=255)
     a = np.asarray(src).astype(int); sat = a.max(2) - a.min(2); lo = a.min(2)
-    m = ((sat > 22) | (lo < 150)) & (np.asarray(poly) > 0)
-    k = Image.fromarray((m * 255).astype('uint8')).filter(ImageFilter.MaxFilter(3)).filter(ImageFilter.GaussianBlur(0.8))
-    return k
+    m = ((sat > sat_min) | (lo < lo_max)) & (np.asarray(poly) > 0)
+    return Image.fromarray((m * 255).astype('uint8')).filter(ImageFilter.MaxFilter(3)).filter(ImageFilter.GaussianBlur(0.8))
+def phone_back(w=440, h=740):
+    """A charcoal phone back with a camera block, drawn flat and warped later."""
+    im = Image.new('RGB', (w, h), (44, 43, 48)); d = ImageDraw.Draw(im)
+    g = np.linspace(0, 1, h)[:, None, None]
+    im = Image.fromarray((np.asarray(im) * (1 - 0.18 * g)).astype('uint8')); d = ImageDraw.Draw(im)
+    d.rounded_rectangle((3, 3, w - 4, h - 4), radius=36, outline=(70, 69, 76), width=4)
+    d.rounded_rectangle((28, 28, 28 + 150, 28 + 150), radius=34, fill=(28, 27, 31), outline=(62, 61, 68), width=3)
+    for cx, cy in ((68, 68), (138, 68), (68, 138)):
+        d.ellipse((cx - 24, cy - 24, cx + 24, cy + 24), fill=(18, 17, 20), outline=(80, 79, 86), width=3)
+        d.ellipse((cx - 11, cy - 11, cx + 11, cy + 11), fill=(40, 44, 60))
+        d.ellipse((cx - 5, cy - 9, cx + 1, cy - 3), fill=(120, 130, 160))
+    d.ellipse((138 - 9, 138 - 9, 138 + 9, 138 + 9), fill=(230, 220, 190))
+    return im
+def cover_text(bbox, angle, text, size, pad=4):
+    """Paint over lettering with the paper tone between its letters, then
+    letter the box again, condensed to fit when the new word is wider."""
+    global out
+    x0, y0, x1, y1 = bbox
+    px = np.asarray(src.crop(bbox)).reshape(-1, 3); tone = tuple(int(v) for v in np.percentile(px, 88, axis=0))
+    w, h = x1 - x0 + 2 * pad, y1 - y0 + 2 * pad
+    lay = Image.new('RGBA', (w, h), tone + (255,))
+    noise = np.random.default_rng(3).normal(0, 3, (h, w, 1)); arr = np.asarray(lay).astype(float); arr[..., :3] += noise
+    lay = Image.fromarray(arr.clip(0, 255).astype('uint8'))
+    if text:
+        f = ImageFont.truetype(FONT, size); tb = ImageDraw.Draw(lay).textbbox((0, 0), text, font=f)
+        tw, th = tb[2] - tb[0], tb[3] - tb[1]
+        t = Image.new('RGBA', (tw + 2, th + 2), (0, 0, 0, 0)); ImageDraw.Draw(t).text((1 - tb[0], 1 - tb[1]), text, font=f, fill=INK)
+        avail = w - 2 * pad
+        if t.width > avail: t = t.resize((avail, t.height), Image.LANCZOS)
+        lay.paste(t, (pad, (h - t.height) // 2), t)
+    lay = lay.rotate(angle, resample=Image.BICUBIC, expand=True)
+    cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
+    out.paste(lay, (int(cx - lay.width / 2), int(cy - lay.height / 2)), lay)
 out = src.copy()
 grain = np.asarray(src.convert('L')).astype(float) / 255.0
 placed = Image.new('L', (W, H), 0); pd = ImageDraw.Draw(placed)
-menu = S.render('menu', 440, 680, S.MENU_CSS, S.MENU)          # panel 2: "Wait, this is new"
-profile = S.render('profile', 440, 600, S.PROFILE_CSS, S.PROFILE)  # panel 5: checking back, a tech found
-for name, img in (('menu', menu), ('profile', profile)):
-    q = QUADS[name]
-    S.paste_screen(out, img, q, radius=0.05)
-    out = Image.composite(src, out, hand_mask(q))
-    pd.polygon(q, fill=255)
-# panel 1: the search box said "Surprise, AZ"; the set is for anywhere in the
-# US, so the pill reads "Your city" in the same weight and tilt.
-from PIL import ImageFont
-paper = np.asarray(src.crop((366, 296, 378, 312))).reshape(-1, 3)
-tone = tuple(int(v) for v in np.median(paper, axis=0))
-poly = [(278, 289), (366, 284), (366, 313), (278, 318)]
-cover = Image.new('L', (W, H), 0); ImageDraw.Draw(cover).polygon(poly, fill=255)
-noise = np.random.default_rng(3).normal(0, 3, (H, W, 1))
-canvas = Image.fromarray((np.full((H, W, 3), tone, float) + noise).clip(0, 255).astype('uint8'))
-out = Image.composite(canvas, out, cover.filter(ImageFilter.GaussianBlur(0.5)))
-font = ImageFont.truetype(r'C:\Windows\Fonts\comicbd.ttf', 19)
-txt = Image.new('RGBA', (120, 40), (0, 0, 0, 0)); ImageDraw.Draw(txt).text((2, 4), 'Your city', font=font, fill=(20, 19, 23, 255))
-txt = txt.rotate(3.7, resample=Image.BICUBIC, expand=True); out.paste(txt, (281, 285), txt)   # not added to `placed`: the grain pass would print the old letters back through
+if BACKS:
+    back = phone_back()
+    for name in ('p1', 'menu', 'profile', 'p6'):
+        q = QUADS[name]; S.paste_screen(out, back, q, radius=0.05)
+        out = Image.composite(src, out, hand_mask(q, 32, 70)); pd.polygon(q, fill=255)
+else:
+    menu = S.render('menu', 440, 680, S.MENU_CSS, S.MENU)          # panel 2: "Wait, this is new"
+    profile = S.render('profile', 440, 600, S.PROFILE_CSS, S.PROFILE)  # panel 5: checking back, a tech found
+    for name, img in (('menu', menu), ('profile', profile)):
+        q = QUADS[name]; S.paste_screen(out, img, q, radius=0.05)
+        out = Image.composite(src, out, hand_mask(q)); pd.polygon(q, fill=255)
+# Lettering that named the West Valley. The set is for anywhere in the US.
+# Panel 1's search box said "Surprise, AZ"; panel 3's five tags named West
+# Valley towns. Nothing here goes into `placed`: the grain pass would print
+# the old letters back through.
+cover_text((280, 291, 364, 315), 3.7, 'Your city', 19)
+TAGS = [  # the tag's text area in the source, tilt, new city
+    ((878, 228, 948, 258), 6.0, 'Atlanta'),
+    ((1112, 313, 1192, 342), 2.0, 'Seattle'),
+    ((868, 468, 928, 498), 3.0, 'Austin'),
+    ((997, 500, 1068, 530), 2.0, 'Chicago'),
+    ((1150, 500, 1224, 528), 1.0, 'Denver'),
+]
+for bbox, ang, city in TAGS:
+    cover_text(bbox, ang, city, 22)
 # the blank strip under the panels carries the wordmark
 strip_css = """body{background:#fff}.s{width:100%;height:100%;display:flex;align-items:center;justify-content:center;gap:28px}
 .w{font-family:'Playfair Display',serif;font-style:italic;font-weight:600;font-size:56px;color:#141317}
