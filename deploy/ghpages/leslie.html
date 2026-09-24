@@ -12,18 +12,21 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
 <style>
 :root{
-  --ink:#2C2C31; --ink-soft:#45454B; --muted:#6B6B70;
-  --rose:#C0687B; --rose-deep:#6B3A47; --rose-pale:#E7B6C0;
-  --blush:#F1E4E0; --cream:#FAF7F4; --paper:#FFFFFF;
-  --line:rgba(44,44,49,0.13);
-  --go:#3F7350; --go-bg:#EAF2EC; --warn:#8A6420; --warn-bg:#F8F0DD;
-  --shadow:0 1px 2px rgba(44,44,49,.07), 0 6px 16px rgba(44,44,49,.07), 0 18px 40px rgba(44,44,49,.05);
-  --shadow-sm:0 1px 2px rgba(44,44,49,.06), 0 4px 10px rgba(44,44,49,.06);
+  /* My Nail Connection 3.0: white first, ink, mauve, blush. Values from the design system. */
+  --ink:#141317; --ink-soft:#2A2A2E; --muted:#6D6068;
+  --rose:#A2636C; --rose-deep:#A2636C; --rose-pale:#D0A3A5; --rose-tint:#DEB3B5;
+  --blush:#F7E2E3; --cream:#FAF7F2; --paper:#FFFFFF;
+  --line:rgba(125,100,102,0.28);
+  --ink-grad:linear-gradient(140deg,#4A4A4F 0%,#2A2A2E 60%,#141317 100%);
+  --hero-grad:linear-gradient(160deg,#1C1A19 0%,#242221 30%,#32302E 60%,#242221 100%);
+  --go:#4A7A5A; --go-bg:#EAF3EC; --warn:#5E5049; --warn-bg:#EDE7E6;
+  --shadow:0 1px 2px rgba(11,11,13,.09), 0 5px 14px rgba(11,11,13,.08), 0 14px 30px rgba(11,11,13,.06);
+  --shadow-sm:0 1px 3px rgba(20,19,23,.06), 0 4px 10px rgba(20,19,23,.06);
 }
 *{box-sizing:border-box;}
 html{-webkit-text-size-adjust:100%;}
 body{
-  margin:0; background:var(--cream); color:var(--ink);
+  margin:0; background:var(--paper); color:var(--ink);
   font-family:'DM Sans',system-ui,-apple-system,sans-serif;
   font-size:16.5px; line-height:1.65; -webkit-font-smoothing:antialiased;
 }
@@ -34,32 +37,34 @@ a{color:var(--rose-deep);text-underline-offset:3px;}
 
 /* hero */
 .hero{
-  background:
-    radial-gradient(120% 90% at 82% 6%, rgba(231,182,192,.55) 0%, rgba(231,182,192,0) 62%),
-    linear-gradient(168deg,#FDFBFA 0%, var(--blush) 62%, #E8D2CE 100%);
-  border-bottom:1px solid var(--line);
-  padding:78px 24px 62px; text-align:center;
+  background:var(--hero-grad); position:relative; overflow:hidden;
+  padding:78px 24px 62px; text-align:center; color:rgba(245,237,232,.94);
 }
-.hero .mark{font-family:'Playfair Display',serif;font-style:italic;font-size:29px;color:var(--rose-deep);line-height:1;}
-.hero .tag{font-size:11px;font-weight:700;letter-spacing:4.5px;text-transform:uppercase;color:var(--rose);margin-top:9px;}
+.hero::before{content:'';position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse at 50% 0%, rgba(200,170,172,.45) 0%, transparent 60%);}
+.hero>*{position:relative;}
+.hero .mark{font-family:'Playfair Display',serif;font-style:italic;font-weight:600;font-size:29px;color:rgba(245,237,232,.94);line-height:1;}
+.hero .tag{font-size:11px;font-weight:700;letter-spacing:4.5px;text-transform:uppercase;color:var(--rose-tint);margin-top:9px;}
 .hero h1{
-  font-family:'Playfair Display',serif;font-weight:500;
-  font-size:clamp(36px,7vw,60px);line-height:1.1;letter-spacing:-.01em;
-  margin:28px 0 16px;text-wrap:balance;
+  font-family:'Playfair Display',serif;font-weight:700;
+  font-size:clamp(36px,7vw,60px);line-height:1.1;letter-spacing:-1px;
+  margin:28px 0 16px;text-wrap:balance;color:rgba(245,237,232,.94);
+  text-shadow:0 2px 10px rgba(0,0,0,.35);
 }
-.hero .lede{max-width:56ch;margin:0 auto;color:var(--ink-soft);font-size:17.5px;}
+.hero h1 em.pf{color:var(--rose-tint);}
+.hero .lede{max-width:56ch;margin:0 auto;color:rgba(245,237,232,.62);font-size:17.5px;}
 .jump{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:34px auto 0;max-width:640px;}
 .jump a{
-  font-size:12.5px;font-weight:600;text-decoration:none;color:var(--rose-deep);
-  background:rgba(255,255,255,.75);border:1px solid rgba(107,58,71,.2);
+  font-size:12.5px;font-weight:600;text-decoration:none;color:var(--rose-tint);
+  background:rgba(191,166,168,.14);border:1px solid rgba(191,166,168,.45);
   border-radius:999px;padding:8px 16px;transition:background .15s,transform .15s;
 }
-.jump a:hover{background:#fff;transform:translateY(-1px);}
+.jump a:hover{background:rgba(191,166,168,.26);transform:translateY(-1px);}
 
 /* structure */
 section{padding:66px 0 0;}
 .kicker{font-size:10.5px;font-weight:700;letter-spacing:3.2px;text-transform:uppercase;color:var(--rose);margin:0 0 11px;}
-h2{font-family:'Playfair Display',serif;font-weight:500;font-size:clamp(27px,5vw,40px);line-height:1.16;margin:0 0 14px;text-wrap:balance;}
+h2{font-family:'Playfair Display',serif;font-weight:700;letter-spacing:-.5px;font-size:clamp(27px,5vw,40px);line-height:1.16;margin:0 0 14px;text-wrap:balance;}
 h3{font-size:11px;font-weight:700;letter-spacing:2.4px;text-transform:uppercase;color:var(--muted);margin:44px 0 16px;
    padding-bottom:9px;border-bottom:1px solid var(--line);}
 h3 .n{color:var(--rose);font-weight:700;}
@@ -88,32 +93,32 @@ p{max-width:66ch;margin:0 0 16px;}
 .mr{aspect-ratio:300/250;}
 
 .mock .eyebrow{font-size:6.5cqw;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--rose);line-height:1.3;}
-.mock .h{font-family:'Playfair Display',serif;font-weight:500;font-size:13cqw;line-height:1.12;margin:.5em 0 0;color:var(--ink);}
+.mock .h{font-family:'Playfair Display',serif;font-weight:600;font-size:13cqw;line-height:1.12;margin:.5em 0 0;color:var(--ink);}
 .mock .h em{font-style:italic;color:var(--rose-deep);}
 .mock .b{font-size:6cqw;line-height:1.45;color:var(--muted);margin:.7em 0 0;max-width:none;}
 .mock .price{font-size:6.4cqw;font-weight:700;color:var(--rose-deep);margin:.75em 0 0;max-width:none;}
 .mock .photo{
   position:absolute;inset:0;
-  background:linear-gradient(150deg,#EFDDDA 0%,#E0C3C4 48%,#CFAAB0 100%);
+  background:linear-gradient(150deg,#FAF7F2 0%,#F7E2E3 48%,#D0A3A5 100%);
 }
 .mock .photo::after{
   content:'your work here';position:absolute;left:0;right:0;top:34%;text-align:center;
-  font-size:4.6cqw;letter-spacing:.22em;text-transform:uppercase;color:rgba(107,58,71,.45);font-weight:700;
+  font-size:4.6cqw;letter-spacing:.22em;text-transform:uppercase;color:rgba(162,99,108,.55);font-weight:700;
 }
 .mock.overlay{padding:0;justify-content:flex-end;}
 .mock.overlay .inner{
   position:relative;z-index:1;padding:9%;
-  background:linear-gradient(to top,rgba(250,247,244,.97) 58%,rgba(250,247,244,0) 100%);
+  background:linear-gradient(to top,rgba(255,255,255,.97) 58%,rgba(255,255,255,0) 100%);
 }
-.mock.bold{background:var(--rose-deep);}
-.mock.bold .eyebrow{color:var(--rose-pale);}
+.mock.bold{background:var(--ink-grad);}
+.mock.bold .eyebrow{color:var(--rose-tint);}
 .mock.bold .h{color:#fff;}
-.mock.bold .h em{color:var(--rose-pale);}
+.mock.bold .h em{color:var(--rose-tint);}
 .mock.bold .b{color:rgba(255,255,255,.78);}
-.mock.dark{background:var(--ink);}
+.mock.dark{background:var(--hero-grad);}
 .mock.dark .h{color:#fff;}
 .mock.dark .b{color:rgba(255,255,255,.72);}
-.mock.dark .eyebrow{color:var(--rose-pale);}
+.mock.dark .eyebrow{color:var(--rose-tint);}
 .mock .rule{height:1px;background:var(--line);margin:.9em 0;}
 .mock ol{margin:.8em 0 0;padding:0;list-style:none;counter-reset:pt;}
 .mock ol li{
@@ -150,25 +155,25 @@ p{max-width:66ch;margin:0 0 16px;}
 
 /* cards, chips, callouts */
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px;}
-.card{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:20px 22px;box-shadow:var(--shadow-sm);}
+.card{background:var(--cream);border:1px solid var(--line);border-bottom:3px solid rgba(191,166,168,.35);border-radius:18px;padding:20px 22px;box-shadow:var(--shadow-sm);}
 .card h4{margin:0 0 8px;font-size:16px;font-weight:700;}
 .card p{margin:0;font-size:14.5px;color:var(--muted);max-width:none;}
 .chips{display:flex;flex-wrap:wrap;gap:8px;margin:0;padding:0;list-style:none;}
-.chips li{background:var(--blush);color:var(--rose-deep);border:1px solid rgba(107,58,71,.16);
+.chips li{background:var(--blush);color:var(--rose-deep);border:1px solid rgba(162,99,108,.22);
           border-radius:999px;padding:7px 15px;font-size:13.5px;font-weight:600;}
 .pill{display:inline-block;font-size:10px;font-weight:700;letter-spacing:1.3px;text-transform:uppercase;
       padding:3px 9px;border-radius:999px;vertical-align:middle;}
 .pill.go{color:var(--go);background:var(--go-bg);}
 .pill.warn{color:var(--warn);background:var(--warn-bg);}
-.note,.dont{border-radius:0 12px 12px 0;padding:16px 20px;margin:22px 0 0;}
-.note{border-left:3px solid var(--rose);background:#FBF1F1;}
-.dont{border-left:3px solid var(--warn);background:var(--warn-bg);}
+.note,.dont{border-radius:14px;padding:16px 20px;margin:22px 0 0;border:1.5px solid var(--line);}
+.note{background:var(--blush);border-color:rgba(162,99,108,.28);}
+.dont{background:var(--warn-bg);border-color:rgba(94,80,73,.25);}
 .note p,.dont p{margin:0;font-size:14.5px;max-width:70ch;}
 
 /* five-day reveal */
 .days{display:grid;gap:10px;}
 .day{
-  background:var(--paper);border:1px solid var(--line);border-radius:14px;
+  background:var(--cream);border:1px solid var(--line);border-radius:14px;
   padding:16px 20px;box-shadow:var(--shadow-sm);
   display:grid;grid-template-columns:76px 1fr;gap:16px;align-items:start;
 }
@@ -178,12 +183,12 @@ p{max-width:66ch;margin:0 0 16px;}
 }
 .day .n small{display:block;font-family:'DM Sans',sans-serif;font-size:9.5px;font-weight:700;
               letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin-top:3px;}
-.day .h{font-family:'Playfair Display',serif;font-size:19.5px;font-weight:500;line-height:1.25;margin:0;}
+.day .h{font-family:'Playfair Display',serif;font-size:19.5px;font-weight:600;line-height:1.25;margin:0;}
 .day .s{color:var(--muted);font-size:14.5px;margin:4px 0 0;max-width:none;}
-.day.payoff{border-color:var(--rose-pale);background:linear-gradient(150deg,#fff 0%,#FDF4F4 100%);}
+.day.payoff{border-color:var(--rose-pale);background:var(--blush);}
 .day.payoff .h{color:var(--rose-deep);}
 
-.caption{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:18px 20px;box-shadow:var(--shadow-sm);}
+.caption{background:var(--cream);border:1px solid var(--line);border-radius:14px;padding:18px 20px;box-shadow:var(--shadow-sm);}
 .caption .lbl{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--rose);margin-bottom:10px;}
 .caption .txt{font-size:14.5px;line-height:1.62;white-space:pre-wrap;margin:0;max-width:none;}
 
@@ -194,16 +199,22 @@ ul.plain li::before{content:'';position:absolute;left:3px;top:20px;width:6px;hei
 
 .dl{
   display:inline-flex;align-items:center;gap:8px;margin-top:14px;
-  background:linear-gradient(150deg,var(--ink-soft) 0%,var(--ink) 70%);
-  color:#fff;text-decoration:none;font-weight:700;font-size:14px;
-  padding:12px 20px;border-radius:999px;box-shadow:var(--shadow-sm);
+  background:var(--ink-grad);
+  color:#fff;text-decoration:none;font-weight:700;font-size:14px;letter-spacing:.3px;
+  padding:12px 20px;border-radius:12px;box-shadow:inset 0 1px 1px rgba(255,255,255,.18),0 6px 16px rgba(20,19,23,.25);
+  transition:transform .15s;
 }
-.dl:hover{background:linear-gradient(150deg,var(--ink) 0%,#000 90%);}
+.dl:hover{transform:translateY(-1px);}
 
 .outro{margin:70px 0 0;padding:34px 0 78px;border-top:1px solid var(--line);color:var(--muted);font-size:15px;text-align:center;}
 .outro p{max-width:58ch;margin:0 auto;}
 .sig{font-family:'Playfair Display',serif;font-style:italic;color:var(--rose-deep);font-size:20px;margin-top:14px;}
 
+.shot{display:block;width:100%;height:auto;border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);background:#fff;}
+button.copy{margin-left:8px;border:1.5px solid var(--line);background:#fff;color:var(--rose-deep);font:700 10px/1 'DM Sans',sans-serif;letter-spacing:.8px;text-transform:uppercase;padding:4px 9px;border-radius:999px;cursor:pointer;vertical-align:middle;}
+button.copy:hover{background:var(--blush);}
+button.copy.done{background:var(--go-bg);border-color:#A8CBB2;color:var(--go);}
+.caption .txt a{color:var(--rose-deep);}
 @media (max-width:560px){
   .pieces.two,.pieces.three{grid-template-columns:1fr;}
 }
@@ -221,11 +232,13 @@ ul.plain li::before{content:'';position:absolute;left:3px;top:20px;width:6px;hei
   <div class="tag">Find &middot; Connect &middot; Glow</div>
   <h1>Leslie, meet <em class="pf">3.0.</em></h1>
   <p class="lede">
-    New brand, new pricing, and a kit that's already built, posts, stories,
-    a flyer, cards, ads, and two countdown campaigns. Everything on this page is
+    New brand, new pricing, and a kit that's already built: posts, stories,
+    a flyer, cards, ads, two countdown campaigns, and now September's comic, two ad
+    sets and the recruitment posts. Everything on this page is
     current and safe to put in front of a nail tech. It just needs you.
   </p>
   <nav class="jump">
+    <a href="#new">New this month</a>
     <a href="#kit">The kit</a>
     <a href="#reveal">5-day reveal</a>
     <a href="#countdown">14-day countdown</a>
@@ -236,6 +249,146 @@ ul.plain li::before{content:'';position:absolute;left:3px;top:20px;width:6px;hei
 </header>
 
 <div class="wrap">
+
+<section id="new">
+  <p class="kicker">September 2026</p>
+  <h2>What's new since launch, <em class="pf">in one place.</em></h2>
+  <p class="lede">
+    The comic, two ad sets and the recruitment posts. Each piece says what it is,
+    where the files are, and whether it can go out today. Everything here is in
+    the 3.0 look: black, mauve, blush.
+  </p>
+
+  <h3><span class="n">01</span> &nbsp;The comic <span class="pill go">ready to post</span></h3>
+  <p>
+    Six panels, pop-art halftone, one client's story with a tech's payoff: broke a
+    nail, nail lady out of town, finds a tech by her work on MNC, books her, and
+    the tech fills an empty chair. The phone screens are the real 3.0 app.
+  </p>
+  <div class="pieces two">
+    <div class="piece">
+      <img class="shot" src="campaign-assets/2026-09/comic/mnc-comic-v2-1080.png" alt="The six-panel comic with the brand band" loading="lazy"/>
+      <div class="meta"><span class="name">Square</span><span class="dim">1080&times;1080</span></div>
+      <p class="cap">Facebook and a single Instagram post.</p>
+    </div>
+    <div class="piece">
+      <div class="pieces two" style="gap:10px;">
+        <img class="shot" src="campaign-assets/2026-09/comic/panels/01.png" alt="Panel 1" loading="lazy"/>
+        <img class="shot" src="campaign-assets/2026-09/comic/panels/03.png" alt="Panel 3" loading="lazy"/>
+        <img class="shot" src="campaign-assets/2026-09/comic/panels/05.png" alt="Panel 5" loading="lazy"/>
+        <img class="shot" src="campaign-assets/2026-09/comic/panels/07.png" alt="Closing card" loading="lazy"/>
+      </div>
+      <div class="meta"><span class="name">Swipe cards, 7 of them</span><span class="dim">1080&times;1080 each</span></div>
+      <p class="cap">One panel per card plus a closing brand card. Instagram carousel, TikTok photo swipe. A 9:16 story version is in the folder too.</p>
+    </div>
+  </div>
+
+  <div class="caption" style="margin-top:18px;">
+    <div class="lbl">Facebook <button class="copy" type="button">Copy</button></div>
+    <p class="txt">Broke a nail and your nail lady is out of town? This is the whole reason My Nail Connection exists.
+
+Open the app, browse real sets from real techs near you, and tap the one whose work you love. Pull up her gallery. Call her, text her, or book her right there. No calling around, no waiting on replies.
+
+And if you are the tech with the empty chair: your work is your booking page now. Post your sets, flip Open today when you have a gap, and let the clients who are looking right now find you.
+
+Free to browse. Free to book. Nails only.
+
+mynailconnection.com</p>
+  </div>
+  <div class="caption" style="margin-top:12px;">
+    <div class="lbl">Instagram, carousel of the seven cards <button class="copy" type="button">Copy</button></div>
+    <p class="txt">Oh no. Broke a nail. Nail lady out of town.
+
+Swipe. This is what My Nail Connection is for. Browse real sets from real techs near you, find the one whose work you love, and reach her right from her gallery. Book in the app, or call, or text.
+
+Techs: that empty chair is the other half of this story. Your work is your booking page. Post it.
+
+Free to browse. Free to book. Link in bio.
+
+#nails #nailtech #nailsofinstagram #nailinspo #brokeanail #nailappointment #naildesign #findyournailtech #supportsmallbusiness #mynailconnection</p>
+  </div>
+  <div class="caption" style="margin-top:12px;">
+    <div class="lbl">TikTok, photo post with the seven cards <button class="copy" type="button">Copy</button></div>
+    <p class="txt">POV: you broke a nail and your nail lady is out of town. There is an app for this. Browse real techs by their actual work, then book, call or text her from her gallery. Free to browse, free to book, nails only.
+
+#nailtok #nailtech #brokeanail #nailsoftiktok #nailappointment #naildesign #smallbusiness #mynailconnection</p>
+  </div>
+  <p class="mono" style="margin-top:14px;">campaign-assets/2026-09/comic/ &nbsp;&middot;&nbsp; captions and a pinned-comment line in POSTS.md</p>
+
+  <h3><span class="n">02</span> &nbsp;Two Instagram ad sets <span class="pill go">ready for paid</span></h3>
+  <p>
+    Two carousels for techs, each at 4:5 for the feed and 9:16 for stories.
+    <strong>Found by your work</strong> sells the format: clients browse the sets, then book,
+    call or text from the gallery, and nobody takes a cut. <strong>Open today</strong> sells the
+    switch: flip it and every photo glows, you land in the Open today rail, you show up
+    twice as often, and it clears itself at midnight. Its fifth frame says plainly that
+    techs are being gathered first and clients come next.
+  </p>
+  <div class="pieces two">
+    <div class="piece">
+      <img class="shot" src="campaign-assets/2026-09/ads/preview-feed.png" alt="Seven frames of the Found by your work carousel" loading="lazy"/>
+      <div class="meta"><span class="name">Found by your work</span><span class="dim">7 frames</span></div>
+      <p class="cap">Frame 6 is the one to spend on: "When an app finds you a new client, many take a cut. Up to 30%. My Nail Connection: $0."</p>
+    </div>
+    <div class="piece">
+      <img class="shot" src="campaign-assets/2026-09/ads/preview-open-today.png" alt="Six frames of the Open today carousel" loading="lazy"/>
+      <div class="meta"><span class="name">Open today</span><span class="dim">6 frames</span></div>
+      <p class="cap">Closes on "Get your work in before the clients get there," so a thin client side is a reason to join now.</p>
+    </div>
+  </div>
+  <div class="note">
+    <p>Every claim in both sets was checked against the live site and the competitors'
+    published fees on 20 September. Primary text, headlines, single-frame variants and
+    the claim check are in <span class="mono">AD-COPY.md</span>. Nothing says MNC is the
+    only marketplace, and no frame promises a filled chair.</p>
+  </div>
+  <p class="mono" style="margin-top:14px;">campaign-assets/2026-09/ads/ &nbsp;&middot;&nbsp; feed-*.png and story-*.png, 26 files</p>
+
+  <h3><span class="n">03</span> &nbsp;Instagram recruitment posts <span class="pill go">copy ready</span></h3>
+  <p>
+    Eight organic posts for techs on the all-welcome, booking-optional vibe: come look
+    around, show your work, get found, add your number, and turn on booking whenever or
+    never. Two or three a week over a month. Lead with post 1 or post 4. Keep this run
+    separate from the feature emails so the same techs are not hit twice.
+  </p>
+  <div class="grid">
+    <div class="caption"><div class="lbl">1 &middot; A home for your work <button class="copy" type="button">Copy</button></div>
+      <p class="txt">Your work deserves more than a grid that buries it by Friday. My Nail Connection is a home for nail artists: post your sets and get found by clients searching for exactly your style. Come look around, there is nothing you have to do today.
+Free to join, free to stay. Link in bio.</p></div>
+    <div class="caption"><div class="lbl">2 &middot; You get found <button class="copy" type="button">Copy</button></div>
+      <p class="txt">Clients here do not scroll hoping to stumble on you. They filter by shape, type and style, and they find you. Every set you post is one more way to be discovered.
+Your gallery is free, always, and it never expires. mynailconnection.com</p></div>
+    <div class="caption"><div class="lbl">3 &middot; Reach, your way <button class="copy" type="button">Copy</button></div>
+      <p class="txt">Add your number and clients can call or text you right from your profile. No new system to learn, no pressure. Just an easy way for the right people to reach you.
+You choose what shows. It is your profile. Link in bio.</p></div>
+    <div class="caption"><div class="lbl">4 &middot; Booking, only if you want it <button class="copy" type="button">Copy</button></div>
+      <p class="txt">Already book through Vagaro, StyleSeat or GlossGenius? Add your link and a Book Now button shows up on your profile, and we send clients your way.
+No booking system yet? Try ours free for 30 days. Like it, keep it for $10.99 a month. Do not, no worries, everything else stays free. Your call, always.</p></div>
+    <div class="caption"><div class="lbl">5 &middot; The part that never changes <button class="copy" type="button">Copy</button></div>
+      <p class="txt">No commission. No per-booking fee. Your clients are never charged to book you.
+You keep your prices, your money, your people. That is not going to change.</p></div>
+    <div class="caption"><div class="lbl">6 &middot; Fill a cancellation <button class="copy" type="button">Copy</button></div>
+      <p class="txt">Chair open this afternoon? Flip Open today and your work glows for the clients looking right now. Free, on every plan.
+Your best advertising is the work you already did.</p></div>
+    <div class="caption"><div class="lbl">7 &middot; Your work stays put <button class="copy" type="button">Copy</button></div>
+      <p class="txt">This is not a feed. Nothing autodeletes and nothing scrolls into the void. The set you did last spring is still working for you next spring.
+Post the whole portfolio, not the highlights. It is yours.</p></div>
+    <div class="caption"><div class="lbl">8 &middot; Come see <button class="copy" type="button">Copy</button></div>
+      <p class="txt">If your best work lives on a feed that forgot it by the weekend, come see what a home for your work feels like. Look around, post a set or two, add your number. Turn on booking whenever, or never.
+Free to join, and most of it stays free. Link in bio.</p></div>
+  </div>
+  <h3>Reel and story hooks, said in the first two seconds</h3>
+  <ul class="chips">
+    <li>Your work, in one place that actually keeps it.</li>
+    <li>Clients here filter to find you. Show me your best set.</li>
+    <li>Booking optional. Getting found, not so much.</li>
+    <li>A home for your work, come look around.</li>
+  </ul>
+  <h3>Hashtag bank, rotate 8 to 12 per post</h3>
+  <div class="caption"><div class="lbl">Bank <button class="copy" type="button">Copy</button></div>
+    <p class="txt">#nailtech #nailtechlife #nailtechsofinstagram #nailtechbusiness #nailartist #nailportfolio #nailcommunity #acrylicnails #gelnails #nailsofinstagram #nailinspo #nailtechtips #salonlife #independentnailtech #nailfeature</p></div>
+
+</section>
 
 <section id="kit">
   <p class="kicker">The kit</p>
@@ -342,7 +495,7 @@ ul.plain li::before{content:'';position:absolute;left:3px;top:20px;width:6px;hei
     </div>
   </div>
 
-  <h3><span class="n">04</span> &nbsp;Print &amp; paid</h3>
+  <h3><span class="n">03</span> &nbsp;Print &amp; paid</h3>
   <div class="pieces two">
     <div class="piece">
       <div class="mock flyer">
@@ -481,7 +634,7 @@ My Nail Connection 3.0 is live, mynailconnection.com
   <p class="lede">All of it verified against the shipping app.</p>
 
   <h3>The one-liner</h3>
-  <div class="card" style="background:linear-gradient(150deg,#fff 0%,#FDF4F4 100%);border-color:var(--rose-pale);">
+  <div class="card" style="background:var(--blush);border-color:rgba(162,99,108,.28);">
     <p class="pf" style="font-size:clamp(23px,4.4vw,32px);font-weight:500;line-height:1.2;margin:0;">
       Booking built for nail techs.
     </p>
@@ -511,7 +664,6 @@ My Nail Connection 3.0 is live, mynailconnection.com
 
   <h3>Claims you can print</h3>
   <ul class="chips">
-    <li>Founding rate, locked for life</li>
     <li>0% commission</li>
     <li>$0 per booking</li>
     <li>$0 charged to clients</li>
@@ -527,7 +679,7 @@ My Nail Connection 3.0 is live, mynailconnection.com
     notifications &middot; <strong>&ldquo;free booking&rdquo;</strong> without
     naming the month &middot; <strong>&ldquo;forever&rdquo;</strong> anywhere near
     the word booking &middot; and <strong>&ldquo;no trial&rdquo;</strong>,
-    the offer <em>is</em> a free month.</p>
+    the offer <em>is</em> a free month &middot; and <strong>a founding rate or a lifetime price</strong>, retired on 2026-08-17.</p>
   </div>
 </section>
 
@@ -569,10 +721,11 @@ My Nail Connection 3.0 is live, mynailconnection.com
     </div>
     <div class="card">
       <h4>Brand kit</h4>
-      <p>Logos (transparent PNG + round marks), the 3.0 illustration art, the raw
-      un-framed app screenshots, and <span class="mono">BRAND-COLORS.txt</span>
-      with the exact palette and fonts, Playfair Display and DM Sans, rose
-      <span class="mono">#C0687B</span> through ink <span class="mono">#2C2C31</span>.</p>
+      <p>Logos (transparent PNG, square and round marks, the email mark), the 3.0
+      lady art and share card, and <span class="mono">BRAND-COLORS.txt</span>
+      with the exact palette and fonts, Playfair Display and DM Sans, ink
+      <span class="mono">#141317</span>, mauve <span class="mono">#A2636C</span>,
+      blush <span class="mono">#F7E2E3</span>. Rebuilt 23 September for 3.0.</p>
       <a class="dl" href="campaign-assets/mnc-brand-assets-3.0.zip">&#8595;&nbsp; Brand kit &middot; 3 MB</a>
     </div>
     <div class="card">
@@ -594,8 +747,8 @@ My Nail Connection 3.0 is live, mynailconnection.com
 <footer class="outro">
   <p>
     The hard part is done. The app is live on both stores, every tech gets her
-    first month free, and everyone who joins now keeps the founding rate for
-    life. Now we make sure they hear about it.
+    first month free, and her profile and gallery never cost a thing. Now we make
+    sure they hear about it.
   </p>
   <div class="sig">Love, Anne</div>
   <p style="margin-top:18px;font-size:13.5px;">
@@ -605,5 +758,16 @@ My Nail Connection 3.0 is live, mynailconnection.com
 </footer>
 
 </div>
+<script>
+  // Copy the caption beside the button. Plain clipboard write, no dependencies.
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest('button.copy'); if (!b) return;
+    var box = b.closest('.caption'); var t = box && box.querySelector('.txt'); if (!t) return;
+    navigator.clipboard.writeText(t.innerText.trim()).then(function () {
+      var was = b.textContent; b.textContent = 'Copied'; b.classList.add('done');
+      setTimeout(function () { b.textContent = was; b.classList.remove('done'); }, 1400);
+    }).catch(function () { b.textContent = 'Select it'; });
+  });
+</script>
 </body>
 </html>

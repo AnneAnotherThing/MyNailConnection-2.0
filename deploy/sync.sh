@@ -130,7 +130,7 @@ validate_js() {
 
 # Validate every critical HTML source before any cache bump or copy
 for f in index.html marketing-v3.html reset-password.html tech-guide-v3.html \
-         privacy.html terms.html 404.html founders.html; do
+         privacy.html terms.html 404.html whats-new.html leslie.html; do
   validate_html "$f"
   validate_js "$f"
 done
@@ -192,7 +192,7 @@ sync_dir() {
 # stay no-op until the user edits HTML again.
 if [ -f sw.js ]; then
   needs_bump=0
-  for f in index.html marketing-v3.html reset-password.html tech-guide-v3.html founders.html admin-feedback.html admin-stats.html manifest.json; do
+  for f in index.html marketing-v3.html reset-password.html tech-guide-v3.html admin-feedback.html admin-stats.html manifest.json; do
     if [ -f "$f" ] && [ "$f" -nt sw.js ]; then needs_bump=1; break; fi
   done
   if [ "$needs_bump" = "1" ]; then
@@ -360,7 +360,7 @@ copy_if_exists 404.html                "$GH/404.html"
 copy_if_exists stats.html              "$GH/stats.html"
 copy_if_exists punch-list.html         "$GH/punch-list.html"
 copy_if_exists tech-guide-v3.html      "$GH/tech-guide-v3.html"
-copy_if_exists founders.html           "$GH/founders.html"
+copy_if_exists founders.html           "$GH/founders.html"   # retired 2026-09-23: redirect stub only
 copy_if_exists admin-feedback.html     "$GH/admin-feedback.html"
 copy_if_exists admin-stats.html        "$GH/admin-stats.html"
 copy_if_exists support.html            "$GH/support.html"
@@ -372,6 +372,7 @@ copy_if_exists account-deletion.html   "$GH/account-deletion.html"
 # client refetches it.
 copy_if_exists og-image.png            "$GH/og-image.png"
 copy_if_exists og-image-2026-08.png    "$GH/og-image-2026-08.png"
+copy_if_exists og-image-2026-09.png    "$GH/og-image-2026-09.png"
 copy_if_exists favicon.ico             "$GH/favicon.ico"
 copy_if_exists favicon-32.png          "$GH/favicon-32.png"
 copy_if_exists apple-touch-icon.png    "$GH/apple-touch-icon.png"
@@ -392,6 +393,7 @@ sync_dir images      "$GH/app/images"
 
 # ── Leslie campaign page + downloadable campaign assets ──────────────────
 copy_if_exists leslie.html "$GH/leslie.html"
+copy_if_exists whats-new.html "$GH/whats-new.html"
 copy_if_exists social-kit.html "$GH/social-kit.html"
 sync_dir campaign-assets "$GH/campaign-assets"
 

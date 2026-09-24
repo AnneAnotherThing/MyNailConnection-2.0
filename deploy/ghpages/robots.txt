@@ -12,7 +12,7 @@ Allow: /privacy.html
 Allow: /terms.html
 Allow: /images/
 Allow: /screenshots/
-Allow: /og-image.png
+Allow: /og-image-2026-09.png
 
 # Internal / ops pages, keep out of the index
 Disallow: /punch-list.html
