@@ -883,7 +883,7 @@
         // Wins from the website
         if (site.today > 0) wins.push({ w: 6, t: '<b>' + fmt(site.today) + '</b> ' + plural(site.today, 'person has', 'people have') + ' visited the site today.' });
         if (site.wk > site.prev && site.prev > 0) wins.push({ w: 10, t: 'Website visitors are <b>up ' + Math.round((site.wk - site.prev) / site.prev * 100) + '%</b> this week: ' + fmt(site.wk) + ' people, against ' + fmt(site.prev) + ' the week before.' });
-        else if (site.wk > 0) wins.push({ w: 7, t: '<b>' + fmt(site.wk) + '</b> ' + plural(site.wk, 'person') + ' visited the site this week.' });
+        else if (site.wk > 0) wins.push({ w: 7, t: '<b>' + fmt(site.wk) + '</b> ' + plural(site.wk, 'person', 'people') + ' visited the site this week.' });
         if (perDay[best] > 0 && best >= 23) wins.push({ w: 8, t: 'Best day on the site this month was <b>' + shortDate(days[best]) + '</b>, with ' + perDay[best] + ' ' + plural(perDay[best], 'visitor') + '.' });
         const topCh = Object.keys(ch).sort(function (a, b) { return ch[b] - ch[a]; })[0];
         if (topCh && topCh !== 'direct' && h30.length >= 5) wins.push({ w: 3, t: 'Most visits this month came from <b>' + esc((CHANNELS[topCh] || topCh).toLowerCase()) + '</b> (' + Math.round(ch[topCh] / h30.length * 100) + '%).' });
