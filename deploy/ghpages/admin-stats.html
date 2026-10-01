@@ -94,12 +94,7 @@
     100% { box-shadow: 0 0 0 0 rgba(74,122,90,0); }
   }
 
-  /* Decoy + sign-in */
-  #quiet-card {
-    display: none; background: white; border: 1px solid var(--border);
-    border-radius: 20px; padding: 52px 24px; text-align: center;
-    box-shadow: 0 6px 24px rgba(20,19,23,0.06); user-select: none;
-  }
+  /* Sign-in */
   #auth-card {
     display: none; background: white; border: 1px solid var(--border);
     border-radius: 20px; padding: 28px 26px; max-width: 380px;
@@ -278,18 +273,9 @@
     <div id="updated-line" class="updated-chip">Updated <span id="stats-updated">just now</span></div>
   </header>
 
-  <!-- Quiet decoy (2026-09-06, Anne: "forget the login and instead give me
-       a tricky way to click into it"). A first-time visitor sees only this
-       card. Tapping it 7 times within 2.5s gaps reveals the sign-in. A
-       browser that has signed in before skips the decoy (2026-09-30), so an
-       expired session lands on the sign-in with a reason, never on "Nothing
-       to see here". Security is unchanged: sign-in still needs the SMS code
-       and is_admin() RLS. -->
-  <div id="quiet-card">
-    <div style="font-family:'Playfair Display',serif;font-style:italic;font-size:22px;">My Nail Connection</div>
-    <div style="font-size:13px;color:var(--muted);margin-top:8px;">Nothing to see here.</div>
-  </div>
-
+  <!-- Sign-in. The 7-tap decoy that hid it (2026-09-06) was removed
+       2026-09-30 on Anne's call. The page stays noindex, and the numbers
+       still need the SMS code plus is_admin() RLS. -->
   <div id="auth-card">
     <h2>Admin sign-in</h2>
     <p class="hint">Pour a coffee. The numbers are right past this door.</p>
@@ -476,8 +462,6 @@
   const SUPABASE_URL = 'https://nwqnakoongrorbwnrqzc.supabase.co';
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im53cW5ha29vbmdyb3Jid25ycXpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNzczMjUsImV4cCI6MjA5ODk1MzMyNX0.TFFMlg9VjB0cyJwbgmVbeatFYQFaF1Ri0nrH0GwhHJs';
   const TOKEN_KEY = 'mnc_admin_stats_token';
-  // Set once a browser has signed in; from then on it skips the decoy.
-  const SEEN_KEY = 'mnc_admin_stats_seen';
   // Keep in sync with index.html loadSubscriptionStats().
   const GLOW_UP_PRICE = 10.99;
   const DAY = 86400000;
@@ -561,7 +545,6 @@
     refreshTok = data.refresh_token || refreshTok || null;
     try {
       localStorage.setItem(TOKEN_KEY, JSON.stringify({ access_token: token, refresh_token: refreshTok }));
-      localStorage.setItem(SEEN_KEY, '1');
     } catch (_) {}
   }
   function clearSession() {
@@ -605,32 +588,15 @@
   }
 
   // Screens
-  let _authRevealed = false;
-  try { _authRevealed = localStorage.getItem(SEEN_KEY) === '1'; } catch (_) {}
   function showDash(yes) {
-    $('auth-card').style.display  = (!yes && _authRevealed)  ? 'block' : 'none';
-    $('quiet-card').style.display = (!yes && !_authRevealed) ? 'block' : 'none';
+    $('auth-card').style.display = yes ? 'none' : 'block';
     $('dash').style.display = yes ? 'block' : 'none';
     $('updated-line').style.display = yes ? 'inline-flex' : 'none';
   }
   function showSignIn(msg) {
-    _authRevealed = true;
     showDash(false);
     if (msg) showAuthError(msg); else clearAuthError();
   }
-  (function () {
-    let n = 0, timer = null;
-    $('quiet-card').addEventListener('click', function () {
-      n++;
-      clearTimeout(timer);
-      timer = setTimeout(function () { n = 0; }, 2500);
-      if (n >= 7) {
-        n = 0;
-        showSignIn();
-        try { $('auth-email').focus(); } catch (_) {}
-      }
-    });
-  })();
   function showAuthError(msg) { const el = $('auth-error'); el.textContent = msg; el.classList.add('visible'); }
   function clearAuthError() { $('auth-error').classList.remove('visible'); }
   function setOffline(on) {
