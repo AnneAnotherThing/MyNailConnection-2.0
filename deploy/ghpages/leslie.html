@@ -108,7 +108,6 @@ footer .sig{font-family:'Playfair Display',serif;font-style:italic;color:var(--r
     <h1>Leslie's kit</h1>
     <p>What is ready to post this month, with the files and the captions. Updated 4 October.</p>
     <nav class="jump">
-      <a href="#progress">Where we stand</a>
       <a href="#welcome">Four new ads</a>
       <a href="#comic">The comic</a>
       <a href="#patience">The patience set</a>
@@ -121,26 +120,6 @@ footer .sig{font-family:'Playfair Display',serif;font-style:italic;color:var(--r
 </header>
 
 <div class="wrap">
-
-<section id="progress">
-  <h2>Where we stand</h2>
-  <p>The pink tiles read straight from the app's database each time this page opens, so they move as techs join and post. The log underneath is the trail: one row each time we check in, so you can see the distance covered.</p>
-  <div class="tiles" id="tiles">
-    <div class="tile live"><div class="v" id="t-techs">36</div><div class="k">nail techs on the platform</div><span class="d hide" id="d-techs"></span></div>
-    <div class="tile live"><div class="v" id="t-states">11</div><div class="k">states they work in</div><span class="d hide" id="d-states"></span></div>
-    <div class="tile live"><div class="v" id="t-photos">205</div><div class="k">photos on tech profiles</div><span class="d hide" id="d-photos"></span></div>
-    <div class="tile live"><div class="v" id="t-joined">7</div><div class="k">techs joined in the last 30 days</div></div>
-    <div class="tile"><div class="v">4.8<small>&#9733;</small></div><div class="k">rating on Google Play</div></div>
-    <div class="tile"><div class="v">3.0.4</div><div class="k">live on both stores since Sep 7</div></div>
-  </div>
-  <p class="asof" id="asof">Last check-in 4 October. The store rating and version are updated by hand.</p>
-  <table class="log" id="log">
-    <thead><tr><th>Check-in</th><th>Techs</th><th>States</th><th>Photos</th><th>Joined, 30 days</th></tr></thead>
-    <tbody>
-      <tr data-log="2026-10-04"><td>4 Oct 2026</td><td>36</td><td>11</td><td>205</td><td>7</td></tr>
-    </tbody>
-  </table>
-</section>
 
 <section id="welcome">
   <h3 style="margin-top:0">Four new ads: now welcoming independent nail techs <span class="pill go">ready for paid</span></h3>
@@ -408,29 +387,6 @@ Free to join, and most of it stays free. Link in bio.</p></div>
 </footer>
 
 </div>
-<script>
-// Live tiles. The anon key is the app's public key, the same one in the app itself.
-(function(){
-  var U='https://nwqnakoongrorbwnrqzc.supabase.co/rest/v1/techs?select=state,photos,created_at&limit=1000';
-  var K='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im53cW5ha29vbmdyb3Jid25ycXpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNzczMjUsImV4cCI6MjA5ODk1MzMyNX0.TFFMlg9VjB0cyJwbgmVbeatFYQFaF1Ri0nrH0GwhHJs';
-  var last=document.querySelector('#log tbody tr[data-log]');
-  var base=last?Array.prototype.slice.call(last.querySelectorAll('td'),1).map(function(td){return parseInt(td.textContent,10);}):null;
-  function delta(id,now,was){var el=document.getElementById(id);if(!el||was==null)return;var d=now-was;
-    el.textContent=d>0?'+'+d+' since last check-in':(d<0?d+' since last check-in':'same as last check-in');
-    el.className='d'+(d>0?'':' flat');}
-  fetch(U,{headers:{apikey:K,Authorization:'Bearer '+K}}).then(function(r){return r.ok?r.json():Promise.reject(r.status);}).then(function(rows){
-    var cut=Date.now()-30*864e5,states={},photos=0,joined=0;
-    rows.forEach(function(t){var st=(t.state||'').trim().toUpperCase();if(st)states[st]=1;
-      if(Array.isArray(t.photos))photos+=t.photos.length;
-      if(t.created_at&&Date.parse(t.created_at)>cut)joined++;});
-    var n=rows.length,ns=Object.keys(states).length;
-    document.getElementById('t-techs').textContent=n;document.getElementById('t-states').textContent=ns;
-    document.getElementById('t-photos').textContent=photos;document.getElementById('t-joined').textContent=joined;
-    if(base){delta('d-techs',n,base[0]);delta('d-states',ns,base[1]);delta('d-photos',photos,base[2]);}
-    var d=new Date();document.getElementById('asof').textContent='Live as of '+d.toLocaleDateString('en-US',{month:'long',day:'numeric'})+' at '+d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})+'. Last check-in 4 October. The store rating and version are updated by hand.';
-  }).catch(function(){document.getElementById('asof').textContent='Showing the 4 October check-in; the live read did not come through this time.';});
-})();
-</script>
 <script>
   // Copy the caption beside the button. Plain clipboard write, no dependencies.
   document.addEventListener('click', function (e) {
