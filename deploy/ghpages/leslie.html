@@ -56,6 +56,21 @@ p{max-width:66ch;margin:0 0 16px;}
 .get a{font-size:13px;font-weight:600;text-decoration:none;color:var(--rose);border:1.5px solid var(--line);border-radius:999px;padding:6px 13px;background:#fff;}
 .get a:hover{border-color:var(--rose-pale);background:var(--blush);}
 
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin-top:6px;}
+.tile{background:var(--cream);border:1px solid var(--line);border-radius:16px;padding:18px 18px 16px;min-width:0;}
+.tile.live{background:var(--blush);border-color:rgba(162,99,108,.22);}
+.tile .v{font-family:'Playfair Display',serif;font-weight:700;font-size:38px;line-height:1;color:var(--rose);letter-spacing:-.5px;}
+.tile .v small{font-size:18px;font-weight:600;margin-left:2px;}
+.tile .k{font-size:14px;color:var(--muted);margin-top:8px;line-height:1.35;}
+.tile .d{display:inline-block;margin-top:9px;font-size:12px;font-weight:700;letter-spacing:.5px;color:var(--go);background:var(--go-bg);border-radius:999px;padding:3px 9px;}
+.tile .d.flat{color:var(--muted);background:#fff;border:1px solid var(--line);}
+.tile .d.hide{display:none;}
+.log{width:100%;border-collapse:collapse;margin-top:14px;font-size:14.5px;}
+.log th{text-align:left;font-size:10.5px;letter-spacing:1.3px;text-transform:uppercase;color:var(--rose);font-weight:700;padding:0 10px 8px 0;border-bottom:1px solid var(--line);}
+.log td{padding:9px 10px 9px 0;border-bottom:1px solid var(--line);white-space:nowrap;}
+.log td:first-child{font-weight:600;}
+.asof{font-size:13px;color:var(--muted);margin:10px 0 0;}
+
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px;}
 .card{background:var(--cream);border:1px solid var(--line);border-radius:18px;padding:20px 22px;}
 .card h4{margin:0 0 8px;font-size:16px;font-weight:700;}
@@ -91,8 +106,10 @@ footer .sig{font-family:'Playfair Display',serif;font-style:italic;color:var(--r
   <div class="wrap">
     <div class="mark">My Nail Connection</div>
     <h1>Leslie's kit</h1>
-    <p>What is ready to post this month, with the files and the captions. Updated 24 September.</p>
+    <p>What is ready to post this month, with the files and the captions. Updated 4 October.</p>
     <nav class="jump">
+      <a href="#progress">Where we stand</a>
+      <a href="#welcome">Four new ads</a>
       <a href="#comic">The comic</a>
       <a href="#patience">The patience set</a>
       <a href="#ads">Two ad sets</a>
@@ -104,6 +121,64 @@ footer .sig{font-family:'Playfair Display',serif;font-style:italic;color:var(--r
 </header>
 
 <div class="wrap">
+
+<section id="progress">
+  <h2>Where we stand</h2>
+  <p>The pink tiles read straight from the app's database each time this page opens, so they move as techs join and post. The log underneath is the trail: one row each time we check in, so you can see the distance covered.</p>
+  <div class="tiles" id="tiles">
+    <div class="tile live"><div class="v" id="t-techs">36</div><div class="k">nail techs on the platform</div><span class="d hide" id="d-techs"></span></div>
+    <div class="tile live"><div class="v" id="t-states">11</div><div class="k">states they work in</div><span class="d hide" id="d-states"></span></div>
+    <div class="tile live"><div class="v" id="t-photos">205</div><div class="k">photos on tech profiles</div><span class="d hide" id="d-photos"></span></div>
+    <div class="tile live"><div class="v" id="t-joined">7</div><div class="k">techs joined in the last 30 days</div></div>
+    <div class="tile"><div class="v">4.8<small>&#9733;</small></div><div class="k">rating on Google Play</div></div>
+    <div class="tile"><div class="v">3.0.4</div><div class="k">live on both stores since Sep 7</div></div>
+  </div>
+  <p class="asof" id="asof">Last check-in 4 October. The store rating and version are updated by hand.</p>
+  <table class="log" id="log">
+    <thead><tr><th>Check-in</th><th>Techs</th><th>States</th><th>Photos</th><th>Joined, 30 days</th></tr></thead>
+    <tbody>
+      <tr data-log="2026-10-04"><td>4 Oct 2026</td><td>36</td><td>11</td><td>205</td><td>7</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="welcome">
+  <h3 style="margin-top:0">Four new ads: now welcoming independent nail techs <span class="pill go">ready for paid</span></h3>
+  <p>Single-image ads for techs, one idea each, in the quiet 3.0 look with the lady art. Each comes at 4:5 for the feed and 9:16 for stories. The same honest line sits on every one: free to join, no commission, your clients are never charged, and we are early in a lot of cities.</p>
+  <img class="shot" src="campaign-assets/2026-10/ads-welcome/preview-feed.png" alt="The four welcome ads side by side" loading="lazy" style="margin-bottom:18px;"/>
+  <div class="pieces two">
+    <div class="piece">
+      <div class="meta"><span class="name">A &middot; Will they find you?</span><span class="dim">1080&times;1350 / 1080&times;1920</span></div>
+      <p class="cap">"Clients in your city are starting to look. Will they find you?" The one to lead with.</p>
+      <div class="get"><a href="campaign-assets/2026-10/ads-welcome/A-will-they-find-you-feed.png" download>&#8595; Feed 4:5</a><a href="campaign-assets/2026-10/ads-welcome/A-will-they-find-you-story.png" download>&#8595; Story 9:16</a></div>
+    </div>
+    <div class="piece">
+      <div class="meta"><span class="name">B &middot; Proud of your work?</span><span class="dim">1080&times;1350 / 1080&times;1920</span></div>
+      <p class="cap">"Proud of your work? Give it a home where clients can find it." The gallery pitch.</p>
+      <div class="get"><a href="campaign-assets/2026-10/ads-welcome/B-proud-of-your-work-feed.png" download>&#8595; Feed 4:5</a><a href="campaign-assets/2026-10/ads-welcome/B-proud-of-your-work-story.png" download>&#8595; Story 9:16</a></div>
+    </div>
+    <div class="piece">
+      <div class="meta"><span class="name">C &middot; The techs already here</span><span class="dim">1080&times;1350 / 1080&times;1920</span></div>
+      <p class="cap">"When clients in your city come looking, the techs already here are the ones they find." Early is an advantage.</p>
+      <div class="get"><a href="campaign-assets/2026-10/ads-welcome/C-techs-already-here-feed.png" download>&#8595; Feed 4:5</a><a href="campaign-assets/2026-10/ads-welcome/C-techs-already-here-story.png" download>&#8595; Story 9:16</a></div>
+    </div>
+    <div class="piece">
+      <div class="meta"><span class="name">D &middot; More than a feed</span><span class="dim">1080&times;1350 / 1080&times;1920</span></div>
+      <p class="cap">"Your best set deserves more than a feed that forgets it by Friday." For the tech who posts to Instagram and watches it sink.</p>
+      <div class="get"><a href="campaign-assets/2026-10/ads-welcome/D-best-set-deserves-more-feed.png" download>&#8595; Feed 4:5</a><a href="campaign-assets/2026-10/ads-welcome/D-best-set-deserves-more-story.png" download>&#8595; Story 9:16</a></div>
+    </div>
+  </div>
+  <div class="get" style="margin-top:16px;"><a href="campaign-assets/2026-10/ads-welcome/ads-welcome.zip">&#8595; All four, feed and story, ZIP</a></div>
+  <div class="caption" style="margin-top:18px;">
+    <div class="lbl">Primary text, works above any of the four <button class="copy" type="button">Copy</button></div>
+    <p class="txt">Independent nail techs: your profile and gallery on My Nail Connection are free. Post your sets, tag them by shape and style, and clients near you find them and book, call or text you straight from the gallery. No commission, and your clients are never charged. We are early in a lot of cities, and the map fills as more techs join.</p>
+  </div>
+  <div class="caption" style="margin-top:12px;">
+    <div class="lbl">Headline and button <button class="copy" type="button">Copy</button></div>
+    <p class="txt">Headline: Free for nail techs. No commission.
+Button: Download</p>
+  </div>
+</section>
 
 <section id="comic">
   <h3 style="margin-top:0">The comic <span class="pill go">ready to post</span></h3>
@@ -304,7 +379,12 @@ Free to join, and most of it stays free. Link in bio.</p></div>
   <h2>Files</h2>
   <div class="grid">
     <div class="card">
-      <h4>This month's images</h4>
+      <h4>October images</h4>
+      <p>The four welcome ads at feed and story sizes.</p>
+      <a class="dl" href="campaign-assets/2026-10/ads-welcome/ads-welcome.zip">&#8595;&nbsp; October ads &middot; 3 MB</a>
+    </div>
+    <div class="card">
+      <h4>September images</h4>
       <p>The comic, the swipe cards, both ad sets at feed and story sizes.</p>
       <a class="dl" href="campaign-assets/mnc-september-2026-kit.zip">&#8595;&nbsp; September images &middot; 31 MB</a>
     </div>
@@ -328,6 +408,29 @@ Free to join, and most of it stays free. Link in bio.</p></div>
 </footer>
 
 </div>
+<script>
+// Live tiles. The anon key is the app's public key, the same one in the app itself.
+(function(){
+  var U='https://nwqnakoongrorbwnrqzc.supabase.co/rest/v1/techs?select=state,photos,created_at&limit=1000';
+  var K='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im53cW5ha29vbmdyb3Jid25ycXpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNzczMjUsImV4cCI6MjA5ODk1MzMyNX0.TFFMlg9VjB0cyJwbgmVbeatFYQFaF1Ri0nrH0GwhHJs';
+  var last=document.querySelector('#log tbody tr[data-log]');
+  var base=last?Array.prototype.slice.call(last.querySelectorAll('td'),1).map(function(td){return parseInt(td.textContent,10);}):null;
+  function delta(id,now,was){var el=document.getElementById(id);if(!el||was==null)return;var d=now-was;
+    el.textContent=d>0?'+'+d+' since last check-in':(d<0?d+' since last check-in':'same as last check-in');
+    el.className='d'+(d>0?'':' flat');}
+  fetch(U,{headers:{apikey:K,Authorization:'Bearer '+K}}).then(function(r){return r.ok?r.json():Promise.reject(r.status);}).then(function(rows){
+    var cut=Date.now()-30*864e5,states={},photos=0,joined=0;
+    rows.forEach(function(t){var st=(t.state||'').trim().toUpperCase();if(st)states[st]=1;
+      if(Array.isArray(t.photos))photos+=t.photos.length;
+      if(t.created_at&&Date.parse(t.created_at)>cut)joined++;});
+    var n=rows.length,ns=Object.keys(states).length;
+    document.getElementById('t-techs').textContent=n;document.getElementById('t-states').textContent=ns;
+    document.getElementById('t-photos').textContent=photos;document.getElementById('t-joined').textContent=joined;
+    if(base){delta('d-techs',n,base[0]);delta('d-states',ns,base[1]);delta('d-photos',photos,base[2]);}
+    var d=new Date();document.getElementById('asof').textContent='Live as of '+d.toLocaleDateString('en-US',{month:'long',day:'numeric'})+' at '+d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})+'. Last check-in 4 October. The store rating and version are updated by hand.';
+  }).catch(function(){document.getElementById('asof').textContent='Showing the 4 October check-in; the live read did not come through this time.';});
+})();
+</script>
 <script>
   // Copy the caption beside the button. Plain clipboard write, no dependencies.
   document.addEventListener('click', function (e) {
