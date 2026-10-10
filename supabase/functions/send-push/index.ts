@@ -382,21 +382,21 @@ serve(async (req) => {
   }
 
   try {
-    const payload = await req.json();
-    const { title, body, url, tag, source } = payload;
+    const input = await req.json();
+    const { title, body, url, tag, source } = input;
     if (!title) return jsonResponse({ error: 'title required' }, 400);
 
     const serverOk = STRICT && req.headers.get('x-mnc-server-key') === PUSH_SERVER_KEY;
-    let user_id = String(payload.user_id || '').trim().toLowerCase();
+    let user_id = String(input.user_id || '').trim().toLowerCase();
     if (STRICT) {
       const caller = serverOk ? null : await resolveCaller(req);
       if (!serverOk && !caller) return jsonResponse({ error: 'sign in required' }, 401);
-      const r = await resolveRecipient(payload, caller, serverOk);
+      const r = await resolveRecipient(input, caller, serverOk);
       if (r.startsWith('!')) return jsonResponse({ error: r.slice(1) }, 403);
       user_id = r;
     } else if (!user_id) {
       // Pre-rollout: resolve the new shapes too, with no gate yet.
-      const r = await resolveRecipient(payload, null, true);
+      const r = await resolveRecipient(input, null, true);
       if (r.startsWith('!')) return jsonResponse({ error: r.slice(1) }, 400);
       user_id = r;
     }
