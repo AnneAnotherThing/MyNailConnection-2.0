@@ -36,8 +36,7 @@ $$;
 update public.users
    set admin = true
  where right(public.phone_digits(phone), 10) in (
-   '4804402314',   -- Anne, admin
-   '4806996166',   -- Anne, tech
+   '4804402314',   -- Anne, admin and tech (699-6166 was deleted 2026-10-10)
    '6025021813',   -- Leslie, tech
    '5555550100'    -- MNC Test Client
  );
@@ -48,5 +47,5 @@ commit;
 -- list has no users row yet; sign in with it once in the app and re-run.
 select name, phone, role, admin
   from public.users
- where right(public.phone_digits(phone), 10) in ('4804402314','4806996166','6025021813','5555550100')
+ where right(public.phone_digits(phone), 10) in ('4804402314','6025021813','5555550100')
  order by name;

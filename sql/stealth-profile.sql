@@ -87,9 +87,10 @@ as $$
     );
 $$;
 
--- Anne's tech account.
+-- Anne's account (480-440-2314 is both her admin and her tech identity since
+-- 2026-10-10; the old 699-6166 tech account was deleted).
 update public.techs set stealth = true
- where right(public.phone_digits(phone), 10) = '4806996166';
+ where right(public.phone_digits(phone), 10) = '4804402314';
 
 commit;
 
