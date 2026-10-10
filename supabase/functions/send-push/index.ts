@@ -316,13 +316,43 @@ async function resolveCaller(req: Request): Promise<Caller> {
   }
 }
 
-async function techKey(techId: string): Promise<string> {
+function keysOf(email: unknown, phone: unknown): string[] {
+  const out: string[] = [];
+  const e = String(email || '').trim().toLowerCase();
+  const d = String(phone || '').replace(/\D/g, '').slice(-10);
+  // Phone first: since the phone-only sign-in (2026-08) a tech's devices
+  // and her in-app Notifications screen are keyed by her phone, even when
+  // her techs row still carries an email.
+  if (d.length === 10) out.push('+1' + d);
+  if (e) out.push(e);
+  return out;
+}
+async function techKeys(techId: string): Promise<string[]> {
   const { data } = await supabase.from('techs').select('email,phone').eq('id', techId).limit(1);
-  return data && data[0] ? identityKey(data[0].email, data[0].phone) : '';
+  return data && data[0] ? keysOf(data[0].email, data[0].phone) : [];
+}
+// A caller (the app's admin tools, the SQL crons) may still name a person by
+// one key. Find the other one so a phone-signed-in tech with an email on
+// file is reached either way.
+async function expandKey(key: string): Promise<string[]> {
+  const k = String(key || '').trim().toLowerCase();
+  if (!k) return [];
+  const keys = new Set<string>([k]);
+  const d = k.replace(/\D/g, '').slice(-10);
+  try {
+    for (const table of ['techs', 'users']) {
+      let q = supabase.from(table).select('email,phone').limit(1);
+      q = k.includes('@') ? q.eq('email', k) : (d.length === 10 ? q.in('phone', ['+1' + d, '1' + d, d]) : q.eq('email', k));
+      const { data } = await q;
+      if (data && data[0]) keysOf(data[0].email, data[0].phone).forEach((x) => keys.add(x));
+    }
+  } catch (_) {}
+  return [...keys];
 }
 
-// Returns the recipient key, or a string starting with '!' naming the refusal.
-async function resolveRecipient(body: any, caller: Caller, serverOk: boolean): Promise<string> {
+// Returns the recipient's keys (first one is the primary, used for the
+// in-app history row), or a single string starting with '!' naming the refusal.
+async function resolveRecipient(body: any, caller: Caller, serverOk: boolean): Promise<string | string[]> {
   const bookingId = String(body.booking_id || '').trim();
   const to = String(body.to || '').trim().toLowerCase();
   const techId = String(body.tech_id || '').trim();
@@ -333,26 +363,26 @@ async function resolveRecipient(body: any, caller: Caller, serverOk: boolean): P
       .select('tech_id,client_email,client_phone').eq('id', bookingId).limit(1);
     const b = data && data[0];
     if (!b) return '!booking not found';
-    const tKey = await techKey(b.tech_id);
-    const cKey = identityKey(b.client_email, b.client_phone);
-    const target = to === 'client' ? cKey : tKey;
-    if (!target) return '!recipient has no identity';
+    const tKeys = await techKeys(b.tech_id);
+    const cKeys = keysOf(b.client_email, b.client_phone);
+    const target = to === 'client' ? cKeys : tKeys;
+    if (!target.length) return '!recipient has no identity';
     if (serverOk || (caller && caller.admin)) return target;
     if (!caller) return '!sign in required';
-    const callerIsTech = sameIdentity(caller.key, tKey) || (!!caller.email && caller.email === tKey);
-    const callerIsClient = sameIdentity(caller.key, cKey);
+    const callerIsTech = tKeys.some((k) => sameIdentity(caller.key, k) || (!!caller.email && caller.email === k));
+    const callerIsClient = cKeys.some((k) => sameIdentity(caller.key, k));
     if (to === 'client' && callerIsTech) return target;
     if (to !== 'client' && callerIsClient) return target;
     return '!not a party to that booking';
   }
   if (techId) {
-    const target = await techKey(techId);
-    if (!target) return '!tech not found';
-    if (serverOk || (caller && (caller.admin || sameIdentity(caller.key, target)))) return target;
+    const target = await techKeys(techId);
+    if (!target.length) return '!tech not found';
+    if (serverOk || (caller && (caller.admin || target.some((k) => sameIdentity(caller.key, k))))) return target;
     return '!a booking_id is required to reach a tech';
   }
   if (direct) {
-    if (serverOk || (caller && (caller.admin || sameIdentity(caller.key, direct)))) return direct;
+    if (serverOk || (caller && (caller.admin || sameIdentity(caller.key, direct)))) return expandKey(direct);
     return '!only an admin can push to another user directly';
   }
   return '!user_id, tech_id or booking_id required';
@@ -387,20 +417,21 @@ serve(async (req) => {
     if (!title) return jsonResponse({ error: 'title required' }, 400);
 
     const serverOk = STRICT && req.headers.get('x-mnc-server-key') === PUSH_SERVER_KEY;
-    let user_id = String(input.user_id || '').trim().toLowerCase();
+    let keys: string[] = [];
     if (STRICT) {
       const caller = serverOk ? null : await resolveCaller(req);
       if (!serverOk && !caller) return jsonResponse({ error: 'sign in required' }, 401);
       const r = await resolveRecipient(input, caller, serverOk);
-      if (r.startsWith('!')) return jsonResponse({ error: r.slice(1) }, 403);
-      user_id = r;
-    } else if (!user_id) {
-      // Pre-rollout: resolve the new shapes too, with no gate yet.
+      if (typeof r === 'string') return jsonResponse({ error: r.slice(1) }, 403);
+      keys = r;
+    } else {
+      // Pre-rollout: no gate yet, but resolve every shape and both keys.
       const r = await resolveRecipient(input, null, true);
-      if (r.startsWith('!')) return jsonResponse({ error: r.slice(1) }, 400);
-      user_id = r;
+      if (typeof r === 'string') return jsonResponse({ error: r.slice(1) }, 400);
+      keys = r;
     }
-    if (!user_id) return jsonResponse({ error: 'user_id and title required' }, 400);
+    if (!keys.length) return jsonResponse({ error: 'user_id and title required' }, 400);
+    const user_id = keys[0];
 
     // History first — see recordNotification above. Awaited rather than
     // fire-and-forget because an edge isolate can be torn down the moment the
@@ -411,7 +442,7 @@ serve(async (req) => {
     const { data: subs, error } = await supabase
       .from('push_subscriptions')
       .select('*')
-      .eq('user_id', user_id);
+      .in('user_id', keys);
 
     if (error || !subs?.length) {
       // Recorded above, so it is readable in-app even though no device could
