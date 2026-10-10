@@ -29,6 +29,8 @@
 //   APNS_TEAM_ID  — 10-char Apple Team ID
 //   APNS_BUNDLE_ID — optional, defaults to com.mynailconnection.app
 //   APNS_ENV       — optional, 'production' (default) or 'sandbox'
+//   PUSH_SERVER_KEY — optional until rollout; once set, anonymous callers
+//     are refused (see 'Who may push to whom' below).
 //     Without APNS_PRIVATE_KEY, iOS rows skip the same way Android rows
 //     do without FCM. Nothing else changes.
 
@@ -259,6 +261,103 @@ async function sendApns(
   throw new Error(`APNs send failed: ${res.status} ${text}`);
 }
 
+// ── Who may push to whom (Build 0, 2026-10-09) ──────────────────────────────
+// Before this, the function trusted whoever held the public key, so anyone
+// could push any title to any user_id. Now a call is allowed when ONE holds:
+//   - x-mnc-server-key matches PUSH_SERVER_KEY (the SQL crons, via
+//     _booking_push reading the key from Vault): any recipient.
+//   - the Bearer is a real user JWT and the caller is an admin: any recipient.
+//   - the Bearer is a real user JWT and the recipient is the caller.
+//   - the Bearer is a real user JWT, the body names a booking_id, the caller
+//     is one party of that booking and the push goes to the other party.
+// Callers may also name tech_id or booking_id instead of user_id; the key
+// is resolved here with the service role so the app never needs a tech's
+// email or phone (those are leaving the public lane in the same build).
+//
+// Rollout: while PUSH_SERVER_KEY is NOT set, the old behaviour stays (public
+// key accepted, user_id as given), so phones on the previous build keep
+// pushing. Set the secret once the new build has reached them.
+const PUSH_SERVER_KEY = Deno.env.get('PUSH_SERVER_KEY') || '';
+const STRICT = PUSH_SERVER_KEY.length > 0;
+
+function identityKey(email: unknown, phone: unknown): string {
+  const e = String(email || '').trim().toLowerCase();
+  if (e) return e;
+  const d = String(phone || '').replace(/\D/g, '').slice(-10);
+  return d.length === 10 ? '+1' + d : '';
+}
+function sameIdentity(a: string, b: string): boolean {
+  if (!a || !b) return false;
+  if (a === b) return true;
+  const da = a.replace(/\D/g, '').slice(-10), db = b.replace(/\D/g, '').slice(-10);
+  return da.length === 10 && da === db;
+}
+
+type Caller = { key: string; email: string; last10: string; admin: boolean } | null;
+
+async function resolveCaller(req: Request): Promise<Caller> {
+  try {
+    const token = (req.headers.get('authorization') || '').replace(/^Bearer\s+/i, '');
+    if (!token) return null;
+    const { data, error } = await supabase.auth.getUser(token);
+    if (error || !data?.user) return null;           // the public key lands here
+    const email = String(data.user.email || '').toLowerCase();
+    const last10 = String(data.user.phone || '').replace(/\D/g, '').slice(-10);
+    let rows: Array<{ role: string | null }> | null = null;
+    if (email) ({ data: rows } = await supabase.from('users').select('role').eq('email', email).limit(1));
+    if ((!rows || !rows.length) && last10.length === 10) {
+      ({ data: rows } = await supabase.from('users').select('role')
+        .in('phone', ['+1' + last10, '1' + last10, last10]).limit(1));
+    }
+    const admin = !!(rows && rows[0] && String(rows[0].role || '').toLowerCase() === 'admin');
+    return { key: email || (last10.length === 10 ? '+1' + last10 : ''), email, last10, admin };
+  } catch (_) {
+    return null;
+  }
+}
+
+async function techKey(techId: string): Promise<string> {
+  const { data } = await supabase.from('techs').select('email,phone').eq('id', techId).limit(1);
+  return data && data[0] ? identityKey(data[0].email, data[0].phone) : '';
+}
+
+// Returns the recipient key, or a string starting with '!' naming the refusal.
+async function resolveRecipient(body: any, caller: Caller, serverOk: boolean): Promise<string> {
+  const bookingId = String(body.booking_id || '').trim();
+  const to = String(body.to || '').trim().toLowerCase();
+  const techId = String(body.tech_id || '').trim();
+  const direct = String(body.user_id || '').trim().toLowerCase();
+
+  if (bookingId) {
+    const { data } = await supabase.from('bookings')
+      .select('tech_id,client_email,client_phone').eq('id', bookingId).limit(1);
+    const b = data && data[0];
+    if (!b) return '!booking not found';
+    const tKey = await techKey(b.tech_id);
+    const cKey = identityKey(b.client_email, b.client_phone);
+    const target = to === 'client' ? cKey : tKey;
+    if (!target) return '!recipient has no identity';
+    if (serverOk || (caller && caller.admin)) return target;
+    if (!caller) return '!sign in required';
+    const callerIsTech = sameIdentity(caller.key, tKey) || (!!caller.email && caller.email === tKey);
+    const callerIsClient = sameIdentity(caller.key, cKey);
+    if (to === 'client' && callerIsTech) return target;
+    if (to !== 'client' && callerIsClient) return target;
+    return '!not a party to that booking';
+  }
+  if (techId) {
+    const target = await techKey(techId);
+    if (!target) return '!tech not found';
+    if (serverOk || (caller && (caller.admin || sameIdentity(caller.key, target)))) return target;
+    return '!a booking_id is required to reach a tech';
+  }
+  if (direct) {
+    if (serverOk || (caller && (caller.admin || sameIdentity(caller.key, direct)))) return direct;
+    return '!only an admin can push to another user directly';
+  }
+  return '!user_id, tech_id or booking_id required';
+}
+
 // Shared CORS headers, included on EVERY response so the browser never
 // blocks the reply. Previous version only set these on the success path,
 // which made 400 / no-subscriptions / 500 look like network failures on
@@ -266,7 +365,7 @@ async function sendApns(
 // when the server logic ran fine.
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin':  '*',
-  'Access-Control-Allow-Headers': 'authorization, content-type, apikey',
+  'Access-Control-Allow-Headers': 'authorization, content-type, apikey, x-mnc-server-key',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
@@ -283,11 +382,25 @@ serve(async (req) => {
   }
 
   try {
-    const { user_id, title, body, url, tag, source } = await req.json();
+    const payload = await req.json();
+    const { title, body, url, tag, source } = payload;
+    if (!title) return jsonResponse({ error: 'title required' }, 400);
 
-    if (!user_id || !title) {
-      return jsonResponse({ error: 'user_id and title required' }, 400);
+    const serverOk = STRICT && req.headers.get('x-mnc-server-key') === PUSH_SERVER_KEY;
+    let user_id = String(payload.user_id || '').trim().toLowerCase();
+    if (STRICT) {
+      const caller = serverOk ? null : await resolveCaller(req);
+      if (!serverOk && !caller) return jsonResponse({ error: 'sign in required' }, 401);
+      const r = await resolveRecipient(payload, caller, serverOk);
+      if (r.startsWith('!')) return jsonResponse({ error: r.slice(1) }, 403);
+      user_id = r;
+    } else if (!user_id) {
+      // Pre-rollout: resolve the new shapes too, with no gate yet.
+      const r = await resolveRecipient(payload, null, true);
+      if (r.startsWith('!')) return jsonResponse({ error: r.slice(1) }, 400);
+      user_id = r;
     }
+    if (!user_id) return jsonResponse({ error: 'user_id and title required' }, 400);
 
     // History first — see recordNotification above. Awaited rather than
     // fire-and-forget because an edge isolate can be torn down the moment the

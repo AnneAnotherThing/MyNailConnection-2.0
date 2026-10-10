@@ -5559,8 +5559,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.6',     /* __APP_BUILD_NAME__   */
-  android: 665,         /* __APP_BUILD_ANDROID__ */
-  ios:     470,          /* __APP_BUILD_IOS__     */
+  android: 666,         /* __APP_BUILD_ANDROID__ */
+  ios:     471,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -6647,18 +6647,24 @@ function wireCapacitorPushListeners(PushNotifications) {
 // fire-and-forget (no res.ok check, no return), so a 400/500 or a
 // {sent:0,reason:'no subscriptions found'} response looked like success to the
 // caller, Anne's "test push works but nothing arrives" bug. 2026-04-22.
+// Build 0 (2026-10-09): `userId` may be a push key (email or +1 phone) or a
+// recipient object: { booking_id, to: 'tech' | 'client' } or { tech_id }.
+// The function resolves the person itself and checks the caller may reach
+// them, so the app never needs another person's email or phone. The call
+// carries the signed-in user's token; the public key alone is refused once
+// PUSH_SERVER_KEY is set on the function.
 async function sendPushToUser(userId, { title, body, url, tag }) {
-  const key = pushKey(userId);
-  if (!key) return { sent: 0, error: 'missing user_id' };
+  const target = (userId && typeof userId === 'object') ? userId : { user_id: pushKey(userId) };
+  if (!target.user_id && !target.tech_id && !target.booking_id) return { sent: 0, error: 'missing recipient' };
   try {
     const res = await fetch(`${SUPABASE_URL}/functions/v1/send-push`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'apikey': SUPABASE_ANON_KEY,
-        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+        'Authorization': `Bearer ${window._mncAccessToken || SUPABASE_ANON_KEY}`
       },
-      body: JSON.stringify({ user_id: key, title, body, url, tag })
+      body: JSON.stringify(Object.assign({ title, body, url, tag }, target))
     });
     const data = await res.json().catch(function() { return {}; });
     if (!res.ok) {
@@ -7200,7 +7206,7 @@ async function toggleFavTech() {
       method: 'DELETE', headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${window._mncAccessToken || SUPABASE_ANON_KEY}` }
     }).catch(()=>{});
     if (_favTechs) _favTechs = _favTechs.filter(f => !_favMatchesTech(f, techId, techEmail));
-    bumpTechFavCount(techEmail, -1);
+    bumpTechFavCount(techId || techEmail, -1);
     showToast('Removed from favorites');
   } else {
     await fetch(`${SUPABASE_URL}/rest/v1/user_favorites`, {
@@ -7210,7 +7216,7 @@ async function toggleFavTech() {
     }).catch(()=>{});
     const row = { tech_id: techId, tech_email: techEmail || null, tech_name: currentTech.name, tech_image: currentTech.imageUrl || '' };
     if (_favTechs) _favTechs.push(row); else _favTechs = [row];
-    bumpTechFavCount(techEmail, +1);
+    bumpTechFavCount(techId || techEmail, +1);
     showToast('Saved to favorites!');
   }
   // Refresh star button (consolidated SVG logic in updateFavBtn) AND the
@@ -7314,7 +7320,7 @@ async function toggleInspoPhoto(url, techName, techEmail, techId) {
     // Remove from cache + bump counts down (fires DOM updates via bump helpers)
     if (_inspoPhotos) _inspoPhotos = _inspoPhotos.filter(p => p.photo_url !== url);
     bumpPhotoHeartCount(url, -1);
-    if (techEmail) bumpTechHeartCount(techEmail, -1);
+    bumpTechHeartCount(techId || techEmail, -1);
     showToast('Removed from inspo');
     try {
       const res = await fetch(`${SUPABASE_URL}/rest/v1/user_inspo?user_id=eq.${encodeURIComponent(currentUserId())}&photo_url=eq.${encodeURIComponent(url)}`, {
@@ -7327,7 +7333,7 @@ async function toggleInspoPhoto(url, techName, techEmail, techId) {
       if (_inspoPhotos) _inspoPhotos.push({ photo_url: url, tech_name: techName, tech_email: techEmail || null });
       else _inspoPhotos = [{ photo_url: url, tech_name: techName, tech_email: techEmail || null }];
       bumpPhotoHeartCount(url, +1);
-      if (techEmail) bumpTechHeartCount(techEmail, +1);
+      bumpTechHeartCount(techId || techEmail, +1);
       showToast('Could not remove, please try again');
     }
   } else {
@@ -7335,7 +7341,7 @@ async function toggleInspoPhoto(url, techName, techEmail, techId) {
     if (_inspoPhotos) _inspoPhotos.push({ photo_url: url, tech_name: techName, tech_email: techEmail || null });
     else _inspoPhotos = [{ photo_url: url, tech_name: techName, tech_email: techEmail || null }];
     bumpPhotoHeartCount(url, +1);
-    if (techEmail) bumpTechHeartCount(techEmail, +1);
+    bumpTechHeartCount(techId || techEmail, +1);
     showToast('Saved to inspo!');
     try {
       const res = await fetch(`${SUPABASE_URL}/rest/v1/user_inspo`, {
@@ -7352,7 +7358,7 @@ async function toggleInspoPhoto(url, techName, techEmail, techId) {
       // Revert: the insert didn't land, so remove from cache
       if (_inspoPhotos) _inspoPhotos = _inspoPhotos.filter(p => p.photo_url !== url);
       bumpPhotoHeartCount(url, -1);
-      if (techEmail) bumpTechHeartCount(techEmail, -1);
+      bumpTechHeartCount(techId || techEmail, -1);
       showToast('Could not save, please try again');
     }
   }
@@ -7499,10 +7505,40 @@ async function callPopRpc(fnName, payload) {
 
 // ── Single-tech / single-photo getters (cached) ────────────────────────
 
+// Build 0 (2026-10-09): the browse lane no longer carries a tech's email or
+// phone, so the popularity key is the tech id wherever one exists. A uuid
+// key goes to tech_pop_by_id / tech_pop_counts_by_ids; the old email-or-phone
+// key still works for anything that has one.
+const _UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+function _isUuidKey(k) { return _UUID_RE.test(String(k || '').trim()); }
+async function _popById(id) {
+  const key = String(id || '').trim().toLowerCase();
+  if (!key) return;
+  if (_techFavCountCache.has(key) && _techHeartCountCache.has(key) && _techJoinedCache.has(key)) return;
+  const rows = await callPopRpc('tech_pop_by_id', { p_tech_id: key });
+  const r = Array.isArray(rows) ? rows[0] : rows;
+  _techFavCountCache.set(key, Number(r && r.favs) || 0);
+  _techHeartCountCache.set(key, Number(r && r.hearts) || 0);
+  _techJoinedCache.set(key, (r && r.joined) || null);
+}
+async function _popByIds(ids) {
+  const need = ids.filter(k => !_techFavCountCache.has(k) || !_techHeartCountCache.has(k));
+  if (!need.length) return;
+  const rows = await callPopRpc('tech_pop_counts_by_ids', { p_ids: need });
+  need.forEach(k => { _techFavCountCache.set(k, 0); _techHeartCountCache.set(k, 0); });
+  if (Array.isArray(rows)) rows.forEach(row => {
+    if (!row || !row.tech_id) return;
+    const k = String(row.tech_id).toLowerCase();
+    _techFavCountCache.set(k, Number(row.favs) || 0);
+    _techHeartCountCache.set(k, Number(row.hearts) || 0);
+  });
+}
+
 async function getTechFavCount(techEmail) {
   const key = String(techEmail || '').trim().toLowerCase();
   if (!key) return 0;
   if (_techFavCountCache.has(key)) return _techFavCountCache.get(key);
+  if (_isUuidKey(key)) { await _popById(key); return _techFavCountCache.get(key) || 0; }
   const result = await callPopRpc('tech_fav_count', { p_tech_email: key });
   const count = Number(result) || 0;
   _techFavCountCache.set(key, count);
@@ -7513,6 +7549,7 @@ async function getTechHeartCount(techEmail) {
   const key = String(techEmail || '').trim().toLowerCase();
   if (!key) return 0;
   if (_techHeartCountCache.has(key)) return _techHeartCountCache.get(key);
+  if (_isUuidKey(key)) { await _popById(key); return _techHeartCountCache.get(key) || 0; }
   const result = await callPopRpc('tech_heart_count', { p_tech_email: key });
   const count = Number(result) || 0;
   _techHeartCountCache.set(key, count);
@@ -7535,6 +7572,7 @@ async function getPhotoHeartCount(photoUrl) {
 async function batchTechFavCounts(emails) {
   const keys = (emails || []).map(e => String(e || '').trim().toLowerCase()).filter(Boolean);
   if (keys.length === 0) return new Map();
+  await _popByIds(keys.filter(_isUuidKey));
   const needed = keys.filter(k => !_techFavCountCache.has(k));
   if (needed.length > 0) {
     const rows = await callPopRpc('tech_fav_counts', { p_tech_emails: needed });
@@ -7557,6 +7595,7 @@ async function batchTechFavCounts(emails) {
 async function batchTechHeartCounts(emails) {
   const keys = (emails || []).map(e => String(e || '').trim().toLowerCase()).filter(Boolean);
   if (keys.length === 0) return new Map();
+  await _popByIds(keys.filter(_isUuidKey));
   const needed = keys.filter(k => !_techHeartCountCache.has(k));
   if (needed.length > 0) {
     const rows = await callPopRpc('tech_heart_counts', { p_tech_emails: needed });
@@ -7621,7 +7660,7 @@ function bumpTechHeartCount(techEmail, delta) {
 function refreshGridChipDOM(techEmail) {
   const key = String(techEmail || '').trim().toLowerCase();
   if (!key) return;
-  const slots = document.querySelectorAll('.tech-card-pop[data-tech-email="' + key.replace(/(["\\])/g, '\\$1') + '"]');
+  const slots = document.querySelectorAll('.tech-card-pop[data-tech-key="' + key.replace(/(["\\])/g, '\\$1') + '"]');
   if (!slots.length) return;
   const fc = _techFavCountCache.get(key) || 0;
   const hc = _techHeartCountCache.get(key) || 0;
@@ -7654,6 +7693,7 @@ async function getTechJoinedDate(techEmail) {
   const key = String(techEmail || '').trim().toLowerCase();
   if (!key) return null;
   if (_techJoinedCache.has(key)) return _techJoinedCache.get(key);
+  if (_isUuidKey(key)) { await _popById(key); return _techJoinedCache.get(key) || null; }
   try {
     const r = await fetch(
       `${SUPABASE_URL}/rest/v1/users?or=(email.eq.${encodeURIComponent(key)},phone.eq.${encodeURIComponent(key)})&select=joined`,
@@ -7724,9 +7764,10 @@ async function renderTechPopularity(tech) {
   // (email-or-phone); hearts resolve the same way since
   // sql/feed-hearts-phone-techs.sql re-keyed user_inspo on tech_id and
   // taught tech_heart_count to take an email-or-phone key.
-  if (!tech || (!tech.email && !tech.phone)) return;
-  const _favVia = tech.email
-    ? getTechFavCount(tech.email)
+  const _popKey = (tech && (tech.id || tech.email || tech.phone)) || '';
+  if (!tech || !_popKey) return;
+  const _favVia = (tech.id || tech.email)
+    ? getTechFavCount(_popKey)
     : fetch(SUPABASE_URL + '/rest/v1/rpc/tech_favorite_count_v2', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', apikey: SUPABASE_ANON_KEY,
@@ -7738,8 +7779,8 @@ async function renderTechPopularity(tech) {
   try {
     const [favCount, heartCount, joined] = await Promise.all([
       _favVia,
-      getTechHeartCount(tech.email || tech.phone),
-      getTechJoinedDate(tech.email || tech.phone)
+      getTechHeartCount(_popKey),
+      getTechJoinedDate(_popKey)
     ]);
     const html = popularityRowHTML(favCount, heartCount, joined);
     if (html) {
@@ -7761,12 +7802,12 @@ async function renderTechPopularity(tech) {
 async function hydrateGridPopularityChips(rootEl) {
   try {
     const root = rootEl || document;
-    const slots = root.querySelectorAll('.tech-card-pop[data-tech-email]');
+    const slots = root.querySelectorAll('.tech-card-pop[data-tech-key]');
     if (!slots.length) return;
     const emails = [];
     const seen = new Set();
     slots.forEach(el => {
-      const k = String(el.dataset.techEmail || '').trim().toLowerCase();
+      const k = String(el.dataset.techKey || '').trim().toLowerCase();
       if (k && !seen.has(k)) { seen.add(k); emails.push(k); }
     });
     if (!emails.length) return;
@@ -7776,7 +7817,7 @@ async function hydrateGridPopularityChips(rootEl) {
       batchTechHeartCounts(emails)
     ]);
     slots.forEach(el => {
-      const k = String(el.dataset.techEmail || '').trim().toLowerCase();
+      const k = String(el.dataset.techKey || '').trim().toLowerCase();
       if (!k) return;
       const fc = favMap.get(k) || 0;
       const hc = heartMap.get(k) || 0;
@@ -7879,10 +7920,17 @@ function renderTechContactFooter(tech) {
   }
   const cm = tech.contact_methods || {};
   const phone = tech.phone || '';
+  // A guest has no phone yet (Build 0): show the buttons, sign in on tap.
+  const _guestContact = !phone && !window._mncAccessToken && !!tech.id;
+  const _canContact = phone || _guestContact;
   // If only 'message' was set true (old default), treat as if nothing was set
   const onlyMessageSet = cm.message && !cm.call && !cm.text;
-  const showCall = phone && (onlyMessageSet || !Object.keys(cm).length ? true : !!cm.call);
-  const showText = phone && (onlyMessageSet || !Object.keys(cm).length ? true : !!cm.text);
+  const showCall = _canContact && (onlyMessageSet || !Object.keys(cm).length ? true : !!cm.call);
+  const showText = _canContact && (onlyMessageSet || !Object.keys(cm).length ? true : !!cm.text);
+  const _telHref = _guestContact ? '#' : 'tel:' + (phone.trim().charAt(0) === '+' ? '+' : '') + phone.replace(/\D/g,'');
+  const _smsHref = _guestContact ? '#' : 'sms:' + (phone.trim().charAt(0) === '+' ? '+' : '') + phone.replace(/\D/g,'');
+  const _tapCall = _guestContact ? `requireLogin({type:'contact',techId:'${tech.id}'});return false;` : `logTechTap('call','${tech.id}')`;
+  const _tapText = _guestContact ? `requireLogin({type:'contact',techId:'${tech.id}'});return false;` : `logTechTap('text','${tech.id}')`;
 
   // One hero, and it's the tech's chosen way (Anne, 2026-08-03): when a
   // tech takes bookings (in-app or link), Call/Text sit quiet beneath the
@@ -7900,13 +7948,13 @@ function renderTechContactFooter(tech) {
 
   let btns = '';
   if (showCall) {
-    btns += `<a href="tel:${(phone.trim().charAt(0) === '+' ? '+' : '') + phone.replace(/\D/g,'')}" onclick="logTechTap('call','${tech.id}')" style="${cardStyle}">
+    btns += `<a href="${_telHref}" onclick="${_tapCall}" style="${cardStyle}">
       <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;vertical-align:middle;"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81a19.79 19.79 0 01-3.07-8.68A2 2 0 012 .9h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 8.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>
       Call
     </a>`;
   }
   if (showText) {
-    btns += `<a href="sms:${(phone.trim().charAt(0) === '+' ? '+' : '') + phone.replace(/\D/g,'')}" onclick="logTechTap('text','${tech.id}')" style="${cardStyle}">
+    btns += `<a href="${_smsHref}" onclick="${_tapText}" style="${cardStyle}">
       <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;vertical-align:middle;"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/><line x1="9" y1="10" x2="15" y2="10"/><line x1="9" y1="14" x2="13" y2="14"/></svg>
       Text
     </a>`;
@@ -8912,7 +8960,7 @@ function updateAvailCounts() {
   var nowEl   = document.getElementById('avail-count-now');
   var todayEl = document.getElementById('avail-count-today');
   // Fetch live counts from Supabase
-  fetch(SUPABASE_URL + '/rest/v1/techs?select=is_available,is_same_day,accepting_new_clients,image_url,photos,hide_address_public',
+  fetch(SUPABASE_URL + '/rest/v1/techs_public?select=is_available,is_same_day,accepting_new_clients,image_url,photos,hide_address_public',
     { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY } })
     .then(function(r) { return r.ok ? r.json() : []; })
     .then(function(data) {
@@ -9224,7 +9272,7 @@ function renderTechCards(query, filteredList) {
     // re-parse the onclick JSON. The key is email OR phone, the batch
     // RPCs resolve either (sql/feed-hearts-phone-techs.sql); email-only
     // keying left every phone-only tech's card chipless.
-    const popKey = (t.email || t.phone || '').toString().trim().toLowerCase();
+    const popKey = (t.id || t.email || t.phone || '').toString().trim().toLowerCase();
 
     return `<div class="tech-card" onclick="openTechDetail(${JSON.stringify(t).replace(/"/g,'&quot;')})">
       <div class="tech-card-photos">${photoSlots}</div>
@@ -9236,7 +9284,7 @@ function renderTechCards(query, filteredList) {
             ${glowUpBadge}${availBadge}${newClientBadge}${bookingBadge}
             <span style="font-size:13px;color:var(--muted);">${esc(formatJoinedBadge(t.joined))}</span>
           </div>
-          <div class="tech-card-pop" data-tech-email="${popKey}"></div>
+          <div class="tech-card-pop" data-tech-key="${popKey}"></div>
         </div>
       </div>
     </div>`;
@@ -9272,7 +9320,7 @@ async function loadBulletinBoard(techId) {
       // scheduled posts before they're released (staggered pivot
       // 2026-04-22). The tech's own "Your Posts" list on tech-home
       // shows pending separately with scheduled times.
-      `${SUPABASE_URL}/rest/v1/board_posts?tech_id=eq.${encodeURIComponent(techId)}&publish_at=lte.${encodeURIComponent(new Date().toISOString())}&order=publish_at.desc`,
+      `${SUPABASE_URL}/rest/v1/board_posts?${(techId && techId.uuid) ? 'tech_uuid=eq.' + encodeURIComponent(techId.uuid) : 'tech_id=eq.' + encodeURIComponent(techId)}&publish_at=lte.${encodeURIComponent(new Date().toISOString())}&order=publish_at.desc`,
       { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` } }
     );
     const posts = res.ok ? await res.json() : [];
@@ -9396,6 +9444,36 @@ function openTechDetail(tech) {
 
   // ── Street address, respects hide_address_public so mobile techs
   //    can keep their home address off the public profile.
+  renderTechAddress(tech);
+  renderTechTagsAndRest(tech);
+}
+
+// Build 0 (2026-10-09): the browse lane has no phone or address. When a
+// profile opens and the viewer is signed in, ask tech_contact() for the
+// phone, and the street address only if the tech shows it, then repaint
+// the address line and the Call/Text row. Guests see Call and Text, and
+// tapping either one signs them in and brings them back here.
+async function loadTechContact(tech) {
+  if (!tech || !tech.id || !window._mncAccessToken || tech._contactLoaded) return;
+  try {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/rpc/tech_contact`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY,
+                 'Authorization': `Bearer ${window._mncAccessToken}` },
+      body: JSON.stringify({ p_tech_id: tech.id })
+    });
+    if (!r.ok) return;
+    const rows = await r.json();
+    const c = Array.isArray(rows) ? rows[0] : rows;
+    if (!c) return;
+    tech._contactLoaded = true;
+    tech.phone = c.phone || tech.phone || '';
+    if (c.address) { tech.address = c.address; if (c.zip) tech.zip = c.zip; }
+    if (currentTech === tech) { renderTechAddress(tech); renderTechContactFooter(tech); }
+  } catch(_) {}
+}
+
+function renderTechAddress(tech) {
   const addrEl = document.getElementById('td-address-line');
   const addrText = document.getElementById('td-address-text');
   const addrLink = document.getElementById('td-address-link');
@@ -9424,7 +9502,9 @@ function openTechDetail(tech) {
   } else if (addrEl) {
     addrEl.style.display = 'none';
   }
+}
 
+function renderTechTagsAndRest(tech) {
   // ── Tags
   const tagsEl = document.getElementById('td-tags');
   const tags = tech.tags || [];
@@ -9508,9 +9588,9 @@ function openTechDetail(tech) {
   renderTechDetailAvail(tech);
 
   // Load bulletin board
-  const techBoardId = tech.email || tech.name;
-  loadBulletinBoard(techBoardId);
+  loadBulletinBoard(tech.id ? { uuid: tech.id } : (tech.email || tech.name));
   renderTechContactFooter(tech);
+  loadTechContact(tech);
   updateFavBtn();
   // Popularity chips (⭐ / ♥ / 🌸 New-on-MNC), fire-and-forget; the
   // function hides the row when there's nothing above threshold, so the
@@ -11974,7 +12054,7 @@ async function confirmTechCleanup() {
         method: 'DELETE',
         headers: {
           'apikey': SUPABASE_ANON_KEY,
-          'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+          'Authorization': 'Bearer ' + (window._mncAccessToken || SUPABASE_ANON_KEY),
           'Prefer': 'return=minimal'
         }
       });
@@ -13330,6 +13410,22 @@ function renderStyleGrid() {
   _feedQueue  = weightedShuffle(photos);
   _feedPage   = 0;
   grid.innerHTML = '';
+  var _tilesOut = 0, _adCursor = 0;   // Build 1: fixed ad slots, 6th tile then every 24th
+  var AD_FIRST = 5, AD_EVERY = 24;
+  function maybeAdTile() {
+    var ads = window._partnerAds || [];
+    if (!ads.length) return;
+    if (_tilesOut !== AD_FIRST && (_tilesOut < AD_FIRST || (_tilesOut - AD_FIRST) % AD_EVERY !== 0)) return;
+    var ad = ads[_adCursor++ % ads.length];
+    var div = document.createElement('div');
+    div.style.cssText = 'cursor:pointer;position:relative;overflow:hidden;background:#F0E8E8;';
+    div.classList.add('tech-card-anim');
+    div.setAttribute('aria-label', (ad.title || 'Sponsored') + ', opens the partner website');
+    div.innerHTML = '<img src="' + esc(safeUrl(ad.image_url)) + '" alt="' + esc(ad.title || 'Sponsored') + '" style="width:100%;display:block;aspect-ratio:1;object-fit:cover;" loading="lazy" onerror="this.parentElement.style.display=\'none\'"/>'
+      + '<div style="position:absolute;bottom:6px;left:6px;background:rgba(20,19,23,0.62);color:#fff;font-size:9.5px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;padding:3px 7px;border-radius:100px;pointer-events:none;">Sponsored</div>';
+    div.onclick = function() { openPartnerAd(ad); };
+    grid.appendChild(div);
+  }
 
   // 3.0 one-gallery: always the 3-col grid, the Find/Inspo split is gone.
   grid.style.gridTemplateColumns = 'repeat(3,1fr)';
@@ -13347,6 +13443,7 @@ function renderStyleGrid() {
     _feedPage++;
 
     batch.forEach(function(p) {
+      maybeAdTile(); _tilesOut++;
       var div = document.createElement('div');
       div.style.cssText = 'cursor:pointer;position:relative;overflow:hidden;background:' + (p.tech.bg || '#F0E8E8') + ';transition:transform 0.15s cubic-bezier(0.34,1.4,0.64,1);';
       div.classList.add('tech-card-anim');
@@ -15786,7 +15883,7 @@ async function tbSetStatus(id, status) {
       // used to be thrown away, so "client has no push subscription" and
       // "delivered" looked identical. Now the toast says what happened, and
       // sent:0 names the likeliest cause instead of faking success.
-      sendPushToUser(pushKeyFor(b.client_email, b.client_phone), { title: m.title, body: m.body, url: '/app/', tag: 'booking-' + id })
+      sendPushToUser({ booking_id: id, to: 'client' }, { title: m.title, body: m.body, url: '/app/', tag: 'booking-' + id })
         .then(function(pr) {
           showToast(pr && pr.sent > 0
             ? 'Updated ✓, client notified'
@@ -17148,9 +17245,8 @@ async function bkConfirm() {
     const when = bkFmtStamp(_bkFlow.slot, _bkFlow.tz);
     const techName = _bkFlow.tech.name || 'your tech';
     // Tell the tech (subscription keyed by email, or E.164 for phone techs)
-    var _techPushKey = pushKeyFor(_bkFlow.tech.email, _bkFlow.tech.phone);
-    if (_techPushKey) {
-      sendPushToUser(_techPushKey, {
+    if (data.id) {
+      sendPushToUser({ booking_id: data.id, to: 'tech' }, {
         title: confirmed ? 'New booking 💅' : 'New booking request 💅',
         body: (clientName || 'A client') + ' · ' + _bkFlow.svc.name + ' · ' + when +
               (confirmed ? '' : '. Tap to confirm.'),
@@ -17285,7 +17381,7 @@ async function maOpenTech(techId) {
   // profile opens complete, gallery, availability, Book button, all of
   // it (Anne, 2026-08-03: the earlier minimal object opened a bare shell).
   try {
-    const r = await fetch(SUPABASE_URL + '/rest/v1/techs?id=eq.' + encodeURIComponent(techId) + '&select=*',
+    const r = await fetch(SUPABASE_URL + '/rest/v1/techs_public?id=eq.' + encodeURIComponent(techId) + '&select=*',
       { headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + (window._mncAccessToken || SUPABASE_ANON_KEY) } });
     const rows = r.ok ? await r.json() : [];
     if (rows && rows[0]) { openTechDetail(_mapTechRow(rows[0])); return; }
@@ -17304,9 +17400,9 @@ async function bkCancelMine(id) {
   const b = _maRows.find(function(x) { return x.id === id; });
   if (b) {
     const tech = (window.ALL_TECHS || []).find(function(t) { return t.id === b.tech_id; });
-    if (tech && pushKeyFor(tech.email, tech.phone)) {
+    if (tech) {
       const who = ((currentUserName.first || '') + ' ' + (currentUserName.last || '')).trim() || 'A client';
-      sendPushToUser(pushKeyFor(tech.email, tech.phone), {
+      sendPushToUser({ booking_id: id, to: 'tech' }, {
         title: 'Appointment cancelled',
         body: who + ' cancelled ' + bkFmtStamp(b.starts_at, tech.booking_timezone) + '.',
         url: '/app/', tag: 'booking-' + id
@@ -17405,16 +17501,14 @@ async function bkDoReschedule() {
     const confirmed = data.status === 'confirmed';
     if (f.reschedRole === 'client') {
       const t = (window.ALL_TECHS || []).find(function(x) { return x.id === f.tech.id; }) || f.tech;
-      const key = pushKeyFor(t.email, t.phone);
-      if (key) {
+      if (t) {
         const who = ((currentUserName.first || '') + ' ' + (currentUserName.last || '')).trim() || 'A client';
-        sendPushToUser(key, { title: 'Appointment moved', body: who + ' moved to ' + when + '.', url: '/app/', tag: 'booking-' + f.rescheduleId });
+        sendPushToUser({ booking_id: f.rescheduleId, to: 'tech' }, { title: 'Appointment moved', body: who + ' moved to ' + when + '.', url: '/app/', tag: 'booking-' + f.rescheduleId });
       }
     } else {
       const cp = f.clientPush || {};
-      const key = pushKeyFor(cp.email, cp.phone);
       const techName = (_bkMyTech && _bkMyTech.name) || 'Your tech';
-      if (key) sendPushToUser(key, { title: 'Appointment moved', body: techName + ' moved your appointment to ' + when + '.', url: '/app/', tag: 'booking-' + f.rescheduleId });
+      sendPushToUser({ booking_id: f.rescheduleId, to: 'client' }, { title: 'Appointment moved', body: techName + ' moved your appointment to ' + when + '.', url: '/app/', tag: 'booking-' + f.rescheduleId });
     }
     closeBookModal();
     showToast(confirmed ? 'Moved to ' + when : 'Requested ' + when + ', waiting on confirmation');
@@ -17990,6 +18084,10 @@ function resumePendingAction() {
       }, 250);
       return true;
     }
+  }
+  if (a.type === 'contact' && a.techId) {
+    var tc = (ALL_TECHS || []).find(function(x){ return x.id === a.techId; });
+    if (tc) { setTimeout(function(){ try { openTechDetail(tc); } catch(_){} }, 250); return true; }
   }
   return false;
 }
@@ -19518,9 +19616,9 @@ async function loadMembersFromSupabase() {
   try {
     const [usersRes, techsRes] = await Promise.all([
       fetch(`${SUPABASE_URL}/rest/v1/users?select=*&order=joined.desc`,
-        { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` } }),
+        { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${window._mncAccessToken || SUPABASE_ANON_KEY}` } }),
       fetch(`${SUPABASE_URL}/rest/v1/techs?select=*,is_visible,is_bookable&order=joined.desc`,
-        { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` } })
+        { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${window._mncAccessToken || SUPABASE_ANON_KEY}` } })
     ]);
     const users = usersRes.ok ? await usersRes.json() : [];
     const techs = techsRes.ok ? await techsRes.json() : [];
@@ -22126,7 +22224,7 @@ async function loadTechsFromSupabase() {
 
   try {
     const res = await fetch(
-      SUPABASE_URL + '/rest/v1/techs?select=*,is_visible,is_bookable&order=name.asc',
+      SUPABASE_URL + '/rest/v1/techs_public?select=*&order=name.asc',   // Build 0: safe columns only
       { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY } }
     );
 
@@ -22217,13 +22315,47 @@ function _mapTechRow(t) {
         // subscription_tier='paid' + subscription_expires_at=null
         // onto the techs row, so this single check covers both).
         // 2026-04-27 comps system + subscriber badge.
-        is_subscriber: t.subscription_tier === 'paid'
-                       && (!t.subscription_expires_at
-                           || new Date(t.subscription_expires_at) > new Date())
+        // techs_public carries is_subscriber ready-made; a full row (own/admin) still has the tier.
+        is_subscriber: (t.is_subscriber !== undefined && t.is_subscriber !== null)
+                       ? !!t.is_subscriber
+                       : (t.subscription_tier === 'paid'
+                          && (!t.subscription_expires_at
+                              || new Date(t.subscription_expires_at) > new Date()))
       };
 }
 
+// Build 1 (2026-10-09): partner ad tiles. Loaded once with the techs; the
+// Gallery slots one in at a fixed place (the 6th tile, then every 24th) and
+// rotates through the active ads in order. Tapping opens the partner's
+// site and counts the tap (partner_ad_taps, admin-stats shows the counts).
+window._partnerAds = window._partnerAds || [];
+async function loadPartnerAds() {
+  try {
+    const r = await fetch(SUPABASE_URL + '/rest/v1/partner_ads?select=id,title,image_url,href&active=is.true&order=sort.asc,created_at.asc',
+      { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY } });
+    window._partnerAds = r.ok ? (await r.json()) : [];
+  } catch(_) { window._partnerAds = []; }
+}
+function logPartnerAdTap(adId) {
+  try {
+    let sid = '';
+    try { sid = localStorage.getItem('mnc_sid') || ''; } catch(_) {}
+    fetch(SUPABASE_URL + '/rest/v1/partner_ad_taps', {
+      method: 'POST', keepalive: true,
+      headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY,
+                 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY, 'Prefer': 'return=minimal' },
+      body: JSON.stringify({ ad_id: adId, session_id: sid || null })
+    }).catch(function() {});
+  } catch(_) {}
+}
+function openPartnerAd(ad) {
+  if (!ad || !ad.href) return;
+  logPartnerAdTap(ad.id);
+  try { window.open(safeUrl(ad.href), '_blank', 'noopener'); } catch(_) { location.href = safeUrl(ad.href); }
+}
+
 function _finishLoadTechs(mapped, container) {
+    loadPartnerAds();
     // Replace ALL_TECHS contents in place so filters still work
     ALL_TECHS.length = 0;
     mapped.forEach(function(t) { ALL_TECHS.push(t); });
@@ -22904,7 +23036,7 @@ function mncMaybeDownloadGate() {
     window._mncGetAppTech = techId;
     mncRenderDownloadGate(null);
     if (techId) {
-      fetch(SUPABASE_URL + '/rest/v1/techs?id=eq.' + encodeURIComponent(techId) +
+      fetch(SUPABASE_URL + '/rest/v1/techs_public?id=eq.' + encodeURIComponent(techId) +
             '&select=name,shop_name,city,state,image_url,photos,tags,initials,bg,color', {
         headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY }
       }).then(function(r) { return r.ok ? r.json() : []; }).then(function(rows) {
@@ -23039,7 +23171,7 @@ async function maybeOpenSharedProfile() {
     if (!t) {
       // Not in the browse cache (new tech, filtered, cache miss), fetch solo.
       try {
-        var r = await fetch(SUPABASE_URL + '/rest/v1/techs?id=eq.' + encodeURIComponent(techId) + '&select=*', {
+        var r = await fetch(SUPABASE_URL + '/rest/v1/techs_public?id=eq.' + encodeURIComponent(techId) + '&select=*', {
           headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + (window._mncAccessToken || SUPABASE_ANON_KEY) }
         });
         var rows = r.ok ? await r.json() : [];

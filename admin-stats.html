@@ -436,6 +436,21 @@
         </div>
       </details>
       <details class="fold">
+        <summary><span>Partner ads <span id="pa-count" style="color:var(--muted);font-weight:400;"></span></span></summary>
+        <div class="fold-body">
+          <div id="pa-list" class="list" style="max-height:380px;"><div class="empty">Loading...</div></div>
+          <div class="sub-head" style="margin-top:14px;">Add an ad</div>
+          <div class="form">
+            <label>Name<input id="pa-title" type="text" placeholder="e.g. Gel Supply Co" style="width:170px;"/></label>
+            <label>Website<input id="pa-href" type="url" placeholder="https://" style="width:220px;"/></label>
+            <label>Image<input id="pa-file" type="file" accept="image/*"/></label>
+            <button id="pa-save" class="btn" type="button">Add</button>
+          </div>
+          <div id="pa-save-msg" style="font-size:12px;margin-top:8px;"></div>
+          <div class="note">A square image works best (1080 by 1080). The tile sits in the Gallery among the nail photos with a small Sponsored tag, as the sixth tile and then every 24th, and opens the website when tapped. Turn an ad off to pull it without losing its tap counts.</div>
+        </div>
+      </details>
+      <details class="fold">
         <summary>Techs and comps</summary>
         <div class="fold-body">
           <input id="comp-search" class="search" oninput="renderCompList()" placeholder="Search techs by name or number" style="margin-bottom:10px;"/>
@@ -814,6 +829,7 @@
       }
       setOffline(false);
       if (sources.every(function (s) { return !s.ok; })) { setOffline(true); return; }
+      loadPartnerAds();
 
       const hits    = sources[0].ok ? sources[0].data : null;
       const taps    = sources[1].ok ? sources[1].data : null;
@@ -1195,6 +1211,76 @@
       renderCompList();
     } catch (e) { alert('Could not update: ' + ((e && e.message) || 'error')); }
   }
+
+  // ── Partner ads (Build 1, 2026-10-09) ──────────────────────────────────────
+  async function loadPartnerAds() {
+    try {
+      const [ads, counts] = await Promise.all([
+        fetchAll('partner_ads?select=*&order=sort.asc,created_at.desc'),
+        rpc('admin_partner_ad_counts').catch(function () { return []; })
+      ]);
+      const byAd = {};
+      (counts || []).forEach(function (c) { byAd[c.ad_id] = c; });
+      window._partnerAds = ads || [];
+      const live = (ads || []).filter(function (a) { return a.active; }).length;
+      setTxt('pa-count', ads && ads.length ? '(' + live + ' on, ' + (ads.length - live) + ' off)' : '');
+      if (!ads || !ads.length) { setHtml('pa-list', '<div class="empty">No partner ads yet. Add one below.</div>'); return; }
+      setHtml('pa-list', ads.map(function (a) {
+        const c = byAd[a.id] || {};
+        return '<div class="row" style="align-items:center;">'
+          + '<img src="' + esc(a.image_url) + '" alt="" style="width:44px;height:44px;object-fit:cover;border-radius:8px;flex-shrink:0;background:#F0E8E8;"/>'
+          + '<div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:700;">' + esc(a.title || 'Untitled') + '</div>'
+          + '<div style="font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"><a href="' + esc(a.href) + '" target="_blank" rel="noopener" style="color:var(--rose-dark);">' + esc(a.href) + '</a></div>'
+          + '<div style="font-size:11.5px;color:#6B5F66;margin-top:2px;">Taps <b>' + fmt(c.total || 0) + '</b>, last 30 days <b>' + fmt(c.last_30 || 0) + '</b>' + (c.last_tap ? ', last ' + String(c.last_tap).slice(0, 10) : '') + '</div></div>'
+          + '<span class="pill" style="color:' + (a.active ? '#2D6A4F' : '#6B5F66') + ';">' + (a.active ? 'On' : 'Off') + '</span>'
+          + '<button class="btn' + (a.active ? ' ghost' : '') + '" onclick="adminTogglePartnerAd(\'' + a.id + '\',' + (!a.active) + ')">' + (a.active ? 'Turn off' : 'Turn on') + '</button>'
+          + '<button class="btn ghost" onclick="adminDeletePartnerAd(\'' + a.id + '\')" title="Delete">&times;</button>'
+          + '</div>';
+      }).join(''));
+    } catch (e) {
+      setHtml('pa-list', '<div class="empty">Could not load partner ads' + (e && e.message ? ': ' + esc(e.message) : '') + '. Has sql/build1-partner-ads.sql been run?</div>');
+    }
+  }
+  async function savePartnerAd() {
+    const btn = $('pa-save'), msg = $('pa-save-msg');
+    const title = ($('pa-title').value || '').trim();
+    const href = ($('pa-href').value || '').trim();
+    const file = $('pa-file').files && $('pa-file').files[0];
+    if (!/^https?:\/\//i.test(href)) { msg.style.color = '#a93226'; msg.textContent = 'The website needs to start with http:// or https://.'; return; }
+    if (!file) { msg.style.color = '#a93226'; msg.textContent = 'Pick an image.'; return; }
+    btn.disabled = true; msg.style.color = 'var(--muted)'; msg.textContent = 'Uploading...';
+    try {
+      const ext = (file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg';
+      const slug = (title || 'ad').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'ad';
+      const path = slug + '-' + Date.now() + '.' + ext;
+      const up = await fetch(SUPABASE_URL + '/storage/v1/object/partner-ads/' + path, {
+        method: 'POST',
+        headers: Object.assign({}, authHeaders(), { 'Content-Type': file.type || 'image/jpeg', 'x-upsert': 'true' }),
+        body: file
+      });
+      if (!up.ok) { msg.style.color = '#a93226'; msg.textContent = 'Image upload failed (' + up.status + ').'; return; }
+      const imageUrl = SUPABASE_URL + '/storage/v1/object/public/partner-ads/' + path;
+      await rpc('admin_save_partner_ad', { p_id: null, p_title: title, p_image_url: imageUrl, p_href: href, p_active: true, p_sort: 0 });
+      msg.style.color = '#2D6A4F'; msg.textContent = 'Added and on.';
+      $('pa-title').value = ''; $('pa-href').value = ''; $('pa-file').value = '';
+      loadPartnerAds();
+    } catch (e) {
+      msg.style.color = '#a93226'; msg.textContent = 'Could not save: ' + ((e && e.message) || 'error');
+    } finally { btn.disabled = false; }
+  }
+  async function adminTogglePartnerAd(id, on) {
+    try { await rpc('admin_set_partner_ad', { p_id: id, p_active: on }); loadPartnerAds(); }
+    catch (e) { alert('Could not update: ' + ((e && e.message) || 'error')); }
+  }
+  async function adminDeletePartnerAd(id) {
+    if (!confirm('Delete this ad and its tap counts?')) return;
+    try { await rpc('admin_delete_partner_ad', { p_id: id }); loadPartnerAds(); }
+    catch (e) { alert('Could not delete: ' + ((e && e.message) || 'error')); }
+  }
+  $('pa-save').addEventListener('click', savePartnerAd);
+  window.adminTogglePartnerAd = adminTogglePartnerAd;
+  window.adminDeletePartnerAd = adminDeletePartnerAd;
+
   window.renderCompList = renderCompList;
   window.adminToggleComp = adminToggleComp;
 
