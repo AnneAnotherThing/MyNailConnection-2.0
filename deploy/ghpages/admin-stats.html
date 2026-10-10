@@ -391,7 +391,7 @@
         <div class="tile"><div class="k">Techs</div><div class="v" id="u-techs">-</div><div class="s" id="u-techs-s">-</div></div>
         <div class="tile"><div class="k">Clients</div><div class="v" id="u-clients">-</div><div class="s" id="u-clients-s">-</div></div>
         <div class="tile"><div class="k">Techs with photos</div><div class="v" id="u-photos">-</div><div class="s" id="u-photos-s">-</div></div>
-        <div class="tile"><div class="k">Open to clients</div><div class="v" id="u-open">-</div><div class="s">open today or this week</div></div>
+        <div class="tile"><div class="k">Open to clients</div><div class="v" id="u-open">-</div><div class="s">open today</div></div>
       </div>
       <div class="sub-head">New signups per day, last 30 days</div>
       <svg id="u-chart" class="chart" viewBox="0 0 600 130" preserveAspectRatio="none" role="img" aria-label="New signups per day"></svg>
@@ -948,7 +948,7 @@
         techs.forEach(function (t) {
           const n = Array.isArray(t.photos) ? t.photos.length : 0;
           photoTotal += n; if (n > 0) withPhotos++;
-          if (t.is_same_day || t.is_available) open++;
+          if (t.is_available) open++;
         });
         setTxt('u-techs', fmt(techs.length));
         setTxt('u-techs-s', '+' + t30 + ' in the last 30 days');

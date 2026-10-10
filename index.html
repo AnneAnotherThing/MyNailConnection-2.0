@@ -1672,7 +1672,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       <div style="display:none;"><!-- Typical Hours retired 2026-07-17 (Anne): hours live only in Bookings -> Weekly hours. -->
         <label style="font-size:11px;color:var(--muted);font-weight:500;display:block;margin-bottom:4px;letter-spacing:0.8px;">TYPICAL HOURS</label>
         <div style="font-size:13px;color:var(--muted);line-height:1.5;margin-bottom:10px;padding:10px 12px;background:var(--cream);border-radius:10px;">
-          These are your <em>general</em> hours, not your availability status. They help clients know when you're usually around. Use the <strong>Open today</strong> and <strong>Open this week</strong> toggles on your Tech Portal to actually show as open. You can update both later from your profile.
+          These are your <em>general</em> hours, not your availability status. They help clients know when you're usually around. Use the <strong>Open today</strong> chip on your Tech Portal to actually show as open. You can update both later from your profile.
         </div>
         <div id="reg-hours-grid" style="display:grid;gap:6px;"></div>
         <input type="hidden" id="reg-hours"/>
@@ -1829,12 +1829,6 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
             <div style="font-size:13px;color:rgba(255,255,255,0.85);margin-top:1px;" id="avail-count-now">, techs</div>
           </div>
         </div>
-        <div onclick="handleAvailBtnClick('today')" id="avail-btn-today" style="cursor:pointer;border-radius:12px;background:#FFFFFF;border:1px solid rgba(96,76,77,0.22);border-bottom:3px solid rgba(70,54,55,0.35);box-shadow:0 2px 8px rgba(70,54,55,0.08);padding:8px 12px;display:flex;align-items:center;gap:9px;transition:opacity 0.2s, filter 0.2s;">
-          <div id="avail-dot-today" style="width:8px;height:8px;border-radius:50%;background:#f59e0b;flex-shrink:0;transition:background 0.2s;"></div>
-          <div>
-            <div style="font-size:13px;font-weight:600;color:var(--charcoal);">Open this week</div>
-            <div style="font-size:13px;color:var(--muted);margin-top:1px;" id="avail-count-today">, techs</div>
-          </div>
         </div>
       </div>
 
@@ -2081,7 +2075,6 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       <div style="font-size:11px;font-weight:500;letter-spacing:1.2px;color:var(--muted);margin-bottom:10px;">AVAILABILITY</div>
       <div id="td-avail" style="display:flex;flex-direction:column;gap:8px;">
         <div id="td-badge-now" style="display:none;align-items:center;gap:8px;font-size:13px;"><div class="avail-dot now"></div><span style="color:var(--charcoal);">I could take a client today!</span></div>
-        <div id="td-badge-week" style="display:none;align-items:center;gap:8px;font-size:13px;"><div class="avail-dot today"></div><span style="color:var(--charcoal);">Open this week</span></div>
         <div id="td-badge-new" style="display:none;align-items:center;gap:8px;font-size:13px;"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#D96B72;flex-shrink:0;"></span><span style="color:var(--charcoal);">Taking new clients</span></div>
         <div id="td-avail-none" style="font-size:13px;color:var(--muted);font-style:italic;">No availability set right now</div>
       </div>
@@ -2212,10 +2205,6 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
         <button class="hero-status-chip" id="td-hero-now" onclick="heroToggle('now')">
           <div class="hero-status-dot" data-kind="now"></div>
           <div class="hero-status-label">Open<br>today</div>
-        </button>
-        <button class="hero-status-chip" id="td-hero-week" onclick="heroToggle('week')">
-          <div class="hero-status-dot" data-kind="week"></div>
-          <div class="hero-status-label">This<br>week</div>
         </button>
         <button class="hero-status-chip" id="td-hero-new" onclick="heroToggle('new')">
           <div class="hero-status-dot" data-kind="new"></div>
@@ -5559,8 +5548,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.6',     /* __APP_BUILD_NAME__   */
-  android: 666,         /* __APP_BUILD_ANDROID__ */
-  ios:     471,          /* __APP_BUILD_IOS__     */
+  android: 667,         /* __APP_BUILD_ANDROID__ */
+  ios:     472,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -8098,7 +8087,7 @@ function saveAvailability() {
     // actually updated (moved in here 2026-04-24 so orphan accounts
     // don't see a false "You're showing as available right now!" toast
     // flashing before the "profile missing" error).
-    var msg = nowOn ? "Clients can see you're open today" : todayOn ? "Clients can see you're open this week" : newOn ? "Clients can see you're taking new clients" : "You're no longer showing as open";
+    var msg = nowOn ? "Clients can see you're open today" : newOn ? "Clients can see you're taking new clients" : "You're no longer showing as open";
     showToast(msg);
     // Same-day nudge (Anne, 2026-08-03): Open today only helps if a
     // same-day client can actually get in TODAY. If there is no instant
@@ -8946,7 +8935,7 @@ function filterByAvail(type) {
     ddSelections.availToday = !ddSelections.availToday;
     const cb = document.getElementById('fm-avail-today');
     if (cb) cb.checked = ddSelections.availToday;
-    document.getElementById('avail-btn-today').classList.toggle('active', ddSelections.availToday);
+    var _abt = document.getElementById('avail-btn-today'); if (_abt) _abt.classList.toggle('active', ddSelections.availToday);
   }
   applyFilters();
   // Scroll down to the tech list
@@ -9032,7 +9021,7 @@ function handleAvailBtnClick(which) {
   if (btn && btn.dataset.inactive === '1') {
     showToast(which === 'now'
       ? 'No techs are available right now, check back soon.'
-      : 'No techs are showing openings this week yet.');
+      : 'No techs are showing openings yet.');
     return;
   }
   if (which === 'now') {
@@ -9125,9 +9114,6 @@ function renderTechDetailAvail(tech) {
     if (tech.is_available) {
       heroBadge.style.display = 'inline-flex';
       if (heroLabel) heroLabel.textContent = 'Open today';
-    } else if (tech.is_same_day) {
-      heroBadge.style.display = 'inline-flex';
-      if (heroLabel) heroLabel.textContent = 'Open this week';
     } else {
       heroBadge.style.display = 'none';
     }
@@ -9252,7 +9238,7 @@ function renderTechCards(query, filteredList) {
 
     const availBadge = t.is_available
       ? `<span class="badge badge-now"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);margin-right:3px;vertical-align:middle;"></span>Now</span>`
-      : t.is_same_day ? `<span class="badge badge-today">This Week</span>` : '';
+      : '';
     const newClientBadge = t.accepting_new_clients
       ? `<span class="badge" style="background:#F3E4E5;color:#A2636C;font-size:13px;">New Clients ✓</span>`
       : '';
@@ -16316,7 +16302,7 @@ async function maybeDailyAvailPrompt(t) {
   // re-entry) can't stack two modals.
   try { localStorage.setItem(stampKey, '1'); } catch(_) {}
   var openToday = await showConfirm('Are you open for clients today?', {
-    body: '“Open today” turns itself off every night, so clients only ever see what’s true. Pop in each day you have chair time and flip it on, that’s what shows you as bookable right now.\n\n(“This week” resets Sundays; “New clients” stays however you set it.)',
+    body: '“Open today” turns itself off every night, so clients only ever see what’s true. Pop in each day you have chair time and flip it on, that’s what shows you as bookable right now.\n\n(“New clients” stays however you set it.)',
     okLabel: 'Yes, open today',
     cancelLabel: 'Not today',
     tone: 'neutral'
@@ -16324,20 +16310,6 @@ async function maybeDailyAvailPrompt(t) {
   if (openToday) {
     heroToggle('now');
     try { showToast('You’re showing as open today 💅'); } catch(_) {}
-  }
-  // "This week" cleared itself Sunday night (or was turned off). At most one
-  // extra question, and only on days it's actually off.
-  if (!t.is_same_day) {
-    var openWeek = await showConfirm('Show as open this week too?', {
-      body: '“This week” cleared itself over the weekend, it resets every Sunday night. Flip it back on if you’ve got room in the next few days.',
-      okLabel: 'Open this week',
-      cancelLabel: 'Not this time',
-      tone: 'neutral'
-    });
-    if (openWeek) {
-      heroToggle('week');
-      try { showToast('You’re showing as open this week 💅'); } catch(_) {}
-    }
   }
 }
 
@@ -16374,7 +16346,7 @@ var PORTAL_NAV = [
   { label:'Time zone', hint:'Booking Settings', kw:'timezone tz', run:function(){ portalGo('tech-booking-settings','tb-tz-label'); } },
   { label:'Services and prices', hint:'Booking Settings', kw:'service price menu offerings add service cost', run:function(){ portalGo('tech-booking-settings'); } },
   { label:'Weekly hours', hint:'Booking Settings', kw:'hours availability schedule days open weekly', run:function(){ portalGo('tech-booking-settings'); } },
-  { label:'Set yourself available', hint:'Open today, this week, new clients', kw:'available open today week new clients fill chair status advertise show', run:function(){ var el=document.getElementById('td-hero-now'); if(el){ try{el.scrollIntoView({behavior:'smooth',block:'center'});}catch(_){ el.scrollIntoView(); } portalFlash(el.parentNode||el);} } },
+  { label:'Set yourself available', hint:'Open today, new clients', kw:'available open today new clients fill chair status advertise show', run:function(){ var el=document.getElementById('td-hero-now'); if(el){ try{el.scrollIntoView({behavior:'smooth',block:'center'});}catch(_){ el.scrollIntoView(); } portalFlash(el.parentNode||el);} } },
   { label:'Edit profile', hint:'Name, photo, bio, booking link', kw:'name photo picture bio about link edit profile', run:function(){ openTechEditFromProfile(); } },
   { label:'Share my profile', hint:'Your link and QR code', kw:'share link qr code url promote instagram', run:function(){ shareMyProfile(); } },
   { label:'See what clients see', hint:'Preview your public profile', kw:'preview public view client profile', run:function(){ viewMyProfileAsClient(); } },
@@ -18602,7 +18574,7 @@ function _setupStepsState() {
     // Done = she has actually flipped at least one on the server, OR has
     // read the explainer and chosen to leave them off. A tech who is slammed
     // is right to have all three off, and the list must not nag her for it.
-    { label: 'Show clients when you\u2019re open', sub: 'Learn the Open today, this week and new-clients chips \u00b7 30 sec',
+    { label: 'Show clients when you\u2019re open', sub: 'Learn the Open today and new-clients chips \u00b7 30 sec',
       done: !!window._mncAvailTouched, action: 'setupOpenAvailability()' },
     { label: 'Turn on notifications', sub: 'So you hear when a client reaches out \u00b7 10 sec',
       done: pushDone, action: 'setupEnablePush()' }
@@ -18706,9 +18678,9 @@ async function setupOpenAvailability() {
       // clip its own buttons off a 360x640 screen. The one thing the slide
       // does NOT say is that these are free for every tech regardless of how
       // she takes bookings (fb0af35), so that is what survives the trim.
-      body: 'The three chips at the top of your portal, Open today, This week and New clients, are how clients spot you right now.\n\n' +
+      body: 'The two chips at the top of your portal, Open today and New clients, are how clients spot you right now.\n\n' +
             'Flip Open today when you have chair time and your work glows in the Gallery. They are free for every tech, however you take bookings, and they save the instant you tap.\n\n' +
-            'New clients and This week start on, and I’ll check in once a day to ask if you’re open today. Change any of it, or turn that daily check-in off, in Settings.\n\n' +
+            'New clients starts on. Open today turns itself off every night, and I’ll check in each morning to ask if you’re open. Change any of it, or turn that daily check-in off, in Settings.\n\n' +
             'I’ll take you to them.',
       okLabel: 'Show me',
       tone: 'neutral'
@@ -24197,7 +24169,6 @@ function closeReleaseWizard() {
         <div style="font-size:13px;font-weight:600;letter-spacing:1px;color:var(--muted);margin-bottom:10px;">AVAILABILITY</div>
         <div style="display:flex;flex-wrap:wrap;gap:7px;">
           <label class="acc-chip" id="fm-avail-now-chip"><input type="checkbox" id="fm-avail-now" onchange="applyFilters()"><span>Open today</span></label>
-          <label class="acc-chip" id="fm-avail-today-chip"><input type="checkbox" id="fm-avail-today" onchange="applyFilters()"><span>Open this week</span></label>
         </div>
       </div>
 
@@ -24388,7 +24359,7 @@ function closeReleaseWizard() {
         </div>
         <div style="flex:1;">
           <div style="font-size:15px;font-weight:600;color:var(--charcoal);margin-bottom:3px;">Availability</div>
-          <div style="font-size:13px;color:var(--muted);line-height:1.4;">See who's open now or this week. Great when you need an appointment fast.</div>
+          <div style="font-size:13px;color:var(--muted);line-height:1.4;">See who's open today. Great when you need an appointment fast.</div>
         </div>
         <div class="bpref-check" style="width:22px;height:22px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;"></div>
       </div>
