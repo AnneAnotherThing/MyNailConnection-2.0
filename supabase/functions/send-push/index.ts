@@ -316,16 +316,12 @@ async function resolveCaller(req: Request): Promise<Caller> {
   }
 }
 
-function keysOf(email: unknown, phone: unknown): string[] {
-  const out: string[] = [];
-  const e = String(email || '').trim().toLowerCase();
+function keysOf(_email: unknown, phone: unknown): string[] {
+  // Phone only (Anne, 2026-10-10: "no email, never email"). Sign-in is by
+  // phone, devices register under the phone, the in-app Notifications
+  // screen reads by phone. An email on a profile is never a push address.
   const d = String(phone || '').replace(/\D/g, '').slice(-10);
-  // Phone first: since the phone-only sign-in (2026-08) a tech's devices
-  // and her in-app Notifications screen are keyed by her phone, even when
-  // her techs row still carries an email.
-  if (d.length === 10) out.push('+1' + d);
-  if (e) out.push(e);
-  return out;
+  return d.length === 10 ? ['+1' + d] : [];
 }
 async function techKeys(techId: string): Promise<string[]> {
   const { data } = await supabase.from('techs').select('email,phone').eq('id', techId).limit(1);
@@ -337,8 +333,11 @@ async function techKeys(techId: string): Promise<string[]> {
 async function expandKey(key: string): Promise<string[]> {
   const k = String(key || '').trim().toLowerCase();
   if (!k) return [];
-  const keys = new Set<string>([k]);
+  const keys = new Set<string>();
   const d = k.replace(/\D/g, '').slice(-10);
+  if (!k.includes('@') && d.length === 10) keys.add('+1' + d);   // a phone in any format
+  // An email (the SQL crons still address by email first) is turned into
+  // the person's phone; nothing is ever sent to the email itself.
   try {
     for (const table of ['techs', 'users']) {
       let q = supabase.from(table).select('email,phone').limit(1);
