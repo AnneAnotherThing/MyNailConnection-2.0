@@ -192,7 +192,7 @@ sync_dir() {
 # stay no-op until the user edits HTML again.
 if [ -f sw.js ]; then
   needs_bump=0
-  for f in index.html marketing-v3.html reset-password.html tech-guide-v3.html admin-feedback.html admin-stats.html manifest.json; do
+  for f in index.html marketing-v3.html reset-password.html tech-guide-v3.html admin-stats.html manifest.json; do
     if [ -f "$f" ] && [ "$f" -nt sw.js ]; then needs_bump=1; break; fi
   done
   if [ "$needs_bump" = "1" ]; then
@@ -361,7 +361,6 @@ copy_if_exists stats.html              "$GH/stats.html"
 copy_if_exists punch-list.html         "$GH/punch-list.html"
 copy_if_exists tech-guide-v3.html      "$GH/tech-guide-v3.html"
 copy_if_exists founders.html           "$GH/founders.html"   # retired 2026-09-23: redirect stub only
-copy_if_exists admin-feedback.html     "$GH/admin-feedback.html"
 copy_if_exists admin-stats.html        "$GH/admin-stats.html"
 copy_if_exists support.html            "$GH/support.html"
 copy_if_exists privacy.html            "$GH/privacy.html"
