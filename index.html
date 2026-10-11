@@ -3219,8 +3219,11 @@ function whCardHtml(i) {
         (i.replies ? '<button class="wh-btn" onclick="whToggleReplies(\'' + i.id + '\')">' + (WH.open[i.id] ? 'Hide replies' : 'See ' + i.replies + ' interested') + '</button>' : '') +
         '</div>' + (WH.open[i.id] ? whRepliesHtml(i.id, WH.open[i.id]) : '');
     } else if (whIsTech()) {
-      actions = i.replied
-        ? '<div class="wh-sub" style="color:#2E7A45;font-weight:600;">You said you\'re interested</div>'
+      actions = i.reply_removed
+        ? '<div class="wh-sub">Your reply to this one was taken down.</div>'
+        : i.replied
+        ? '<div class="wh-sub" style="color:#2E7A45;font-weight:600;">You said you\'re interested' +
+          ' <button class="wh-more" style="margin-left:6px;font-size:12px;letter-spacing:0;text-decoration:underline;color:var(--muted);" onclick="event.stopPropagation();whWithdrawReply(\'' + i.id + '\')">Not interested anymore</button></div>'
         : '<div class="wh-actions"><button class="wh-btn primary" onclick="whOpenReplySheet(\'' + i.id + '\')">I\'m interested</button></div>';
     }
   } else if (i.kind === 'available') {
@@ -3375,6 +3378,18 @@ async function whMoreBlock() {
     WH.open = {};
     whRefresh();
   } catch (_) { showToast('Could not block just now'); }
+}
+
+// Take back an Interested reply (Anne, 2026-10-11). The row is deleted on the
+// server, so the client's list drops it and the card offers I'm interested again.
+async function whWithdrawReply(reqId) {
+  if (!confirm('Not interested anymore? Your reply comes off her request.')) return;
+  try {
+    var out = await whRpc('wh_withdraw_reply', { p_request_id: reqId });
+    if (!out || !out.ok) { showToast(out && out.code === 'not_found' ? 'That reply is already gone.' : 'Could not take that back just now'); return; }
+    showToast('Taken back');
+    whRefresh();
+  } catch (_) { showToast('Could not take that back just now'); }
 }
 
 // ── Interested replies (Build 2b) ───────────────────────────────────────────
@@ -6270,8 +6285,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.6',     /* __APP_BUILD_NAME__   */
-  android: 675,         /* __APP_BUILD_ANDROID__ */
-  ios:     480,          /* __APP_BUILD_IOS__     */
+  android: 676,         /* __APP_BUILD_ANDROID__ */
+  ios:     481,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────

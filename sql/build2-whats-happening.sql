@@ -413,7 +413,9 @@ begin
            (select count(*) from public.wh_replies x where x.request_id = r.id and not x.removed
               and not public.wh_blocked(r.author_key, x.tech_key))::int as replies,
            exists (select 1 from public.wh_replies x
-                    where x.request_id = r.id and x.tech_key = me) as replied
+                    where x.request_id = r.id and x.tech_key = me and not x.removed) as replied,
+           exists (select 1 from public.wh_replies x
+                    where x.request_id = r.id and x.tech_key = me and x.removed) as reply_removed
       -- Never the whole table: her own open requests, then the newest in her
       -- city, in her state and everywhere, each an indexed slice of 150.
       from (
@@ -444,7 +446,7 @@ begin
            t.city, public.wh_state(t.state, t.zip), coalesce(a.note, ''), null,
            t.name, t.image_url,
            t.id, null::date, a.until,
-           (public.wh_key(t.phone) = me), 0, false
+           (public.wh_key(t.phone) = me), 0, false, false
       from public.techs t
       left join public.wh_available a on a.tech_id = t.id
      where (p_kind is null or p_kind = 'available')
@@ -457,7 +459,7 @@ begin
            t.city, public.wh_state(t.state, t.zip), b.body, b.image_url,
            t.name, t.image_url,
            t.id, null::date, null::timestamptz,
-           (public.wh_key(t.phone) = me), 0, false
+           (public.wh_key(t.phone) = me), 0, false, false
       from (select b0.*, row_number() over (partition by b0.tech_uuid order by b0.publish_at desc) as rn
               from (select b1.* from public.board_posts b1
                      where b1.image_url is not null
@@ -482,7 +484,7 @@ begin
            'kind', kind, 'id', id, 'at', at, 'city', city, 'state', state,
            'body', body, 'photo', photo, 'name', name, 'image', image,
            'tech_id', tech_id, 'need_by', need_by, 'ends_at', ends_at,
-           'mine', mine, 'replies', replies, 'replied', replied, 'near', near
+           'mine', mine, 'replies', replies, 'replied', replied, 'reply_removed', reply_removed, 'near', near
          ) order by near, at desc), '[]'::jsonb)
     into v_out
     from ranked;
