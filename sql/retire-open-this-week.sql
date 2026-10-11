@@ -42,7 +42,7 @@ declare
   v_today int := 0;
 begin
   with cand as (
-    select t.idlive
+    select t.id
       from public.techs t
      where t.is_available
        and t.avail_set_at is not null
