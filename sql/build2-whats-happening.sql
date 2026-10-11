@@ -410,7 +410,8 @@ begin
            split_part(btrim(r.author_name), ' ', 1) as name, r.author_image as image,
            null::uuid as tech_id, r.need_by, r.expires_at as ends_at,
            (r.author_key = me) as mine,
-           (select count(*) from public.wh_replies x where x.request_id = r.id and not x.removed)::int as replies,
+           (select count(*) from public.wh_replies x where x.request_id = r.id and not x.removed
+              and not public.wh_blocked(r.author_key, x.tech_key))::int as replies,
            exists (select 1 from public.wh_replies x
                     where x.request_id = r.id and x.tech_key = me) as replied
       -- Never the whole table: her own open requests, then the newest in her
@@ -631,7 +632,8 @@ as $$
            'id', r.id, 'at', r.created_at, 'body', r.body, 'need_by', r.need_by,
            'photo', r.photo_url, 'status', case when r.status in ('open', 'expired') and r.expires_at <= now() then 'expired' else r.status end,
            'ends_at', r.expires_at,
-           'replies', (select count(*) from public.wh_replies x where x.request_id = r.id and not x.removed)
+           'replies', (select count(*) from public.wh_replies x where x.request_id = r.id and not x.removed
+                         and not public.wh_blocked(r.author_key, x.tech_key))
          ) order by r.created_at desc), '[]'::jsonb)
     from public.wh_requests r
    where r.author_key = public.wh_me_key()

@@ -3026,6 +3026,9 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
 #wh-bell.on svg{stroke:var(--rose-dark) !important;fill:rgba(222,179,181,0.35) !important;}
 @keyframes whBellGlow{0%,100%{box-shadow:0 0 0 3px rgba(222,179,181,0.30),0 0 10px rgba(208,163,165,0.65);}50%{box-shadow:0 0 0 4px rgba(222,179,181,0.45),0 0 18px rgba(208,163,165,0.95);}}
 @media (prefers-reduced-motion: reduce){#wh-bell.on{animation:none;}}
+.wh-more{margin-left:auto;background:none;border:none;font-size:18px;line-height:1;color:var(--muted);cursor:pointer;padding:0 2px 4px 8px;font-family:'DM Sans',sans-serif;letter-spacing:1px;}
+.wh-reason{display:block;width:100%;text-align:left;padding:11px 13px;margin-bottom:8px;border-radius:12px;border:1.5px solid var(--border);background:white;color:var(--charcoal);font-size:14px;font-family:'DM Sans',sans-serif;cursor:pointer;}
+.wh-reason.on{border-color:var(--charcoal);background:var(--cream);font-weight:600;}
 .wh-group{font-size:11px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--muted);margin:6px 2px -2px;}
 .wh-card{background:white;border:1.5px solid var(--border);border-radius:16px;padding:12px 14px;box-shadow:var(--shadow);display:flex;gap:11px;align-items:flex-start;}
 .wh-card.tap{cursor:pointer;}
@@ -3156,6 +3159,37 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       </div>
       <div id="wh-av-msg" style="display:none;font-size:13px;color:#A0442F;"></div>
       <button id="wh-av-send" class="wh-btn primary" style="padding:12px;font-size:14px;" onclick="whSubmitAvailable()">Put me on the board</button>
+    </div>
+  </div>
+</div>
+
+<!-- Report and block (Build 2c, App Store 1.2) -->
+<div id="wh-more-modal" class="modal-overlay" style="display:none;position:fixed;inset:0;z-index:9100;background:rgba(20,10,11,0.72);backdrop-filter:blur(4px);align-items:flex-end;justify-content:center;">
+  <div style="background:white;border-radius:28px 28px 0 0;width:100%;max-width:440px;padding:20px 22px 34px;box-shadow:0 -8px 40px rgba(0,0,0,0.22);box-sizing:border-box;max-height:92vh;overflow-y:auto;">
+    <div style="width:40px;height:4px;background:var(--border);border-radius:100px;margin:0 auto 14px;"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+      <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:600;color:var(--charcoal);" id="wh-more-title">About this post</div>
+      <button onclick="whCloseModal('wh-more-modal')" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted);line-height:1;">&times;</button>
+    </div>
+    <div id="wh-more-step1" style="display:flex;flex-direction:column;gap:10px;">
+      <button class="wh-btn" style="padding:12px;font-size:14px;text-align:left;" onclick="whMoreReport()">Report this
+        <div style="font-size:12px;color:var(--muted);font-weight:400;margin-top:2px;">Tell us what's wrong. We look at every report within 24 hours.</div></button>
+      <button class="wh-btn" style="padding:12px;font-size:14px;text-align:left;" onclick="whMoreBlock()"><span id="wh-more-block-label">Block</span>
+        <div style="font-size:12px;color:var(--muted);font-weight:400;margin-top:2px;">You won't see each other's posts or replies here.</div></button>
+    </div>
+    <div id="wh-more-step2" style="display:none;">
+      <div class="wh-field-label">WHAT'S WRONG?</div>
+      <div id="wh-reasons">
+        <button class="wh-reason" data-r="Spam or an ad">Spam or an ad</button>
+        <button class="wh-reason" data-r="Inappropriate or offensive">Inappropriate or offensive</button>
+        <button class="wh-reason" data-r="Harassment or bullying">Harassment or bullying</button>
+        <button class="wh-reason" data-r="Fake or a scam">Fake or a scam</button>
+        <button class="wh-reason" data-r="Something else">Something else</button>
+      </div>
+      <label class="wh-field-label" for="wh-rep-note" style="margin-top:6px;">ANYTHING TO ADD? (OPTIONAL)</label>
+      <textarea id="wh-rep-note" rows="2" maxlength="400" class="wh-input" style="resize:vertical;"></textarea>
+      <div id="wh-rep-msg" style="display:none;font-size:13px;color:#A0442F;margin-top:8px;"></div>
+      <button id="wh-rep-send" class="wh-btn primary" style="width:100%;padding:12px;font-size:14px;margin-top:12px;" onclick="whSubmitReport()">Send report</button>
     </div>
   </div>
 </div>
@@ -3474,7 +3508,8 @@ function whCardHtml(i) {
   var place = [i.city, i.state].filter(Boolean).join(', ');
   var meta = '<div class="wh-meta"><span class="wh-name">' + whEsc(i.name || (i.kind === 'request' ? 'A client' : 'A tech')) + '</span>' +
     '<span class="wh-pill ' + i.kind + '">' + pillLabel + '</span>' +
-    (place ? '<span>' + whEsc(place) + '</span>' : '') + '<span>· ' + whEsc(whAgo(i.at)) + '</span></div>';
+    (place ? '<span>' + whEsc(place) + '</span>' : '') + '<span>· ' + whEsc(whAgo(i.at)) + '</span>' +
+    (i.mine ? '' : whMoreBtn(i.kind, i.id, i.name)) + '</div>';
   var text = i.body ? '<div class="wh-text">' + whEsc(i.body) + '</div>' : '';
   var sub = '';
   var actions = '';
@@ -3578,6 +3613,74 @@ function whLiveTick() {
   setTimeout(function () { WH_LIVE.idx++; whLiveShow(); el.style.opacity = '1'; }, 350);
 }
 
+// ── Report and block (Build 2c) ─────────────────────────────────────────────
+var WH_MORE = null;
+function whMoreBtn(kind, id, name) {
+  return '<button class="wh-more" aria-label="Report or block" title="Report or block" data-kind="' + whEsc(kind) +
+    '" data-id="' + whEsc(id) + '" data-name="' + whEsc(name || '') + '" onclick="event.stopPropagation();whMore(this)">\u00b7\u00b7\u00b7</button>';
+}
+function whMore(btn) {
+  if (whIsGuest()) { requireLogin({ type: 'wh' }); return; }
+  WH_MORE = { kind: btn.getAttribute('data-kind'), id: btn.getAttribute('data-id'), name: btn.getAttribute('data-name') || '' };
+  var first = WH_MORE.name ? String(WH_MORE.name).trim().split(/\s+/)[0] : '';
+  document.getElementById('wh-more-title').textContent = WH_MORE.kind === 'reply' ? 'About this reply' : 'About this post';
+  document.getElementById('wh-more-block-label').textContent = first ? 'Block ' + first : 'Block this person';
+  document.getElementById('wh-more-step1').style.display = 'flex';
+  document.getElementById('wh-more-step2').style.display = 'none';
+  whLog('more', WH_MORE.kind, WH_MORE.id);
+  whOpenModal('wh-more-modal');
+}
+function whMoreReport() {
+  document.getElementById('wh-more-title').textContent = 'Report';
+  document.getElementById('wh-more-step1').style.display = 'none';
+  document.getElementById('wh-more-step2').style.display = 'block';
+  document.querySelectorAll('#wh-reasons .wh-reason').forEach(function (b) {
+    b.classList.remove('on');
+    b.onclick = function () {
+      document.querySelectorAll('#wh-reasons .wh-reason').forEach(function (x) { x.classList.remove('on'); });
+      b.classList.add('on');
+    };
+  });
+  document.getElementById('wh-rep-note').value = '';
+  whMsg('wh-rep-msg', '');
+  var s = document.getElementById('wh-rep-send'); s.disabled = false; s.textContent = 'Send report';
+}
+async function whSubmitReport() {
+  if (!WH_MORE) return;
+  var picked = document.querySelector('#wh-reasons .wh-reason.on');
+  if (!picked) { whMsg('wh-rep-msg', 'Pick what is wrong.'); return; }
+  var note = (document.getElementById('wh-rep-note').value || '').trim();
+  var reason = picked.getAttribute('data-r') + (note ? ': ' + note : '');
+  var s = document.getElementById('wh-rep-send'); s.disabled = true; s.textContent = 'Sending…';
+  try {
+    var out = await whRpc('wh_report', { p_kind: WH_MORE.kind, p_id: WH_MORE.id, p_reason: reason });
+    if (!out || !out.ok) {
+      whMsg('wh-rep-msg', out && out.code === 'not_found' ? 'That post is already gone.' :
+        out && out.code === 'daily_cap' ? 'You have sent a lot of reports today. We are on it.' : 'Could not send that just now. Try again in a moment.');
+      s.disabled = false; s.textContent = 'Send report';
+      return;
+    }
+    whCloseModal('wh-more-modal');
+    showToast('Thanks. We look at every report within 24 hours.');
+  } catch (_) {
+    whMsg('wh-rep-msg', 'Could not send that just now. Try again in a moment.');
+    s.disabled = false; s.textContent = 'Send report';
+  }
+}
+async function whMoreBlock() {
+  if (!WH_MORE) return;
+  var first = WH_MORE.name ? String(WH_MORE.name).trim().split(/\s+/)[0] : 'this person';
+  if (!confirm('Block ' + first + '? You won\'t see each other\'s posts or replies here.')) return;
+  try {
+    var out = await whRpc('wh_block', { p_kind: WH_MORE.kind, p_id: WH_MORE.id });
+    if (!out || !out.ok) { showToast('Could not block just now'); return; }
+    whCloseModal('wh-more-modal');
+    showToast('Blocked. You won\'t see each other here.');
+    WH.open = {};
+    whRefresh();
+  } catch (_) { showToast('Could not block just now'); }
+}
+
 // ── Interested replies (Build 2b) ───────────────────────────────────────────
 async function whLoadMe() {
   // The signed-in tech's own contact options, for the reply sheet.
@@ -3666,7 +3769,8 @@ function whRepliesHtml(reqId, reps) {
     if (r.show_text && cm.text) btns.push('<button class="wh-btn" onclick="whReplyContact(\'' + reqId + '\',\'' + r.tech_id + '\',\'text\')">Text</button>');
     btns.push('<button class="wh-btn" onclick="whOpenTech(\'' + r.tech_id + '\',\'reply\')">View profile</button>');
     return '<div style="display:flex;gap:10px;align-items:flex-start;padding:10px;background:var(--cream);border-radius:12px;">' + whAvatar(r.name, r.image) +
-      '<div class="wh-body"><div class="wh-meta"><span class="wh-name">' + whEsc(r.name || 'A tech') + '</span><span>\u00b7 ' + whEsc(whAgo(r.at)) + '</span></div>' +
+      '<div class="wh-body"><div class="wh-meta"><span class="wh-name">' + whEsc(r.name || 'A tech') + '</span><span>\u00b7 ' + whEsc(whAgo(r.at)) + '</span>' +
+      (r.mine ? '' : whMoreBtn('reply', r.id, r.name)) + '</div>' +
       (r.note ? '<div class="wh-text">' + whEsc(r.note) + '</div>' : '') +
       '<div class="wh-actions">' + btns.join('') + '</div></div></div>';
   }).join('') + '</div>';
@@ -6534,8 +6638,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.6',     /* __APP_BUILD_NAME__   */
-  android: 671,         /* __APP_BUILD_ANDROID__ */
-  ios:     476,          /* __APP_BUILD_IOS__     */
+  android: 672,         /* __APP_BUILD_ANDROID__ */
+  ios:     477,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────

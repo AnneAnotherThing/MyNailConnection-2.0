@@ -484,6 +484,14 @@
           <div class="note">Everything sent through the in-app ladybug, whether or not the alert email worked. Tap a message to expand it.</div>
         </div>
       </details>
+      <details class="fold" id="whr-fold">
+        <summary><span>What's happening reports <span id="whr-count" style="color:var(--muted);font-weight:400;"></span></span></summary>
+        <div class="fold-body">
+          <label style="font-size:12.5px;color:var(--muted);display:flex;align-items:center;gap:6px;margin-bottom:8px;"><input type="checkbox" id="whr-done" onchange="loadWhReports()"/> Show handled reports</label>
+          <div id="whr-list" class="list" style="max-height:440px;"><div class="empty">Loading...</div></div>
+          <div class="note">Remove takes the post or reply down. Remove and stop posting also stops that person posting requests, replies or Available now. Each report is answered within 24 hours; the App Store expects it.</div>
+        </div>
+      </details>
       <details class="fold">
         <summary><span>Partner ads <span id="pa-count" style="color:var(--muted);font-weight:400;"></span></span></summary>
         <div class="fold-body">
@@ -879,6 +887,7 @@
       if (sources.every(function (s) { return !s.ok; })) { setOffline(true); return; }
       loadPartnerAds();
       loadWhStats().catch(function () {});
+      loadWhReports().catch(function () {});
 
       const hits    = sources[0].ok ? sources[0].data : null;
       const taps    = sources[1].ok ? sources[1].data : null;
@@ -1261,6 +1270,54 @@
     } catch (e) { alert('Could not update: ' + ((e && e.message) || 'error')); }
   }
 
+  // ── What's happening reports (Build 2c, 2026-10-11) ────────────────────────
+  const WHR_KIND = { request: 'Request', reply: 'Reply', available: 'Available now', photo: 'Photo' };
+  async function loadWhReports() {
+    let rows;
+    try { rows = await rpc('admin_wh_reports', { p_show_done: !!($('whr-done') && $('whr-done').checked) }); }
+    catch (e) { setHtml('whr-list', '<div class="empty">Could not load reports' + (e && e.message ? ': ' + esc(e.message) : '') + '.</div>'); return; }
+    rows = rows || [];
+    const open = rows.filter(function (r) { return r.status === 'open'; }).length;
+    setTxt('whr-count', open ? '(' + open + ' open)' : '');
+    if (open && $('whr-fold')) $('whr-fold').open = true;
+    if (!rows.length) { setHtml('whr-list', '<div class="empty">No reports. All clear.</div>'); return; }
+    setHtml('whr-list', rows.map(function (r) {
+      const done = r.status !== 'open';
+      const btns = done
+        ? (r.banned ? '<button class="btn ghost" onclick="adminWhResolve(\'' + r.id + '\',\'unban\')">Let them post again</button>' : '')
+        : '<button class="btn" onclick="adminWhResolve(\'' + r.id + '\',\'remove\')">Remove</button>'
+          + '<button class="btn" onclick="adminWhResolve(\'' + r.id + '\',\'ban\')">Remove and stop posting</button>'
+          + '<button class="btn ghost" onclick="adminWhResolve(\'' + r.id + '\',\'dismiss\')">Nothing wrong</button>'
+          + (r.banned ? '<button class="btn ghost" onclick="adminWhResolve(\'' + r.id + '\',\'unban\')">Let them post again</button>' : '');
+      return '<div class="row" style="flex-direction:column;align-items:stretch;gap:6px;' + (done ? 'opacity:0.65;' : '') + '">'
+        + '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;"><span class="pill">' + esc(WHR_KIND[r.kind] || r.kind) + '</span>'
+        + (r.banned ? '<span class="pill" style="color:#a93226;">Stopped from posting</span>' : '')
+        + '<span style="font-size:12px;color:var(--muted);">' + esc(relTime(r.at)) + (r.reports_on_person > 1 ? ', ' + r.reports_on_person + ' reports on this person' : '') + '</span></div>'
+        + '<div style="font-size:13.5px;">' + esc(r.snapshot || '(post no longer there)') + '</div>'
+        + '<div style="font-size:12.5px;color:#6B5F66;">Reason: ' + esc(r.reason || 'none given') + '</div>'
+        + (r.admin_note ? '<div style="font-size:12px;color:var(--muted);">Your note: ' + esc(r.admin_note) + '</div>' : '')
+        + (btns ? '<div style="display:flex;gap:6px;flex-wrap:wrap;">' + btns + '</div>' : '')
+        + '</div>';
+    }).join(''));
+  }
+  async function adminWhResolve(id, action) {
+    let note = '';
+    if (action === 'ban' && !confirm('Remove this and stop this person posting on What\'s happening?')) return;
+    if (action === 'remove' || action === 'ban') {
+      const n = prompt('A note for the record (optional)', '');
+      if (n === null) return;
+      note = n;
+    }
+    try {
+      const out = await rpc('admin_wh_resolve', { p_report_id: id, p_action: action, p_note: note });
+      if (!out || !out.ok) alert('Could not update: ' + ((out && out.code) || 'error'));
+    } catch (e) { alert('Could not update: ' + ((e && e.message) || 'error')); }
+    loadWhReports();
+    loadWhStats().catch(function () {});
+  }
+  window.loadWhReports = loadWhReports;
+  window.adminWhResolve = adminWhResolve;
+
   // ── What's happening stats (Build 2, 2026-10-10) ──────────────────────────
   let _whDays = 30;
   async function loadWhStats() {
@@ -1291,7 +1348,7 @@
     setTxt('whs-push', fmt((d.near_pushes || 0) + t('push_reply')));
     setTxt('whs-push-s', fmt(d.near_pushes || 0) + ' near-me, ' + fmt(t('push_reply')) + ' reply; ' + fmt(n('open:push') + n('open:notif')) + ' tapped');
     setTxt('whs-reports', fmt(d.reports_open || 0));
-    setTxt('whs-reports-s', fmt(t('report')) + ' reports, ' + fmt(t('block')) + ' blocks, ' + span);
+    setTxt('whs-reports-s', fmt(t('report')) + ' ' + plural(t('report'), 'report') + ', ' + fmt(t('block')) + ' ' + plural(t('block'), 'block') + ', ' + span);
 
     const days = lastNDays(30), dop = d.daily_opens || {}, dps = d.daily_posts || {};
     barChart('whs-chart', days, [{ values: days.map(function (k) { return dop[k] || 0; }), color: '#8B5041' },
