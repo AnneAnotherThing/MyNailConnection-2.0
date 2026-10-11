@@ -783,6 +783,15 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
   #avail-btn-now::before,
   #avail-btn-now:not([data-inactive="1"]) #avail-dot-now { animation: none; }
 }
+#wh-home-card { position: relative; overflow: hidden; }
+#wh-home-card > * { position: relative; z-index: 1; }
+#wh-home-card::before {
+  content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 0;
+  background: linear-gradient(110deg, transparent 30%, rgba(255,255,255,0.35) 50%, transparent 70%);
+  transform: translateX(-110%); animation: avail-now-shimmer 4.2s ease-in-out infinite;
+}
+#wh-live-dot, .wh-portal-dot { animation: avail-now-dot-pulse 1.6s ease-out infinite; }
+@media (prefers-reduced-motion: reduce) { #wh-home-card::before, #wh-live-dot, .wh-portal-dot { animation: none; } }
 .modal-overlay{position:fixed;inset:0;background:rgba(20,19,23,0.5);z-index:500;display:none;align-items:flex-end;justify-content:center;}
 .modal-overlay.open{display:flex;}
 .modal{background:white;border-radius:28px 28px 0 0;padding:28px 24px 40px;width:420px;max-height:85vh;overflow-y:auto;}
@@ -1816,31 +1825,30 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       </div>
 
 
-      <!-- What's happening (Build 2): requests, who is free now, new work -->
-      <div onclick="openWhatsHappening('all','home')" style="cursor:pointer;border-radius:12px;background:#FFFFFF;border:1px solid rgba(96,76,77,0.22);border-bottom:3px solid rgba(70,54,55,0.35);box-shadow:0 2px 8px rgba(70,54,55,0.08);display:flex;align-items:center;gap:14px;padding:10px 14px;">
-        <div style="width:72px;height:72px;border-radius:14px;flex-shrink:0;box-sizing:border-box;border:1.5px solid var(--border);background:var(--rose-light);display:flex;align-items:center;justify-content:center;">
-          <svg viewBox="0 0 24 24" style="width:30px;height:30px;stroke:var(--rose-dark);fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;"><path d="M21 12a8 8 0 01-11.6 7.1L4 20l1-4.6A8 8 0 1121 12z"/><path d="M8.5 11h7M8.5 14h4"/></svg>
-        </div>
-        <div style="flex:1;">
-          <div style="font-size:15px;font-weight:600;color:var(--charcoal);">What's happening</div>
-          <div style="font-size:13px;color:var(--muted);margin-top:2px;">Ask for a set · see who is free now</div>
-        </div>
-        <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--rose-mid);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg>
-      </div>
-
       <!-- Available Today / Within 24h, the dot + count are live via
            updateAvailCounts(). When nobody matches, the card flips to an
            inactive treatment (dim + "Not at this time" note + click
            disabled) so clients don't tap through to an empty list.
            2026-04-23 per Anne. -->
-      <div style="display:grid;grid-template-columns:1fr;gap:8px;">
-        <div onclick="openWhatsHappening('available','home-available')" id="avail-btn-now" style="cursor:pointer;border-radius:14px;background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);border:1px solid rgba(96,76,77,0.3);border-bottom:3px solid rgba(43,41,39,0.5);box-shadow:0 4px 14px rgba(125,100,102,0.35);display:flex;align-items:center;gap:11px;padding:14px 16px;">
-          <div id="avail-dot-now" style="width:10px;height:10px;border-radius:50%;background:#8CEBAC;box-shadow:0 0 8px rgba(140,235,172,0.8);flex-shrink:0;transition:background 0.2s;"></div>
-          <div>
-            <div style="font-size:15px;font-weight:700;color:white;letter-spacing:0.2px;">✨ Available now</div>
-            <div style="font-size:13px;color:rgba(255,255,255,0.85);margin-top:1px;" id="avail-count-now">, techs</div>
+      <!-- What's happening, live (Build 2, 2026-10-11). Merged with the old
+           Open today card: one bold door into the board, with a pulsing Live
+           dot, live counts and the latest posts rolling through. The old
+           avail-btn-now element stays hidden so updateAvailCounts and the
+           filter code that look it up keep working. -->
+      <div onclick="openWhatsHappening('all','home')" id="wh-home-card" style="cursor:pointer;border-radius:14px;background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);border:1px solid rgba(96,76,77,0.3);border-bottom:3px solid rgba(43,41,39,0.5);box-shadow:0 4px 14px rgba(125,100,102,0.35);padding:14px 16px;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="font-size:15px;font-weight:700;color:white;letter-spacing:0.2px;flex:1;">What's happening</div>
+          <div style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.22);border-radius:100px;padding:3px 9px 3px 7px;">
+            <span id="wh-live-dot" style="width:8px;height:8px;border-radius:50%;background:#8CEBAC;display:inline-block;"></span>
+            <span style="font-size:10.5px;font-weight:800;letter-spacing:1px;color:white;">LIVE</span>
           </div>
+          <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:rgba(255,255,255,0.8);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg>
         </div>
+        <div id="wh-home-counts" style="font-size:13px;color:rgba(255,255,255,0.9);margin-top:4px;">Requests, who is free now, and new work</div>
+        <div id="wh-home-ticker" style="font-size:12.5px;color:rgba(255,255,255,0.72);margin-top:6px;min-height:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:opacity .35s;"></div>
+      </div>
+      <div style="display:none;" aria-hidden="true">
+        <div id="avail-btn-now"><div id="avail-dot-now"></div><div id="avail-count-now"></div></div>
       </div>
 
     </div>
@@ -2304,8 +2312,9 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
           <svg viewBox="0 0 24 24" style="width:22px;height:22px;stroke:var(--rose-dark);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;"><path d="M21 12a8 8 0 01-11.6 7.1L4 20l1-4.6A8 8 0 1121 12z"/><path d="M8.5 11h7M8.5 14h4"/></svg>
         </div>
         <div style="flex:1;min-width:0;">
-          <div style="font-family:'Playfair Display',serif;font-size:17px;font-weight:600;color:var(--charcoal);">What's happening</div>
-          <div style="font-size:12.5px;color:var(--muted);margin-top:2px;line-height:1.4;">Client requests near you · who is free now</div>
+          <div style="display:flex;align-items:center;gap:8px;"><div style="font-family:'Playfair Display',serif;font-size:17px;font-weight:600;color:var(--charcoal);">What's happening</div>
+            <span class="wh-portal-dot" style="width:8px;height:8px;border-radius:50%;background:#5F9B72;display:inline-block;"></span><span style="font-size:10px;font-weight:800;letter-spacing:1px;color:#2E7A45;">LIVE</span></div>
+          <div id="wh-portal-count" style="font-size:12.5px;color:var(--muted);margin-top:2px;line-height:1.4;">Client requests near you · who is free now</div>
         </div>
         <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:var(--muted);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg>
       </div>
@@ -3357,7 +3366,7 @@ function whPaintCta() {
     if (m && m.is_available) {
       el.innerHTML = '<div class="wh-card" style="align-items:center;"><div class="wh-body"><div class="wh-name">You\'re on the Available now board</div>' +
         '<div class="wh-sub">' + (m.until ? 'Until ' + whEsc(whTime(m.until)) : 'For today') + (m.note ? ' · ' + whEsc(m.note) : '') + '</div></div>' +
-        '<button class="wh-btn" onclick="whClearAvailable()">I\'m booked up</button></div>';
+        '<button class="wh-btn" onclick="whClearAvailable()">Turn off Available now</button></div>';
     } else {
       el.innerHTML = '<button class="wh-btn primary" style="width:100%;padding:12px;font-size:14px;" onclick="whOpenAvailSheet()">I\'m available now</button>';
     }
@@ -3509,6 +3518,64 @@ async function whOpenTech(techId, from) {
   if (!t) { try { await loadTechsFromSupabase(); } catch (_) {} t = find(); }
   if (t) openTechDetail(t);
   else showToast('That profile is not available right now');
+}
+
+// ── Live cards on Home and the Tech Portal (Build 2, 2026-10-11) ───────────
+var WH_LIVE = { lines: [], idx: 0, rot: null, refresh: null, at: 0 };
+function whPlural(n, one, many) { return n + ' ' + (n === 1 ? one : many); }
+function whLiveLine(i) {
+  var who = i.name ? String(i.name).trim().split(/\s+/)[0] : (i.kind === 'request' ? 'A client' : 'A tech');
+  var place = i.city ? ' in ' + i.city : '';
+  if (i.kind === 'request') return who + place + ': ' + String(i.body || '').slice(0, 70);
+  if (i.kind === 'available') return who + place + ' is free ' + (i.ends_at ? 'until ' + whTime(i.ends_at) : 'today') + (i.body ? ': ' + String(i.body).slice(0, 50) : '');
+  return 'New work from ' + who + place;
+}
+async function whLiveCards() {
+  // Counts for everyone; the rolling lines need a signed-in feed.
+  var counts = null, items = [];
+  try { counts = await whRpc('wh_teaser', {}); } catch (_) {}
+  if (!whIsGuest()) {
+    if (WH.loadedFor !== currentUserEmail) {
+      WH.loadedFor = currentUserEmail; WH.city = ''; WH.state = ''; WH.items = []; WH.mine = null; WH.open = {}; WH.prefs = null; WH.me = null;
+      try { var row = await loadOwnUserRow('city,state'); if (row) { WH.city = (row.city || '').trim(); WH.state = (row.state || '').trim(); } } catch (_) {}
+    }
+    try { items = (await whRpc('wh_feed', { p_city: WH.city || null, p_state: WH.state || null, p_kind: null })) || []; } catch (_) {}
+  }
+  var free = counts ? counts.available || 0 : 0, reqs = counts ? counts.requests || 0 : 0;
+  var near = items.filter(function (i) { return i.kind === 'request' && i.near === 0 && !i.mine; }).length;
+  var homeCounts = document.getElementById('wh-home-counts');
+  if (homeCounts) {
+    // Only the counts that are not zero, so a quiet board never reads "0 techs".
+    var parts = [];
+    if (free) parts.push(whPlural(free, 'tech free now', 'techs free now'));
+    if (reqs) parts.push(whPlural(reqs, 'open request', 'open requests'));
+    homeCounts.textContent = parts.length ? parts.join(' \u00b7 ') : 'Be the first to post today';
+  }
+  var portal = document.getElementById('wh-portal-count');
+  if (portal) {
+    portal.textContent = near ? whPlural(near, 'request near you', 'requests near you') + ' \u00b7 tap to see'
+      : (reqs ? whPlural(reqs, 'open request', 'open requests') + ' \u00b7 who is free now' : 'Client requests near you \u00b7 who is free now');
+  }
+  WH_LIVE.lines = items.slice(0, 8).map(whLiveLine).filter(Boolean);
+  if (!WH_LIVE.lines.length) WH_LIVE.lines = [whIsGuest() ? 'Sign in to see who needs a set and who is free' : 'Ask for a set, or see who is free right now'];
+  WH_LIVE.idx = 0;
+  whLiveShow();
+  if (!WH_LIVE.rot) WH_LIVE.rot = setInterval(whLiveTick, 4000);
+  if (!WH_LIVE.refresh) WH_LIVE.refresh = setInterval(function () {
+    if (_currentScreen === 'home' || _currentScreen === 'tech-home') whLiveCards();
+  }, 60000);
+}
+function whLiveShow() {
+  var el = document.getElementById('wh-home-ticker');
+  if (el) el.textContent = WH_LIVE.lines[WH_LIVE.idx % WH_LIVE.lines.length] || '';
+}
+function whLiveTick() {
+  if (_currentScreen !== 'home' || WH_LIVE.lines.length < 2) return;
+  if (document.visibilityState && document.visibilityState !== 'visible') return;
+  var el = document.getElementById('wh-home-ticker');
+  if (!el) return;
+  el.style.opacity = '0';
+  setTimeout(function () { WH_LIVE.idx++; whLiveShow(); el.style.opacity = '1'; }, 350);
 }
 
 // ── Interested replies (Build 2b) ───────────────────────────────────────────
@@ -3888,7 +3955,7 @@ async function whSubmitAvailable() {
 async function whClearAvailable() {
   try {
     var out = await whRpc('wh_clear_available', {});
-    if (out && out.ok) { whSetOpenTodayChip(false); showToast("You're off the board for now"); }
+    if (out && out.ok) { whSetOpenTodayChip(false); showToast("You're off the Available now board"); }
     else showToast('Could not update that just now');
   } catch (e) {
     if (e && e.status === 404) { doToggleDash('td-t-now', 't-now'); syncHeroStatus(); return; }
@@ -6467,8 +6534,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.6',     /* __APP_BUILD_NAME__   */
-  android: 670,         /* __APP_BUILD_ANDROID__ */
-  ios:     475,          /* __APP_BUILD_IOS__     */
+  android: 671,         /* __APP_BUILD_ANDROID__ */
+  ios:     476,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -21070,6 +21137,7 @@ function show(id) {
   }
   if (id === 'browse-location') { renderLocTechCards(); }
   if (id === 'tech-home') { loadTechDashboard(); try { refreshNotifBadge(); } catch(_) {} }
+  if (id === 'home' || id === 'tech-home') { try { whLiveCards(); } catch(_) {} }
   if (id === 'whats-happening') { try { whLoad(); } catch(_) {} }
   else { try { whStopPoll(); whStopMotion(); } catch(_) {} }
   if (id === 'my-photos') { loadMyPhotosData(); }

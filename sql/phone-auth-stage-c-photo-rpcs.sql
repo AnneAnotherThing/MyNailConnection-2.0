@@ -1,3 +1,6 @@
+-- SUPERSEDED 2026-10-11 by sql/photo-rpcs-owner-check.sql for append_tech_photo and
+-- remove_tech_photo_by_url. Do not re-run this file: it would put back the
+-- version that lets any signed-in user edit another tech's Gallery.
 -- ============================================================================
 -- PHONE-AUTH STAGE C: photo pipeline accepts phone identity  (2026-07-24)
 -- ============================================================================

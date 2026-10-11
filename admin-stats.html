@@ -1314,7 +1314,7 @@
       row('Available now: started, posted', fmt(n('sheet:available')), fmt(t('post_available'))) +
       row('Guest sign-in taps', fmt(t('signin_tap'))) +
       row('Requests posted with a photo', fmt(rq.with_photo || 0)) +
-      row('Turned off by the tech ("I\'m booked up")', fmt(t('clear_available'))));
+      row('Turned off by the tech', fmt(t('clear_available'))));
     setHtml('whs-req-detail',
       row('Found someone', fmt(rq.found || 0)) +
       row('Taken down by the client', fmt(rq.closed || 0)) +
