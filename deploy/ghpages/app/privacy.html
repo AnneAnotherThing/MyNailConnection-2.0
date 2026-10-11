@@ -62,22 +62,24 @@
   <h3>Information you give us</h3>
   <ul>
     <li><strong>Account information:</strong> name, email address, and (for techs) phone number, shop name, street address, city, state, and ZIP code.</li>
-    <li><strong>Profile content (techs):</strong> biography, portfolio photos, service tags, typical hours, booking link, availability toggles, and contact-preference settings.</li>
-    <li><strong>Payments and purchase history (techs):</strong> when you purchase photo credits or a subscription (Glow Up), Stripe processes the payment. We receive a Stripe customer ID, a record of which products you purchased and when (your purchase history), and the current subscription status (paid, renewed, cancelled). We do not see or store your full card number, CVV, or bank details, those are handled directly by Stripe.</li>
-    <li><strong>Communications:</strong> messages you send through our in-app "Send feedback" tool, customer-support emails, and any liability-acknowledgment checkboxes you agree to at signup.</li>
+    <li><strong>Profile content (techs):</strong> biography, portfolio photos, service tags, typical hours, booking link, Available now posts, and contact-preference settings.</li>
+    <li><strong>Payments and purchase history (techs):</strong> when you subscribe to Glow Up, Apple (iPhone) or Stripe (Android and web) processes the payment. We receive a Stripe customer ID, a record of which products you purchased and when (your purchase history), and the current subscription status (paid, renewed, cancelled). We do not see or store your full card number, CVV, or bank details, those are handled directly by Stripe.</li>
+    <li><strong>What's happening posts:</strong> when you post a request, we store the text, your city and state, the date you need it by, and an optional photo, and show them to signed-in users, closest first. When a tech posts Available now, we store the end time and note. Replies, reports and blocks you make are stored so we can act on them. Request photos are deleted a week after the request ends.</li>
+    <li><strong>Communications:</strong> messages you send through our in-app "Report a bug" and "Get help" tools, customer-support emails, and any liability-acknowledgment checkboxes you agree to at signup.</li>
   </ul>
 
   <h3>Information we collect automatically</h3>
   <ul>
     <li><strong>Device &amp; usage:</strong> IP address, device type, operating system, browser, approximate location derived from IP, pages viewed, features used, and error logs.</li>
     <li><strong>Cookies &amp; local storage:</strong> a session token so you stay signed in across reloads, and minimal preferences (e.g. last-used filters). We do not use third-party advertising cookies.</li>
+    <li><strong>Usage events:</strong> when you open What's happening, post, reply, or tap a profile or contact button from the board, we record the event with your role and the time, so we can see what is used. Raw events older than 90 days are folded into daily totals.</li>
     <li><strong>Push notification tokens:</strong> if you opt in to notifications, we store a device-specific subscription token so we can deliver messages. You can revoke this at any time in your browser or device settings.</li>
   </ul>
 
   <h3>Information from others</h3>
   <ul>
     <li><strong>Geocoding services:</strong> when you enter an address, we send it to our geocoding provider to convert it to latitude/longitude so we can power the map search.</li>
-    <li><strong>Authentication events:</strong> Supabase Auth (our identity provider) logs sign-in attempts, password resets, and similar security events on our behalf.</li>
+    <li><strong>Authentication events:</strong> Supabase Auth (our identity provider) logs sign-in attempts, sign-in codes, and similar security events on our behalf.</li>
   </ul>
 
   <h2>2. How We Use Your Information</h2>
@@ -95,7 +97,7 @@
   <p>We share personal information only with service providers who help us run the Service, and only as needed for them to perform their function:</p>
   <ul>
     <li><strong>Supabase</strong>, database, authentication, and file storage for tech photos.</li>
-    <li><strong>Stripe</strong>, payment processing for one-time photo purchases and Glow Up subscriptions.</li>
+    <li><strong>Stripe</strong>, payment processing for Glow Up subscriptions on Android and the web (Apple handles iPhone).</li>
     <li><strong>Email delivery providers</strong>, transactional email.</li>
     <li><strong>Geocoding &amp; mapping providers</strong>, converting addresses to map coordinates; serving map tiles.</li>
     <li><strong>Hosting providers</strong>, serving the Service itself.</li>

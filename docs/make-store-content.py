@@ -5,7 +5,7 @@
 # not. The Play short description was labelled 74/80 and was actually 98, and
 # Apple's promotional text was 175 against a 170 limit. Both would have been
 # refused in the form, and the wrong label is exactly what stops anyone
-# noticing — you trust the number and paste.
+# noticing - you trust the number and paste.
 #
 # Counts are now computed, and anything over its limit aborts loudly instead
 # of being written to the file.
@@ -28,7 +28,7 @@ APPLE_PROMO = ("Still booking in your DMs? Your work is already why clients pick
                "and no commission, ever.")
 
 FREE_BLOCK = """FREE, FOREVER
-Your profile, your whole gallery, and your place in the Gallery clients browse are free and stay free. Post up to 50 looks a month. Your photos never expire - this is a portfolio, not a feed that buries you in a week. Flip "Open today" so clients can see you have a chair right now. Keep your Call and Text buttons. Already booking somewhere else? Paste that link and a Book button appears on your profile. None of this ever costs you anything."""
+Your profile, your whole gallery, and your place in the Gallery clients browse are free and stay free. Post up to 50 looks a month. Your photos never expire - this is a portfolio, not a feed that buries you in a week. Post "Available now" on the What's happening board so clients can see you have a chair right now. Keep your Call and Text buttons. Already booking somewhere else? Paste that link and a Book button appears on your profile. None of this ever costs you anything."""
 
 TECH_LIST = """FOR NAIL TECHS
 * Clients book you right in the app - approve each request, or auto-confirm
@@ -40,13 +40,14 @@ TECH_LIST = """FOR NAIL TECHS
 * Search your clients by name or number when you can't remember who's who
 * Your own shareable profile link and QR code - your bio, your stories, your station
 * Every photo you post lands in the Gallery, where clients browse by shape, type and style
+* What's happening: post Available now when a chair opens, and reply Interested when a client near you asks for a set
 * Notifications stay put, so a booking request you swiped away isn't gone"""
 
 CLIENT_LIST = """FOR CLIENTS
 Always free.
 * Browse real sets from real techs, and filter by shape, type and style
 * Find techs near you on the map, at whatever distance suits you
-* See who is open today and book them before the chair fills
+* See who posted Available now, or ask for a set and let techs near you reply
 * Heart the looks you love and bring them to your appointment
 * Get a reminder before your appointment"""
 
@@ -61,7 +62,7 @@ My Nail Connection is booking built for nail techs only. Not salons, not barbers
 # and Privacy links in metadata the user sees before buying (Guideline 3.1.2).
 # Omitting it is one of the most common subscription rejections.
 APPLE_SUB_BLOCK = """SUBSCRIPTION DETAILS
-Glow Up - booking on My Nail Connection: $10.99 per month, auto-renewing, with the first month free. Locked at that price for life as a founding tech. Payment is charged to your Apple ID at confirmation of purchase. The subscription renews automatically unless auto-renew is turned off at least 24 hours before the end of the current period. Manage or cancel any time in your Apple ID account settings. Your gallery and your calendar stay exactly as they are either way.
+Glow Up - booking on My Nail Connection: $10.99 per month, auto-renewing, with the first month free. Payment is charged to your Apple ID at confirmation of purchase. The subscription renews automatically unless auto-renew is turned off at least 24 hours before the end of the current period. Manage or cancel any time in your Apple ID account settings. Your gallery and your calendar stay exactly as they are either way.
 
 Terms of Use: https://mynailconnection.com/terms.html
 Privacy Policy: https://mynailconnection.com/privacy.html"""
@@ -81,9 +82,9 @@ PLAY_NAME = "My Nail Connection: Booking"
 PLAY_SHORT = "Booking built for nail techs. No commission, no per-booking fee."
 
 PLAY_PAID = """WHAT YOU PAY FOR
-MNC's own booking - the part where a client taps Book and lands on your calendar. First month free, then $10.99/month, locked at that price for life as a founding tech. No commission. No per-booking fee. And never a charge to your clients."""
+MNC's own booking - the part where a client taps Book and lands on your calendar. First month free, then $10.99/month. No commission. No per-booking fee. And never a charge to your clients."""
 
-PLAY_CLOSER = """Free to set up. First month of booking free, then $10.99/month at the founding rate. Cancel any time; your gallery and your calendar stay exactly as they are."""
+PLAY_CLOSER = """Free to set up. First month of booking free, then $10.99/month. Cancel any time; your gallery and your calendar stay exactly as they are."""
 
 PLAY_DESC = "\n\n".join([OPENER, FREE_BLOCK, PLAY_PAID, TECH_LIST, CLIENT_LIST, WHY, PLAY_CLOSER])
 
@@ -113,9 +114,9 @@ if over:
         print(f"OVER LIMIT: {s} / {n} is {ln}, limit {lim}", file=sys.stderr)
     sys.exit(1)
 
-out = ["# MNC 3.0 Store Content — ready to paste",
+out = ["# MNC 3.0 Store Content - ready to paste",
        "",
-       "GENERATED by docs/make-store-content.py — edit the copy there, not here,",
+       "GENERATED by docs/make-store-content.py - edit the copy there, not here,",
        "then re-run it. Counts below are computed, and the script refuses to write",
        "this file if any field is over its limit. Hand-written counts are what let",
        "a 98-character short description sit under a `74/80` label until 2026-08-23.",
@@ -129,9 +130,9 @@ for section, fields in FIELDS:
 out += ["---", "",
         "## Panel order (both stores)",
         "1. Still booking in your DMs? (tech hook)",
-        "2. Home — Everything starts here",
-        "3. Gallery — Browse real sets",
-        "4. Map — Find techs near you",
+        "2. Home - Everything starts here",
+        "3. Gallery - Browse real sets",
+        "4. Map - Find techs near you",
         "5. Find the look. Find the tech. Book them. (client hook)",
         "",
         "## Assets",
