@@ -2707,10 +2707,15 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
      first. Everything is read and written through the wh_* functions in
      sql/build2-whats-happening.sql; nothing here reads a table directly. -->
 <style>
+#whats-happening .wh-sticky{position:sticky;top:0;z-index:6;background:var(--cream);padding-bottom:6px;box-shadow:0 -14px 0 0 var(--cream),0 8px 10px -10px rgba(20,19,23,0.18);}
 #whats-happening .wh-tabs{display:flex;gap:6px;padding:12px 20px 0;}
+#whats-happening .wh-near{display:flex;gap:6px;padding:8px 20px 0;}
+#whats-happening .wh-chip{flex:1;padding:6px 6px;border-radius:100px;border:1.5px solid var(--border);background:white;color:var(--muted);font-size:11.5px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+#whats-happening .wh-chip.on{border-color:var(--charcoal);color:var(--charcoal);background:var(--cream);}
 #whats-happening .wh-tab{flex:1;padding:8px 6px;border-radius:12px;border:1.5px solid var(--border);background:white;color:var(--charcoal);font-size:12.5px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;}
 #whats-happening .wh-tab.on{background:var(--charcoal);border-color:var(--charcoal);color:white;}
 #wh-list{display:flex;flex-direction:column;gap:10px;padding:12px 20px 0;}
+.wh-loop{display:flex;flex-direction:column;gap:10px;}
 .wh-thumb{width:96px;height:96px;border-radius:12px;object-fit:cover;flex-shrink:0;border:1px solid var(--border);background:var(--cream);}
 .wh-tags{font-size:12px;color:var(--muted);margin-top:4px;}
 #wh-bell{transition:box-shadow .3s,border-color .3s;}
@@ -2759,10 +2764,17 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
   <div class="scroll-content" style="padding-bottom:70px;">
     <div id="wh-where" style="padding:10px 20px 0;font-size:12.5px;color:var(--muted);text-align:center;"></div>
     <div id="wh-cta" style="padding:10px 20px 0;"></div>
-    <div class="wh-tabs" id="wh-tabs">
-      <button class="wh-tab" data-tab="all" onclick="whSetTab('all')">Everything</button>
-      <button class="wh-tab" data-tab="request" onclick="whSetTab('request')">Requests</button>
-      <button class="wh-tab" data-tab="available" onclick="whSetTab('available')">Available now</button>
+    <div class="wh-sticky">
+      <div class="wh-tabs" id="wh-tabs">
+        <button class="wh-tab" data-tab="all" onclick="whSetTab('all')">Everything</button>
+        <button class="wh-tab" data-tab="request" onclick="whSetTab('request')">Requests</button>
+        <button class="wh-tab" data-tab="available" onclick="whSetTab('available')">Available now</button>
+      </div>
+      <div class="wh-near" id="wh-near" style="display:none;" aria-label="How far">
+        <button class="wh-chip" data-n="0" onclick="whSetNear(0)">Nearby</button>
+        <button class="wh-chip" data-n="1" onclick="whSetNear(1)">My state</button>
+        <button class="wh-chip on" data-n="2" onclick="whSetNear(2)">Everywhere</button>
+      </div>
     </div>
     <div id="wh-list"></div>
   </div>
@@ -2917,7 +2929,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
 
 <script>
 // ── What's happening (Build 2a) ─────────────────────────────────────────────
-var WH = { tab: 'all', items: [], city: '', state: '', loadedFor: '', poll: null, raf: null, paused: false, resume: null, last: 0, acc: 0, mine: null,
+var WH = { tab: 'all', nearMax: 2, items: [], city: '', state: '', loadedFor: '', poll: null, raf: null, paused: false, resume: null, last: 0, acc: 0, mine: null,
            open: {}, prefs: null, me: null, focus: null, replyTo: null };
 var WH_POLL_MS = 20000;
 var WH_SCROLL_PX_PER_SEC = 30;
@@ -3036,6 +3048,14 @@ async function whLoad() {
     var row = null;
     try { row = await loadOwnUserRow('city,state'); } catch (_) {}
     if (row) { WH.city = (row.city || '').trim(); WH.state = (row.state || '').trim(); }
+    // A tech's city lives on her tech profile; the users row may never get one.
+    if (!WH.city && !WH.state && whIsTech()) {
+      try {
+        var tr = await fetch(SUPABASE_URL + '/rest/v1/techs?or=(email.eq.' + encodeURIComponent(who) + ',phone.eq.' + encodeURIComponent(who) + ')&select=city,state&limit=1', { headers: whHeaders() });
+        var trows = tr.ok ? await tr.json() : [];
+        if (trows[0]) { WH.city = (trows[0].city || '').trim(); WH.state = (trows[0].state || '').trim(); }
+      } catch (_) {}
+    }
   }
   if (!WH.items.length) list.innerHTML = '<div class="wh-sub" style="text-align:center;padding:20px;">Loading…</div>';
   await whRefresh();
@@ -3048,6 +3068,9 @@ async function whRefresh() {
     var items = await whRpc('wh_feed', { p_city: WH.city || null, p_state: WH.state || null, p_kind: null });
     WH.items = Array.isArray(items) ? items : [];
   } catch (e) {
+    // Leave a trace server-side: the native shell has no console to read
+    // (2026-10-11, the first APK run showed an empty board and nothing else).
+    try { whLog('feed_error', String((e && (e.status || e.message)) || 'err').slice(0, 60) + (window._mncAccessToken ? '' : ' no-token')); } catch (_) {}
     if (!WH.items.length) {
       var list = document.getElementById('wh-list');
       if (list) list.innerHTML = '<div class="wh-empty"><div class="wh-empty-sub">Could not load this just now. Check your connection and pull back in a moment.</div></div>';
@@ -3079,6 +3102,35 @@ function whSetTab(tab) {
   WH.tab = tab;
   whPaintTabs();
   whRender();
+}
+// How far (2026-10-11): 0 = her city, 1 = her state, 2 = everywhere. The
+// board already sorts closest first; this just stops at the chosen ring.
+function whSetNear(nMax) {
+  nMax = Math.max(0, Math.min(2, parseInt(nMax, 10) || 0));
+  if (nMax !== WH.nearMax) whLog('near', String(nMax));
+  WH.nearMax = nMax;
+  try { localStorage.setItem('mnc_wh_near', String(nMax)); } catch (_) {}
+  whRender();
+}
+try { var _whNearSaved = localStorage.getItem('mnc_wh_near'); if (_whNearSaved !== null) WH.nearMax = Math.max(0, Math.min(2, parseInt(_whNearSaved, 10) || 0)); } catch (_) {}
+function whPaintNear(all) {
+  var row = document.getElementById('wh-near');
+  if (!row) return;
+  var canRing = !!(WH.city || WH.state);
+  row.style.display = canRing ? 'flex' : 'none';
+  if (!canRing) return;
+  var c0 = all.filter(function (i) { return i.near === 0; }).length;
+  var c1 = all.filter(function (i) { return i.near <= 1; }).length;
+  var labels = [
+    (WH.city ? 'In ' + WH.city : 'Nearby') + ' (' + c0 + ')',
+    'In ' + (WH.state || 'my state') + ' (' + c1 + ')',
+    'Everywhere (' + all.length + ')'
+  ];
+  row.querySelectorAll('.wh-chip').forEach(function (b) {
+    var k = parseInt(b.getAttribute('data-n'), 10);
+    b.textContent = labels[k];
+    b.classList.toggle('on', k === WH.nearMax);
+  });
 }
 function whPaintTabs() {
   document.querySelectorAll('#wh-tabs .wh-tab').forEach(function (b) {
@@ -3120,6 +3172,13 @@ function whRender() {
   // Closest first, and say so: a heading where each distance group starts
   // (her city, the rest of her state, farther away). Only when she has a
   // city on file and the list really spans more than one group.
+  // The distance ring. Counts are painted from the unfiltered list so each
+  // chip says what it would show.
+  var allItems = items;
+  whPaintNear(allItems);
+  if ((WH.city || WH.state) && WH.nearMax < 2) {
+    items = items.filter(function (i) { return (i.near || 0) <= WH.nearMax; });
+  }
   var groups = {};
   items.forEach(function (i) { groups[i.near] = true; });
   var labelled = !!WH.city && Object.keys(groups).length > 1;
@@ -3134,15 +3193,25 @@ function whRender() {
     return head + whCardHtml(i);
   }).join('');
   var realOfKind = function (k) { return WH.items.filter(function (i) { return i.kind === k; }).length; };
-  if (!items.length) html = whEmptyHtml(tab);
+  if (!items.length) {
+    html = (allItems.length && WH.nearMax < 2)
+      ? '<div class="wh-empty"><div class="wh-empty-title">Nothing that close yet</div><div class="wh-empty-sub">Tap Everywhere to see all ' + allItems.length + ' on the board, closest first.</div></div>'
+      : whEmptyHtml(tab);
+  }
   // Example cards keep a quiet board from looking dead. They step aside once
   // a board has three real posts.
   var ex = [];
   if ((tab === 'all' || tab === 'request') && realOfKind('request') < 3) ex = ex.concat(WH_EXAMPLES.request.map(function (e, k) { return whExampleHtml('request', e, k); }));
   if ((tab === 'all' || tab === 'available') && realOfKind('available') < 3) ex = ex.concat(WH_EXAMPLES.available.map(function (e, k) { return whExampleHtml('available', e, k); }));
   if (ex.length) html += '<div class="wh-sub" style="text-align:center;margin-top:6px;">Examples of what you will see here</div>' + ex.join('');
-  list.innerHTML = html;
-  if (tab === 'all' && items.length >= 6) whStartMotion();
+  // Everything, with enough posts: two copies back to back so the slow
+  // scroll can loop without a visible jump (the second copy is hidden from
+  // screen readers; it is the same posts again).
+  var loop = (tab === 'all' && items.length >= 6);
+  list.innerHTML = loop
+    ? '<div class="wh-loop">' + html + '</div><div class="wh-loop" aria-hidden="true">' + html + '</div>'
+    : html;
+  if (loop) whStartMotion();
   else whStopMotion();
 }
 
@@ -3220,7 +3289,8 @@ function whCardHtml(i) {
         '</div>' + (WH.open[i.id] ? whRepliesHtml(i.id, WH.open[i.id]) : '');
     } else if (whIsTech()) {
       actions = i.reply_removed
-        ? '<div class="wh-sub">Your reply to this one was taken down.</div>'
+        ? '<div class="wh-sub">Your earlier reply to this one was taken down.</div>' +
+          '<div class="wh-actions"><button class="wh-btn primary" onclick="whOpenReplySheet(\'' + i.id + '\')">I\'m interested</button></div>'
         : i.replied
         ? '<div class="wh-sub" style="color:#2E7A45;font-weight:600;">You said you\'re interested' +
           ' <button class="wh-more" style="margin-left:6px;font-size:12px;letter-spacing:0;text-decoration:underline;color:var(--muted);" onclick="event.stopPropagation();whWithdrawReply(\'' + i.id + '\')">Not interested anymore</button></div>'
@@ -3628,8 +3698,16 @@ function whStartMotion() {
       if (WH.acc >= 1) {
         var px = Math.floor(WH.acc); WH.acc -= px;
         el.scrollTop += px;
-        if (el.scrollTop + el.clientHeight >= el.scrollHeight - 1) {
-          // At the bottom: rest a moment, then glide back to the top.
+        var copies = el.querySelectorAll('#wh-list .wh-loop');
+        if (copies.length === 2) {
+          // Loop: once the first copy has scrolled past, step back by exactly
+          // one copy so the second copy's cards are now the first copy's.
+          var elTop = el.getBoundingClientRect().top;
+          var aTop = copies[0].getBoundingClientRect().top - elTop + el.scrollTop;
+          var span = copies[1].getBoundingClientRect().top - copies[0].getBoundingClientRect().top;
+          if (span > 0 && el.scrollTop >= aTop + span) el.scrollTop -= span;
+        } else if (el.scrollTop + el.clientHeight >= el.scrollHeight - 1) {
+          // Short list, no loop copy: rest a moment, then glide back to the top.
           WH.paused = true;
           setTimeout(function () { try { el.scrollTo({ top: 0, behavior: 'smooth' }); } catch (_) { el.scrollTop = 0; } }, 2500);
           WH.resume = setTimeout(function () { WH.paused = false; }, 5000);
@@ -6285,8 +6363,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.6',     /* __APP_BUILD_NAME__   */
-  android: 677,         /* __APP_BUILD_ANDROID__ */
-  ios:     482,          /* __APP_BUILD_IOS__     */
+  android: 678,         /* __APP_BUILD_ANDROID__ */
+  ios:     483,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────

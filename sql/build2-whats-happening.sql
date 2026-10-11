@@ -778,7 +778,7 @@ begin
   if public.wh_blocked(me, r.author_key) then
     return jsonb_build_object('ok', false, 'code', 'closed');
   end if;
-  if exists (select 1 from public.wh_replies where request_id = r.id and tech_id = t.id) then
+  if exists (select 1 from public.wh_replies where request_id = r.id and tech_id = t.id and not removed) then
     return jsonb_build_object('ok', false, 'code', 'already');
   end if;
   v_tz := coalesce(t.avail_reminder_tz, t.booking_timezone, 'America/Phoenix');
@@ -791,9 +791,15 @@ begin
     return jsonb_build_object('ok', false, 'code', 'pick_one');
   end if;
 
+  -- A reply an admin took down leaves its row (removed = true); replying
+  -- again revives that row as a fresh reply. A ban is checked above.
   insert into public.wh_replies (request_id, tech_id, tech_key, note, show_book, show_call, show_text)
   values (r.id, t.id, me, left(btrim(coalesce(p_note, '')), 280),
-          coalesce(p_show_book, false), coalesce(p_show_call, false), coalesce(p_show_text, false));
+          coalesce(p_show_book, false), coalesce(p_show_call, false), coalesce(p_show_text, false))
+  on conflict (request_id, tech_id) do update
+    set tech_key = excluded.tech_key, note = excluded.note,
+        show_book = excluded.show_book, show_call = excluded.show_call, show_text = excluded.show_text,
+        removed = false, created_at = now();
 
   if coalesce((select p.reply_alerts from public.wh_prefs p where p.person_key = r.author_key), true) then
     perform public._booking_push(
