@@ -3010,7 +3010,14 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
 #whats-happening .wh-tab{flex:1;padding:8px 6px;border-radius:12px;border:1.5px solid var(--border);background:white;color:var(--charcoal);font-size:12.5px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;}
 #whats-happening .wh-tab.on{background:var(--charcoal);border-color:var(--charcoal);color:white;}
 #wh-list{display:flex;flex-direction:column;gap:10px;padding:12px 20px 0;}
-#wh-list.wh-moving{max-height:calc(100vh - 290px);overflow-y:auto;-webkit-overflow-scrolling:touch;scrollbar-width:thin;}
+.wh-thumb{width:96px;height:96px;border-radius:12px;object-fit:cover;flex-shrink:0;border:1px solid var(--border);background:var(--cream);}
+.wh-tags{font-size:12px;color:var(--muted);margin-top:4px;}
+#wh-bell{transition:box-shadow .3s,border-color .3s;}
+#wh-bell.on{border-color:var(--rose-mid);box-shadow:0 0 0 3px rgba(222,179,181,0.35),0 0 14px rgba(208,163,165,0.85);animation:whBellGlow 2.6s ease-in-out infinite;}
+#wh-bell.on svg{stroke:var(--rose-dark) !important;fill:rgba(222,179,181,0.35) !important;}
+@keyframes whBellGlow{0%,100%{box-shadow:0 0 0 3px rgba(222,179,181,0.30),0 0 10px rgba(208,163,165,0.65);}50%{box-shadow:0 0 0 4px rgba(222,179,181,0.45),0 0 18px rgba(208,163,165,0.95);}}
+@media (prefers-reduced-motion: reduce){#wh-bell.on{animation:none;}}
+.wh-group{font-size:11px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--muted);margin:6px 2px -2px;}
 .wh-card{background:white;border:1.5px solid var(--border);border-radius:16px;padding:12px 14px;box-shadow:var(--shadow);display:flex;gap:11px;align-items:flex-start;}
 .wh-card.tap{cursor:pointer;}
 .wh-card.example{opacity:0.62;border-style:dashed;box-shadow:none;}
@@ -3041,7 +3048,9 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
   <div class="header">
     <button class="back-btn" onclick="backSmart()">←</button>
     <div style="text-align:center;"><div class="logo-mark" style="font-size:17px;">What's happening</div></div>
-    <div style="width:36px;"></div>
+    <button id="wh-bell" class="back-btn" onclick="whOpenAlertsSheet()" aria-label="Alerts" title="Alerts" style="visibility:hidden;display:flex;align-items:center;justify-content:center;">
+      <svg viewBox="0 0 24 24" style="width:17px;height:17px;stroke:var(--charcoal);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 01-3.4 0"/><line id="wh-bell-off" x1="3" y1="3" x2="21" y2="21" style="display:none;"/></svg>
+    </button>
   </div>
   <div class="scroll-content" style="padding-bottom:70px;">
     <div id="wh-where" style="padding:10px 20px 0;font-size:12.5px;color:var(--muted);text-align:center;"></div>
@@ -3052,6 +3061,23 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       <button class="wh-tab" data-tab="available" onclick="whSetTab('available')">Available now</button>
     </div>
     <div id="wh-list"></div>
+  </div>
+</div>
+
+<!-- Alerts switch, opened from the bell (Build 2b) -->
+<div id="wh-alerts-modal" class="modal-overlay" style="display:none;position:fixed;inset:0;z-index:9100;background:rgba(20,10,11,0.72);backdrop-filter:blur(4px);align-items:flex-end;justify-content:center;">
+  <div style="background:white;border-radius:28px 28px 0 0;width:100%;max-width:440px;padding:20px 22px 34px;box-shadow:0 -8px 40px rgba(0,0,0,0.22);box-sizing:border-box;">
+    <div style="width:40px;height:4px;background:var(--border);border-radius:100px;margin:0 auto 14px;"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+      <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:600;color:var(--charcoal);" id="wh-alerts-head">Alerts</div>
+      <button onclick="whCloseModal('wh-alerts-modal')" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted);line-height:1;">&times;</button>
+    </div>
+    <div id="wh-alerts" style="display:flex;padding:12px 14px;background:var(--cream);border:1.5px solid var(--border);border-radius:14px;align-items:center;gap:10px;">
+      <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:700;color:var(--charcoal);" id="wh-alerts-title"></div>
+        <div style="font-size:12px;color:var(--muted);margin-top:2px;" id="wh-alerts-sub"></div></div>
+      <button class="toggle off" id="wh-alerts-toggle" onclick="whToggleAlerts()" aria-label="Alerts"></button>
+    </div>
+    <button class="wh-btn primary" style="width:100%;padding:12px;font-size:14px;margin-top:14px;" onclick="whCloseModal('wh-alerts-modal')">Done</button>
   </div>
 </div>
 
@@ -3073,6 +3099,16 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
         <label class="wh-field-label" for="wh-req-date">NEED IT BY (OPTIONAL)</label>
         <input id="wh-req-date" type="date" class="wh-input"/>
         <div style="font-size:11.5px;color:var(--muted);margin-top:4px;">No date? It stays up for 14 days, or until you tap Found someone.</div>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <div style="flex:1;">
+          <label class="wh-field-label" for="wh-req-city">YOUR CITY</label>
+          <input id="wh-req-city" type="text" maxlength="60" placeholder="Surprise" class="wh-input" autocomplete="address-level2"/>
+        </div>
+        <div style="width:86px;">
+          <label class="wh-field-label" for="wh-req-state">STATE</label>
+          <input id="wh-req-state" type="text" maxlength="2" placeholder="AZ" class="wh-input" style="text-transform:uppercase;" autocomplete="address-level1"/>
+        </div>
       </div>
       <div>
         <label class="wh-field-label" for="wh-req-photo">A PHOTO OF THE LOOK (OPTIONAL)</label>
@@ -3115,9 +3151,35 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
   </div>
 </div>
 
+<!-- Tech: Interested in a client's request (Build 2b) -->
+<div id="wh-reply-modal" class="modal-overlay" style="display:none;position:fixed;inset:0;z-index:9100;background:rgba(20,10,11,0.72);backdrop-filter:blur(4px);align-items:flex-end;justify-content:center;">
+  <div style="background:white;border-radius:28px 28px 0 0;width:100%;max-width:440px;padding:20px 22px 34px;box-shadow:0 -8px 40px rgba(0,0,0,0.22);box-sizing:border-box;">
+    <div style="width:40px;height:4px;background:var(--border);border-radius:100px;margin:0 auto 14px;"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+      <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:600;color:var(--charcoal);">I'm interested</div>
+      <button onclick="whCloseModal('wh-reply-modal')" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted);line-height:1;">&times;</button>
+    </div>
+    <div id="wh-rp-req" style="font-size:13px;color:var(--muted);line-height:1.5;margin-bottom:14px;"></div>
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <div>
+        <label class="wh-field-label" for="wh-rp-note">A QUICK NOTE (OPTIONAL)</label>
+        <textarea id="wh-rp-note" rows="2" maxlength="280" placeholder="I can do Tuesday at 4" class="wh-input" style="resize:vertical;"></textarea>
+      </div>
+      <div>
+        <div class="wh-field-label">HOW CAN SHE REACH YOU?</div>
+        <div id="wh-rp-ways" style="display:flex;flex-direction:column;gap:8px;font-size:14px;color:var(--charcoal);"></div>
+        <div style="font-size:11.5px;color:var(--muted);margin-top:6px;">Your profile link is always included. Your number shows only when she taps Call or Text.</div>
+      </div>
+      <div id="wh-rp-msg" style="display:none;font-size:13px;color:#A0442F;"></div>
+      <button id="wh-rp-send" class="wh-btn primary" style="padding:12px;font-size:14px;" onclick="whSubmitReply()">Send</button>
+    </div>
+  </div>
+</div>
+
 <script>
 // ── What's happening (Build 2a) ─────────────────────────────────────────────
-var WH = { tab: 'all', items: [], city: '', state: '', loadedFor: '', poll: null, raf: null, paused: false, resume: null, last: 0, acc: 0, mine: null };
+var WH = { tab: 'all', items: [], city: '', state: '', loadedFor: '', poll: null, raf: null, paused: false, resume: null, last: 0, acc: 0, mine: null,
+           open: {}, prefs: null, me: null, focus: null, replyTo: null };
 var WH_POLL_MS = 20000;
 var WH_SCROLL_PX_PER_SEC = 30;
 var WH_EXAMPLES = {
@@ -3169,11 +3231,7 @@ function whLog(event, detail, itemId, techId) {
     }).catch(function () {});
   } catch (_) {}
 }
-function whIsTech() {
-  // isTechUser() matches on email only, so phone-only techs read false there.
-  if (window._mncCurrentRole === 'tech' || window._mncIsTechTableUser) return true;
-  try { return isTechUser(); } catch (_) { return false; }
-}
+function whIsTech() { try { return isTechUser(); } catch (_) { return false; } }
 function whAgo(iso) {
   if (!iso) return '';
   var min = Math.floor((Date.now() - new Date(iso).getTime()) / 60000);
@@ -3220,7 +3278,7 @@ async function whLoad() {
     whStopMotion();
     document.getElementById('wh-where').textContent = '';
     document.getElementById('wh-cta').innerHTML = '';
-    list.classList.remove('wh-moving');
+    var bl = document.getElementById('wh-bell'); if (bl) bl.style.visibility = 'hidden';
     var counts = { requests: 0, available: 0 };
     try { counts = (await whRpc('wh_teaser', {})) || counts; } catch (_) {}
     list.innerHTML =
@@ -3235,7 +3293,7 @@ async function whLoad() {
   }
   var who = currentUserEmail;
   if (WH.loadedFor !== who) {
-    WH.loadedFor = who; WH.city = ''; WH.state = ''; WH.items = []; WH.mine = null;
+    WH.loadedFor = who; WH.city = ''; WH.state = ''; WH.items = []; WH.mine = null; WH.open = {}; WH.prefs = null; WH.me = null;
     var row = null;
     try { row = await loadOwnUserRow('city,state'); } catch (_) {}
     if (row) { WH.city = (row.city || '').trim(); WH.state = (row.state || '').trim(); }
@@ -3260,6 +3318,20 @@ async function whRefresh() {
   if (whIsTech()) {
     try { WH.mine = await whRpc('wh_my_available', {}); } catch (_) { WH.mine = null; }
   }
+  // Keep any open reply lists current, and drop ones for closed requests.
+  var openIds = Object.keys(WH.open);
+  for (var k = 0; k < openIds.length; k++) {
+    var still = WH.items.some(function (x) { return x.kind === 'request' && x.id === openIds[k] && x.mine; });
+    if (!still) { delete WH.open[openIds[k]]; continue; }
+    try { WH.open[openIds[k]] = (await whRpc('wh_replies_for', { p_request_id: openIds[k] })) || []; } catch (_) {}
+  }
+  if (WH.focus) {
+    var f = WH.focus; WH.focus = null;
+    var mineReq = WH.items.some(function (x) { return x.kind === 'request' && x.id === f && x.mine; });
+    if (mineReq && !WH.open[f]) { try { WH.open[f] = (await whRpc('wh_replies_for', { p_request_id: f })) || []; } catch (_) {} }
+  }
+  whPaintCta();
+  whPaintAlerts();
   whRender();
 }
 
@@ -3278,7 +3350,7 @@ function whPaintTabs() {
 function whPaintCta() {
   var el = document.getElementById('wh-cta');
   var where = document.getElementById('wh-where');
-  if (where) where.textContent = WH.city ? ('Near ' + WH.city + (WH.state ? ', ' + WH.state : '') + ' first, then everywhere') : 'Newest first';
+  if (where) where.textContent = WH.city ? ('Closest to ' + WH.city + (WH.state ? ', ' + WH.state : '') + ' first') : 'Newest first';
   if (!el) return;
   if (whIsTech()) {
     var m = WH.mine;
@@ -3298,21 +3370,41 @@ function whRender() {
   var list = document.getElementById('wh-list');
   if (!list) return;
   var tab = WH.tab;
-  var items = WH.items.filter(function (i) { return tab === 'all' || i.kind === tab; });
-  var html = items.map(whCardHtml).join('');
+  // Two photos per tech at most, so one bulk upload does not fill the screen.
+  var perTech = {};
+  var items = WH.items.filter(function (i) {
+    if (!(tab === 'all' || i.kind === tab)) return false;
+    if (i.kind !== 'photo') return true;
+    perTech[i.tech_id] = (perTech[i.tech_id] || 0) + 1;
+    return perTech[i.tech_id] <= 2;
+  });
+  // Closest first, and say so: a heading where each distance group starts
+  // (her city, the rest of her state, farther away). Only when she has a
+  // city on file and the list really spans more than one group.
+  var groups = {};
+  items.forEach(function (i) { groups[i.near] = true; });
+  var labelled = !!WH.city && Object.keys(groups).length > 1;
+  var lastNear = null;
+  var html = items.map(function (i) {
+    var head = '';
+    if (labelled && i.near !== lastNear) {
+      lastNear = i.near;
+      var label = i.near === 0 ? 'In ' + WH.city : (i.near === 1 ? 'Elsewhere in ' + (WH.state || 'your state') : 'Farther away');
+      head = '<div class="wh-group">' + whEsc(label) + '</div>';
+    }
+    return head + whCardHtml(i);
+  }).join('');
   var realOfKind = function (k) { return WH.items.filter(function (i) { return i.kind === k; }).length; };
   if (!items.length) html = whEmptyHtml(tab);
   // Example cards keep a quiet board from looking dead. They step aside once
   // a board has three real posts.
   var ex = [];
-  if ((tab === 'all' || tab === 'request') && realOfKind('request') < 3) ex = ex.concat(WH_EXAMPLES.request.map(function (e) { return whExampleHtml('request', e); }));
-  if ((tab === 'all' || tab === 'available') && realOfKind('available') < 3) ex = ex.concat(WH_EXAMPLES.available.map(function (e) { return whExampleHtml('available', e); }));
+  if ((tab === 'all' || tab === 'request') && realOfKind('request') < 3) ex = ex.concat(WH_EXAMPLES.request.map(function (e, k) { return whExampleHtml('request', e, k); }));
+  if ((tab === 'all' || tab === 'available') && realOfKind('available') < 3) ex = ex.concat(WH_EXAMPLES.available.map(function (e, k) { return whExampleHtml('available', e, k); }));
   if (ex.length) html += '<div class="wh-sub" style="text-align:center;margin-top:6px;">Examples of what you will see here</div>' + ex.join('');
-  var keep = list.scrollTop;
   list.innerHTML = html;
-  list.scrollTop = keep;
-  if (tab === 'all' && items.length >= 6) { list.classList.add('wh-moving'); whStartMotion(); }
-  else { list.classList.remove('wh-moving'); whStopMotion(); }
+  if (tab === 'all' && items.length >= 6) whStartMotion();
+  else whStopMotion();
 }
 
 function whEmptyHtml(tab) {
@@ -3330,11 +3422,42 @@ function whEmptyHtml(tab) {
   return '<div class="wh-empty"><div class="wh-empty-title">Be the first</div><div class="wh-empty-sub">Requests, techs who are free now and fresh work all land here.</div></div>';
 }
 
-function whExampleHtml(kind, e) {
-  return '<div class="wh-card example">' + whAvatar(e.name, null) +
+// Drawn, not photographed: the Example cards never show a real person's
+// hands or face. A fan of five almond nails, and a simple silhouette.
+function whNailArt(c1, c2, finish) {
+  var nail = 'M0,-34 C9,-34 12,-17 12,-2 L12,24 C12,30 -12,30 -12,24 L-12,-2 C-12,-17 -9,-34 0,-34Z';
+  var tip = 'M0,-34 C9,-34 12,-17 12,-8 C4,-12 -4,-12 -12,-8 C-12,-17 -9,-34 0,-34Z';
+  var out = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1">' +
+    '<stop offset="0" stop-color="' + c1 + '"/><stop offset="1" stop-color="' + c2 + '"/></linearGradient></defs>' +
+    '<rect width="100" height="100" rx="14" fill="#FBF3F1"/>';
+  [-32, -16, 0, 16, 32].forEach(function (a, k) {
+    out += '<g transform="rotate(' + a + ' 50 112) translate(50 ' + (56 - (k === 2 ? 6 : (k === 1 || k === 3 ? 3 : 0))) + ')">' +
+      '<path d="' + nail + '" fill="url(#g)" stroke="rgba(0,0,0,0.08)" stroke-width="1"/>';
+    if (finish === 'french') out += '<path d="' + tip + '" fill="#FFFFFF" opacity="0.92"/>';
+    if (finish === 'glitter') out += '<circle cx="-4" cy="-14" r="1.6" fill="#fff"/><circle cx="5" cy="-4" r="1.2" fill="#fff"/><circle cx="-2" cy="8" r="1.4" fill="#fff"/><circle cx="6" cy="16" r="1" fill="#fff"/>';
+    out += '<path d="M-6,-24 C-4,-28 0,-29 2,-28 C-3,-22 -5,-6 -5,8" stroke="#fff" stroke-width="2.4" fill="none" opacity="0.45" stroke-linecap="round"/></g>';
+  });
+  return 'data:image/svg+xml;utf8,' + encodeURIComponent(out + '</svg>');
+}
+function whPersonArt(c1, c2) {
+  var s = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><defs><linearGradient id="p" x1="0" y1="0" x2="1" y2="1">' +
+    '<stop offset="0" stop-color="' + c1 + '"/><stop offset="1" stop-color="' + c2 + '"/></linearGradient></defs>' +
+    '<circle cx="20" cy="20" r="20" fill="url(#p)"/><circle cx="20" cy="16" r="6.5" fill="#fff" opacity="0.9"/>' +
+    '<path d="M8,34 C9,26 14,23 20,23 C26,23 31,26 32,34 Z" fill="#fff" opacity="0.9"/></svg>';
+  return 'data:image/svg+xml;utf8,' + encodeURIComponent(s);
+}
+var WH_ART = {
+  people: [['#E8B4B8', '#A2636C'], ['#C9B6D9', '#7D6A93'], ['#F2C6A8', '#B9785A'], ['#B8D8C8', '#5E8C76'], ['#D9C3A5', '#8E7353'], ['#E5B7CF', '#9B5A7A']],
+  looks: [['#F7DCDC', '#EBC3C6', 'french'], ['#E3D6F2', '#A995C9', 'shine'], ['#F7A08A', '#D9573F', 'glitter']]
+};
+function whExampleHtml(kind, e, k) {
+  var pp = WH_ART.people[(k + (kind === 'available' ? 3 : 0)) % WH_ART.people.length];
+  var look = kind === 'request' && WH_ART.looks[k % WH_ART.looks.length];
+  return '<div class="wh-card example"><div class="wh-av"><img src="' + whPersonArt(pp[0], pp[1]) + '" alt=""/></div>' +
     '<div class="wh-body"><div class="wh-meta"><span class="wh-name">' + whEsc(e.name) + '</span>' +
     '<span class="wh-pill example">Example</span><span>' + whEsc(e.city) + '</span></div>' +
-    '<div class="wh-text">' + whEsc(e.body) + '</div><div class="wh-sub">' + whEsc(e.sub) + '</div></div></div>';
+    '<div class="wh-text">' + whEsc(e.body) + '</div><div class="wh-sub">' + whEsc(e.sub) + '</div></div>' +
+    (look ? '<img class="wh-photo" src="' + whNailArt(look[0], look[1], look[2]) + '" alt=""/>' : '') + '</div>';
 }
 
 function whCardHtml(i) {
@@ -3352,13 +3475,24 @@ function whCardHtml(i) {
       (i.replies ? ' · ' + i.replies + ' interested' : '') + '</div>';
     if (i.mine) {
       actions = '<div class="wh-actions"><button class="wh-btn primary" onclick="whCloseRequest(\'' + i.id + '\',\'found\')">Found someone</button>' +
-        '<button class="wh-btn" onclick="whCloseRequest(\'' + i.id + '\',\'closed\')">Take it down</button></div>';
+        '<button class="wh-btn" onclick="whCloseRequest(\'' + i.id + '\',\'closed\')">Take it down</button>' +
+        (i.replies ? '<button class="wh-btn" onclick="whToggleReplies(\'' + i.id + '\')">' + (WH.open[i.id] ? 'Hide replies' : 'See ' + i.replies + ' interested') + '</button>' : '') +
+        '</div>' + (WH.open[i.id] ? whRepliesHtml(i.id, WH.open[i.id]) : '');
+    } else if (whIsTech()) {
+      actions = i.replied
+        ? '<div class="wh-sub" style="color:#2E7A45;font-weight:600;">You said you\'re interested</div>'
+        : '<div class="wh-actions"><button class="wh-btn primary" onclick="whOpenReplySheet(\'' + i.id + '\')">I\'m interested</button></div>';
     }
   } else if (i.kind === 'available') {
     sub = '<div class="wh-sub">' + (i.ends_at ? 'Free until ' + whEsc(whTime(i.ends_at)) : 'Open today') + '</div>';
     if (!i.mine) tap = ' tap" onclick="whOpenTech(\'' + i.tech_id + '\',\'available\')';
   } else if (i.kind === 'photo') {
-    if (!i.mine) tap = ' tap" onclick="whOpenTech(\'' + i.tech_id + '\',\'photo\')';
+    var tags = String(i.body || '').split(/\s*\u00b7\s*/).filter(Boolean);
+    var tagLine = tags.slice(0, 3).join(' \u00b7 ') + (tags.length > 3 ? ' and more' : '');
+    return '<div class="wh-card photo' + (i.mine ? '' : ' tap" onclick="whOpenTech(\'' + i.tech_id + '\',\'photo\')') + '">' +
+      whAvatar(i.name, i.image) + '<div class="wh-body">' + meta +
+      (tagLine ? '<div class="wh-tags">' + whEsc(tagLine) + '</div>' : '') + '</div>' +
+      (i.photo ? '<img class="wh-thumb" src="' + whEsc(i.photo) + '" alt="" loading="lazy"/>' : '') + '</div>';
   }
   var photo = i.photo ? '<img class="wh-photo" src="' + whEsc(i.photo) + '" alt="" loading="lazy"/>' : '';
   return '<div class="wh-card' + tap + '">' + whAvatar(i.name, i.image) +
@@ -3377,9 +3511,171 @@ async function whOpenTech(techId, from) {
   else showToast('That profile is not available right now');
 }
 
+// ── Interested replies (Build 2b) ───────────────────────────────────────────
+async function whLoadMe() {
+  // The signed-in tech's own contact options, for the reply sheet.
+  if (WH.me && WH.me.for === currentUserEmail) return WH.me;
+  WH.me = { for: currentUserEmail, cm: { call: true, text: true }, link: null, id: null };
+  try {
+    var r = await fetch(SUPABASE_URL + '/rest/v1/techs?select=id,contact_methods,booking_link&phone=eq.' + encodeURIComponent(currentUserEmail) + '&limit=1', { headers: whHeaders() });
+    var d = r.ok ? await r.json() : [];
+    if (d && d[0]) { WH.me.id = d[0].id; WH.me.cm = d[0].contact_methods || WH.me.cm; WH.me.link = (d[0].booking_link || '').trim() || null; }
+  } catch (_) {}
+  return WH.me;
+}
+
+async function whOpenReplySheet(reqId) {
+  var req = WH.items.filter(function (x) { return x.kind === 'request' && x.id === reqId; })[0];
+  if (!req) return;
+  WH.replyTo = reqId;
+  whLog('sheet', 'reply', reqId);
+  document.getElementById('wh-rp-req').innerHTML = '<b>' + whEsc(req.name || 'A client') + '</b>' + (req.city ? ' in ' + whEsc(req.city) : '') + ': ' + whEsc(req.body);
+  document.getElementById('wh-rp-note').value = '';
+  whMsg('wh-rp-msg', '');
+  var b = document.getElementById('wh-rp-send'); b.disabled = false; b.textContent = 'Send';
+  var me = await whLoadMe();
+  var ways = [];
+  if (me.link) ways.push(['book', 'Book through my booking link']);
+  if (me.cm.call) ways.push(['call', 'Call me']);
+  if (me.cm.text) ways.push(['text', 'Text me']);
+  document.getElementById('wh-rp-ways').innerHTML = ways.length
+    ? ways.map(function (w) {
+        return '<label style="display:flex;align-items:center;gap:9px;cursor:pointer;"><input type="checkbox" data-way="' + w[0] + '" checked style="width:18px;height:18px;accent-color:var(--rose);"/>' + w[1] + '</label>';
+      }).join('')
+    : '<div style="font-size:13px;color:var(--muted);">Calls, texts and a booking link are all off on your profile, so she will reach you through your profile. You can turn them on in My Settings.</div>';
+  whOpenModal('wh-reply-modal');
+}
+
+async function whSubmitReply() {
+  var reqId = WH.replyTo;
+  if (!reqId) return;
+  var boxes = document.querySelectorAll('#wh-rp-ways input[type=checkbox]');
+  var pick = { book: false, call: false, text: false };
+  boxes.forEach(function (x) { pick[x.getAttribute('data-way')] = x.checked; });
+  if (boxes.length && !pick.book && !pick.call && !pick.text) { whMsg('wh-rp-msg', 'Pick at least one way for her to reach you.'); return; }
+  if (!boxes.length) pick = { book: true, call: true, text: true }; // shown only where her profile allows, so the profile link carries it
+  var btn = document.getElementById('wh-rp-send');
+  btn.disabled = true; btn.textContent = 'Sending…';
+  try {
+    var out = await whRpc('wh_reply', { p_request_id: reqId, p_note: (document.getElementById('wh-rp-note').value || '').trim(),
+                                        p_show_book: pick.book, p_show_call: pick.call, p_show_text: pick.text });
+    if (!out || !out.ok) {
+      whMsg('wh-rp-msg', {
+        already: 'You already said you\'re interested in this one.',
+        closed: 'This request has closed.',
+        daily_cap: 'That\'s ten for today. You can reply to more tomorrow.',
+        banned: 'Posting is turned off on your account. Reach us through Send feedback if that seems wrong.',
+        not_tech: 'This is for tech accounts.',
+        own_request: 'This is your own request.'
+      }[out && out.code] || 'Could not send that just now. Try again in a moment.');
+      btn.disabled = false; btn.textContent = 'Send';
+      return;
+    }
+    whCloseModal('wh-reply-modal');
+    showToast('Sent. She gets a heads up.');
+    whRefresh();
+  } catch (e) {
+    whMsg('wh-rp-msg', 'Could not send that just now. Try again in a moment.');
+    btn.disabled = false; btn.textContent = 'Send';
+  }
+}
+
+async function whToggleReplies(reqId) {
+  if (WH.open[reqId]) { delete WH.open[reqId]; whRender(); return; }
+  whLog('see_replies', null, reqId);
+  try {
+    WH.open[reqId] = (await whRpc('wh_replies_for', { p_request_id: reqId })) || [];
+  } catch (_) { WH.open[reqId] = []; showToast('Could not load replies just now'); }
+  whRender();
+}
+
+function whRepliesHtml(reqId, reps) {
+  if (!reps || !reps.length) return '<div class="wh-sub" style="margin-top:8px;">No replies yet.</div>';
+  return '<div style="margin-top:10px;display:flex;flex-direction:column;gap:8px;">' + reps.map(function (r) {
+    var cm = r.contact_methods || { call: true, text: true };
+    var btns = [];
+    if (r.show_book && r.booking_link) btns.push('<button class="wh-btn primary" onclick="whReplyBook(\'' + reqId + '\',\'' + r.tech_id + '\',\'' + whEsc(encodeURIComponent(r.booking_link)) + '\')">Book</button>');
+    if (r.show_call && cm.call) btns.push('<button class="wh-btn" onclick="whReplyContact(\'' + reqId + '\',\'' + r.tech_id + '\',\'call\')">Call</button>');
+    if (r.show_text && cm.text) btns.push('<button class="wh-btn" onclick="whReplyContact(\'' + reqId + '\',\'' + r.tech_id + '\',\'text\')">Text</button>');
+    btns.push('<button class="wh-btn" onclick="whOpenTech(\'' + r.tech_id + '\',\'reply\')">View profile</button>');
+    return '<div style="display:flex;gap:10px;align-items:flex-start;padding:10px;background:var(--cream);border-radius:12px;">' + whAvatar(r.name, r.image) +
+      '<div class="wh-body"><div class="wh-meta"><span class="wh-name">' + whEsc(r.name || 'A tech') + '</span><span>\u00b7 ' + whEsc(whAgo(r.at)) + '</span></div>' +
+      (r.note ? '<div class="wh-text">' + whEsc(r.note) + '</div>' : '') +
+      '<div class="wh-actions">' + btns.join('') + '</div></div></div>';
+  }).join('') + '</div>';
+}
+
+function whReplyBook(reqId, techId, enc) {
+  var url = decodeURIComponent(enc);
+  if (!/^https?:\/\//i.test(url)) return;
+  whLog('contact', 'book_link', reqId, techId);
+  try { logTechTap('book_link', techId); } catch (_) {}
+  window.open(url, '_blank', 'noopener');
+}
+
+async function whReplyContact(reqId, techId, kind) {
+  try {
+    var rows = await whRpc('tech_contact', { p_tech_id: techId });
+    var phone = rows && rows[0] && rows[0].phone;
+    if (!phone) { showToast('That number is not available right now'); return; }
+    whLog('contact', kind, reqId, techId);
+    try { logTechTap(kind, techId); } catch (_) {}
+    location.href = (kind === 'call' ? 'tel:' : 'sms:') + String(phone).replace(/[^+\d]/g, '');
+  } catch (_) { showToast('That number is not available right now'); }
+}
+
+// ── Alerts switch: Reply alerts (clients) or Requests near me (techs) ──────
+async function whPaintAlerts() {
+  var bell = document.getElementById('wh-bell');
+  if (!bell) return;
+  if (whIsGuest()) { bell.style.visibility = 'hidden'; return; }
+  if (!WH.prefs) { try { WH.prefs = await whRpc('wh_my_prefs', {}); } catch (_) { bell.style.visibility = 'hidden'; return; } }
+  var tech = whIsTech();
+  var on = tech ? WH.prefs.near_alerts !== false : WH.prefs.reply_alerts !== false;
+  document.getElementById('wh-alerts-title').textContent = tech ? 'Requests near me' : 'Reply alerts';
+  document.getElementById('wh-alerts-sub').textContent = tech
+    ? 'A push when a client near you posts. Up to 3 a day, never overnight.'
+    : 'A push when a tech says she\'s interested in your request.';
+  var t = document.getElementById('wh-alerts-toggle');
+  t.classList.toggle('on', on); t.classList.toggle('off', !on);
+  var slash = document.getElementById('wh-bell-off');
+  if (slash) slash.style.display = on ? 'none' : '';
+  bell.classList.toggle('on', on);
+  bell.title = bell.ariaLabel = on ? 'Alerts are on' : 'Alerts are off';
+  bell.style.visibility = 'visible';
+}
+function whOpenAlertsSheet(prompt) {
+  document.getElementById('wh-alerts-head').textContent = prompt || 'Alerts';
+  whLog('alerts_sheet', prompt ? 'after_post' : 'bell');
+  whPaintAlerts();
+  whOpenModal('wh-alerts-modal');
+}
+async function whToggleAlerts() {
+  var tech = whIsTech();
+  var name = tech ? 'near_alerts' : 'reply_alerts';
+  var t = document.getElementById('wh-alerts-toggle');
+  var turnOn = !t.classList.contains('on');
+  t.classList.toggle('on', turnOn); t.classList.toggle('off', !turnOn);
+  try {
+    var out = await whRpc('wh_set_pref', { p_name: name, p_on: turnOn });
+    if (!out || !out.ok) throw new Error('pref');
+    WH.prefs = out;
+    whLog('alerts', name + (turnOn ? ':on' : ':off'));
+    var slash = document.getElementById('wh-bell-off');
+    if (slash) slash.style.display = turnOn ? 'none' : '';
+    var bellEl = document.getElementById('wh-bell');
+    if (bellEl) bellEl.classList.toggle('on', turnOn);
+    showToast(turnOn ? 'Alerts on' : 'Alerts off');
+  } catch (_) {
+    t.classList.toggle('on', !turnOn); t.classList.toggle('off', turnOn);
+    showToast('Could not save that just now');
+  }
+}
+
 // ── Motion: the Everything tab drifts slowly, like the old feed ────────────
+function whScroller() { return document.querySelector('#whats-happening .scroll-content'); }
 function whStartMotion() {
-  var list = document.getElementById('wh-list');
+  var list = whScroller();
   if (!list) return;
   if (!list._whListeners) {
     var pause = function () {
@@ -3392,7 +3688,7 @@ function whStartMotion() {
   if (WH.raf) return;
   WH.last = 0; WH.acc = 0;
   var tick = function (t) {
-    var el = document.getElementById('wh-list');
+    var el = whScroller();
     var skip = WH.paused || _currentScreen !== 'whats-happening' || WH.tab !== 'all' ||
       (document.visibilityState && document.visibilityState !== 'visible') || !el ||
       el.scrollHeight <= el.clientHeight + 1;
@@ -3446,6 +3742,10 @@ function whOpenRequestSheet() {
   d.value = '';
   var t = new Date(); d.min = t.getFullYear() + '-' + String(t.getMonth() + 1).padStart(2, '0') + '-' + String(t.getDate()).padStart(2, '0');
   document.getElementById('wh-req-photo').value = '';
+  var cityEl = document.getElementById('wh-req-city'), stEl = document.getElementById('wh-req-state');
+  cityEl.value = WH.city || ''; stEl.value = WH.state || '';
+  // Her city is on file: show it, but it is not something to change per post.
+  cityEl.readOnly = stEl.readOnly = !!WH.city;
   whMsg('wh-req-msg', '');
   var b = document.getElementById('wh-req-send'); b.disabled = false; b.textContent = 'Post my request';
   whOpenModal('wh-request-modal');
@@ -3456,6 +3756,9 @@ async function whSubmitRequest() {
   var date = document.getElementById('wh-req-date').value || null;
   var file = (document.getElementById('wh-req-photo').files || [])[0];
   if (!body) { whMsg('wh-req-msg', 'Tell techs what you are looking for.'); return; }
+  var city = (document.getElementById('wh-req-city').value || '').trim();
+  var st = (document.getElementById('wh-req-state').value || '').trim().toUpperCase();
+  if (!city) { whMsg('wh-req-msg', 'Add your city so techs near you see it.'); return; }
   var btn = document.getElementById('wh-req-send');
   btn.disabled = true; btn.textContent = file ? 'Uploading photo…' : 'Posting…';
   whMsg('wh-req-msg', '');
@@ -3472,11 +3775,11 @@ async function whSubmitRequest() {
     }
     var tz = '';
     try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (_) {}
-    var out = await whRpc('wh_post_request', { p_body: body, p_need_by: date, p_photo_url: photoUrl, p_tz: tz || null });
+    var out = await whRpc('wh_post_request', { p_body: body, p_need_by: date, p_photo_url: photoUrl, p_tz: tz || null, p_city: city, p_state: st || null });
     if (!out || !out.ok) {
       var code = out && out.code;
       whMsg('wh-req-msg', {
-        city_needed: 'Add your city in your profile first so techs near you can see it.',
+        city_needed: 'Add your city so techs near you see it.',
         too_many: 'You have three requests up already. Close one with Found someone first.',
         date_past: 'That date has passed. Pick today or later.',
         banned: 'Posting is turned off on your account. Reach us through Send feedback if that seems wrong.',
@@ -3486,7 +3789,11 @@ async function whSubmitRequest() {
       return;
     }
     whCloseModal('wh-request-modal');
+    if (!WH.city) { WH.city = city; WH.state = st; whPaintCta(); }
     showToast('Your request is up. Techs near you will see it.');
+    var asked = false;
+    try { asked = localStorage.getItem('mnc_wh_alert_asked') === '1'; localStorage.setItem('mnc_wh_alert_asked', '1'); } catch (_) {}
+    if (!asked) setTimeout(function () { whOpenAlertsSheet('Want a heads up when a tech replies?'); }, 900);
     WH.tab = 'request'; whPaintTabs();
     whRefresh();
   } catch (e) {
@@ -6160,8 +6467,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.6',     /* __APP_BUILD_NAME__   */
-  android: 669,         /* __APP_BUILD_ANDROID__ */
-  ios:     474,          /* __APP_BUILD_IOS__     */
+  android: 670,         /* __APP_BUILD_ANDROID__ */
+  ios:     475,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -7240,6 +7547,7 @@ function wireCapacitorPushListeners(PushNotifications) {
     // What's happening (Build 2): a new request near her, or a tech who is
     // interested in a client's request, opens the Requests board.
     if (tag.indexOf('wh-') === 0) {
+      if (tag.indexOf('wh-reply-') === 0) { try { WH.focus = tag.slice(9); } catch (_) {} }
       try { openWhatsHappening('request', 'push'); } catch (_) {}
       return;
     }
@@ -18555,8 +18863,12 @@ function styleNavForRole() {
 
 // ── Tech Dashboard ────────────────────────────────────────────────────────────
 function isTechUser() {
+  // Phone-only sign-in (2026-08-14): the role the app loaded at sign-in is
+  // the truth. The email match below only helps a legacy email account.
+  const r = String(window._mncCurrentRole || '').toLowerCase();
+  if (r === 'tech' || r === 'admin' || window._mncIsTechTableUser) return true;
   const email = currentUserEmail || '';
-  const u = ALL_USERS.find(u => u.email && u.email.toLowerCase() === email.toLowerCase());
+  const u = ALL_USERS.find(u => (u.email && u.email.toLowerCase() === email.toLowerCase()) || (u.phone && u.phone === email));
   if (u) return u.role === 'tech' || u.role === 'admin';
   // Fall back to regData if just signed up
   if (typeof regData !== 'undefined' && regData.role) {
@@ -19050,7 +19362,11 @@ async function openNotification(id) {
   // Only follow in-app routes. A notification's url is server-supplied, so
   // handing it to location.href would let anything that can write a row
   // navigate the app off-site. Screen ids only, nothing with a scheme.
-  if (String(n.tag || '').indexOf('wh-') === 0) { try { openWhatsHappening('request', 'notif'); } catch(_) {} return; }
+  if (String(n.tag || '').indexOf('wh-') === 0) {
+    if (String(n.tag).indexOf('wh-reply-') === 0) { try { WH.focus = String(n.tag).slice(9); } catch(_) {} }
+    try { openWhatsHappening('request', 'notif'); } catch(_) {}
+    return;
+  }
   var u = String(n.url || '').trim().replace(/^\//, '');
   if (u && /^[a-z0-9-]+$/i.test(u) && (SCREEN_DEPTH[u] !== undefined)) {
     try { show(u); } catch(_) {}

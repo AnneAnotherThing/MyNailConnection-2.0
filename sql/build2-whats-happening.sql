@@ -23,6 +23,12 @@
 -- request pushes only techs who are admins (Anne). Flip it off at launch:
 --   update public.wh_settings set value = 'false' where key = 'near_push_admin_only';
 --
+-- Built to scale (Anne, 2026-10-11, "what if it's 100,000 a day"): the feed
+-- reads your city, your state and everywhere as three small indexed slices,
+-- never the whole table; a nightly job marks ended requests, folds raw clicks
+-- into daily totals (raw kept 90 days) and calls the wh-cleanup edge function,
+-- which deletes a request's photo a week after the request ends.
+--
 -- Run AFTER sql/build0-guest-lane.sql, sql/admin-flag.sql and
 -- sql/stealth-profile.sql. Idempotent. Re-run freely.
 
@@ -66,6 +72,83 @@ language sql stable security definer
 set search_path = public
 as $$ select value from public.wh_settings where key = p_key; $$;
 
+-- A US state from the first three digits of a ZIP, for profiles that have a
+-- ZIP but no state (6 of 37 techs on 2026-10-11). Standard USPS prefixes.
+create or replace function public.wh_state_from_zip(p_zip text) returns text
+language sql immutable
+set search_path = public
+as $$
+  select case
+    when z is null then null
+    when z between 5 and 5 then 'NY'
+    when z between 6 and 9 then 'PR'
+    when z between 10 and 27 then 'MA'
+    when z between 28 and 29 then 'RI'
+    when z between 30 and 38 then 'NH'
+    when z between 39 and 49 then 'ME'
+    when z = 55 then 'MA'
+    when z between 50 and 59 then 'VT'
+    when z between 60 and 69 then 'CT'
+    when z between 70 and 89 then 'NJ'
+    when z between 100 and 149 then 'NY'
+    when z between 150 and 196 then 'PA'
+    when z between 197 and 199 then 'DE'
+    when z between 200 and 205 then 'DC'
+    when z between 206 and 219 then 'MD'
+    when z between 220 and 246 then 'VA'
+    when z between 247 and 268 then 'WV'
+    when z between 270 and 289 then 'NC'
+    when z between 290 and 299 then 'SC'
+    when z between 300 and 319 then 'GA'
+    when z between 320 and 349 then 'FL'
+    when z between 350 and 369 then 'AL'
+    when z between 370 and 385 then 'TN'
+    when z between 386 and 397 then 'MS'
+    when z between 398 and 399 then 'GA'
+    when z between 400 and 427 then 'KY'
+    when z between 430 and 459 then 'OH'
+    when z between 460 and 479 then 'IN'
+    when z between 480 and 499 then 'MI'
+    when z between 500 and 528 then 'IA'
+    when z between 530 and 549 then 'WI'
+    when z between 550 and 567 then 'MN'
+    when z = 569 then 'DC'
+    when z between 570 and 577 then 'SD'
+    when z between 580 and 588 then 'ND'
+    when z between 590 and 599 then 'MT'
+    when z between 600 and 629 then 'IL'
+    when z between 630 and 658 then 'MO'
+    when z between 660 and 679 then 'KS'
+    when z between 680 and 693 then 'NE'
+    when z between 700 and 714 then 'LA'
+    when z between 716 and 729 then 'AR'
+    when z between 730 and 749 then 'OK'
+    when z = 885 then 'TX'
+    when z between 750 and 799 then 'TX'
+    when z between 800 and 816 then 'CO'
+    when z between 820 and 831 then 'WY'
+    when z between 832 and 838 then 'ID'
+    when z between 840 and 847 then 'UT'
+    when z between 850 and 865 then 'AZ'
+    when z between 870 and 884 then 'NM'
+    when z between 889 and 898 then 'NV'
+    when z between 900 and 961 then 'CA'
+    when z between 967 and 968 then 'HI'
+    when z between 970 and 979 then 'OR'
+    when z between 980 and 994 then 'WA'
+    when z between 995 and 999 then 'AK'
+    else null end
+  from (select case when coalesce(p_zip, '') ~ '^\s*\d{5}' then substring(btrim(p_zip) from 1 for 3)::int end as z) x;
+$$;
+
+-- A stored state, or the one its ZIP implies.
+create or replace function public.wh_state(p_state text, p_zip text) returns text
+language sql immutable
+set search_path = public
+as $$
+  select coalesce(nullif(upper(btrim(coalesce(p_state, ''))), ''), public.wh_state_from_zip(p_zip), '');
+$$;
+
 -- ── Tables ──────────────────────────────────────────────────────────────────
 
 create table if not exists public.wh_requests (
@@ -83,8 +166,17 @@ create table if not exists public.wh_requests (
   expires_at   timestamptz not null,
   removed_note text
 );
+alter table public.wh_requests add column if not exists closed_at timestamptz;
+alter table public.wh_requests add column if not exists photo_cleaned_at timestamptz;
+alter table public.wh_requests drop constraint if exists wh_requests_status_check;
+alter table public.wh_requests add constraint wh_requests_status_check
+  check (status in ('open', 'found', 'closed', 'removed', 'expired'));
 create index if not exists wh_requests_open_idx on public.wh_requests (status, expires_at desc);
 create index if not exists wh_requests_author_idx on public.wh_requests (author_key, created_at desc);
+create index if not exists wh_requests_place_idx on public.wh_requests (lower(btrim(state)), lower(btrim(city)), created_at desc) where status = 'open';
+create index if not exists wh_requests_recent_idx on public.wh_requests (created_at desc) where status = 'open';
+create index if not exists wh_requests_photo_idx on public.wh_requests (closed_at, expires_at) where photo_url is not null;
+create index if not exists board_posts_publish_idx on public.board_posts (publish_at desc);
 
 create table if not exists public.wh_replies (
   id         uuid primary key default gen_random_uuid(),
@@ -171,6 +263,22 @@ create table if not exists public.wh_events (
 );
 create index if not exists wh_events_created_idx on public.wh_events (created_at desc);
 create index if not exists wh_events_event_idx on public.wh_events (event, created_at desc);
+create index if not exists wh_events_tech_idx on public.wh_events (tech_id, created_at desc) where tech_id is not null;
+
+-- Daily totals. Raw clicks older than 90 days are folded in here and deleted.
+create table if not exists public.wh_events_daily (
+  day     date not null,
+  event   text not null,
+  detail  text not null default '',
+  role    text not null default '',
+  tech_id uuid not null default '00000000-0000-0000-0000-000000000000',
+  n       bigint not null,
+  primary key (day, event, detail, role, tech_id)
+);
+alter table public.wh_events_daily enable row level security;
+drop policy if exists wh_events_daily_admin_read on public.wh_events_daily;
+create policy wh_events_daily_admin_read on public.wh_events_daily for select to authenticated using (public.is_admin());
+revoke all on public.wh_events_daily from anon;
 
 create or replace function public.wh_log(p_event text, p_detail text default null, p_item_id text default null, p_tech_id uuid default null)
 returns void
@@ -289,6 +397,12 @@ begin
   if me is null then
     raise exception 'sign in required' using errcode = '42501';
   end if;
+  if v_st = '' then
+    select lower(public.wh_state(u.state, u.zip)) into v_st
+      from public.users u where public.wh_key(u.phone) = me
+     order by u.created_at desc nulls last limit 1;
+    v_st := coalesce(v_st, '');
+  end if;
 
   with items as (
     select 'request'::text as kind, r.id::text as id, r.created_at as at,
@@ -299,16 +413,34 @@ begin
            (select count(*) from public.wh_replies x where x.request_id = r.id and not x.removed)::int as replies,
            exists (select 1 from public.wh_replies x
                     where x.request_id = r.id and x.tech_key = me) as replied
-      from public.wh_requests r
+      -- Never the whole table: her own open requests, then the newest in her
+      -- city, in her state and everywhere, each an indexed slice of 150.
+      from (
+        (select x.* from public.wh_requests x
+          where x.author_key = me and x.status = 'open' and x.expires_at > now())
+        union
+        (select x.* from public.wh_requests x
+          where v_city <> '' and x.status = 'open' and x.expires_at > now()
+            and (v_st = '' or lower(btrim(x.state)) = v_st) and lower(btrim(x.city)) = v_city
+          order by x.created_at desc limit 150)
+        union
+        (select x.* from public.wh_requests x
+          where v_st <> '' and x.status = 'open' and x.expires_at > now()
+            and lower(btrim(x.state)) = v_st
+          order by x.created_at desc limit 150)
+        union
+        (select x.* from public.wh_requests x
+          where x.status = 'open' and x.expires_at > now()
+          order by x.created_at desc limit 150)
+      ) r
      where (p_kind is null or p_kind = 'request')
-       and r.status = 'open' and r.expires_at > now()
        and not public.wh_blocked(me, r.author_key)
     union all
     -- Every tech with Open today on, however she turned it on (this
     -- screen, the chip on an older build, the morning prompt). A post from
     -- this screen adds her note and end time.
     select 'available', t.id::text, coalesce(a.created_at, t.avail_set_at, now()),
-           t.city, t.state, coalesce(a.note, ''), null,
+           t.city, public.wh_state(t.state, t.zip), coalesce(a.note, ''), null,
            t.name, t.image_url,
            t.id, null::date, a.until,
            (public.wh_key(t.phone) = me), 0, false
@@ -321,15 +453,18 @@ begin
        and not public.wh_blocked(me, public.wh_key(t.phone))
     union all
     select 'photo', b.id::text, b.publish_at,
-           t.city, t.state, b.body, b.image_url,
+           t.city, public.wh_state(t.state, t.zip), b.body, b.image_url,
            t.name, t.image_url,
            t.id, null::date, null::timestamptz,
            (public.wh_key(t.phone) = me), 0, false
-      from public.board_posts b
+      from (select b0.*, row_number() over (partition by b0.tech_uuid order by b0.publish_at desc) as rn
+              from (select b1.* from public.board_posts b1
+                     where b1.image_url is not null
+                       and b1.publish_at <= now() and b1.publish_at > now() - interval '60 days'
+                     order by b1.publish_at desc limit 400) b0) b
       join public.techs t on t.id = b.tech_uuid
      where (p_kind is null or p_kind = 'photo')
-       and b.image_url is not null
-       and b.publish_at <= now() and b.publish_at > now() - interval '60 days'
+       and b.rn <= 2
        and public.wh_tech_in_view(t)
        and not public.wh_blocked(me, public.wh_key(t.phone))
   ), ranked as (
@@ -356,9 +491,13 @@ end $$;
 -- ── Requests (2a) ───────────────────────────────────────────────────────────
 
 -- p_tz is the poster's device time zone; a need-by date ends at the end of
--- that day there. No date = 14 days.
+-- that day there. No date = 14 days. City and state come from her profile;
+-- when the profile has none (client sign-up only asks for a ZIP), the ones
+-- she types on the sheet are used and saved back to her profile.
+drop function if exists public.wh_post_request(text, date, text, text);
 create or replace function public.wh_post_request(
-  p_body text, p_need_by date default null, p_photo_url text default null, p_tz text default null
+  p_body text, p_need_by date default null, p_photo_url text default null, p_tz text default null,
+  p_city text default null, p_state text default null
 ) returns jsonb
 language plpgsql security definer
 set search_path = public
@@ -393,7 +532,14 @@ begin
    order by created_at desc nulls last
    limit 1;
   if coalesce(btrim(u.city), '') = '' then
-    return jsonb_build_object('ok', false, 'code', 'city_needed');
+    if coalesce(btrim(p_city), '') = '' then
+      return jsonb_build_object('ok', false, 'code', 'city_needed');
+    end if;
+    u.city  := left(btrim(p_city), 60);
+    u.state := coalesce(nullif(left(upper(btrim(coalesce(p_state, ''))), 2), ''), u.state);
+    if u.id is not null then
+      update public.users set city = u.city, state = coalesce(u.state, state) where id = u.id;
+    end if;
   end if;
 
   if p_need_by is not null then
@@ -413,7 +559,7 @@ begin
   end if;
 
   insert into public.wh_requests (author_key, author_name, author_image, city, state, body, need_by, photo_url, expires_at)
-  values (me, coalesce(u.name, ''), u.image_url, btrim(u.city), btrim(coalesce(u.state, '')),
+  values (me, coalesce(u.name, ''), u.image_url, btrim(u.city), public.wh_state(u.state, u.zip),
           btrim(p_body), p_need_by, nullif(btrim(coalesce(p_photo_url, '')), ''), v_exp)
   returning * into v_row;
 
@@ -424,7 +570,7 @@ begin
            coalesce(x.avail_reminder_tz, x.booking_timezone, 'America/Phoenix') as tz
       from public.techs x
      where lower(btrim(coalesce(x.city, ''))) = lower(btrim(v_row.city))
-       and lower(btrim(coalesce(x.state, ''))) = lower(btrim(v_row.state))
+       and lower(public.wh_state(x.state, x.zip)) = lower(btrim(v_row.state))
        and public.wh_key(x.phone) is not null
        and public.wh_key(x.phone) <> me
        and coalesce((select p.near_alerts from public.wh_prefs p where p.person_key = public.wh_key(x.phone)), true)
@@ -469,7 +615,7 @@ begin
   if p_status not in ('found', 'closed') then
     return jsonb_build_object('ok', false, 'code', 'bad_status');
   end if;
-  update public.wh_requests set status = p_status
+  update public.wh_requests set status = p_status, closed_at = now()
    where id = p_id and author_key = me and status = 'open';
   get diagnostics n = row_count;
   if n = 1 then perform public.wh_log('close_request', p_status, p_id::text); end if;
@@ -483,7 +629,7 @@ set search_path = public
 as $$
   select coalesce(jsonb_agg(jsonb_build_object(
            'id', r.id, 'at', r.created_at, 'body', r.body, 'need_by', r.need_by,
-           'photo', r.photo_url, 'status', case when r.status = 'open' and r.expires_at <= now() then 'expired' else r.status end,
+           'photo', r.photo_url, 'status', case when r.status in ('open', 'expired') and r.expires_at <= now() then 'expired' else r.status end,
            'ends_at', r.expires_at,
            'replies', (select count(*) from public.wh_replies x where x.request_id = r.id and not x.removed)
          ) order by r.created_at desc), '[]'::jsonb)
@@ -824,7 +970,7 @@ begin
 
   if p_action in ('remove', 'ban') then
     if p.kind = 'request' then
-      update public.wh_requests set status = 'removed', removed_note = p_note where id::text = p.target_id;
+      update public.wh_requests set status = 'removed', removed_note = p_note, closed_at = coalesce(closed_at, now()) where id::text = p.target_id;
     elsif p.kind = 'reply' then
       update public.wh_replies set removed = true where id::text = p.target_id;
     elsif p.kind = 'available' then
@@ -860,16 +1006,29 @@ set search_path = public
 as $$
 declare
   v_from timestamptz := case when coalesce(p_days, 0) <= 0 then '-infinity'::timestamptz else now() - make_interval(days => p_days) end;
+  -- Raw rows older than this have been folded into wh_events_daily.
+  v_raw  timestamptz := coalesce((select min(created_at) from public.wh_events), now());
 begin
   if not public.is_admin() then raise exception 'admin only' using errcode = '42501'; end if;
-  return jsonb_build_object(
+  return (
+  with ev as (
+    select event, coalesce(detail, '') as detail, coalesce(role, 'guest') as role, tech_id, 1::bigint as n
+      from public.wh_events where created_at >= v_from
+    union all
+    select event, detail, case when role = '' then 'guest' else role end,
+           nullif(tech_id, '00000000-0000-0000-0000-000000000000'::uuid), n
+      from public.wh_events_daily
+     where day < (v_raw at time zone 'America/Phoenix')::date
+       and (v_from = '-infinity'::timestamptz or day >= (v_from at time zone 'America/Phoenix')::date)
+  )
+  select jsonb_build_object(
     'events', (select coalesce(jsonb_object_agg(k, n), '{}'::jsonb) from (
-        select event || coalesce(':' || detail, '') as k, count(*) as n
-          from public.wh_events where created_at >= v_from group by 1) x),
+        select event || case when detail <> '' then ':' || detail else '' end as k, sum(n) as n
+          from ev group by 1) x),
     'event_totals', (select coalesce(jsonb_object_agg(event, n), '{}'::jsonb) from (
-        select event, count(*) as n from public.wh_events where created_at >= v_from group by 1) x),
-    'opens_by_role', (select coalesce(jsonb_object_agg(coalesce(role, 'guest'), n), '{}'::jsonb) from (
-        select role, count(*) as n from public.wh_events where event = 'open' and created_at >= v_from group by 1) x),
+        select event, sum(n) as n from ev group by 1) x),
+    'opens_by_role', (select coalesce(jsonb_object_agg(role, n), '{}'::jsonb) from (
+        select role, sum(n) as n from ev where event = 'open' group by 1) x),
     'open_sessions', (select count(distinct session_id) from public.wh_events where event = 'open' and created_at >= v_from),
     'daily_opens', (select coalesce(jsonb_object_agg(d, n), '{}'::jsonb) from (
         select to_char(created_at at time zone 'America/Phoenix', 'YYYY-MM-DD') as d, count(*) as n
@@ -884,7 +1043,7 @@ begin
         'found',      count(*) filter (where status = 'found'),
         'closed',     count(*) filter (where status = 'closed'),
         'removed',    count(*) filter (where status = 'removed'),
-        'expired',    count(*) filter (where status = 'open' and expires_at <= now()),
+        'expired',    count(*) filter (where status = 'expired' or (status = 'open' and expires_at <= now())),
         'with_reply', count(*) filter (where exists (select 1 from public.wh_replies x where x.request_id = r.id)),
         'with_photo', count(*) filter (where photo_url is not null))
         from public.wh_requests r where created_at >= v_from),
@@ -899,16 +1058,89 @@ begin
           from public.wh_requests where created_at >= v_from group by 1 order by 2 desc limit 10) x),
     'top_techs', (select coalesce(jsonb_agg(row_to_json(x) order by x.profile_taps desc, x.contacts desc), '[]'::jsonb) from (
         select t.id, t.name,
-               count(*) filter (where e.event = 'profile_tap') as profile_taps,
-               count(*) filter (where e.event = 'contact') as contacts,
-               count(*) filter (where e.event = 'reply') as replies,
-               count(*) filter (where e.event = 'post_available') as available_posts
-          from public.wh_events e join public.techs t on t.id = e.tech_id
-         where e.created_at >= v_from
+               coalesce(sum(e.n) filter (where e.event = 'profile_tap'), 0) as profile_taps,
+               coalesce(sum(e.n) filter (where e.event = 'contact'), 0) as contacts,
+               coalesce(sum(e.n) filter (where e.event = 'reply'), 0) as replies,
+               coalesce(sum(e.n) filter (where e.event = 'post_available'), 0) as available_posts
+          from ev e join public.techs t on t.id = e.tech_id
          group by t.id, t.name
          order by 3 desc, 4 desc
          limit 10) x)
+  ));
+end $$;
+
+-- ── Nightly upkeep ──────────────────────────────────────────────────────────
+-- 3:15 AM Phoenix. Marks ended requests, folds raw clicks older than 90 days
+-- into daily totals, trims the push cap log, then asks the wh-cleanup edge
+-- function to delete photos from requests that ended over a week ago.
+create or replace function public.wh_nightly() returns jsonb
+language plpgsql security definer
+set search_path = public
+as $$
+declare
+  v_cut     timestamptz := ((date_trunc('day', now() at time zone 'America/Phoenix') - interval '90 days') at time zone 'America/Phoenix');
+  v_expired int;
+  v_folded  int;
+  k_anon text := 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im53cW5ha29vbmdyb3Jid25ycXpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNzczMjUsImV4cCI6MjA5ODk1MzMyNX0.TFFMlg9VjB0cyJwbgmVbeatFYQFaF1Ri0nrH0GwhHJs';
+begin
+  update public.wh_requests set status = 'expired', closed_at = coalesce(closed_at, expires_at)
+   where status = 'open' and expires_at <= now();
+  get diagnostics v_expired = row_count;
+
+  insert into public.wh_events_daily (day, event, detail, role, tech_id, n)
+  select (created_at at time zone 'America/Phoenix')::date, event, coalesce(detail, ''), coalesce(role, ''),
+         coalesce(tech_id, '00000000-0000-0000-0000-000000000000'::uuid), count(*)
+    from public.wh_events
+   where created_at < v_cut
+   group by 1, 2, 3, 4, 5
+  on conflict (day, event, detail, role, tech_id) do update set n = public.wh_events_daily.n + excluded.n;
+  delete from public.wh_events where created_at < v_cut;
+  get diagnostics v_folded = row_count;
+
+  delete from public.wh_near_pushes where created_at < now() - interval '3 days';
+
+  perform net.http_post(
+    url := 'https://nwqnakoongrorbwnrqzc.supabase.co/functions/v1/wh-cleanup',
+    headers := jsonb_build_object('Content-Type', 'application/json', 'apikey', k_anon, 'Authorization', 'Bearer ' || k_anon),
+    body := '{}'::jsonb
   );
+
+  return jsonb_build_object('expired', v_expired, 'clicks_folded', v_folded);
+end $$;
+
+do $$
+begin
+  if exists (select 1 from cron.job where jobname = 'wh-nightly') then
+    perform cron.unschedule('wh-nightly');
+  end if;
+  perform cron.schedule('wh-nightly', '15 10 * * *', 'select public.wh_nightly()');
+end $$;
+
+-- For the wh-cleanup edge function (service role only): photos from requests
+-- that ended more than a week ago, and the stamp once they are deleted.
+create or replace function public.wh_photos_to_clean(p_limit int default 500)
+returns table (id uuid, photo_url text)
+language sql stable security definer
+set search_path = public
+as $$
+  select r.id, r.photo_url
+    from public.wh_requests r
+   where r.photo_url is not null
+     and (   (r.status <> 'open' and coalesce(r.closed_at, r.expires_at) < now() - interval '7 days')
+          or (r.expires_at < now() - interval '7 days'))
+   order by coalesce(r.closed_at, r.expires_at)
+   limit greatest(1, least(coalesce(p_limit, 500), 1000));
+$$;
+
+create or replace function public.wh_photos_cleaned(p_ids uuid[]) returns int
+language plpgsql security definer
+set search_path = public
+as $$
+declare n int;
+begin
+  update public.wh_requests set photo_url = null, photo_cleaned_at = now() where id = any(p_ids);
+  get diagnostics n = row_count;
+  return n;
 end $$;
 
 -- ── Grants ──────────────────────────────────────────────────────────────────
@@ -927,7 +1159,7 @@ declare f text;
 begin
   foreach f in array array[
     'wh_feed(text, text, text)',
-    'wh_post_request(text, date, text, text)',
+    'wh_post_request(text, date, text, text, text, text)',
     'wh_close_request(uuid, text)',
     'wh_my_requests()',
     'wh_post_available(timestamptz, text)',
@@ -948,6 +1180,11 @@ begin
   end loop;
 end $$;
 revoke all on function public.wh_expire_available() from public, anon, authenticated;
+revoke all on function public.wh_nightly() from public, anon, authenticated;
+revoke all on function public.wh_photos_to_clean(int) from public, anon, authenticated;
+revoke all on function public.wh_photos_cleaned(uuid[]) from public, anon, authenticated;
+grant execute on function public.wh_photos_to_clean(int) to service_role;
+grant execute on function public.wh_photos_cleaned(uuid[]) to service_role;
 
 -- ── Request photos ──────────────────────────────────────────────────────────
 -- Public read (the link is random); a signed-in person writes only under
@@ -980,5 +1217,6 @@ commit;
 
 -- ── Check ───────────────────────────────────────────────────────────────────
 -- select public.wh_teaser();                                   -- {"requests":0,"available":0}
--- select jobname, schedule from cron.job where jobname = 'wh-expire-available';
+-- select jobname, schedule from cron.job where jobname in ('wh-expire-available', 'wh-nightly');
+-- select public.wh_nightly();                                 -- safe to run by hand
 -- select * from public.wh_settings order by key;

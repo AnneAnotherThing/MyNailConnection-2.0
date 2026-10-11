@@ -423,6 +423,55 @@
       </details>
     </section>
 
+    <!-- 6b. What's happening (Build 2, 2026-10-10) -->
+    <section class="panel" id="wh-panel">
+      <div class="panel-head">
+        <div class="panel-title">What's happening</div>
+        <div class="panel-meta" id="wh-range-btns">
+          <button class="btn ghost" type="button" data-days="7" onclick="whStatsRange(7)">7 days</button>
+          <button class="btn" type="button" data-days="30" onclick="whStatsRange(30)">30 days</button>
+          <button class="btn ghost" type="button" data-days="0" onclick="whStatsRange(0)">All time</button>
+        </div>
+      </div>
+      <div class="tiles">
+        <div class="tile"><div class="k">Screen opens</div><div class="v" id="whs-opens">-</div><div class="s" id="whs-opens-s">-</div></div>
+        <div class="tile"><div class="k">Requests posted</div><div class="v" id="whs-req">-</div><div class="s" id="whs-req-s">-</div></div>
+        <div class="tile"><div class="k">Available posts</div><div class="v" id="whs-av">-</div><div class="s" id="whs-av-s">-</div></div>
+        <div class="tile"><div class="k">Interested replies</div><div class="v" id="whs-rep">-</div><div class="s" id="whs-rep-s">-</div></div>
+        <div class="tile"><div class="k">Profile taps</div><div class="v" id="whs-prof">-</div><div class="s" id="whs-prof-s">-</div></div>
+        <div class="tile"><div class="k">Call, text, book</div><div class="v" id="whs-contact">-</div><div class="s" id="whs-contact-s">-</div></div>
+        <div class="tile"><div class="k">Pushes sent</div><div class="v" id="whs-push">-</div><div class="s" id="whs-push-s">-</div></div>
+        <div class="tile"><div class="k">Reports open</div><div class="v" id="whs-reports">-</div><div class="s" id="whs-reports-s">-</div></div>
+      </div>
+      <div class="sub-head">Opens and posts per day, last 30 days</div>
+      <svg id="whs-chart" class="chart" viewBox="0 0 600 130" preserveAspectRatio="none" role="img" aria-label="What's happening opens and posts per day"></svg>
+      <div class="chart-axis"><span>30 days ago</span><span>today</span></div>
+      <div class="legend"><span><i style="background:#8B5041"></i>Opens</span><span><i style="background:#2D6A4F"></i>Posts and replies</span></div>
+      <details class="fold">
+        <summary>Where people come in from, and who</summary>
+        <div class="fold-body">
+          <div class="sub-head" style="margin-top:0;">Way in</div><div id="whs-src"></div>
+          <div class="sub-head">Who opens it</div><div id="whs-role"></div>
+          <div class="sub-head">Tabs they switch to</div><div id="whs-tabs"></div>
+        </div>
+      </details>
+      <details class="fold">
+        <summary>Started versus posted</summary>
+        <div class="fold-body"><div id="whs-funnel" class="list"></div>
+          <div class="note">"Started" counts the times the sheet was opened. "Posted" counts what actually went up, logged by the database itself.</div></div>
+      </details>
+      <details class="fold">
+        <summary>Requests: how they end, and where they come from</summary>
+        <div class="fold-body"><div id="whs-req-detail" class="list"></div>
+          <div class="sub-head">Cities</div><div id="whs-cities"></div></div>
+      </details>
+      <details class="fold">
+        <summary>Techs getting attention from the board</summary>
+        <div class="fold-body"><div id="whs-top" class="list"><div class="empty">Loading...</div></div></div>
+      </details>
+      <div class="note" id="whs-note">Counts include test posts made from the admin and test accounts.</div>
+    </section>
+
     <!-- 7. Admin tools -->
     <section class="panel tools">
       <div class="panel-head">
@@ -829,6 +878,7 @@
       setOffline(false);
       if (sources.every(function (s) { return !s.ok; })) { setOffline(true); return; }
       loadPartnerAds();
+      loadWhStats().catch(function () {});
 
       const hits    = sources[0].ok ? sources[0].data : null;
       const taps    = sources[1].ok ? sources[1].data : null;
@@ -1210,6 +1260,83 @@
       renderCompList();
     } catch (e) { alert('Could not update: ' + ((e && e.message) || 'error')); }
   }
+
+  // ── What's happening stats (Build 2, 2026-10-10) ──────────────────────────
+  let _whDays = 30;
+  async function loadWhStats() {
+    let d;
+    try { d = await rpc('admin_wh_stats', { p_days: _whDays }); }
+    catch (e) {
+      if (e && e.auth) throw e;
+      setTxt('whs-note', 'Could not load these stats' + (e && e.message ? ' (' + e.message + ')' : '') + '. Has sql/build2-whats-happening.sql been run?');
+      return;
+    }
+    d = d || {};
+    const ev = d.events || {}, tot = d.event_totals || {}, rq = d.requests || {};
+    const n = function (k) { return ev[k] || 0; };
+    const t = function (k) { return tot[k] || 0; };
+    const span = _whDays ? 'last ' + _whDays + ' days' : 'all time';
+    setTxt('whs-opens', fmt(t('open')));
+    setTxt('whs-opens-s', fmt(d.open_sessions || 0) + ' ' + plural(d.open_sessions || 0, 'person', 'people') + ', ' + span);
+    setTxt('whs-req', fmt(rq.posted || 0));
+    setTxt('whs-req-s', fmt(rq.found || 0) + ' found someone, ' + fmt(rq.open || 0) + ' open now');
+    setTxt('whs-av', fmt(t('post_available')));
+    setTxt('whs-av-s', fmt(d.available_now || 0) + ' on the board right now');
+    setTxt('whs-rep', fmt(d.replies || 0));
+    setTxt('whs-rep-s', fmt(rq.with_reply || 0) + ' of ' + fmt(rq.posted || 0) + ' requests got one');
+    setTxt('whs-prof', fmt(t('profile_tap')));
+    setTxt('whs-prof-s', fmt(n('profile_tap:available')) + ' from available, ' + fmt(n('profile_tap:photo')) + ' from photos');
+    setTxt('whs-contact', fmt(t('contact')));
+    setTxt('whs-contact-s', fmt(n('contact:call')) + ' calls, ' + fmt(n('contact:text')) + ' texts, ' + fmt(n('contact:book') + n('contact:book_link')) + ' books');
+    setTxt('whs-push', fmt((d.near_pushes || 0) + t('push_reply')));
+    setTxt('whs-push-s', fmt(d.near_pushes || 0) + ' near-me, ' + fmt(t('push_reply')) + ' reply; ' + fmt(n('open:push') + n('open:notif')) + ' tapped');
+    setTxt('whs-reports', fmt(d.reports_open || 0));
+    setTxt('whs-reports-s', fmt(t('report')) + ' reports, ' + fmt(t('block')) + ' blocks, ' + span);
+
+    const days = lastNDays(30), dop = d.daily_opens || {}, dps = d.daily_posts || {};
+    barChart('whs-chart', days, [{ values: days.map(function (k) { return dop[k] || 0; }), color: '#8B5041' },
+                                 { values: days.map(function (k) { return dps[k] || 0; }), color: '#2D6A4F' }], -1);
+
+    const pick = function (prefix) {
+      const out = {};
+      Object.keys(ev).forEach(function (k) { if (k.indexOf(prefix + ':') === 0) out[k.slice(prefix.length + 1)] = ev[k]; });
+      return out;
+    };
+    setHtml('whs-src', barList(pick('open'), { home: 'Home card', portal: 'Tech Portal card', 'home-available': 'Available now card on Home', push: 'Tapped a push', notif: 'Tapped in Notifications', signin: 'Right after signing in', other: 'Other' }, 'No opens yet.'));
+    setHtml('whs-role', barList(d.opens_by_role || {}, { guest: 'Guests (signed out)', client: 'Clients', tech: 'Techs', admin: 'Admins' }, 'No opens yet.'));
+    setHtml('whs-tabs', barList(pick('tab'), { all: 'Everything', request: 'Requests', available: 'Available now' }, 'No tab switches yet.'));
+
+    const row = function (label, a, b) {
+      return '<div class="row"><div class="l"><span class="main">' + esc(label) + '</span></div><span class="when">' + a + (b !== undefined ? ' &rarr; <b>' + b + '</b>' : '') + '</span></div>';
+    };
+    setHtml('whs-funnel',
+      row('Ask for a set: started, posted', fmt(n('sheet:request')), fmt(t('post_request'))) +
+      row('Available now: started, posted', fmt(n('sheet:available')), fmt(t('post_available'))) +
+      row('Guest sign-in taps', fmt(t('signin_tap'))) +
+      row('Requests posted with a photo', fmt(rq.with_photo || 0)) +
+      row('Turned off by the tech ("I\'m booked up")', fmt(t('clear_available'))));
+    setHtml('whs-req-detail',
+      row('Found someone', fmt(rq.found || 0)) +
+      row('Taken down by the client', fmt(rq.closed || 0)) +
+      row('Ran out of time', fmt(rq.expired || 0)) +
+      row('Removed by admin', fmt(rq.removed || 0)) +
+      row('Still open', fmt(rq.open || 0)));
+    setHtml('whs-cities', barList(d.cities || {}, {}, 'No requests yet.'));
+    const top = d.top_techs || [];
+    setHtml('whs-top', top.length ? top.map(function (x) {
+      return '<div class="row"><div class="l"><span class="main">' + esc(x.name || 'Tech') + '</span></div>'
+        + '<span class="when">' + fmt(x.profile_taps) + ' profile taps, ' + fmt(x.contacts) + ' contacts, ' + fmt(x.replies) + ' replies, ' + fmt(x.available_posts) + ' available posts</span></div>';
+    }).join('') : '<div class="empty">Nobody yet.</div>');
+    setTxt('whs-note', 'Counts include test posts made from the admin and test accounts.');
+  }
+  function whStatsRange(days) {
+    _whDays = days;
+    document.querySelectorAll('#wh-range-btns .btn').forEach(function (btn) {
+      btn.classList.toggle('ghost', String(btn.getAttribute('data-days')) !== String(days));
+    });
+    loadWhStats().catch(function () {});
+  }
+  window.whStatsRange = whStatsRange;
 
   // ── Partner ads (Build 1, 2026-10-09) ──────────────────────────────────────
   async function loadPartnerAds() {
