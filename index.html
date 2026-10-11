@@ -6285,8 +6285,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.6',     /* __APP_BUILD_NAME__   */
-  android: 676,         /* __APP_BUILD_ANDROID__ */
-  ios:     481,          /* __APP_BUILD_IOS__     */
+  android: 677,         /* __APP_BUILD_ANDROID__ */
+  ios:     482,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -15742,10 +15742,13 @@ function renderTrialPill() {
   if (!el) return;
   var t = window._mncTrial;
   if (!t || t.source !== 'trial') { el.style.display = 'none'; return; }
-  if (t.bookable) {
-    var end = t.reset ? new Date(t.reset) : null;
+  // The clock decides "ended", not bookability: a paused or hidden page is
+  // not bookable either, and that used to read as "Free month ended".
+  var end = t.reset ? new Date(t.reset) : null;
+  var ended = !!(end && !isNaN(end.getTime()) && end.getTime() < Date.now());
+  if (t.bookable || !ended) {
     var days = (end && !isNaN(end.getTime())) ? Math.max(0, Math.ceil((end.getTime() - Date.now()) / 86400000)) : 0;
-    el.textContent = (days <= 1) ? 'Free month: last day' : 'Free month: ' + days + 'd left';
+    el.textContent = ((days <= 1) ? 'Free month: last day' : 'Free month: ' + days + 'd left') + (t.paused && !t.bookable ? ' \u00b7 page paused' : '');
     el.style.background = 'linear-gradient(140deg,#FFF3E9 0%,#FDE8EC 100%)';
     el.style.color = 'var(--charcoal)';
     el.style.border = '1.5px solid var(--rose-mid)';
@@ -15788,12 +15791,23 @@ function tdRenderLapseBanner(t) {
   var lapsed = !!(t && t.booking_enabled && t.is_bookable === false);
   if (!lapsed) { el.style.display = 'none'; return; }
   var wasTrial = (t.subscription_source === 'trial');
+  var endAt = t.period_reset_at ? new Date(t.period_reset_at) : null;
+  var windowEnded = !!(endAt && !isNaN(endAt.getTime()) && endAt.getTime() < Date.now());
   var head = document.getElementById('td-lapse-head');
   var body = document.getElementById('td-lapse-body');
-  if (head) head.textContent = wasTrial ? 'Your free month has ended' : 'Your booking is paused';
-  if (body) body.textContent = wasTrial
-    ? 'Clients cannot book you right now. Join Glow Up, $10.99 a month, to keep taking bookings.'
-    : 'Your subscription lapsed, so clients cannot book you right now. Subscribe to turn booking back on.';
+  if (t.paused_by_tech) {
+    if (head) head.textContent = 'Your page is paused';
+    if (body) body.textContent = 'Clients cannot book you while Pause my page is on. Flip it off in Booking Settings and booking comes back.';
+  } else if (wasTrial && windowEnded) {
+    if (head) head.textContent = 'Your free month has ended';
+    if (body) body.textContent = 'Clients cannot book you right now. Join Glow Up, $10.99 a month, to keep taking bookings.';
+  } else if (wasTrial) {
+    if (head) head.textContent = 'Clients cannot book you right now';
+    if (body) body.textContent = 'Your free month is still running, but your profile is not showing to clients. Check Pause my page in Booking Settings, or tap Get help.';
+  } else {
+    if (head) head.textContent = 'Your booking is paused';
+    if (body) body.textContent = 'Your subscription lapsed, so clients cannot book you right now. Subscribe to turn booking back on.';
+  }
   el.style.display = 'block';
 }
 
@@ -15802,7 +15816,7 @@ async function tbLoadDashBadge() {
   const sub = document.getElementById('td-bookings-sub');
   const badge = document.getElementById('td-bookings-pending');
   try {
-    const r = await fetch(SUPABASE_URL + '/rest/v1/techs?select=id,booking_enabled,booking_link,booking_timezone,is_available,is_same_day,accepting_new_clients,is_bookable,subscription_source,period_reset_at,daily_avail_nudge_off,avail_reminder_time&or=(email.eq.' +
+    const r = await fetch(SUPABASE_URL + '/rest/v1/techs?select=id,booking_enabled,booking_link,paused_by_tech,booking_timezone,is_available,is_same_day,accepting_new_clients,is_bookable,subscription_source,period_reset_at,daily_avail_nudge_off,avail_reminder_time&or=(email.eq.' +
       encodeURIComponent(currentUserEmail) + ',phone.eq.' + encodeURIComponent(currentUserEmail) + ')', { headers: bkHeaders() });
     if (!r.ok) return; // migration not run yet, leave the default copy
     const t = (await r.json())[0];
@@ -15813,7 +15827,7 @@ async function tbLoadDashBadge() {
     try { tdRenderLapseBanner(t); } catch(_) {}
     // Cache the trial state so the persistent free-month pill can paint on any
     // screen without a refetch, then render it.
-    window._mncTrial = { source: t.subscription_source, reset: t.period_reset_at, bookable: !!t.is_bookable };
+    window._mncTrial = { source: t.subscription_source, reset: t.period_reset_at, bookable: !!t.is_bookable, paused: !!t.paused_by_tech };
     try { renderTrialPill(); } catch(_) {}
     try { tdRenderMncBookingCta(t); } catch(_) {}
     // Remember how this tech takes bookings so tbOpenBookings() can route
