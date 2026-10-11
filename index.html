@@ -1682,7 +1682,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       <div style="margin-top:16px;padding:14px 14px;background:var(--rose-light);border:1px solid rgba(224,168,152,0.3);border-radius:12px;display:flex;align-items:flex-start;gap:10px;">
         <input id="reg-tech-liability" type="checkbox" style="flex-shrink:0;width:18px;height:18px;margin:2px 0 0;accent-color:var(--rose);cursor:pointer;"/>
         <label for="reg-tech-liability" style="margin:0;cursor:pointer;flex:1;font-size:13px;color:#4A3C36;line-height:1.55;">
-          I confirm I am properly <strong>licensed and insured</strong> to practice in my jurisdiction, I will maintain that status, and I understand My Nail Connection <strong>does not verify</strong> or vouch for my credentials. I am solely responsible for the legality and quality of the services I offer.
+          I understand My Nail Connection <strong>does not verify</strong> or vouch for my credentials, and that meeting the rules where I practice is my own responsibility. I am solely responsible for the legality and quality of the services I offer.
         </label>
       </div>
       <button type="button" class="btn btn-rose" style="margin-top:12px;" onclick="goSignupStep5()">Continue</button>
@@ -5547,8 +5547,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.6',     /* __APP_BUILD_NAME__   */
-  android: 668,         /* __APP_BUILD_ANDROID__ */
-  ios:     473,          /* __APP_BUILD_IOS__     */
+  android: 669,         /* __APP_BUILD_ANDROID__ */
+  ios:     474,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -16989,7 +16989,7 @@ function paRenderProfile() {
       '<input id="pa-liability" type="checkbox" ' + (_paFlow.liab ? 'checked ' : '') + 'style="flex-shrink:0;width:18px;height:18px;margin:2px 0 0;accent-color:var(--rose);cursor:pointer;"/>' +
       '<label for="pa-liability" style="margin:0;cursor:pointer;flex:1;font-size:13px;color:#4A3C36;line-height:1.55;">' +
       (isTech
-        ? 'I confirm I am properly <strong>licensed and insured</strong> to practice in my jurisdiction, I will maintain that status, and I understand My Nail Connection <strong>does not verify</strong> or vouch for my credentials. I am solely responsible for the legality and quality of the services I offer.'
+        ? 'I understand My Nail Connection <strong>does not verify</strong> or vouch for my credentials, and that meeting the rules where I practice is my own responsibility. I am solely responsible for the legality and quality of the services I offer.'
         : 'I understand My Nail Connection is a <strong>discovery platform</strong> that connects me with independent nail technicians. MNC <strong>does not verify</strong> licensing, insurance, sanitation practices, or service quality, and appointments, cancellations, and payments are between me and the tech. Booking with any tech is my choice, and any concerns should be directed to the tech or to my local licensing board.') +
       '</label>' +
     '</div>' +
@@ -22138,7 +22138,7 @@ function goSignupStep5() {
   // Tech liability acknowledgment, must be checked to proceed.
   var techLiability = document.getElementById('reg-tech-liability');
   if (techLiability && !techLiability.checked) {
-    showSignupError("Please acknowledge the licensing & insurance confirmation so we can proceed.");
+    showSignupError("Please tick the confirmation so we can proceed.");
     return;
   }
   regData.liability_version = 'tech-v1';
