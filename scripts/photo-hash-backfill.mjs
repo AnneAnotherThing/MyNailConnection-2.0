@@ -59,36 +59,40 @@ const sql = `-- MNC: SHA-256 for every stored photo and feed image (duplicate gu
 -- Run AFTER sql/photo-dedupe-hash.sql. Only fills hashes that are missing,
 -- so re-running it, or a newer copy of it, is safe.
 
-begin;
-
-create temporary table _photo_hash (url text primary key, hash text not null) on commit drop;
-insert into _photo_hash (url, hash) values
-${rows.join(',\n')};
-
+-- One statement, so it runs whole or not at all, in any SQL client (the
+-- Supabase editor does not keep a temporary table between statements).
+with h(url, hash) as (values
+${rows.join(',\n')}
+),
 -- techs.photos: add "hash" to each photo object that lacks one, order kept.
-update public.techs t
-   set photos = (
-     select jsonb_agg(
-              case when jsonb_typeof(e.p) = 'object' and coalesce(e.p ->> 'hash', '') = '' and h.hash is not null
-                   then e.p || jsonb_build_object('hash', h.hash)
-                   else e.p end
-              order by e.o)
-       from jsonb_array_elements(t.photos) with ordinality e(p, o)
-       left join _photo_hash h on h.url = e.p ->> 'url')
- where exists (
-   select 1
-     from jsonb_array_elements(coalesce(t.photos, '[]'::jsonb)) p
-     join _photo_hash h on h.url = p ->> 'url'
-    where coalesce(p ->> 'hash', '') = '');
-
--- board_posts: image_hash from the same table.
-update public.board_posts b
-   set image_hash = h.hash
-  from _photo_hash h
- where b.image_url = h.url
-   and b.image_hash is null;
-
-commit;
+t_up as (
+  update public.techs t
+     set photos = (
+       select jsonb_agg(
+                case when jsonb_typeof(e.p) = 'object' and coalesce(e.p ->> 'hash', '') = '' and hh.hash is not null
+                     then e.p || jsonb_build_object('hash', hh.hash)
+                     else e.p end
+                order by e.o)
+         from jsonb_array_elements(t.photos) with ordinality e(p, o)
+         left join h hh on hh.url = e.p ->> 'url')
+   where exists (
+     select 1
+       from jsonb_array_elements(coalesce(t.photos, '[]'::jsonb)) p
+       join h hh on hh.url = p ->> 'url'
+      where coalesce(p ->> 'hash', '') = '')
+  returning 1
+),
+-- board_posts: image_hash from the same list.
+b_up as (
+  update public.board_posts b
+     set image_hash = hh.hash
+    from h hh
+   where b.image_url = hh.url
+     and b.image_hash is null
+  returning 1
+)
+select (select count(*) from t_up) as techs_updated,
+       (select count(*) from b_up) as posts_updated;
 
 -- Check: photos and posts still without a hash (both should be 0, or only
 -- images uploaded after this file was generated).

@@ -1,13 +1,12 @@
 -- MNC: SHA-256 for every stored photo and feed image (duplicate guard backfill).
--- Generated 2026-10-11T15:12:34.052Z by scripts/photo-hash-backfill.mjs from 215 images
+-- Generated 2026-10-11T15:39:48.213Z by scripts/photo-hash-backfill.mjs from 215 images
 -- (38 techs, 45 feed posts with an image).
 -- Run AFTER sql/photo-dedupe-hash.sql. Only fills hashes that are missing,
 -- so re-running it, or a newer copy of it, is safe.
 
-begin;
-
-create temporary table _photo_hash (url text primary key, hash text not null) on commit drop;
-insert into _photo_hash (url, hash) values
+-- One statement, so it runs whole or not at all, in any SQL client (the
+-- Supabase editor does not keep a temporary table between statements).
+with h(url, hash) as (values
   ('https://nwqnakoongrorbwnrqzc.supabase.co/storage/v1/object/public/tech-photos/acrylic_bliss/acrylic_bliss_01.jpg', 'e735615e565cc56c8496a5d38fd3b495cf9ed65756f2145e079e72c6190bd535'),
   ('https://nwqnakoongrorbwnrqzc.supabase.co/storage/v1/object/public/tech-photos/acrylic_bliss/acrylic_bliss_02.jpg', 'ba61fb9bbd6ca9634d09f85e82809b3d09cb63f32cb0603c7e6b1583711e1e55'),
   ('https://nwqnakoongrorbwnrqzc.supabase.co/storage/v1/object/public/tech-photos/acrylic_bliss/acrylic_bliss_03.jpg', '6e0d8a84899505040105b947c6135f254e022ce6cc231f60d5618a74fb8f29dd'),
@@ -222,32 +221,37 @@ insert into _photo_hash (url, hash) values
   ('https://nwqnakoongrorbwnrqzc.supabase.co/storage/v1/object/public/tech-photos/katie/katie_08.jpg', 'cc92d70b2e7c1f0210a4daf81d1783c5cfbb93908f37f40c0aff1ef7061157ee'),
   ('https://nwqnakoongrorbwnrqzc.supabase.co/storage/v1/object/public/tech-photos/katie/katie_09.jpg', '3b860566760c2b5c13135073dd70fd5c8bd20b6bad2568c78a37897835abaaf1'),
   ('https://nwqnakoongrorbwnrqzc.supabase.co/storage/v1/object/public/tech-photos/katie/katie_10.jpg', '56a8c0c2fc805b9224ddfaf1b8f3a0300d46b0b7afc1ba61f710c0cb3cc4d9eb'),
-  ('https://nwqnakoongrorbwnrqzc.supabase.co/storage/v1/object/public/tech-photos/katie/katie_11.jpg', 'b3b144f3148154b64716aafa7e237819ade8537417b10ce40c4d259e177eb644');
-
+  ('https://nwqnakoongrorbwnrqzc.supabase.co/storage/v1/object/public/tech-photos/katie/katie_11.jpg', 'b3b144f3148154b64716aafa7e237819ade8537417b10ce40c4d259e177eb644')
+),
 -- techs.photos: add "hash" to each photo object that lacks one, order kept.
-update public.techs t
-   set photos = (
-     select jsonb_agg(
-              case when jsonb_typeof(e.p) = 'object' and coalesce(e.p ->> 'hash', '') = '' and h.hash is not null
-                   then e.p || jsonb_build_object('hash', h.hash)
-                   else e.p end
-              order by e.o)
-       from jsonb_array_elements(t.photos) with ordinality e(p, o)
-       left join _photo_hash h on h.url = e.p ->> 'url')
- where exists (
-   select 1
-     from jsonb_array_elements(coalesce(t.photos, '[]'::jsonb)) p
-     join _photo_hash h on h.url = p ->> 'url'
-    where coalesce(p ->> 'hash', '') = '');
-
--- board_posts: image_hash from the same table.
-update public.board_posts b
-   set image_hash = h.hash
-  from _photo_hash h
- where b.image_url = h.url
-   and b.image_hash is null;
-
-commit;
+t_up as (
+  update public.techs t
+     set photos = (
+       select jsonb_agg(
+                case when jsonb_typeof(e.p) = 'object' and coalesce(e.p ->> 'hash', '') = '' and hh.hash is not null
+                     then e.p || jsonb_build_object('hash', hh.hash)
+                     else e.p end
+                order by e.o)
+         from jsonb_array_elements(t.photos) with ordinality e(p, o)
+         left join h hh on hh.url = e.p ->> 'url')
+   where exists (
+     select 1
+       from jsonb_array_elements(coalesce(t.photos, '[]'::jsonb)) p
+       join h hh on hh.url = p ->> 'url'
+      where coalesce(p ->> 'hash', '') = '')
+  returning 1
+),
+-- board_posts: image_hash from the same list.
+b_up as (
+  update public.board_posts b
+     set image_hash = hh.hash
+    from h hh
+   where b.image_url = hh.url
+     and b.image_hash is null
+  returning 1
+)
+select (select count(*) from t_up) as techs_updated,
+       (select count(*) from b_up) as posts_updated;
 
 -- Check: photos and posts still without a hash (both should be 0, or only
 -- images uploaded after this file was generated).
