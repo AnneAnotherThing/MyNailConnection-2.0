@@ -3089,6 +3089,10 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
         <div style="font-size:12px;color:var(--muted);margin-top:2px;" id="wh-alerts-sub"></div></div>
       <button class="toggle off" id="wh-alerts-toggle" onclick="whToggleAlerts()" aria-label="Alerts"></button>
     </div>
+    <div id="wh-blocked-wrap" style="margin-top:14px;">
+      <div class="wh-field-label" style="margin-bottom:6px;">BLOCKED PEOPLE</div>
+      <div id="wh-blocked-list" style="display:flex;flex-direction:column;gap:6px;max-height:40vh;overflow-y:auto;"><div style="font-size:12.5px;color:var(--muted);">Loading...</div></div>
+    </div>
     <button class="wh-btn primary" style="width:100%;padding:12px;font-size:14px;margin-top:14px;" onclick="whCloseModal('wh-alerts-modal')">Done</button>
   </div>
 </div>
@@ -3175,7 +3179,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       <button class="wh-btn" style="padding:12px;font-size:14px;text-align:left;" onclick="whMoreReport()">Report this
         <div style="font-size:12px;color:var(--muted);font-weight:400;margin-top:2px;">Tell us what's wrong. We look at every report within 24 hours.</div></button>
       <button class="wh-btn" style="padding:12px;font-size:14px;text-align:left;" onclick="whMoreBlock()"><span id="wh-more-block-label">Block</span>
-        <div style="font-size:12px;color:var(--muted);font-weight:400;margin-top:2px;">You won't see each other's posts or replies here.</div></button>
+        <div style="font-size:12px;color:var(--muted);font-weight:400;margin-top:2px;">You won't see each other's posts or replies here. Undo any time from the bell.</div></button>
     </div>
     <div id="wh-more-step2" style="display:none;">
       <div class="wh-field-label">WHAT'S WRONG?</div>
@@ -3670,7 +3674,7 @@ async function whSubmitReport() {
 async function whMoreBlock() {
   if (!WH_MORE) return;
   var first = WH_MORE.name ? String(WH_MORE.name).trim().split(/\s+/)[0] : 'this person';
-  if (!confirm('Block ' + first + '? You won\'t see each other\'s posts or replies here.')) return;
+  if (!confirm('Block ' + first + '? You won\'t see each other\'s posts or replies here. You can unblock from the bell.')) return;
   try {
     var out = await whRpc('wh_block', { p_kind: WH_MORE.kind, p_id: WH_MORE.id });
     if (!out || !out.ok) { showToast('Could not block just now'); return; }
@@ -3819,7 +3823,47 @@ function whOpenAlertsSheet(prompt) {
   document.getElementById('wh-alerts-head').textContent = prompt || 'Alerts';
   whLog('alerts_sheet', prompt ? 'after_post' : 'bell');
   whPaintAlerts();
+  var bw = document.getElementById('wh-blocked-wrap');
+  if (bw) bw.style.display = prompt ? 'none' : '';
+  if (!prompt) whPaintBlocked();
   whOpenModal('wh-alerts-modal');
+}
+
+// ── Blocked people: list and unblock (2026-10-11) ───────────────────────────
+async function whPaintBlocked() {
+  var el = document.getElementById('wh-blocked-list');
+  if (!el) return;
+  if (whIsGuest()) { el.innerHTML = ''; return; }
+  el.innerHTML = '<div style="font-size:12.5px;color:var(--muted);">Loading...</div>';
+  var rows;
+  try { rows = await whRpc('wh_my_blocks', {}); }
+  catch (_) { el.innerHTML = '<div style="font-size:12.5px;color:var(--muted);">Could not load this just now.</div>'; return; }
+  rows = rows || [];
+  if (!rows.length) {
+    el.innerHTML = '<div style="font-size:12.5px;color:var(--muted);">Nobody blocked. The \u00b7\u00b7\u00b7 on a post is where you block someone.</div>';
+    return;
+  }
+  el.innerHTML = rows.map(function (b) {
+    var who = b.name || (b.tech ? 'A tech' : 'A client');
+    return '<div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--cream);border:1.5px solid var(--border);border-radius:12px;">' +
+      '<div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:var(--charcoal);">' + whEsc(who) + '</div>' +
+      '<div style="font-size:12px;color:var(--muted);">' + (b.tech ? 'Tech' : 'Client') + ' \u00b7 blocked ' + whEsc(whAgo(b.at)) + '</div></div>' +
+      '<button class="wh-btn" style="padding:7px 12px;font-size:13px;" data-key="' + whEsc(b.key) + '" data-name="' + whEsc(who) + '" onclick="whUnblock(this)">Unblock</button></div>';
+  }).join('');
+}
+async function whUnblock(btn) {
+  var key = btn.getAttribute('data-key');
+  var who = btn.getAttribute('data-name') || 'this person';
+  if (!confirm('Unblock ' + who + '? You may see each other\'s posts and replies here again.')) return;
+  btn.disabled = true;
+  try {
+    var out = await whRpc('wh_unblock', { p_key: key });
+    if (!out || !out.ok) throw new Error('unblock');
+    showToast('Unblocked');
+    whPaintBlocked();
+    WH.open = {};
+    whRefresh();
+  } catch (_) { btn.disabled = false; showToast('Could not unblock just now'); }
 }
 async function whToggleAlerts() {
   var tech = whIsTech();
@@ -6638,8 +6682,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.6',     /* __APP_BUILD_NAME__   */
-  android: 672,         /* __APP_BUILD_ANDROID__ */
-  ios:     477,          /* __APP_BUILD_IOS__     */
+  android: 673,         /* __APP_BUILD_ANDROID__ */
+  ios:     478,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
