@@ -11355,6 +11355,76 @@ async function compressForUpload(file, maxDim, quality, force) {
   } catch (_) { return force ? null : file; }
 }
 
+// ── Duplicate photo guard (2026-10-11) ─────────────────────────────────────
+// Every upload gets a fresh file name, so nothing noticed the same photo
+// going up twice (Julieth's Gallery held 3 extra copies of 7). Each pick is
+// now hashed in the browser BEFORE a slot is spent: src_hash is the file she
+// picked, hash is the bytes we store (what the backfill measured from the
+// bucket, so it also catches a re-pick of a photo uploaded before this).
+// A repeat of either, against her gallery or earlier in the same batch, is
+// skipped with a friendly line. append_tech_photo refuses a known hash too
+// (sql/photo-dedupe-hash.sql) for builds that skip this check. Hashing never
+// blocks an upload: if the browser cannot hash, the file goes through.
+async function mncSha256(blob) {
+  try {
+    if (!blob || !window.crypto || !crypto.subtle) return null;
+    const d = await crypto.subtle.digest('SHA-256', await blob.arrayBuffer());
+    return Array.from(new Uint8Array(d)).map(function(b) { return b.toString(16).padStart(2, '0'); }).join('');
+  } catch (_) { return null; }
+}
+function _mncAddPhotoHashes(set, photos) {
+  (photos || []).forEach(function(p) {
+    if (p && typeof p === 'object') { if (p.hash) set.add(p.hash); if (p.src_hash) set.add(p.src_hash); }
+  });
+  return set;
+}
+// Her gallery as the database holds it now (another device may have added
+// photos since the editor loaded), plus the local edit buffer.
+async function _mncGalleryHashes(localPhotos) {
+  const set = _mncAddPhotoHashes(new Set(), localPhotos);
+  try {
+    var filter = null;
+    if (currentEditTech && currentEditTech.id) filter = 'id=eq.' + encodeURIComponent(currentEditTech.id);
+    else if (currentUserEmail) filter = 'or=(email.eq.' + encodeURIComponent(currentUserEmail) + ',phone.eq.' + encodeURIComponent(currentUserEmail) + ')';
+    if (filter) {
+      const res = await fetch(SUPABASE_URL + '/rest/v1/techs?' + filter + '&select=photos', {
+        headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + (window._mncAccessToken || SUPABASE_ANON_KEY) }
+      });
+      if (res.ok) { const rows = await res.json(); if (rows && rows[0]) _mncAddPhotoHashes(set, rows[0].photos); }
+    }
+  } catch (_) {}
+  return set;
+}
+// Splits picked files into fresh ones (each with its hashes) and repeats.
+async function mncSortOutRepeats(files, localPhotos) {
+  const known = await _mncGalleryHashes(localPhotos);
+  const fresh = [], repeats = [];
+  for (const file of files) {
+    const srcHash = await mncSha256(file);
+    var hash = null;
+    if (!(srcHash && known.has(srcHash))) {
+      const blob = await precompressForUpload(file);   // cached, the upload reuses it
+      hash = (blob === file) ? srcHash : await mncSha256(blob);
+    }
+    if ((srcHash && known.has(srcHash)) || (hash && known.has(hash))) { repeats.push(file); continue; }
+    if (srcHash) known.add(srcHash);
+    if (hash) known.add(hash);
+    fresh.push({ file: file, hash: hash, src_hash: srcHash });
+  }
+  return { fresh: fresh, repeats: repeats };
+}
+// Only the hashes we actually have, so a photo never carries hash: null.
+function _mncHashFields(h) {
+  var o = {};
+  if (h && h.hash) o.hash = h.hash;
+  if (h && h.src_hash) o.src_hash = h.src_hash;
+  return o;
+}
+function mncRepeatLine(repeats, added) {
+  if (!added) return repeats === 1 ? 'You already added this one' : 'You already added these';
+  return added + ' photo' + (added !== 1 ? 's' : '') + ' added. You already added the other ' + repeats + '.';
+}
+
 // ── Storage POST with timeout + one retry (2026-08-11) ──────────────────────
 // Mobile connections stall silently, and a bare fetch has no timeout, so a
 // dropped connection left the bulk-upload progress bar frozen forever
@@ -11424,6 +11494,14 @@ async function techEditAddPhotos(input) {
   // Overlap compression with the slot round-trips below (perf 2026-08-11).
   files.slice(0, 3).forEach(function(f) { try { precompressForUpload(f); } catch(_) {} });
 
+  // Repeats are dropped here, before any slot is spent (2026-10-11).
+  const _sorted = await mncSortOutRepeats(files, edit.photos);
+  const _repeats = _sorted.repeats.length;
+  const _hashOf = new Map(_sorted.fresh.map(function(f) { return [f.file, f]; }));
+  files.length = 0;
+  _sorted.fresh.forEach(function(f) { files.push(f.file); });
+  if (!files.length) { showToast(mncRepeatLine(_repeats, 0)); input.value = ''; return; }
+
   // All slots in one parallel batch (2026-08-19) instead of one blocking
   // RPC per file. See reserveUploadSlots.
   const _slots = await reserveUploadSlots(files.length);
@@ -11470,15 +11548,16 @@ async function techEditAddPhotos(input) {
     const _ext = file.name.split('.').pop() || 'jpg';
     const _fileName = 'gallery/' + techSlug + '/' + Date.now() + '-' + Math.random().toString(36).slice(2,7) + '.' + _ext;
     const _publicUrl = SUPABASE_URL + '/storage/v1/object/public/tech-photos/' + _fileName;
+    const _hashes = _mncHashFields(_hashOf.get(file));
     // Persist immediately, race-free against Cancel.
-    try { appendTechPhoto({ url: _publicUrl, tags: [], slot_type: _slotType }); } catch(_){}
+    try { appendTechPhoto(Object.assign({ url: _publicUrl, tags: [], slot_type: _slotType }, _hashes)); } catch(_){}
     _newlyUploadedUrls.push(_publicUrl);
     // Instant preview via object URL (perf pass 2026-08-10): the old
     // FileReader-to-base64 of the ORIGINAL file was the second full-file
     // read per photo and the other half of the upload lag. An object URL
     // is a zero-copy handle the <img> can render immediately.
     const preview = URL.createObjectURL(file);
-    edit.photos.push({ url: _publicUrl, _previewSrc: preview, tags: [], slot_type: _slotType });
+    edit.photos.push(Object.assign({ url: _publicUrl, _previewSrc: preview, tags: [], slot_type: _slotType }, _hashes));
     added++;
     renderTePhotoGrid(edit.photos);
     // Background storage upload. On failure, yank from both DB and
@@ -11503,7 +11582,7 @@ async function techEditAddPhotos(input) {
       }
     })();
   }
-  showToast('' + added + ' photo' + (added !== 1 ? 's' : '') + ' added');
+  showToast(_repeats ? mncRepeatLine(_repeats, added) : ('' + added + ' photo' + (added !== 1 ? 's' : '') + ' added'));
   renderTePhotoGrid(edit.photos);
   // Launch the Release Wizard for the just-uploaded URLs. No more waiting
   // for Save Changes, the tech naturally expects tagging next. 2026-05-07
@@ -11546,6 +11625,16 @@ async function techBulkDropFiles(fileList) {
   // 20-photo batch doesn't hold that many full-res bitmaps at once; the
   // rest compress as their upload job starts.
   files.slice(0, 3).forEach(function(f) { try { precompressForUpload(f); } catch(_) {} });
+
+  // Repeats are dropped before the paywall trim and the slot reservation,
+  // so a photo she already has never costs her an upload (2026-10-11).
+  try { showToast('Checking your photos\u2026'); } catch(_) {}
+  const _sorted = await mncSortOutRepeats(files, ((techEdits[currentEditTech.name || '__new__'] || {}).photos) || currentEditTech.photos);
+  const repeats = _sorted.repeats.length;
+  const _hashOf = new Map(_sorted.fresh.map(function(f) { return [f.file, f]; }));
+  files.length = 0;
+  _sorted.fresh.forEach(function(f) { files.push(f.file); });
+  if (!files.length) { showToast(mncRepeatLine(repeats, 0)); return; }
 
   // Paywall gate. Without this, Anne added a 6th photo via the bulk drop
   // zone on 2026-04-21 and never saw the upgrade modal, because only
@@ -11669,10 +11758,11 @@ async function techBulkDropFiles(fileList) {
     const _ext = file.name.split('.').pop() || 'jpg';
     const _fileName = 'gallery/' + techSlug + '/' + Date.now() + '-' + Math.random().toString(36).slice(2,7) + '.' + _ext;
     const _publicUrl = SUPABASE_URL + '/storage/v1/object/public/tech-photos/' + _fileName;
-    try { appendTechPhoto({ url: _publicUrl, tags: [], slot_type: _slotType }); } catch(_){}
+    const _hashes = _mncHashFields(_hashOf.get(file));
+    try { appendTechPhoto(Object.assign({ url: _publicUrl, tags: [], slot_type: _slotType }, _hashes)); } catch(_){}
     if (!Array.isArray(window._bulkDropNewUrls)) window._bulkDropNewUrls = [];
     window._bulkDropNewUrls.push(_publicUrl);
-    const photoEntry = { url: _publicUrl, _previewSrc: URL.createObjectURL(file), tags: [], slot_type: _slotType };
+    const photoEntry = Object.assign({ url: _publicUrl, _previewSrc: URL.createObjectURL(file), tags: [], slot_type: _slotType }, _hashes);
     edit.photos.push(photoEntry);
     renderTePhotoGrid(edit.photos);
 
@@ -11723,9 +11813,9 @@ async function techBulkDropFiles(fileList) {
   bar.style.width = '100%';
   bar.style.background = '#2E6B44';
   const uploadedCount = done - skipped - failed;
-  label.textContent = `✓ Done! ${uploadedCount} photo${uploadedCount !== 1 ? 's' : ''} added${skipped ? `, ${skipped} skipped (not nail photos)` : ''}${failed ? `, ${failed} failed` : ''}`;
+  label.textContent = `✓ Done! ${uploadedCount} photo${uploadedCount !== 1 ? 's' : ''} added${repeats ? `, ${repeats} already in your gallery` : ''}${skipped ? `, ${skipped} skipped (not nail photos)` : ''}${failed ? `, ${failed} failed` : ''}`;
   count.textContent = '';
-  showToast(`${uploadedCount} photo${uploadedCount !== 1 ? 's' : ''} added`);
+  showToast(repeats ? mncRepeatLine(repeats, uploadedCount) : `${uploadedCount} photo${uploadedCount !== 1 ? 's' : ''} added`);
   setTimeout(() => { wrap.style.display = 'none'; bar.style.background = 'var(--rose)'; bar.style.width = '0%'; }, 5000);
   // Launch Release Wizard immediately for the just-uploaded URLs so the
   // tech goes straight to tagging without hunting for Save Changes.
@@ -24553,6 +24643,7 @@ async function _rwPatchPhoto(url, patch) {
     if (pUrl !== url) return p;
     changed = true;
     const obj = (typeof p === 'string') ? { url: p } : Object.assign({}, p);
+    if (obj.hash) { st.hashes = st.hashes || {}; st.hashes[url] = obj.hash; }
     if (patch.tags !== undefined) obj.tags = patch.tags;
     if (patch.caption !== undefined) obj.caption = patch.caption;
     if (patch.pending_feed !== undefined) {
@@ -24640,10 +24731,13 @@ async function releaseCurrentWizardPhoto() {
           type: 'inspo',
           body: caption || tags.join(' \u00b7 '),
           image_url: url,
+          image_hash: (st.hashes && st.hashes[url]) || null,
           publish_at: publishAt
         })
       });
-      if (!ires.ok) {
+      // 409 = this tech already has this image on the feed (unique index in
+      // sql/photo-dedupe-cleanup.sql): the tags are saved, nothing to post.
+      if (!ires.ok && ires.status !== 409) {
         if (errEl) {
           errEl.style.display = 'block';
           errEl.textContent = 'Tags saved but feed post failed, try again or skip.';
@@ -24659,7 +24753,7 @@ async function releaseCurrentWizardPhoto() {
       if (btn) { btn.disabled = false; btn.textContent = 'Add to Gallery →'; }
       return;
     }
-    st.releasedCount += 1;
+    if (ires.ok) st.releasedCount += 1;
   }
 
   if (btn) { btn.disabled = false; btn.textContent = 'Add to Gallery →'; }
