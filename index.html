@@ -6363,8 +6363,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.6',     /* __APP_BUILD_NAME__   */
-  android: 679,         /* __APP_BUILD_ANDROID__ */
-  ios:     484,          /* __APP_BUILD_IOS__     */
+  android: 680,         /* __APP_BUILD_ANDROID__ */
+  ios:     485,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -14594,20 +14594,23 @@ function tbRenderTrialBanner() {
   var cta   = document.getElementById('tb-trial-cta');
   var end   = t.period_reset_at ? new Date(t.period_reset_at) : null;
   var ends  = (end && !isNaN(end.getTime())) ? end.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
-  // is_bookable is the truth: it stays true through the 30 days (and the 3-day
-  // grace), then flips false. Drive the ended state off it, not the raw day
-  // count, so the copy and the toggle can never disagree.
-  if (t.is_bookable) {
+  // The clock decides "ended" (2026-10-11): a paused or hidden page is not
+  // bookable either, and that used to read as "Your free month has ended"
+  // while 30 days were still on it. Within the window, say what is true.
+  var days = end ? Math.ceil((end.getTime() - Date.now()) / 86400000) : 0;
+  var windowEnded = !!(end && !isNaN(end.getTime()) && end.getTime() < Date.now());
+  if (!windowEnded) {
     if (cta) cta.style.display = 'none';
-    var days = end ? Math.ceil((end.getTime() - Date.now()) / 86400000) : 0;
+    var why = t.paused_by_tech ? ' Booking is on hold while Pause my page is on, and the days keep counting.'
+            : (!t.is_bookable && t.booking_enabled ? ' Clients cannot book you right now, check Pause my page or tap Get help.' : '');
     if (days >= 2) {
       if (title) title.textContent = 'Your free month: ' + days + ' days left';
-      if (sub)   sub.textContent = 'Booking is on and free through ' + ends +
-        '. No card until then, and your clients are never charged to book you.';
+      if (sub)   sub.textContent = 'Free through ' + ends +
+        '. No card until then, and your clients are never charged to book you.' + why;
     } else {
       if (title) title.textContent = (days === 1) ? 'Your free month: 1 day left' : 'Your free month ends today';
       if (sub)   sub.textContent = 'Free through ' + ends +
-        '. After that it is $10.99 a month to keep taking bookings.';
+        '. After that it is $10.99 a month to keep taking bookings.' + why;
     }
   } else {
     if (title) title.textContent = 'Your free month has ended';
