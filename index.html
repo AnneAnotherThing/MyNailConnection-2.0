@@ -904,13 +904,13 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
 
 /* ── Tech-home hero status trio (Available today / This week / New clients) ── */
 .hero-status-trio {
-  display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px;
+  display:grid; grid-template-columns:1fr; gap:10px;
 }
 .hero-status-chip {
   position:relative;
-  display:flex; flex-direction:column; align-items:center; justify-content:center;
-  gap:8px;
-  padding:16px 8px 14px;
+  display:flex; flex-direction:row; align-items:center; justify-content:center;
+  gap:10px;
+  padding:16px 14px;
   background:linear-gradient(180deg,#FFFFFF 0%,#FFFFFF 100%);
   border:1.5px solid var(--border);
   border-bottom:3px solid rgba(125,100,102,0.25);
@@ -941,12 +941,14 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
 .hero-status-chip.on .hero-status-dot[data-kind="week"] { background: var(--gold); box-shadow: 0 0 0 4px rgba(200,150,80,0.20); }
 .hero-status-chip.on .hero-status-dot[data-kind="new"]  { background: #D96B72; box-shadow: 0 0 0 4px rgba(217,107,114,0.18); }
 .hero-status-label {
-  font-size:13px; font-weight:600; line-height:1.2;
+  font-size:15px; font-weight:700; line-height:1.2;
   color: var(--muted);
   text-align:center;
   letter-spacing:0.1px;
 }
 .hero-status-chip.on .hero-status-label { color: var(--charcoal); }
+.hero-status-hint { font-size:12.5px; color:var(--muted); margin-left:4px; }
+.hero-status-chip.on .hero-status-hint { color: var(--rose-dark); }
 
 /* ── Tech-home presence stats (Photos / Posts / Saved by) ─────────────────── */
 .presence-stat {
@@ -1937,14 +1939,14 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
     <!-- HERO: status trio, the visual centerpiece -->
     <div style="margin:16px 20px 0;">
       <div style="font-size:11px;font-weight:700;letter-spacing:0.6px;text-transform:uppercase;color:var(--muted);text-align:center;margin-bottom:11px;">Show clients you're open</div>
+      <!-- New clients retired 2026-10-11 (Anne: "they wouldn't be there if
+           they didn't want clients"). accepting_new_clients stays true on the
+           row; nothing reads it for the client any more. -->
       <div class="hero-status-trio">
         <button class="hero-status-chip" id="td-hero-now" onclick="heroToggle('now')">
           <div class="hero-status-dot" data-kind="now"></div>
-          <div class="hero-status-label">Available<br>now</div>
-        </button>
-        <button class="hero-status-chip" id="td-hero-new" onclick="heroToggle('new')">
-          <div class="hero-status-dot" data-kind="new"></div>
-          <div class="hero-status-label">New<br>clients</div>
+          <div class="hero-status-label">Available now</div>
+          <div class="hero-status-hint" id="td-hero-now-hint">Tap to go on the board</div>
         </button>
       </div>
       <!-- Original toggles kept as hidden state-of-truth so existing
@@ -2022,53 +2024,55 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
          dash calendar (td-cal) retired with the dark card, renderDashCalendar
          null-guards its absence. Subtitle/badge ids preserved so
          tbLoadDashBadge and loadTechHomeStats keep painting. -->
-    <div style="margin:20px 20px 0;display:flex;flex-direction:column;gap:12px;">
+    <div style="margin:20px 20px 0;display:flex;flex-direction:column;gap:10px;">
 
-      <div onclick="openWhatsHappening('request','portal')" style="display:flex;align-items:center;gap:14px;background:white;border:1.5px solid var(--border);border-radius:18px;padding:18px 16px;box-shadow:var(--shadow);cursor:pointer;">
-        <div style="width:46px;height:46px;border-radius:14px;background:var(--rose-light);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-          <svg viewBox="0 0 24 24" style="width:22px;height:22px;stroke:var(--rose-dark);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;"><path d="M21 12a8 8 0 01-11.6 7.1L4 20l1-4.6A8 8 0 1121 12z"/><path d="M8.5 11h7M8.5 14h4"/></svg>
+      <!-- Same door as the home screen's What's happening card (Anne,
+           2026-10-11: the portal buttons look like the home screen's). -->
+      <div onclick="openWhatsHappening('request','portal')" style="cursor:pointer;border-radius:14px;background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);border:1px solid rgba(96,76,77,0.3);border-bottom:3px solid rgba(43,41,39,0.5);box-shadow:0 4px 14px rgba(125,100,102,0.35);padding:14px 16px;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="font-size:15px;font-weight:700;color:white;letter-spacing:0.2px;flex:1;">What's happening</div>
+          <div style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.22);border-radius:100px;padding:3px 9px 3px 7px;">
+            <span class="wh-portal-dot" style="width:8px;height:8px;border-radius:50%;background:#8CEBAC;display:inline-block;"></span>
+            <span style="font-size:10.5px;font-weight:800;letter-spacing:1px;color:white;">LIVE</span>
+          </div>
+          <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:rgba(255,255,255,0.8);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg>
         </div>
-        <div style="flex:1;min-width:0;">
-          <div style="display:flex;align-items:center;gap:8px;"><div style="font-family:'Playfair Display',serif;font-size:17px;font-weight:600;color:var(--charcoal);">What's happening</div>
-            <span class="wh-portal-dot" style="width:8px;height:8px;border-radius:50%;background:#5F9B72;display:inline-block;"></span><span style="font-size:10px;font-weight:800;letter-spacing:1px;color:#2E7A45;">LIVE</span></div>
-          <div id="wh-portal-count" style="font-size:12.5px;color:var(--muted);margin-top:2px;line-height:1.4;">Client requests near you · who is free now</div>
-        </div>
-        <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:var(--muted);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg>
+        <div id="wh-portal-count" style="font-size:13px;color:rgba(255,255,255,0.9);margin-top:4px;">Client requests near you · who is free now</div>
       </div>
 
-      <div onclick="openMyPhotos()" style="display:flex;align-items:center;gap:14px;background:white;border:1.5px solid var(--border);border-radius:18px;padding:18px 16px;box-shadow:var(--shadow);cursor:pointer;">
-        <div style="width:46px;height:46px;border-radius:14px;background:var(--rose-light);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-          <svg viewBox="0 0 24 24" style="width:22px;height:22px;stroke:var(--rose-dark);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5-9 9"/></svg>
+      <div onclick="openMyPhotos()" style="cursor:pointer;border-radius:12px;background:#FFFFFF;border:1px solid rgba(96,76,77,0.22);border-bottom:3px solid rgba(70,54,55,0.35);box-shadow:0 2px 8px rgba(70,54,55,0.08);display:flex;align-items:center;gap:14px;padding:10px 14px;">
+        <div style="width:72px;height:72px;border-radius:14px;overflow:hidden;flex-shrink:0;box-sizing:border-box;border:1.5px solid var(--border);box-shadow:inset 0 0 0 1px rgba(255,255,255,0.35),0 1px 5px rgba(70,54,55,0.16);display:flex;align-items:center;justify-content:center;">
+          <img src="images/theLook.jpg?v=3" alt="" style="width:100%;height:100%;object-fit:cover;object-position:center;"/>
         </div>
         <div style="flex:1;min-width:0;">
-          <div style="font-family:'Playfair Display',serif;font-size:17px;font-weight:600;color:var(--charcoal);">My Gallery</div>
-          <div style="font-size:12.5px;color:var(--muted);margin-top:2px;line-height:1.4;">Your work &amp; saved looks <span id="td-gal-count"></span></div>
+          <div style="font-size:15px;font-weight:600;color:var(--charcoal);">My Gallery</div>
+          <div style="font-size:13px;color:var(--muted);margin-top:2px;line-height:1.4;">Your work &amp; saved looks <span id="td-gal-count"></span></div>
         </div>
-        <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:var(--muted);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg>
+        <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--rose-mid);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg>
       </div>
 
-      <div onclick="tbOpenBookings()" style="display:flex;align-items:center;gap:14px;background:white;border:1.5px solid var(--border);border-radius:18px;padding:18px 16px;box-shadow:var(--shadow);cursor:pointer;">
-        <div style="width:46px;height:46px;border-radius:14px;background:var(--green-light);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-          <svg viewBox="0 0 24 24" style="width:22px;height:22px;stroke:var(--green);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <div onclick="tbOpenBookings()" style="cursor:pointer;border-radius:12px;background:#FFFFFF;border:1px solid rgba(96,76,77,0.22);border-bottom:3px solid rgba(70,54,55,0.35);box-shadow:0 2px 8px rgba(70,54,55,0.08);display:flex;align-items:center;gap:14px;padding:10px 14px;">
+        <div style="width:72px;height:72px;border-radius:14px;overflow:hidden;flex-shrink:0;box-sizing:border-box;border:1.5px solid var(--border);box-shadow:inset 0 0 0 1px rgba(255,255,255,0.35),0 1px 5px rgba(70,54,55,0.16);display:flex;align-items:center;justify-content:center;">
+          <img src="images/appts.jpg?v=1" alt="" style="width:100%;height:100%;object-fit:cover;object-position:center;"/>
         </div>
         <div style="flex:1;min-width:0;">
-          <div style="font-family:'Playfair Display',serif;font-size:17px;font-weight:600;color:var(--charcoal);">My Appts</div>
-          <div style="font-size:12.5px;color:var(--muted);margin-top:2px;line-height:1.4;" id="td-bookings-sub">Set up your booking</div>
+          <div style="font-size:15px;font-weight:600;color:var(--charcoal);">My Appts</div>
+          <div style="font-size:13px;color:var(--muted);margin-top:2px;line-height:1.4;" id="td-bookings-sub">Set up your booking</div>
         </div>
         <span id="td-bookings-pending" style="display:none;background:var(--rose-dark);color:white;font-size:13px;font-weight:700;border-radius:100px;padding:3px 9px;flex-shrink:0;">0</span>
-        <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:var(--muted);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg>
+        <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:#6BA06B;fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg>
       </div>
 
-      <div onclick="show('tech-settings')" style="display:flex;align-items:center;gap:14px;background:white;border:1.5px solid var(--border);border-radius:18px;padding:18px 16px;box-shadow:var(--shadow);cursor:pointer;">
-        <div style="width:46px;height:46px;border-radius:14px;background:var(--gold-light);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-          <svg viewBox="0 0 24 24" style="width:22px;height:22px;stroke:var(--gold);fill:none;stroke-width:1.8;stroke-linecap:round;"><line x1="4" y1="7" x2="20" y2="7"/><circle cx="14" cy="7" r="2.4" fill="var(--gold-light)"/><line x1="4" y1="12" x2="20" y2="12"/><circle cx="8" cy="12" r="2.4" fill="var(--gold-light)"/><line x1="4" y1="17" x2="20" y2="17"/><circle cx="16" cy="17" r="2.4" fill="var(--gold-light)"/></svg>
+      <div onclick="show('tech-settings')" style="cursor:pointer;border-radius:12px;background:#FFFFFF;border:1px solid rgba(96,76,77,0.22);border-bottom:3px solid rgba(70,54,55,0.35);box-shadow:0 2px 8px rgba(70,54,55,0.08);display:flex;align-items:center;gap:14px;padding:10px 14px;">
+        <div style="width:72px;height:72px;border-radius:14px;overflow:hidden;flex-shrink:0;box-sizing:border-box;border:1.5px solid var(--border);box-shadow:inset 0 0 0 1px rgba(255,255,255,0.35),0 1px 5px rgba(70,54,55,0.16);display:flex;align-items:center;justify-content:center;">
+          <img src="images/settings.jpg?v=1" alt="" style="width:100%;height:100%;object-fit:cover;object-position:center;"/>
         </div>
         <div style="flex:1;min-width:0;">
-          <div style="font-family:'Playfair Display',serif;font-size:17px;font-weight:600;color:var(--charcoal);">My Settings</div>
-          <div style="font-size:12.5px;color:var(--muted);margin-top:2px;line-height:1.4;">Profile, booking, notifications &amp; help</div>
+          <div style="font-size:15px;font-weight:600;color:var(--charcoal);">My Settings</div>
+          <div style="font-size:13px;color:var(--muted);margin-top:2px;line-height:1.4;">Profile, booking, notifications &amp; help</div>
         </div>
         <span id="notif-badge-hub" style="display:none;align-items:center;justify-content:center;min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:var(--rose-dark);color:white;font-size:12px;font-weight:700;flex-shrink:0;"></span>
-        <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:var(--muted);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg>
+        <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--gold);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg>
       </div>
 
       <!-- Booking settings entry moved to My Settings (hub redesign
@@ -2133,7 +2137,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
          to the My Settings screen (hub redesign 2026-09-06). Apple-required
          links (Terms/Privacy 3.1.2c, deletion 5.1.1v) stay reachable there,
          one tap from this screen. -->
-    <div style="text-align:center;margin:18px 20px 0;font-size:12px;color:var(--muted);">Available now asks until when. New clients saves the instant you tap.</div>
+    <div style="text-align:center;margin:18px 20px 0;font-size:12px;color:var(--muted);">Available now asks until when, then takes you off the board on its own.</div>
 
     <!-- The host at the bottom of the portal: a calm, personal "ready to book
          through MNC?" from the lady in the hat, for calls/text or external-link
@@ -6462,8 +6466,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.6',     /* __APP_BUILD_NAME__   */
-  android: 684,         /* __APP_BUILD_ANDROID__ */
-  ios:     489,          /* __APP_BUILD_IOS__     */
+  android: 685,         /* __APP_BUILD_ANDROID__ */
+  ios:     490,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -9633,10 +9637,10 @@ function renderTechDetailAvail(tech) {
   // (Anne 2026-04-21). Clients can always reach out; the toggles control
   // whether a tech is publicly surfacing as Available Today / This Week /
   // Accepting New.
-  var hasAny = tech.is_available || tech.is_same_day || tech.accepting_new_clients;
+  var hasAny = tech.is_available || tech.is_same_day;
   if (nowEl)  nowEl.style.display  = tech.is_available ? 'flex' : 'none';
   if (weekEl) weekEl.style.display = tech.is_same_day  ? 'flex' : 'none';
-  if (newEl)  newEl.style.display  = tech.accepting_new_clients ? 'flex' : 'none';
+  if (newEl)  newEl.style.display  = 'none';   // New clients retired 2026-10-11
   if (noneEl) {
     noneEl.style.display = hasAny ? 'none' : 'block';
     // A bookable tech is never "unavailable": say so instead of reading as closed.
@@ -9777,9 +9781,7 @@ function renderTechCards(query, filteredList) {
     const availBadge = t.is_available
       ? `<span class="badge badge-now"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);margin-right:3px;vertical-align:middle;"></span>Now</span>`
       : '';
-    const newClientBadge = t.accepting_new_clients
-      ? `<span class="badge" style="background:#F3E4E5;color:#A2636C;font-size:13px;">New Clients ✓</span>`
-      : '';
+    const newClientBadge = '';   // New clients retired 2026-10-11
     const bookingBadge = t.booking_link
       ? `<span class="badge" style="background:#E8F5EE;color:#1A7A4A;font-size:13px;">Book Online</span>`
       : '';
@@ -16321,7 +16323,7 @@ var PORTAL_NAV = [
   { label:'Time zone', hint:'Booking Settings', kw:'timezone tz', run:function(){ portalGo('tech-booking-settings','tb-tz-label'); } },
   { label:'Services and prices', hint:'Booking Settings', kw:'service price menu offerings add service cost', run:function(){ portalGo('tech-booking-settings'); } },
   { label:'Weekly hours', hint:'Booking Settings', kw:'hours availability schedule days open weekly', run:function(){ portalGo('tech-booking-settings'); } },
-  { label:'Set yourself available', hint:'Available now, new clients', kw:'available now new clients fill chair status advertise show board', run:function(){ var el=document.getElementById('td-hero-now'); if(el){ try{el.scrollIntoView({behavior:'smooth',block:'center'});}catch(_){ el.scrollIntoView(); } portalFlash(el.parentNode||el);} } },
+  { label:'Set yourself available', hint:'Available now', kw:'available now fill chair status advertise show board', run:function(){ var el=document.getElementById('td-hero-now'); if(el){ try{el.scrollIntoView({behavior:'smooth',block:'center'});}catch(_){ el.scrollIntoView(); } portalFlash(el.parentNode||el);} } },
   { label:'Edit profile', hint:'Name, photo, bio, booking link', kw:'name photo picture bio about link edit profile', run:function(){ openTechEditFromProfile(); } },
   { label:'Share my profile', hint:'Your profile link', kw:'share link qr code url promote instagram', run:function(){ shareMyProfile(); } },
   { label:'See what clients see', hint:'Preview your public profile', kw:'preview public view client profile', run:function(){ viewMyProfileAsClient(); } },
@@ -18019,6 +18021,11 @@ function heroToggle(kind) {
 
 function syncHeroStatus() {
   // Read the hidden toggles' .on class and project it onto the hero chips.
+  try {
+    var _hint = document.getElementById('td-hero-now-hint');
+    var _truth = document.getElementById('td-t-now');
+    if (_hint && _truth) _hint.textContent = _truth.classList.contains('on') ? 'On the board \u00b7 tap to come off' : 'Tap to go on the board';
+  } catch (_) {}
   var pairs = [
     ['td-hero-now',  'td-t-now'],
     ['td-hero-week', 'td-t-today'],
@@ -18352,7 +18359,7 @@ function _setupStepsState() {
     // Done = she has actually flipped at least one on the server, OR has
     // read the explainer and chosen to leave them off. A tech who is slammed
     // is right to have all three off, and the list must not nag her for it.
-    { label: 'Tell clients when you have chair time', sub: 'Post Available now, keep New clients on \u00b7 30 sec',
+    { label: 'Tell clients when you have chair time', sub: 'Post Available now when you have an opening \u00b7 30 sec',
       done: !!window._mncAvailTouched, action: 'setupOpenAvailability()' },
     { label: 'Turn on notifications', sub: 'So you hear when a client reaches out \u00b7 10 sec',
       done: pushDone, action: 'setupEnablePush()' }
@@ -18453,10 +18460,10 @@ async function setupOpenAvailability() {
       // Deliberately short: tall bodies clip their own buttons on a 360x640
       // screen. Rewritten 2026-10-11 for the What's happening board, which
       // replaced the Open today chip.
-      body: 'The two chips at the top of your portal are how clients spot you right now.\n\n' +
-            'Tap Available now when you have chair time. Pick until when, add a note if you like, and you go on the What\u2019s happening board while your work glows in the Gallery. Free for every tech, however you take bookings.\n\n' +
-            'New clients starts on and saves the instant you tap. I\u2019ll check in each morning to ask if you\u2019re working. Turn that off any time in My Settings.\n\n' +
-            'I\u2019ll take you to them.',
+      body: 'The Available now button at the top of your portal is how clients spot you right now.\n\n' +
+            'Tap it when you have chair time. Pick until when, add a note if you like, and you go on the What\u2019s happening board while your work glows in the Gallery. Free for every tech, however you take bookings.\n\n' +
+            'I\u2019ll check in each morning to ask if you\u2019re working. Turn that off any time in My Settings.\n\n' +
+            'I\u2019ll take you to it.',
       okLabel: 'Show me',
       tone: 'neutral',
       host: true
@@ -18473,7 +18480,7 @@ async function setupOpenAvailability() {
       setTimeout(function() {
         try { chip.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
         catch(_) { try { chip.scrollIntoView(); } catch(__) {} }
-        try { showToast('Tap Available now to post your chair time. New clients is a simple on and off.'); } catch(_) {}
+        try { showToast('Tap Available now to post your chair time.'); } catch(_) {}
       }, 120);
     }
   }
