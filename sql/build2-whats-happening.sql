@@ -93,7 +93,9 @@ as $$
     when z between 100 and 149 then 'NY'
     when z between 150 and 196 then 'PA'
     when z between 197 and 199 then 'DE'
-    when z between 200 and 205 then 'DC'
+    when z = 200 then 'DC'
+    when z = 201 then 'VA'   -- Northern Virginia (Manassas, Dulles)
+    when z between 202 and 205 then 'DC'
     when z between 206 and 219 then 'MD'
     when z between 220 and 246 then 'VA'
     when z between 247 and 268 then 'WV'
@@ -528,8 +530,10 @@ begin
   if coalesce(btrim(p_body), '') = '' then
     return jsonb_build_object('ok', false, 'code', 'empty');
   end if;
+  -- One open request per person (Anne, 2026-10-11; it was three). The board
+  -- is "what I need right now", not a wish list. Close it to post the next.
   if (select count(*) from public.wh_requests
-       where author_key = me and status = 'open' and expires_at > now()) >= 3 then
+       where author_key = me and status = 'open' and expires_at > now()) >= 1 then
     return jsonb_build_object('ok', false, 'code', 'too_many');
   end if;
 

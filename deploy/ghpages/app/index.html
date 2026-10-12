@@ -1918,6 +1918,15 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       <button onclick="openBookingSubscribe()" style="margin-top:11px;padding:11px 16px;border:none;border-radius:11px;background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);color:white;font-size:13.5px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;">Subscribe, $10.99/month</button>
     </div>
 
+    <!-- Missing city or state (2026-10-11): without them she lands under
+         Everywhere on What's happening and gets no near-me pushes. Painted by
+         tdRenderCityBanner() out of tbLoadDashBadge. -->
+    <div id="td-city-banner" style="display:none;margin:14px 20px 0;padding:14px 16px;background:linear-gradient(140deg,#FFF3E9 0%,#FDE8EC 100%);border:1.5px solid var(--rose-mid);border-radius:16px;box-shadow:var(--shadow);">
+      <div style="font-size:14px;font-weight:700;color:var(--charcoal);">Add your city so clients near you find you</div>
+      <div style="font-size:13px;color:var(--muted);margin-top:3px;line-height:1.45;" id="td-city-body">Your profile has no city yet. Clients searching nearby, and the What's happening board, go by city and state.</div>
+      <button onclick="openTechEditFromProfile()" style="margin-top:11px;padding:10px 16px;border:none;border-radius:11px;background:var(--charcoal);color:white;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;">Add my city</button>
+    </div>
+
     <div id="td-alerts" style="display:none;margin:14px 20px 0;gap:8px;"></div>
 
     <!-- Notifications big button moved to the My Settings screen in the
@@ -2708,7 +2717,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
      first. Everything is read and written through the wh_* functions in
      sql/build2-whats-happening.sql; nothing here reads a table directly. -->
 <style>
-#whats-happening .wh-sticky{position:sticky;top:0;z-index:6;background:var(--cream);padding-bottom:6px;box-shadow:0 -14px 0 0 var(--cream),0 8px 10px -10px rgba(20,19,23,0.18);}
+#whats-happening .wh-sticky{position:sticky;top:0;z-index:6;background:var(--cream);padding-bottom:6px;box-shadow:0 8px 10px -10px rgba(20,19,23,0.18);}
 #whats-happening .wh-tabs{display:flex;gap:6px;padding:12px 20px 0;}
 #whats-happening .wh-near{display:flex;gap:6px;padding:8px 20px 0;}
 #whats-happening .wh-chip{flex:1;padding:6px 6px;border-radius:100px;border:1.5px solid var(--border);background:white;color:var(--muted);font-size:11.5px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -2859,6 +2868,11 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       <button onclick="whCloseModal('wh-avail-modal')" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted);line-height:1;">&times;</button>
     </div>
     <div style="font-size:13px;color:var(--muted);line-height:1.5;margin-bottom:14px;">You go on the Available now board and your work glows in the Gallery until the time you pick.</div>
+    <div id="wh-av-paused" style="display:none;margin:-4px 0 14px;padding:10px 12px;background:#FDE8EC;border:1.5px solid var(--rose-mid);border-radius:12px;">
+      <div style="font-size:13px;font-weight:700;color:var(--charcoal);">Your page is paused, so nobody will see this</div>
+      <div style="font-size:12.5px;color:var(--muted);margin-top:2px;line-height:1.45;">Pause my page hides you everywhere: the Gallery, your profile, and this board. Unpause and your post shows.</div>
+      <button class="wh-btn" style="margin-top:8px;padding:8px 12px;font-size:13px;" onclick="whUnpauseFromSheet(this)">Unpause my page</button>
+    </div>
     <div style="display:flex;flex-direction:column;gap:12px;">
       <div>
         <label class="wh-field-label" for="wh-av-until">UNTIL</label>
@@ -3841,7 +3855,7 @@ async function whSubmitRequest() {
       var code = out && out.code;
       whMsg('wh-req-msg', {
         city_needed: 'Add your city so techs near you see it.',
-        too_many: 'You can have three requests up at a time. Close one first, with Found someone or Take it down, then post the next.',
+        too_many: 'You already have a request up. Close it first, with Found someone or Take it down, then post the next.',
         date_past: 'That date has passed. Pick today or later.',
         banned: 'Posting is turned off on your account. Reach us through Get help in My Settings if that seems wrong.',
         empty: 'Tell techs what you are looking for.'
@@ -3874,12 +3888,42 @@ async function whCloseRequest(id, status) {
 // ── Tech: available now ─────────────────────────────────────────────────────
 function whOpenAvailSheet() {
   whLog('sheet', 'available');
+  // Paused page (Anne, 2026-10-11: "if she posts something to go live and
+  // she's paused there should be a warning"). _mncTrial.paused is the tech row
+  // as of the last portal load.
+  try {
+    var pw = document.getElementById('wh-av-paused');
+    if (pw) pw.style.display = (window._mncTrial && window._mncTrial.paused) ? 'block' : 'none';
+  } catch (_) {}
   document.getElementById('wh-av-until').value = 'eod';
   document.getElementById('wh-av-time').style.display = 'none';
   document.getElementById('wh-av-note').value = (WH.mine && WH.mine.note) || '';
   whMsg('wh-av-msg', '');
   var b = document.getElementById('wh-av-send'); b.disabled = false; b.textContent = 'Put me on the board';
   whOpenModal('wh-avail-modal');
+}
+// Unpause from the Available now sheet. Writes paused_by_tech the same way
+// Booking Settings does (a trigger derives listing_paused from it).
+async function whUnpauseFromSheet(btn) {
+  if (btn) btn.disabled = true;
+  try {
+    var who = currentUserEmail || '';
+    var r = await fetch(SUPABASE_URL + '/rest/v1/techs?or=(email.eq.' + encodeURIComponent(who) + ',phone.eq.' + encodeURIComponent(who) + ')', {
+      method: 'PATCH',
+      headers: bkHeaders({ 'Content-Type': 'application/json', 'Prefer': 'return=minimal' }),
+      body: JSON.stringify({ paused_by_tech: false })
+    });
+    if (!r.ok) throw new Error('patch ' + r.status);
+    if (window._mncTrial) window._mncTrial.paused = false;
+    if (typeof _bkMyTech !== 'undefined' && _bkMyTech) _bkMyTech.paused_by_tech = false;
+    var pw = document.getElementById('wh-av-paused'); if (pw) pw.style.display = 'none';
+    try { renderTrialPill(); } catch (_) {}
+    try { tbLoadDashBadge(); } catch (_) {}
+    showToast('Welcome back! Your page is live again');
+  } catch (_) {
+    if (btn) btn.disabled = false;
+    showToast('Could not unpause just now. Try Booking Settings.');
+  }
 }
 function whAvailUntilChanged() {
   var v = document.getElementById('wh-av-until').value;
@@ -3932,7 +3976,9 @@ async function whSubmitAvailable() {
     }
     whCloseModal('wh-avail-modal');
     whSetOpenTodayChip(true);
-    showToast("You're on the board until " + whTime(out.until || until));
+    showToast((window._mncTrial && window._mncTrial.paused)
+      ? "Saved, but your page is paused, so nobody sees it until you unpause"
+      : "You're on the board until " + whTime(out.until || until), (window._mncTrial && window._mncTrial.paused) ? 6000 : undefined);
     if (_currentScreen === 'whats-happening') whRefresh();
   } catch (e) {
     if (e && e.status === 404) {
@@ -6416,8 +6462,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.6',     /* __APP_BUILD_NAME__   */
-  android: 682,         /* __APP_BUILD_ANDROID__ */
-  ios:     487,          /* __APP_BUILD_IOS__     */
+  android: 683,         /* __APP_BUILD_ANDROID__ */
+  ios:     488,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -12611,6 +12657,25 @@ async function saveTechEdit() {
     document.getElementById('te-name').focus();
     return;
   }
+  // City and state are required (Anne, 2026-10-11): without them a tech lands
+  // under Everywhere on What's happening and never gets a near-me push, and
+  // nothing told her. A blank state fills from the ZIP when it can.
+  if (!edit.state && edit.zip) {
+    var _zs = mncStateFromZip(edit.zip);
+    if (_zs) { edit.state = _zs; try { document.getElementById('te-state').value = _zs; } catch(_) {} }
+  }
+  if (!edit.city) {
+    showToast('Add your city so clients near you can find you');
+    restoreSaveBtns();
+    document.getElementById('te-city').focus();
+    return;
+  }
+  if (!edit.state) {
+    showToast('Pick your state so clients near you can find you');
+    restoreSaveBtns();
+    document.getElementById('te-state').focus();
+    return;
+  }
   // Phone-first (2026-07-24): email is OPTIONAL for phone-identity techs.
   // It stays required only when the signed-in identity IS an email, since
   // blanking it would orphan the row from its own login.
@@ -15168,7 +15233,7 @@ async function tbTogglePaused() {
   if (!_bkMyTech) return;
   const next = !_bkMyTech.paused_by_tech;
   if (next && !(await showConfirm('Pause your listing?', {
-    body: 'Your photos leave the Gallery and clients can\u2019t book or contact you until you flip this back off. Your portfolio is safe.',
+    body: 'Your photos leave the Gallery, you come off the What\u2019s happening board, and clients can\u2019t book or contact you until you flip this back off. Your portfolio is safe.',
     okLabel: 'Pause it' }))) return;
   // Write paused_by_tech, never listing_paused: a BEFORE trigger derives
   // listing_paused from this plus subscription state (sql/tech-paywall.sql).
@@ -15922,6 +15987,19 @@ function tdRenderMncBookingCta(t) {
   el.style.display = showIt ? 'block' : 'none';
 }
 
+// Missing city or state on the tech row (2026-10-11).
+function tdRenderCityBanner(t) {
+  var el = document.getElementById('td-city-banner');
+  if (!el) return;
+  var noCity = !(t && String(t.city || '').trim());
+  var noState = !(t && String(t.state || '').trim());
+  if (!noCity && !noState) { el.style.display = 'none'; return; }
+  var body = document.getElementById('td-city-body');
+  if (body) body.textContent = noCity
+    ? 'Your profile has no city yet. Clients searching nearby, and the What\u2019s happening board, go by city and state.'
+    : 'Your profile has a city but no state. Clients searching nearby, and the What\u2019s happening board, go by both.';
+  el.style.display = 'block';
+}
 function tdRenderLapseBanner(t) {
   var el = document.getElementById('td-lapse-banner');
   if (!el) return;
@@ -15953,8 +16031,13 @@ async function tbLoadDashBadge() {
   const sub = document.getElementById('td-bookings-sub');
   const badge = document.getElementById('td-bookings-pending');
   try {
-    const r = await fetch(SUPABASE_URL + '/rest/v1/techs?select=id,booking_enabled,booking_link,paused_by_tech,booking_timezone,is_available,is_same_day,accepting_new_clients,is_bookable,subscription_source,period_reset_at,daily_avail_nudge_off,avail_reminder_time&or=(email.eq.' +
-      encodeURIComponent(currentUserEmail) + ',phone.eq.' + encodeURIComponent(currentUserEmail) + ')', { headers: bkHeaders() });
+    var _bkSel = 'id,booking_enabled,booking_link,paused_by_tech,booking_timezone,is_available,is_same_day,accepting_new_clients,is_bookable,subscription_source,period_reset_at,daily_avail_nudge_off,avail_reminder_time,city,state';
+    var _bkWho = '&or=(email.eq.' + encodeURIComponent(currentUserEmail) + ',phone.eq.' + encodeURIComponent(currentUserEmail) + ')';
+    // setup_calls_only and setup_avail_ack (sql/setup-acks-server.sql,
+    // 2026-10-11): the two checklist choices that used to live on the phone.
+    // Until that SQL runs the columns are missing, so fall back to the old select.
+    let r = await fetch(SUPABASE_URL + '/rest/v1/techs?select=' + _bkSel + ',setup_calls_only,setup_avail_ack' + _bkWho, { headers: bkHeaders() });
+    if (r.status === 400) r = await fetch(SUPABASE_URL + '/rest/v1/techs?select=' + _bkSel + _bkWho, { headers: bkHeaders() });
     if (!r.ok) return; // migration not run yet, leave the default copy
     const t = (await r.json())[0];
     if (!t) { window._mncTrial = null; try { renderTrialPill(); } catch(_) {} return; }  // no tech row: no pill (a client after a tech signed out here)
@@ -15962,6 +16045,7 @@ async function tbLoadDashBadge() {
     // (trial ended or sub lapsed). Without this the Book button just vanishes
     // and nothing on the portal says why or how to renew (Anne, 2026-09-20).
     try { tdRenderLapseBanner(t); } catch(_) {}
+    try { tdRenderCityBanner(t); } catch(_) {}
     // Cache the trial state so the persistent free-month pill can paint on any
     // screen without a refetch, then render it.
     window._mncTrial = { source: t.subscription_source, reset: t.period_reset_at, bookable: !!t.is_bookable, paused: !!t.paused_by_tech };
@@ -15972,7 +16056,16 @@ async function tbLoadDashBadge() {
     window._bkSetup = { id: t.id, enabled: !!t.booking_enabled, link: (t.booking_link || '').trim(),
       // availOn drives the "Show clients when you're open" checklist step:
       // any chip on means she has already found them.
-      availOn: !!(t.is_available || t.is_same_day || t.accepting_new_clients) };
+      availOn: !!(t.is_available || t.is_same_day || t.accepting_new_clients),
+      // Server copy of the calls-and-texts-only choice (2026-10-11).
+      callsOnly: !!t.setup_calls_only };
+    // Server copy of "read the chair-time explainer": once true on the row, the
+    // step stays done on every phone and after every sign-in (2026-10-11).
+    if (t.setup_avail_ack) {
+      window._mncAvailTouched = true;
+      try { localStorage.setItem('mnc_avail_ack_' + (currentUserEmail || ''), '1'); } catch(_) {}
+      try { updateSetupChecklist(); } catch(_) {}
+    }
     // Account-level daily-reminder preference, cached so My Settings can paint
     // its toggle without a refetch (Anne, 2026-09-20).
     window._mncDailyNudgeOff = !!t.daily_avail_nudge_off;
@@ -16175,7 +16268,7 @@ async function maybeDailyAvailPrompt(t) {
   // Brand-new techs are the walkthrough's job; only nudge once onboarding has
   // acked the chips (the _setupStepsState latch writes this same key).
   var acked = false;
-  try { acked = localStorage.getItem('mnc_avail_ack_' + (currentUserEmail || '')) === '1'; } catch(_) {}
+  try { acked = window._mncAvailTouched === true || localStorage.getItem('mnc_avail_ack_' + (currentUserEmail || '')) === '1'; } catch(_) {}
   if (!acked && !window._mncAvailTouched) return;
   var day = new Date().toISOString().slice(0, 10);
   var stampKey = 'mnc_avail_prompt_' + (currentUserEmail || '') + '_' + day;
@@ -16363,6 +16456,7 @@ async function bkForkSaveLink() {
   var ok = await patchBookingField({ booking_link: url });
   if (!ok) { showToast('Could not save, try again'); return; }
   try { localStorage.removeItem(_bkPrefKey()); } catch(_) {}
+  if (window._bkSetup) window._bkSetup.callsOnly = false; _setupPatch({ setup_calls_only: false });
   window._bkSetup = window._bkSetup || {}; window._bkSetup.link = url;
   if (_bkMyTech) _bkMyTech.booking_link = url;
   try { var te = document.getElementById('te-booking-link'); if (te) te.value = url; } catch(_){}
@@ -16377,6 +16471,8 @@ function bkForkCallsOnly() {
   // profile already shows Call and Text; remember the choice locally so
   // the setup checklist counts this step done.
   try { localStorage.setItem(_bkPrefKey(), 'calls'); } catch(_) {}
+  window._bkSetup = window._bkSetup || {}; window._bkSetup.callsOnly = true;
+  _setupPatch({ setup_calls_only: true });
   bkCloseSetupFork();
   showToast('Done, clients will see big Call and Text buttons on your profile.');
   try { setupAdvance(); } catch(_) {}
@@ -16412,6 +16508,7 @@ async function bkForkInApp() {
     var ok = await patchBookingField({ booking_enabled: true });
     if (!ok) { showToast('Could not turn booking on, try again'); return; }
     try { localStorage.removeItem(_bkPrefKey()); } catch(_) {}
+  if (window._bkSetup) window._bkSetup.callsOnly = false; _setupPatch({ setup_calls_only: false });
     window._bkSetup = window._bkSetup || {}; window._bkSetup.enabled = true;
     if (_bkMyTech) _bkMyTech.booking_enabled = true;
     bkCloseSetupFork();
@@ -16495,6 +16592,7 @@ async function bkForkHoursFinish() {
     // waits.
     if (await bkSubscriptionBlocks()) {
       try { localStorage.removeItem(_bkPrefKey()); } catch(_) {}
+  if (window._bkSetup) window._bkSetup.callsOnly = false; _setupPatch({ setup_calls_only: false });
       bkCloseSetupFork();
       try { tbLoadDashBadge(); } catch(_) {}
       try { updateSetupChecklist(); } catch(_) {}
@@ -16509,6 +16607,7 @@ async function bkForkHoursFinish() {
     }
     showToast('You\u2019re bookable! ' + name + ' \u00b7 ' + dur + ' min' + (priceRaw ? ' \u00b7 $' + priceRaw : '') + ', tweak anytime in Booking Settings.');
     try { localStorage.removeItem(_bkPrefKey()); } catch(_) {}
+  if (window._bkSetup) window._bkSetup.callsOnly = false; _setupPatch({ setup_calls_only: false });
     window._bkSetup = window._bkSetup || {}; window._bkSetup.enabled = true;
     if (_bkMyTech) _bkMyTech.booking_enabled = true;
     bkCloseSetupFork();
@@ -18173,6 +18272,20 @@ function _bkPrefKey() {
 function _bkCallsOnlyPref() {
   try { return localStorage.getItem(_bkPrefKey()) === 'calls'; } catch(_) { return false; }
 }
+// Write a setup flag to her techs row (2026-10-11). Quiet on failure: the
+// local flag still covers this device, and the next sign-in retries nothing;
+// she just sees the step again, which is what happened before anyway.
+function _setupPatch(fields) {
+  try {
+    var who = currentUserEmail || '';
+    if (!who) return;
+    fetch(SUPABASE_URL + '/rest/v1/techs?or=(email.eq.' + encodeURIComponent(who) + ',phone.eq.' + encodeURIComponent(who) + ')', {
+      method: 'PATCH',
+      headers: bkHeaders({ 'Content-Type': 'application/json', 'Prefer': 'return=minimal' }),
+      body: JSON.stringify(fields)
+    }).catch(function () {});
+  } catch(_) {}
+}
 
 function _setupStepsState() {
   var bk = window._bkSetup || {};
@@ -18217,14 +18330,14 @@ function _setupStepsState() {
     { label: 'Post your first set', sub: 'Photos are free, always \u00b7 1 min',
       done: (window._setupPhotoCount || 0) > 0, action: 'openPhotoUploadFromHome(false)' },
     { label: 'Choose how clients reach you', sub: 'Call, text, your booking link, or ours \u00b7 2 min',
-      done: !!(bk.enabled || bk.link || _bkCallsOnlyPref()), action: 'tbOpenBookings()' },
+      done: !!(bk.enabled || bk.link || bk.callsOnly || _bkCallsOnlyPref()), action: 'tbOpenBookings()' },
     // Schedule step (Anne, 2026-08-10): walk new techs into Booking
     // Settings for buffer / notice / weekly hours. Done = availability
     // windows exist on the server; techs on an external link or
     // calls-only don't need a schedule here, so it's done for them the
     // moment they've made that choice.
     { label: 'Set your hours', sub: 'Only if you take booking here \u00b7 2 min',
-      done: (!bk.enabled && !!(bk.link || _bkCallsOnlyPref())) || !!window._mncHasAvailability,
+      done: (!bk.enabled && !!(bk.link || bk.callsOnly || _bkCallsOnlyPref())) || !!window._mncHasAvailability,
       action: 'setupOpenSchedule()' },
     // Availability step (Anne, 2026-08-19): "i don't see a step that
     // explains/onboards them to get familiar with available today, this
@@ -18352,6 +18465,7 @@ async function setupOpenAvailability() {
   // Either way she has now been told, so stop listing it as outstanding.
   window._mncAvailTouched = true;
   try { localStorage.setItem('mnc_avail_ack_' + (currentUserEmail || ''), '1'); } catch(_) {}
+  _setupPatch({ setup_avail_ack: true });
   try { updateSetupChecklist(); } catch(_) {}
   if (ok) {
     var chip = document.getElementById('td-hero-now');
@@ -18843,6 +18957,22 @@ function initGooglePlaces() {
 // street / city / state / zip fields. Only fills fields that are empty,
 // a hand-typed city is never overwritten. 2026-08-03, found by Anne in
 // the launch-day test lap.
+// US state from the first three digits of a ZIP (USPS sectional centers).
+// Same table as public.wh_state_from_zip; keep the two in step.
+function mncStateFromZip(zip) {
+  var m = /^\s*(\d{5})/.exec(String(zip || ''));
+  if (!m) return null;
+  var z = parseInt(m[1].slice(0, 3), 10);
+  var T = [[5,5,'NY'],[6,9,'PR'],[10,27,'MA'],[28,29,'RI'],[30,38,'NH'],[39,49,'ME'],[55,55,'MA'],[50,59,'VT'],[60,69,'CT'],[70,89,'NJ'],
+    [100,149,'NY'],[150,196,'PA'],[197,199,'DE'],[200,200,'DC'],[201,201,'VA'],[202,205,'DC'],[206,219,'MD'],[220,246,'VA'],[247,268,'WV'],[270,289,'NC'],[290,299,'SC'],
+    [300,319,'GA'],[320,349,'FL'],[350,369,'AL'],[370,385,'TN'],[386,397,'MS'],[398,399,'GA'],[400,427,'KY'],[430,459,'OH'],[460,479,'IN'],
+    [480,499,'MI'],[500,528,'IA'],[530,549,'WI'],[550,567,'MN'],[569,569,'DC'],[570,577,'SD'],[580,588,'ND'],[590,599,'MT'],[600,629,'IL'],
+    [630,658,'MO'],[660,679,'KS'],[680,693,'NE'],[700,714,'LA'],[716,729,'AR'],[730,749,'OK'],[885,885,'TX'],[750,799,'TX'],[800,816,'CO'],
+    [820,831,'WY'],[832,838,'ID'],[840,847,'UT'],[850,865,'AZ'],[870,884,'NM'],[889,898,'NV'],[900,961,'CA'],[967,968,'HI'],[970,979,'OR'],
+    [980,994,'WA'],[995,999,'AK']];
+  for (var i = 0; i < T.length; i++) { if (z >= T[i][0] && z <= T[i][1]) return T[i][2]; }
+  return null;
+}
 function mncSplitAddressField(addrEl, cityId, stateId, zipId) {
   if (!addrEl) return;
   var v = (addrEl.value || '').trim();
