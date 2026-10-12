@@ -924,9 +924,10 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
 .hero-status-chip:active { transform: scale(0.97); }
 .hero-status-chip.off { opacity: 0.78; }
 .hero-status-chip.on {
-  background: linear-gradient(160deg, #FFFFFF 0%, #FBF1EC 55%, #F1E4E5 100%);
-  border-color: var(--rose-mid);
-  box-shadow: 0 4px 14px rgba(178, 110, 95, 0.18), inset 0 0 0 1px rgba(255,255,255,0.7);
+  background: linear-gradient(160deg, #FFFFFF 0%, #EEF6F0 55%, #DCEEE2 100%);
+  border-color: #6BA06B;
+  border-bottom-color: rgba(95,155,114,0.55);
+  box-shadow: 0 4px 14px rgba(95, 155, 114, 0.22), inset 0 0 0 1px rgba(255,255,255,0.7);
 }
 /* Gold upper-right corner flourish removed 2026-04-22, created a
    visual conflict with the primary hero-status-dot and read as two
@@ -937,7 +938,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
   background:#D5CDCE;
   transition: background 0.2s ease, box-shadow 0.2s ease;
 }
-.hero-status-chip.on .hero-status-dot[data-kind="now"]  { background: #5F9B72; box-shadow: 0 0 0 4px rgba(95,155,114,0.22); animation: pulse 1.5s infinite; }
+.hero-status-chip.on .hero-status-dot[data-kind="now"]  { background: #5F9B72; box-shadow: 0 0 0 4px rgba(95,155,114,0.22); }
 .hero-status-chip.on .hero-status-dot[data-kind="week"] { background: var(--gold); box-shadow: 0 0 0 4px rgba(200,150,80,0.20); }
 .hero-status-chip.on .hero-status-dot[data-kind="new"]  { background: #D96B72; box-shadow: 0 0 0 4px rgba(217,107,114,0.18); }
 .hero-status-label {
@@ -948,7 +949,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
 }
 .hero-status-chip.on .hero-status-label { color: var(--charcoal); }
 .hero-status-hint { font-size:12.5px; color:var(--muted); margin-left:4px; }
-.hero-status-chip.on .hero-status-hint { color: var(--rose-dark); }
+.hero-status-chip.on .hero-status-hint { color: #2E7A45; }
 
 /* ── Tech-home presence stats (Photos / Posts / Saved by) ─────────────────── */
 .presence-stat {
@@ -2024,7 +2025,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
          dash calendar (td-cal) retired with the dark card, renderDashCalendar
          null-guards its absence. Subtitle/badge ids preserved so
          tbLoadDashBadge and loadTechHomeStats keep painting. -->
-    <div style="margin:20px 20px 0;display:flex;flex-direction:column;gap:10px;">
+    <div style="margin:30px 20px 0;display:flex;flex-direction:column;gap:10px;">
 
       <!-- Same door as the home screen's What's happening card (Anne,
            2026-10-11: the portal buttons look like the home screen's). -->
@@ -6466,8 +6467,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.6',     /* __APP_BUILD_NAME__   */
-  android: 685,         /* __APP_BUILD_ANDROID__ */
-  ios:     490,          /* __APP_BUILD_IOS__     */
+  android: 686,         /* __APP_BUILD_ANDROID__ */
+  ios:     491,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
