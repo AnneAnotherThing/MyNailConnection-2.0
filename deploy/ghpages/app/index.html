@@ -6363,8 +6363,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.6',     /* __APP_BUILD_NAME__   */
-  android: 678,         /* __APP_BUILD_ANDROID__ */
-  ios:     483,          /* __APP_BUILD_IOS__     */
+  android: 679,         /* __APP_BUILD_ANDROID__ */
+  ios:     484,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -7677,6 +7677,7 @@ function doSignOut() {
   window._setupProfileDone = undefined;
   window._setupPhotoCount = undefined;
   window._mncTrial = undefined;
+  try { var _tp = document.getElementById('trial-pill'); if (_tp) _tp.style.display = 'none'; } catch(_) {}  // the pill is per account, never carried to the next sign-in
   // Per-user device flags (storage audit 2026-08-03): none are namespaced
   // by user, so on a shared device account A's state leaked into account
   // B, "push done" claimed for a user with no subscription, A's booking
@@ -15819,7 +15820,9 @@ function renderTrialPill() {
   var el = document.getElementById('trial-pill');
   if (!el) return;
   var t = window._mncTrial;
-  if (!t || t.source !== 'trial') { el.style.display = 'none'; return; }
+  var isTech = false;
+  try { isTech = whIsTech(); } catch (_) {}
+  if (!t || t.source !== 'trial' || !isTech) { el.style.display = 'none'; return; }
   // The clock decides "ended", not bookability: a paused or hidden page is
   // not bookable either, and that used to read as "Free month ended".
   var end = t.reset ? new Date(t.reset) : null;
@@ -15898,7 +15901,7 @@ async function tbLoadDashBadge() {
       encodeURIComponent(currentUserEmail) + ',phone.eq.' + encodeURIComponent(currentUserEmail) + ')', { headers: bkHeaders() });
     if (!r.ok) return; // migration not run yet, leave the default copy
     const t = (await r.json())[0];
-    if (!t) return;
+    if (!t) { window._mncTrial = null; try { renderTrialPill(); } catch(_) {} return; }  // no tech row: no pill (a client after a tech signed out here)
     // Lapsed-booking renew banner: she wants booking on but is not bookable
     // (trial ended or sub lapsed). Without this the Book button just vanishes
     // and nothing on the portal says why or how to renew (Anne, 2026-09-20).
