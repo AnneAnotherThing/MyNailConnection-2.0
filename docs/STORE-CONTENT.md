@@ -24,9 +24,9 @@ Booking built for nail techs
 nail tech,nail booking,nails near me,nail salon,manicure,nail art,book nails,appointments
 ```
 
-**Promotional Text** (158/170)
+**Promotional Text** (167/170)
 ```
-Still booking in your DMs? Your work is already why clients pick you. Now it's your booking page too. First month free, then $10.99 - and no commission, ever.
+New: What's happening. Clients post the set they need, techs nearby say Interested, and Available now shows who has a chair right now. First month free. No commission.
 ```
 
 **Description** (2881/4000)
@@ -72,9 +72,9 @@ Terms of Use: https://mynailconnection.com/terms.html
 Privacy Policy: https://mynailconnection.com/privacy.html
 ```
 
-**What's New in This Version** (416/4000)
+**What's New in This Version** (489/4000)
 ```
-3.0: Real booking is here. Clients book you right in the app - no commission, no per-booking fee, and nothing charged to them. Your own shareable profile link and QR, standing appointments for your regulars, walk-in entry, private client notes, and automatic reminders so fewer people no-show. Notifications now stay put, so a request you swiped away isn't gone. Photos stay free - 50 a month, and they never expire.
+3.0.7: What's happening, a live board for your city. Clients post what they need and by when, with a photo of the look. Techs nearby reply Interested with one tap, and the client gets a push. Post Available now when a chair opens and your work glows in the Gallery until the time you pick. Techs get a push when a client nearby posts, and can snooze those for the day. Choose how far the board reaches: your city, your state, or everywhere. Plus a cleaner Tech Portal and Booking Settings.
 ```
 
 ---
@@ -130,9 +130,9 @@ A general beauty app has to describe a haircut, a lash fill and a full set in th
 Free to set up. First month of booking free, then $10.99/month. Cancel any time; your gallery and your calendar stay exactly as they are.
 ```
 
-**Release notes** (416/500)
+**Release notes** (489/500)
 ```
-3.0: Real booking is here. Clients book you right in the app - no commission, no per-booking fee, and nothing charged to them. Your own shareable profile link and QR, standing appointments for your regulars, walk-in entry, private client notes, and automatic reminders so fewer people no-show. Notifications now stay put, so a request you swiped away isn't gone. Photos stay free - 50 a month, and they never expire.
+3.0.7: What's happening, a live board for your city. Clients post what they need and by when, with a photo of the look. Techs nearby reply Interested with one tap, and the client gets a push. Post Available now when a chair opens and your work glows in the Gallery until the time you pick. Techs get a push when a client nearby posts, and can snooze those for the day. Choose how far the board reaches: your city, your state, or everywhere. Plus a cleaner Tech Portal and Booking Settings.
 ```
 
 ---

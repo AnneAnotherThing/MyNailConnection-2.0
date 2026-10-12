@@ -23,9 +23,11 @@ APPLE_KEYWORDS = ("nail tech,nail booking,nails near me,nail salon,manicure,"
 
 # The ONLY App Store field editable without shipping a build. The offer lives
 # here on purpose: when it changes, this is a browser edit, not a release.
-APPLE_PROMO = ("Still booking in your DMs? Your work is already why clients pick you. "
-               "Now it's your booking page too. First month free, then $10.99 - "
-               "and no commission, ever.")
+# 3.0.7 (2026-10-12): the What's happening board is the news. The 3.0
+# promo ("Still booking in your DMs? ...") sits in git history.
+APPLE_PROMO = ("New: What's happening. Clients post the set they need, techs nearby say "
+               "Interested, and Available now shows who has a chair right now. "
+               "First month free. No commission.")
 
 FREE_BLOCK = """FREE, FOREVER
 Your profile, your whole gallery, and your place in the Gallery clients browse are free and stay free. Post up to 50 looks a month. Your photos never expire - this is a portfolio, not a feed that buries you in a week. Post "Available now" on the What's happening board so clients can see you have a chair right now. Keep your Call and Text buttons. Already booking somewhere else? Paste that link and a Book button appears on your profile. None of this ever costs you anything."""
@@ -72,7 +74,10 @@ MNC's own booking - the part where a client taps Book and lands on your calendar
 
 APPLE_DESC = "\n\n".join([OPENER, FREE_BLOCK, APPLE_PAID, TECH_LIST, CLIENT_LIST, WHY, APPLE_SUB_BLOCK])
 
-APPLE_WHATS_NEW = """3.0: Real booking is here. Clients book you right in the app - no commission, no per-booking fee, and nothing charged to them. Your own shareable profile link and QR, standing appointments for your regulars, walk-in entry, private client notes, and automatic reminders so fewer people no-show. Notifications now stay put, so a request you swiped away isn't gone. Photos stay free - 50 a month, and they never expire."""
+APPLE_WHATS_NEW = """3.0.7: What's happening, a live board for your city. Clients post what they need and by when, with a photo of the look. Techs nearby reply Interested with one tap, and the client gets a push. Post Available now when a chair opens and your work glows in the Gallery until the time you pick. Techs get a push when a client nearby posts, and can snooze those for the day. Choose how far the board reaches: your city, your state, or everywhere. Plus a cleaner Tech Portal and Booking Settings."""
+
+# 3.0 (2026-10-11), kept for the record; Play and Apple show the current one.
+WHATS_NEW_3_0 = """3.0: Real booking is here. Clients book you right in the app - no commission, no per-booking fee, and nothing charged to them. Your own shareable profile link and QR, standing appointments for your regulars, walk-in entry, private client notes, and automatic reminders so fewer people no-show. Notifications now stay put, so a request you swiped away isn't gone. Photos stay free - 50 a month, and they never expire."""
 
 # ── Google Play ──────────────────────────────────────────────────────────
 PLAY_NAME = "My Nail Connection: Booking"
