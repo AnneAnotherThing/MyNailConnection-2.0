@@ -570,6 +570,18 @@ input[type="password"]::-webkit-contacts-auto-fill-button{display:none;}
 input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
 .input-group input:focus{border-color:var(--rose-mid);background:white;}
 .toggle{width:44px;height:24px;border-radius:100px;border:none;cursor:pointer;position:relative;transition:background 0.2s;flex-shrink:0;}
+/* Booking Settings (2026-10-11): native pickers and inputs wear the app's
+   input chrome instead of the browser's. Inline styles on the controls are
+   older, hence the !important. */
+#tech-booking-settings select,
+#tech-booking-settings input[type="time"],
+#tech-booking-settings input[type="date"],
+#tech-booking-settings input[type="text"],
+#tech-booking-settings input:not([type]){font-family:'DM Sans',sans-serif;border:1.5px solid var(--border) !important;border-radius:12px !important;background-color:var(--cream) !important;color:var(--charcoal);padding:9px 12px !important;font-size:13.5px !important;line-height:1.2;outline:none;-webkit-appearance:none;appearance:none;min-height:38px;box-sizing:border-box;}
+#tech-booking-settings select{padding-right:32px !important;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236E6467' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") !important;background-repeat:no-repeat !important;background-position:right 10px center !important;background-size:13px !important;}
+#tech-booking-settings input[type="time"]::-webkit-calendar-picker-indicator,
+#tech-booking-settings input[type="date"]::-webkit-calendar-picker-indicator{opacity:0.5;cursor:pointer;}
+#tech-booking-settings .bk-card{box-shadow:var(--shadow);}
 .toggle.on{background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);}.toggle.off{background:#D5CDCE;}
 .toggle::after{content:'';position:absolute;top:3px;width:18px;height:18px;border-radius:50%;background:white;transition:left 0.2s;}
 .toggle.on::after{left:23px;}.toggle.off::after{left:3px;}
@@ -1461,7 +1473,9 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       <button id="home-signout-btn" onclick="confirmSignOut()" title="Sign Out" aria-label="Sign Out" style="display:none;background:white;border:1.5px solid var(--border);box-shadow:0 1px 6px rgba(20,19,23,0.14);width:34px;height:34px;border-radius:50%;align-items:center;justify-content:center;cursor:pointer;padding:0;">
         <svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:var(--charcoal);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
       </button>
-      <div class="avatar" onclick="navToProfile()" id="home-avatar-btn"><img src="images/mncLogo-round-256.webp?v=2" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" draggable="false"/></div>
+      <!-- Brand coin only (2026-10-11). It used to open Profile, which the
+           bottom nav already does; one door per destination. -->
+      <div class="avatar" id="home-avatar-btn" aria-hidden="true" style="cursor:default;"><img src="images/mncLogo-round-256.webp?v=2" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" draggable="false"/></div>
     </div>
   </div>
 
@@ -1575,7 +1589,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
          bottom of the home scroll. Tappable to the dedicated find-us page,
          OR direct-to-platform via the individual icons. Tucked in tightly
          under the illustration so it reads as a soft footer flourish. -->
-    <div style="text-align:center;padding:0 20px 6px;">
+    <div style="text-align:center;padding:30px 20px 6px;">
       <div style="font-family:'Playfair Display',serif;font-style:italic;font-size:11px;color:var(--muted);opacity:0.85;letter-spacing:0.4px;margin-bottom:6px;">find us on</div>
       <div style="display:flex;justify-content:center;gap:14px;">
         <a href="https://www.instagram.com/mynailconnection" target="_blank" rel="noopener noreferrer" aria-label="Instagram" style="display:inline-flex;text-decoration:none;"><img src="images/insta.jpg?v=2" alt="Instagram" style="width:42px;height:42px;border-radius:12px;"/></a>
@@ -2533,20 +2547,21 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       <button id="tb-trial-cta" onclick="openBookingSubscribe()" style="display:none;margin-top:11px;width:100%;padding:11px;border:none;border-radius:11px;background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);color:white;font-size:14px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;">Subscribe, $10.99/month</button>
     </div>
 
-    <div style="margin:16px 20px 0;background:white;border:1.5px solid var(--border);border-radius:16px;padding:16px;">
+    <div class="etched-caps" style="font-size:11px;font-weight:700;letter-spacing:1.6px;color:var(--muted);text-transform:uppercase;margin:20px 20px 8px 24px;">Booking</div>
+    <div class="bk-card" style="margin:0 20px;background:white;border:1.5px solid var(--border);border-radius:16px;padding:16px;">
       <div style="display:flex;align-items:center;gap:10px;">
         <div style="flex:1;min-width:0;">
           <div style="font-size:15px;font-weight:600;color:var(--charcoal);">Take bookings on MNC</div>
           <div id="tb-enabled-sub" style="font-size:13px;color:var(--muted);margin-top:2px;">Clients book you right from your profile.</div>
         </div>
-        <button id="tb-enabled-btn" onclick="tbToggleEnabled()" style="min-width:56px;padding:8px 14px;border-radius:100px;font-size:13px;font-weight:700;cursor:pointer;border:1.5px solid var(--border);background:white;color:var(--muted);">Off</button>
+        <button class="toggle off" id="tb-enabled-btn" onclick="tbToggleEnabled()" aria-label="Take bookings on MNC"></button>
       </div>
       <div style="display:flex;align-items:center;gap:10px;margin-top:14px;padding-top:14px;border-top:1px solid var(--border);">
         <div style="flex:1;min-width:0;">
           <div style="font-size:14px;font-weight:600;color:var(--charcoal);">Auto-confirm bookings</div>
           <div id="tb-autoconfirm-sub" style="font-size:13px;color:var(--muted);margin-top:2px;">You approve each request before it books, stay near your phone!</div>
         </div>
-        <button id="tb-autoconfirm-btn" onclick="tbToggleAutoConfirm()" style="min-width:56px;padding:8px 14px;border-radius:100px;font-size:13px;font-weight:700;cursor:pointer;border:1.5px solid var(--border);background:white;color:var(--muted);">Off</button>
+        <button class="toggle off" id="tb-autoconfirm-btn" onclick="tbToggleAutoConfirm()" aria-label="Auto-confirm bookings"></button>
       </div>
       <!-- Minimum notice, visible only while auto-confirm is on (Anne,
            2026-08-03): with requests booking themselves, a tech needs a
@@ -2569,7 +2584,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
           <div style="font-size:14px;font-weight:600;color:var(--charcoal);">Pause my page</div>
           <div id="tb-paused-sub" style="font-size:13px;color:var(--muted);margin-top:2px;">You&rsquo;re live: photos in the Gallery, profile open to clients.</div>
         </div>
-        <button id="tb-paused-btn" onclick="tbTogglePaused()" style="min-width:56px;padding:8px 14px;border-radius:100px;font-size:13px;font-weight:700;cursor:pointer;border:1.5px solid var(--border);background:white;color:var(--muted);">Off</button>
+        <button class="toggle off" id="tb-paused-btn" onclick="tbTogglePaused()" aria-label="Pause my page"></button>
       </div>
       <div style="display:flex;align-items:center;gap:10px;margin-top:14px;padding-top:14px;border-top:1px solid var(--border);">
         <div style="flex:1;min-width:0;">
@@ -2592,8 +2607,8 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
     </div>
 
     <!-- Services -->
-    <div style="margin:20px 20px 0;background:white;border:1.5px solid var(--border);border-radius:16px;padding:16px;">
-      <div style="font-size:15px;font-weight:600;color:var(--charcoal);">Services</div>
+    <div class="etched-caps" style="font-size:11px;font-weight:700;letter-spacing:1.6px;color:var(--muted);text-transform:uppercase;margin:20px 20px 8px 24px;">Services</div>
+    <div class="bk-card" style="margin:0 20px;background:white;border:1.5px solid var(--border);border-radius:16px;padding:16px;">
       <div style="font-size:13px;color:var(--muted);margin-top:2px;">What clients can book, how long it takes, what it costs.</div>
       <div id="tb-svc-list" style="margin-top:12px;"></div>
       <div style="display:grid;grid-template-columns:1fr;gap:8px;margin-top:10px;">
@@ -2613,15 +2628,15 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
     </div>
 
     <!-- Weekly hours -->
-    <div style="margin:20px 20px 24px;background:white;border:1.5px solid var(--border);border-radius:16px;padding:16px;">
-      <div style="font-size:15px;font-weight:600;color:var(--charcoal);">Weekly hours</div>
+    <div class="etched-caps" style="font-size:11px;font-weight:700;letter-spacing:1.6px;color:var(--muted);text-transform:uppercase;margin:20px 20px 8px 24px;">Weekly hours</div>
+    <div class="bk-card" style="margin:0 20px;background:white;border:1.5px solid var(--border);border-radius:16px;padding:16px;">
       <div style="font-size:13px;color:var(--muted);margin-top:2px;">When clients can book you. Add two windows on a day for a split shift.</div>
       <div id="tb-avail-list" style="margin-top:6px;"></div>
     </div>
 
     <!-- Time off (tier 1) -->
-    <div style="margin:20px 20px 24px;background:white;border:1.5px solid var(--border);border-radius:16px;padding:16px;">
-      <div style="font-size:15px;font-weight:600;color:var(--charcoal);">Time off</div>
+    <div class="etched-caps" style="font-size:11px;font-weight:700;letter-spacing:1.6px;color:var(--muted);text-transform:uppercase;margin:20px 20px 8px 24px;">Time off</div>
+    <div class="bk-card" style="margin:0 20px;background:white;border:1.5px solid var(--border);border-radius:16px;padding:16px;">
       <div style="font-size:13px;color:var(--muted);margin-top:2px;">Block days you're away. Clients can't book them.</div>
       <div id="tb-timeoff-list" style="margin-top:10px;"></div>
       <div style="display:flex;gap:6px;margin-top:8px;align-items:center;flex-wrap:wrap;">
@@ -2633,8 +2648,8 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
     </div>
 
     <!-- Blocked clients (quiet blocklist) -->
-    <div style="margin:20px 20px 24px;background:white;border:1.5px solid var(--border);border-radius:16px;padding:16px;">
-      <div style="font-size:15px;font-weight:600;color:var(--charcoal);">Blocked from booking you</div>
+    <div class="etched-caps" style="font-size:11px;font-weight:700;letter-spacing:1.6px;color:var(--muted);text-transform:uppercase;margin:20px 20px 8px 24px;">Blocked from booking you</div>
+    <div class="bk-card" style="margin:0 20px;background:white;border:1.5px solid var(--border);border-radius:16px;padding:16px;">
       <div style="font-size:13px;color:var(--muted);margin-top:2px;">They're never told. They simply never see an opening with you again.</div>
       <div id="tb-blocked-list" style="margin-top:10px;"></div>
       <!-- Manual entry field removed (Anne, 2026-08-03): blocking now
@@ -6467,8 +6482,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.6',     /* __APP_BUILD_NAME__   */
-  android: 686,         /* __APP_BUILD_ANDROID__ */
-  ios:     491,          /* __APP_BUILD_IOS__     */
+  android: 687,         /* __APP_BUILD_ANDROID__ */
+  ios:     492,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -14693,12 +14708,13 @@ async function loadTechBookings() {
 }
 
 function tbPill(id, on) {
+  // Switch toggles since 2026-10-11 (were Off/On text pills); same class as
+  // the alerts sheet and My Settings.
   const b = document.getElementById(id);
   if (!b) return;
-  b.textContent = on ? 'On' : 'Off';
-  b.style.background = on ? 'var(--rose)' : 'white';
-  b.style.color = on ? 'white' : 'var(--muted)';
-  b.style.borderColor = on ? 'var(--rose)' : 'var(--border)';
+  b.classList.toggle('on', !!on);
+  b.classList.toggle('off', !on);
+  b.setAttribute('aria-checked', on ? 'true' : 'false');
 }
 
 // Free-month countdown banner. Shows only while a tech is on the card-free
@@ -15083,7 +15099,19 @@ function tbRenderAvail() {
   const wrap = document.getElementById('tb-avail-list');
   if (!wrap) return;
   const inp = 'padding:7px 8px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:white;color:var(--charcoal);';
-  wrap.innerHTML = BK_DAYS.map(function(day, d) {
+  // One row for the common case (2026-10-11): the same window Monday to
+  // Friday. Replaces whatever those five days had; weekends stay as set.
+  const shortcut =
+    '<div style="padding:10px 12px;margin:10px 0 2px;background:var(--cream);border:1.5px solid var(--border);border-radius:12px;">' +
+      '<div style="font-size:13px;font-weight:700;color:var(--charcoal);margin-bottom:6px;">Same hours Monday to Friday</div>' +
+      '<div style="display:flex;gap:6px;align-items:center;">' +
+        '<input type="time" id="tb-av-s-wk" value="09:00" style="' + inp + '">' +
+        '<span style="font-size:13px;color:var(--muted);">to</span>' +
+        '<input type="time" id="tb-av-e-wk" value="17:00" style="' + inp + '">' +
+        '<button onclick="tbSetWeekdays()" style="padding:7px 12px;border-radius:12px;border:none;background:var(--charcoal);color:white;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;">Set</button>' +
+      '</div>' +
+    '</div>';
+  wrap.innerHTML = shortcut + BK_DAYS.map(function(day, d) {
     const wins = _bkAvail.filter(function(a) { return a.day_of_week === d; });
     const chips = wins.length
       ? wins.map(function(w) {
@@ -15122,6 +15150,31 @@ async function tbAddWindow(d) {
   window._mncHasAvailability = true; // schedule checklist step flips live
   try { updateSetupChecklist(); } catch(_) {}
   tbRenderAvail();
+}
+
+// Monday to Friday in one go (2026-10-11). Clears those five days first so
+// the result is exactly one window per weekday.
+async function tbSetWeekdays() {
+  if (!_bkMyTech) return;
+  const s = document.getElementById('tb-av-s-wk').value;
+  const e = document.getElementById('tb-av-e-wk').value;
+  if (!s || !e || e <= s) { showToast('End time needs to be after start time'); return; }
+  const r0 = await fetch(SUPABASE_URL + '/rest/v1/tech_availability?tech_id=eq.' + encodeURIComponent(_bkMyTech.id) + '&day_of_week=in.(1,2,3,4,5)', {
+    method: 'DELETE', headers: bkHeaders({ 'Prefer': 'return=minimal' })
+  });
+  if (!r0.ok) { showToast('Could not save those hours, try again'); return; }
+  const r = await fetch(SUPABASE_URL + '/rest/v1/tech_availability', {
+    method: 'POST',
+    headers: bkHeaders({ 'Content-Type': 'application/json', 'Prefer': 'return=representation' }),
+    body: JSON.stringify([1, 2, 3, 4, 5].map(function(d) { return { tech_id: _bkMyTech.id, day_of_week: d, start_time: s, end_time: e }; }))
+  });
+  if (!r.ok) { showToast('Could not save those hours, try again'); return; }
+  const rows = await r.json();
+  _bkAvail = _bkAvail.filter(function(a) { return a.day_of_week < 1 || a.day_of_week > 5; }).concat(rows || []);
+  window._mncHasAvailability = true;
+  try { updateSetupChecklist(); } catch(_) {}
+  tbRenderAvail();
+  showToast('Monday to Friday set, ' + bkFmtTime(s) + ' to ' + bkFmtTime(e));
 }
 
 async function tbDeleteWindow(id) {
@@ -17565,9 +17618,11 @@ function styleNavForRole() {
       lbl.textContent = 'Tech Portal';
       if (svg) svg.innerHTML = TECH_ICON;
     } else {
-      // Clients + pure admins, this is where their saved techs and
-      // saved inspo live. "My Saves" reads more clearly than "Profile".
-      lbl.textContent = 'My Saves';
+      // Clients + pure admins. Was "My Saves" (2026-07); back to "Profile"
+      // on 2026-10-11 because Anne could not find Sign Out from the bottom
+      // nav: the screen holds saves AND account options, and "Profile" is
+      // where every app keeps sign out.
+      lbl.textContent = 'Profile';
       if (svg) svg.innerHTML = PROFILE_ICON;
     }
   });
@@ -17611,7 +17666,7 @@ function styleNavForRole() {
       if (!cItem) {
         var savesItem = Array.prototype.find.call(nav.querySelectorAll('.nav-item'), function(it) {
           var l = it.querySelector('.nav-label');
-          return l && (l.textContent || '').trim() === 'My Saves';
+          return l && (l.textContent || '').trim() === 'Profile';
         });
         if (savesItem) {
           var cd = document.createElement('div');
