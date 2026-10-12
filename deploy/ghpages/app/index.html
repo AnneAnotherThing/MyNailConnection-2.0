@@ -1027,7 +1027,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
      for life. Populated by renderTrialPill() from tbLoadDashBadge; a fixed
      child of .device so it survives screen changes. Bottom-right to clear the
      headers. Hidden for free, comped and paid techs. Tap = details / renew. -->
-<div id="trial-pill" onclick="trialPillTap()" style="display:none;position:absolute;bottom:92px;left:14px;z-index:9500;padding:5px 11px;border-radius:100px;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;cursor:pointer;box-shadow:0 3px 10px rgba(20,19,23,0.22);"></div>
+<!-- The free-month pill moved inline under the Tech Portal greeting on 2026-10-11 (Anne: "the free month sticky is in the way"). -->
 
 <!-- PUSH PERMISSION BANNER, push is used for MNC → user announcements
      (new features, important updates, launches), NOT for tech→client
@@ -1886,6 +1886,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
            gesture is just the hidden doorknob. -->
       <div onclick="adminSecretTap()" style="font-family:'Playfair Display',serif;font-size:24px;color:var(--charcoal);line-height:1.2;cursor:default;" id="tech-dash-greeting">Good morning!</div>
       <div style="font-size:13px;color:var(--muted);margin-top:4px;" id="tech-dash-subtle">Your business, at a glance</div>
+      <div id="trial-pill" onclick="trialPillTap()" style="display:none;margin-top:8px;padding:5px 11px;border-radius:100px;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;cursor:pointer;box-shadow:0 2px 6px rgba(20,19,23,0.14);"></div>
     </div>
 
     <!-- Portal find-anything search (2026-09-20): jump to any screen or
@@ -2770,6 +2771,11 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
         <button class="wh-tab" data-tab="request" onclick="whSetTab('request')">Requests</button>
         <button class="wh-tab" data-tab="available" onclick="whSetTab('available')">Available now</button>
       </div>
+      <div id="wh-push-bar" style="display:none;align-items:center;gap:8px;margin:8px 20px 0;padding:8px 10px 8px 12px;background:white;border:1.5px solid var(--border);border-radius:12px;">
+        <div style="flex:1;min-width:0;font-size:12.5px;color:var(--muted);">Getting too many today?</div>
+        <button class="wh-btn" style="padding:6px 10px;font-size:12px;white-space:nowrap;" onclick="whSnoozeNear()">Snooze for today</button>
+        <button onclick="whHidePushBar()" aria-label="Close" style="background:none;border:none;font-size:18px;line-height:1;color:var(--muted);cursor:pointer;padding:0 2px;">&times;</button>
+      </div>
       <div class="wh-near" id="wh-near" style="display:none;" aria-label="How far">
         <button class="wh-chip" data-n="0" onclick="whSetNear(0)">Nearby</button>
         <button class="wh-chip" data-n="1" onclick="whSetNear(1)">My state</button>
@@ -2792,6 +2798,10 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:700;color:var(--charcoal);" id="wh-alerts-title"></div>
         <div style="font-size:12px;color:var(--muted);margin-top:2px;" id="wh-alerts-sub"></div></div>
       <button class="toggle off" id="wh-alerts-toggle" onclick="whToggleAlerts()" aria-label="Alerts"></button>
+    </div>
+    <div id="wh-snooze-wrap" style="display:none;margin-top:8px;">
+      <button class="wh-btn" id="wh-snooze-btn" style="width:100%;padding:10px 12px;font-size:13px;" onclick="whSnoozeNear()">Snooze for today</button>
+      <div style="font-size:12px;color:var(--muted);margin-top:5px;text-align:center;" id="wh-snooze-sub">A busy day? Pushes stop until tomorrow. The board keeps filling up.</div>
     </div>
     <div id="wh-blocked-wrap" style="margin-top:14px;">
       <div class="wh-field-label" style="margin-bottom:6px;">BLOCKED ON WHAT'S HAPPENING</div>
@@ -3019,6 +3029,41 @@ function openWhatsHappening(tab, source) {
   if (tab) WH.tab = tab;
   whLog('open', source || 'other', null, null);
   show('whats-happening');
+  try { whPaintPushBar(source === 'push'); } catch (_) {}
+}
+// "Snooze for today" (Anne, 2026-10-11). There is no daily cap on near-me
+// pushes any more: every tech in the city hears every request, so the valve
+// is hers. The bar shows when she arrived from a push; the bell sheet always
+// has the same button.
+function whSnoozedNow() {
+  var u = WH.prefs && WH.prefs.near_snoozed_until;
+  if (!u) return false;
+  var d = new Date(u);
+  return !isNaN(d.getTime()) && d.getTime() > Date.now();
+}
+function whPaintPushBar(fromPush) {
+  var bar = document.getElementById('wh-push-bar');
+  if (!bar) return;
+  var on = !!fromPush && whIsTech() && !whSnoozedNow();
+  bar.style.display = on ? 'flex' : 'none';
+}
+function whHidePushBar() {
+  var bar = document.getElementById('wh-push-bar');
+  if (bar) bar.style.display = 'none';
+}
+async function whSnoozeNear(wake) {
+  var on = !wake;
+  var tz = 'America/Phoenix';
+  try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || tz; } catch (_) {}
+  try {
+    var out = await whRpc('wh_snooze_near', { p_tz: tz, p_on: on });
+    if (!out || !out.ok) throw new Error('snooze');
+    WH.prefs = out;
+    whLog('near_snooze', on ? 'on' : 'off');
+    showToast(on ? 'Snoozed. Pushes start again tomorrow.' : 'Pushes are back on');
+    whHidePushBar();
+    try { whPaintAlerts(); } catch (_) {}
+  } catch (_) { showToast('Could not save that just now'); }
 }
 
 async function whLoad() {
@@ -3593,9 +3638,17 @@ async function whPaintAlerts() {
   var tech = whIsTech();
   var on = tech ? WH.prefs.near_alerts !== false : WH.prefs.reply_alerts !== false;
   document.getElementById('wh-alerts-title').textContent = tech ? 'Requests near me' : 'Reply alerts';
+  var snoozed = tech && whSnoozedNow();
   document.getElementById('wh-alerts-sub').textContent = tech
-    ? 'A push when a client near you posts. Up to 3 a day, never overnight.'
+    ? (snoozed ? 'Snoozed for today. Pushes start again tomorrow, never overnight.' : 'A push when a client near you posts. Never overnight.')
     : 'A push when a tech says she\'s interested in your request.';
+  var sw = document.getElementById('wh-snooze-wrap');
+  if (sw) {
+    sw.style.display = (tech && on) ? '' : 'none';
+    var sb = document.getElementById('wh-snooze-btn'), ss = document.getElementById('wh-snooze-sub');
+    if (sb) { sb.textContent = snoozed ? 'Wake pushes back up' : 'Snooze for today'; sb.onclick = function () { whSnoozeNear(snoozed); }; }
+    if (ss) ss.textContent = snoozed ? 'Nothing pushes until tomorrow. The board keeps filling up.' : 'A busy day? Pushes stop until tomorrow. The board keeps filling up.';
+  }
   var t = document.getElementById('wh-alerts-toggle');
   t.classList.toggle('on', on); t.classList.toggle('off', !on);
   var slash = document.getElementById('wh-bell-off');
@@ -3788,7 +3841,7 @@ async function whSubmitRequest() {
       var code = out && out.code;
       whMsg('wh-req-msg', {
         city_needed: 'Add your city so techs near you see it.',
-        too_many: 'You have three requests up already. Close one with Found someone first.',
+        too_many: 'You can have three requests up at a time. Close one first, with Found someone or Take it down, then post the next.',
         date_past: 'That date has passed. Pick today or later.',
         banned: 'Posting is turned off on your account. Reach us through Get help in My Settings if that seems wrong.',
         empty: 'Tell techs what you are looking for.'
@@ -6363,8 +6416,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.6',     /* __APP_BUILD_NAME__   */
-  android: 680,         /* __APP_BUILD_ANDROID__ */
-  ios:     485,          /* __APP_BUILD_IOS__     */
+  android: 682,         /* __APP_BUILD_ANDROID__ */
+  ios:     487,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -15844,7 +15897,7 @@ function renderTrialPill() {
     el.style.border = 'none';
     el.setAttribute('data-mode', 'lapsed');
   }
-  el.style.display = 'block';
+  el.style.display = 'inline-block';
 }
 function trialPillTap() {
   var el = document.getElementById('trial-pill');
@@ -19927,6 +19980,24 @@ document.addEventListener('DOMContentLoaded', async function() {
   applyFilters();
   // checkStorageReady is called only when the Settings tab opens, not on page load
 
+  // Snooze button on a near-me push with no window open (2026-10-11): the
+  // service worker opens the app with ?whsnooze=1. Wait for sign-in to
+  // restore, then snooze and land on the board.
+  try {
+    if (new URLSearchParams(location.search).get('whsnooze') === '1') {
+      try { history.replaceState(null, '', location.pathname); } catch (_) {}
+      var _snoozeTries = 0;
+      var _snoozeWait = setInterval(function () {
+        _snoozeTries++;
+        if (window._mncAccessToken) {
+          clearInterval(_snoozeWait);
+          try { whSnoozeNear(); } catch (_) {}
+          try { openWhatsHappening('request', 'push'); } catch (_) {}
+        } else if (_snoozeTries > 40) { clearInterval(_snoozeWait); }
+      }, 500);
+    }
+  } catch (_) {}
+
   // ── Register service worker ───────────────────────────────────────────────
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js')
@@ -19937,6 +20008,18 @@ document.addEventListener('DOMContentLoaded', async function() {
           if (event.data?.type === 'NOTIFICATION_CLICK') {
             // Navigate to the right screen
             var url = event.data.url || '';
+            var ntag = String(event.data.tag || '');
+            if (event.data.action === 'wh-snooze') {
+              // The Snooze button on a near-me push (2026-10-11).
+              try { whSnoozeNear(); } catch (_) {}
+              try { openWhatsHappening('request', 'push'); } catch (_) {}
+              return;
+            }
+            if (ntag.indexOf('wh-') === 0) {
+              if (ntag.indexOf('wh-reply-') === 0) { try { WH.focus = ntag.slice(9); } catch (_) {} }
+              try { openWhatsHappening('request', 'push'); } catch (_) {}
+              return;
+            }
             if (url.includes('messages')) show('home'); // no messages screen; land on home rather than dead-end
             else if (url.includes('tech-home')) show('tech-home');
           }

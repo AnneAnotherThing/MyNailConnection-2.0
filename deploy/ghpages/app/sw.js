@@ -3,7 +3,7 @@
 
 // IMPORTANT: bump this string every release so returning users get the
 // new build instead of a stale cached copy. Old caches are deleted on activate.
-const CACHE_NAME = 'mnc-v727';
+const CACHE_NAME = 'mnc-v729';
 const STATIC_ASSETS = ['/', '/index.html', '/manifest.json'];
 
 // ── Install ───────────────────────────────────────────────────────────────────
@@ -58,11 +58,14 @@ self.addEventListener('push', event => {
     body: data.body || 'You have a new message',
     icon: '/images/mncLogo-192.webp',
     badge: '/images/mncLogo-64.webp',
-    data: { url: data.url || '/' },
+    data: { url: data.url || '/', tag: data.tag || '' },
     vibrate: [100, 50, 100],
     tag: data.tag || 'mnc-notification',
     renotify: true,
-    actions: data.actions || []
+    // Near-me request pushes (tag wh-req-<id>) carry a Snooze button
+    // (Anne, 2026-10-11). Browsers that hide actions just show the push.
+    actions: data.actions || (String(data.tag || '').indexOf('wh-req-') === 0
+      ? [{ action: 'wh-snooze', title: 'Snooze for today' }] : [])
   };
 
   event.waitUntil(self.registration.showNotification(title, options));
@@ -71,7 +74,11 @@ self.addEventListener('push', event => {
 // ── Notification click ────────────────────────────────────────────────────────
 self.addEventListener('notificationclick', event => {
   event.notification.close();
-  const url = event.notification.data?.url || '/';
+  const action = event.action || '';
+  const tag = event.notification.data?.tag || '';
+  let url = event.notification.data?.url || '/';
+  // The Snooze button with no window open: the app reads ?whsnooze=1 on load.
+  if (action === 'wh-snooze') url = url + (url.indexOf('?') >= 0 ? '&' : '?') + 'whsnooze=1';
 
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clientList => {
@@ -79,7 +86,7 @@ self.addEventListener('notificationclick', event => {
       for (const client of clientList) {
         if (client.url.includes(self.location.origin) && 'focus' in client) {
           client.focus();
-          client.postMessage({ type: 'NOTIFICATION_CLICK', url });
+          client.postMessage({ type: 'NOTIFICATION_CLICK', url, tag, action });
           return;
         }
       }
