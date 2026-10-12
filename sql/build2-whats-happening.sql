@@ -61,7 +61,7 @@ create table if not exists public.wh_settings (
 alter table public.wh_settings enable row level security;
 insert into public.wh_settings (key, value) values
   ('near_push_admin_only', 'true'),
-  ('near_push_daily_cap',  '3'),
+  ('near_push_daily_cap',  '0'),   -- 0 = no cap (Anne, 2026-10-11); techs snooze instead
   ('reply_daily_cap',      '10'),
   ('quiet_start_hour',     '21'),
   ('quiet_end_hour',       '7')
@@ -237,6 +237,9 @@ create table if not exists public.wh_prefs (
   near_alerts   boolean not null default true,
   updated_at    timestamptz not null default now()
 );
+-- "Snooze for today" (2026-10-11): near pushes stop until this passes, then
+-- start again by themselves. Null or past means not snoozed.
+alter table public.wh_prefs add column if not exists near_snoozed_until timestamptz;
 
 create table if not exists public.wh_near_pushes (
   id         bigserial primary key,
@@ -566,8 +569,8 @@ begin
           btrim(p_body), p_need_by, nullif(btrim(coalesce(p_photo_url, '')), ''), v_exp)
   returning * into v_row;
 
-  -- Near-me pushes: same city and state, switch on, not blocked, not in
-  -- quiet hours, under the daily cap. While testing, admins only.
+  -- Near-me pushes: same city and state, switch on, not snoozed, not blocked,
+  -- not in quiet hours. While testing, admins only.
   for t in
     select x.id, x.email, x.phone, x.name,
            coalesce(x.avail_reminder_tz, x.booking_timezone, 'America/Phoenix') as tz
@@ -577,6 +580,7 @@ begin
        and public.wh_key(x.phone) is not null
        and public.wh_key(x.phone) <> me
        and coalesce((select p.near_alerts from public.wh_prefs p where p.person_key = public.wh_key(x.phone)), true)
+       and coalesce((select p.near_snoozed_until from public.wh_prefs p where p.person_key = public.wh_key(x.phone)), now() - interval '1 second') <= now()
        and not public.wh_blocked(me, public.wh_key(x.phone))
        and (not v_admin_only or exists (
              select 1 from public.users au
@@ -584,7 +588,10 @@ begin
                 and (coalesce(au.admin, false) or lower(coalesce(au.role, '')) = 'admin')))
   loop
     if public.wh_quiet_now(t.tz) then continue; end if;
-    if (select count(*) from public.wh_near_pushes n
+    -- Daily cap, only when the setting is above 0. Anne turned it off on
+    -- 2026-10-11: with a cap, every tech in a city burns her three on the same
+    -- three requests and the fourth reaches nobody. Snooze is the valve now.
+    if v_cap > 0 and (select count(*) from public.wh_near_pushes n
          where n.tech_id = t.id
            and n.created_at > ((date_trunc('day', now() at time zone t.tz)) at time zone t.tz)) >= v_cap then
       continue;
@@ -849,9 +856,37 @@ set search_path = public
 as $$
   select jsonb_build_object(
     'reply_alerts', coalesce((select reply_alerts from public.wh_prefs where person_key = public.wh_me_key()), true),
-    'near_alerts',  coalesce((select near_alerts  from public.wh_prefs where person_key = public.wh_me_key()), true)
+    'near_alerts',  coalesce((select near_alerts  from public.wh_prefs where person_key = public.wh_me_key()), true),
+    'near_snoozed_until', (select near_snoozed_until from public.wh_prefs
+                            where person_key = public.wh_me_key() and near_snoozed_until > now())
   );
 $$;
+
+-- Snooze near pushes until the end of her local day (p_on true), or wake
+-- them early (p_on false). The switch itself stays on; this is a pause.
+create or replace function public.wh_snooze_near(p_tz text default 'America/Phoenix', p_on boolean default true) returns jsonb
+language plpgsql security definer
+set search_path = public
+as $$
+declare
+  me   text := public.wh_me_key();
+  v_tz text := coalesce(nullif(btrim(p_tz), ''), 'America/Phoenix');
+  v_until timestamptz;
+begin
+  if me is null then return jsonb_build_object('ok', false, 'code', 'sign_in'); end if;
+  begin
+    v_until := (date_trunc('day', now() at time zone v_tz) + interval '1 day') at time zone v_tz;
+  exception when others then
+    v_until := (date_trunc('day', now() at time zone 'America/Phoenix') + interval '1 day') at time zone 'America/Phoenix';
+  end;
+  insert into public.wh_prefs (person_key) values (me) on conflict (person_key) do nothing;
+  update public.wh_prefs
+     set near_snoozed_until = case when coalesce(p_on, true) then v_until else null end,
+         updated_at = now()
+   where person_key = me;
+  perform public.wh_log('near_snooze', case when coalesce(p_on, true) then 'on' else 'off' end);
+  return public.wh_my_prefs() || jsonb_build_object('ok', true);
+end $$;
 
 create or replace function public.wh_set_pref(p_name text, p_on boolean) returns jsonb
 language plpgsql security definer
@@ -1179,6 +1214,7 @@ begin
     'wh_replies_for(uuid)',
     'wh_my_prefs()',
     'wh_set_pref(text, boolean)',
+    'wh_snooze_near(text, boolean)',
     'wh_report(text, text, text)',
     'wh_block(text, text)',
     'admin_wh_reports(boolean)',
