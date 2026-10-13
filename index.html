@@ -6606,8 +6606,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.8',     /* __APP_BUILD_NAME__   */
-  android: 692,         /* __APP_BUILD_ANDROID__ */
-  ios:     497,          /* __APP_BUILD_IOS__     */
+  android: 695,         /* __APP_BUILD_ANDROID__ */
+  ios:     500,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -13981,11 +13981,13 @@ function renderStyleGrid() {
     if (_tilesOut !== AD_FIRST && (_tilesOut < AD_FIRST || (_tilesOut - AD_FIRST) % AD_EVERY !== 0)) return;
     var ad = ads[_adCursor++ % ads.length];
     var div = document.createElement('div');
-    div.style.cssText = 'cursor:pointer;position:relative;overflow:hidden;background:#F0E8E8;';
+    // Square like every other tile, split into the picture and a slim
+    // Sponsored band under it, so the label never sits on the picture.
+    div.style.cssText = 'cursor:pointer;position:relative;overflow:hidden;background:white;aspect-ratio:1;display:flex;flex-direction:column;box-sizing:border-box;padding:4px 4px 0;border:1.5px solid var(--rose-mid);box-shadow:inset 0 1px 0 rgba(255,255,255,0.9),0 1px 4px rgba(162,99,108,0.22);';
     div.classList.add('tech-card-anim');
     div.setAttribute('aria-label', (ad.title || 'Sponsored') + ', opens the partner website');
-    div.innerHTML = '<img src="' + esc(safeUrl(ad.image_url)) + '" alt="' + esc(ad.title || 'Sponsored') + '" style="width:100%;display:block;aspect-ratio:1;object-fit:cover;" loading="lazy" onerror="this.parentElement.style.display=\'none\'"/>'
-      + '<div style="position:absolute;bottom:6px;left:6px;background:rgba(20,19,23,0.62);color:#fff;font-size:9.5px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;padding:3px 7px;border-radius:100px;pointer-events:none;">Sponsored</div>';
+    div.innerHTML = '<img src="' + esc(safeUrl(ad.image_url)) + '" alt="' + esc(ad.title || 'Sponsored') + '" style="width:100%;flex:1 1 auto;min-height:0;display:block;object-fit:cover;border-radius:6px;" loading="lazy" onerror="this.parentElement.style.display=\'none\'"/>'
+      + '<div style="flex:0 0 auto;background:white;color:var(--rose-dark);font-family:Playfair Display,serif;font-style:italic;font-size:9.5px;font-weight:500;letter-spacing:.2px;text-align:center;line-height:1;padding:3px 0 4px;pointer-events:none;">Sponsored</div>';
     div.onclick = function() { openPartnerAd(ad); };
     grid.appendChild(div);
   }
