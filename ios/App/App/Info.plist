@@ -74,5 +74,27 @@
 	     2026-04-30 -->
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
+	<!-- UIScene lifecycle (Capacitor 8.5, 2026-10-13): Xcode 27 requires it.
+	     SceneDelegate.swift builds the window; AppDelegate keeps the push
+	     token callbacks, which are unaffected. -->
+	<key>UIApplicationSceneManifest</key>
+	<dict>
+		<key>UIApplicationSupportsMultipleScenes</key>
+		<false/>
+		<key>UISceneConfigurations</key>
+		<dict>
+			<key>UIWindowSceneSessionRoleApplication</key>
+			<array>
+				<dict>
+					<key>UISceneConfigurationName</key>
+					<string>Default Configuration</string>
+					<key>UISceneDelegateClassName</key>
+					<string>$(PRODUCT_MODULE_NAME).SceneDelegate</string>
+					<key>UISceneStoryboardFile</key>
+					<string>Main</string>
+				</dict>
+			</array>
+		</dict>
+	</dict>
 </dict>
 </plist>
