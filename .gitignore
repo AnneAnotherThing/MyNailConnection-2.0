@@ -11,6 +11,7 @@ www/
 android/build/
 android/app/build/
 android/.gradle/
+android/.kotlin/
 android/local.properties
 android/app/release/
 *.apk
