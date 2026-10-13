@@ -2219,6 +2219,16 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
         <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:var(--charcoal);">Daily reminder</div><div style="font-size:12px;color:var(--muted);margin-top:1px;">A once-a-day "working today?" push to post Available now. 8:00 AM unless you pick another time, or turn it off.</div></div>
         <select id="ts-reminder-time" onchange="tsSetAvailReminder(this.value)" style="border:1.5px solid var(--border);border-radius:100px;padding:8px 30px 8px 14px;font-size:13px;font-weight:700;font-family:'DM Sans',sans-serif;color:var(--charcoal);background:white url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%2212%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%238B7E70%22 stroke-width=%223%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><path d=%22M6 9l6 6 6-6%22/></svg>') no-repeat right 12px center;-webkit-appearance:none;appearance:none;cursor:pointer;flex-shrink:0;"></select>
       </div>
+      <div style="display:flex;align-items:center;gap:10px;padding:14px 16px;border-top:1px solid var(--border);">
+        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:var(--charcoal);">Requests near me</div><div style="font-size:12px;color:var(--muted);margin-top:1px;">A push when a client posts a request within reach, measured from your address or the center of your ZIP. Never overnight.</div></div>
+        <select id="ts-near-radius" onchange="tsSetNearRadius(this.value)" style="border:1.5px solid var(--border);border-radius:100px;padding:8px 30px 8px 14px;font-size:13px;font-weight:700;font-family:'DM Sans',sans-serif;color:var(--charcoal);background:white url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%2212%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%238B7E70%22 stroke-width=%223%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><path d=%22M6 9l6 6 6-6%22/></svg>') no-repeat right 12px center;-webkit-appearance:none;appearance:none;cursor:pointer;flex-shrink:0;">
+          <option value="10">10 miles</option>
+          <option value="25">25 miles</option>
+          <option value="50">50 miles</option>
+          <option value="0">My state</option>
+          <option value="">Off</option>
+        </select>
+      </div>
     </div>
 
     <div class="etched-caps" style="font-size:11px;font-weight:700;letter-spacing:1.6px;color:var(--muted);text-transform:uppercase;margin:20px 20px 8px 24px;">Account</div>
@@ -2776,6 +2786,8 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
 .wh-actions{display:flex;gap:8px;margin-top:9px;flex-wrap:wrap;}
 .wh-btn{padding:7px 12px;border-radius:11px;border:1.5px solid var(--border);background:white;color:var(--charcoal);font-size:12.5px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;}
 .wh-btn.primary{background:var(--charcoal);border-color:var(--charcoal);color:white;}
+.wh-btn.ask{background:linear-gradient(135deg,var(--rose-dark) 0%,#B9777F 100%);border-color:var(--rose-dark);color:white;box-shadow:0 3px 10px rgba(162,99,108,0.28);}
+.wh-card.request{background:#FBF4F1;border-color:#E6CBC3;}
 .wh-empty{text-align:center;padding:22px 18px;background:white;border:1.5px dashed var(--border);border-radius:16px;}
 .wh-empty-title{font-family:'Playfair Display',serif;font-size:18px;font-weight:600;color:var(--charcoal);}
 .wh-empty-sub{font-size:13px;color:var(--muted);margin-top:5px;line-height:1.5;}
@@ -2834,6 +2846,16 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       <button class="wh-btn" id="wh-snooze-btn" style="width:100%;padding:10px 12px;font-size:13px;" onclick="whSnoozeNear()">Snooze for today</button>
       <div style="font-size:12px;color:var(--muted);margin-top:5px;text-align:center;" id="wh-snooze-sub">A busy day? Pushes stop until tomorrow. The board keeps filling up.</div>
     </div>
+    <div id="wh-radius-wrap" style="display:none;margin-top:10px;">
+      <label class="wh-field-label" for="wh-radius-sel">HOW FAR A CLIENT CAN BE</label>
+      <select id="wh-radius-sel" class="wh-input" onchange="whSetRadius(this.value)" aria-label="How far a client can be for a push">
+        <option value="10">Within 10 miles</option>
+        <option value="25">Within 25 miles</option>
+        <option value="50">Within 50 miles</option>
+        <option value="0">Anywhere in my state</option>
+      </select>
+      <div style="font-size:12px;color:var(--muted);margin-top:5px;" id="wh-radius-sub">Measured from your address, or the center of your ZIP.</div>
+    </div>
     <div id="wh-blocked-wrap" style="margin-top:14px;">
       <div class="wh-field-label" style="margin-bottom:6px;">BLOCKED ON WHAT'S HAPPENING</div>
       <div id="wh-blocked-list" style="display:flex;flex-direction:column;gap:6px;max-height:40vh;overflow-y:auto;"><div style="font-size:12.5px;color:var(--muted);">Loading...</div></div>
@@ -2871,6 +2893,16 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
           <input id="wh-req-state" type="text" maxlength="2" placeholder="AZ" class="wh-input" style="text-transform:uppercase;" autocomplete="address-level1"/>
         </div>
       </div>
+      <div>
+        <label class="wh-field-label" for="wh-req-miles">HOW FAR WOULD YOU TRAVEL?</label>
+        <select id="wh-req-miles" class="wh-input">
+          <option value="10">Up to 10 miles</option>
+          <option value="25">Up to 25 miles</option>
+          <option value="50">Up to 50 miles</option>
+          <option value="">Anywhere in my state</option>
+        </select>
+      </div>
+      <div style="font-size:11.5px;color:var(--muted);margin-top:-4px;line-height:1.4;" id="wh-req-where">Techs inside that distance who travel to where you are get a ping: from your location if you share it, or the center of your ZIP.</div>
       <div>
         <label class="wh-field-label" for="wh-req-photo">A PHOTO OF THE LOOK (OPTIONAL)</label>
         <input id="wh-req-photo" type="file" accept="image/*" style="font-size:13px;"/>
@@ -3232,7 +3264,7 @@ function whPaintCta() {
       el.innerHTML = '<button class="wh-btn primary" style="width:100%;padding:12px;font-size:14px;" onclick="whOpenAvailSheet()">I\'m available now</button>';
     }
   } else {
-    el.innerHTML = '<button class="wh-btn primary" style="width:100%;padding:12px;font-size:14px;" onclick="whOpenRequestSheet()">Ask for a set</button>';
+    el.innerHTML = '<button class="wh-btn ask" style="width:100%;padding:12px;font-size:14px;" onclick="whOpenRequestSheet()">Ask for a set</button>';
   }
 }
 
@@ -3397,7 +3429,7 @@ function whCardHtml(i) {
       (i.photo ? '<img class="wh-thumb" src="' + whEsc(i.photo) + '" alt="" loading="lazy"/>' : '') + '</div>';
   }
   var photo = i.photo ? '<img class="wh-photo" src="' + whEsc(i.photo) + '" alt="" loading="lazy"/>' : '';
-  return '<div class="wh-card' + tap + '">' + whAvatar(i.name, i.image) +
+  return '<div class="wh-card' + (i.kind === 'request' ? ' request' : '') + tap + '">' + whAvatar(i.name, i.image) +
     '<div class="wh-body">' + meta + text + sub + actions + '</div>' + photo + '</div>';
 }
 
@@ -3682,8 +3714,11 @@ async function whPaintAlerts() {
   var on = tech ? WH.prefs.near_alerts !== false : WH.prefs.reply_alerts !== false;
   document.getElementById('wh-alerts-title').textContent = tech ? 'Requests near me' : 'Reply alerts';
   var snoozed = tech && whSnoozedNow();
+  var radius = whRadius();
   document.getElementById('wh-alerts-sub').textContent = tech
-    ? (snoozed ? 'Snoozed for today. Pushes start again tomorrow, never overnight.' : 'A push when a client near you posts. Never overnight.')
+    ? (snoozed ? 'Snoozed for today. Pushes start again tomorrow, never overnight.'
+        : (radius > 0 ? 'A push when a client within ' + radius + ' miles posts. Never overnight.'
+                      : 'A push when a client anywhere in your state posts. Never overnight.'))
     : 'A push when a tech says she\'s interested in your request.';
   var sw = document.getElementById('wh-snooze-wrap');
   if (sw) {
@@ -3692,6 +3727,13 @@ async function whPaintAlerts() {
     if (sb) { sb.textContent = snoozed ? 'Wake pushes back up' : 'Snooze for today'; sb.onclick = function () { whSnoozeNear(snoozed); }; }
     if (ss) ss.textContent = snoozed ? 'Nothing pushes until tomorrow. The board keeps filling up.' : 'A busy day? Pushes stop until tomorrow. The board keeps filling up.';
   }
+  var rw = document.getElementById('wh-radius-wrap');
+  if (rw) {
+    rw.style.display = (tech && on) ? '' : 'none';
+    var rs = document.getElementById('wh-radius-sel');
+    if (rs && !rs.disabled) rs.value = String(radius);
+  }
+  try { renderNearRadiusPref(); } catch (_) {}
   var t = document.getElementById('wh-alerts-toggle');
   t.classList.toggle('on', on); t.classList.toggle('off', !on);
   var slash = document.getElementById('wh-bell-off');
@@ -3699,6 +3741,53 @@ async function whPaintAlerts() {
   bell.classList.toggle('on', on);
   bell.title = bell.ariaLabel = on ? 'Alerts are on' : 'Alerts are off';
   bell.style.visibility = 'visible';
+}
+// "Willing to travel" radius (Anne, 2026-10-13): how far a client can be for
+// a push. 10, 25 or 50 miles, or 0 for anywhere in her state. Default 25.
+// Before this, a request pinged only techs in the same city, so her Surprise
+// request reached Surprise techs and Peoria and Glendale heard nothing.
+function whRadius() {
+  var r = parseInt(WH.prefs && WH.prefs.near_radius_miles, 10);
+  return isNaN(r) ? 25 : r;
+}
+async function whSetRadius(v) {
+  var miles = parseInt(v, 10);
+  if (isNaN(miles)) return;
+  var sel = document.getElementById('wh-radius-sel');
+  if (sel) sel.disabled = true;
+  try {
+    var out = await whRpc('wh_set_radius', { p_miles: miles });
+    if (!out || !out.ok) throw new Error('radius');
+    WH.prefs = out;
+    whLog('near_radius', String(miles));
+    showToast(miles > 0 ? 'Pushes from clients within ' + miles + ' miles' : 'Pushes from anywhere in your state');
+  } catch (_) { showToast('Could not save that just now'); }
+  if (sel) sel.disabled = false;
+  try { whPaintAlerts(); } catch (_) {}
+}
+// The client's device point for a request, if she allows it: pushes go by
+// where she is; otherwise the server uses the center of her ZIP. Resolves
+// null on deny, timeout or no geolocation. Never throws.
+function whDevicePoint(ms) {
+  return new Promise(function (resolve) {
+    var done = false;
+    var finish = function (p) { if (!done) { done = true; resolve(p); } };
+    try {
+      if (userLat != null && userLng != null) { finish({ lat: userLat, lng: userLng }); return; }
+    } catch (_) {}
+    var timer = setTimeout(function () { finish(null); }, ms || 20000);
+    try {
+      getCurrentPositionSafe(function (pos) {
+        clearTimeout(timer);
+        var c = pos && pos.coords;
+        if (c && isFinite(c.latitude) && isFinite(c.longitude)) {
+          try { userLat = c.latitude; userLng = c.longitude; } catch (_) {}
+          finish({ lat: c.latitude, lng: c.longitude });
+        } else { finish(null); }
+      }, function () { clearTimeout(timer); finish(null); },
+      { enableHighAccuracy: false, timeout: ms || 20000, maximumAge: 10 * 60 * 1000 });
+    } catch (_) { clearTimeout(timer); finish(null); }
+  });
 }
 function whOpenAlertsSheet(prompt) {
   document.getElementById('wh-alerts-head').textContent = prompt || 'Alerts';
@@ -3850,8 +3939,16 @@ function whOpenRequestSheet() {
   cityEl.value = WH.city || ''; stEl.value = WH.state || '';
   // Her city is on file: show it, but it is not something to change per post.
   cityEl.readOnly = stEl.readOnly = !!WH.city;
+  var mi = document.getElementById('wh-req-miles');
+  if (mi) {
+    var saved = '25';
+    try { saved = localStorage.getItem('mnc_wh_req_miles'); if (saved == null) saved = '25'; } catch (_) { saved = '25'; }
+    mi.value = saved;
+    if (mi.value !== saved) mi.value = '25';
+  }
   whMsg('wh-req-msg', '');
   var b = document.getElementById('wh-req-send'); b.disabled = false; b.textContent = 'Post my request';
+  WH.point = whDevicePoint(20000);
   whOpenModal('wh-request-modal');
 }
 
@@ -3879,7 +3976,25 @@ async function whSubmitRequest() {
     }
     var tz = '';
     try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (_) {}
-    var out = await whRpc('wh_post_request', { p_body: body, p_need_by: date, p_photo_url: photoUrl, p_tz: tz || null, p_city: city, p_state: st || null });
+    // Her device point, if it arrived while she typed (4 more seconds at most).
+    var pt = null;
+    try {
+      pt = await Promise.race([WH.point || Promise.resolve(null),
+                               new Promise(function (r) { setTimeout(function () { r(null); }, 4000); })]);
+    } catch (_) { pt = null; }
+    var miEl = document.getElementById('wh-req-miles');
+    var miVal = miEl ? miEl.value : '25';
+    try { localStorage.setItem('mnc_wh_req_miles', miVal); } catch (_) {}
+    var args = { p_body: body, p_need_by: date, p_photo_url: photoUrl, p_tz: tz || null, p_city: city, p_state: st || null,
+                 p_lat: pt ? pt.lat : null, p_lng: pt ? pt.lng : null,
+                 p_max_miles: miVal === '' ? null : parseInt(miVal, 10) };
+    var out;
+    try { out = await whRpc('wh_post_request', args); }
+    catch (e) {
+      if (!(e && e.status === 404)) throw e;
+      delete args.p_lat; delete args.p_lng; delete args.p_max_miles;
+      out = await whRpc('wh_post_request', args);
+    }
     if (!out || !out.ok) {
       var code = out && out.code;
       whMsg('wh-req-msg', {
@@ -4069,7 +4184,7 @@ async function whClearAvailable() {
       </div>
       <div style="padding:16px 20px;display:flex;flex-direction:column;gap:12px;">
         <div style="font-size:13px;color:var(--charcoal);line-height:1.6;">One live board, open from the Home screen. Clients post what they need and when (<b>Ask for a set</b>). Techs post <b>Available now</b> with an end time and a note. Everyone sees the newest posts closest to them first.</div>
-        <div style="font-size:13px;color:var(--charcoal);line-height:1.6;">See a request you can take? Tap <b>I'm interested</b> and the client gets your name, your profile and whichever of Call, Text or Book you have turned on. Want a heads up when a client near you posts? The <b>bell</b> at the top of the board turns alerts on and off, and holds your <b>Blocked people</b> list.</div>
+        <div style="font-size:13px;color:var(--charcoal);line-height:1.6;">See a request you can take? Tap <b>I'm interested</b> and the client gets your name, your profile and whichever of Call, Text or Book you have turned on. Want a heads up when a client posts within reach? The <b>bell</b> at the top of the board turns alerts on and off, sets how far you travel (10, 25 or 50 miles, or your whole state), and holds your <b>Blocked people</b> list. The same setting lives in My Settings.</div>
         <div style="font-size:13px;color:var(--charcoal);line-height:1.6;">Posting is free on every plan. Something looks wrong? The <b>&middot;&middot;&middot;</b> on any post lets you report it or block the person; we look at every report within 24 hours.</div>
       </div>
     </div>
@@ -6491,8 +6606,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.8',     /* __APP_BUILD_NAME__   */
-  android: 690,         /* __APP_BUILD_ANDROID__ */
-  ios:     495,          /* __APP_BUILD_IOS__     */
+  android: 692,         /* __APP_BUILD_ANDROID__ */
+  ios:     497,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -16256,6 +16371,43 @@ function renderReminderPref() {
   if (!sel) return;
   if (!sel.options || !sel.options.length) _populateReminderTimes(sel);
   sel.value = _reminderStateValue();
+  try { renderNearRadiusPref(); } catch (_) {}
+}
+// Requests near me, in My Settings too (Anne, 2026-10-13): the same switch
+// and radius as the bell on the board. '' is Off; 0 is anywhere in her state.
+function renderNearRadiusPref() {
+  var sel = document.getElementById('ts-near-radius');
+  if (!sel) return;
+  if (!WH.prefs) {
+    if (whIsGuest()) return;
+    whRpc('wh_my_prefs', {}).then(function (p) { if (p) { WH.prefs = p; renderNearRadiusPref(); } }).catch(function () {});
+    return;
+  }
+  sel.value = WH.prefs.near_alerts === false ? '' : String(whRadius());
+}
+async function tsSetNearRadius(val) {
+  var sel = document.getElementById('ts-near-radius');
+  if (sel) sel.disabled = true;
+  try {
+    var out;
+    if (val === '') {
+      out = await whRpc('wh_set_pref', { p_name: 'near_alerts', p_on: false });
+    } else {
+      if (WH.prefs && WH.prefs.near_alerts === false) {
+        out = await whRpc('wh_set_pref', { p_name: 'near_alerts', p_on: true });
+        if (!out || !out.ok) throw new Error('pref');
+      }
+      out = await whRpc('wh_set_radius', { p_miles: parseInt(val, 10) });
+    }
+    if (!out || !out.ok) throw new Error('pref');
+    WH.prefs = out;
+    whLog('near_radius', val === '' ? 'off' : String(val));
+    showToast(val === '' ? 'Request pushes off'
+      : (parseInt(val, 10) > 0 ? 'Pushes from clients within ' + val + ' miles' : 'Pushes from anywhere in your state'));
+  } catch (_) { showToast("Couldn't save that, try again"); }
+  if (sel) sel.disabled = false;
+  renderNearRadiusPref();
+  try { whPaintAlerts(); } catch (_) {}
 }
 async function tsSetAvailReminder(val) {
   var email = currentUserEmail;

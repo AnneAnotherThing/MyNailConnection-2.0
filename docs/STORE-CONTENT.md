@@ -72,9 +72,9 @@ Terms of Use: https://mynailconnection.com/terms.html
 Privacy Policy: https://mynailconnection.com/privacy.html
 ```
 
-**What's New in This Version** (489/4000)
+**What's New in This Version** (481/4000)
 ```
-3.0.7: What's happening, a live board for your city. Clients post what they need and by when, with a photo of the look. Techs nearby reply Interested with one tap, and the client gets a push. Post Available now when a chair opens and your work glows in the Gallery until the time you pick. Techs get a push when a client nearby posts, and can snooze those for the day. Choose how far the board reaches: your city, your state, or everywhere. Plus a cleaner Tech Portal and Booking Settings.
+3.0.8: Techs, choose how far you travel. Under the bell on What's happening, pick 10, 25 or 50 miles, or anywhere in your state, and a client's request pings you when she is within reach, not only when she is in your city. Clients say how far they would travel when they post. Guests can now browse What's happening before signing in: Available now and new work. The Post button stays put while you scroll. The daily Available now reminder starts at 8:00 AM, with Off one tap away.
 ```
 
 ---
@@ -130,9 +130,9 @@ A general beauty app has to describe a haircut, a lash fill and a full set in th
 Free to set up. First month of booking free, then $10.99/month. Cancel any time; your gallery and your calendar stay exactly as they are.
 ```
 
-**Release notes** (489/500)
+**Release notes** (481/500)
 ```
-3.0.7: What's happening, a live board for your city. Clients post what they need and by when, with a photo of the look. Techs nearby reply Interested with one tap, and the client gets a push. Post Available now when a chair opens and your work glows in the Gallery until the time you pick. Techs get a push when a client nearby posts, and can snooze those for the day. Choose how far the board reaches: your city, your state, or everywhere. Plus a cleaner Tech Portal and Booking Settings.
+3.0.8: Techs, choose how far you travel. Under the bell on What's happening, pick 10, 25 or 50 miles, or anywhere in your state, and a client's request pings you when she is within reach, not only when she is in your city. Clients say how far they would travel when they post. Guests can now browse What's happening before signing in: Available now and new work. The Post button stays put while you scroll. The daily Available now reminder starts at 8:00 AM, with Off one tap away.
 ```
 
 ---

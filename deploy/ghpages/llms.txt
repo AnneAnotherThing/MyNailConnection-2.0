@@ -14,7 +14,7 @@
 - Photos are free, up to 50 a month, and they never expire.
 - Booking is optional. Already use Vagaro, StyleSeat or GlossGenius? Add your link and a Book Now button appears on your profile, sending clients to your existing system at no cost. No booking system yet? Try MNC's own booking free for your first month, then $10.99 a month only if you keep it.
 - No commission and no per-booking fee, ever. Your clients are never charged to book you.
-- What's happening is a live board inside the app. A tech posts "Available now" with an end time and a note, and her work glows in the Gallery for clients looking right now. Clients post what they need and when (city, optional photo, needed-by date) and techs reply "Interested", which sends the client the tech's profile and her Call, Text or Book button. Every post can be reported or the person blocked, and reports are handled within 24 hours.
+- What's happening is a live board inside the app. A tech posts "Available now" with an end time and a note, and her work glows in the Gallery for clients looking right now. Clients post what they need and when (city, optional photo, needed-by date, how far she would travel) and techs reply "Interested", which sends the client the tech's profile and her Call, Text or Book button. Each tech sets how far she travels, 10, 25 or 50 miles or her whole state, and gets a push when a request lands within reach. Every post can be reported or the person blocked, and reports are handled within 24 hours.
 
 ## For clients
 

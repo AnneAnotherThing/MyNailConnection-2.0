@@ -74,7 +74,10 @@ MNC's own booking - the part where a client taps Book and lands on your calendar
 
 APPLE_DESC = "\n\n".join([OPENER, FREE_BLOCK, APPLE_PAID, TECH_LIST, CLIENT_LIST, WHY, APPLE_SUB_BLOCK])
 
-APPLE_WHATS_NEW = """3.0.7: What's happening, a live board for your city. Clients post what they need and by when, with a photo of the look. Techs nearby reply Interested with one tap, and the client gets a push. Post Available now when a chair opens and your work glows in the Gallery until the time you pick. Techs get a push when a client nearby posts, and can snooze those for the day. Choose how far the board reaches: your city, your state, or everywhere. Plus a cleaner Tech Portal and Booking Settings."""
+APPLE_WHATS_NEW = """3.0.8: Techs, choose how far you travel. Under the bell on What's happening, pick 10, 25 or 50 miles, or anywhere in your state, and a client's request pings you when she is within reach, not only when she is in your city. Clients say how far they would travel when they post. Guests can now browse What's happening before signing in: Available now and new work. The Post button stays put while you scroll. The daily Available now reminder starts at 8:00 AM, with Off one tap away."""
+
+# 3.0.7 (2026-10-12), kept for the record.
+WHATS_NEW_3_0_7 = """3.0.7: What's happening, a live board for your city. Clients post what they need and by when, with a photo of the look. Techs nearby reply Interested with one tap, and the client gets a push. Post Available now when a chair opens and your work glows in the Gallery until the time you pick. Techs get a push when a client nearby posts, and can snooze those for the day. Choose how far the board reaches: your city, your state, or everywhere. Plus a cleaner Tech Portal and Booking Settings."""
 
 # 3.0 (2026-10-11), kept for the record; Play and Apple show the current one.
 WHATS_NEW_3_0 = """3.0: Real booking is here. Clients book you right in the app - no commission, no per-booking fee, and nothing charged to them. Your own shareable profile link and QR, standing appointments for your regulars, walk-in entry, private client notes, and automatic reminders so fewer people no-show. Notifications now stay put, so a request you swiped away isn't gone. Photos stay free - 50 a month, and they never expire."""
