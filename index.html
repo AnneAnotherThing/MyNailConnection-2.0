@@ -2738,7 +2738,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
      sql/build2-whats-happening.sql; nothing here reads a table directly. -->
 <style>
 #whats-happening .wh-sticky{position:sticky;top:0;z-index:6;background:var(--cream);padding-bottom:6px;box-shadow:0 8px 10px -10px rgba(20,19,23,0.18);}
-#whats-happening .wh-tabs{display:flex;gap:6px;padding:12px 20px 0;}
+#whats-happening .wh-tabs{display:flex;gap:6px;padding:10px 20px 0;}
 #whats-happening .wh-near{display:flex;gap:6px;padding:8px 20px 0;}
 #whats-happening .wh-chip{flex:1;padding:6px 6px;border-radius:100px;border:1.5px solid var(--border);background:white;color:var(--muted);font-size:11.5px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 #whats-happening .wh-chip.on{border-color:var(--charcoal);color:var(--charcoal);background:var(--cream);}
@@ -2793,8 +2793,10 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
   </div>
   <div class="scroll-content" style="padding-bottom:70px;">
     <div id="wh-where" style="padding:10px 20px 0;font-size:12.5px;color:var(--muted);text-align:center;"></div>
-    <div id="wh-cta" style="padding:10px 20px 0;"></div>
+    <!-- The post button rides in the sticky band (Anne, 2026-10-13: "make
+         'ask for a set' sticky"), so it stays in reach while the board scrolls. -->
     <div class="wh-sticky">
+      <div id="wh-cta" style="padding:8px 20px 0;"></div>
       <div class="wh-tabs" id="wh-tabs">
         <button class="wh-tab" data-tab="all" onclick="whSetTab('all')">Everything</button>
         <button class="wh-tab" data-tab="request" onclick="whSetTab('request')">Requests</button>
@@ -6489,8 +6491,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.8',     /* __APP_BUILD_NAME__   */
-  android: 689,         /* __APP_BUILD_ANDROID__ */
-  ios:     494,          /* __APP_BUILD_IOS__     */
+  android: 690,         /* __APP_BUILD_ANDROID__ */
+  ios:     495,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
