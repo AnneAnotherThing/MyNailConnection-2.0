@@ -95,3 +95,8 @@ deploy/staging-v3/
 # Python bytecode from deploy/ scripts
 __pycache__/
 *.pyc
+
+# Internal punch lists live in the Hive Vault
+# (02 - Hive-Rise/Clients/My Nail Connection), never in deploy/ghpages.
+punch-list*.html
+*punchlist*

@@ -15,7 +15,6 @@ Allow: /screenshots/
 Allow: /og-image-2026-09.png
 
 # Internal / ops pages, keep out of the index
-Disallow: /punch-list.html
 Disallow: /stats.html
 Disallow: /stats
 Disallow: /ANDROID-BUILD-RUNBOOK.html

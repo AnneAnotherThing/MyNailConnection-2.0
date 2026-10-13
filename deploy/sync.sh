@@ -358,7 +358,8 @@ mkdir -p "$GH" "$GH/app"
 copy_if_exists marketing-v3.html       "$GH/index.html"
 copy_if_exists 404.html                "$GH/404.html"
 copy_if_exists stats.html              "$GH/stats.html"
-copy_if_exists punch-list.html         "$GH/punch-list.html"
+# [retired 2026-10-13] internal punch list moved to the Hive Vault, never publish it
+# copy_if_exists punch-list.html         "$GH/punch-list.html"
 copy_if_exists tech-guide-v3.html      "$GH/tech-guide-v3.html"
 copy_if_exists founders.html           "$GH/founders.html"   # retired 2026-09-23: redirect stub only
 copy_if_exists admin-stats.html        "$GH/admin-stats.html"
