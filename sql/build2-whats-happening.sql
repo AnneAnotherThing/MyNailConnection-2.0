@@ -386,8 +386,13 @@ as $$
   );
 $$;
 
--- Signed in: the merged feed. p_kind = null for everything, or one of
--- 'request', 'available', 'photo'. City and state are the viewer's own.
+-- The merged feed. p_kind = null for everything, or one of 'request',
+-- 'available', 'photo'. City and state are the viewer's own.
+-- Guests (2026-10-13, Anne: "guests should see avail, but not see their
+-- contact info"): with no signed-in key the feed still returns Available now
+-- and new work. Those carry name, city, note and photo only; a phone is
+-- handed out by tech_contact() after sign in, never here. Client requests
+-- stay signed-in only, so a client's first name and ask never reach a scraper.
 create or replace function public.wh_feed(p_city text default null, p_state text default null, p_kind text default null)
 returns jsonb
 language plpgsql stable security definer
@@ -399,10 +404,7 @@ declare
   v_st   text := lower(btrim(coalesce(p_state, '')));
   v_out  jsonb;
 begin
-  if me is null then
-    raise exception 'sign in required' using errcode = '42501';
-  end if;
-  if v_st = '' then
+  if v_st = '' and me is not null then
     select lower(public.wh_state(u.state, u.zip)) into v_st
       from public.users u where public.wh_key(u.phone) = me
      order by u.created_at desc nulls last limit 1;
@@ -414,7 +416,7 @@ begin
            r.city, r.state, r.body, r.photo_url as photo,
            split_part(btrim(r.author_name), ' ', 1) as name, r.author_image as image,
            null::uuid as tech_id, r.need_by, r.expires_at as ends_at,
-           (r.author_key = me) as mine,
+           coalesce(r.author_key = me, false) as mine,
            (select count(*) from public.wh_replies x where x.request_id = r.id and not x.removed
               and not public.wh_blocked(r.author_key, x.tech_key))::int as replies,
            exists (select 1 from public.wh_replies x
@@ -442,6 +444,7 @@ begin
           order by x.created_at desc limit 150)
       ) r
      where (p_kind is null or p_kind = 'request')
+       and me is not null
        and not public.wh_blocked(me, r.author_key)
     union all
     -- Every tech with Open today on, however she turned it on (this
@@ -451,7 +454,7 @@ begin
            t.city, public.wh_state(t.state, t.zip), coalesce(a.note, ''), null,
            t.name, t.image_url,
            t.id, null::date, a.until,
-           (public.wh_key(t.phone) = me), 0, false, false
+           coalesce(public.wh_key(t.phone) = me, false), 0, false, false
       from public.techs t
       left join public.wh_available a on a.tech_id = t.id
      where (p_kind is null or p_kind = 'available')
@@ -464,7 +467,7 @@ begin
            t.city, public.wh_state(t.state, t.zip), b.body, b.image_url,
            t.name, t.image_url,
            t.id, null::date, null::timestamptz,
-           (public.wh_key(t.phone) = me), 0, false, false
+           coalesce(public.wh_key(t.phone) = me, false), 0, false, false
       from (select b0.*, row_number() over (partition by b0.tech_uuid order by b0.publish_at desc) as rn
               from (select b1.* from public.board_posts b1
                      where b1.image_url is not null
@@ -1202,6 +1205,9 @@ revoke all on function public.wh_my_tech() from public, anon, authenticated;
 revoke all on function public.wh_tech_in_view(public.techs) from public, anon, authenticated;
 
 grant execute on function public.wh_teaser() to anon, authenticated;
+-- Guests read the board too (2026-10-13); the loop below keeps every other
+-- function signed-in only.
+
 
 do $$
 declare f text;
@@ -1229,6 +1235,8 @@ begin
     execute format('grant execute on function public.%s to authenticated', f);
   end loop;
 end $$;
+-- Guests read the board (2026-10-13). After the loop, so anon keeps it.
+grant execute on function public.wh_feed(text, text, text) to anon;
 revoke all on function public.wh_expire_available() from public, anon, authenticated;
 revoke all on function public.wh_nightly() from public, anon, authenticated;
 revoke all on function public.wh_photos_to_clean(int) from public, anon, authenticated;

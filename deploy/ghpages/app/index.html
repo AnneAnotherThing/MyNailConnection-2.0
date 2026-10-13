@@ -2216,7 +2216,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button{display:none;}
       <div onclick="show('tech-booking-settings')" style="display:flex;align-items:center;gap:10px;padding:14px 16px;cursor:pointer;"><div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:var(--charcoal);">Booking Settings</div><div style="font-size:12px;color:var(--muted);margin-top:1px;">Services, hours, auto-confirm, blocking</div></div><svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:var(--muted);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg></div>
       <div onclick="openSubscriptionManagement()" style="display:flex;align-items:center;gap:10px;padding:14px 16px;border-top:1px solid var(--border);cursor:pointer;"><div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:var(--charcoal);">Manage Glow Up</div><div style="font-size:12px;color:var(--muted);margin-top:1px;">Receipts, your card, or cancel. Nothing to manage until you join.</div></div><svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:var(--muted);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0;"><path d="M9 18l6-6-6-6"/></svg></div>
       <div style="display:flex;align-items:center;gap:10px;padding:14px 16px;border-top:1px solid var(--border);">
-        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:var(--charcoal);">Daily reminder</div><div style="font-size:12px;color:var(--muted);margin-top:1px;">A once-a-day "working today?" nudge to post Available now. Pick a time for a phone push, or just when you open the app.</div></div>
+        <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:var(--charcoal);">Daily reminder</div><div style="font-size:12px;color:var(--muted);margin-top:1px;">A once-a-day "working today?" push to post Available now. 8:00 AM unless you pick another time, or turn it off.</div></div>
         <select id="ts-reminder-time" onchange="tsSetAvailReminder(this.value)" style="border:1.5px solid var(--border);border-radius:100px;padding:8px 30px 8px 14px;font-size:13px;font-weight:700;font-family:'DM Sans',sans-serif;color:var(--charcoal);background:white url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%2212%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%238B7E70%22 stroke-width=%223%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><path d=%22M6 9l6 6 6-6%22/></svg>') no-repeat right 12px center;-webkit-appearance:none;appearance:none;cursor:pointer;flex-shrink:0;"></select>
       </div>
     </div>
@@ -3105,20 +3105,18 @@ async function whLoad() {
   var list = document.getElementById('wh-list');
   if (!list) return;
   if (whIsGuest()) {
-    whStopMotion();
+    // Guests see the board (2026-10-13): Available now and new work, served
+    // by wh_feed with no key. Client requests and every action wait for sign
+    // in; whRender shows how many requests are waiting behind it.
+    if (WH.loadedFor !== 'guest') { WH.loadedFor = 'guest'; WH.city = ''; WH.state = ''; WH.items = []; WH.mine = null; WH.open = {}; WH.prefs = null; WH.me = null; }
     document.getElementById('wh-where').textContent = '';
-    document.getElementById('wh-cta').innerHTML = '';
+    document.getElementById('wh-cta').innerHTML =
+      '<button class="wh-btn primary" style="width:100%;padding:12px;font-size:14px;" onclick="whLog(\'signin_tap\');requireLogin({type:\'wh\'})">Sign in to post or reply</button>';
     var bl = document.getElementById('wh-bell'); if (bl) bl.style.visibility = 'hidden';
-    var counts = { requests: 0, available: 0 };
-    try { counts = (await whRpc('wh_teaser', {})) || counts; } catch (_) {}
-    list.innerHTML =
-      '<div class="wh-empty">' +
-        '<div class="wh-empty-title">See who needs a set and who is free now</div>' +
-        '<div class="wh-empty-sub">' + (counts.requests || 0) + ' open request' + (counts.requests === 1 ? '' : 's') +
-        ' and ' + (counts.available || 0) + ' tech' + (counts.available === 1 ? '' : 's') + ' available right now. ' +
-        'Sign in to see them and post your own.</div>' +
-        '<div class="wh-actions" style="justify-content:center;"><button class="wh-btn primary" onclick="whLog(\'signin_tap\');requireLogin({type:\'wh\'})">Sign in</button></div>' +
-      '</div>';
+    try { WH.teaser = (await whRpc('wh_teaser', {})) || null; } catch (_) { WH.teaser = null; }
+    if (!WH.items.length) list.innerHTML = '<div class="wh-sub" style="text-align:center;padding:20px;">Loading…</div>';
+    await whRefresh();
+    whStartPoll();
     return;
   }
   var who = currentUserEmail;
@@ -3272,6 +3270,15 @@ function whRender() {
     return head + whCardHtml(i);
   }).join('');
   var realOfKind = function (k) { return WH.items.filter(function (i) { return i.kind === k; }).length; };
+  // Guests (2026-10-13): requests are signed-in only, so say how many wait.
+  var guestNote = '';
+  if (whIsGuest() && (tab === 'all' || tab === 'request')) {
+    var reqN = (WH.teaser && WH.teaser.requests) || 0;
+    guestNote = '<div class="wh-card" style="cursor:pointer;" onclick="whLog(\'signin_tap\');requireLogin({type:\'wh\'})">' +
+      '<div class="wh-body"><div class="wh-text" style="font-weight:600;">' +
+      (reqN ? reqN + ' client' + (reqN === 1 ? '' : 's') + ' asking for a set right now' : 'Clients post what they need here') +
+      '</div><div class="wh-sub">Sign in to see the requests, reply, or post your own.</div></div></div>';
+  }
   if (!items.length) {
     html = (allItems.length && WH.nearMax < 2)
       ? '<div class="wh-empty"><div class="wh-empty-title">Nothing that close yet</div><div class="wh-empty-sub">Tap Everywhere to see all ' + allItems.length + ' on the board, closest first.</div></div>'
@@ -3286,6 +3293,7 @@ function whRender() {
   // Everything, with enough posts: two copies back to back so the slow
   // scroll can loop without a visible jump (the second copy is hidden from
   // screen readers; it is the same posts again).
+  if (guestNote) html = guestNote + html;
   var loop = (tab === 'all' && items.length >= 6);
   list.innerHTML = loop
     ? '<div class="wh-loop">' + html + '</div><div class="wh-loop" aria-hidden="true">' + html + '</div>'
@@ -3417,13 +3425,12 @@ async function whLiveCards() {
   // Counts for everyone; the rolling lines need a signed-in feed.
   var counts = null, items = [];
   try { counts = await whRpc('wh_teaser', {}); } catch (_) {}
-  if (!whIsGuest()) {
-    if (WH.loadedFor !== currentUserEmail) {
-      WH.loadedFor = currentUserEmail; WH.city = ''; WH.state = ''; WH.items = []; WH.mine = null; WH.open = {}; WH.prefs = null; WH.me = null;
-      try { var row = await loadOwnUserRow('city,state'); if (row) { WH.city = (row.city || '').trim(); WH.state = (row.state || '').trim(); } } catch (_) {}
-    }
-    try { items = (await whRpc('wh_feed', { p_city: WH.city || null, p_state: WH.state || null, p_kind: null })) || []; } catch (_) {}
+  if (!whIsGuest() && WH.loadedFor !== currentUserEmail) {
+    WH.loadedFor = currentUserEmail; WH.city = ''; WH.state = ''; WH.items = []; WH.mine = null; WH.open = {}; WH.prefs = null; WH.me = null;
+    try { var row = await loadOwnUserRow('city,state'); if (row) { WH.city = (row.city || '').trim(); WH.state = (row.state || '').trim(); } } catch (_) {}
   }
+  // Guests get the feed too since 2026-10-13 (Available now and new work).
+  try { items = (await whRpc('wh_feed', { p_city: WH.city || null, p_state: WH.state || null, p_kind: null })) || []; } catch (_) {}
   var free = counts ? counts.available || 0 : 0, reqs = counts ? counts.requests || 0 : 0;
   var near = items.filter(function (i) { return i.kind === 'request' && i.near === 0 && !i.mine; }).length;
   var homeCounts = document.getElementById('wh-home-counts');
@@ -3440,7 +3447,7 @@ async function whLiveCards() {
       : (reqs ? whPlural(reqs, 'open request', 'open requests') + ' \u00b7 who is free now' : 'Client requests near you \u00b7 who is free now');
   }
   WH_LIVE.lines = items.slice(0, 8).map(whLiveLine).filter(Boolean);
-  if (!WH_LIVE.lines.length) WH_LIVE.lines = [whIsGuest() ? 'Sign in to see who needs a set and who is free' : 'Ask for a set, or see who is free right now'];
+  if (!WH_LIVE.lines.length) WH_LIVE.lines = [whIsGuest() ? 'See who is free now, sign in to ask for a set' : 'Ask for a set, or see who is free right now'];
   WH_LIVE.idx = 0;
   whLiveShow();
   if (!WH_LIVE.rot) WH_LIVE.rot = setInterval(whLiveTick, 4000);
@@ -3812,7 +3819,7 @@ function whStopMotion() {
 function whStartPoll() {
   whStopPoll();
   WH.poll = setInterval(function () {
-    if (_currentScreen !== 'whats-happening' || whIsGuest()) { whStopPoll(); return; }
+    if (_currentScreen !== 'whats-happening') { whStopPoll(); return; }
     if (document.visibilityState && document.visibilityState !== 'visible') return;
     whRefresh();
   }, WH_POLL_MS);
@@ -6481,9 +6488,9 @@ function maybeShowTutorial(role) {
 // __APP_BUILD_*__ below are how sync.sh finds and rewrites the values.
 // Don't reorder or rename them.
 const APP_BUILD = {
-  name:    '3.0.7',     /* __APP_BUILD_NAME__   */
-  android: 688,         /* __APP_BUILD_ANDROID__ */
-  ios:     493,          /* __APP_BUILD_IOS__     */
+  name:    '3.0.8',     /* __APP_BUILD_NAME__   */
+  android: 689,         /* __APP_BUILD_ANDROID__ */
+  ios:     494,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -16215,8 +16222,7 @@ function _fmtReminderTime(hhmm) {
   } catch(_) { return hhmm; }
 }
 function _populateReminderTimes(sel) {
-  var html = '<option value="">Off</option>' +
-             '<option value="inapp">When I open the app</option>';
+  var html = '<option value="">Off</option>';
   // 5:00 AM through noon, half-hour steps, friendly AM/PM labels.
   for (var h = 5; h <= 12; h++) {
     for (var m = 0; m < 60; m += 30) {
@@ -16237,8 +16243,11 @@ function _populateReminderTimes(sel) {
 // The in-app ask is gated on daily_avail_nudge_off; the push on
 // avail_reminder_time. This maps both onto the single dropdown.
 function _reminderStateValue() {
+  // Off, or a time. No time set means the server's default, 8:00 AM
+  // (sql/avail-reminder-default-on.sql), so show that (Anne, 2026-10-13).
+  if (window._mncDailyNudgeOff) return '';
   if (window._mncAvailReminderTime) return (window._mncAvailReminderTime || '').slice(0, 5);
-  return window._mncDailyNudgeOff ? '' : 'inapp';
+  return '08:00';
 }
 function renderReminderPref() {
   var sel = document.getElementById('ts-reminder-time');
@@ -16252,7 +16261,7 @@ async function tsSetAvailReminder(val) {
   var prevTime = window._mncAvailReminderTime || '';
   var prevOff  = !!window._mncDailyNudgeOff;
   var choice = (val || '').trim();
-  var isTime = choice && choice !== 'inapp';
+  var isTime = !!choice;
   // Optimistic local state
   window._mncAvailReminderTime = isTime ? (choice.length === 5 ? choice + ':00' : choice) : '';
   window._mncDailyNudgeOff = (choice === '');   // only "Off" silences the in-app ask
@@ -16274,8 +16283,6 @@ async function tsSetAvailReminder(val) {
       showToast('Reminder set for ' + _fmtReminderTime(choice));
       // A push reminder is worthless without notification permission.
       if (!window._mncHasPushSub) { try { await setupEnablePush(); } catch(_) {} }
-    } else if (choice === 'inapp') {
-      showToast('We’ll ask when you open the app');
     } else {
       showToast('Daily reminder turned off');
     }
