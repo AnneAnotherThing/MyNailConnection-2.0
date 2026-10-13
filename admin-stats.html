@@ -477,6 +477,25 @@
       <div class="panel-head">
         <div class="panel-title">Admin tools</div>
       </div>
+      <details class="fold" id="bc-fold">
+        <summary>Send a push</summary>
+        <div class="fold-body">
+          <div class="form">
+            <label>To<select id="bc-aud"><option value="techs">Techs</option><option value="clients">Clients</option><option value="all">Everyone</option><option value="admins">Admins only</option></select></label>
+            <label>Title<input id="bc-title" type="text" maxlength="60" placeholder="Thank you from My Nail Connection" style="width:300px;"/></label>
+          </div>
+          <div class="form" style="margin-top:10px;">
+            <label style="flex:1;min-width:260px;">Message<textarea id="bc-body" rows="3" maxlength="200" placeholder="Short. A lock screen shows about 150 characters." style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:10px;font:inherit;font-size:14px;background:white;resize:vertical;box-sizing:border-box;"></textarea></label>
+          </div>
+          <div class="form" style="margin-top:10px;">
+            <label>Opens<input id="bc-url" type="url" placeholder="https://mynailconnection.com/app/" style="width:300px;"/></label>
+            <button id="bc-test" class="btn ghost" type="button">Send a test to me</button>
+            <button id="bc-send" class="btn" type="button">Send</button>
+          </div>
+          <div id="bc-msg" style="font-size:12px;margin-top:8px;"></div>
+          <div class="note">Reaches phones and browsers that allowed notifications. The count that comes back is devices, not people. Someone who deleted the app has no device here; she gets a text instead. Send a test to yourself first; it lands in a few seconds.</div>
+        </div>
+      </details>
       <details class="fold">
         <summary><span>Bug reports and feedback <span id="fb-count" style="color:var(--muted);font-weight:400;"></span></span></summary>
         <div class="fold-body">
@@ -860,7 +879,14 @@
         safe(fetchAll('marketing_hits?select=created_at,session_id,page,referrer,device_type,entry_channel,utm_source,utm_campaign&order=created_at.desc')),
         safe(fetchAll('store_clicks?select=created_at,platform,page,entry_channel,utm_campaign&order=created_at.desc')),
         safe(fetchAll('users?select=joined&role=eq.client')),
-        safe(fetchAll('techs?select=id,name,email,phone,image_url,photos,is_available,is_same_day,created_at,subscription_tier,subscription_source,booking_enabled,glow_up_months_purchased&order=created_at.desc')),
+        // last_opened_at (sql/tech-last-opened.sql, 2026-10-13): until that SQL
+        // runs the column is missing and PostgREST answers 400, so fall back
+        // to the old select rather than lose the whole People panel.
+        safe(fetchAll('techs?select=id,name,email,phone,image_url,photos,is_available,is_same_day,created_at,subscription_tier,subscription_source,booking_enabled,glow_up_months_purchased,last_opened_at&order=created_at.desc')
+          .catch(function (e) {
+            if (e && e.auth) throw e;
+            return fetchAll('techs?select=id,name,email,phone,image_url,photos,is_available,is_same_day,created_at,subscription_tier,subscription_source,booking_enabled,glow_up_months_purchased&order=created_at.desc');
+          })),
         safe(rpc('admin_booking_stats')),
         safe(fetchAll('app_downloads?select=*&order=recorded_for.desc,created_at.desc', 1000)),
         safe(rpc('admin_tech_tap_counts'))
@@ -1103,15 +1129,31 @@
   // techs a table").
   function renderRoster(techs) {
     if (!techs.length) { setHtml('u-roster', '<div class="empty">No techs yet.</div>'); return; }
-    setHtml('u-roster', '<table class="t"><thead><tr><th>Tech</th><th>Joined</th><th class="num">Photos</th><th>Plan</th></tr></thead><tbody>'
+    setHtml('u-roster', '<table class="t"><thead><tr><th>Tech</th><th>Joined</th><th>Last opened</th><th class="num">Photos</th><th>Plan</th></tr></thead><tbody>'
       + techs.map(function (t) {
           const n = Array.isArray(t.photos) ? t.photos.length : 0;
           const plan = planBadge(t);
           return '<tr><td>' + esc(t.name || 'Unnamed tech') + '</td>'
             + '<td class="nowrap" style="color:var(--muted);">' + (t.created_at ? new Date(t.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '-') + '</td>'
+            + '<td class="nowrap">' + openedCell(t.last_opened_at) + '</td>'
             + '<td class="num">' + (n ? n : '<span style="color:#a93226;font-style:italic;">none</span>') + '</td>'
             + '<td><span class="pill" style="color:' + plan[1] + ';">' + plan[0] + '</span></td></tr>';
         }).join('') + '</tbody></table>');
+  }
+  // Last opened (2026-10-13): the app stamps techs.last_opened_at once a day
+  // per device when a signed-in tech lands on her portal. Null means not
+  // since the stamp went in, which is not the same as never.
+  function openedCell(ts) {
+    if (!ts) return '<span style="color:var(--muted);font-style:italic;">not yet</span>';
+    const d = new Date(ts);
+    if (isNaN(d.getTime())) return '-';
+    const days = Math.floor((Date.now() - d.getTime()) / 86400000);
+    let label, color = 'var(--muted)';
+    if (days <= 0) { label = 'today'; color = '#2D6A4F'; }
+    else if (days === 1) { label = 'yesterday'; color = '#2D6A4F'; }
+    else if (days < 14) { label = days + ' days ago'; }
+    else { label = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); color = days >= 30 ? '#a93226' : color; }
+    return '<span style="color:' + color + ';">' + label + '</span>';
   }
   function planBadge(t) {
     const s = t.subscription_source || '';
@@ -1460,6 +1502,65 @@
     try { await rpc('admin_delete_partner_ad', { p_id: id }); loadPartnerAds(); }
     catch (e) { alert('Could not delete: ' + ((e && e.message) || 'error')); }
   }
+  // Send a push (2026-10-13). The app's Admin screen lost its entry point long
+  // ago, so the Broadcast tab there is unreachable; this is the one place to
+  // send. broadcast-push checks the admin token itself; send-push lets a
+  // signed-in user push to herself, which is the test button.
+  function myPushKey() {
+    try {
+      const part = String(token || '').split('.')[1] || '';
+      const json = atob(part.replace(/-/g, '+').replace(/_/g, '/'));
+      const c = JSON.parse(json);
+      const email = String(c.email || '').trim().toLowerCase();
+      if (email) return email;
+      const digits = String(c.phone || '').replace(/[^0-9]/g, '');
+      return digits.length >= 10 ? '+1' + digits.slice(-10) : '';
+    } catch (_) { return ''; }
+  }
+  const BC_LABEL = { techs: 'every tech', clients: 'every client', all: 'everyone', admins: 'the admins' };
+  async function sendPush(test) {
+    const aud = $('bc-aud').value;
+    const title = ($('bc-title').value || '').trim();
+    const body = ($('bc-body').value || '').trim();
+    const url = ($('bc-url').value || '').trim();
+    const msg = $('bc-msg');
+    if (!title || !body) { msg.style.color = '#a93226'; msg.textContent = 'Title and message are both needed.'; return; }
+    if (!test && !confirm('Send this push to ' + (BC_LABEL[aud] || aud) + '? It cannot be unsent.')) return;
+    const btns = [$('bc-test'), $('bc-send')];
+    btns.forEach(function (b) { b.disabled = true; });
+    msg.style.color = 'var(--muted)';
+    msg.textContent = test ? 'Sending the test to you...' : 'Sending to ' + (BC_LABEL[aud] || aud) + '...';
+    try {
+      let r;
+      if (test) {
+        const me = myPushKey();
+        if (!me) throw new Error('could not read your own sign-in; refresh and try again');
+        r = await fetch(SUPABASE_URL + '/functions/v1/send-push', { method: 'POST', headers: authHeaders(),
+          body: JSON.stringify({ user_id: me, title: title, body: body, url: url || undefined, tag: 'admin-test-self' }) });
+      } else {
+        r = await fetch(SUPABASE_URL + '/functions/v1/broadcast-push', { method: 'POST', headers: authHeaders(),
+          body: JSON.stringify({ audience: aud, title: title, body: body, url: url || undefined, tag: 'admin-broadcast' }) });
+      }
+      const j = await r.json().catch(function () { return {}; });
+      if (!r.ok || j.error) throw new Error(j.error || ('HTTP ' + r.status));
+      const sent = j.sent || 0, failed = j.failed || 0, skipped = j.skipped || 0;
+      if (!sent) {
+        msg.style.color = '#8A6A2F';
+        msg.textContent = (test ? 'No device of yours is subscribed to push' : 'Nobody in that audience has a push device') + (j.reason ? ' (' + j.reason + ')' : '') + '. Nothing was delivered.';
+      } else {
+        msg.style.color = '#2D6A4F';
+        msg.textContent = (test ? 'Test delivered to ' : 'Delivered to ') + sent + ' device' + (sent === 1 ? '' : 's')
+          + (failed ? ', ' + failed + ' failed' : '') + (skipped ? ', ' + skipped + ' skipped' : '') + '.';
+      }
+    } catch (e) {
+      msg.style.color = '#a93226';
+      msg.textContent = 'Send failed: ' + (e && e.message ? e.message : 'unknown error');
+    } finally {
+      btns.forEach(function (b) { b.disabled = false; });
+    }
+  }
+  $('bc-test').addEventListener('click', function () { sendPush(true); });
+  $('bc-send').addEventListener('click', function () { sendPush(false); });
   $('pa-save').addEventListener('click', savePartnerAd);
   window.adminTogglePartnerAd = adminTogglePartnerAd;
   window.adminDeletePartnerAd = adminDeletePartnerAd;

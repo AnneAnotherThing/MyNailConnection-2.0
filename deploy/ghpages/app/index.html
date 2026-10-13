@@ -6606,8 +6606,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.8',     /* __APP_BUILD_NAME__   */
-  android: 695,         /* __APP_BUILD_ANDROID__ */
-  ios:     500,          /* __APP_BUILD_IOS__     */
+  android: 696,         /* __APP_BUILD_ANDROID__ */
+  ios:     501,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -16223,6 +16223,17 @@ async function tbLoadDashBadge() {
     if (!r.ok) return; // migration not run yet, leave the default copy
     const t = (await r.json())[0];
     if (!t) { window._mncTrial = null; try { renderTrialPill(); } catch(_) {} return; }  // no tech row: no pill (a client after a tech signed out here)
+    // Last opened (2026-10-13): stamp techs.last_opened_at once a day per
+    // device, so admin-stats can show who has gone quiet. Fire and forget;
+    // sql/tech-last-opened.sql adds the column and the caller-scoped RPC. If
+    // the RPC is not there yet, drop the day stamp so the next load retries.
+    try {
+      var _openedDay = new Date().toLocaleDateString('en-CA');
+      if (localStorage.getItem('mnc_tech_opened') !== _openedDay) {
+        localStorage.setItem('mnc_tech_opened', _openedDay);
+        whRpc('tech_opened', {}).catch(function () { try { localStorage.removeItem('mnc_tech_opened'); } catch (_) {} });
+      }
+    } catch (_) {}
     // Lapsed-booking renew banner: she wants booking on but is not bookable
     // (trial ended or sub lapsed). Without this the Book button just vanishes
     // and nothing on the portal says why or how to renew (Anne, 2026-09-20).
