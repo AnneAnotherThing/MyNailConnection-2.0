@@ -6606,8 +6606,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.8',     /* __APP_BUILD_NAME__   */
-  android: 696,         /* __APP_BUILD_ANDROID__ */
-  ios:     501,          /* __APP_BUILD_IOS__     */
+  android: 697,         /* __APP_BUILD_ANDROID__ */
+  ios:     502,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -12862,6 +12862,18 @@ async function saveTechEdit() {
     // them PATCHes availability to false and joined to today (Anne's
     // "saved contact prefs, vanished from browse" bug, 2026-08-03).
     // Send them only on INSERT, where the row needs initial values.
+    if (isNew) {
+      // Her time zone follows her location (Anne, 2026-10-13). The column
+      // defaults to Phoenix and the 8:00 AM reminder, quiet hours, the
+      // midnight reset and the booking grid all read it, so a new tech gets
+      // her device's zone on the insert. sql/tech-timezone.sql fills from
+      // her state when the device cannot say, and the daily heartbeat
+      // carries the device zone after that.
+      try {
+        var _joinTz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+        if (_joinTz && _joinTz.indexOf('/') > 0) techData.booking_timezone = _joinTz;
+      } catch (_) {}
+    }
     if (!isNew) {
       delete techData.is_available;
       delete techData.is_same_day;
@@ -16227,11 +16239,16 @@ async function tbLoadDashBadge() {
     // device, so admin-stats can show who has gone quiet. Fire and forget;
     // sql/tech-last-opened.sql adds the column and the caller-scoped RPC. If
     // the RPC is not there yet, drop the day stamp so the next load retries.
+    // The call carries the device's time zone (sql/tech-timezone.sql): a
+    // tech outside Arizona still on the Phoenix default gets her real zone,
+    // so her 8:00 AM reminder and quiet hours land on her clock.
     try {
       var _openedDay = new Date().toLocaleDateString('en-CA');
       if (localStorage.getItem('mnc_tech_opened') !== _openedDay) {
         localStorage.setItem('mnc_tech_opened', _openedDay);
-        whRpc('tech_opened', {}).catch(function () { try { localStorage.removeItem('mnc_tech_opened'); } catch (_) {} });
+        var _openedTz = null;
+        try { _openedTz = Intl.DateTimeFormat().resolvedOptions().timeZone || null; } catch (_) {}
+        whRpc('tech_opened', { p_tz: _openedTz }).catch(function () { try { localStorage.removeItem('mnc_tech_opened'); } catch (_) {} });
       }
     } catch (_) {}
     // Lapsed-booking renew banner: she wants booking on but is not bookable
