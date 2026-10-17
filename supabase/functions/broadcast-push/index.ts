@@ -283,15 +283,15 @@ async function callerIsAdmin(req: Request): Promise<boolean> {
     const phoneDigits = String(data.user.phone || '').replace(/\D/g, '');
     const last10 = phoneDigits.slice(-10);
 
-    let rows: Array<{ role: string | null }> | null = null;
+    let rows: Array<{ role: string | null; admin: boolean | null }> | null = null;
     if (email) {
-      ({ data: rows } = await supabase.from('users').select('role').eq('email', email).limit(1));
+      ({ data: rows } = await supabase.from('users').select('role, admin').eq('email', email).limit(1));
     }
     if ((!rows || !rows.length) && last10.length === 10) {
-      ({ data: rows } = await supabase.from('users').select('role')
+      ({ data: rows } = await supabase.from('users').select('role, admin')
         .in('phone', ['+1' + last10, '1' + last10, last10, phoneDigits]).limit(1));
     }
-    return !!(rows && rows[0] && String(rows[0].role || '').toLowerCase() === 'admin');
+    return !!(rows && rows[0] && (String(rows[0].role || '').toLowerCase() === 'admin' || rows[0].admin === true)); // same rule as is_admin() in sql/admin-flag.sql
   } catch (_) {
     return false;
   }
