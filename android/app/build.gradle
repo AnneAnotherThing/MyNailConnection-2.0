@@ -7,7 +7,7 @@ android {
         applicationId "com.mynailconnection.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 698
+        versionCode 699
         versionName "3.0.8"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {

@@ -6606,8 +6606,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.8',     /* __APP_BUILD_NAME__   */
-  android: 698,         /* __APP_BUILD_ANDROID__ */
-  ios:     503,          /* __APP_BUILD_IOS__     */
+  android: 699,         /* __APP_BUILD_ANDROID__ */
+  ios:     504,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -7697,12 +7697,17 @@ function wireCapacitorPushListeners(PushNotifications) {
       var pu = new URL(String(data.url || ''), 'https://mynailconnection.com/');
       if (pu.protocol === 'https:' && pu.hostname === 'mynailconnection.com' &&
           pu.pathname !== '/' && pu.pathname.indexOf('/app') !== 0) {
+        try { openNotifications(); } catch (_) {}  // so the message is on screen when she comes back
         window.open(pu.href, '_blank');
         return;
       }
     } catch (_) {}
     if (data.screen === 'messages') show('home'); // no messages screen; land on home rather than dead-end
     else if (data.screen === 'tech-home') show('tech-home');
+    // Everything else (admin broadcasts, booking pings): open the Notifications list, where
+    // every push is kept, instead of the generic front door. Anne, 2026-10-17: tapping a push
+    // only opened the app, so the message was gone once she dismissed it.
+    else { try { openNotifications(); } catch (_) {} }
   });
 }
 
