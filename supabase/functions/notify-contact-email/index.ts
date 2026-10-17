@@ -23,6 +23,10 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY') || '';
 const NOTIFY_TO      = Deno.env.get('NOTIFY_TO') || '';
 const NOTIFY_FROM    = Deno.env.get('NOTIFY_FROM') || 'onboarding@resend.dev';
+// Founders-page feedback (added 2026-10-17) goes to Leslie and Anne. Recipients
+// are fixed here, never taken from the request, so a public caller cannot
+// aim this function at an arbitrary inbox. Override with FOUNDERS_NOTIFY_TO.
+const FOUNDERS_TO    = Deno.env.get('FOUNDERS_NOTIFY_TO') || 'leslie@mynailconnection.com,anne@mynailconnection.com';
 
 // Service-role client, used ONLY for anonymous submissions (2026-08-23).
 //
@@ -93,7 +97,7 @@ serve(async (req) => {
   // clients still insert directly and do NOT set this, so nothing is written
   // twice. Failure here does not stop the email: a note that reaches Anne's
   // inbox but not the table is far better than one that reaches neither.
-  const save = p.save === true || p.save === 'true';
+  const save = (p.save === true || p.save === 'true') && (p.kind || '') !== 'founders';
   let saved = false;
   if (save) {
     const kind = (p.kind || 'contact').toString();
@@ -138,7 +142,10 @@ serve(async (req) => {
     email && 'Email: ' + email,
   ].filter(Boolean).join('  ·  ');
 
-  const subject = `MNC note from ${name || phone || 'a user'}`;
+  const isFounders = (p.kind || '') === 'founders';
+  const subject = isFounders
+    ? `Founders feedback from ${name || email || 'a founder'}`
+    : `MNC note from ${name || phone || 'a user'}`;
   const html =
     `<div style="font-family:'DM Sans',Arial,sans-serif;max-width:560px;margin:0 auto;color:#141317;">` +
     `<div style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#A2636C;font-weight:700;">My Nail Connection</div>` +
@@ -146,7 +153,7 @@ serve(async (req) => {
     (contactBits ? `<div style="font-size:13px;color:#7A6E78;margin-bottom:14px;">${esc(contactBits)}</div>` : '') +
     `<div style="background:#FAF7F2;border:1px solid #E4D9DA;border-radius:12px;padding:16px 18px;font-size:15px;line-height:1.6;white-space:pre-wrap;">${esc(note)}</div>` +
     (phone ? `<div style="margin-top:14px;"><a href="sms:${esc(phone.replace(/[^\d+]/g, ''))}" style="display:inline-block;background:#141317;color:#fff;text-decoration:none;font-weight:700;padding:10px 18px;border-radius:100px;font-size:14px;">Text ${esc(name || 'them')} back</a></div>` : '') +
-    `<div style="font-size:11px;color:#918C81;margin-top:18px;">Sent from the Contact-the-developer form. The full note is also saved in contact_anne_messages.</div>` +
+    `<div style="font-size:11px;color:#918C81;margin-top:18px;">${isFounders ? 'Sent from the founders page. The full note is also saved in founders_feedback.' : 'Sent from the Contact-the-developer form. The full note is also saved in contact_anne_messages.'}</div>` +
     `</div>`;
 
   try {
@@ -155,7 +162,7 @@ serve(async (req) => {
       headers: { 'Authorization': 'Bearer ' + RESEND_API_KEY, 'Content-Type': 'application/json' },
       body: JSON.stringify({
         from: NOTIFY_FROM,
-        to: NOTIFY_TO.split(',').map((s) => s.trim()).filter(Boolean),
+        to: (isFounders ? FOUNDERS_TO : NOTIFY_TO).split(',').map((s) => s.trim()).filter(Boolean),
         reply_to: email || undefined,
         subject,
         html,

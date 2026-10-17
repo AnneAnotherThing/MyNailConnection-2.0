@@ -1,16 +1,254 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>My Nail Connection</title>
-<meta name="robots" content="noindex, nofollow"/>
-<meta http-equiv="refresh" content="0; url=/"/>
-<link rel="canonical" href="https://mynailconnection.com/"/>
-<script>window.location.replace("/");</script>
-<!-- The founders page was retired 2026-09-23. Its source is archive/founders-2026-09-20.html. This stub only keeps the links in the August OG17 emails from landing on a 404. -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Thank you for joining early - My Nail Connection</title>
+  <meta name="description" content="Thank you for joining My Nail Connection early. Your feedback is greatly appreciated." />
+  <meta name="robots" content="noindex" />
+  <meta name="color-scheme" content="light" />
+  <link rel="icon" href="/favicon.ico" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600;1,700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --page: #F4EEEE;
+      --card: #FFFFFF;
+      --ink: #141317;
+      --muted: #6D6068;
+      --rose: #A2636C;
+      --blush: #F7E2E3;
+      --paper: #FAF7F2;
+      --rule: #E4D7D8;
+      --gold: #8C7E76;
+      --ink-grad: linear-gradient(140deg,#4A4A4F 0%,#2A2A2E 60%,#141317 100%);
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      background: var(--page);
+      color: var(--ink);
+      font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+      line-height: 1.62;
+      -webkit-font-smoothing: antialiased;
+    }
+    .wrap { max-width: 620px; margin: 0 auto; padding: 0 16px; }
+    .serif { font-family: 'Playfair Display', Georgia, serif; }
+    .eyebrow {
+      font-size: 12px; font-weight: 700; letter-spacing: 2px;
+      text-transform: uppercase; color: var(--rose);
+    }
+    a { color: var(--rose); }
+
+    /* Hero */
+    .hero { text-align: center; padding: 44px 0 30px; }
+    .hero img { width: 58px; height: 58px; border-radius: 15px; display: block; margin: 0 auto 16px; }
+    .hero .mark {
+      font-family: 'Playfair Display', Georgia, serif; font-style: italic;
+      font-size: 20px; font-weight: 600; letter-spacing: 0.3px; color: var(--ink);
+    }
+    .hero h1 {
+      font-family: 'Playfair Display', Georgia, serif; font-weight: 700;
+      font-size: 40px; line-height: 1.08; letter-spacing: 0.2px; margin: 18px 0 0;
+    }
+    .hero h1 em { font-style: italic; color: var(--rose); }
+    .hero p { font-size: 16px; color: var(--ink); margin: 16px auto 0; max-width: 460px; }
+
+    /* Reassurance band */
+    .band {
+      background: var(--blush); border-radius: 20px;
+      padding: 22px 24px; text-align: center; margin: 8px 0 6px;
+    }
+    .band .line { font-family: 'Playfair Display', Georgia, serif; font-size: 20px; font-weight: 600; line-height: 1.3; }
+    .band .sub { font-size: 14px; color: var(--muted); margin-top: 6px; }
+
+    section { padding: 34px 0 8px; }
+    .sec-label {
+      font-size: 12px; font-weight: 700; letter-spacing: 1.8px;
+      text-transform: uppercase; color: var(--muted); text-align: center; margin-bottom: 20px;
+    }
+
+    /* Then / Now */
+    .tn { background: var(--card); border: 1px solid var(--rule); border-radius: 18px; overflow: hidden; box-shadow: 0 6px 26px rgba(20,19,23,0.06); }
+    .tn-row { display: grid; grid-template-columns: 1fr 1fr; }
+    .tn-row + .tn-row { border-top: 1px solid var(--rule); }
+    .tn-cell { padding: 16px 18px; }
+    .tn-then { background: var(--paper); border-right: 1px solid var(--rule); }
+    .tn-tag { font-size: 11px; font-weight: 700; letter-spacing: 1.4px; text-transform: uppercase; margin-bottom: 5px; }
+    .tn-then .tn-tag { color: var(--gold); }
+    .tn-now .tn-tag { color: var(--rose); }
+    .tn-then .tn-text { color: var(--muted); font-size: 14px; }
+    .tn-now .tn-text { color: var(--ink); font-size: 14px; font-weight: 500; }
+
+    /* Highlights */
+    .cards { display: grid; gap: 12px; }
+    .card { background: var(--card); border: 1px solid var(--rule); border-radius: 16px; padding: 17px 19px; box-shadow: 0 4px 18px rgba(20,19,23,0.05); }
+    .card h3 { font-family: 'Playfair Display', Georgia, serif; font-size: 18px; font-weight: 600; margin: 0 0 4px; }
+    .card p { margin: 0; font-size: 14px; color: var(--muted); }
+
+    /* Steps */
+    .steps { counter-reset: step; display: grid; gap: 12px; }
+    .step { display: grid; grid-template-columns: 34px 1fr; align-items: start; gap: 12px; }
+    .step .n {
+      counter-increment: step; width: 34px; height: 34px; border-radius: 100px;
+      background: var(--ink-grad); color: #fff; font-weight: 700; font-size: 15px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .step .n::before { content: counter(step); }
+    .step .t { font-size: 15px; padding-top: 5px; }
+    .step .t strong { font-weight: 700; }
+
+    /* Buttons */
+    .cta-stack { display: grid; gap: 12px; max-width: 340px; margin: 22px auto 0; }
+    .btn {
+      display: block; text-align: center; text-decoration: none; border-radius: 13px;
+      padding: 15px 22px; font-size: 15px; font-weight: 700; letter-spacing: 0.4px;
+    }
+    .btn-ink { background: var(--ink-grad); color: #fff; }
+    .btn-out { background: var(--card); color: var(--ink); border: 1.5px solid var(--rule); }
+    .btn small { display: block; font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; opacity: 0.7; margin-bottom: 2px; }
+
+    /* Anne note */
+    .note { background: var(--card); border: 1px solid var(--rule); border-radius: 20px; padding: 26px 26px 24px; box-shadow: 0 6px 26px rgba(20,19,23,0.06); }
+    .note .from { font-size: 12px; font-weight: 700; letter-spacing: 1.6px; text-transform: uppercase; color: var(--rose); margin-bottom: 10px; }
+    .note p { margin: 0 0 12px; font-size: 15px; }
+    .note .sign { font-family: 'Playfair Display', Georgia, serif; font-style: italic; font-size: 17px; color: var(--rose); margin: 4px 0 0; }
+    .note .email-btn {
+      display: inline-block; margin-top: 16px; text-decoration: none; border-radius: 12px;
+      padding: 13px 24px; font-size: 15px; font-weight: 700; background: var(--ink-grad); color: #fff;
+    }
+
+    footer { text-align: center; padding: 34px 0 44px; color: var(--muted); font-size: 12px; }
+    footer a { color: var(--rose); text-decoration: none; font-weight: 600; }
+
+    @media (max-width: 480px) {
+      .hero h1 { font-size: 32px; }
+      .tn-cell { padding: 13px 14px; }
+    }
+  
+    .form-card { background: var(--card); border: 1px solid var(--rule); border-radius: 20px; padding: 26px; box-shadow: 0 6px 26px rgba(20,19,23,0.06); }
+    .field { margin: 0 0 18px; }
+    .field label { display: block; font-size: 12px; font-weight: 700; letter-spacing: 1.4px; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+    .field input, .field textarea { display: block; width: 100%; font-family: inherit; font-size: 16px; padding: 12px 14px; border: 1px solid var(--rule); border-radius: 12px; background: var(--paper); color: var(--ink); outline: none; }
+    .field input:focus, .field textarea:focus { border-color: var(--rose); }
+    .field textarea { min-height: 104px; resize: vertical; }
+    button.primary { width: 100%; border: 0; cursor: pointer; font-family: inherit; border-radius: 13px; padding: 15px 22px; font-size: 15px; font-weight: 700; letter-spacing: 0.4px; background: var(--ink-grad); color: #fff; }
+    button.primary[disabled] { opacity: .6; cursor: not-allowed; }
+    .err { color: #A9665D; font-size: 14px; margin: 10px 0 0; min-height: 1em; }
+    .thanks { text-align: center; padding: 10px 0 6px; }
+    .thanks h2 { font-family: 'Playfair Display', Georgia, serif; font-size: 28px; color: var(--rose); margin: 0 0 12px; }
+    .thanks p { font-size: 16px; margin: 0 0 14px; }
+    .hidden { display: none !important; }
+  </style>
 </head>
 <body>
-<p style="font-family:DM Sans,system-ui,sans-serif;text-align:center;padding:40px;color:#6D6068">The founders page has moved on. <a href="/" style="color:#A2636C">Continue to My Nail Connection</a>.</p>
+  <div class="wrap">
+
+    <div class="hero">
+      <img src="/images/mncLogo-email.png" alt="My Nail Connection" />
+      <div class="mark">My Nail Connection</div>
+      <div class="eyebrow" style="margin-top:6px;">For our founding techs</div>
+      <h1>Thank you for<br /><em>joining early.</em></h1>
+      <p>You trusted My Nail Connection before there was much to show. That trust is why we are here, and we are so grateful.</p>
+    </div>
+
+    <div class="band">
+      <div class="line">Your feedback is greatly appreciated.</div>
+      <div class="sub">A bug, a wish, something that feels off, something that feels right. Tell us. It goes straight to Anne and Leslie.</div>
+    </div>
+
+    <section id="formSection">
+      <div class="sec-label">Tell us what you think</div>
+      <div class="form-card">
+        <p style="margin:0 0 18px;font-size:14px;color:var(--muted);">Fill in any of the prompts below. One is plenty. All three is a gift!</p>
+        <form id="feedbackForm" novalidate>
+          <div class="field"><label for="name">Your name</label><input type="text" id="name" name="name" required autocomplete="name" /></div>
+          <div class="field"><label for="email">Your email</label><input type="email" id="email" name="email" required autocomplete="email" /></div>
+          <div class="field"><label for="wish_to_add">Something you&rsquo;d add?</label><textarea id="wish_to_add" name="wish_to_add" placeholder="A feature, a tweak, a wish, anything you would love to see."></textarea></div>
+          <div class="field"><label for="annoyance">Something annoying?</label><textarea id="annoyance" name="annoyance" placeholder="A bug, friction, confusion, whatever made you sigh."></textarea></div>
+          <div class="field"><label for="message">Anything else?</label><textarea id="message" name="message" placeholder="Praise, observations, anything we did not ask about."></textarea></div>
+          <button type="submit" class="primary" id="submitBtn">Send to Anne &amp; Leslie</button>
+          <p class="err" id="errMsg" aria-live="polite"></p>
+        </form>
+      </div>
+    </section>
+
+    <section id="thanksSection" class="thanks hidden" aria-live="polite">
+      <div class="form-card">
+        <h2>Got it. Thank you!</h2>
+        <p>We read every one. If it is a bug, we will fix it. If it is a wish, we will consider it.</p>
+        <p>Now go open the app and post some nails.</p>
+      </div>
+    </section>
+
+    <footer>
+      <a href="https://mynailconnection.com/">mynailconnection.com</a>
+      &nbsp;&middot;&nbsp;
+      <a href="mailto:anne@mynailconnection.com">Email us</a>
+    </footer>
+
+  </div>
+
+  <script type="module">
+    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+    const SUPABASE_URL = 'https://nwqnakoongrorbwnrqzc.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im53cW5ha29vbmdyb3Jid25ycXpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNzczMjUsImV4cCI6MjA5ODk1MzMyNX0.TFFMlg9VjB0cyJwbgmVbeatFYQFaF1Ri0nrH0GwhHJs';
+    const supa = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const form = document.getElementById('feedbackForm');
+    const btn = document.getElementById('submitBtn');
+    const err = document.getElementById('errMsg');
+    const formSection = document.getElementById('formSection');
+    const thanksSection = document.getElementById('thanksSection');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      err.textContent = '';
+      const fd = new FormData(form);
+      const val = (k) => (fd.get(k) || '').toString().trim();
+      const payload = {
+        name: val('name'),
+        email: val('email'),
+        wish_to_add: val('wish_to_add') || null,
+        annoyance: val('annoyance') || null,
+        message: val('message') || null,
+        user_agent: navigator.userAgent || null
+      };
+      if (!payload.name || !payload.email) { err.textContent = 'Please fill in your name and email.'; return; }
+      if (!payload.wish_to_add && !payload.annoyance && !payload.message) { err.textContent = 'Please fill in at least one of the prompts.'; return; }
+
+      btn.disabled = true;
+      btn.textContent = 'Sending...';
+
+      const { error } = await supa.from('founders_feedback').insert(payload);
+      if (error) {
+        console.error('Founder feedback insert failed:', error);
+        err.textContent = "Couldn't send, please email anne@mynailconnection.com instead.";
+        btn.disabled = false;
+        btn.textContent = 'Send to Anne & Leslie';
+        return;
+      }
+
+      // Heads-up email to Leslie and Anne. Best effort: the row is already saved.
+      try {
+        const note = ['Something to add: ' + (payload.wish_to_add || '-'),
+                      'Something annoying: ' + (payload.annoyance || '-'),
+                      'Anything else: ' + (payload.message || '-')].join('\n\n');
+        await fetch(SUPABASE_URL + '/functions/v1/notify-contact-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY },
+          body: JSON.stringify({ kind: 'founders', name: payload.name, email: payload.email, note })
+        });
+      } catch (_) {}
+
+      formSection.classList.add('hidden');
+      thanksSection.classList.remove('hidden');
+      thanksSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  </script>
+
 </body>
 </html>
