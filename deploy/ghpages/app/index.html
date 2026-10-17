@@ -6606,8 +6606,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.8',     /* __APP_BUILD_NAME__   */
-  android: 697,         /* __APP_BUILD_ANDROID__ */
-  ios:     502,          /* __APP_BUILD_IOS__     */
+  android: 698,         /* __APP_BUILD_ANDROID__ */
+  ios:     503,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -7689,6 +7689,18 @@ function wireCapacitorPushListeners(PushNotifications) {
       try { openWhatsHappening('request', 'push'); } catch (_) {}
       return;
     }
+    // A push that carries a web page on our own site (the founders page, a news post)
+    // opens that page in the browser. Until 2026-10-17 the url in the payload was
+    // ignored and every tap just opened the app. Own host only, and /app paths stay
+    // in the app, so a push can never send her to an arbitrary site.
+    try {
+      var pu = new URL(String(data.url || ''), 'https://mynailconnection.com/');
+      if (pu.protocol === 'https:' && pu.hostname === 'mynailconnection.com' &&
+          pu.pathname !== '/' && pu.pathname.indexOf('/app') !== 0) {
+        window.open(pu.href, '_blank');
+        return;
+      }
+    } catch (_) {}
     if (data.screen === 'messages') show('home'); // no messages screen; land on home rather than dead-end
     else if (data.screen === 'tech-home') show('tech-home');
   });
