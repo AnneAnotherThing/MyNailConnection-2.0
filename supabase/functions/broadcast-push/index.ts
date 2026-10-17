@@ -349,10 +349,11 @@ serve(async (req) => {
     targetSubs = data || [];
   } else {
     const role = audience === 'techs' ? 'tech' : audience === 'clients' ? 'client' : 'admin';
-    const { data: users, error: uerr } = await supabase
-      .from('users')
-      .select('email, phone')
-      .ilike('role', role);   // case-insensitive equality (no wildcards in `role`)
+    // 'admins' also takes anyone with the users.admin flag (Anne is role tech with
+    // admin = true), same rule as is_admin(); matching on role alone found nobody.
+    let uq = supabase.from('users').select('email, phone');
+    uq = audience === 'admins' ? uq.or('role.ilike.admin,admin.eq.true') : uq.ilike('role', role);  // ilike: case-insensitive equality
+    const { data: users, error: uerr } = await uq;
     if (uerr) return jsonResponse({ error: 'could not load users', detail: String(uerr) }, 500);
 
     const keys = new Set<string>();
