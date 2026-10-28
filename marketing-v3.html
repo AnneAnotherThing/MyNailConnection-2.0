@@ -474,6 +474,8 @@
 
   .hero-grid { position: relative; z-index: 1; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(420px, 100%), 1fr)); gap: 48px; align-items: center; }
   .hero-copy { display: flex; flex-direction: column; gap: 22px; max-width: 580px; }
+  /* the rose-gold coin above the kicker, the same mark as the nav, cut to its circle */
+  .hero-mark { width: 76px; height: 76px; border-radius: 50%; margin-bottom: -6px; box-shadow: var(--shadow-raised); }
   .hero h1 { font-size: clamp(40px, 5.4vw, 72px); font-weight: 700; line-height: 1.06; letter-spacing: -1px; text-wrap: pretty; }
   .hero h1 .w { display: inline-block; opacity: 0; transform: translateY(14px); animation: wordIn .7s var(--ease-out) forwards; }
   .hero h1 .w:nth-child(1) { animation-delay: .05s } .hero h1 .w:nth-child(2) { animation-delay: .17s } .hero h1 .w:nth-child(3) { animation-delay: .29s }
@@ -637,6 +639,7 @@
     .hero-actions, .hero-stores { justify-content: center; }
     .hero-art { min-height: 0; margin-top: 8px; }
     .hero-art > img { width: min(320px, 78vw); }
+    .hero-mark { width: 64px; height: 64px; }
     .tuck.t1 { left: 0; bottom: 8px; width: 132px; }
     .tuck.t2 { right: 0; top: 8px; width: 120px; }
     .tuck.t3 { display: none; }
@@ -687,6 +690,7 @@
   <div class="hero-bg" aria-hidden="true"><div class="bloom"></div><div class="bloom b2"></div><div class="brim"></div><div class="brim r2"></div><div class="brim r3"></div><div class="brim r4"></div></div>
   <div class="wrap hero-grid">
     <div class="hero-copy">
+      <img class="hero-mark" src="images/mncLogo-round-256.webp" width="256" height="256" alt="My Nail Connection logo" decoding="async"/>
       <div class="eyebrow">Find &nbsp;·&nbsp; Connect &nbsp;·&nbsp; Glow</div>
       <h1><span class="w">Your</span> <span class="w">work</span> <span class="w">is</span> <span class="w">why</span> <span class="w">clients</span> <span class="w">pick</span> <span class="w">you,</span> <em class="w">already.</em></h1>
       <p class="hero-sub">Now it is how they find you too. Post your sets, tag them by shape, type and style, and let clients book, call or text. Free for techs, free for clients. Nails only.</p>
