@@ -6606,8 +6606,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.9',     /* __APP_BUILD_NAME__   */
-  android: 701,         /* __APP_BUILD_ANDROID__ */
-  ios:     506,          /* __APP_BUILD_IOS__     */
+  android: 702,         /* __APP_BUILD_ANDROID__ */
+  ios:     507,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -23096,7 +23096,10 @@ async function releaseCurrentWizardPhoto() {
           'Prefer': 'return=minimal'
         },
         body: JSON.stringify({
-          tech_id: st.techEmail || null,
+          // Email stays out of public rows (privacy lock 2026-11-09);
+          // only a tech with no id falls back to it, and the DB trigger
+          // board_posts_strip_email swaps it for the id anyway.
+          tech_id: st.techId ? null : (st.techEmail || null),
           tech_uuid: st.techId || null,
           type: 'inspo',
           body: caption || tags.join(' \u00b7 '),
