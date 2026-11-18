@@ -269,6 +269,10 @@ serve(async (req) => {
       const periodResetAt = nextMonthFromNow();
       const { error } = await supabase.from('techs').update({
         subscription_tier: 'paid',
+        // A tech who joins from her in-app free month still had source 'trial'
+        // here, so the app kept showing her a free-month countdown after she
+        // paid (found 2026-11-16). Paying through Stripe makes her a Stripe sub.
+        subscription_source: 'stripe',
         ...(expiresAt ? { subscription_expires_at: expiresAt.toISOString() } : {}),
         period_upload_count: 0,
         period_reset_at: periodResetAt.toISOString(),

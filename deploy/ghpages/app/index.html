@@ -5628,6 +5628,19 @@ function closeBookingSubscribe() {
 
 function openBookingSubscribe() {
   closeBookingSubscribe();
+  // The free month lives in the app (since 2026-09-20: grant_booking_trial
+  // stamps 30 days the first time booking goes on), so nobody reaches this
+  // sheet before her free month has started. It used to say "Start my free
+  // month" to everyone, which read as "you cannot pay" to a tech already on
+  // her trial (Anne, 2026-11-16). Say where she actually is instead.
+  var st = (typeof _bkMyTech !== 'undefined') ? _bkMyTech : null;
+  var stEnd = (st && st.period_reset_at) ? new Date(st.period_reset_at) : null;
+  var stInTrial = !!(st && st.subscription_source === 'trial' && stEnd &&
+                     !isNaN(stEnd.getTime()) && stEnd.getTime() > Date.now());
+  var stEnds = stInTrial ? stEnd.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
+  var boxHead = stInTrial ? ('Your free month runs through ' + stEnds) : (BOOKING_SUB_PRICE + ' a month');
+  var boxSub  = stInTrial ? ('Join now and ' + BOOKING_SUB_PRICE + '/month starts today. Cancel anytime.')
+                          : 'Billed monthly, no contract.';
   var el = document.createElement('div');
   el.id = 'mnc-sub-sheet';
   el.className = 'modal-overlay';
@@ -5655,13 +5668,13 @@ function openBookingSubscribe() {
         + row('<b>No commission, no per-booking fee</b>, and never a charge to your clients')
       + '</div>'
       + '<div style="margin-top:20px;padding:14px;border-radius:14px;background:var(--cream);text-align:center;">'
-        + '<div style="font-size:15px;font-weight:700;color:var(--charcoal);">Free for your first month</div>'
-        + '<div style="font-size:13px;color:var(--muted);margin-top:3px;">then ' + BOOKING_SUB_PRICE + '/month. Cancel anytime.</div>'
+        + '<div style="font-size:15px;font-weight:700;color:var(--charcoal);">' + boxHead + '</div>'
+        + '<div style="font-size:13px;color:var(--muted);margin-top:3px;">' + boxSub + '</div>'
       + '</div>'
       + '<button onclick="subscribeToBooking()" style="width:100%;margin-top:16px;padding:15px;border:none;'
         + 'border-radius:13px;background:linear-gradient(140deg,var(--ink-1) 0%,var(--ink-2) 60%,var(--ink-3) 100%);'
         + 'color:white;font-size:15px;font-weight:700;font-family:\'DM Sans\',sans-serif;cursor:pointer;">'
-        + 'Start my free month</button>'
+        + 'Join Glow Up, ' + BOOKING_SUB_PRICE + '/month</button>'
       + '<button onclick="closeBookingSubscribe()" style="width:100%;margin-top:9px;padding:15px;border:none;'
         + 'background:none;color:var(--muted);font-size:13.5px;font-family:\'DM Sans\',sans-serif;cursor:pointer;">'
         + 'Not yet</button>'
@@ -6606,8 +6619,8 @@ function maybeShowTutorial(role) {
 // Don't reorder or rename them.
 const APP_BUILD = {
   name:    '3.0.9',     /* __APP_BUILD_NAME__   */
-  android: 702,         /* __APP_BUILD_ANDROID__ */
-  ios:     507,          /* __APP_BUILD_IOS__     */
+  android: 704,         /* __APP_BUILD_ANDROID__ */
+  ios:     509,          /* __APP_BUILD_IOS__     */
 };
 
 // ── Supabase ─────────────────────────────────────────────────────────────────
@@ -14892,7 +14905,9 @@ function tbRenderTrialBanner() {
   var days = end ? Math.ceil((end.getTime() - Date.now()) / 86400000) : 0;
   var windowEnded = !!(end && !isNaN(end.getTime()) && end.getTime() < Date.now());
   if (!windowEnded) {
-    if (cta) cta.style.display = 'none';
+    // Join early is allowed (Anne, 2026-11-16): a tech on her free month had
+    // no way to pay until the clock ran out.
+    if (cta) { cta.textContent = 'Join Glow Up now'; cta.style.display = 'block'; }
     var why = t.paused_by_tech ? ' Booking is on hold while Pause my page is on, and the days keep counting.'
             : (!t.is_bookable && t.booking_enabled ? ' Clients cannot book you right now, check Pause my page or tap Get help.' : '');
     if (days >= 2) {
@@ -14907,7 +14922,7 @@ function tbRenderTrialBanner() {
   } else {
     if (title) title.textContent = 'Your free month has ended';
     if (sub)   sub.textContent = 'Join Glow Up, $10.99 a month, to keep taking bookings. Your gallery and profile stay exactly as they are.';
-    if (cta) cta.style.display = 'block';
+    if (cta) { cta.textContent = 'Subscribe, $10.99/month'; cta.style.display = 'block'; }
   }
   el.style.display = 'block';
 }
