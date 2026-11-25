@@ -554,7 +554,7 @@
         <summary>What changed on Nov 24</summary>
         <div class="fold-body"><ul style="padding-left:18px;font-size:13.5px;line-height:1.7;">
           <li>Google Analytics on every public page, counting only the real site.</li>
-          <li>Four answer pages for Google and the chat assistants: finding a nail tech in Phoenix, nails today, how techs get clients, and Vagaro, StyleSeat and GlossGenius.</li>
+          <li>Answer pages for Google and the chat assistants: finding a nail tech in Phoenix, nails today, how techs get clients, and Vagaro, StyleSeat and GlossGenius; then the best app to find a nail tech and salon suite techs.</li>
           <li>A page for every tech with 3 or more photos, plus the tech gallery by city, rebuilt every night.</li>
           <li>The homepage and tech guide link to the new pages; the sitemap and the AI summary file list them all.</li>
         </ul></div>
@@ -1885,7 +1885,7 @@
     { date: '2026-11-16', days: 28, impressions: 878, clicks: 9, position: 8.2, note: 'before the SEO work' }
   ];
   const SEO = {};
-  const ANSWER_LABELS = { 'answer:find-a-nail-tech-phoenix': 'Find a nail tech in Phoenix', 'answer:nails-today': 'Nails today', 'answer:get-nail-clients': 'How techs get clients', 'answer:vagaro-styleseat-glossgenius': 'Vagaro, StyleSeat, GlossGenius', 'tech-page': 'Tech pages', techs: 'Tech gallery' };
+  const ANSWER_LABELS = { 'answer:find-a-nail-tech-phoenix': 'Find a nail tech in Phoenix', 'answer:nails-today': 'Nails today', 'answer:get-nail-clients': 'How techs get clients', 'answer:vagaro-styleseat-glossgenius': 'Vagaro, StyleSeat, GlossGenius', 'answer:best-apps-to-find-a-nail-tech': 'Best app to find a nail tech', 'answer:salon-suite-nail-techs': 'Salon suite techs', 'tech-page': 'Tech pages', techs: 'Tech gallery' };
   Object.assign(PAGES, ANSWER_LABELS);
   async function renderSeo() {
     if (!SEO.now) {
@@ -1894,7 +1894,7 @@
         const locs = xml.match(/<loc>[^<]+<\/loc>/g) || [];
         if (locs.length) SEO.now = { total: locs.length,
           tech: locs.filter(function (l) { return /\/techs\/[^<]+\.html/.test(l); }).length,
-          answer: locs.filter(function (l) { return /(find-a-nail-tech-phoenix|nails-today|get-nail-clients|vagaro-styleseat-glossgenius)\.html/.test(l); }).length };
+          answer: locs.filter(function (l) { return /(find-a-nail-tech-phoenix|nails-today|get-nail-clients|vagaro-styleseat-glossgenius|best-apps-to-find-a-nail-tech|salon-suite-nail-techs)\.html/.test(l); }).length };
       } catch (e) { /* stays empty; the rows show a dash */ }
     }
     const n = SEO.now;

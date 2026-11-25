@@ -120,6 +120,63 @@ PAGES = [
       ("Does My Nail Connection take a cut of my bookings?", "No. No commission and no per-booking fee, ever."),
     ],
   },
+  {
+    "slug": "best-apps-to-find-a-nail-tech",
+    "title": "Best app to find a nail tech near you",
+    "meta": "Booking apps and a nails-only gallery do different jobs. How to pick the right app to find a nail tech whose work you love, close to you.",
+    "eyebrow": "For clients",
+    "h1": "What's the best app to find a nail tech near me?",
+    "short": "It depends on the job. If you already know your nail tech, use whatever she books through. If you are looking for a new one, use an app that shows real work first. My Nail Connection is a free, nails-only app: browse a Gallery of real sets by shape, style and distance, then book, call or text the tech. Clients never pay a booking fee.",
+    "sections": [
+      ("Two kinds of apps",
+       ["<b>Booking and business apps</b> such as Vagaro, StyleSeat, GlossGenius, Booksy and Fresha run a beauty pro's calendar, payments and reminders, and several also let you search for pros. They cover many kinds of beauty work.",
+        "<b>A nails-only discovery app</b> such as My Nail Connection is built for finding the right nail tech by her actual work, close to you, before you book."]),
+      ("What to look for when you choose a new tech",
+       ["Real photos of her own work, in the look you want.",
+        "Filters for shape, type and style, not only a name search.",
+        "Distance, so she is close enough for every fill.",
+        "An easy way to reach her: book, call or text."]),
+      ("Where My Nail Connection fits",
+       ["Nails only, so every photo in the Gallery is nail work.",
+        "Filter by shape, type, style and distance, and save the looks you love.",
+        "See who has an opening today on the What's happening board.",
+        "Free for clients, with no booking fees. A tech who already uses a booking app can add her link, and the Book Now button on her profile sends you there."]),
+    ],
+    "faq": [
+      ("Is My Nail Connection free for clients?", "Yes. It is free for clients, with no booking fees."),
+      ("Can I book a tech who uses Vagaro, StyleSeat or GlossGenius?", "Yes, if she has added her booking link to her profile. The Book Now button sends you to her booking page, where you book the way you already do."),
+      ("Is there an app just for nails?", "Yes. My Nail Connection is built for nails only: nail techs and the clients looking for them."),
+      ("Does it work outside Phoenix?", "Yes. Nail techs join from all over the US, and the Phoenix area has the most of them so far."),
+    ],
+  },
+  {
+    "slug": "salon-suite-nail-techs",
+    "title": "Getting new clients when you rent a salon suite",
+    "meta": "Renting a salon suite means no front desk sending clients your way. How suite nail techs get found by their work, for free, with no commission.",
+    "eyebrow": "For nail techs",
+    "h1": "I rent a salon suite. How do new clients find me?",
+    "short": "In a salon suite there is no front desk sending walk-ins your way, so new clients have to find you. Put your real work where people search by look and distance. A free My Nail Connection profile and gallery shows your sets to clients nearby, lets you post Available now when you have an opening, and keeps your own booking link. No commission and no per-booking fee.",
+    "sections": [
+      ("Your gallery is your storefront",
+       ["A suite gives you your own space, your own hours and your own prices. It also means every new client is yours to find.",
+        "When someone is choosing a new nail tech, her work is the first thing they want to see. Put it where they are looking."]),
+      ("What to set up",
+       ["A free profile with your city, your styles and your sets. Photos are free, up to 50 a month, and they never expire.",
+        "Tag every set by shape, type and style, so clients filtering for that look find you.",
+        "Add your booking link if you use Vagaro, StyleSeat, GlossGenius or another app. A Book Now button sends clients straight to it.",
+        "Choose Hide my street address if you would rather not show your suite's address on your public profile."]),
+      ("Fill the gaps in your book",
+       ["A client cancels? Post <b>Available now</b> with an end time, and your work glows in the Gallery for clients looking right now.",
+        "Clients post what they need and when. Reply <b>Interested</b> and they get your profile and your Call, Text or Book button.",
+        "Choose your reach, 10, 25 or 50 miles or your whole state, and get a notification when a request lands within it."]),
+    ],
+    "faq": [
+      ("Does My Nail Connection cost anything for suite techs?", "It is free to join and free to stay. The only paid feature is My Nail Connection's own booking, which is optional and free for your first month."),
+      ("Do I have to leave my booking app?", "No. Add your booking link and keep using the app you have. My Nail Connection adds a place for clients to find you by your work."),
+      ("Will my suite address show?", "Only if you want it to. Turn on Hide my street address and clients see your city, not your street."),
+      ("Does My Nail Connection take a commission?", "No. There is no commission and no per-booking fee, and your clients are never charged to book you."),
+    ],
+  },
 ]
 
 CSS = """
@@ -174,7 +231,7 @@ def build(p):
         f"<h2>{esc(h)}</h2>\n<ul>\n" + "\n".join(f"<li>{li}</li>" for li in items) + "\n</ul>"
         for h, items in p["sections"])
     faq = "\n".join(f"<details><summary>{esc(q)}</summary><p>{esc(a)}</p></details>" for q, a in p["faq"])
-    others = "\n".join(f'<li><a href="/{o["slug"]}.html">{esc(o["h1"])}</a></li>' for o in PAGES if o is not p)
+    others = "\n".join(f'<li><a href="/{o["slug"]}.html">{esc(o["h1"])}</a></li>' for o in PAGES if o is not p and (p.get("draft") or not o.get("draft")))
     return f"""<!DOCTYPE html>
 <html lang="en">
 <head>

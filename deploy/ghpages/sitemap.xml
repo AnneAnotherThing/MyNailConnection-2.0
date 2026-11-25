@@ -69,6 +69,18 @@
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
+  <url>
+    <loc>https://mynailconnection.com/best-apps-to-find-a-nail-tech.html</loc>
+    <lastmod>2026-11-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://mynailconnection.com/salon-suite-nail-techs.html</loc>
+    <lastmod>2026-11-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
   <!-- TECH PAGES START (build_tech_pages.py) -->
   <url>
     <loc>https://mynailconnection.com/techs/</loc>
