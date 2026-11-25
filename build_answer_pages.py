@@ -230,7 +230,8 @@ def build(p):
 </html>
 """
 
-for p in PAGES:
-    out = pathlib.Path(p["slug"] + ".html")
-    out.write_text(build(p), encoding="utf-8")
-    print("wrote", out)
+if __name__ == "__main__":
+    for p in PAGES:
+        out = pathlib.Path(p["slug"] + ".html")
+        out.write_text(build(p), encoding="utf-8")
+        print("wrote", out)
