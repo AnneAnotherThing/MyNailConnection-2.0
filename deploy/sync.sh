@@ -381,6 +381,7 @@ copy_if_exists sw.js                   "$GH/sw.js"
 copy_if_exists sitemap.xml             "$GH/sitemap.xml"
 copy_if_exists robots.txt              "$GH/robots.txt"
 copy_if_exists llms.txt                "$GH/llms.txt"
+copy_if_exists ga4.js                  "$GH/ga4.js"   # shared GA4 loader, live domain only (2026-11-24)
 sync_dir images      "$GH/images"
 sync_dir app-screens "$GH/app-screens"
 

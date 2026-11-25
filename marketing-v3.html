@@ -271,6 +271,8 @@
   const GA4_ID = 'G-GT7YP1X70K';
   (function(){
     if (!GA4_ID || GA4_ID === 'G-XXXXXXXXXX') return;   // No-op until a real ID is pasted
+    // Live domain only: localhost, previews and copies never send hits (2026-11-24).
+    if (location.hostname !== 'mynailconnection.com' && location.hostname !== 'www.mynailconnection.com') return;
     var s = document.createElement('script'); s.async = true;
     s.src = 'https://www.googletagmanager.com/gtag/js?id=' + GA4_ID;
     document.head.appendChild(s);
