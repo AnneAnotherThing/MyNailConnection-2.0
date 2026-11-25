@@ -395,6 +395,11 @@ sync_dir images      "$GH/app/images"
 # ── Leslie campaign page + downloadable campaign assets ──────────────────
 copy_if_exists leslie.html "$GH/leslie.html"
 copy_if_exists whats-new.html "$GH/whats-new.html"
+# Answer pages for Google and the chat assistants (locked 2026-11-24; built by build_answer_pages.py)
+copy_if_exists find-a-nail-tech-phoenix.html "$GH/find-a-nail-tech-phoenix.html"
+copy_if_exists nails-today.html "$GH/nails-today.html"
+copy_if_exists get-nail-clients.html "$GH/get-nail-clients.html"
+copy_if_exists vagaro-styleseat-glossgenius.html "$GH/vagaro-styleseat-glossgenius.html"
 copy_if_exists social-kit.html "$GH/social-kit.html"
 sync_dir campaign-assets "$GH/campaign-assets"
 
