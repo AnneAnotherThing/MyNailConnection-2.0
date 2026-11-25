@@ -50,10 +50,12 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+  # Upload and deploy are two jobs (2026-11-24). In one job the deploy step
+  # can look for the upload a fraction of a second too early and find
+  # nothing ("No artifacts named github-pages"; actions/deploy-pages#451).
+  # It failed three times in a row on Nov 24 with our ~250 MB bundle. A
+  # second job only starts once the upload is finished and listed.
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -67,6 +69,13 @@ jobs:
         with:
           path: ./deploy/ghpages
 
+  deploy:
+    needs: build
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5
