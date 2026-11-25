@@ -259,6 +259,7 @@ footer a{color:var(--muted)}
   fetch('https://nwqnakoongrorbwnrqzc.supabase.co/rest/v1/techs_public?select=id', { headers: { apikey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im53cW5ha29vbmdyb3Jid25ycXpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNzczMjUsImV4cCI6MjA5ODk1MzMyNX0.TFFMlg9VjB0cyJwbgmVbeatFYQFaF1Ri0nrH0GwhHJs', Authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im53cW5ha29vbmdyb3Jid25ycXpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNzczMjUsImV4cCI6MjA5ODk1MzMyNX0.TFFMlg9VjB0cyJwbgmVbeatFYQFaF1Ri0nrH0GwhHJs' } })
     .then(function (r) { return r.ok ? r.json() : null; })
     .then(function (rows) { if (!Array.isArray(rows)) return;
+    if (!rows.length) return;  // an empty answer is a fault, never "hide everyone"
     var live = {}; rows.forEach(function (r) { live[r.id] = 1; });
     document.querySelectorAll('.card[data-id]').forEach(function (c) { if (!live[c.getAttribute('data-id')]) c.hidden = true; });
     document.querySelectorAll('main .cards').forEach(function (g) {

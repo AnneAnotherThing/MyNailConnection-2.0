@@ -139,7 +139,8 @@ def live_check(tech_id=None):
       document.querySelector('main').innerHTML = '<p class="short"><b>Not listed</b>This nail tech is not listed on My Nail Connection right now. <a href="/techs/">See the other nail techs</a> or open the free app to browse by style and distance.</p>';
     }"""
     else:
-        act = """var live = {}; rows.forEach(function (r) { live[r.id] = 1; });
+        act = """if (!rows.length) return;  // an empty answer is a fault, never "hide everyone"
+    var live = {}; rows.forEach(function (r) { live[r.id] = 1; });
     document.querySelectorAll('.card[data-id]').forEach(function (c) { if (!live[c.getAttribute('data-id')]) c.hidden = true; });
     document.querySelectorAll('main .cards').forEach(function (g) {
       if (!g.querySelector('.card:not([hidden])')) { g.hidden = true; var h = g.previousElementSibling; if (h && h.tagName === 'H2') h.hidden = true; }
