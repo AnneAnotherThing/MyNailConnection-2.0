@@ -52,13 +52,24 @@ CONTACT_RE = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[a-z]{2,}|\+?1?[ .-]
 
 def web_bio(s):
     # Phone numbers and emails stay in the app; the open web gets a pointer.
-    return CONTACT_RE.sub("(contact details in the app)", s or "").strip()
+    s = CONTACT_RE.sub("(contact details in the app)", s or "")
+    return re.sub(r"\s*\(contact details in the app\)", " (contact details in the app)", s).strip()
 
 def thumb_img(url, alt, size=300):
     # The app writes <name>_thumb.jpg (500px) beside every photo; fall back to the full one.
     t = re.sub(r"\.(jpe?g|png|webp|heic)$", "_thumb.jpg", url, flags=re.I)
     return (f'<img src="{esc(t)}" onerror="this.onerror=null;this.src=\'{esc(url)}\'" loading="lazy" '
             f'decoding="async" width="{size}" height="{size}" alt="{esc(alt)}">')
+
+def nice_name(n):
+    # Capitalize words a tech typed in lowercase; keep particles like "de" lowercase.
+    small = {"de", "del", "la", "las", "los", "y", "van", "von", "da", "di"}
+    out = []
+    for i, w in enumerate((n or "").strip().split()):
+        if w.islower() and not (i and w in small):
+            w = w[:1].upper() + w[1:]
+        out.append(w)
+    return " ".join(out)
 
 def tidy_city(c):
     return " ".join(w.capitalize() for w in (c or "").strip().split())
@@ -77,7 +88,7 @@ CSS = BASE_CSS + """
 .card div{padding:10px 12px}.card b{display:block}.card span{color:var(--muted);font-size:14px}
 """
 
-def head(title, desc, url, image, schema):
+def head(title, desc, url, image, schema, ogtype="profile"):
     return f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -88,7 +99,7 @@ def head(title, desc, url, image, schema):
 <link rel="canonical" href="{url}">
 <meta property="og:title" content="{esc(title)}">
 <meta property="og:description" content="{esc(desc)}">
-<meta property="og:type" content="profile">
+<meta property="og:type" content="{ogtype}">
 <meta property="og:url" content="{url}">
 <meta property="og:image" content="{esc(image)}">
 <meta property="og:site_name" content="My Nail Connection">
@@ -116,11 +127,11 @@ FOOT = """<footer><a href="/">Home</a> Â· <a href="/techs/">All nail techs</a> Â
 def cta(tech_id):
     return f"""<div class="cta">
 <p>See her full gallery and book, call or text her in the free My Nail Connection app.</p>
-<a href="/app/?tech={esc(tech_id)}&amp;src=techpage">Open her profile</a><a href="{APP_STORE}">App Store</a><a href="{PLAY}">Google Play</a>
+<a href="/app/?tech={esc(tech_id)}&amp;src=techpage">See her in the app</a><a href="{APP_STORE}">App Store</a><a href="{PLAY}">Google Play</a>
 </div>"""
 
 def tech_page(t, slug):
-    name = t["name"].strip()
+    name = nice_name(t["name"])
     city, state = tidy_city(t.get("city")), (t.get("state") or "").strip().upper()
     where = ", ".join(x for x in (city, state) if x)
     url = f"{SITE}/techs/{slug}.html"
@@ -145,7 +156,12 @@ def tech_page(t, slug):
         thumb_img(p["url"], (" ".join((p.get("tags") or [])[:3]) + " nails by " + name) if p.get("tags") else "Nail set by " + name)
         for p in photos)
     shop = f'<p class="meta">{esc(t["shop_name"].strip())}</p>' if t.get("shop_name") else ""
-    bio = f'<h2>About {esc(name)}</h2>\n<p class="bio">{esc(web_bio(t["bio"]))}</p>' if (t.get("bio") or "").strip() else ""
+    if (t.get("bio") or "").strip():
+        bio = f'<h2>About {esc(name)}</h2>\n<p class="bio">{esc(web_bio(t["bio"]))}</p>'
+    else:
+        bio = (f'<h2>About {esc(name)}</h2>\n<p>{esc(name)} is a nail tech' + (f' in {esc(where)}' if where else '')
+               + '.' + (f' On My Nail Connection she lists {esc(", ".join(tags[:5]))}.' if tags else '')
+               + ' The gallery above is her own work, and you can reach her through the free My Nail Connection app.</p>')
     tag_ul = "<ul class=\"tags\">" + "".join(f"<li>{esc(x)}</li>" for x in tags) + "</ul>" if tags else ""
     ext = ""
     if (t.get("booking_link") or "").startswith("http"):
@@ -184,7 +200,7 @@ def index_page(entries):
     for w in order:
         cards = "\n".join(
             f'<a class="card" href="/techs/{s}.html">{thumb_img(t["photos"][0]["url"], "")}'
-            f'<div><b>{esc(t["name"].strip())}</b><span>{esc(", ".join((t.get("tags") or [])[:3]))}</span></div></a>'
+            f'<div><b>{esc(nice_name(t["name"]))}</b><span>{esc(", ".join((t.get("tags") or [])[:3]))}</span></div></a>'
             for s, t in sorted(by_place[w], key=lambda e: e[1]["name"].lower()))
         blocks.append(f"<h2>{esc(w)}</h2>\n<div class=\"cards\">\n{cards}\n</div>")
     schema = {"@context": "https://schema.org", "@type": "CollectionPage", "url": url,
@@ -192,7 +208,7 @@ def index_page(entries):
               "hasPart": [{"@type": "ProfilePage", "url": f"{SITE}/techs/{s}.html"} for s, _ in entries]}
     title = "Nail techs on My Nail Connection, by city"
     desc = "Browse nail techs on My Nail Connection by city and see their real work before you book. Free for clients."
-    return head(title, desc, url, f"{SITE}/og-image-2026-09.png", schema) + f"""<section class="hero"><div class="in">
+    return head(title, desc, url, f"{SITE}/og-image-2026-09.png", schema, "website") +f"""<section class="hero"><div class="in">
 <div class="eyebrow">For clients</div>
 <h1>Nail techs on My Nail Connection</h1>
 </div></section>
