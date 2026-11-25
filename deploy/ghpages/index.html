@@ -240,7 +240,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link rel="dns-prefetch" href="https://nwqnakoongrorbwnrqzc.supabase.co"/>
 <link rel="preconnect" href="https://nwqnakoongrorbwnrqzc.supabase.co" crossorigin/>
-<link rel="preload" as="image" imagesrcset="images/lady-card-480.webp 480w, images/lady-card-720.webp 720w, images/lady-card.webp 900w" imagesizes="(max-width: 640px) 70vw, 380px" fetchpriority="high"/>
+<link rel="preload" as="image" imagesrcset="images/mncLogo-round-256.webp 256w, images/mncLogo-round-512.webp 512w" imagesizes="(max-width: 700px) 112px, 152px" fetchpriority="high"/>
 
 <!-- Async font load, avoids render-blocking. Falls back to sync via noscript. -->
 <link rel="preload" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'"/>
@@ -399,7 +399,9 @@
   .eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 2.6px; text-transform: uppercase; color: var(--rose-dark); }
   h1, h2, h3 { font-family: 'Playfair Display', Georgia, serif; color: var(--ink); }
   h2.title { font-size: clamp(30px, 3.6vw, 46px); font-weight: 700; line-height: 1.12; letter-spacing: -0.5px; text-wrap: pretty; }
-  h2.title em, h1 em { font-style: italic; font-weight: 600; color: var(--rose-dark); }
+  /* Headline accent words: upright and the same ink as the rest (2026-11-24, Anne: "the italics
+     scream AI"). The <em> stays in the markup for meaning; it just no longer changes the look. */
+  h2.title em, h1 em { font-style: normal; font-weight: inherit; color: inherit; }
   .lead { font-size: 16px; line-height: 1.7; color: var(--muted); max-width: 540px; }
   .lead strong { color: var(--ink); font-weight: 600; }
 
@@ -485,7 +487,7 @@
   .hero-grid { position: relative; z-index: 1; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(420px, 100%), 1fr)); gap: 48px; align-items: center; }
   .hero-copy { display: flex; flex-direction: column; gap: 22px; max-width: 580px; }
   /* the rose-gold coin above the kicker, the same mark as the nav, cut to its circle */
-  .hero-mark { width: 76px; height: 76px; border-radius: 50%; margin-bottom: -6px; box-shadow: var(--shadow-raised); }
+  .hero-mark { width: 152px; height: 152px; border-radius: 50%; margin-bottom: -2px; box-shadow: var(--shadow-raised); border: 4px solid #fff; }
   .hero h1 { font-size: clamp(40px, 5.4vw, 72px); font-weight: 700; line-height: 1.06; letter-spacing: -1px; text-wrap: pretty; }
   .hero h1 .w { display: inline-block; opacity: 0; transform: translateY(14px); animation: wordIn .7s var(--ease-out) forwards; }
   .hero h1 .w:nth-child(1) { animation-delay: .05s } .hero h1 .w:nth-child(2) { animation-delay: .17s } .hero h1 .w:nth-child(3) { animation-delay: .29s }
@@ -498,6 +500,82 @@
 
   .hero-art { position: relative; min-height: 520px; display: flex; justify-content: center; }
   .hero-art > img { width: min(440px, 100%); aspect-ratio: 1; object-fit: cover; border-radius: 22px; box-shadow: var(--shadow-raised); }
+  /* ── HERO PHONE (2026-11-24, Anne: "a scrolling phone would be more appropriate alongside our
+     girl"). The hat girl is the brand; the phone beside her runs MNC's real Gallery screen
+     (tabs, All Photos, Within chips, bottom bar, from app-screens/browse-style.jpg) filled with
+     the techs' real sets, scrolling slowly the way a client browses. Hover pauses it. The only
+     motion in the hero; reduced motion holds it still. */
+  .hero-art { align-items: center; }
+  .phone { position: absolute; right: -6px; bottom: -26px; width: 236px; aspect-ratio: 236 / 486; z-index: 2;
+    border-radius: 40px; padding: 9px; background: linear-gradient(150deg, #3a3a3f 0%, #141317 45%, #2a2a2e 100%);
+    box-shadow: 0 1px 0 rgba(255,255,255,.25) inset, 0 0 0 1px rgba(20,19,23,.6), 0 30px 60px rgba(20,19,23,.28), 0 12px 24px rgba(20,19,23,.18); }
+  .ph-screen { position: relative; height: 100%; border-radius: 32px; overflow: hidden; background: #EEEEEE; display: flex; flex-direction: column; }
+  .ph-island { position: absolute; top: 8px; left: 50%; width: 74px; height: 20px; margin-left: -37px; border-radius: 12px; background: #0b0b0d; z-index: 3; }
+  .ph-head { padding: 34px 8px 6px; background: #EEEEEE; box-shadow: 0 1px 0 rgba(20,19,23,.06); z-index: 2; }
+  .ph-tabs { display: flex; justify-content: space-between; font-size: 9px; color: #6d6d72; padding: 0 4px 5px; border-bottom: 1px solid rgba(20,19,23,.08); }
+  .ph-tabs b { color: #141317; border-bottom: 1.5px solid #141317; padding-bottom: 4px; margin-bottom: -6px; }
+  .ph-row { display: flex; gap: 4px; align-items: center; margin-top: 6px; }
+  .ph-pill { font-size: 8px; font-weight: 600; padding: 3px 7px; border-radius: 100px; background: #fff; border: 1px solid rgba(20,19,23,.1); color: #3a3a3f; white-space: nowrap; }
+  .ph-pill.on { background: linear-gradient(140deg, #4A4A4F, #141317); color: #fff; border-color: #141317; }
+  .ph-pill.rose { color: #A2636C; border-color: rgba(162,99,108,.45); background: #FBF1F1; }
+  .ph-within { font-size: 7px; letter-spacing: .12em; text-transform: uppercase; font-weight: 700; color: #7a6b70; margin-right: 2px; }
+  .ph-feed { flex: 1; overflow: hidden; position: relative; }
+  .ph-scroll { animation: phFeed 38s linear infinite; will-change: transform; }
+  .phone:hover .ph-scroll { animation-play-state: paused; }
+  @keyframes phFeed { from { transform: translateY(0); } to { transform: translateY(-50%); } }
+  .ph-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; padding-bottom: 2px; }
+  .ph-tile { position: relative; aspect-ratio: 1; overflow: hidden; background: #ddd; }
+  .ph-tile img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .ph-heart { position: absolute; top: 4px; right: 4px; width: 15px; height: 15px; border-radius: 50%; background: rgba(255,255,255,.92); display: grid; place-items: center; }
+  .ph-live { position: absolute; left: 3px; bottom: 3px; font-size: 6.5px; font-weight: 700; color: #1F3D2E; background: #fff; border-radius: 100px; padding: 2px 5px 2px 4px; display: flex; gap: 3px; align-items: center; box-shadow: 0 0 0 2px rgba(74,160,110,.35); }
+  .ph-live i { width: 5px; height: 5px; border-radius: 50%; background: #3FA36B; }
+  .ph-nav { display: flex; justify-content: space-around; padding: 7px 6px 12px; background: #EEEEEE; font-size: 8px; font-weight: 600; color: #7a6b70; box-shadow: 0 -1px 0 rgba(20,19,23,.06); z-index: 2; }
+  .ph-nav .on { color: #A2636C; background: #F7E2E3; border-radius: 8px; padding: 3px 12px; }
+  @media (prefers-reduced-motion: reduce) { .ph-scroll { animation: none; } }
+  @media (max-width: 1000px) and (min-width: 701px) { .phone { width: 250px; } }
+  /* Phone scenes: Home, then a tap on Gallery, the Gallery scrolling, then the Shape tab with
+     Almond tapped and the grid narrowed to almond sets, then back to Home. Driven by the small
+     script after the hero. Reduced motion: the Gallery, still. */
+  /* Centerpiece (Anne: "remove her and make the pic over the title larger.. tilt the phone"):
+     the phone stands alone at a still 3D angle. Nothing tilts or moves; only the screen plays. */
+  .phone { position: relative; left: auto; right: auto; bottom: auto; width: 290px; border-radius: 46px; padding: 11px;
+    transform: perspective(1600px) rotateY(-18deg) rotateX(7deg) rotateZ(4deg);
+    box-shadow: 0 1px 0 rgba(255,255,255,.25) inset, 0 0 0 1px rgba(20,19,23,.6), 34px 40px 70px rgba(20,19,23,.26), 12px 16px 26px rgba(20,19,23,.16); }
+  .phone .ph-screen { border-radius: 36px; }
+  .hero-art { min-height: 0; padding: 20px 0 30px; }
+  .ph-body { position: relative; flex: 1; overflow: hidden; }
+  .ph-scene { position: absolute; inset: 0; display: flex; flex-direction: column; opacity: 0; transition: opacity .45s ease; }
+  .phone[data-scene="home"] .s-home, .phone[data-scene="gal"] .s-gal, .phone[data-scene="shape"] .s-shape { opacity: 1; }
+  .s-home { padding: 34px 10px 0; gap: 6px; background: #EEEEEE; }
+  .ph-brand { display: flex; flex-direction: column; border-bottom: 1px solid rgba(162,99,108,.25); padding-bottom: 6px; }
+  .ph-brand i { font-family: 'Playfair Display', Georgia, serif; font-size: 12px; font-weight: 700; color: #141317; }
+  .ph-brand span { font-size: 6.5px; letter-spacing: .14em; text-transform: uppercase; font-weight: 700; color: #A2636C; }
+  .ph-hi { font-family: 'Playfair Display', Georgia, serif; font-size: 11.5px; font-weight: 700; color: #141317; display: flex; flex-direction: column; margin-top: 4px; }
+  .ph-hi small { font-family: 'DM Sans', sans-serif; font-size: 7.5px; font-weight: 400; color: #4A4A4F; }
+  .ph-hi em { color: #A2636C; }
+  .ph-search { font-size: 7.5px; color: #8a8a8f; background: #fff; border: 1px solid rgba(20,19,23,.08); border-radius: 100px; padding: 6px 9px; }
+  .ph-by { font-size: 6.5px; letter-spacing: .14em; text-transform: uppercase; font-weight: 700; color: #6d6068; margin-top: 2px; }
+  .ph-card { display: flex; gap: 8px; align-items: center; background: #fff; border: 1px solid rgba(20,19,23,.08); border-radius: 10px; padding: 7px; box-shadow: 0 2px 0 rgba(162,99,108,.18); transition: transform .2s, box-shadow .2s; }
+  .ph-card img, .ph-ico { width: 34px; height: 34px; border-radius: 8px; object-fit: cover; flex: 0 0 34px; display: grid; place-items: center; background: #FBF7F7; }
+  .ph-card b { display: block; font-size: 9px; color: #141317; }
+  .ph-card span { font-size: 7px; color: #6d6068; line-height: 1.3; }
+  .ph-open { display: flex; gap: 8px; align-items: center; border-radius: 10px; padding: 8px 9px; background: linear-gradient(140deg, #4A4A4F, #141317); color: #fff; }
+  .ph-open i { width: 7px; height: 7px; border-radius: 50%; background: #3FA36B; box-shadow: 0 0 0 3px rgba(63,163,107,.25); flex: 0 0 7px; }
+  .ph-open b { display: block; font-size: 9px; } .ph-open span { font-size: 7px; opacity: .8; }
+  .ph-open.wk { background: #fff; color: #141317; border: 1px solid rgba(20,19,23,.08); }
+  .ph-open.wk i { background: #DEB3B5; box-shadow: none; }
+  .phone.press-gallery .c-gallery { transform: scale(.96); box-shadow: 0 0 0 1.5px #A2636C; }
+  .ph-shapes .ph-pill { transition: background .25s, color .25s; }
+  .phone.pick-almond .p-almond { background: linear-gradient(140deg, #4A4A4F, #141317); color: #fff; border-color: #141317; }
+  .s-shape .ph-static .ph-grid { opacity: 0; transition: opacity .35s ease; }
+  .phone.pick-almond .s-shape .ph-static .ph-grid { opacity: 1; }
+  .ph-static { flex: 1; overflow: hidden; }
+  .s-shape .ph-grid { grid-template-columns: repeat(2, 1fr); }
+  .ph-tap { position: absolute; width: 26px; height: 26px; margin: -13px 0 0 -13px; border-radius: 50%; pointer-events: none; z-index: 5;
+    border: 2px solid rgba(162,99,108,.9); background: rgba(222,179,181,.35); opacity: 0; transform: scale(.4); }
+  .ph-tap.go { animation: phTap .6s ease-out; }
+  @keyframes phTap { 0% { opacity: 0; transform: scale(.4); } 30% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(1.6); } }
+  @media (prefers-reduced-motion: reduce) { .ph-scene { transition: none; } .ph-tap { display: none; } }
   .tuck { position: absolute; background: #fff; border: 1.5px solid var(--border-strong); border-radius: 18px; padding: 8px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 8px; }
   .tuck img { width: 100%; height: auto; aspect-ratio: 1; object-fit: cover; border-radius: 12px; }
   .tuck .pill { align-self: flex-start; }
@@ -544,7 +622,7 @@
   .band-copy { display: flex; flex-direction: column; gap: 20px; max-width: 520px; }
   .band .eyebrow { color: var(--rose); }
   .band h2 { font-size: clamp(32px, 3.8vw, 50px); font-weight: 700; line-height: 1.1; letter-spacing: -0.5px; color: #fff; text-wrap: pretty; }
-  .band h2 em { font-style: italic; font-weight: 400; color: var(--rose); }
+  .band h2 em { font-style: normal; font-weight: inherit; color: inherit; }
   .band p { font-size: 16px; line-height: 1.75; color: rgba(255,255,255,0.72); }
   .band p strong { color: #fff; font-weight: 600; }
   .band-order { display: flex; gap: 28px; flex-wrap: wrap; margin-top: 6px; }
@@ -625,7 +703,7 @@
   .final .wrap { display: flex; flex-direction: column; gap: 18px; align-items: center; text-align: center; }
   .final-mark { width: 88px; height: 88px; border-radius: 22px; object-fit: cover; box-shadow: 0 14px 30px rgba(0,0,0,0.4); }
   .final h2 { font-size: clamp(32px, 4vw, 54px); font-weight: 700; line-height: 1.1; letter-spacing: -0.5px; color: #fff; }
-  .final h2 em { font-style: italic; font-weight: 400; color: var(--rose); }
+  .final h2 em { font-style: normal; font-weight: inherit; color: inherit; }
   .final p { font-size: 16px; line-height: 1.7; color: rgba(255,255,255,0.72); max-width: 480px; }
   .final .store-btns { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-top: 8px; }
   footer { background: var(--ink); color: rgba(255,255,255,0.7); padding: 0 0 36px; }
@@ -651,9 +729,15 @@
     .hero { padding: 48px 0 56px; }
     .hero-copy { text-align: center; align-items: center; margin: 0 auto; }
     .hero-actions, .hero-stores { justify-content: center; }
-    .hero-art { min-height: 0; margin-top: 8px; }
+    .hero-art { min-height: 0; margin-top: 8px; padding: 10px 0 24px; }
+    .phone { width: 230px; border-radius: 38px; padding: 9px; transform: perspective(1400px) rotateY(-12deg) rotateX(5deg) rotateZ(3deg); }
+    .phone .ph-screen { border-radius: 30px; }
+    .s-home { padding-top: 24px; gap: 4px; }
+    .ph-screen { border-radius: 23px; }
+    .ph-island { width: 50px; height: 14px; margin-left: -25px; top: 6px; }
+    .ph-head { padding-top: 24px; }
     .hero-art > img { width: min(320px, 78vw); }
-    .hero-mark { width: 64px; height: 64px; }
+    .hero-mark { width: 112px; height: 112px; }
     .tuck.t1 { left: 0; bottom: 8px; width: 132px; }
     .tuck.t2 { right: 0; top: 8px; width: 120px; }
     .tuck.t3 { display: none; }
@@ -704,7 +788,7 @@
   <div class="hero-bg" aria-hidden="true"><div class="bloom"></div><div class="bloom b2"></div><div class="brim"></div><div class="brim r2"></div><div class="brim r3"></div><div class="brim r4"></div></div>
   <div class="wrap hero-grid">
     <div class="hero-copy">
-      <img class="hero-mark" src="images/mncLogo-round-256.webp" width="256" height="256" alt="My Nail Connection logo" decoding="async"/>
+      <img class="hero-mark" src="images/mncLogo-round-256.webp" srcset="images/mncLogo-round-256.webp 256w, images/mncLogo-round-512.webp 512w" sizes="(max-width: 700px) 112px, 152px" width="256" height="256" alt="My Nail Connection logo" decoding="async" fetchpriority="high"/>
       <div class="eyebrow">Find &nbsp;·&nbsp; Connect &nbsp;·&nbsp; Glow</div>
       <h1><span class="w">Your</span> <span class="w">work</span> <span class="w">is</span> <span class="w">why</span> <span class="w">clients</span> <span class="w">pick</span> <span class="w">you,</span> <em class="w">already.</em></h1>
       <p class="hero-sub">Now it is how they find you too. Post your sets, tag them by shape, type and style, and let clients book, call or text. Free for techs, free for clients. Nails only.</p>
@@ -725,14 +809,80 @@
     </div>
 
     <div class="hero-art">
-      <img src="images/lady-card-720.webp" srcset="images/lady-card-480.webp 480w, images/lady-card-720.webp 720w, images/lady-card.webp 900w" sizes="(max-width: 640px) 78vw, 440px" width="900" height="900" alt="The My Nail Connection hat girl" decoding="async" fetchpriority="high"/>
-      <div class="tuck t1" aria-hidden="true"><img src="images/gallery/g03.webp" width="420" height="420" alt="" loading="lazy" decoding="async"/><span class="pill now"><span class="dot"></span>Available now</span></div>
-      <div class="tuck t2" aria-hidden="true"><img src="images/gallery/g05.webp" width="420" height="420" alt="" loading="lazy" decoding="async"/><span class="pill">Oval · Cat eye</span></div>
-      <div class="tuck t3" aria-hidden="true"><img src="images/gallery/g10.webp" width="420" height="420" alt="" loading="lazy" decoding="async"/></div>
+      <div class="phone" aria-hidden="true" data-scene="home">
+        <div class="ph-screen">
+          <div class="ph-island"></div>
+          <div class="ph-body">
+            <div class="ph-scene s-home">
+              <div class="ph-brand"><i>My Nail Connection</i><span>Find · Connect · Glow</span></div>
+              <div class="ph-hi">Good afternoon.<small>Here's what's <em>beautiful</em> today.</small></div>
+              <div class="ph-search">Know your tech? Search by name</div>
+              <div class="ph-by">Browse by</div>
+              <div class="ph-card c-gallery"><img src="images/theLook.jpg" width="220" height="220" alt="" loading="lazy" decoding="async"/><div><b>Gallery</b><span>Browse nail photos, filter by shape and style</span></div></div>
+              <div class="ph-card"><span class="ph-ico"><svg viewBox="0 0 40 40" width="26" height="26"><circle cx="20" cy="20" r="15" fill="none" stroke="#5C3D5E" stroke-width="1.4"/><path d="M20 6 L23 20 L20 34 L17 20 Z" fill="#A2636C" opacity=".85"/><path d="M6 20 L20 17 L34 20 L20 23 Z" fill="#5C3D5E" opacity=".55"/></svg></span><div><b>Near Me</b><span>Find techs on the map, filter by distance</span></div></div>
+              <div class="ph-open"><i></i><div><b>Open today</b><span>Techs with time today</span></div></div>
+              <div class="ph-open wk"><i></i><div><b>Open this week</b><span>Openings in the next 7 days</span></div></div>
+            </div>
+            <div class="ph-scene s-gal">
+              <div class="ph-head">
+                <div class="ph-tabs"><b>All</b><span>Shape</span><span>Type</span><span>Style</span></div>
+                <div class="ph-row"><span class="ph-pill on">All Photos</span></div>
+                <div class="ph-row"><span class="ph-within">Within</span><span class="ph-pill rose">Anywhere</span><span class="ph-pill">25 mi</span><span class="ph-pill">50 mi</span></div>
+              </div>
+              <div class="ph-feed"><div class="ph-scroll"><div class="ph-grid"><div class="ph-tile"><img src="images/gallery/g04.webp" width="420" height="420" alt="" loading="lazy" decoding="async"/><span class="ph-heart"><svg viewBox="0 0 24 24" width="9" height="9"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" fill="none" stroke="#141317" stroke-width="2"/></svg></span></div><div class="ph-tile"><img src="images/gallery/g10.webp" width="420" height="420" alt="" loading="lazy" decoding="async"/><span class="ph-heart"><svg viewBox="0 0 24 24" width="9" height="9"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" fill="none" stroke="#141317" stroke-width="2"/></svg></span></div><div class="ph-tile"><img src="images/gallery/g17.webp" width="420" height="420" alt="" loading="lazy" decoding="async"/><span class="ph-heart"><svg viewBox="0 0 24 24" width="9" height="9"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" fill="none" stroke="#141317" stroke-width="2"/></svg></span></div><div class="ph-tile"><img src="images/gallery/g01.webp" width="420" height="420" alt="" loading="lazy" decoding="async"/><span class="ph-heart"><svg viewBox="0 0 24 24" width="9" height="9"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" fill="none" stroke="#141317" stroke-width="2"/></svg></span></div><div class="ph-tile"><img src="images/gallery/g05.webp" width="420" height="420" alt="" loading="lazy" decoding="async"/><span class="ph-heart"><svg viewBox="0 0 24 24" width="9" height="9"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" fill="none" stroke="#141317" stroke-width="2"/></svg></span></div><div class="ph-tile"><img src="images/gallery/g14.webp" width="420" height="420" alt="" loading="lazy" decoding="async"/><span class="ph-heart"><svg viewBox="0 0 24 24" width="9" height="9"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" fill="none" stroke="#141317" stroke-width="2"/></svg></span></div><div class="ph-tile"><img src="images/gallery/g08.webp" width="420" height="420" alt="" loading="lazy" decoding="async"/><span class="ph-heart"><svg viewBox="0 0 24 24" width="9" height="9"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" fill="none" stroke="#141317" stroke-width="2"/></svg></span></div><div class="ph-tile"><img src="images/gallery/g21.webp" width="420" height="420" alt="" loading="lazy" decoding="async"/><span class="ph-heart"><svg viewBox="0 0 24 24" width="9" height="9"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" fill="none" stroke="#141317" stroke-width="2"/></svg></span></div><div class="ph-tile"><img src="images/gallery/g03.webp" width="420" height="420" alt="" loading="lazy" decoding="async"/><span class="ph-heart"><svg viewBox="0 0 24 24" width="9" height="9"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" fill="none" stroke="#141317" stroke-width="2"/></svg></span><span class="ph-live"><i></i>Available now</span></div><div class="ph-tile"><img src="images/gallery/g12.webp" width="420" height="420" alt="" loading="lazy" decoding="async"/><span class="ph-heart"><svg viewBox="0 0 24 24" width="9" height="9"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" fill="none" stroke="#141317" stroke-width="2"/></svg></span></div><div class="ph-tile"><img src="images/gallery/g19.webp" width="420" height="420" alt="" loading="lazy" decoding="async"/><span class="ph-heart"><svg viewBox="0 0 24 24" width="9" height="9"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" fill="none" stroke="#141317" stroke-width="2"/></svg></span></div><div class="ph-tile"><img src="images/gallery/g16.webp" width="420" height="420" alt="" loading="lazy" decoding="async"/><span class="ph-heart"><svg viewBox="0 0 24 24" width="9" height="9"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" fill="none" stroke="#141317" stroke-width="2"/></svg></span></div><div class="ph-tile"><img src="images/gallery/g13.webp" width="420" height="420" alt="" loading="lazy" decoding="async"/><span class="ph-heart"><svg viewBox="0 0 24 24" width="9" height="9"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" fill="none" stroke="#141317" stroke-width="2"/></svg></span></div><div class="ph-tile"><img src="images/gallery/g22.webp" width="420" height="420" alt="" loading="lazy" decoding="async"/><span class="ph-heart"><svg viewBox="0 0 24 24" width="9" height="9"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" fill="none" stroke="#141317" stroke-width="2"/></svg></span></div><div class="ph-tile"><img src="images/gallery/g06.webp" width="420" height="420" alt="" loading="lazy" decoding="async"/><span class="ph-heart"><svg viewBox="0 0 24 24" width="9" height="9"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" fill="none" stroke="#141317" stroke-width="2"/></svg></span></div><div class="ph-tile"><img src="images/gallery/g18.webp" width="420" height="420" alt="" loading="lazy" decoding="async"/><span class="ph-heart"><svg viewBox="0 0 24 24" width="9" height="9"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" fill="none" stroke="#141317" stroke-width="2"/></svg></span></div><div class="ph-tile"><img src="images/gallery/g09.webp" width="420" height="420" alt="" loading="lazy" decoding="async"/><span class="ph-heart"><svg viewBox="0 0 24 24" width="9" height="9"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" fill="none" stroke="#141317" stroke-width="2"/></svg></span></div><div class="ph-tile"><img src="images/gallery/g23.webp" width="420" height="420" alt="" loading="lazy" decoding="async"/><span class="ph-heart"><svg viewBox="0 0 24 24" width="9" height="9"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" fill="none" stroke="#141317" stroke-width="2"/></svg></span></div></div><div class="ph-grid"><div class="ph-tile"><img src="images/gallery/g04.webp" width="420" height="420" alt="" loading="lazy" decoding="async"/><span class="ph-heart"><svg viewBox="0 0 24 24" width="9" height="9"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" fill="none" stroke="#141317" stroke-width="2"/></svg></span></div><div class="ph-tile"><img src="images/gallery/g10.webp" width="420" height="420" alt="" loading="lazy" decoding="async"/><span class="ph-heart"><svg viewBox="0 0 24 24" width="9" height="9"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" fill="none" stroke="#141317" stroke-width="2"/></svg></span></div><div class="ph-tile"><img src="images/gallery/g17.webp" width="420" height="420" alt="" loading="lazy" decoding="async"/><span class="ph-heart"><svg viewBox="0 0 24 24" width="9" height="9"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" fill="none" stroke="#141317" stroke-width="2"/></svg></span></div><div class="ph-tile"><img src="images/gallery/g01.webp" width="420" height="420" alt="" loading="lazy" decoding="async"/><span class="ph-heart"><svg viewBox="0 0 24 24" width="9" height="9"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" fill="none" stroke="#141317" stroke-width="2"/></svg></span></div><div class="ph-tile"><img src="images/gallery/g05.webp" width="420" height="420" alt="" loading="lazy" decoding="async"/><span class="ph-heart"><svg viewBox="0 0 24 24" width="9" height="9"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" fill="none" stroke="#141317" stroke-width="2"/></svg></span></div><div class="ph-tile"><img src="images/gallery/g14.webp" width="420" height="420" alt="" loading="lazy" decoding="async"/><span class="ph-heart"><svg viewBox="0 0 24 24" width="9" height="9"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" fill="none" stroke="#141317" stroke-width="2"/></svg></span></div><div class="ph-tile"><img src="images/gallery/g08.webp" width="420" height="420" alt="" loading="lazy" decoding="async"/><span class="ph-heart"><svg viewBox="0 0 24 24" width="9" height="9"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" fill="none" stroke="#141317" stroke-width="2"/></svg></span></div><div class="ph-tile"><img src="images/gallery/g21.webp" width="420" height="420" alt="" loading="lazy" decoding="async"/><span class="ph-heart"><svg viewBox="0 0 24 24" width="9" height="9"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" fill="none" stroke="#141317" stroke-width="2"/></svg></span></div><div class="ph-tile"><img src="images/gallery/g03.webp" width="420" height="420" alt="" loading="lazy" decoding="async"/><span class="ph-heart"><svg viewBox="0 0 24 24" width="9" height="9"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" fill="none" stroke="#141317" stroke-width="2"/></svg></span><span class="ph-live"><i></i>Available now</span></div><div class="ph-tile"><img src="images/gallery/g12.webp" width="420" height="420" alt="" loading="lazy" decoding="async"/><span class="ph-heart"><svg viewBox="0 0 24 24" width="9" height="9"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" fill="none" stroke="#141317" stroke-width="2"/></svg></span></div><div class="ph-tile"><img src="images/gallery/g19.webp" width="420" height="420" alt="" loading="lazy" decoding="async"/><span class="ph-heart"><svg viewBox="0 0 24 24" width="9" height="9"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" fill="none" stroke="#141317" stroke-width="2"/></svg></span></div><div class="ph-tile"><img src="images/gallery/g16.webp" width="420" height="420" alt="" loading="lazy" decoding="async"/><span class="ph-heart"><svg viewBox="0 0 24 24" width="9" height="9"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" fill="none" stroke="#141317" stroke-width="2"/></svg></span></div><div class="ph-tile"><img src="images/gallery/g13.webp" width="420" height="420" alt="" loading="lazy" decoding="async"/><span class="ph-heart"><svg viewBox="0 0 24 24" width="9" height="9"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" fill="none" stroke="#141317" stroke-width="2"/></svg></span></div><div class="ph-tile"><img src="images/gallery/g22.webp" width="420" height="420" alt="" loading="lazy" decoding="async"/><span class="ph-heart"><svg viewBox="0 0 24 24" width="9" height="9"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" fill="none" stroke="#141317" stroke-width="2"/></svg></span></div><div class="ph-tile"><img src="images/gallery/g06.webp" width="420" height="420" alt="" loading="lazy" decoding="async"/><span class="ph-heart"><svg viewBox="0 0 24 24" width="9" height="9"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" fill="none" stroke="#141317" stroke-width="2"/></svg></span></div><div class="ph-tile"><img src="images/gallery/g18.webp" width="420" height="420" alt="" loading="lazy" decoding="async"/><span class="ph-heart"><svg viewBox="0 0 24 24" width="9" height="9"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" fill="none" stroke="#141317" stroke-width="2"/></svg></span></div><div class="ph-tile"><img src="images/gallery/g09.webp" width="420" height="420" alt="" loading="lazy" decoding="async"/><span class="ph-heart"><svg viewBox="0 0 24 24" width="9" height="9"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" fill="none" stroke="#141317" stroke-width="2"/></svg></span></div><div class="ph-tile"><img src="images/gallery/g23.webp" width="420" height="420" alt="" loading="lazy" decoding="async"/><span class="ph-heart"><svg viewBox="0 0 24 24" width="9" height="9"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" fill="none" stroke="#141317" stroke-width="2"/></svg></span></div></div></div></div>
+            </div>
+            <div class="ph-scene s-shape">
+              <div class="ph-head">
+                <div class="ph-tabs"><span>All</span><b class="t-shape">Shape</b><span>Type</span><span>Style</span></div>
+                <div class="ph-row ph-shapes"><span class="ph-pill p-almond">Almond</span><span class="ph-pill">Coffin</span><span class="ph-pill">Square</span><span class="ph-pill">Oval</span><span class="ph-pill">Stiletto</span></div>
+                <div class="ph-row"><span class="ph-within">Within</span><span class="ph-pill rose">Anywhere</span><span class="ph-pill">25 mi</span><span class="ph-pill">50 mi</span></div>
+              </div>
+              <div class="ph-feed ph-static"><div class="ph-grid"><div class="ph-tile"><img src="images/gallery/g10.webp" width="420" height="420" alt="" loading="lazy" decoding="async"/><span class="ph-heart"><svg viewBox="0 0 24 24" width="9" height="9"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" fill="none" stroke="#141317" stroke-width="2"/></svg></span></div><div class="ph-tile"><img src="images/gallery/g14.webp" width="420" height="420" alt="" loading="lazy" decoding="async"/><span class="ph-heart"><svg viewBox="0 0 24 24" width="9" height="9"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" fill="none" stroke="#141317" stroke-width="2"/></svg></span></div><div class="ph-tile"><img src="images/gallery/g17.webp" width="420" height="420" alt="" loading="lazy" decoding="async"/><span class="ph-heart"><svg viewBox="0 0 24 24" width="9" height="9"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" fill="none" stroke="#141317" stroke-width="2"/></svg></span></div><div class="ph-tile"><img src="images/gallery/g21.webp" width="420" height="420" alt="" loading="lazy" decoding="async"/><span class="ph-heart"><svg viewBox="0 0 24 24" width="9" height="9"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" fill="none" stroke="#141317" stroke-width="2"/></svg></span></div></div></div>
+            </div>
+          </div>
+          <div class="ph-nav"><span class="on">Home</span><span>My Saves</span><span>Sign In</span></div>
+          <span class="ph-tap"></span>
+        </div>
+      </div>
     </div>
   </div>
 </section>
 
+<script>
+/* Hero phone story (2026-11-24): Home, tap Gallery, Gallery scrolls, tap Shape, tap Almond,
+   almond sets only, back to Home. Pauses off screen; reduced motion shows the Gallery, still. */
+(function () {
+  var ph = document.querySelector('.hero .phone');
+  if (!ph) return;
+  if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) { ph.setAttribute('data-scene', 'gal'); return; }
+  var tap = ph.querySelector('.ph-tap'), scr = ph.querySelector('.ph-screen'), visible = true, timer = null;
+  function tapAt(sel) {
+    var el = ph.querySelector(sel); if (!el || !tap) return;
+    var s = scr.getBoundingClientRect(), r = el.getBoundingClientRect();
+    tap.style.left = (r.left - s.left + r.width / 2) + 'px'; tap.style.top = (r.top - s.top + r.height / 2) + 'px';
+    tap.classList.remove('go'); void tap.offsetWidth; tap.classList.add('go');
+  }
+  var steps = [
+    [0,    function () { ph.className = 'phone'; ph.setAttribute('data-scene', 'home'); }],
+    [2600, function () { tapAt('.c-gallery'); ph.classList.add('press-gallery'); }],
+    [600,  function () { ph.classList.remove('press-gallery'); ph.setAttribute('data-scene', 'gal'); }],
+    [7600, function () { ph.setAttribute('data-scene', 'shape'); tapAt('.s-shape .t-shape'); }],
+    [1300, function () { tapAt('.p-almond'); }],
+    [350,  function () { ph.classList.add('pick-almond'); }],
+    [3600, function () {}]
+  ];
+  var i = 0;
+  function next() {
+    if (!visible) { timer = null; return; }
+    steps[i][1](); i = (i + 1) % steps.length;
+    timer = setTimeout(next, steps[i][0] || 1);
+  }
+  if ('IntersectionObserver' in window) new IntersectionObserver(function (es) {
+    visible = es[0].isIntersecting; if (visible && !timer) next();
+  }).observe(ph);
+  next();
+})();
+</script>
 <!-- THE GALLERY STRIP. Two rows scrolling in opposite directions and a filter
      bar cycling REAL tags (the techs' own tags from the DB). Tiles whose tags
      don't match dim out, so the page shows what filtering does. The strip
