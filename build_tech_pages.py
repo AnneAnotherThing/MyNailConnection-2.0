@@ -10,6 +10,7 @@
 # (not self-paused) and have at least MIN_PHOTOS photos get a page; thinner
 # pages would hurt more than help. Never shown: zip, lat/lng, street address.
 #
+# Also runs nightly in .github/workflows/deploy.yml (3 AM Phoenix).
 # Run: python build_tech_pages.py --publish   (rewrites techs/ and the marked
 # block in sitemap.xml), then deploy/sync.sh. Without --publish it only builds
 # techs/ for review. Re-run before each deploy so new techs
