@@ -530,6 +530,37 @@
       <div class="note" id="whs-note">Counts include test posts made from the admin and test accounts.</div>
     </section>
 
+    <!-- 5a. Found on Google (2026-11-24, Anne: "before/after all the seo work we did today").
+         Before = Nov 23, the day before the SEO work. Now = read live from
+         the sitemap. Google's own numbers come from Search Console readings
+         kept in SEARCH_LOG below (Claude adds one at each check-in). -->
+    <section class="panel" data-view="seo">
+      <div class="panel-head">
+        <div class="panel-title">Found on Google</div>
+        <div class="panel-meta">before and after the Nov 24 SEO work</div>
+      </div>
+      <div id="seo-ba" class="list"><div class="empty">Loading...</div></div>
+      <div class="sub-head">Visitors from Google and other search, per week</div>
+      <svg id="seo-chart" class="chart" viewBox="0 0 600 130" preserveAspectRatio="none" role="img" aria-label="Search visitors per week"></svg>
+      <div class="chart-axis"><span>8 weeks ago</span><span id="seo-mark"></span><span>this week</span></div>
+      <div class="drill" id="seo-chart-drill"><span class="drill-hint">Tap a week to see which pages search visitors landed on.</span></div>
+      <div class="note" id="seo-sum"></div>
+      <details class="fold">
+        <summary>Visits to the new pages</summary>
+        <div class="fold-body"><div id="seo-new"><div class="empty">Loading...</div></div>
+          <div class="note">The answer pages and tech pages count visits from Nov 24 on. Google takes days to weeks to start sending people to new pages.</div></div>
+      </details>
+      <details class="fold">
+        <summary>What changed on Nov 24</summary>
+        <div class="fold-body"><ul style="padding-left:18px;font-size:13.5px;line-height:1.7;">
+          <li>Google Analytics on every public page, counting only the real site.</li>
+          <li>Four answer pages for Google and the chat assistants: finding a nail tech in Phoenix, nails today, how techs get clients, and Vagaro, StyleSeat and GlossGenius.</li>
+          <li>A page for every tech with 3 or more photos, plus the tech gallery by city, rebuilt every night.</li>
+          <li>The homepage and tech guide link to the new pages; the sitemap and the AI summary file list them all.</li>
+        </ul></div>
+      </details>
+    </section>
+
     <!-- 5b. Gallery (2026-11-24): how findable the techs are, who to nudge. -->
     <section class="panel" data-view="gallery">
       <div class="panel-head">
@@ -1238,7 +1269,8 @@
 
       // Front page: story, Next moves, cards, Gallery (2026-11-24)
       Object.assign(FRONT, { site: site, tapWk: tapWk, tapPrev: tapPrev, joinWk: joinWk, joinPrev: joinPrev,
-        techsWk: techsWk, clientsWk: clientsWk, bk: bk, paying: paying, techs: techs, clients: clients, taps: taps });
+        techsWk: techsWk, clientsWk: clientsWk, bk: bk, paying: paying, techs: techs, clients: clients, taps: taps, hits: hits });
+      renderSeo();
       renderGallery();
       renderFront();
 
@@ -1720,7 +1752,7 @@
   // Boot. A stored refresh token goes straight to the dashboard; only a
   // refresh Supabase actually refuses lands on the sign-in, with a reason.
   // ── Front page: story, Next moves, cards, Gallery, views (2026-11-24) ─────
-  const VIEWS = ['home', 'website', 'downloads', 'people', 'gallery', 'bookings', 'happening', 'tools'];
+  const VIEWS = ['home', 'website', 'downloads', 'people', 'seo', 'gallery', 'bookings', 'happening', 'tools'];
   function route() {
     let v = (location.hash || '').replace('#', '');
     if (VIEWS.indexOf(v) === -1) v = 'home';
@@ -1836,11 +1868,85 @@
     card('website', 'Website', F.site ? fmt(F.site.wk) : '-', F.site ? 'visitors this week, ' + trend(F.site.wk, F.site.prev) : 'loading or unavailable', 'Who finds MNC and where they come from.', spark(F.siteDaily, '#7D6478'));
     card('downloads', 'Downloads', fmt(F.tapWk), F.tapWk != null ? 'store taps this week, ' + trend(F.tapWk, F.tapPrev) : 'loading or unavailable', 'Interest in the app, plus the install counts you record.');
     card('people', 'People', fmt(F.joinWk), F.techs || F.clients ? 'joined this week (' + fmt((F.techs || []).length) + ' techs, ' + fmt((F.clients || []).length) + ' clients in all)' : 'loading or unavailable', 'Who is in the book and who joined when.', spark(F.joinDaily, '#2D6A4F'));
+    const sNow = SEO.now;
+    card('seo', 'Found on Google', sNow ? fmt(sNow.total) + '<span style="font-size:16px;color:var(--muted);"> pages</span>' : '-', sNow ? 'Google can find, up from ' + SEO_BEFORE.sitemap + ' before Nov 24' : 'before and after the Nov 24 SEO work', SEO.sum || 'Search visitors per week, before and after.', SEO.weekly ? spark(SEO.weekly, '#4A6274') : '');
     card('gallery', 'Gallery', g ? fmt(g.seen) + '<span style="font-size:16px;color:var(--muted);"> of ' + fmt(g.total - g.hidden) + '</span>' : '-', g ? 'techs clients can see with photos' : 'loading or unavailable', 'Who to nudge for photos, who went quiet, who clients love.', '', g && (g.nudge.length + g.none.length) ? (g.nudge.length + g.none.length) + ' to nudge' : '');
     card('bookings', 'Bookings and money', bk ? fmt(bk.this_week || 0) : '-', bk ? 'booked this week, ' + fmt(bk.upcoming || 0) + ' coming up' : 'loading or unavailable', (F.paying != null ? fmt(F.paying) + ' paying for Glow Up.' : 'Appointments and Glow Up.'), '', bk && bk.pending ? bk.pending + ' waiting' : '');
     card('happening', 'What&#39;s happening', wh ? fmt(wh.opens) : '-', wh ? 'screen opens, ' + wh.span : 'loading or unavailable', wh ? fmt(wh.contacts) + ' calls, texts and books from the board.' : 'Requests, Available now and the board.', wh ? spark(wh.daily, '#8B5041') : '', wh && wh.reports ? wh.reports + ' to answer' : '');
     card('tools', 'Admin tools', '&#9881;', 'push, comps, hide, ads, reports', 'Send a push, comp or hide a tech, manage partner ads.');
     setHtml('cards', cards.join(''));
+  }
+
+  // ── Found on Google (2026-11-24) ───────────────────────────────────────────
+  const SEO_START = '2026-11-24';
+  const SEO_BEFORE = { sitemap: 5, answer: 0, tech: 0, ga4: 'homepage only' };
+  // Search Console readings, newest last. Claude adds one at each check-in.
+  const SEARCH_LOG = [
+    { date: '2026-11-16', days: 28, impressions: 878, clicks: 9, position: 8.2, note: 'before the SEO work' }
+  ];
+  const SEO = {};
+  const ANSWER_LABELS = { 'answer:find-a-nail-tech-phoenix': 'Find a nail tech in Phoenix', 'answer:nails-today': 'Nails today', 'answer:get-nail-clients': 'How techs get clients', 'answer:vagaro-styleseat-glossgenius': 'Vagaro, StyleSeat, GlossGenius', 'tech-page': 'Tech pages', techs: 'Tech gallery' };
+  Object.assign(PAGES, ANSWER_LABELS);
+  async function renderSeo() {
+    if (!SEO.now) {
+      try {
+        const xml = await (await fetch('/sitemap.xml', { cache: 'no-store' })).text();
+        const locs = xml.match(/<loc>[^<]+<\/loc>/g) || [];
+        if (locs.length) SEO.now = { total: locs.length,
+          tech: locs.filter(function (l) { return /\/techs\/[^<]+\.html/.test(l); }).length,
+          answer: locs.filter(function (l) { return /(find-a-nail-tech-phoenix|nails-today|get-nail-clients|vagaro-styleseat-glossgenius)\.html/.test(l); }).length };
+      } catch (e) { /* stays empty; the rows show a dash */ }
+    }
+    const n = SEO.now;
+    const row = function (label, before, now) {
+      return '<div class="row"><div class="l"><span class="main">' + label + '</span></div><span class="when">' + before + ' &rarr; <b style="color:var(--green);">' + now + '</b></span></div>';
+    };
+    const g0 = SEARCH_LOG[0], gN = SEARCH_LOG[SEARCH_LOG.length - 1], more = SEARCH_LOG.length > 1;
+    setHtml('seo-ba',
+      row('Pages Google can find (sitemap)', SEO_BEFORE.sitemap, n ? fmt(n.total) : '-') +
+      row('Answer pages for Google and AI', SEO_BEFORE.answer, n ? n.answer : '-') +
+      row('Tech pages (one per tech)', SEO_BEFORE.tech, n ? n.tech : '-') +
+      row('Pages with Google Analytics', SEO_BEFORE.ga4, 'every public page') +
+      row('Google impressions, ' + g0.days + ' days', fmt(g0.impressions) + ' (' + shortDate(g0.date) + ')', more ? fmt(gN.impressions) + ' (' + shortDate(gN.date) + ')' : 'next reading at check-in') +
+      row('Google clicks, ' + g0.days + ' days', fmt(g0.clicks), more ? fmt(gN.clicks) : 'next reading') +
+      row('Average position in Google', g0.position, more ? gN.position : 'next reading'));
+    const hits = FRONT.hits;
+    if (hits) {
+      const start = new Date(SEO_START + 'T00:00:00').getTime(), weeks = [];
+      for (let w = 7; w >= 0; w--) { const end = Date.now() - w * 7 * DAY; weeks.push([end - 7 * DAY, end]); }
+      const per = weeks.map(function (r) {
+        const s = new Set(); let anon = 0;
+        hits.forEach(function (x) { if (x.entry_channel === 'search' && within(x.created_at, r[0], r[1])) { if (x.session_id) s.add(x.session_id); else anon++; } });
+        return s.size + anon;
+      });
+      const keys = weeks.map(function (r) { return dayKey(new Date(r[1] - 1)); });
+      DRILL['seo-chart'] = function (k) {
+        const i = keys.indexOf(k), r = weeks[i], pg = {};
+        hits.forEach(function (x) { if (x.entry_channel === 'search' && within(x.created_at, r[0], r[1])) { const p = x.page || 'other'; pg[p] = (pg[p] || 0) + 1; } });
+        return '<div class="note" style="margin:0 0 6px;">Week ending ' + shortDate(k) + '</div>' + barList(pg, PAGES, 'No search visits that week.');
+      };
+      const markIdx = weeks.findIndex(function (r) { return r[1] > start; });
+      barChart('seo-chart', keys, [{ values: per, color: '#9FB4C4', highlight: '#4A6274' }], markIdx);
+      setTxt('seo-mark', markIdx >= 0 ? 'dark bar: the week the SEO work went live' : '');
+      // Day-exact rate: search visitors per week over the 28 days before Nov 24,
+      // against the days since (whole weeks would blur the two together).
+      const rate = function (from, to) {
+        const s = new Set(); let anon = 0;
+        hits.forEach(function (x) { if (x.entry_channel === 'search' && within(x.created_at, from, to)) { if (x.session_id) s.add(x.session_id); else anon++; } });
+        const days = Math.max(1, (to - from) / DAY);
+        return (s.size + anon) / days * 7;
+      };
+      const beforeRate = rate(start - 28 * DAY, start), sinceDays = Math.max(0, (Date.now() - start) / DAY);
+      SEO.weekly = per;
+      SEO.sum = 'Search visitors a week: ' + beforeRate.toFixed(1) + ' before Nov 24' + (sinceDays >= 3 ? ', ' + rate(start, Date.now()).toFixed(1) + ' since' : ', too soon to compare') + '.';
+      setTxt('seo-sum', SEO.sum + ' Early days: Google usually takes a few weeks to show new pages.');
+      const fresh = hits.filter(function (x) { return String(x.created_at) >= SEO_START && ANSWER_LABELS[x.page]; });
+      const byPage = {}, bySrc = {};
+      fresh.forEach(function (x) { byPage[x.page] = (byPage[x.page] || 0) + 1; const c = x.entry_channel || 'direct'; bySrc[c] = (bySrc[c] || 0) + 1; });
+      setHtml('seo-new', fresh.length ? '<div class="cols"><div><div class="sub-head" style="margin-top:0;">Pages</div>' + barList(byPage, PAGES, '') + '</div><div><div class="sub-head" style="margin-top:0;">Came from</div>' + barList(bySrc, CHANNELS, '') + '</div></div>'
+        : '<div class="empty">No visits to the new pages yet.</div>');
+    }
+    renderFront();
   }
 
   async function boot() {

@@ -201,6 +201,7 @@ def build(p):
 {json.dumps(schema, indent=2)}
 </script>
 <script src="/ga4.js" defer></script>
+<script src="/visit.js" data-page="answer:{p['slug']}" defer></script>
 </head>
 <body>
 <header class="top"><a href="/"><img src="/images/mncLogo-round-256.webp" width="36" height="36" alt="">My Nail Connection</a></header>

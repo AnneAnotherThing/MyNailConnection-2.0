@@ -90,7 +90,7 @@ CSS = BASE_CSS + """
 .card div{padding:10px 12px}.card b{display:block}.card span{color:var(--muted);font-size:14px}
 """
 
-def head(title, desc, url, image, schema, ogtype="profile"):
+def head(title, desc, url, image, schema, ogtype="profile", visit="tech-page"):
     return f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -116,6 +116,7 @@ def head(title, desc, url, image, schema, ogtype="profile"):
 {json.dumps(schema, indent=2)}
 </script>
 <script src="/ga4.js" defer></script>
+<script src="/visit.js" data-page="{visit}" defer></script>
 </head>
 <body>
 <header class="top"><a href="/"><img src="/images/mncLogo-round-256.webp" width="36" height="36" alt="">My Nail Connection</a></header>
@@ -240,7 +241,7 @@ def index_page(entries):
               "hasPart": [{"@type": "ProfilePage", "url": f"{SITE}/techs/{s}.html"} for s, _ in entries]}
     title = "Nail techs on My Nail Connection, by city"
     desc = "Browse nail techs on My Nail Connection by city and see their real work before you book. Free for clients."
-    return head(title, desc, url, f"{SITE}/og-image-2026-09.png", schema, "website") +f"""<section class="hero"><div class="in">
+    return head(title, desc, url, f"{SITE}/og-image-2026-09.png", schema, "website", "techs") +f"""<section class="hero"><div class="in">
 <div class="eyebrow">For clients</div>
 <h1>Nail techs on My Nail Connection</h1>
 </div></section>
