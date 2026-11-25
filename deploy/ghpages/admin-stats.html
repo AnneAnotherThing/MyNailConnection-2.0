@@ -1940,7 +1940,12 @@
       SEO.weekly = per;
       SEO.sum = 'Search visitors a week: ' + beforeRate.toFixed(1) + ' before Nov 24' + (sinceDays >= 3 ? ', ' + rate(start, Date.now()).toFixed(1) + ' since' : ', too soon to compare') + '.';
       setTxt('seo-sum', SEO.sum + ' Early days: Google usually takes a few weeks to show new pages.');
-      const fresh = hits.filter(function (x) { return String(x.created_at) >= SEO_START && ANSWER_LABELS[x.page]; });
+      const isNew = function (p) { return !!ANSWER_LABELS[p] || String(p || '').indexOf('tech:') === 0; };
+      hits.forEach(function (x) {
+        const p = String(x.page || '');
+        if (p.indexOf('tech:') === 0 && !PAGES[p]) PAGES[p] = 'Tech page: ' + p.slice(5).replace(/-/g, ' ');
+      });
+      const fresh = hits.filter(function (x) { return String(x.created_at) >= SEO_START && isNew(x.page); });
       const byPage = {}, bySrc = {};
       fresh.forEach(function (x) { byPage[x.page] = (byPage[x.page] || 0) + 1; const c = x.entry_channel || 'direct'; bySrc[c] = (bySrc[c] || 0) + 1; });
       setHtml('seo-new', fresh.length ? '<div class="cols"><div><div class="sub-head" style="margin-top:0;">Pages</div>' + barList(byPage, PAGES, '') + '</div><div><div class="sub-head" style="margin-top:0;">Came from</div>' + barList(bySrc, CHANNELS, '') + '</div></div>'

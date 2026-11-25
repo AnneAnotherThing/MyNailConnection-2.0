@@ -199,7 +199,7 @@ def tech_page(t, slug):
     ext = ""
     if (t.get("booking_link") or "").startswith("http"):
         ext = f'<p>Already know her? <a href="{esc(t["booking_link"])}" rel="nofollow ugc noopener">Book on her booking site</a>.</p>'
-    return head(title, desc, url, image, schema) + f"""<section class="hero"><div class="in">
+    return head(title, desc, url, image, schema, "profile", "tech:" + slug) + f"""<section class="hero"><div class="in">
 <div class="eyebrow">Nail tech{(" in " + esc(where)) if where else ""}</div>
 <h1>{esc(name)}</h1>
 {shop}
