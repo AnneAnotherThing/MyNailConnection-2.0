@@ -93,12 +93,12 @@ PAGES = [
       ("Does My Nail Connection take a commission?", "No. There is no commission and no per-booking fee, ever, and your clients are never charged to book you."),
       ("Do I have to stop using Instagram?", "No. My Nail Connection is one more place clients find you, searchable by your look and how close you are."),
       ("How many photos can I post?", "Up to 50 a month, free, and they never expire."),
-      ("Is it only for nail techs?", "Yes. It is built for nail techs specifically. Nails only."),
+      ("Is it only for nails?", "Yes. It is built for nail techs specifically. Nails only."),
     ],
   },
   {
     "slug": "vagaro-styleseat-glossgenius",
-    "title": "Already on Vagaro, StyleSeat or GlossGenius? Add a free nail portfolio",
+    "title": "Already on Vagaro, StyleSeat or GlossGenius?",
     "meta": "Keep the booking system you use. Add your Vagaro, StyleSeat or GlossGenius link to a free My Nail Connection profile and get found by clients searching your look.",
     "eyebrow": "For nail techs",
     "h1": "I already book through Vagaro, StyleSeat or GlossGenius. Can I still use My Nail Connection?",
@@ -123,20 +123,20 @@ PAGES = [
 ]
 
 CSS = """
-:root{--rose:#DEB3B5;--rose-dark:#A2636C;--rose-light:#F7E2E3;--cream:#FAF7F2;--ink:#141317;--muted:#6D6068;--border:#EBDDDA}
+:root{--rose:#DEB3B5;--rose-dark:#A2636C;--link:#8A4F58;--rose-light:#F7E2E3;--cream:#FAF7F2;--ink:#141317;--muted:#6D6068;--border:#EBDDDA}
 *{box-sizing:border-box}html,body{margin:0;padding:0}
 body{font-family:'DM Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:var(--ink);background:var(--cream);line-height:1.65;-webkit-font-smoothing:antialiased}
-a{color:var(--rose-dark)}
+a{color:var(--link)}
 .top{display:flex;align-items:center;gap:10px;padding:14px 22px;max-width:760px;margin:0 auto}
 .top a{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink);font-weight:600}
 .top img{width:36px;height:36px}
 .hero{background:linear-gradient(135deg,#F7E2E3 0%,#DEB3B5 100%);padding:44px 22px 40px}
 .hero .in{max-width:760px;margin:0 auto}
-.eyebrow{font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--rose-dark);font-weight:600;margin-bottom:10px}
+.eyebrow{font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--ink);font-weight:600;margin-bottom:10px}
 h1{font-family:'Playfair Display',Georgia,serif;font-size:36px;line-height:1.2;margin:0;font-weight:600}
 main{max-width:760px;margin:0 auto;padding:28px 22px 40px}
 .short{background:#fff;border:1px solid var(--border);border-left:4px solid var(--rose-dark);border-radius:2px;padding:18px 20px;margin:0 0 28px;font-size:17px}
-.short b{display:block;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:var(--rose-dark);margin-bottom:6px}
+.short b{display:block;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:var(--link);margin-bottom:6px}
 h2{font-family:'Playfair Display',Georgia,serif;font-size:24px;margin:30px 0 10px;font-weight:600}
 ul{padding-left:20px;margin:0}li{margin:0 0 8px}
 .faq details{background:#fff;border:1px solid var(--border);border-radius:2px;padding:14px 16px;margin:0 0 10px}
@@ -188,6 +188,8 @@ def build(p):
 <meta property="og:type" content="article">
 <meta property="og:url" content="{url}">
 <meta property="og:image" content="{SITE}/og-image-2026-09.png">
+<meta property="og:site_name" content="My Nail Connection">
+<meta property="og:image:alt" content="My Nail Connection, the app for finding nail techs by their real work">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="/favicon.ico">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -201,7 +203,7 @@ def build(p):
 <script src="/ga4.js" defer></script>
 </head>
 <body>
-<header class="top"><a href="/"><img src="/images/mncLogo-round-256.webp" width="36" height="36" alt="My Nail Connection logo">My Nail Connection</a></header>
+<header class="top"><a href="/"><img src="/images/mncLogo-round-256.webp" width="36" height="36" alt="">My Nail Connection</a></header>
 <section class="hero"><div class="in">
 <div class="eyebrow">{esc(p['eyebrow'])}</div>
 <h1>{esc(p['h1'])}</h1>
