@@ -222,6 +222,7 @@ def build(p):
 <div class="more"><b>More answers</b>
 <ul>
 {others}
+<li><a href="/techs/">Nail techs on My Nail Connection, by city</a></li>
 <li><a href="/tech-guide-v3.html">How it works, step by step, for nail techs</a></li>
 </ul></div>
 </main>

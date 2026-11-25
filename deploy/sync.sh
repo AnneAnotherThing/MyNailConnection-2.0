@@ -400,6 +400,8 @@ copy_if_exists find-a-nail-tech-phoenix.html "$GH/find-a-nail-tech-phoenix.html"
 copy_if_exists nails-today.html "$GH/nails-today.html"
 copy_if_exists get-nail-clients.html "$GH/get-nail-clients.html"
 copy_if_exists vagaro-styleseat-glossgenius.html "$GH/vagaro-styleseat-glossgenius.html"
+# Tech profile pages + /techs/ index (locked 2026-11-24). Rebuild first: python build_tech_pages.py --publish
+sync_dir techs "$GH/techs"
 copy_if_exists social-kit.html "$GH/social-kit.html"
 sync_dir campaign-assets "$GH/campaign-assets"
 
