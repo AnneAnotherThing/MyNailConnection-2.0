@@ -428,6 +428,7 @@ copy_if_exists favicon-32.png          "$GH/app/favicon-32.png"
 copy_if_exists apple-touch-icon.png    "$GH/app/apple-touch-icon.png"
 copy_if_exists manifest.json           "$GH/app/manifest.json"
 copy_if_exists sw.js                   "$GH/app/sw.js"
+copy_if_exists ga4.js                  "$GH/app/ga4.js"   # app privacy/terms load /ga4.js; native builds need their own copy
 
 # Custom domain pin for GitHub Pages. This file must sit at the publish
 # root so Pages serves the site under mynailconnection.com instead of the
