@@ -879,7 +879,7 @@
         // last_opened_at (sql/tech-last-opened.sql, 2026-10-13): until that SQL
         // runs the column is missing and PostgREST answers 400, so fall back
         // to the old select rather than lose the whole People panel.
-        safe(fetchAll('techs?select=id,name,email,phone,image_url,photos,is_available,is_same_day,created_at,subscription_tier,subscription_source,booking_enabled,glow_up_months_purchased,last_opened_at&order=created_at.desc')
+        safe(fetchAll('techs?select=id,name,email,phone,image_url,photos,is_available,is_same_day,created_at,subscription_tier,subscription_source,booking_enabled,glow_up_months_purchased,last_opened_at,stealth&order=created_at.desc')
           .catch(function (e) {
             if (e && e.auth) throw e;
             return fetchAll('techs?select=id,name,email,phone,image_url,photos,is_available,is_same_day,created_at,subscription_tier,subscription_source,booking_enabled,glow_up_months_purchased&order=created_at.desc');
@@ -1287,6 +1287,7 @@
     if (!rows.length) { setHtml('comp-list', '<div class="empty">No techs match.</div>'); return; }
     setHtml('comp-list', rows.map(function (t) {
       const comped = t.subscription_source === 'comp';
+      const hidden = t.stealth === true;
       const plan = planBadge(t);
       const tp = (window._tapByTech || {})[t.id];
       const reach = tp
@@ -1295,10 +1296,21 @@
       return '<div class="row" style="align-items:center;">'
         + '<div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:700;">' + esc(t.name || 'Unnamed tech') + '</div>'
         + '<div style="font-size:12px;color:var(--muted);">' + esc(t.email || t.phone || 'no contact') + (t.booking_enabled ? ', booking on' : '') + '</div>' + reach + '</div>'
+        + (hidden ? '<span class="pill" style="color:#6B5F66;">Hidden</span>' : '')
         + '<span class="pill" style="color:' + plan[1] + ';">' + plan[0] + '</span>'
         + '<button class="btn' + (comped ? ' ghost' : '') + '" onclick="adminToggleComp(\'' + t.id + '\',' + (!comped) + ')">' + (comped ? 'Un-comp' : 'Comp') + '</button>'
+        + '<button class="btn' + (hidden ? '' : ' ghost') + '" title="' + (hidden ? 'Hidden from the Gallery, map, search and her web page. Tap to show her again.' : 'Hide her from the Gallery, map, search and her web page. She can still sign in.') + '" onclick="adminToggleHide(\'' + t.id + '\',' + (!hidden) + ')">' + (hidden ? 'Unhide' : 'Hide') + '</button>'
         + '</div>';
     }).join(''));
+  }
+  // Hide / Unhide (2026-11-24): flips techs.stealth via sql/admin-hide-tech.sql.
+  async function adminToggleHide(techId, on) {
+    try {
+      const data = await rpc('admin_set_tech_stealth', { p_tech_id: techId, p_on: on });
+      const t = (window._compTechs || []).find(function (x) { return x.id === techId; });
+      if (t) t.stealth = data.stealth === true;
+      renderCompList();
+    } catch (e) { alert('Could not update: ' + ((e && e.message) || 'error')); }
   }
   async function adminToggleComp(techId, on) {
     try {
@@ -1564,6 +1576,7 @@
 
   window.renderCompList = renderCompList;
   window.adminToggleComp = adminToggleComp;
+  window.adminToggleHide = adminToggleHide;
 
   // Boot. A stored refresh token goes straight to the dashboard; only a
   // refresh Supabase actually refuses lands on the sign-in, with a reason.
