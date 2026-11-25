@@ -76,6 +76,7 @@ def tidy_city(c):
     return " ".join(w.capitalize() for w in (c or "").strip().split())
 
 CSS = BASE_CSS + """
+[hidden]{display:none!important}
 .meta{color:var(--muted);margin:8px 0 0}
 .tags{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 0;padding:0;list-style:none}
 .tags li{background:#fff;border:1px solid var(--border);border-radius:2px;padding:3px 10px;font-size:14px;margin:0}
@@ -123,6 +124,35 @@ def head(title, desc, url, image, schema, ogtype="profile"):
 FOOT = """<footer><a href="/">Home</a> · <a href="/techs/">All nail techs</a> · <a href="/find-a-nail-tech-phoenix.html">Find a nail tech</a> · <a href="/privacy.html">Privacy</a> · <a href="/terms.html">Terms</a></footer>
 </body>
 </html>
+"""
+
+def live_check(tech_id=None):
+    # Hide in the admin panel (techs.stealth) or a self-pause takes a tech out
+    # of techs_public at once; the page checks on load so she disappears now,
+    # not at the next nightly rebuild (which then removes the page itself).
+    k = anon_key()
+    q = f"select=id&id=eq.{tech_id}" if tech_id else "select=id"
+    if tech_id:
+        act = """if (rows.length === 0) {
+      var m = document.createElement('meta'); m.name = 'robots'; m.content = 'noindex'; document.head.appendChild(m);
+      document.querySelector('.hero .in').innerHTML = '<div class="eyebrow">Nail techs</div><h1>Not listed right now</h1>';
+      document.querySelector('main').innerHTML = '<p class="short"><b>Not listed</b>This nail tech is not listed on My Nail Connection right now. <a href="/techs/">See the other nail techs</a> or open the free app to browse by style and distance.</p>';
+    }"""
+    else:
+        act = """var live = {}; rows.forEach(function (r) { live[r.id] = 1; });
+    document.querySelectorAll('.card[data-id]').forEach(function (c) { if (!live[c.getAttribute('data-id')]) c.hidden = true; });
+    document.querySelectorAll('main .cards').forEach(function (g) {
+      if (!g.querySelector('.card:not([hidden])')) { g.hidden = true; var h = g.previousElementSibling; if (h && h.tagName === 'H2') h.hidden = true; }
+    });"""
+    return f"""<script>
+(function () {{
+  fetch('{PROJECT}/rest/v1/techs_public?{q}', {{ headers: {{ apikey: '{k}', Authorization: 'Bearer {k}' }} }})
+    .then(function (r) {{ return r.ok ? r.json() : null; }})
+    .then(function (rows) {{ if (!Array.isArray(rows)) return;
+    {act}
+  }}).catch(function () {{}});
+}})();
+</script>
 """
 
 def cta(tech_id):
@@ -188,7 +218,7 @@ def tech_page(t, slug):
 <li><a href="/nails-today.html">Where to get your nails done today</a></li>
 </ul></div>
 </main>
-""" + FOOT
+""" + live_check(t["id"]) + FOOT
 
 def index_page(entries):
     url = f"{SITE}/techs/"
@@ -200,7 +230,7 @@ def index_page(entries):
     blocks = []
     for w in order:
         cards = "\n".join(
-            f'<a class="card" href="/techs/{s}.html">{thumb_img(t["photos"][0]["url"], "")}'
+            f'<a class="card" data-id="{esc(t["id"])}" href="/techs/{s}.html">{thumb_img(t["photos"][0]["url"], "")}'
             f'<div><b>{esc(nice_name(t["name"]))}</b><span>{esc(", ".join((t.get("tags") or [])[:3]))}</span></div></a>'
             for s, t in sorted(by_place[w], key=lambda e: e[1]["name"].lower()))
         blocks.append(f"<h2>{esc(w)}</h2>\n<div class=\"cards\">\n{cards}\n</div>")
@@ -218,7 +248,7 @@ def index_page(entries):
 {chr(10).join(blocks)}
 {cta("").replace('/app/?tech=&amp;src=techpage', '/app/?src=techindex').replace("See her full gallery and book, call or text her", "Browse every tech, filter by style and distance, and book, call or text")}
 </main>
-""" + FOOT
+""" + live_check() + FOOT
 
 def main():
     rows = fetch()

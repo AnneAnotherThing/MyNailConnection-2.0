@@ -47,6 +47,7 @@ footer{text-align:center;font-size:13px;color:var(--muted);padding:24px 22px 40p
 footer a{color:var(--muted)}
 @media(max-width:560px){h1{font-size:28px}}
 
+[hidden]{display:none!important}
 .meta{color:var(--muted);margin:8px 0 0}
 .tags{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 0;padding:0;list-style:none}
 .tags li{background:#fff;border:1px solid var(--border);border-radius:2px;padding:3px 10px;font-size:14px;margin:0}
@@ -152,6 +153,19 @@ My goal is to provide a clean, relaxing, and elevated experience where nail heal
 <li><a href="/nails-today.html">Where to get your nails done today</a></li>
 </ul></div>
 </main>
+<script>
+(function () {
+  fetch('https://nwqnakoongrorbwnrqzc.supabase.co/rest/v1/techs_public?select=id&id=eq.98f45531-7bd5-4ed6-b8b6-c7b130f0fff1', { headers: { apikey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im53cW5ha29vbmdyb3Jid25ycXpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNzczMjUsImV4cCI6MjA5ODk1MzMyNX0.TFFMlg9VjB0cyJwbgmVbeatFYQFaF1Ri0nrH0GwhHJs', Authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im53cW5ha29vbmdyb3Jid25ycXpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNzczMjUsImV4cCI6MjA5ODk1MzMyNX0.TFFMlg9VjB0cyJwbgmVbeatFYQFaF1Ri0nrH0GwhHJs' } })
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (rows) { if (!Array.isArray(rows)) return;
+    if (rows.length === 0) {
+      var m = document.createElement('meta'); m.name = 'robots'; m.content = 'noindex'; document.head.appendChild(m);
+      document.querySelector('.hero .in').innerHTML = '<div class="eyebrow">Nail techs</div><h1>Not listed right now</h1>';
+      document.querySelector('main').innerHTML = '<p class="short"><b>Not listed</b>This nail tech is not listed on My Nail Connection right now. <a href="/techs/">See the other nail techs</a> or open the free app to browse by style and distance.</p>';
+    }
+  }).catch(function () {});
+})();
+</script>
 <footer><a href="/">Home</a> · <a href="/techs/">All nail techs</a> · <a href="/find-a-nail-tech-phoenix.html">Find a nail tech</a> · <a href="/privacy.html">Privacy</a> · <a href="/terms.html">Terms</a></footer>
 </body>
 </html>

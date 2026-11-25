@@ -261,6 +261,40 @@
   .bottom-row .signout { flex: 0 0 auto; color: var(--muted); background: transparent; border-color: transparent; }
   .nav-links { text-align: center; font-size: 12px; color: var(--muted); margin-top: 22px; }
   .nav-links a { color: var(--rose-dark); text-decoration: none; font-weight: 500; margin: 0 8px; }
+
+  /* Front page and drill-down views (2026-11-24) */
+  #dash [data-view][hidden] { display: none !important; }
+  .crumb { margin: 0 0 12px; }
+  .crumb a { display: inline-block; font-size: 13px; font-weight: 700; color: var(--rose-dark); text-decoration: none; padding: 7px 12px; background: white; border: 1px solid var(--border); border-radius: 10px; }
+  .crumb a:hover, .crumb a:focus-visible { background: var(--rose-light); }
+  .story #story p { font-size: 15.5px; line-height: 1.65; margin-bottom: 8px; max-width: 68ch; }
+  .story #story p:last-child { margin-bottom: 0; }
+  .story #story b { color: var(--rose-dark); }
+  .story .weak { background: #FFF6E6; border-left: 3px solid var(--amber); padding: 8px 12px; border-radius: 4px; }
+  .next-list { list-style: none; display: grid; gap: 8px; counter-reset: nx; }
+  .next-list li { counter-increment: nx; display: flex; gap: 12px; align-items: baseline; background: var(--cream); border: 1px solid var(--border); border-radius: 12px; padding: 10px 14px; font-size: 14.5px; }
+  .next-list li::before { content: counter(nx); flex: 0 0 22px; height: 22px; border-radius: 50%; background: var(--rose-dark); color: white; font-size: 12px; font-weight: 700; display: grid; place-items: center; transform: translateY(2px); }
+  .next-list li a { color: var(--rose-dark); font-weight: 700; white-space: nowrap; }
+  .next-list li.done { background: var(--green-soft); }
+  .next-list li.done::before { content: '\2713'; background: var(--green); }
+  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px; margin-bottom: 14px; }
+  .card { display: flex; flex-direction: column; gap: 4px; background: white; border: 1px solid var(--border); border-radius: 16px; padding: 14px 16px 12px; text-decoration: none; color: var(--charcoal); box-shadow: 0 2px 14px rgba(44,36,32,0.04); transition: transform .12s, box-shadow .12s; min-width: 0; }
+  .card:hover, .card:focus-visible { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(125,100,120,0.16); outline: none; border-color: var(--rose); }
+  .card .ct { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+  .card .ck { font-size: 10.5px; letter-spacing: 1.1px; font-weight: 700; text-transform: uppercase; color: var(--muted); }
+  .card .go { font-size: 12px; color: var(--rose-dark); font-weight: 700; }
+  .card .cv { font-family: 'Playfair Display', serif; font-size: 32px; font-weight: 700; line-height: 1.1; }
+  .card .cs { font-size: 12.5px; color: var(--muted); }
+  .card .cm { font-size: 13px; color: #4E4450; border-top: 1px solid var(--border); padding-top: 8px; margin-top: 6px; }
+  .card .flag { display: inline-block; font-size: 11px; font-weight: 700; border-radius: 100px; padding: 1px 8px; background: #FFF1DA; color: var(--amber); margin-left: 6px; }
+  .card svg { width: 100%; height: 34px; display: block; margin-top: 4px; }
+  @media (prefers-reduced-motion: reduce) { .card { transition: none; } .card:hover { transform: none; } }
+  .chart rect.hit { fill: transparent; cursor: pointer; }
+  .chart rect.hit:hover { fill: rgba(125,100,120,0.10); }
+  .chart rect.sel { fill: rgba(125,100,120,0.16); }
+  .drill { margin-top: 8px; font-size: 13px; }
+  .drill .drill-hint { color: var(--muted); font-size: 12px; }
+  .drill .drill-head { font-weight: 700; color: var(--rose-dark); margin-bottom: 6px; }
 </style>
 </head>
 <body>
@@ -297,8 +331,29 @@
 
   <div id="dash">
 
+    <!-- 0. Front page (2026-11-24, Anne: "graphs should be clickable, details
+         compacted under headings, cards that drill down... no story"). The
+         story and Next moves are written from the live numbers; each card
+         opens one area on its own (#website, #people...), Back returns. -->
+    <nav class="crumb" id="crumb" hidden><a href="#">&larr; All cards</a></nav>
+    <section class="panel story" data-view="home">
+      <div class="panel-head">
+        <div class="panel-title">This week at MNC</div>
+        <div class="panel-meta">the story in the numbers</div>
+      </div>
+      <div id="story"><p>Reading this week's numbers...</p></div>
+    </section>
+    <section class="panel next" data-view="home">
+      <div class="panel-head">
+        <div class="panel-title">Next moves</div>
+        <div class="panel-meta">what the numbers say to do</div>
+      </div>
+      <ol id="next-list" class="next-list"><li>Working it out...</li></ol>
+    </section>
+    <div class="cards" id="cards" data-view="home"></div>
+
     <!-- 1. Good news -->
-    <section class="panel wins">
+    <section class="panel wins" data-view="home">
       <div class="panel-head">
         <div class="panel-title">Good news</div>
         <div class="panel-meta">written from the live numbers</div>
@@ -307,7 +362,7 @@
     </section>
 
     <!-- 2. The path -->
-    <section class="panel">
+    <section class="panel" data-view="home">
       <div class="panel-head">
         <div class="panel-title">The path</div>
         <div class="panel-meta">last 7 days, compared with the 7 before</div>
@@ -323,7 +378,7 @@
     </section>
 
     <!-- 3. Website -->
-    <section class="panel">
+    <section class="panel" data-view="website">
       <div class="panel-head">
         <div class="panel-title">Website</div>
         <div class="panel-meta">mynailconnection.com, bots skipped</div>
@@ -337,6 +392,7 @@
       <div class="sub-head">Visitors per day, last 30 days</div>
       <svg id="w-chart" class="chart" viewBox="0 0 600 130" preserveAspectRatio="none" role="img" aria-label="Website visitors per day"></svg>
       <div class="chart-axis"><span id="w-axis-start">30 days ago</span><span id="w-best"></span><span>today</span></div>
+      <div class="drill" id="w-chart-drill"><span class="drill-hint">Tap a day to see who came.</span></div>
       <div class="cols" style="margin-top:14px;">
         <div><div class="sub-head">Where they come from</div><div id="w-channels"><div class="empty">Loading...</div></div></div>
         <div><div class="sub-head">Pages they land on</div><div id="w-pages"><div class="empty">Loading...</div></div></div>
@@ -349,7 +405,7 @@
     </section>
 
     <!-- 4. Downloads -->
-    <section class="panel">
+    <section class="panel" data-view="downloads">
       <div class="panel-head">
         <div class="panel-title">Downloads</div>
         <div class="panel-meta">store taps and real installs</div>
@@ -382,7 +438,7 @@
     </section>
 
     <!-- 5. People -->
-    <section class="panel">
+    <section class="panel" data-view="people">
       <div class="panel-head">
         <div class="panel-title">People</div>
         <div class="panel-meta">who is in the book</div>
@@ -397,6 +453,7 @@
       <svg id="u-chart" class="chart" viewBox="0 0 600 130" preserveAspectRatio="none" role="img" aria-label="New signups per day"></svg>
       <div class="chart-axis"><span>30 days ago</span><span>today</span></div>
       <div class="legend"><span><i style="background:#2D6A4F"></i>Techs</span><span><i style="background:#BFA6BB"></i>Clients</span></div>
+      <div class="drill" id="u-chart-drill"><span class="drill-hint">Tap a day to see who joined.</span></div>
       <details class="fold">
         <summary>Every tech, newest first</summary>
         <div class="fold-body"><div id="u-roster" class="list" style="max-height:420px;"><div class="empty">Loading...</div></div></div>
@@ -404,7 +461,7 @@
     </section>
 
     <!-- 6. Bookings and money -->
-    <section class="panel">
+    <section class="panel" data-view="bookings">
       <div class="panel-head">
         <div class="panel-title">Bookings and money</div>
         <div class="panel-meta">MNC's own booking and Glow Up</div>
@@ -424,7 +481,7 @@
     </section>
 
     <!-- 6b. What's happening (Build 2, 2026-10-10) -->
-    <section class="panel" id="wh-panel">
+    <section class="panel" id="wh-panel" data-view="happening">
       <div class="panel-head">
         <div class="panel-title">What's happening</div>
         <div class="panel-meta" id="wh-range-btns">
@@ -447,6 +504,7 @@
       <svg id="whs-chart" class="chart" viewBox="0 0 600 130" preserveAspectRatio="none" role="img" aria-label="What's happening opens and posts per day"></svg>
       <div class="chart-axis"><span>30 days ago</span><span>today</span></div>
       <div class="legend"><span><i style="background:#8B5041"></i>Opens</span><span><i style="background:#2D6A4F"></i>Posts and replies</span></div>
+      <div class="drill" id="whs-chart-drill"><span class="drill-hint">Tap a day for its numbers.</span></div>
       <details class="fold">
         <summary>Where people come in from, and who</summary>
         <div class="fold-body">
@@ -472,8 +530,39 @@
       <div class="note" id="whs-note">Counts include test posts made from the admin and test accounts.</div>
     </section>
 
+    <!-- 5b. Gallery (2026-11-24): how findable the techs are, who to nudge. -->
+    <section class="panel" data-view="gallery">
+      <div class="panel-head">
+        <div class="panel-title">Gallery</div>
+        <div class="panel-meta"><a href="/techs/" target="_blank" rel="noopener" style="color:var(--rose-dark);font-weight:700;">Open the tech gallery &rarr;</a></div>
+      </div>
+      <div class="tiles">
+        <div class="tile"><div class="k">Seen with photos</div><div class="v" id="g-seen">-</div><div class="s" id="g-seen-s">-</div></div>
+        <div class="tile"><div class="k">Own Google page</div><div class="v" id="g-web">-</div><div class="s">3 or more photos</div></div>
+        <div class="tile"><div class="k">No photos yet</div><div class="v" id="g-none">-</div><div class="s">invisible in the Gallery</div></div>
+        <div class="tile"><div class="k">Hidden</div><div class="v" id="g-hidden">-</div><div class="s">by admin</div></div>
+      </div>
+      <div class="sub-head">Text these techs</div>
+      <div class="note" style="margin-top:0;margin-bottom:8px;">One or two photos so far. Each set they add helps; at 3 they get their own page on Google the next morning.</div>
+      <div id="g-nudge" class="list"><div class="empty">Loading...</div></div>
+      <details class="fold">
+        <summary><span>No photos yet <span id="g-none-count" style="color:var(--muted);font-weight:400;"></span></span></summary>
+        <div class="fold-body"><div id="g-none-list" class="list"><div class="empty">Loading...</div></div></div>
+      </details>
+      <details class="fold">
+        <summary><span>Gone quiet <span id="g-quiet-count" style="color:var(--muted);font-weight:400;"></span></span></summary>
+        <div class="fold-body"><div id="g-quiet" class="list"><div class="empty">Loading...</div></div>
+          <div class="note">Techs with photos who have not opened the app in 30 days or more. A friendly text brings most back.</div></div>
+      </details>
+      <details class="fold">
+        <summary>Clients reaching out the most</summary>
+        <div class="fold-body"><div id="g-attn" class="list"><div class="empty">Loading...</div></div>
+          <div class="note">Text, call and book taps on each tech's profile, all time. Worth celebrating or featuring in a post.</div></div>
+      </details>
+    </section>
+
     <!-- 7. Admin tools -->
-    <section class="panel tools">
+    <section class="panel tools" data-view="tools">
       <div class="panel-head">
         <div class="panel-title">Admin tools</div>
       </div>
@@ -527,11 +616,11 @@
         </div>
       </details>
       <details class="fold">
-        <summary>Techs and comps</summary>
+        <summary>Techs: comp and hide</summary>
         <div class="fold-body">
           <input id="comp-search" class="search" oninput="renderCompList()" placeholder="Search techs by name or number" style="margin-bottom:10px;"/>
           <div id="comp-list" class="list" style="max-height:440px;"><div class="empty">Loading...</div></div>
-          <div class="note">Comp turns a tech's booking free forever, no card, no charge. Un-comp only affects comped techs; it never cancels a paying or free-month sub.</div>
+          <div class="note">Comp turns a tech's booking free forever, no card, no charge. Un-comp only affects comped techs; it never cancels a paying or free-month sub. Hide takes a tech out of the app's Gallery, map and search at once, and off <a href="/techs/" target="_blank" rel="noopener" style="color:var(--rose-dark);">the tech gallery</a> the moment her page is opened; she can still sign in.</div>
         </div>
       </details>
     </section>
@@ -826,6 +915,8 @@
   }
 
   // Charts
+  const DRILL = {};   // svgId -> function(dayKey) returning the day's detail HTML
+  const FRONT = {};   // numbers handed to the front page by renderStats and loadWhStats
   function barChart(svgId, days, series, highlightIdx) {
     // series: [{ values:[], color }] stacked bottom-up
     const W = 600, H = 130, padTop = 8, gap = 3;
@@ -849,7 +940,22 @@
               + '<title>' + shortDate(d) + ': ' + totals[i] + '</title></rect>';
       });
     });
+    // Tap targets, one per day, on top: a tap lists that day (DRILL[svgId]).
+    days.forEach(function (d, i) {
+      html += '<rect class="hit" data-day="' + d + '" x="' + (i * (bw + gap)).toFixed(1) + '" y="0" width="' + (bw + gap).toFixed(1) + '" height="' + H + '"><title>' + shortDate(d) + ': ' + totals[i] + '</title></rect>';
+    });
     $(svgId).innerHTML = html;
+    if (!$(svgId)._drillBound) {
+      $(svgId)._drillBound = true;
+      $(svgId).addEventListener('click', function (e) {
+        const hit = e.target.closest && e.target.closest('rect.hit');
+        if (!hit) return;
+        this.querySelectorAll('rect.sel').forEach(function (r) { r.classList.remove('sel'); });
+        hit.classList.add('sel');
+        const fn = DRILL[svgId], out = $(svgId + '-drill');
+        if (fn && out) out.innerHTML = '<div class="drill-head">' + shortDate(hit.getAttribute('data-day')) + '</div>' + fn(hit.getAttribute('data-day'));
+      });
+    }
   }
   function barList(counts, labels, emptyMsg) {
     const keys = Object.keys(counts).sort(function (a, b) { return counts[b] - counts[a]; });
@@ -955,6 +1061,15 @@
           return s.size + anon;
         });
         let best = 0; perDay.forEach(function (v, i) { if (v > perDay[best]) best = i; });
+        DRILL['w-chart'] = function (day) {
+          const rows = h30.filter(function (r) { return dayKey(r.created_at) === day; });
+          if (!rows.length) return '<div class="empty">Nobody that day.</div>';
+          const pgc = {}, chc = {};
+          rows.forEach(function (r) { const p = r.page || 'other', c = r.entry_channel || 'direct'; pgc[p] = (pgc[p] || 0) + 1; chc[c] = (chc[c] || 0) + 1; });
+          return '<div class="cols"><div><div class="sub-head" style="margin-top:0;">Pages</div>' + barList(pgc, PAGES, '') + '</div>'
+            + '<div><div class="sub-head" style="margin-top:0;">Came from</div>' + barList(chc, CHANNELS, '') + '</div></div>';
+        };
+        FRONT.siteDaily = perDay;
         barChart('w-chart', days, [{ values: perDay, color: '#D9C6D6', highlight: '#7D6478' }], perDay[best] > 0 ? best : -1);
         setTxt('w-best', perDay[best] > 0 ? 'best day: ' + shortDate(days[best]) + ', ' + perDay[best] : '');
 
@@ -1056,6 +1171,16 @@
         const days = lastNDays(30);
         const tv = days.map(function (d) { return (techs || []).filter(function (t) { return t.created_at && dayKey(t.created_at) === d; }).length; });
         const cv = days.map(function (d) { return (clients || []).filter(function (c) { return c.joined && dayKey(c.joined) === d; }).length; });
+        DRILL['u-chart'] = function (day) {
+          const ts = (techs || []).filter(function (t) { return t.created_at && dayKey(t.created_at) === day; });
+          const cs = (clients || []).filter(function (c) { return c.joined && dayKey(c.joined) === day; }).length;
+          return '<div class="list">' + ts.map(function (t) {
+              const n = Array.isArray(t.photos) ? t.photos.length : 0;
+              return '<div class="row"><div class="l"><span class="main">' + esc(t.name || 'Unnamed tech') + '</span><span class="dim">tech</span></div><span class="when">' + n + ' ' + plural(n, 'photo') + '</span></div>';
+            }).join('')
+            + '<div class="row"><div class="l"><span class="main">' + cs + ' ' + plural(cs, 'client') + '</span></div></div></div>';
+        };
+        FRONT.joinDaily = tv.map(function (v, i) { return v + cv[i]; });
         barChart('u-chart', days, [{ values: tv, color: '#2D6A4F' }, { values: cv, color: '#BFA6BB' }], -1);
         const cnt = function (rows, f, w) { return (rows || []).filter(function (r) { return r[f] && within(r[f], w[0], w[1]); }).length; };
         joinWk = cnt(techs, 'created_at', W.wk) + cnt(clients, 'joined', W.wk);
@@ -1110,6 +1235,12 @@
       setHtml('wins-list', wins.length
         ? wins.slice(0, 6).map(function (w) { return '<li><span>' + w.t + '</span></li>'; }).join('')
         : '<li><span>A quiet week so far. Every number below is live, so this fills in as things happen.</span></li>');
+
+      // Front page: story, Next moves, cards, Gallery (2026-11-24)
+      Object.assign(FRONT, { site: site, tapWk: tapWk, tapPrev: tapPrev, joinWk: joinWk, joinPrev: joinPrev,
+        techsWk: techsWk, clientsWk: clientsWk, bk: bk, paying: paying, techs: techs, clients: clients, taps: taps });
+      renderGallery();
+      renderFront();
 
       // Bug reports load on their own (they have their own write actions)
       loadFeedback();
@@ -1310,6 +1441,8 @@
       const t = (window._compTechs || []).find(function (x) { return x.id === techId; });
       if (t) t.stealth = data.stealth === true;
       renderCompList();
+      renderGallery();
+      renderFront();
     } catch (e) { alert('Could not update: ' + ((e && e.message) || 'error')); }
   }
   async function adminToggleComp(techId, on) {
@@ -1402,6 +1535,12 @@
     setTxt('whs-reports-s', fmt(t('report')) + ' ' + plural(t('report'), 'report') + ', ' + fmt(t('block')) + ' ' + plural(t('block'), 'block') + ', ' + span);
 
     const days = lastNDays(30), dop = d.daily_opens || {}, dps = d.daily_posts || {};
+    DRILL['whs-chart'] = function (day) {
+      return '<div class="list"><div class="row"><div class="l"><span class="main">Screen opens</span></div><span class="when">' + fmt(dop[day] || 0) + '</span></div>'
+        + '<div class="row"><div class="l"><span class="main">Posts and replies</span></div><span class="when">' + fmt(dps[day] || 0) + '</span></div></div>';
+    };
+    FRONT.wh = { opens: t('open'), contacts: t('contact'), reqOpen: rq.open || 0, reports: d.reports_open || 0, daily: days.map(function (k) { return (dop[k] || 0) + (dps[k] || 0); }), span: span };
+    renderFront();
     barChart('whs-chart', days, [{ values: days.map(function (k) { return dop[k] || 0; }), color: '#8B5041' },
                                  { values: days.map(function (k) { return dps[k] || 0; }), color: '#2D6A4F' }], -1);
 
@@ -1580,6 +1719,127 @@
 
   // Boot. A stored refresh token goes straight to the dashboard; only a
   // refresh Supabase actually refuses lands on the sign-in, with a reason.
+  // ── Front page: story, Next moves, cards, Gallery, views (2026-11-24) ─────
+  const VIEWS = ['home', 'website', 'downloads', 'people', 'gallery', 'bookings', 'happening', 'tools'];
+  function route() {
+    let v = (location.hash || '').replace('#', '');
+    if (VIEWS.indexOf(v) === -1) v = 'home';
+    document.querySelectorAll('#dash [data-view]').forEach(function (el) { el.hidden = el.getAttribute('data-view') !== v; });
+    $('crumb').hidden = v === 'home';
+    if (route._last !== undefined && route._last !== v) window.scrollTo(0, 0);
+    route._last = v;
+  }
+  window.addEventListener('hashchange', route);
+  route();
+
+  function spark(values, color) {
+    if (!values || !values.length) return '';
+    const W = 300, H = 34, max = Math.max(1, Math.max.apply(null, values)), bw = W / values.length;
+    return '<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" aria-hidden="true">' + values.map(function (v, i) {
+      const h = Math.max(1.5, (v / max) * (H - 2));
+      return '<rect x="' + (i * bw + 0.5).toFixed(1) + '" y="' + (H - h).toFixed(1) + '" width="' + Math.max(1, bw - 1.5).toFixed(1) + '" height="' + h.toFixed(1) + '" rx="1" fill="' + (v ? color : 'rgba(125,100,120,0.18)') + '"/>';
+    }).join('') + '</svg>';
+  }
+  function trend(cur, prev) {
+    if (cur == null || prev == null) return '';
+    if (prev === 0) return cur > 0 ? 'new this week' : 'none last week either';
+    const p = Math.round((cur - prev) / prev * 100);
+    return p === 0 ? 'same as last week' : (p > 0 ? 'up ' + p + '%' : 'down ' + Math.abs(p) + '%') + ' on last week';
+  }
+  function photoCount(t) { return Array.isArray(t.photos) ? t.photos.length : 0; }
+
+  function galleryNumbers() {
+    const techs = FRONT.techs || [];
+    const out = { total: techs.length, hidden: 0, seen: 0, web: 0, none: [], nudge: [], quiet: [], hasOpened: false };
+    techs.forEach(function (t) {
+      if (t.stealth === true) { out.hidden++; return; }
+      const n = photoCount(t);
+      if (n > 0) out.seen++;
+      if (n >= 3) out.web++;
+      if (n === 0) out.none.push(t);
+      else if (n < 3) out.nudge.push(t);
+      if (t.last_opened_at !== undefined) out.hasOpened = true;
+      if (n > 0 && t.last_opened_at && Date.now() - new Date(t.last_opened_at).getTime() > 30 * DAY) out.quiet.push(t);
+    });
+    return out;
+  }
+  function techRow(t, right) {
+    const ph = t.phone ? String(t.phone) : '';
+    return '<div class="row"><div class="l"><span class="main">' + esc(t.name || 'Unnamed tech') + '</span>'
+      + '<span class="dim">' + (ph ? '<a href="sms:' + esc(ph) + '" style="color:inherit;">' + esc(ph) + '</a>' : esc(t.email || 'no contact')) + '</span></div>'
+      + '<span class="when">' + right + '</span></div>';
+  }
+  function renderGallery() {
+    if (!FRONT.techs) return;
+    const g = galleryNumbers();
+    setTxt('g-seen', fmt(g.seen)); setTxt('g-seen-s', 'of ' + fmt(g.total - g.hidden) + ' listed techs');
+    setTxt('g-web', fmt(g.web)); setTxt('g-none', fmt(g.none.length)); setTxt('g-hidden', fmt(g.hidden));
+    const byNew = function (a, b) { return String(b.created_at || '').localeCompare(String(a.created_at || '')); };
+    setHtml('g-nudge', g.nudge.length ? g.nudge.sort(byNew).map(function (t) {
+      const need = 3 - photoCount(t);
+      return techRow(t, need + ' more ' + plural(need, 'set') + ' for her Google page');
+    }).join('') : '<div class="empty">Nobody on one or two photos right now.</div>');
+    setTxt('g-none-count', '(' + g.none.length + ')');
+    setHtml('g-none-list', g.none.length ? g.none.sort(byNew).map(function (t) {
+      return techRow(t, 'joined ' + (t.created_at ? new Date(t.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '?'));
+    }).join('') : '<div class="empty">Every listed tech has at least one photo.</div>');
+    setTxt('g-quiet-count', g.hasOpened ? '(' + g.quiet.length + ')' : '');
+    setHtml('g-quiet', !g.hasOpened ? '<div class="empty">Needs sql/tech-last-opened.sql to show who is quiet.</div>'
+      : (g.quiet.length ? g.quiet.map(function (t) { return techRow(t, 'last opened ' + openedCell(t.last_opened_at)); }).join('') : '<div class="empty">Nobody quiet. Every tech with photos opened the app in the last 30 days.</div>'));
+    const taps = window._tapByTech || {}, names = {};
+    (FRONT.techs || []).forEach(function (t) { names[t.id] = t; });
+    const ranked = Object.keys(taps).map(function (id) {
+      const r = taps[id]; return { id: id, total: (r.texts || 0) + (r.calls || 0) + (r.books || 0) + (r.book_links || 0), r: r };
+    }).filter(function (x) { return x.total > 0 && names[x.id]; }).sort(function (a, b) { return b.total - a.total; }).slice(0, 8);
+    setHtml('g-attn', ranked.length ? ranked.map(function (x) {
+      return techRow(names[x.id], x.total + ' ' + plural(x.total, 'tap') + ' (' + (x.r.texts || 0) + ' text, ' + (x.r.calls || 0) + ' call, ' + ((x.r.books || 0) + (x.r.book_links || 0)) + ' book)');
+    }).join('') : '<div class="empty">No client taps recorded yet.</div>');
+  }
+
+  function renderFront() {
+    const F = FRONT, g = F.techs ? galleryNumbers() : null, bk = F.bk, wh = F.wh;
+    // Story
+    const p = [];
+    if (F.site) {
+      p.push('<p>This week <b>' + fmt(F.site.wk) + ' ' + plural(F.site.wk, 'person', 'people') + '</b> visited the site (' + trend(F.site.wk, F.site.prev) + '), <b>'
+        + fmt(F.tapWk || 0) + '</b> tapped a download button and <b>' + fmt(F.joinWk || 0) + '</b> joined: ' + F.techsWk + ' ' + plural(F.techsWk, 'tech') + ' and ' + F.clientsWk + ' ' + plural(F.clientsWk, 'client') + '.</p>');
+      let weak = '';
+      if (F.site.wk >= 5 && (F.tapWk || 0) / F.site.wk < 0.05) weak = 'Only ' + Math.round((F.tapWk || 0) / F.site.wk * 100) + '% of visitors tapped a download button. The homepage and tech pages are where to push.';
+      else if ((F.tapWk || 0) >= 5 && (F.joinWk || 0) < F.tapWk * 0.3) weak = fmt(F.tapWk) + ' download taps but only ' + fmt(F.joinWk || 0) + ' joined. People reach the store and stop; the store listing or sign-up is where to look.';
+      if (weak) p.push('<p class="weak"><b>Weak spot:</b> ' + weak + '</p>');
+    }
+    if (g) p.push('<p><b>' + fmt(g.seen) + ' of ' + fmt(g.total - g.hidden) + ' techs</b> show in the Gallery with photos, and ' + fmt(g.web) + ' have their own page on Google. '
+      + (g.none.length ? fmt(g.none.length) + ' have no photos yet, so clients never see them.' : 'Every listed tech has photos.') + '</p>');
+    if (bk || F.paying != null) p.push('<p>' + (bk ? '<b>' + fmt(bk.this_week || 0) + '</b> ' + plural(bk.this_week || 0, 'appointment') + ' booked through MNC this week, ' + fmt(bk.upcoming || 0) + ' coming up. ' : '')
+      + (F.paying != null ? '<b>' + fmt(F.paying) + '</b> ' + plural(F.paying, 'tech pays', 'techs pay') + ' for Glow Up (comped techs not counted).' : '') + '</p>');
+    if (p.length) setHtml('story', p.join(''));
+
+    // Next moves
+    const moves = [];
+    if (g && g.nudge.length) moves.push('Text <b>' + g.nudge.length + ' ' + plural(g.nudge.length, 'tech') + '</b> with one or two photos. One more set each gets them a Google page. <a href="#gallery">See who</a>');
+    if (g && g.none.length) moves.push('<b>' + g.none.length + ' ' + plural(g.none.length, 'tech has', 'techs have') + '</b> no photos, so clients never see them. <a href="#gallery">See who</a>');
+    if (g && g.quiet.length) moves.push('<b>' + g.quiet.length + ' ' + plural(g.quiet.length, 'tech', 'techs') + '</b> with photos ' + plural(g.quiet.length, 'has', 'have') + ' not opened the app in 30 days. <a href="#gallery">See who</a>');
+    if (wh && wh.reports) moves.push('<b>' + wh.reports + ' What&#39;s happening ' + plural(wh.reports, 'report') + '</b> waiting. Answer within 24 hours. <a href="#tools">Open</a>');
+    if (bk && bk.pending) moves.push('<b>' + bk.pending + ' ' + plural(bk.pending, 'booking') + '</b> waiting on a tech&#39;s reply. <a href="#bookings">See them</a>');
+    setHtml('next-list', moves.length ? moves.map(function (m) { return '<li><span>' + m + '</span></li>'; }).join('')
+      : '<li class="done"><span>Nothing waiting. Keep sharing tech pages and the app.</span></li>');
+
+    // Cards
+    const cards = [];
+    const card = function (id, k, v, s, meaning, sp, flag) {
+      cards.push('<a class="card" href="#' + id + '"><div class="ct"><span class="ck">' + k + (flag ? '<span class="flag">' + flag + '</span>' : '') + '</span><span class="go">Open &rarr;</span></div>'
+        + '<div class="cv">' + v + '</div><div class="cs">' + s + '</div>' + (sp || '') + '<div class="cm">' + meaning + '</div></a>');
+    };
+    if (F.site) card('website', 'Website', fmt(F.site.wk), 'visitors this week, ' + trend(F.site.wk, F.site.prev), 'Who finds MNC and where they come from.', spark(F.siteDaily, '#7D6478'));
+    card('downloads', 'Downloads', fmt(F.tapWk), 'store taps this week, ' + trend(F.tapWk, F.tapPrev), 'Interest in the app, plus the install counts you record.');
+    card('people', 'People', fmt(F.joinWk), 'joined this week (' + fmt((F.techs || []).length) + ' techs, ' + fmt((F.clients || []).length) + ' clients in all)', 'Who is in the book and who joined when.', spark(F.joinDaily, '#2D6A4F'));
+    if (g) card('gallery', 'Gallery', fmt(g.seen) + '<span style="font-size:16px;color:var(--muted);"> of ' + fmt(g.total - g.hidden) + '</span>', 'techs clients can see with photos', 'Who to nudge for photos, who went quiet, who clients love.', '', g.nudge.length + g.none.length ? (g.nudge.length + g.none.length) + ' to nudge' : '');
+    if (bk) card('bookings', 'Bookings and money', fmt(bk.this_week || 0), 'booked this week, ' + fmt(bk.upcoming || 0) + ' coming up', (F.paying != null ? fmt(F.paying) + ' paying for Glow Up.' : 'Appointments and Glow Up.'), '', bk.pending ? bk.pending + ' waiting' : '');
+    if (wh) card('happening', 'What&#39;s happening', fmt(wh.opens), 'screen opens, ' + wh.span, fmt(wh.contacts) + ' calls, texts and books from the board.', spark(wh.daily, '#8B5041'), wh.reports ? wh.reports + ' to answer' : '');
+    card('tools', 'Admin tools', '&#9881;', 'push, comps, hide, ads, reports', 'Send a push, comp or hide a tech, manage partner ads.');
+    setHtml('cards', cards.join(''));
+  }
+
   async function boot() {
     if (!refreshTok && !token) { showDash(false); return; }
     showDash(true);
