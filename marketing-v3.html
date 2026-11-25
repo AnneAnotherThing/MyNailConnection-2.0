@@ -240,8 +240,8 @@
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap"/></noscript>
 
 <!-- ─── Analytics & tracking ──────────────────────────────────────────────
-     GA4 loader is LIVE, it just no-ops until you paste a real measurement ID
-     into the GA4_ID constant below (look for "G-GT7YP1X70K" and replace).
+     GA4 loader is LIVE on mynailconnection.com and www only. It sends to
+     Anne's property 565732502 (stream ID G-0859ESXVFR, set 2026-11-25).
      Meta / TikTok / Pinterest pixels remain commented; uncomment + add IDs
      when you're ready to turn those channels on.
      Each loads asynchronously so it can't block render.
@@ -259,9 +259,9 @@
   });
 
   // ── Google Analytics 4 ───────────────────────────────────────────────
-  // 👉 Paste your GA4 measurement ID here. Format: G-GT7YP1X70K
-  //    Find it in: analytics.google.com → Admin → Data Streams → Web → Measurement ID
-  const GA4_ID = 'G-GT7YP1X70K';
+  // Measurement ID for Anne's GA4 property 565732502 (2026-11-25).
+  //    analytics.google.com → Admin → Data Streams → Web → Measurement ID
+  const GA4_ID = 'G-0859ESXVFR';
   (function(){
     if (!GA4_ID || GA4_ID === 'G-XXXXXXXXXX') return;   // No-op until a real ID is pasted
     // Live domain only: localhost, previews and copies never send hits (2026-11-24).
