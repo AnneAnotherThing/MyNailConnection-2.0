@@ -10,7 +10,7 @@
 # (not self-paused) and have at least MIN_PHOTOS photos get a page; thinner
 # pages would hurt more than help. Never shown: zip, lat/lng, street address.
 #
-# Also runs nightly in .github/workflows/deploy.yml (3 AM Phoenix).
+# Also runs nightly in .github/workflows/deploy.yml (3:17 AM Phoenix).
 # Run: python build_tech_pages.py --publish   (rewrites techs/ and the marked
 # block in sitemap.xml), then deploy/sync.sh. Without --publish it only builds
 # techs/ for review. Re-run before each deploy so new techs
@@ -229,6 +229,14 @@ def main():
         base = slugify(t["name"] + " " + (t.get("city") or ""))
         slug = base if base not in used else f"{base}-{t['id'][:6]}"
         used.add(slug); entries.append((slug, t))
+    # Safety: an empty or collapsed answer (a view or key change) must never
+    # take the live pages down. Exit non-zero so the nightly step keeps the
+    # committed pages.
+    live_now = len([f for f in pathlib.Path("deploy/ghpages/techs").glob("*.html") if f.name != "index.html"])
+    if not entries:
+        sys.exit("0 tech pages from the app; keeping the committed ones")
+    if live_now and len(entries) < live_now / 2:
+        sys.exit(f"only {len(entries)} tech pages vs {live_now} live; keeping the committed ones")
     if OUT.exists():
         for f in OUT.glob("*.html"): f.unlink()
     OUT.mkdir(exist_ok=True)

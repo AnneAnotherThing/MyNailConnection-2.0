@@ -27,7 +27,7 @@ on:
     # named "v3 preview refresh: …", each one a re-commit of v3's work so it
     # could be previewed at /v3/ without disturbing the live 2.0 site. v3 has
     # 166 real commits of the same work. Same content, two irreconcilable
-    # histories — `git merge` would have been a conflict storm that bought
+    # histories, so `git merge` would have been a conflict storm that bought
     # nothing. Switching the trigger sidesteps it completely.
     #
     # `main` is kept, frozen, as the rollback: point this back at [main] and
@@ -36,11 +36,11 @@ on:
     branches: [v3]
   # Allow manual re-run from the Actions tab without needing a new commit.
   workflow_dispatch:
-  # Nightly at 3 AM Phoenix (10:00 UTC): rebuild the tech profile pages from
+  # Nightly at 3:17 AM Phoenix (10:17 UTC; off the hour, which GitHub runs late): rebuild the tech profile pages from
   # the live app so new techs and photos appear and paused techs drop off
   # without anyone having to deploy (2026-11-24). Runs on the default branch.
   schedule:
-    - cron: '0 10 * * *'
+    - cron: '17 10 * * *'
 
 # Grant the Action the minimum permissions needed to publish to Pages.
 permissions:
@@ -75,9 +75,10 @@ jobs:
       - name: Rebuild tech profile pages
         run: |
           python3 build_tech_pages.py --publish
-          rm -rf deploy/ghpages/techs
-          cp -r techs deploy/ghpages/techs
+          cp -r techs deploy/ghpages/techs.new
           cp sitemap.xml deploy/ghpages/sitemap.xml
+          rm -rf deploy/ghpages/techs
+          mv deploy/ghpages/techs.new deploy/ghpages/techs
         continue-on-error: true
 
       - name: Upload site artifact (deploy/ghpages/)
