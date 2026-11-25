@@ -88,6 +88,39 @@ CSS = BASE_CSS + """
 .card{background:#fff;border:1px solid var(--border);border-radius:2px;overflow:hidden;text-decoration:none;color:var(--ink);display:block}
 .card img{width:100%;aspect-ratio:1;object-fit:cover;display:block;background:var(--rose-light)}
 .card div{padding:10px 12px}.card b{display:block}.card span{color:var(--muted);font-size:14px}
+.lede{margin:12px 0 0;max-width:60ch;color:#3d2f35}
+main.wide{max-width:1120px}
+.hero.wide .in{max-width:1076px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.fbar{position:sticky;top:0;z-index:5;background:rgba(250,247,242,.94);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid var(--border);padding:12px max(16px,calc((100% - 1120px)/2 + 22px))}
+.frow{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.fsearch{flex:1 1 220px}.fsearch input,.fsel select{width:100%;font:inherit;font-size:15px;padding:9px 12px;border:1px solid var(--border);border-radius:2px;background:#fff;color:var(--ink)}
+.fsel{flex:0 1 220px}
+.chips{display:flex;gap:6px;overflow-x:auto;padding:10px 0 2px;scrollbar-width:none}.chips::-webkit-scrollbar{display:none}
+.chip{flex:0 0 auto;font:inherit;font-size:13.5px;font-weight:600;padding:7px 13px;border:1px solid var(--border);border-radius:2px;background:#fff;color:var(--ink);cursor:pointer;box-shadow:0 1px 0 var(--border)}
+.chip:hover{border-color:var(--ink)}
+.chip[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.chip.tog[aria-pressed="true"]{background:var(--link);border-color:var(--link)}
+.chip:focus-visible,.fsearch input:focus-visible,.fsel select:focus-visible,.clear:focus-visible{outline:2px solid var(--link);outline-offset:2px}
+.fcount{display:flex;gap:12px;align-items:center;font-size:13.5px;color:var(--muted);margin-top:6px}
+.clear{font:inherit;font-size:13.5px;font-weight:600;color:var(--link);background:none;border:0;padding:0;cursor:pointer;text-decoration:underline}
+.place h2{margin-top:30px}
+.tcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;margin:12px 0 0}
+.tcard{display:flex;flex-direction:column;background:#fff;border:1px solid var(--border);border-radius:2px;overflow:hidden;text-decoration:none;color:var(--ink);transition:transform .18s ease,box-shadow .18s ease}
+.tcard:hover,.tcard:focus-visible{transform:translateY(-3px);box-shadow:0 12px 28px rgba(20,19,23,.12);outline:none}
+.mosaic{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);grid-template-rows:repeat(2,minmax(0,1fr));gap:3px;aspect-ratio:3/2;overflow:hidden;background:var(--rose-light)}
+.mosaic img{width:100%;height:100%;min-height:0;object-fit:cover;display:block;aspect-ratio:auto}
+.mosaic img:first-child{grid-row:1 / span 2}
+.mosaic img:only-child{grid-column:1 / span 2}
+.tbody{padding:12px 14px 14px;display:flex;flex-direction:column;gap:4px}
+.tbody b{font-size:17px}
+.where{color:var(--muted);font-size:13.5px}
+.mini{display:flex;flex-wrap:wrap;gap:5px;list-style:none;padding:0;margin:4px 0 0}
+.mini li{font-size:12px;background:var(--rose-light);border-radius:2px;padding:2px 8px;margin:0}
+.foot{display:flex;gap:8px;align-items:center;font-size:12.5px;color:var(--muted);margin-top:6px}
+.bk{font-weight:700;color:#2D6A4F;background:#EAF3EC;border-radius:2px;padding:1px 7px}
+.none{margin:24px 0;color:var(--muted)}
+@media (prefers-reduced-motion: reduce){.tcard{transition:none}.tcard:hover{transform:none}}
 """
 
 def head(title, desc, url, image, schema, ogtype="profile", visit="tech-page"):
@@ -142,10 +175,8 @@ def live_check(tech_id=None):
     else:
         act = """if (!rows.length) return;  // an empty answer is a fault, never "hide everyone"
     var live = {}; rows.forEach(function (r) { live[r.id] = 1; });
-    document.querySelectorAll('.card[data-id]').forEach(function (c) { if (!live[c.getAttribute('data-id')]) c.hidden = true; });
-    document.querySelectorAll('main .cards').forEach(function (g) {
-      if (!g.querySelector('.card:not([hidden])')) { g.hidden = true; var h = g.previousElementSibling; if (h && h.tagName === 'H2') h.hidden = true; }
-    });"""
+    document.querySelectorAll('.tcard[data-id]').forEach(function (c) { if (!live[c.getAttribute('data-id')]) c.setAttribute('data-gone', '1'); });
+    if (window.__techFilter) window.__techFilter();"""
     return f"""<script>
 (function () {{
   fetch('{PROJECT}/rest/v1/techs_public?{q}', {{ headers: {{ apikey: '{k}', Authorization: 'Bearer {k}' }} }})
@@ -229,28 +260,91 @@ def index_page(entries):
         where = ", ".join(x for x in (tidy_city(t.get("city")), (t.get("state") or "").upper()) if x) or "Other"
         by_place.setdefault(where, []).append((slug, t))
     order = sorted(by_place, key=lambda w: (not w.endswith(", AZ"), -len(by_place[w]), w))
+    # Style chips: the tags most techs use, so a tap usually finds someone.
+    counts = {}
+    for _, t in entries:
+        for tag in set(x for x in (t.get("tags") or []) if x):
+            counts[tag] = counts.get(tag, 0) + 1
+    chips = [k for k, _ in sorted(counts.items(), key=lambda kv: (-kv[1], kv[0].lower()))[:12]]
     blocks = []
     for w in order:
-        cards = "\n".join(
-            f'<a class="card" data-id="{esc(t["id"])}" href="/techs/{s}.html">{thumb_img(t["photos"][0]["url"], "")}'
-            f'<div><b>{esc(nice_name(t["name"]))}</b><span>{esc(", ".join((t.get("tags") or [])[:3]))}</span></div></a>'
-            for s, t in sorted(by_place[w], key=lambda e: e[1]["name"].lower()))
-        blocks.append(f"<h2>{esc(w)}</h2>\n<div class=\"cards\">\n{cards}\n</div>")
+        cards = []
+        for s, t in sorted(by_place[w], key=lambda e: e[1]["name"].lower()):
+            ph = [p for p in (t.get("photos") or []) if isinstance(p, dict) and p.get("url")]
+            name = nice_name(t["name"])
+            tags = [x for x in (t.get("tags") or []) if x]
+            books = bool(t.get("is_bookable")) or (t.get("booking_link") or "").startswith("http")
+            mosaic = thumb_img(ph[0]["url"], "") + "".join(thumb_img(p["url"], "", 150) for p in ph[1:3])
+            cards.append(
+                f'<a class="tcard" data-id="{esc(t["id"])}" data-name="{esc(name.lower())}" data-city="{esc(w)}" '
+                f'data-tags="{esc("|".join(tags))}" data-book="{1 if books else 0}" href="/techs/{s}.html">'
+                f'<div class="mosaic">{mosaic}</div>'
+                f'<div class="tbody"><b>{esc(name)}</b><span class="where">{esc(w)}</span>'
+                + ('<ul class="mini">' + "".join(f"<li>{esc(x)}</li>" for x in tags[:3]) + "</ul>" if tags else "")
+                + f'<span class="foot">{len(ph)} {"photo" if len(ph) == 1 else "photos"}'
+                + ('<span class="bk">Books online</span>' if books else "")
+                + "</span></div></a>")
+        blocks.append(f'<section class="place" data-place="{esc(w)}"><h2>{esc(w)}</h2>\n<div class="tcards">\n' + "\n".join(cards) + "\n</div></section>")
     schema = {"@context": "https://schema.org", "@type": "CollectionPage", "url": url,
               "name": "Nail techs on My Nail Connection",
               "hasPart": [{"@type": "ProfilePage", "url": f"{SITE}/techs/{s}.html"} for s, _ in entries]}
     title = "Nail techs on My Nail Connection, by city"
-    desc = "Browse nail techs on My Nail Connection by city and see their real work before you book. Free for clients."
-    return head(title, desc, url, f"{SITE}/og-image-2026-09.png", schema, "website", "techs") +f"""<section class="hero"><div class="in">
+    desc = "Browse nail techs on My Nail Connection by city and style and see their real work before you book. Free for clients."
+    city_opts = "".join(f'<option value="{esc(w)}">{esc(w)} ({len(by_place[w])})</option>' for w in order)
+    chip_html = "".join(f'<button type="button" class="chip" data-tag="{esc(c)}" aria-pressed="false">{esc(c)}</button>' for c in chips)
+    return head(title, desc, url, f"{SITE}/og-image-2026-09.png", schema, "website", "techs") + f"""<section class="hero wide"><div class="in">
 <div class="eyebrow">For clients</div>
 <h1>Nail techs on My Nail Connection</h1>
+<p class="lede">{len(entries)} techs with a gallery of their own work. Pick a city or a style, tap a tech to see her sets, then book, call or text her in the free app.</p>
 </div></section>
-<main>
-<p class="short"><b>Short answer</b>These are nail techs on My Nail Connection with a gallery of their own work. Tap one to see her sets, then book, call or text her in the free app.</p>
+<div class="fbar" id="fbar">
+  <div class="frow">
+    <label class="fsearch"><span class="sr">Search by name</span><input id="f-q" type="search" placeholder="Search by name" autocomplete="off"></label>
+    <label class="fsel"><span class="sr">City</span><select id="f-city"><option value="">All cities</option>{city_opts}</select></label>
+    <button type="button" class="chip tog" id="f-book" aria-pressed="false">Books online</button>
+  </div>
+  <div class="chips" role="group" aria-label="Filter by style">{chip_html}</div>
+  <div class="fcount"><span id="f-count">{len(entries)} techs</span><button type="button" id="f-clear" class="clear" hidden>Clear filters</button></div>
+</div>
+<main class="wide">
 {chr(10).join(blocks)}
+<p class="none" id="f-none" hidden>No techs match those filters yet. <button type="button" class="clear" onclick="document.getElementById('f-clear').click()">Clear filters</button></p>
 {cta("").replace('/app/?tech=&amp;src=techpage', '/app/?src=techindex').replace("See her full gallery and book, call or text her", "Browse every tech, filter by style and distance, and book, call or text")}
 </main>
-""" + live_check() + FOOT
+<script>
+(function () {{
+  var q = document.getElementById('f-q'), city = document.getElementById('f-city'), book = document.getElementById('f-book');
+  var chips = [].slice.call(document.querySelectorAll('.chips .chip')), clear = document.getElementById('f-clear');
+  var count = document.getElementById('f-count'), none = document.getElementById('f-none');
+  function on(b) {{ return b.getAttribute('aria-pressed') === 'true'; }}
+  function apply() {{
+    var term = (q.value || '').trim().toLowerCase(), c = city.value, wantBook = on(book);
+    var tags = chips.filter(on).map(function (b) {{ return b.getAttribute('data-tag'); }});
+    var shown = 0;
+    document.querySelectorAll('.place').forEach(function (sec) {{
+      var any = false;
+      sec.querySelectorAll('.tcard').forEach(function (card) {{
+        if (card.getAttribute('data-gone') === '1') {{ card.hidden = true; return; }}
+        var t = '|' + card.getAttribute('data-tags') + '|';
+        var ok = (!term || card.getAttribute('data-name').indexOf(term) !== -1)
+          && (!c || card.getAttribute('data-city') === c)
+          && (!wantBook || card.getAttribute('data-book') === '1')
+          && tags.every(function (x) {{ return t.indexOf('|' + x + '|') !== -1; }});
+        card.hidden = !ok; if (ok) {{ any = true; shown++; }}
+      }});
+      sec.hidden = !any;
+    }});
+    count.textContent = shown + (shown === 1 ? ' tech' : ' techs');
+    none.hidden = shown !== 0;
+    clear.hidden = !(term || c || wantBook || tags.length);
+  }}
+  window.__techFilter = apply;
+  q.addEventListener('input', apply); city.addEventListener('change', apply);
+  [book].concat(chips).forEach(function (b) {{ b.addEventListener('click', function () {{ b.setAttribute('aria-pressed', on(b) ? 'false' : 'true'); apply(); }}); }});
+  clear.addEventListener('click', function () {{ q.value = ''; city.value = ''; [book].concat(chips).forEach(function (b) {{ b.setAttribute('aria-pressed', 'false'); }}); apply(); }});
+}})();
+</script>
+""" + FOOT
 
 def main():
     rows = fetch()

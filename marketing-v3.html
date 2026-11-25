@@ -489,7 +489,36 @@
   .hero-stores { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
 
   .hero-art { position: relative; min-height: 520px; display: flex; justify-content: center; }
-  .hero-art > img { width: min(440px, 100%); aspect-ratio: 1; object-fit: cover; border-radius: 22px; box-shadow: var(--shadow-raised); }
+  .card3d > img { width: min(440px, 100%); aspect-ratio: 1; object-fit: cover; border-radius: 22px; box-shadow: var(--shadow-raised); display: block; }
+  /* ── 3D HERO (2026-11-24, Anne: "some cool 3d effect in the hero... depth and personality").
+     The stage tilts toward the pointer (or sways on its own on touch screens),
+     the photo cards sit at different depths so they move more than the card,
+     and two hat-brim rings orbit in 3D, one carrying a gem that passes behind
+     the card. Reduced motion: a still 3D pose, nothing moves. */
+  .hero-art { perspective: 1200px; }
+  .stage3d { position: relative; width: 100%; min-height: inherit; display: flex; justify-content: center; align-items: center;
+    transform-style: preserve-3d; transform: rotateX(var(--rx, 4deg)) rotateY(var(--ry, -8deg)); will-change: transform; }
+  .card3d { position: relative; width: min(440px, 100%); transform: translateZ(0); transform-style: preserve-3d; border-radius: 22px; }
+  .card3d::after { content: ''; position: absolute; inset: 14px -10px -22px; border-radius: 26px; background: rgba(20,19,23,.22); filter: blur(26px); transform: translateZ(-70px); z-index: -1; }
+  .sheen { position: absolute; inset: 0; border-radius: 22px; pointer-events: none; mix-blend-mode: soft-light;
+    background: radial-gradient(circle at var(--mx, 30%) var(--my, 20%), rgba(255,255,255,.75), rgba(255,255,255,0) 46%); }
+  .tuck.t1 { transform: translateZ(110px); }
+  .tuck.t2 { transform: translateZ(160px); }
+  .tuck.t3 { transform: translateZ(70px); }
+  .tuck { animation: floaty 6s ease-in-out infinite alternate; }
+  .tuck.t2 { animation-duration: 7.5s; animation-delay: -2s; }
+  .tuck.t3 { animation-duration: 5.2s; animation-delay: -4s; }
+  @keyframes floaty { from { translate: 0 0; } to { translate: 0 -12px; } }
+  .orbit { position: absolute; left: 50%; top: 50%; width: 560px; height: 560px; margin: -280px 0 0 -280px; border-radius: 50%;
+    border: 2px solid rgba(162,99,108,.38); transform-style: preserve-3d; pointer-events: none;
+    transform: translateZ(-20px) rotateX(74deg) rotateZ(0deg); animation: orbit 26s linear infinite; }
+  .orbit.o2 { width: 640px; height: 640px; margin: -320px 0 0 -320px; border: 1.5px solid rgba(20,19,23,.14);
+    transform: translateZ(-40px) rotateX(78deg) rotateY(-12deg) rotateZ(0deg); animation: orbit2 40s linear infinite reverse; }
+  .gem { position: absolute; top: -9px; left: 50%; width: 16px; height: 16px; margin-left: -8px; border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #fff 0 18%, #DEB3B5 40%, #A2636C 75%); box-shadow: 0 0 14px rgba(222,179,181,.9);
+    transform: rotateX(-74deg); }
+  @keyframes orbit { to { transform: translateZ(-20px) rotateX(74deg) rotateZ(360deg); } }
+  @keyframes orbit2 { to { transform: translateZ(-40px) rotateX(78deg) rotateY(-12deg) rotateZ(360deg); } }
   .tuck { position: absolute; background: #fff; border: 1.5px solid var(--border-strong); border-radius: 18px; padding: 8px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 8px; }
   .tuck img { width: 100%; height: auto; aspect-ratio: 1; object-fit: cover; border-radius: 12px; }
   .tuck .pill { align-self: flex-start; }
@@ -644,7 +673,10 @@
     .hero-copy { text-align: center; align-items: center; margin: 0 auto; }
     .hero-actions, .hero-stores { justify-content: center; }
     .hero-art { min-height: 0; margin-top: 8px; }
-    .hero-art > img { width: min(320px, 78vw); }
+    .card3d, .card3d > img { width: min(320px, 78vw); }
+    .orbit { width: 400px; height: 400px; margin: -200px 0 0 -200px; }
+    .orbit.o2 { width: 460px; height: 460px; margin: -230px 0 0 -230px; }
+    .hero-art { overflow: visible; }
     .hero-mark { width: 64px; height: 64px; }
     .tuck.t1 { left: 0; bottom: 8px; width: 132px; }
     .tuck.t2 { right: 0; top: 8px; width: 120px; }
@@ -662,6 +694,7 @@
   }
   @media (prefers-reduced-motion: reduce) {
     .bloom, .brim, .gs-row-a, .gs-row-b { animation: none; }
+    .tuck, .orbit { animation: none; }
     .hero h1 .w { animation: none; opacity: 1; transform: none; }
     .band-skin, .post, .gal { transition: none; }
     .band-skin { clip-path: none; }
@@ -717,14 +750,53 @@
     </div>
 
     <div class="hero-art">
+      <div class="stage3d" id="stage3d">
+      <div class="orbit o1" aria-hidden="true"><i class="gem"></i></div>
+      <div class="orbit o2" aria-hidden="true"></div>
+      <div class="card3d">
       <img src="images/lady-card-720.webp" srcset="images/lady-card-480.webp 480w, images/lady-card-720.webp 720w, images/lady-card.webp 900w" sizes="(max-width: 640px) 78vw, 440px" width="900" height="900" alt="The My Nail Connection hat girl" decoding="async" fetchpriority="high"/>
+      <span class="sheen" aria-hidden="true"></span>
+      </div>
       <div class="tuck t1" aria-hidden="true"><img src="images/gallery/g03.webp" width="420" height="420" alt="" loading="lazy" decoding="async"/><span class="pill now"><span class="dot"></span>Available now</span></div>
       <div class="tuck t2" aria-hidden="true"><img src="images/gallery/g05.webp" width="420" height="420" alt="" loading="lazy" decoding="async"/><span class="pill">Oval · Cat eye</span></div>
       <div class="tuck t3" aria-hidden="true"><img src="images/gallery/g10.webp" width="420" height="420" alt="" loading="lazy" decoding="async"/></div>
+      </div>
     </div>
   </div>
 </section>
 
+<script>
+/* 3D hero tilt (2026-11-24). Pointer moves set a target; each frame eases
+   toward it. No pointer (phones): a slow idle sway. Reduced motion: none. */
+(function () {
+  var stage = document.getElementById('stage3d');
+  if (!stage || !window.requestAnimationFrame) return;
+  if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  var hero = document.getElementById('top') || stage, rx = 4, ry = -8, tx = 4, ty = -8, mx = 30, my = 20, tmx = 30, tmy = 20;
+  var lastMove = 0, running = true, card = stage.querySelector('.card3d');
+  hero.addEventListener('pointermove', function (e) {
+    if (e.pointerType === 'touch') return;
+    var r = stage.getBoundingClientRect();
+    var px = (e.clientX - (r.left + r.width / 2)) / (r.width / 2), py = (e.clientY - (r.top + r.height / 2)) / (r.height / 2);
+    px = Math.max(-1.4, Math.min(1.4, px)); py = Math.max(-1.4, Math.min(1.4, py));
+    ty = px * 12; tx = -py * 9; tmx = 50 + px * 40; tmy = 50 + py * 40; lastMove = Date.now();
+  });
+  hero.addEventListener('pointerleave', function () { lastMove = 0; });
+  if ('IntersectionObserver' in window) new IntersectionObserver(function (es) { running = es[0].isIntersecting; if (running) requestAnimationFrame(tick); }).observe(stage);
+  function tick(t) {
+    if (!running) return;
+    if (Date.now() - lastMove > 2500) {           // idle sway
+      var s = t / 1000; ty = Math.sin(s * 0.5) * 10 - 2; tx = Math.cos(s * 0.37) * 5 + 2;
+      tmx = 50 + Math.sin(s * 0.5) * 35; tmy = 35 + Math.cos(s * 0.37) * 20;
+    }
+    rx += (tx - rx) * 0.08; ry += (ty - ry) * 0.08; mx += (tmx - mx) * 0.08; my += (tmy - my) * 0.08;
+    stage.style.setProperty('--rx', rx.toFixed(2) + 'deg'); stage.style.setProperty('--ry', ry.toFixed(2) + 'deg');
+    if (card) { card.style.setProperty('--mx', mx.toFixed(1) + '%'); card.style.setProperty('--my', my.toFixed(1) + '%'); }
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+})();
+</script>
 <!-- THE GALLERY STRIP. Two rows scrolling in opposite directions and a filter
      bar cycling REAL tags (the techs' own tags from the DB). Tiles whose tags
      don't match dim out, so the page shows what filtering does. The strip
